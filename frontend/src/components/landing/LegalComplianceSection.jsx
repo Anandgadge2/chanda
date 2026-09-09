@@ -65,30 +65,30 @@ const STATUTES = [
 
 export default function LegalComplianceSection() {
   return (
-    <section id="mlrc" className="py-16 bg-white">
+    <section id="mlrc" className="py-8 bg-white border-b border-slate-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto space-y-3 mb-12">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100 text-amber-900 text-xs font-bold border border-amber-300">
+        <div className="text-center max-w-3xl mx-auto space-y-1.5 mb-5">
+          <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900 text-xs font-bold border border-amber-300">
             <Scale className="w-3.5 h-3.5 text-amber-700" />
             <span>महाराष्ट्र जमीन महसूल संहिता (MLRC) १९६६</span>
           </div>
-          <h2 className="text-2xl sm:text-4xl font-black text-slate-900 tracking-tight">
+          <h2 className="text-lg sm:text-2xl font-black text-slate-900 tracking-tight">
             कायदेशीर अधिकार, कलमे व वैधानिक अंमलबजावणी
           </h2>
-          <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-            चंद्रपूर महसूल प्रशासनाद्वारे वापरण्यात येणाऱ्या मुख्य वैधानिक तरतुदी ज्यांच्या आधारे भूखंडांची वैधता तपासली जाते आणि अर्ध-न्यायिक सुनावणी चालविली जाते.
+          <p className="text-xs text-slate-600 leading-relaxed">
+            चंद्रपूर महसूल प्रशासनाद्वारे वापरण्यात येणाऱ्या मुख्य वैधानिक तरतुदी.
           </p>
         </div>
 
         {/* 4 Law Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {STATUTES.map((statute, idx) => {
             const Icon = statute.icon;
             return (
               <div
                 key={idx}
-                className={`p-6 rounded-3xl border-2 ${statute.color} shadow-sm hover:shadow-md transition duration-200 flex flex-col justify-between space-y-4`}
+                className={`p-4 sm:p-5 rounded-2xl border-2 ${statute.color} shadow-2xs hover:shadow-xs transition duration-200 flex flex-col justify-between space-y-3`}
               >
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">

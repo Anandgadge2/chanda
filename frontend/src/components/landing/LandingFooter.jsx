@@ -16,8 +16,8 @@ export default function LandingFooter() {
   return (
     <footer className="bg-slate-100 text-slate-700 text-xs border-t border-slate-300">
       {/* Main Footer Links */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
           {/* Col 1: Collectorate Identity */}
           <div className="space-y-4">
             <div className="flex items-center gap-3">
@@ -192,7 +192,7 @@ export default function LandingFooter() {
         </div>
 
         {/* Disclaimer & Copyright */}
-        <div className="mt-12 pt-6 border-t border-slate-200 flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left text-[11px] text-slate-600">
+        <div className="mt-8 pt-4 border-t border-slate-200 flex flex-col md:flex-row items-center justify-between gap-3 text-center md:text-left text-[11px] text-slate-600">
           <p>
             © २०२६ जिल्हाधिकारी कार्यालय, चंद्रपूर (Collectorate Chandrapur). सर्व हक्क सुरक्षित.
           </p>

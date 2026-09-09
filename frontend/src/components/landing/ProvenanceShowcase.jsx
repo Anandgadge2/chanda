@@ -16,30 +16,30 @@ import {
 
 export default function ProvenanceShowcase() {
   return (
-    <section id="provenance" className="py-16 bg-slate-50 text-slate-900 relative border-b border-slate-200">
+    <section id="provenance" className="py-8 bg-slate-50 text-slate-900 relative border-b border-slate-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto space-y-3 mb-12">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 text-emerald-900 text-xs font-bold border border-emerald-300">
+        <div className="text-center max-w-3xl mx-auto space-y-1.5 mb-5">
+          <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-900 text-xs font-bold border border-emerald-300">
             <History className="w-3.5 h-3.5 text-emerald-700" />
             <span>१९५० मूळ शीर्षक साखळी (1950 Backward Provenance)</span>
           </div>
-          <h2 className="text-2xl sm:text-4xl font-black text-slate-900 tracking-tight">
+          <h2 className="text-lg sm:text-2xl font-black text-slate-900 tracking-tight">
             ऐतिहासिक हक्कनोंदी व विद्यमान ७/१२ मधील तफावत शोध
           </h2>
-          <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-            स्वातंत्र्य काळातील मूळ अभिलेख (Baseline 1950) व आजच्या चालू ७/१२ मधील सर्व फेरफारांची संगणकीय पडताळणी करून अनधिकृत शर्तभंग निष्पन्न करणारी प्रणाली.
+          <p className="text-xs text-slate-600 leading-relaxed">
+            स्वातंत्र्य काळातील मूळ अभिलेख (Baseline 1950) व आजच्या चालू ७/१२ मधील सर्व फेरफारांची संगणकीय पडताळणी.
           </p>
         </div>
 
         {/* Interactive Comparison & Timeline Box */}
-        <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm space-y-8">
+        <div className="bg-white border border-slate-200 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-2xs space-y-4">
           {/* Top Comparison Cards: 1950 Baseline vs Present 2026 */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {/* Card 1: 1950 Original Record */}
-            <div className="p-6 rounded-2xl bg-emerald-50/50 border-2 border-emerald-300 space-y-3 relative overflow-hidden">
+            <div className="p-4 rounded-xl bg-emerald-50/50 border-2 border-emerald-300 space-y-2 relative overflow-hidden">
               <div className="flex items-center justify-between">
-                <span className="px-3 py-1 rounded-full text-xs font-black bg-emerald-200/80 text-emerald-900 border border-emerald-400">
+                <span className="px-2.5 py-0.5 rounded-full text-xs font-black bg-emerald-200/80 text-emerald-900 border border-emerald-400">
                   मूळ अभिलेख (१९५० बेसलाईन)
                 </span>
                 <span className="text-xs font-mono text-emerald-800 font-bold">१३५९ फसली / १९५०</span>
@@ -68,9 +68,9 @@ export default function ProvenanceShowcase() {
             </div>
 
             {/* Card 2: Current Status & Detected Violation */}
-            <div className="p-6 rounded-2xl bg-rose-50/50 border-2 border-rose-300 space-y-3 relative overflow-hidden">
+            <div className="p-4 rounded-xl bg-rose-50/50 border-2 border-rose-300 space-y-2 relative overflow-hidden">
               <div className="flex items-center justify-between">
-                <span className="px-3 py-1 rounded-full text-xs font-black bg-rose-200/80 text-rose-900 border border-rose-400">
+                <span className="px-2.5 py-0.5 rounded-full text-xs font-black bg-rose-200/80 text-rose-900 border border-rose-400">
                   विद्यमान ७/१२ स्थिती (तपासणीत निष्पन्न)
                 </span>
                 <span className="text-xs font-mono text-rose-800 font-bold">सध्याची स्थिती २०२६</span>
@@ -100,35 +100,35 @@ export default function ProvenanceShowcase() {
           </div>
 
           {/* Chronological Provenance Chain Flow */}
-          <div className="space-y-4 pt-4 border-t border-slate-200">
+          <div className="space-y-3 pt-3 border-t border-slate-200">
             <h4 className="text-xs font-bold text-amber-800 uppercase tracking-wider flex items-center gap-1.5">
               <Layers className="w-4 h-4 text-amber-600" />
               <span>हक्कनोंदी व फेरफार साखळी अखंडता (Provenance Mutation Chain)</span>
             </h4>
 
-            <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 text-xs">
-              <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
+            <div className="grid grid-cols-1 sm:grid-cols-4 gap-2.5 text-xs">
+              <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
                 <span className="text-emerald-700 font-mono font-bold text-[11px]">१९५० बेसलाईन</span>
                 <p className="font-bold text-slate-900 text-xs">मूळ सनद व अधिकार अभिलेख</p>
-                <p className="text-[11px] text-slate-500">भोगवटादार वर्ग-२ म्हणून नोंदणीकृत</p>
+                <p className="text-[10px] text-slate-500">भोगवटादार वर्ग-२ म्हणून नोंदणीकृत</p>
               </div>
 
-              <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
+              <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
                 <span className="text-blue-700 font-mono font-bold text-[11px]">१९७५ कायदेशीर संरक्षण</span>
                 <p className="font-bold text-slate-900 text-xs">महाराष्ट्र कायदा क्र. ३५/१९७५</p>
-                <p className="text-[11px] text-slate-500">आदिवासी जमीन हस्तांतरणावर निर्बंध लागू</p>
+                <p className="text-[10px] text-slate-500">आदिवासी जमीन हस्तांतरणावर निर्बंध लागू</p>
               </div>
 
-              <div className="p-4 rounded-xl bg-slate-50 border border-rose-300 space-y-1">
+              <div className="p-3 rounded-xl bg-slate-50 border border-rose-300 space-y-1">
                 <span className="text-rose-700 font-mono font-bold text-[11px]">२००८ अनधिकृत फेरफार</span>
                 <p className="font-bold text-slate-900 text-xs">फेरफार क्र. ८९४ संशयास्पद</p>
-                <p className="text-[11px] text-slate-500">जिल्हाधिकारी पूर्वपरवानगी गहाळ</p>
+                <p className="text-[10px] text-slate-500">जिल्हाधिकारी पूर्वपरवानगी गहाळ</p>
               </div>
 
-              <div className="p-4 rounded-xl bg-slate-50 border border-amber-300 space-y-1">
+              <div className="p-3 rounded-xl bg-slate-50 border border-amber-300 space-y-1">
                 <span className="text-amber-700 font-mono font-bold text-[11px]">२०२६ महसूल अंमलबजावणी</span>
                 <p className="font-bold text-slate-900 text-xs">SDO न्यायालय सुनावणी</p>
-                <p className="text-[11px] text-slate-500">शासन जमा किंवा मूळ मालकास पुनर्वसन</p>
+                <p className="text-[10px] text-slate-500">शासन जमा किंवा मूळ मालकास पुनर्वसन</p>
               </div>
             </div>
           </div>

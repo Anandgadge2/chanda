@@ -26,28 +26,28 @@ export default function LandingNavbar({ onOpenAuth }) {
 
       {/* Primary Top Bar */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-20">
+        <div className="flex items-center justify-between h-16 sm:h-18">
           {/* Official Emblem & District Title */}
-          <Link href="/" className="flex items-center gap-3.5 group">
+          <Link href="/" className="flex items-center gap-3 group">
             <div className="flex items-center gap-2">
-              <ChandrapurDistrictLogo className="w-13 h-13 drop-shadow-xs transition-transform group-hover:scale-105" />
-              <div className="h-10 w-px bg-slate-200 hidden sm:block" />
-              <AshokStambhEmblem className="w-10 h-10 drop-shadow-xs transition-transform group-hover:scale-105 hidden sm:block" />
+              <ChandrapurDistrictLogo className="w-11 h-11 sm:w-12 sm:h-12 drop-shadow-xs transition-transform group-hover:scale-105" />
+              <div className="h-8 w-px bg-slate-200 hidden sm:block" />
+              <AshokStambhEmblem className="w-8 h-8 sm:w-9 sm:h-9 drop-shadow-xs transition-transform group-hover:scale-105 hidden sm:block" />
             </div>
 
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-xs font-bold text-amber-800 bg-amber-100/80 px-2 py-0.5 rounded border border-amber-300/80">
+                <span className="text-[10px] sm:text-xs font-bold text-amber-800 bg-amber-100/80 px-2 py-0.5 rounded border border-amber-300/80">
                   महाराष्ट्र शासन
                 </span>
-                <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider hidden md:inline-block">
+                <span className="text-[10px] sm:text-[11px] font-semibold text-slate-500 uppercase tracking-wider hidden md:inline-block">
                   Govt. of Maharashtra
                 </span>
               </div>
-              <h1 className="text-base sm:text-lg font-black text-slate-900 leading-tight group-hover:text-blue-950 transition">
+              <h1 className="text-sm sm:text-base font-black text-slate-900 leading-tight group-hover:text-blue-950 transition">
                 जिल्हाधिकारी कार्यालय, चंद्रपूर
               </h1>
-              <p className="text-[11px] text-slate-600 font-medium hidden sm:block">
+              <p className="text-[10px] sm:text-[11px] text-slate-600 font-medium hidden sm:block">
                 जमीन अभिलेख, १९५० मूळ शीर्षक साखळी व महसूल संनियंत्रण प्रणाली
               </p>
             </div>

@@ -12,15 +12,11 @@ import {
   ChevronLeft,
   ChevronRight,
   Lock,
-  UserPlus,
   FileSpreadsheet,
-  CheckCircle2,
-  Sparkles,
   Building,
   Compass,
+  Sparkles,
 } from 'lucide-react';
-import ChandrapurDistrictLogo from './ChandrapurDistrictLogo';
-import { AshokStambhEmblem } from './GovEmblem';
 import { CHANDRAPUR_TALUKAS } from '../../lib/constants';
 
 const CHANDRAPUR_BANNERS = [
@@ -56,7 +52,7 @@ export default function LandingHero({ onOpenAuth }) {
   const [searchTaluka, setSearchTaluka] = useState('');
   const [searchGat, setSearchGat] = useState('');
 
-  // Auto-scrolling banner timer
+  // Auto-scrolling banner timer (5s)
   useEffect(() => {
     if (!isPaused) {
       timerRef.current = setInterval(() => {
@@ -85,52 +81,11 @@ export default function LandingHero({ onOpenAuth }) {
   const activeBanner = CHANDRAPUR_BANNERS[currentSlide];
 
   return (
-    <section className="relative bg-gradient-to-b from-blue-50/60 via-slate-50 to-white text-slate-900 pt-8 pb-16 overflow-hidden border-b border-slate-200">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-        {/* Top District Header Bar */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-200/80">
-          <div className="flex items-center gap-3.5">
-            <ChandrapurDistrictLogo className="w-14 h-14 drop-shadow-sm flex-shrink-0" />
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-bold text-amber-800 bg-amber-100 px-2.5 py-0.5 rounded-full border border-amber-300">
-                  महाराष्ट्र शासन • महसूल व वन विभाग
-                </span>
-                <span className="text-xs font-semibold text-slate-500 hidden sm:inline">
-                  जिल्हा चंद्रपूर (Maharashtra)
-                </span>
-              </div>
-              <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight mt-0.5">
-                जिल्हाधिकारी कार्यालय, चंद्रपूर
-              </h1>
-              <p className="text-xs text-slate-600 font-medium">
-                जमीन महसूल संहिता (MLRC) १९६६ • १९५० मूळ शीर्षक साखळी व अर्ध-न्यायिक सुनावणी पोर्टल
-              </p>
-            </div>
-          </div>
-
-          {/* Quick Action Badges */}
-          <div className="flex items-center gap-2 self-start md:self-auto">
-            <button
-              onClick={() => onOpenAuth('login')}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-blue-950 bg-amber-400 hover:bg-amber-300 border border-amber-500/40 shadow-xs hover:shadow-sm transition"
-            >
-              <Lock className="w-3.5 h-3.5" />
-              <span>अधिकारी लॉगिन</span>
-            </button>
-            <Link
-              href="/dashboard"
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-white bg-blue-900 hover:bg-blue-800 shadow-xs hover:shadow-sm transition"
-            >
-              <Landmark className="w-3.5 h-3.5 text-amber-400" />
-              <span>डॅशबोर्ड उघडा</span>
-            </Link>
-          </div>
-        </div>
-
-        {/* Auto-scrolling Chandrapur Actual Photographic Banner */}
+    <section className="relative bg-gradient-to-b from-blue-50/40 via-slate-50/70 to-white text-slate-900 pt-3 pb-8 overflow-hidden border-b border-slate-200">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
+        {/* Sleek Auto-scrolling Chandrapur Actual Photographic Banner */}
         <div
-          className="relative w-full rounded-3xl overflow-hidden shadow-xl border border-slate-200 bg-slate-950 group h-[340px] sm:h-[440px] lg:h-[480px]"
+          className="relative w-full rounded-2xl sm:rounded-3xl overflow-hidden shadow-md border border-slate-200 bg-slate-950 group h-[210px] sm:h-[270px] lg:h-[310px]"
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
         >
@@ -145,59 +100,58 @@ export default function LandingHero({ onOpenAuth }) {
               <img
                 src={banner.image}
                 alt={banner.titleMr}
-                className="w-full h-full object-cover object-center scale-105 transition-transform duration-7000 ease-out"
+                className="w-full h-full object-cover object-center"
               />
-              {/* Subtle Gradient Overlays for High-Contrast Legibility */}
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/30 to-transparent" />
-              <div className="absolute inset-0 bg-gradient-to-r from-slate-950/70 via-transparent to-transparent hidden sm:block" />
+              {/* High-Contrast Readability Gradient Overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/35 to-transparent" />
             </div>
           ))}
 
           {/* Banner Slide Content Overlay */}
-          <div className="absolute inset-x-0 bottom-0 z-20 p-6 sm:p-10 flex flex-col sm:flex-row sm:items-end justify-between gap-4 text-white">
-            <div className="max-w-2xl space-y-2">
+          <div className="absolute inset-x-0 bottom-0 z-20 p-4 sm:p-6 flex flex-col sm:flex-row sm:items-end justify-between gap-3 text-white">
+            <div className="max-w-2xl space-y-1 sm:space-y-1.5">
               <div className="flex items-center gap-2">
-                <span className="px-3 py-1 rounded-full text-xs font-bold bg-amber-500 text-slate-950 shadow-md">
+                <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-400 text-slate-950 shadow-xs">
                   {activeBanner.badge}
                 </span>
-                <span className="px-3 py-1 rounded-full text-xs font-semibold bg-white/20 backdrop-blur-md border border-white/30 text-white">
+                <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-white/20 backdrop-blur-md border border-white/30 text-white">
                   {activeBanner.tag}
                 </span>
               </div>
-              <h2 className="text-xl sm:text-3xl font-black text-white leading-tight drop-shadow-md">
+              <h2 className="text-base sm:text-2xl font-black text-white leading-tight drop-shadow-md">
                 {activeBanner.titleMr}
               </h2>
-              <p className="text-xs sm:text-sm text-slate-200 drop-shadow-sm font-medium">
+              <p className="text-xs sm:text-xs text-slate-200 drop-shadow-sm font-medium line-clamp-1">
                 {activeBanner.titleEn}
               </p>
             </div>
 
-            {/* Carousel Navigation Buttons & Indicators */}
-            <div className="flex items-center gap-3">
+            {/* Carousel Controls */}
+            <div className="flex items-center gap-2.5 self-end sm:self-auto">
               <div className="flex items-center gap-1.5">
                 {CHANDRAPUR_BANNERS.map((_, idx) => (
                   <button
                     key={idx}
                     onClick={() => setCurrentSlide(idx)}
-                    className={`h-2.5 rounded-full transition-all duration-300 ${
-                      idx === currentSlide ? 'w-8 bg-amber-400' : 'w-2.5 bg-white/40 hover:bg-white/70'
+                    className={`h-2 rounded-full transition-all duration-300 ${
+                      idx === currentSlide ? 'w-6 bg-amber-400' : 'w-2 bg-white/40 hover:bg-white/70'
                     }`}
                     aria-label={`Slide ${idx + 1}`}
                   />
                 ))}
               </div>
 
-              <div className="flex items-center gap-1 ml-2">
+              <div className="flex items-center gap-1 ml-1">
                 <button
                   onClick={handlePrevSlide}
-                  className="p-2 rounded-xl bg-white/20 hover:bg-white/30 backdrop-blur-md text-white border border-white/20 transition"
+                  className="p-1.5 rounded-lg bg-white/20 hover:bg-white/30 backdrop-blur-md text-white border border-white/25 transition"
                   aria-label="Previous Slide"
                 >
                   <ChevronLeft className="w-4 h-4" />
                 </button>
                 <button
                   onClick={handleNextSlide}
-                  className="p-2 rounded-xl bg-white/20 hover:bg-white/30 backdrop-blur-md text-white border border-white/20 transition"
+                  className="p-1.5 rounded-lg bg-white/20 hover:bg-white/30 backdrop-blur-md text-white border border-white/25 transition"
                   aria-label="Next Slide"
                 >
                   <ChevronRight className="w-4 h-4" />
@@ -207,27 +161,43 @@ export default function LandingHero({ onOpenAuth }) {
           </div>
         </div>
 
-        {/* Search Bar & Action Center in Premium Light Glassmorphism */}
-        <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-slate-200 space-y-6">
-          <div className="max-w-3xl space-y-2">
-            <div className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-900 bg-blue-50 px-3 py-1 rounded-full border border-blue-200">
-              <Search className="w-3.5 h-3.5 text-blue-700" />
-              <span>चंद्रपूर जिल्हा भूखंड शोध व ३६०° साखळी (Land Intelligence Search)</span>
+        {/* Compact Search & Action Center */}
+        <div className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-5 shadow-xs border border-slate-200 space-y-3.5">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
+            <div>
+              <div className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-900 bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-200">
+                <Search className="w-3.5 h-3.5 text-blue-700" />
+                <span>चंद्रपूर जिल्हा भूखंड शोध व ३६०° साखळी (Land Intelligence Search)</span>
+              </div>
+              <h3 className="text-base sm:text-lg font-black text-slate-900 mt-1">
+                भूखंडाचा गट क्र., सर्व्हे नंबर अथवा गावनिहाय शोध व १९५० साखळी
+              </h3>
             </div>
-            <h3 className="text-xl sm:text-2xl font-black text-slate-900">
-              जिल्ह्यातील कोणत्याही भूखंडाची १९५० साखळी व कायदेशीर स्थिती त्वरित शोधा
-            </h3>
-            <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-              गट क्रमांक, सर्व्हे नंबर अथवा गावनिहाय शोध घेऊन भोगवटादार वर्ग, आदिवासी जमीन निर्बंध (कलम ३६/३६अ), आणि SDO सुनावणी खटल्यांची माहिती मिळवा.
-            </p>
+
+            <div className="flex items-center gap-2">
+              <Link
+                href="/dashboard"
+                className="px-3.5 py-1.5 rounded-xl bg-blue-900 hover:bg-blue-800 text-white font-bold text-xs shadow-2xs transition flex items-center gap-1.5"
+              >
+                <Landmark className="w-3.5 h-3.5 text-amber-400" />
+                <span>महसूल डॅशबोर्ड</span>
+              </Link>
+              <button
+                onClick={() => onOpenAuth('login')}
+                className="px-3 py-1.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-blue-950 font-bold text-xs shadow-2xs transition flex items-center gap-1.5"
+              >
+                <Lock className="w-3.5 h-3.5 text-blue-950" />
+                <span>अधिकारी लॉगिन</span>
+              </button>
+            </div>
           </div>
 
-          {/* Search Form */}
+          {/* Quick Search Form */}
           <form
             onSubmit={handleSearch}
-            className="p-2.5 bg-slate-50 rounded-2xl border border-slate-200 flex flex-col sm:flex-row gap-2.5"
+            className="p-2 bg-slate-50 rounded-xl border border-slate-200 flex flex-col sm:flex-row gap-2"
           >
-            <div className="flex-1 flex items-center bg-white rounded-xl px-3 py-1 border border-slate-200 focus-within:border-blue-600 focus-within:ring-2 focus-within:ring-blue-100 transition">
+            <div className="flex-1 flex items-center bg-white rounded-lg px-3 py-0.5 border border-slate-200 focus-within:border-blue-600 focus-within:ring-2 focus-within:ring-blue-100 transition">
               <MapPin className="w-4 h-4 text-blue-900 mr-2 flex-shrink-0" />
               <select
                 value={searchTaluka}
@@ -243,20 +213,20 @@ export default function LandingHero({ onOpenAuth }) {
               </select>
             </div>
 
-            <div className="flex-1 flex items-center bg-white rounded-xl px-3 py-1 border border-slate-200 focus-within:border-blue-600 focus-within:ring-2 focus-within:ring-blue-100 transition">
+            <div className="flex-1 flex items-center bg-white rounded-lg px-3 py-0.5 border border-slate-200 focus-within:border-blue-600 focus-within:ring-2 focus-within:ring-blue-100 transition">
               <Search className="w-4 h-4 text-slate-400 mr-2 flex-shrink-0" />
               <input
                 type="text"
                 value={searchGat}
                 onChange={(e) => setSearchGat(e.target.value)}
-                placeholder="गट क्र. / सर्व्हे नंबर / गाव नाव प्रविष्ट करा..."
+                placeholder="गट क्र. / सर्व्हे नंबर / गाव नाव..."
                 className="w-full py-2 text-xs font-medium bg-transparent focus:outline-none placeholder:text-slate-400 text-slate-800"
               />
             </div>
 
             <button
               type="submit"
-              className="px-6 py-2.5 rounded-xl bg-blue-900 hover:bg-blue-800 text-white font-bold text-xs shadow-sm transition flex items-center justify-center gap-1.5 flex-shrink-0"
+              className="px-5 py-2 rounded-lg bg-blue-900 hover:bg-blue-800 text-white font-bold text-xs shadow-2xs transition flex items-center justify-center gap-1.5 flex-shrink-0"
             >
               <span>शोधा (Search 7/12)</span>
               <ArrowRight className="w-3.5 h-3.5 text-amber-400" />
@@ -264,84 +234,76 @@ export default function LandingHero({ onOpenAuth }) {
           </form>
 
           {/* Quick Action Navigation CTAs */}
-          <div className="pt-2 flex flex-wrap items-center gap-3 text-xs font-bold">
-            <Link
-              href="/dashboard"
-              className="px-5 py-2.5 rounded-xl bg-blue-900 hover:bg-blue-800 text-white shadow-xs transition flex items-center gap-2"
-            >
-              <Landmark className="w-4 h-4 text-amber-400" />
-              <span>महसूल अधिकारी डॅशबोर्ड</span>
-            </Link>
-
+          <div className="flex flex-wrap items-center gap-2 pt-0.5 text-xs font-bold">
             <Link
               href="/parcels"
-              className="px-5 py-2.5 rounded-xl bg-white hover:bg-slate-50 text-slate-800 border border-slate-300 shadow-2xs transition flex items-center gap-2"
+              className="px-3.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 transition flex items-center gap-1.5"
             >
-              <ShieldCheck className="w-4 h-4 text-emerald-600" />
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
               <span>भूखंड नोंदवही (७/१२ साखळी)</span>
             </Link>
 
             <Link
-              href="/reports"
-              className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white transition flex items-center gap-2"
+              href="/cases"
+              className="px-3.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 transition flex items-center gap-1.5"
             >
-              <FileSpreadsheet className="w-4 h-4" />
-              <span>प्रपत्र-३ अहवाल डाऊनलोड</span>
+              <Building className="w-3.5 h-3.5 text-amber-700" />
+              <span>SDO सुनावणी खटले</span>
             </Link>
 
-            <button
-              onClick={() => onOpenAuth('login')}
-              className="px-5 py-2.5 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 transition flex items-center gap-2 ml-auto"
+            <Link
+              href="/reports"
+              className="px-3.5 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 transition flex items-center gap-1.5"
             >
-              <Lock className="w-4 h-4 text-amber-800" />
-              <span>अधिकारी थेट प्रवेश</span>
-            </button>
+              <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600" />
+              <span>प्रपत्र-३ अहवाल</span>
+            </Link>
           </div>
         </div>
 
-        {/* Real-time District Metrics Cards in Crisp Light Theme */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-xs flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-900 flex-shrink-0">
-              <Landmark className="w-6 h-6" />
+        {/* Compact Real-time District Metrics Cards */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          <div className="p-3.5 rounded-xl bg-white border border-slate-200 shadow-2xs flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-900 flex-shrink-0">
+              <Landmark className="w-5 h-5" />
             </div>
             <div>
-              <p className="text-2xl sm:text-3xl font-black text-slate-900">१५</p>
+              <p className="text-xl font-black text-slate-900">१५</p>
               <p className="text-xs font-bold text-slate-800">प्रशासकीय तालुके</p>
-              <p className="text-[11px] text-slate-500">चंद्रपूर जिल्हा महसूल मंडळे</p>
+              <p className="text-[10px] text-slate-500">चंद्रपूर महसूल मंडळे</p>
             </div>
           </div>
 
-          <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-xs flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-700 flex-shrink-0">
-              <Compass className="w-6 h-6" />
+          <div className="p-3.5 rounded-xl bg-white border border-slate-200 shadow-2xs flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-700 flex-shrink-0">
+              <Compass className="w-5 h-5" />
             </div>
             <div>
-              <p className="text-2xl sm:text-3xl font-black text-slate-900">१,४८२</p>
+              <p className="text-xl font-black text-slate-900">१,४८२</p>
               <p className="text-xs font-bold text-slate-800">महसूल गावे</p>
-              <p className="text-[11px] text-slate-500">एक्सेल डेटा अंतर्ग्रहण सक्षम</p>
+              <p className="text-[10px] text-slate-500">एक्सेल अंतर्ग्रहण</p>
             </div>
           </div>
 
-          <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-xs flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-700 flex-shrink-0">
-              <ShieldCheck className="w-6 h-6" />
+          <div className="p-3.5 rounded-xl bg-white border border-slate-200 shadow-2xs flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-700 flex-shrink-0">
+              <ShieldCheck className="w-5 h-5" />
             </div>
             <div>
-              <p className="text-2xl sm:text-3xl font-black text-slate-900">१९५०</p>
+              <p className="text-xl font-black text-slate-900">१९५०</p>
               <p className="text-xs font-bold text-slate-800">मूळ शीर्षक साखळी</p>
-              <p className="text-[11px] text-slate-500">बु.ग.दे. व ता.ग.दे. पडताळणी</p>
+              <p className="text-[10px] text-slate-500">बु.ग.दे. पडताळणी</p>
             </div>
           </div>
 
-          <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-xs flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-indigo-50 border border-indigo-200 flex items-center justify-center text-indigo-700 flex-shrink-0">
-              <Sparkles className="w-6 h-6" />
+          <div className="p-3.5 rounded-xl bg-white border border-slate-200 shadow-2xs flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-indigo-50 border border-indigo-200 flex items-center justify-center text-indigo-700 flex-shrink-0">
+              <Sparkles className="w-5 h-5" />
             </div>
             <div>
-              <p className="text-2xl sm:text-3xl font-black text-slate-900">२४x७</p>
+              <p className="text-xl font-black text-slate-900">२४x७</p>
               <p className="text-xs font-bold text-slate-800">डिजिटल संनियंत्रण</p>
-              <p className="text-[11px] text-slate-500">MLRC १९६६ वैधानिक अंमलबजावणी</p>
+              <p className="text-[10px] text-slate-500">MLRC १९६६ अंमलबजावणी</p>
             </div>
           </div>
         </div>

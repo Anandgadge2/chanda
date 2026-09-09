@@ -123,62 +123,59 @@ export default function HeroBannerSlider() {
   return (
     <section
       id="features"
-      className="py-14 bg-white text-slate-900 relative select-none border-b border-slate-200"
+      className="py-8 bg-white text-slate-900 relative select-none border-b border-slate-200"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 pb-4 border-b border-slate-200 gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-4 pb-2.5 border-b border-slate-200 gap-3">
           <div>
-            <div className="inline-flex items-center gap-2 text-xs font-bold text-amber-800 bg-amber-100 px-3 py-1 rounded-full border border-amber-300">
-              <ShieldCheck className="w-4 h-4 text-amber-700" />
+            <div className="inline-flex items-center gap-2 text-xs font-bold text-amber-800 bg-amber-100 px-2.5 py-0.5 rounded-full border border-amber-300">
+              <ShieldCheck className="w-3.5 h-3.5 text-amber-700" />
               <span>प्रशासन स्तंभ व वैधानिक कार्यप्रणाली</span>
             </div>
-            <h2 className="text-xl sm:text-2xl font-black text-slate-900 mt-2">
+            <h2 className="text-lg sm:text-xl font-black text-slate-900 mt-1">
               महसूल संनियंत्रणाचे प्रमुख वैशिष्ट्ये व तंत्रज्ञान
             </h2>
-            <p className="text-xs sm:text-sm text-slate-600 mt-1">
-              महाराष्ट्र जमीन महसूल संहिता (MLRC) १९६६ अंतर्गत विकसित ४ प्रमुख अंमलबजावणी स्तंभ
-            </p>
           </div>
 
           {/* Slider Controls (Next / Prev buttons) */}
           <div className="flex items-center gap-2">
             <button
               onClick={handlePrev}
-              className="p-2.5 rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 shadow-2xs transition"
+              className="p-1.5 rounded-lg bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 shadow-2xs transition"
               aria-label="Previous Slide"
             >
-              <ChevronLeft className="w-5 h-5" />
+              <ChevronLeft className="w-4 h-4" />
             </button>
-            <span className="text-xs font-mono font-bold text-slate-600 px-2">
+            <span className="text-xs font-mono font-bold text-slate-600 px-1">
               0{current + 1} / 0{SLIDES.length}
             </span>
             <button
               onClick={handleNext}
-              className="p-2.5 rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 shadow-2xs transition"
+              className="p-1.5 rounded-lg bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 shadow-2xs transition"
               aria-label="Next Slide"
             >
-              <ChevronRight className="w-5 h-5" />
+              <ChevronRight className="w-4 h-4" />
             </button>
           </div>
         </div>
 
         {/* Dynamic Slide Container with Smooth Background Transition */}
         <div
-          className={`relative rounded-3xl p-6 sm:p-10 border bg-gradient-to-br ${slide.accentColor} shadow-md transition-all duration-500 min-h-[380px] flex flex-col justify-between overflow-hidden`}
+          className={`relative rounded-2xl sm:rounded-3xl p-4 sm:p-6 border bg-gradient-to-br ${slide.accentColor} shadow-sm transition-all duration-500 min-h-[250px] sm:min-h-[280px] flex flex-col justify-between overflow-hidden`}
         >
           {/* Subtle watermark background icon */}
           <div className="absolute -right-8 -bottom-8 opacity-5 pointer-events-none">
-            <Icon className="w-72 h-72 text-slate-900" />
+            <Icon className="w-64 h-64 text-slate-900" />
           </div>
 
-          <div className="relative z-10 max-w-3xl space-y-4">
+          <div className="relative z-10 max-w-3xl space-y-2.5">
             {/* Slide Badge */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2.5">
               <span
-                className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${slide.badgeColor}`}
+                className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${slide.badgeColor}`}
               >
                 <Icon className={`w-3.5 h-3.5 ${slide.iconColor}`} />
                 <span>{slide.badge}</span>
@@ -188,20 +185,20 @@ export default function HeroBannerSlider() {
 
             {/* Slide Titles */}
             <div>
-              <h3 className="text-xl sm:text-3xl font-black text-slate-900 leading-tight">
+              <h3 className="text-lg sm:text-xl font-black text-slate-900 leading-tight">
                 {slide.titleMr}
               </h3>
-              <p className="text-xs sm:text-sm text-slate-600 font-semibold mt-1">{slide.titleEn}</p>
+              <p className="text-xs text-slate-600 font-semibold mt-0.5">{slide.titleEn}</p>
             </div>
 
             {/* Slide Description */}
-            <p className="text-xs sm:text-sm text-slate-700 leading-relaxed font-normal">{slide.desc}</p>
+            <p className="text-xs text-slate-700 leading-relaxed font-normal">{slide.desc}</p>
 
             {/* Key Bullet Points */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
               {slide.points.map((pt, idx) => (
-                <div key={idx} className="flex items-start gap-2 text-xs text-slate-800 font-medium">
-                  <CheckCircle2 className={`w-4 h-4 mt-0.5 flex-shrink-0 ${slide.iconColor}`} />
+                <div key={idx} className="flex items-start gap-1.5 text-xs text-slate-800 font-medium">
+                  <CheckCircle2 className={`w-3.5 h-3.5 mt-0.5 flex-shrink-0 ${slide.iconColor}`} />
                   <span>{pt}</span>
                 </div>
               ))}
@@ -209,23 +206,23 @@ export default function HeroBannerSlider() {
           </div>
 
           {/* Slide Action Bar */}
-          <div className="relative z-10 pt-6 mt-6 border-t border-slate-200/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="relative z-10 pt-4 mt-4 border-t border-slate-200/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
             <Link
               href={slide.ctaHref}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-900 text-white hover:bg-blue-800 font-bold text-xs shadow-sm transition group"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-900 text-white hover:bg-blue-800 font-bold text-xs shadow-xs transition group"
             >
               <span>{slide.ctaText}</span>
-              <ArrowUpRight className="w-4 h-4 text-amber-400 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+              <ArrowUpRight className="w-3.5 h-3.5 text-amber-400 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
             </Link>
 
             {/* Indicator Dots */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5">
               {SLIDES.map((s, idx) => (
                 <button
                   key={s.id}
                   onClick={() => setCurrent(idx)}
-                  className={`h-2.5 rounded-full transition-all duration-300 ${
-                    idx === current ? 'w-8 bg-blue-900' : 'w-2.5 bg-slate-300 hover:bg-slate-400'
+                  className={`h-2 rounded-full transition-all duration-300 ${
+                    idx === current ? 'w-6 bg-blue-900' : 'w-2 bg-slate-300 hover:bg-slate-400'
                   }`}
                   aria-label={`Go to slide ${idx + 1}`}
                 />
