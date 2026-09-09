@@ -1,0 +1,219 @@
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  directUrl  = env("DATABASE_URL_UNPOOLED")
+  extensions = [pgcrypto]
+}
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+// -------------------------------------------------------------
+// ENUMS
+// -------------------------------------------------------------
+
+enum TenureClass {
+  BHOGVATDAR_CLASS_1 // भोगवटादार वर्ग-१
+  BHOGVATDAR_CLASS_2 // भोगवटादार वर्ग-२
+  SARKAR_SHASAN      // शासकीय / सरकारी जमीन
+  DEVASTHAN_INAM     // इनाम / देवस्थान
+  FOREST_JANGAL      // वन जमीन
+}
+
+enum ViolationType {
+  SHARTBHANG                 // Breach of allotment conditions
+  TRIBAL_LAND_VIOLATION      // Adivasi transfer violation (Sec 36/36A)
+  UNAUTHORIZED_NA_CONVERSION // Unapproved NA use
+  ENCROACHMENT               // Encroachment on Gairan/Govt land (Sec 50-54)
+  POKALIST_NONDI             // Defunct/hollow unverified entries (Bu.Ga.De / Ta.Ga.De)
+  GOVERNMENT_NAME_MISSING    // Altered from Shasan to private without sanction
+}
+
+enum EnforcementStatus {
+  FLAGGED_IN_AUDIT          // Identified in Prapatra/Field Audit
+  FIELD_PANCHNAMA_COMPLETED // Spot inspection conducted
+  NOTICE_ISSUED             // Show-Cause notice served
+  HEARING_SCHEDULED         // Active litigation with SDO/Tehsildar
+  FINAL_ORDER_PASSED        // Order passed (Shasan Jama or Regularized)
+  RECTIFIED_7_12            // Mutation certified & 7/12 updated
+  DISMISSED                 // Dismissed on appeal
+}
+
+enum DMSDocType {
+  OLD_7_12_ARCHIVE          // Historical 1950 baseline 7/12
+  FERFAR_REGISTER_COPY      // Village Form VI extract
+  FIELD_PANCHNAMA           // Spot inspection report
+  SDO_ORDER                 // Sub-Divisional Officer ruling
+  COLLECTOR_ORDER           // Collectorate resumption/sanction order
+  SHOW_CAUSE_NOTICE         // Formal legal notice
+}
+
+// -------------------------------------------------------------
+// CORE PARCEL REGISTRY (Master Record)
+// -------------------------------------------------------------
+
+model LandParcel {
+  id               String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  upi              String      @unique @db.VarChar(64) // Unique Parcel ID (e.g., MH-CHA-WAR-042-0019-01)
+  
+  // Administrative Hierarchy
+  district         String      @default("Chandrapur") @db.VarChar(64)
+  taluka           String      @db.VarChar(64)
+  revenueCircle    String?     @map("revenue_circle") @db.VarChar(64)
+  villageCode      String      @map("village_code") @db.VarChar(32)
+  villageName      String      @map("village_name") @db.VarChar(128)
+  
+  // Survey & Spatial Identification
+  oldSurveyNo      String?     @map("old_survey_no") @db.VarChar(32) // जुना स.नं.
+  gatNumber        String      @map("gat_number") @db.VarChar(32)     // नवा गट क्र.
+  hissaNumber      String?     @map("hissa_number") @db.VarChar(16)   // हिस्सा क्र.
+  
+  // Area & Tenure
+  totalAreaHa      Decimal     @map("total_area_ha") @db.Decimal(12, 4) // Hectares
+  potkharabaAreaHa Decimal     @default(0.0000) @map("potkharaba_area_ha") @db.Decimal(12, 4)
+  tenureClass      TenureClass @map("tenure_class")
+  
+  // System Metadata
+  hasActiveDispute Boolean     @default(false) @map("has_active_dispute")
+  metadata         Json?       @db.JsonB
+  createdAt        DateTime    @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt        DateTime    @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relational Links
+  backwardHistories BackwardHistory[]
+  forwardCases      ForwardEnforcementCase[]
+  documents         DmsDocument[]
+
+  @@index([taluka, villageCode, gatNumber], name: "idx_parcel_hierarchy_lookup")
+  @@index([tenureClass], name: "idx_parcel_tenure")
+  @@index([hasActiveDispute], name: "idx_parcel_dispute")
+  @@map("land_parcels")
+}
+
+// -------------------------------------------------------------
+// BACKWARD LINKAGE (Historical Title & 1950 Provenance)
+// -------------------------------------------------------------
+
+model BackwardHistory {
+  id           String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  parcelId     String      @map("parcel_id") @db.Uuid
+  
+  epochYear    Int         @map("epoch_year") // e.g., 1950, 1972, 1995
+  recordDate   DateTime?   @map("record_date") @db.Date
+  ferfarNumber String?     @map("ferfar_number") @db.VarChar(64)
+  
+  ownerName    String      @map("owner_name") @db.VarChar(255)
+  khataNumber  String?     @map("khata_number") @db.VarChar(64)
+  areaHa       Decimal     @map("area_ha") @db.Decimal(12, 4)
+  tenureClass  TenureClass @map("tenure_class")
+  
+  wasGovtLand  Boolean     @default(false) @map("was_govt_land") // Marked Sarkar/Shasan in this epoch
+  mutationType String?     @map("mutation_type") @db.VarChar(128) // Varas, Kharedikhat, वाटप
+  remarks      String?     @db.Text
+  
+  createdAt    DateTime    @default(now()) @map("created_at") @db.Timestamptz
+
+  // Relations
+  parcel       LandParcel  @relation(fields: [parcelId], references: [id], onDelete: Cascade)
+  documents    DmsDocument[]
+
+  @@index([parcelId, epochYear(sort: Desc)], name: "idx_backward_timeline")
+  @@index([ferfarNumber], name: "idx_backward_ferfar")
+  @@index([wasGovtLand], name: "idx_backward_govt_flag")
+  @@map("backward_histories")
+}
+
+// -------------------------------------------------------------
+// FORWARD LINKAGE (Violations, Audits & Quasi-Judicial Cases)
+// -------------------------------------------------------------
+
+model ForwardEnforcementCase {
+  id                   String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  parcelId             String            @map("parcel_id") @db.Uuid
+  caseNumber           String            @unique @map("case_number") @db.VarChar(128) // e.g., SDO/REV/2026/892
+  
+  violationType        ViolationType     @map("violation_type")
+  status               EnforcementStatus @default(FLAGGED_IN_AUDIT)
+  
+  encroachedAreaHa     Decimal           @default(0.0000) @map("encroached_area_ha") @db.Decimal(12, 4)
+  occupantName         String?           @map("occupant_name") @db.VarChar(255)
+  prapatraCategory     String?           @map("prapatra_category") @db.VarChar(32) // Prapatra 1, 2, or 3
+  
+  investigatingOfficer String?           @map("investigating_officer") @db.VarChar(128)
+  showCauseNoticeDate  DateTime?         @map("show_cause_notice_date") @db.Date
+  orderDate            DateTime?         @map("order_date") @db.Date
+  finalOrderDetails    String?           @map("final_order_details") @db.Text
+  isRepossessedToGovt  Boolean           @default(false) @map("is_repossessed_to_govt") // शासन जमा
+  
+  createdAt            DateTime          @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt            DateTime          @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relations
+  parcel               LandParcel        @relation(fields: [parcelId], references: [id], onDelete: Cascade)
+  hearings             CaseHearing[]
+  documents            DmsDocument[]
+
+  @@index([parcelId, status], name: "idx_forward_parcel_status")
+  @@index([violationType, status], name: "idx_forward_violation_status")
+  @@index([isRepossessedToGovt], name: "idx_forward_repossessed")
+  @@map("forward_enforcement_cases")
+}
+
+// -------------------------------------------------------------
+// CASE PROCEEDINGS & HEARINGS
+// -------------------------------------------------------------
+
+model CaseHearing {
+  id              String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  caseId          String                 @map("case_id") @db.Uuid
+  
+  hearingDate     DateTime               @map("hearing_date") @db.Date
+  authority       String                 @db.VarChar(64) // Tehsildar, SDO, Collector
+  proceedingsLog  String                 @map("proceedings_log") @db.Text
+  nextHearingDate DateTime?              @map("next_hearing_date") @db.Date
+  
+  createdAt       DateTime               @default(now()) @map("created_at") @db.Timestamptz
+
+  case            ForwardEnforcementCase @relation(fields: [caseId], references: [id], onDelete: Cascade)
+
+  @@index([caseId, hearingDate(sort: Desc)], name: "idx_case_hearing_date")
+  @@map("case_hearings")
+}
+
+// -------------------------------------------------------------
+// COLLECTORATE DMS (Cloudinary & Physical Rack Mapping)
+// -------------------------------------------------------------
+
+model DmsDocument {
+  id                 String                  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  parcelId           String?                 @map("parcel_id") @db.Uuid
+  caseId             String?                 @map("case_id") @db.Uuid
+  backwardHistoryId  String?                 @map("backward_history_id") @db.Uuid
+  
+  title              String                  @db.VarChar(255)
+  docType            DMSDocType              @map("doc_type")
+  
+  // Cloudinary Storage Coordinates
+  cloudinaryPublicId String                  @map("cloudinary_public_id") @db.VarChar(255)
+  storageUrl         String                  @map("storage_url") @db.VarChar(1024)
+  fileSizeBytes      BigInt                  @map("file_size_bytes")
+  mimeType           String                  @default("application/pdf") @map("mime_type") @db.VarChar(64)
+  
+  // Physical Collectorate Coordinates
+  recordRoomRackNo   String?                 @map("record_room_rack_no") @db.VarChar(64)
+  recordRoomBundleNo String?                 @map("record_room_bundle_no") @db.VarChar(64)
+  fileNumber         String?                 @map("file_number") @db.VarChar(128)
+  
+  uploadedAt         DateTime                @default(now()) @map("uploaded_at") @db.Timestamptz
+
+  // Relations
+  parcel             LandParcel?             @relation(fields: [parcelId], references: [id], onDelete: SetNull)
+  enforcementCase    ForwardEnforcementCase? @relation(fields: [caseId], references: [id], onDelete: SetNull)
+  backwardHistory    BackwardHistory?        @relation(fields: [backwardHistoryId], references: [id], onDelete: SetNull)
+
+  @@index([parcelId], name: "idx_dms_parcel")
+  @@index([caseId], name: "idx_dms_case")
+  @@map("dms_documents")
+}
