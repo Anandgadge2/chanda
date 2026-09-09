@@ -21,35 +21,9 @@ export default function LandingNavbar({ onOpenAuth }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 bg-white border-b border-slate-200 shadow-sm">
-      {/* Official Indian National Tricolor Strip */}
-      <div className="gov-tricolor-bar" />
-
-      {/* Top Utility Header Strip */}
-      <div className="bg-slate-100/90 border-b border-slate-200/80 px-4 sm:px-6 lg:px-8 py-1">
-        <div className="max-w-7xl mx-auto flex items-center justify-between text-[11px] text-slate-600">
-          <div className="flex items-center gap-2">
-            <span className="font-bold text-amber-900 bg-amber-200/60 px-2 py-0.5 rounded text-[10px] border border-amber-300">
-              महाराष्ट्र शासन
-            </span>
-            <span className="font-medium text-slate-700 hidden sm:inline">
-              Government of Maharashtra • महसूल व वन विभाग
-            </span>
-          </div>
-
-          <div className="flex items-center gap-4 text-[11px] font-medium">
-            <span className="text-slate-500 hidden md:inline">जिल्हा चंद्रपूर (Chandrapur District)</span>
-            <div className="flex items-center gap-1.5 text-slate-700 bg-white px-2 py-0.5 rounded border border-slate-200">
-              <span className="font-bold text-blue-900">मराठी</span>
-              <span className="text-slate-300">|</span>
-              <span className="text-slate-500">English</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
+    <header className="sticky top-0 z-50 bg-white border-b border-slate-200 shadow-xs">
       {/* Main Brand & Officer Actions Header */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
         <div className="flex items-center justify-between">
           {/* Official Emblem & Collectorate Title */}
           <Link href="/" className="flex items-center gap-3.5 group">
