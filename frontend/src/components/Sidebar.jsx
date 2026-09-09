@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
+  Home,
   LayoutDashboard,
   MapPin,
   Scale,
@@ -16,10 +17,16 @@ import clsx from 'clsx';
 
 const navItems = [
   {
-    href: '/',
-    labelMr: 'डॅशबोर्ड',
-    labelEn: 'Executive Dashboard',
+    href: '/dashboard',
+    labelMr: 'महसूल डॅशबोर्ड',
+    labelEn: 'Officer Dashboard',
     icon: LayoutDashboard,
+  },
+  {
+    href: '/',
+    labelMr: 'सार्वजनिक पोर्टल',
+    labelEn: 'Public Landing Page',
+    icon: Home,
   },
   {
     href: '/parcels',

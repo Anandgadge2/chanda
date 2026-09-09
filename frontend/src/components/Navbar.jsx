@@ -10,13 +10,13 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16 items-center">
           {/* Brand & Emblem */}
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-900 to-indigo-950 flex items-center justify-center text-white shadow-md">
+          <Link href="/dashboard" className="flex items-center gap-3 group">
+            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-900 to-indigo-950 flex items-center justify-center text-white shadow-md group-hover:scale-105 transition-transform">
               <Landmark className="w-5 h-5 text-amber-400" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="font-bold text-slate-900 text-lg tracking-tight">
+                <span className="font-bold text-slate-900 text-lg tracking-tight group-hover:text-blue-900 transition">
                   जिल्हाधिकारी कार्यालय, चंद्रपूर
                 </span>
                 <span className="text-xs bg-amber-100 text-amber-800 font-semibold px-2 py-0.5 rounded border border-amber-200">
@@ -27,10 +27,18 @@ export default function Navbar() {
                 Land Intelligence & Governance Portal (जमीन महसूल अभिलेख व शर्तभंग प्रणाली)
               </p>
             </div>
-          </div>
+          </Link>
 
-          {/* System Status Badges */}
+          {/* System Status Badges & Quick Nav */}
           <div className="hidden md:flex items-center gap-3">
+            <Link
+              href="/"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border border-slate-200 text-slate-600 hover:text-blue-900 hover:bg-slate-50 transition"
+            >
+              <ExternalLink className="w-3.5 h-3.5" />
+              <span>सार्वजनिक पोर्टल</span>
+            </Link>
+
             <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-medium">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
               <span>Neon PostgreSQL Connected</span>
