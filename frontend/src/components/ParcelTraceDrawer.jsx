@@ -49,17 +49,17 @@ export default function ParcelTraceDrawer({ upi, onClose, onRefresh }) {
   const tenureConfig = parcel?.tenureClass ? TENURE_CLASSES[parcel.tenureClass] : null;
 
   return (
-    <>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 md:p-6 overflow-hidden">
       {/* Backdrop */}
       <div
-        className="fixed inset-0 z-40 bg-slate-900/50 backdrop-blur-sm transition-opacity"
+        className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity animate-in fade-in duration-200"
         onClick={onClose}
       />
 
-      {/* Slide-over Drawer */}
-      <div className="fixed inset-y-0 right-0 z-50 w-full max-w-2xl bg-white shadow-2xl flex flex-col border-l border-slate-200 animate-in slide-in-from-right duration-300">
+      {/* Centered Modal Dialog */}
+      <div className="relative z-10 w-full max-w-3xl max-h-[90vh] bg-white rounded-2xl shadow-2xl flex flex-col border border-slate-200 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
         {/* Header */}
-        <div className="px-6 py-5 bg-slate-900 text-white flex justify-between items-start border-b border-slate-800">
+        <div className="px-6 py-4 bg-slate-900 text-white flex justify-between items-start border-b border-slate-800 shrink-0">
           <div>
             <div className="flex items-center gap-2">
               <span className="font-mono text-xs text-amber-400 bg-amber-950/60 px-2 py-0.5 rounded border border-amber-800/80">
@@ -419,7 +419,7 @@ export default function ParcelTraceDrawer({ upi, onClose, onRefresh }) {
         </div>
 
         {/* Footer */}
-        <div className="p-4 bg-slate-50 border-t border-slate-200 flex justify-between items-center">
+        <div className="p-4 bg-slate-50 border-t border-slate-200 flex justify-between items-center shrink-0">
           <button
             onClick={() => setUploadModalOpen(true)}
             className="inline-flex items-center gap-1.5 text-xs text-blue-900 hover:text-blue-700 font-semibold"
@@ -450,6 +450,6 @@ export default function ParcelTraceDrawer({ upi, onClose, onRefresh }) {
           }}
         />
       )}
-    </>
+    </div>
   );
 }

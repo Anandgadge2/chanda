@@ -1,1 +1,68 @@
-node_modules
+# ==========================================
+# Environment Variables & Secrets (CRITICAL)
+# ==========================================
+.env
+.env*.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.env
+!.env.example
+!.env.*.example
+
+# ==========================================
+# Dependencies
+# ==========================================
+node_modules/
+package-lock.json.bak
+.pnp
+.pnp.js
+
+# ==========================================
+# Next.js Build Output & Cache
+# ==========================================
+.next/
+out/
+build/
+dist/
+.vercel/
+
+# ==========================================
+# Logs & Process Artifacts
+# ==========================================
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ==========================================
+# Operating System & IDE Files
+# ==========================================
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+
+# ==========================================
+# Database & Runtime Dumps
+# ==========================================
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+
+# ==========================================
+# Temporary Files & Uploads
+# ==========================================
+tmp/
+temp/
+scratch/
+uploads/
+*.tmp
