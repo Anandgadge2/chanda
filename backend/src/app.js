@@ -25,6 +25,28 @@ app.use(requestLogger);
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
+// Root API Welcome / Status Index
+const apiIndexHandler = (req, res) => {
+  res.json({
+    name: 'Chandrapur Land Records & Governance Platform API',
+    version: '1.0.0',
+    status: 'online',
+    district: 'Chandrapur (Maharashtra MLRC 1966)',
+    timestamp: new Date().toISOString(),
+    endpoints: {
+      health: '/api/health',
+      parcels: '/api/parcels',
+      cases: '/api/cases',
+      reports: '/api/reports',
+      documents: '/api/documents',
+      analytics: '/api/analytics',
+    },
+  });
+};
+
+app.get('/', apiIndexHandler);
+app.get('/api', apiIndexHandler);
+
 // Health Check
 app.get('/api/health', (req, res) => {
   res.json({
