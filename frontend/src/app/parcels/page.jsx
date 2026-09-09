@@ -64,9 +64,9 @@ export default function ParcelsPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-6 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-3 sm:gap-4">
         <div>
           <div className="flex items-center gap-2">
             <span className="text-xs bg-blue-100 text-blue-900 font-bold px-2 py-0.5 rounded">
@@ -74,19 +74,19 @@ export default function ParcelsPage() {
             </span>
             <span className="text-xs text-slate-500 font-medium">गाव नमुना ७/१२ अभिलेख</span>
           </div>
-          <h1 className="text-2xl font-black text-slate-900 mt-1">
-            भूखंड नोंदवही व ३६०° शीर्षक साखळी (Parcel Registry)
+          <h1 className="text-lg sm:text-2xl font-black text-slate-900 mt-1 leading-tight">
+            भूखंड नोंदवही व १९५० शीर्षक साखळी (Parcel Registry)
           </h1>
           <p className="text-xs text-slate-500 mt-0.5">
             ऐतिहासिक १९५० मूळ मालकी, फेरफार नोंदी व चालू शर्तभंग चौकशी
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 w-full sm:w-auto">
           <a
             href={api.getSampleTemplateUrl()}
             download
-            className="inline-flex items-center gap-1.5 px-3 py-2 border border-slate-300 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50 transition"
+            className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3 py-2 border border-slate-300 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50 transition active:scale-95"
           >
             <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
             <span>एक्सेल टेम्पलेट</span>
@@ -94,7 +94,8 @@ export default function ParcelsPage() {
           <button
             onClick={fetchParcels}
             disabled={loading}
-            className="p-2 border border-slate-300 rounded-xl text-slate-600 hover:bg-slate-50 transition"
+            className="p-2 border border-slate-300 rounded-xl text-slate-600 hover:bg-slate-50 transition active:scale-95"
+            aria-label="Refresh parcels"
           >
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
           </button>
@@ -102,9 +103,9 @@ export default function ParcelsPage() {
       </div>
 
       {/* Filter Bar */}
-      <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm space-y-3">
-        <form onSubmit={handleSearchSubmit} className="flex flex-wrap gap-3 items-center">
-          <div className="flex-1 min-w-[240px] relative">
+      <div className="bg-white border border-slate-200 rounded-xl p-3.5 sm:p-4 shadow-sm space-y-3">
+        <form onSubmit={handleSearchSubmit} className="grid grid-cols-1 sm:grid-cols-2 lg:flex lg:flex-wrap gap-2.5 sm:gap-3 items-center">
+          <div className="sm:col-span-2 lg:flex-1 min-w-[200px] relative">
             <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
             <input
               type="text"
@@ -118,7 +119,7 @@ export default function ParcelsPage() {
           <select
             value={taluka}
             onChange={(e) => setTaluka(e.target.value)}
-            className="border border-slate-300 rounded-lg px-3 py-2 text-xs bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full border border-slate-300 rounded-lg px-2.5 py-2 text-xs bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">सर्व तालुके (All Talukas)</option>
             {CHANDRAPUR_TALUKAS.map((t) => (
@@ -131,7 +132,7 @@ export default function ParcelsPage() {
           <select
             value={tenureClass}
             onChange={(e) => setTenureClass(e.target.value)}
-            className="border border-slate-300 rounded-lg px-3 py-2 text-xs bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full border border-slate-300 rounded-lg px-2.5 py-2 text-xs bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">सर्व धारणा प्रकार (All Tenures)</option>
             {Object.entries(TENURE_CLASSES).map(([k, v]) => (
@@ -144,7 +145,7 @@ export default function ParcelsPage() {
           <select
             value={hasActiveDispute}
             onChange={(e) => setHasActiveDispute(e.target.value)}
-            className="border border-slate-300 rounded-lg px-3 py-2 text-xs bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full sm:col-span-2 lg:w-auto border border-slate-300 rounded-lg px-2.5 py-2 text-xs bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">सर्व वाद स्थिती (All Dispute Status)</option>
             <option value="true">सक्रिय वाद / शर्तभंग (In Dispute)</option>
@@ -153,7 +154,7 @@ export default function ParcelsPage() {
 
           <button
             type="submit"
-            className="bg-blue-900 hover:bg-blue-800 text-white font-semibold px-4 py-2 rounded-lg text-xs transition shadow-xs"
+            className="w-full sm:col-span-2 lg:w-auto bg-blue-900 hover:bg-blue-800 text-white font-bold px-4 py-2 rounded-lg text-xs transition shadow-xs active:scale-95"
           >
             शोधा (Search)
           </button>
@@ -162,17 +163,22 @@ export default function ParcelsPage() {
 
       {/* Parcels Table */}
       <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
-        <div className="px-5 py-3.5 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
+        <div className="px-3.5 sm:px-5 py-3 border-b border-slate-200 bg-slate-50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1.5">
           <p className="text-xs font-bold text-slate-700">
             एकूण नोंदणीकृत भूखंड: <span className="text-blue-900">{totalCount}</span>
           </p>
-          <span className="text-[11px] text-slate-500">
-            ओळीवर क्लिक करून ३६०° शीर्षक इतिहास व पुरावे पहा
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] text-slate-500 hidden sm:inline">
+              ओळीवर क्लिक करून १९५० शीर्षक इतिहास व पुरावे पहा
+            </span>
+            <span className="text-[10px] text-amber-800 bg-amber-50 px-2 py-0.5 rounded border border-amber-200 sm:hidden">
+              तक्ता आडवा स्क्रोल करा (Swipe ↔)
+            </span>
+          </div>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
+        <div className="overflow-x-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
+          <table className="w-full text-left text-xs min-w-[760px]">
             <thead className="bg-slate-100/80 text-slate-600 font-bold border-b border-slate-200">
               <tr>
                 <th className="py-3 px-4">UPI / भूखंड ओळख</th>
@@ -272,7 +278,7 @@ export default function ParcelsPage() {
                           className="inline-flex items-center gap-1 text-[11px] bg-blue-900 hover:bg-blue-800 text-white font-semibold px-2.5 py-1 rounded transition"
                         >
                           <Eye className="w-3 h-3" />
-                          <span>३६०° साखळी</span>
+                          <span>१९५० साखळी</span>
                         </button>
                         <button
                           onClick={() => setUploadModalParcelId(parcel.id)}

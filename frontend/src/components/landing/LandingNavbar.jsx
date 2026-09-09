@@ -23,27 +23,27 @@ export default function LandingNavbar({ onOpenAuth }) {
   return (
     <header className="sticky top-0 z-50 bg-white border-b border-slate-200 shadow-xs">
       {/* Main Brand & Officer Actions Header */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
-        <div className="flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-2.5 sm:py-3">
+        <div className="flex items-center justify-between gap-2">
           {/* Official Emblem & Collectorate Title */}
-          <Link href="/" className="flex items-center gap-3.5 group">
-            <ChandrapurDistrictLogo className="w-12 h-12 sm:w-14 sm:h-14 drop-shadow-xs transition-transform group-hover:scale-105" />
+          <Link href="/" className="flex items-center gap-2.5 sm:gap-3.5 group min-w-0">
+            <ChandrapurDistrictLogo className="w-10 h-10 sm:w-14 sm:h-14 drop-shadow-xs transition-transform group-hover:scale-105 flex-shrink-0" />
 
-            <div>
-              <h1 className="text-base sm:text-xl font-black text-slate-900 leading-tight group-hover:text-blue-950 transition tracking-tight">
+            <div className="min-w-0">
+              <h1 className="text-sm sm:text-xl font-black text-slate-900 leading-tight group-hover:text-blue-950 transition tracking-tight truncate">
                 जिल्हाधिकारी कार्यालय, चंद्रपूर
               </h1>
-              <p className="text-[10px] sm:text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+              <p className="text-[9px] sm:text-[11px] font-bold text-slate-500 uppercase tracking-wider truncate">
                 DISTRICT COLLECTORATE, CHANDRAPUR
               </p>
-              <p className="text-[11px] text-amber-800 font-semibold hidden sm:block">
+              <p className="text-[11px] text-amber-800 font-semibold hidden md:block truncate">
                 जमीन महसूल, भूमी अभिलेख व १९५० मूळ शीर्षक साखळी संनियंत्रण प्रणाली
               </p>
             </div>
           </Link>
 
           {/* Action CTAs: Register, Login, Dashboard */}
-          <div className="hidden lg:flex items-center gap-2.5">
+          <div className="hidden lg:flex items-center gap-2.5 flex-shrink-0">
             <button
               onClick={() => onOpenAuth('register')}
               className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:text-blue-950 hover:bg-slate-100 border border-slate-300 transition shadow-2xs"
@@ -70,19 +70,19 @@ export default function LandingNavbar({ onOpenAuth }) {
           </div>
 
           {/* Mobile Menu Hamburger */}
-          <div className="flex lg:hidden items-center gap-2">
+          <div className="flex lg:hidden items-center gap-1.5 flex-shrink-0">
             <button
               onClick={() => onOpenAuth('login')}
-              className="px-3 py-1.5 rounded-lg text-xs font-bold text-blue-950 bg-amber-400"
+              className="px-2.5 py-1.5 rounded-lg text-[11px] font-bold text-blue-950 bg-amber-400 active:scale-95 transition"
             >
               लॉगिन
             </button>
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 rounded-xl text-slate-700 hover:bg-slate-100 transition"
+              className="w-9 h-9 flex items-center justify-center rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-100 active:bg-slate-200 transition"
               aria-label="Toggle menu"
             >
-              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
           </div>
         </div>
@@ -90,7 +90,7 @@ export default function LandingNavbar({ onOpenAuth }) {
 
       {/* Official Navy Navigation Ribbon (Gov Strip) */}
       <div className="bg-[#0B1E36] text-white border-t border-slate-700">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-10">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 flex items-center justify-between h-9 sm:h-10">
           <nav className="hidden lg:flex items-center gap-6 text-xs font-semibold text-slate-200">
             <a href="/" className="hover:text-amber-400 transition py-1 text-white font-bold">
               मुख्य पृष्ठ

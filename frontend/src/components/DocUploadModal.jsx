@@ -54,29 +54,30 @@ export default function DocUploadModal({ isOpen, onClose, parcelId, caseId, onUp
   };
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-      <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 max-w-lg w-full overflow-hidden">
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-2.5 sm:p-4 animate-in fade-in duration-200 overflow-y-auto">
+      <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 max-w-lg w-full max-h-[94vh] flex flex-col overflow-hidden my-auto">
         {/* Modal Header */}
-        <div className="px-6 py-4 bg-slate-900 text-white flex justify-between items-center">
+        <div className="px-4 sm:px-6 py-3.5 sm:py-4 bg-slate-900 text-white flex justify-between items-center shrink-0">
           <div>
-            <h2 className="text-base font-bold flex items-center gap-2">
+            <h2 className="text-sm sm:text-base font-bold flex items-center gap-2">
               <Upload className="w-4 h-4 text-amber-400" />
               <span>दस्तावेज अपलोड व अभिलेख नोंद (Upload to DMS)</span>
             </h2>
-            <p className="text-xs text-slate-400">
+            <p className="text-[11px] sm:text-xs text-slate-400">
               Cloudinary Storage & Physical Record Room Mapping
             </p>
           </div>
           <button
             onClick={onClose}
             className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition"
+            aria-label="Close dialog"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Modal Body */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-3.5 sm:space-y-4 overflow-y-auto flex-1">
           {statusMsg.text && (
             <div
               className={`p-3 rounded-lg text-xs flex items-center gap-2 ${

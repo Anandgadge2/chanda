@@ -85,9 +85,9 @@ export default function CasesPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-6 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-3 sm:gap-4">
         <div>
           <div className="flex items-center gap-2">
             <span className="text-xs bg-amber-100 text-amber-900 font-bold px-2 py-0.5 rounded">
@@ -95,8 +95,8 @@ export default function CasesPage() {
             </span>
             <span className="text-xs text-slate-500 font-medium">कलम ३६, ३६अ व ५०-५४</span>
           </div>
-          <h1 className="text-2xl font-black text-slate-900 mt-1">
-            शर्तभंग व अर्ध-न्यायिक सुनावणी कक्ष (Enforcement & Quasi-Judicial Cases)
+          <h1 className="text-lg sm:text-2xl font-black text-slate-900 mt-1 leading-tight">
+            शर्तभंग व अर्ध-न्यायिक सुनावणी कक्ष (Enforcement & Cases)
           </h1>
           <p className="text-xs text-slate-500 mt-0.5">
             SDO व तहसीलदार न्यायालयातील सुनावण्या, स्थळ पंचनामे व शासन जमा आदेश
@@ -106,18 +106,19 @@ export default function CasesPage() {
         <button
           onClick={fetchCases}
           disabled={loading}
-          className="p-2 border border-slate-300 rounded-xl text-slate-600 hover:bg-slate-50 transition"
+          className="p-2 border border-slate-300 rounded-xl text-slate-600 hover:bg-slate-50 transition active:scale-95 self-end sm:self-auto"
+          aria-label="Refresh cases"
         >
           <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
         </button>
       </div>
 
       {/* Filter Bar */}
-      <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex flex-wrap gap-3 items-center">
+      <div className="bg-white border border-slate-200 rounded-xl p-3.5 sm:p-4 shadow-sm grid grid-cols-1 sm:grid-cols-2 lg:flex lg:flex-wrap gap-2.5 sm:gap-3 items-center">
         <select
           value={taluka}
           onChange={(e) => setTaluka(e.target.value)}
-          className="border border-slate-300 rounded-lg px-3 py-2 text-xs bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full lg:w-auto border border-slate-300 rounded-lg px-2.5 py-2 text-xs bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <option value="">सर्व तालुके (All Talukas)</option>
           {CHANDRAPUR_TALUKAS.map((t) => (
@@ -130,7 +131,7 @@ export default function CasesPage() {
         <select
           value={violationType}
           onChange={(e) => setViolationType(e.target.value)}
-          className="border border-slate-300 rounded-lg px-3 py-2 text-xs bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full lg:w-auto border border-slate-300 rounded-lg px-2.5 py-2 text-xs bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <option value="">सर्व उल्लंघन प्रकार (All Violations)</option>
           {Object.entries(VIOLATION_TYPES).map(([k, v]) => (
@@ -143,7 +144,7 @@ export default function CasesPage() {
         <select
           value={status}
           onChange={(e) => setStatus(e.target.value)}
-          className="border border-slate-300 rounded-lg px-3 py-2 text-xs bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full lg:w-auto border border-slate-300 rounded-lg px-2.5 py-2 text-xs bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <option value="">सर्व सद्यस्थिती (All Statuses)</option>
           {Object.entries(ENFORCEMENT_STATUSES).map(([k, v]) => (
@@ -156,7 +157,7 @@ export default function CasesPage() {
         <select
           value={isRepossessedToGovt}
           onChange={(e) => setIsRepossessedToGovt(e.target.value)}
-          className="border border-slate-300 rounded-lg px-3 py-2 text-xs bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full lg:w-auto border border-slate-300 rounded-lg px-2.5 py-2 text-xs bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <option value="">सर्व शासन जमा स्थिती</option>
           <option value="true">शासन जमा (Shasan Jama Resumed)</option>
@@ -165,7 +166,7 @@ export default function CasesPage() {
       </div>
 
       {/* Cases List */}
-      <div className="space-y-4">
+      <div className="space-y-3.5 sm:space-y-4">
         {loading ? (
           <div className="py-20 text-center bg-white border border-slate-200 rounded-2xl">
             <div className="w-8 h-8 border-3 border-blue-900 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
@@ -184,64 +185,64 @@ export default function CasesPage() {
             return (
               <div
                 key={c.id}
-                className="p-5 bg-white border border-slate-200 rounded-2xl shadow-sm hover:border-slate-300 transition space-y-4"
+                className="p-4 sm:p-5 bg-white border border-slate-200 rounded-2xl shadow-sm hover:border-slate-300 transition space-y-3 sm:space-y-4"
               >
                 {/* Case Top Bar */}
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 border-b border-slate-100 pb-3">
-                  <div className="flex items-center gap-2.5">
-                    <span className="font-mono text-sm font-extrabold text-blue-900 bg-blue-50 px-2.5 py-1 rounded-lg border border-blue-200">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-slate-100 pb-2.5 sm:pb-3">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="font-mono text-xs sm:text-sm font-extrabold text-blue-900 bg-blue-50 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-lg border border-blue-200">
                       {c.caseNumber}
                     </span>
-                    <span className={`text-[11px] font-bold px-2.5 py-1 rounded-md border ${viol?.badgeClass}`}>
+                    <span className={`text-[10px] sm:text-[11px] font-bold px-2 py-0.5 rounded-md border ${viol?.badgeClass}`}>
                       {viol?.labelMr || c.violationType}
                     </span>
                     {c.isRepossessedToGovt && (
-                      <span className="text-[11px] font-bold px-2.5 py-1 rounded-md bg-emerald-100 text-emerald-900 border border-emerald-300 flex items-center gap-1">
+                      <span className="text-[10px] sm:text-[11px] font-bold px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-900 border border-emerald-300 flex items-center gap-1">
                         <ShieldCheck className="w-3.5 h-3.5 text-emerald-700" />
                         <span>शासन जमा (Resumed)</span>
                       </span>
                     )}
                   </div>
 
-                  <span className={`text-xs font-bold px-3 py-1 rounded-full border ${stat?.color}`}>
+                  <span className={`text-[11px] sm:text-xs font-bold px-2.5 py-0.5 sm:py-1 rounded-full border self-start sm:self-auto ${stat?.color}`}>
                     {stat?.labelMr || c.status}
                   </span>
                 </div>
 
-                {/* Details Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-xs">
-                  <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
-                    <span className="text-[11px] text-slate-400 font-semibold block">भूखंड स्थान</span>
-                    <p className="font-bold text-slate-900 mt-0.5">
+                {/* Details Grid (2-col on mobile, 4-col on desktop) */}
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 text-xs">
+                  <div className="p-2.5 sm:p-3 bg-slate-50 rounded-xl border border-slate-100">
+                    <span className="text-[10px] sm:text-[11px] text-slate-400 font-semibold block">भूखंड स्थान</span>
+                    <p className="font-bold text-slate-900 mt-0.5 truncate">
                       {c.parcel?.villageName} (गट {c.parcel?.gatNumber})
                     </p>
-                    <p className="text-[11px] text-slate-500">तालुका: {c.parcel?.taluka}</p>
+                    <p className="text-[10px] sm:text-[11px] text-slate-500 truncate">तालुका: {c.parcel?.taluka}</p>
                   </div>
 
-                  <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
-                    <span className="text-[11px] text-slate-400 font-semibold block">सध्याचा अनधिकृत कब्जेदार</span>
+                  <div className="p-2.5 sm:p-3 bg-slate-50 rounded-xl border border-slate-100">
+                    <span className="text-[10px] sm:text-[11px] text-slate-400 font-semibold block">सध्याचा अनधिकृत कब्जेदार</span>
                     <p className="font-bold text-slate-900 mt-0.5 truncate">
                       {c.occupantName || 'तपासणी सुरू'}
                     </p>
-                    <p className="text-[11px] text-slate-500">अतिक्रमीत क्षेत्र: {Number(c.encroachedAreaHa).toFixed(4)} हे.</p>
+                    <p className="text-[10px] sm:text-[11px] text-slate-500 truncate">क्षेत्र: {Number(c.encroachedAreaHa).toFixed(4)} हे.</p>
                   </div>
 
-                  <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
-                    <span className="text-[11px] text-slate-400 font-semibold block">तपास अधिकारी / नोटीस</span>
-                    <p className="font-semibold text-slate-900 mt-0.5">
+                  <div className="p-2.5 sm:p-3 bg-slate-50 rounded-xl border border-slate-100">
+                    <span className="text-[10px] sm:text-[11px] text-slate-400 font-semibold block">तपास अधिकारी / नोटीस</span>
+                    <p className="font-semibold text-slate-900 mt-0.5 truncate">
                       {c.investigatingOfficer || 'नायब तहसीलदार'}
                     </p>
-                    <p className="text-[11px] text-slate-500">
+                    <p className="text-[10px] sm:text-[11px] text-slate-500 truncate">
                       नोटीस: {c.showCauseNoticeDate ? new Date(c.showCauseNoticeDate).toLocaleDateString('mr-IN') : '-'}
                     </p>
                   </div>
 
-                  <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
-                    <span className="text-[11px] text-slate-400 font-semibold block">DMS पुरावे व फायली</span>
+                  <div className="p-2.5 sm:p-3 bg-slate-50 rounded-xl border border-slate-100">
+                    <span className="text-[10px] sm:text-[11px] text-slate-400 font-semibold block">DMS पुरावे व फायली</span>
                     <p className="font-bold text-blue-900 mt-0.5">
-                      {c.documents?.length || 0} दस्तऐवज संलग्न
+                      {c.documents?.length || 0} दस्तऐवज
                     </p>
-                    <p className="text-[11px] text-slate-500">प्रपत्र प्रवर्ग: {c.prapatraCategory || 'प्रपत्र-३'}</p>
+                    <p className="text-[10px] sm:text-[11px] text-slate-500 truncate">प्रवर्ग: {c.prapatraCategory || 'प्रपत्र-३'}</p>
                   </div>
                 </div>
 
@@ -282,38 +283,38 @@ export default function CasesPage() {
                 )}
 
                 {/* Action Buttons */}
-                <div className="flex flex-wrap gap-2 pt-1 border-t border-slate-100 justify-end items-center">
+                <div className="flex flex-wrap gap-2 pt-2 border-t border-slate-100 justify-end items-center">
                   <button
                     onClick={() => setTraceUpi(c.parcel?.upi)}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg text-xs transition"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg text-xs transition active:scale-95"
                   >
                     <Eye className="w-3.5 h-3.5" />
-                    <span>३६०° इतिहास</span>
+                    <span>१९५० इतिहास</span>
                   </button>
 
                   <button
                     onClick={() => setUploadDocCaseId(c.id)}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-slate-300 hover:bg-slate-50 text-slate-700 font-semibold rounded-lg text-xs transition"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-slate-300 hover:bg-slate-50 text-slate-700 font-semibold rounded-lg text-xs transition active:scale-95"
                   >
                     <Upload className="w-3.5 h-3.5 text-blue-700" />
-                    <span>DMS पुरावा जोडा</span>
+                    <span>DMS पुरावा</span>
                   </button>
 
                   <button
                     onClick={() => setSelectedCaseForHearing(c)}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-900 hover:bg-blue-800 text-white font-semibold rounded-lg text-xs transition shadow-xs"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-900 hover:bg-blue-800 text-white font-semibold rounded-lg text-xs transition shadow-xs active:scale-95"
                   >
                     <Scale className="w-3.5 h-3.5 text-amber-400" />
-                    <span>सुनावणी नोंदवा (Add Hearing)</span>
+                    <span>सुनावणी नोंदवा</span>
                   </button>
 
                   {!c.isRepossessedToGovt && (
                     <button
                       onClick={() => handleMarkShasanJama(c)}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg text-xs transition shadow-xs"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg text-xs transition shadow-xs active:scale-95"
                     >
                       <ShieldCheck className="w-3.5 h-3.5" />
-                      <span>शासन जमा करा (Repossess)</span>
+                      <span>शासन जमा करा</span>
                     </button>
                   )}
                 </div>

@@ -42,25 +42,25 @@ export default function TalukaSlider() {
   };
 
   return (
-    <section id="talukas" className="py-8 bg-slate-50 border-y border-slate-200">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="talukas" className="py-6 sm:py-8 bg-slate-50 border-y border-slate-200">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-4 gap-3">
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-3 sm:mb-4 gap-2.5 sm:gap-3">
           <div>
             <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-blue-100/80 text-blue-900 text-xs font-bold border border-blue-200">
               <Compass className="w-3.5 h-3.5 text-blue-700" />
               <span>प्रशासकीय कार्यक्षेत्र (Jurisdiction Map)</span>
             </div>
-            <h2 className="text-lg sm:text-xl font-black text-slate-900 mt-1">
+            <h2 className="text-base sm:text-xl font-black text-slate-900 mt-1">
               चंद्रपूर जिल्ह्यातील १५ तालुके व महसूल मंडळे
             </h2>
-            <p className="text-xs text-slate-600 mt-0.5 max-w-2xl">
+            <p className="text-[11px] sm:text-xs text-slate-600 mt-0.5 max-w-2xl">
               जिल्ह्यातील सर्व १५ तालुक्यांतील गावनिहाय एक्सेल डेटा, १९५० मूळ शीर्षक तपासणी व शर्तभंग खटले.
             </p>
           </div>
 
           {/* Carousel Arrows */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 self-end md:self-auto">
             <button
               onClick={() => scroll('left')}
               className="p-1.5 rounded-lg bg-white border border-slate-300 text-slate-700 hover:bg-slate-100 hover:text-blue-900 shadow-2xs transition"
@@ -81,13 +81,13 @@ export default function TalukaSlider() {
         {/* Horizontal Scrolling Card Track */}
         <div
           ref={scrollContainerRef}
-          className="flex gap-3 overflow-x-auto pb-3 pt-1 snap-x snap-mandatory scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-transparent"
-          style={{ scrollbarWidth: 'thin' }}
+          className="flex gap-2.5 sm:gap-3 overflow-x-auto pb-3 pt-1 snap-x snap-mandatory scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-transparent"
+          style={{ scrollbarWidth: 'thin', WebkitOverflowScrolling: 'touch' }}
         >
           {TALUKA_DETAILS.map((t) => (
             <div
               key={t.id}
-              className="w-[230px] sm:w-[250px] flex-shrink-0 snap-start bg-white rounded-xl border border-slate-200 p-3.5 shadow-2xs hover:shadow-xs transition-all duration-200 flex flex-col justify-between group hover:-translate-y-0.5"
+              className="w-[210px] sm:w-[250px] flex-shrink-0 snap-start bg-white rounded-xl border border-slate-200 p-3.5 shadow-2xs hover:shadow-xs transition-all duration-200 flex flex-col justify-between group hover:-translate-y-0.5"
             >
               <div className="space-y-2.5">
                 {/* Header with Code */}

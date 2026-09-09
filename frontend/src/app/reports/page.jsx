@@ -53,9 +53,9 @@ export default function ReportsPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-6 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-3 sm:gap-4">
         <div>
           <div className="flex items-center gap-2">
             <span className="text-xs bg-emerald-100 text-emerald-900 font-bold px-2 py-0.5 rounded">
@@ -65,7 +65,7 @@ export default function ReportsPage() {
               महसूल व वन विभाग, महाराष्ट्र शासन
             </span>
           </div>
-          <h1 className="text-2xl font-black text-slate-900 mt-1">
+          <h1 className="text-lg sm:text-2xl font-black text-slate-900 mt-1 leading-tight">
             प्रपत्र-३ अहवाल निर्यात केंद्र (Prapatra-3 Government Booklet)
           </h1>
           <p className="text-xs text-slate-500 mt-0.5">
@@ -75,23 +75,23 @@ export default function ReportsPage() {
 
         <button
           onClick={handleDownload}
-          className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-5 py-3 rounded-xl text-xs shadow-md transition"
+          className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl text-xs shadow-md transition active:scale-95 flex-shrink-0"
         >
           <Download className="w-4 h-4" />
-          <span>अधिकृत प्रपत्र-३ एक्सेल डाऊनलोड करा (Download Prapatra-3)</span>
+          <span>अधिकृत प्रपत्र-३ एक्सेल डाऊनलोड करा</span>
         </button>
       </div>
 
       {/* Statutory Mapping Guidelines */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs space-y-3">
+      <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-5 shadow-xs space-y-2.5 sm:space-y-3">
         <div className="flex items-center gap-2">
-          <Landmark className="w-4 h-4 text-blue-900" />
+          <Landmark className="w-4 h-4 text-blue-900 flex-shrink-0" />
           <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wide">
             प्रपत्र-३ शासन नियमावली व १३ अधिकृत वैधानिक स्तंभ (13 Statutory Columns)
           </h3>
         </div>
         <p className="text-xs text-slate-600 leading-relaxed">
-          हा अहवाल महाराष्ट्र जमीन महसूल संहिता (MLRC) १९६६ च्या तरतुदीनुसार प्रत्यक्ष क्षेत्रीय पडताळणी, सन १९५० ची मूळ मालकी साखळी (Backward Linkage) व उपविभागीय अधिकारी यांच्या अर्ध-न्यायिक आदेशांचा समावेश करून १३ अधिकृत शासकीय स्तंभांमध्ये तयार केला जातो.
+          हा अहवाल महाराष्ट्र जमीन महसूल संहिता (MLRC) १९६६ च्या तरतुदीनुसार प्रत्यक्ष क्षेत्रीय पडताळणी, सन १९५० ची मूळ मालकी साखळी व उपविभागीय अधिकारी यांच्या अर्ध-न्यायिक आदेशांचा समावेश करून १३ अधिकृत शासकीय स्तंभांमध्ये तयार केला जातो.
         </p>
 
         <div className="flex flex-wrap gap-1.5 pt-1">
@@ -112,7 +112,7 @@ export default function ReportsPage() {
           ].map((col, idx) => (
             <span
               key={idx}
-              className="text-[11px] bg-slate-100 text-slate-700 font-medium px-2 py-0.5 rounded border border-slate-200"
+              className="text-[10px] sm:text-[11px] bg-slate-100 text-slate-700 font-medium px-2 py-0.5 rounded border border-slate-200"
             >
               {col}
             </span>
@@ -121,12 +121,12 @@ export default function ReportsPage() {
       </div>
 
       {/* Filter Bar */}
-      <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex flex-wrap gap-3 items-center justify-between">
-        <div className="flex flex-wrap gap-3 items-center">
+      <div className="bg-white border border-slate-200 rounded-xl p-3.5 sm:p-4 shadow-sm flex flex-col sm:flex-row gap-2.5 sm:gap-3 items-stretch sm:items-center justify-between">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3 flex-1">
           <select
             value={taluka}
             onChange={(e) => setTaluka(e.target.value)}
-            className="border border-slate-300 rounded-lg px-3 py-2 text-xs bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full border border-slate-300 rounded-lg px-2.5 py-2 text-xs bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">सर्व तालुके (District Wide)</option>
             {CHANDRAPUR_TALUKAS.map((t) => (
@@ -139,7 +139,7 @@ export default function ReportsPage() {
           <select
             value={violationType}
             onChange={(e) => setViolationType(e.target.value)}
-            className="border border-slate-300 rounded-lg px-3 py-2 text-xs bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full border border-slate-300 rounded-lg px-2.5 py-2 text-xs bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">सर्व उल्लंघन प्रकार</option>
             {Object.entries(VIOLATION_TYPES).map(([k, v]) => (
@@ -152,7 +152,7 @@ export default function ReportsPage() {
           <select
             value={status}
             onChange={(e) => setStatus(e.target.value)}
-            className="border border-slate-300 rounded-lg px-3 py-2 text-xs bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full border border-slate-300 rounded-lg px-2.5 py-2 text-xs bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">सर्व प्रकरण स्थिती</option>
             {Object.entries(ENFORCEMENT_STATUSES).map(([k, v]) => (
@@ -166,7 +166,8 @@ export default function ReportsPage() {
         <button
           onClick={fetchPreview}
           disabled={loading}
-          className="p-2 border border-slate-300 rounded-xl text-slate-600 hover:bg-slate-50 transition"
+          className="p-2 border border-slate-300 rounded-xl text-slate-600 hover:bg-slate-50 transition active:scale-95 self-end sm:self-auto"
+          aria-label="Refresh report preview"
         >
           <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
         </button>
@@ -174,22 +175,27 @@ export default function ReportsPage() {
 
       {/* Live Preview Table */}
       <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
-        <div className="px-5 py-3.5 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
+        <div className="px-3.5 sm:px-5 py-3 border-b border-slate-200 bg-slate-50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1.5">
           <div className="flex items-center gap-2">
             <span className="text-xs font-bold text-slate-800">
-              प्रपत्र-३ थेट पूर्वावलोकन (Live Table Preview):
+              प्रपत्र-३ थेट पूर्वावलोकन:
             </span>
             <span className="text-xs font-bold bg-blue-100 text-blue-900 px-2 py-0.5 rounded">
-              {previewData.length} नोंदणीकृत प्रकरणे
+              {previewData.length} नोंदणीकृत
             </span>
           </div>
-          <span className="text-[11px] text-slate-500">
-            डाऊनलोड होणाऱ्या एक्सेल पत्रकातील हुबेहूब रचना
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] text-slate-500 hidden sm:inline">
+              डाऊनलोड होणाऱ्या एक्सेल पत्रकातील हुबेहूब रचना
+            </span>
+            <span className="text-[10px] text-amber-800 bg-amber-50 px-2 py-0.5 rounded border border-amber-200 sm:hidden">
+              तक्ता आडवा स्क्रोल करा (Swipe ↔)
+            </span>
+          </div>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-[11px] whitespace-nowrap">
+        <div className="overflow-x-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
+          <table className="w-full text-left text-[11px] whitespace-nowrap min-w-[960px]">
             <thead className="bg-amber-100/70 text-slate-900 font-bold border-b border-amber-200">
               <tr>
                 <th className="py-3 px-3 text-center">१. अ.क्र.</th>

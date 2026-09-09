@@ -55,9 +55,9 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3.5 sm:space-y-4">
       {/* Unified Executive Command & Filter Header */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-5 shadow-2xs space-y-3.5">
+      <div className="bg-white border border-slate-200 rounded-2xl p-3.5 sm:p-5 shadow-2xs space-y-3">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
           <div>
             <div className="flex items-center gap-2">
@@ -66,25 +66,25 @@ export default function DashboardPage() {
               </span>
               <span className="text-[11px] text-slate-500 font-medium">चंद्रपूर जिल्हा (महाराष्ट्र)</span>
             </div>
-            <h1 className="text-lg sm:text-xl font-black text-slate-900 mt-1 leading-tight">
+            <h1 className="text-base sm:text-xl font-black text-slate-900 mt-1 leading-tight">
               जमीन अभिलेख व्यवस्थापन व महसूल चौकशी प्रणाली
             </h1>
-            <p className="text-[11px] text-slate-500 mt-0.5 font-medium">
+            <p className="text-[11px] text-slate-500 mt-0.5 font-medium line-clamp-1 sm:line-clamp-none">
               महाराष्ट्र जमीन महसूल संहिता (MLRC) १९६६ अंतर्गत महसूल संनियंत्रण, आदिवासी जमीन संरक्षण व सुनावणी प्रणाली
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 w-full md:w-auto">
             <button
               onClick={handleExport}
-              className="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3.5 py-2 rounded-xl text-xs shadow-2xs transition"
+              className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-2 rounded-xl text-xs shadow-2xs transition active:scale-95"
             >
               <FileSpreadsheet className="w-3.5 h-3.5" />
-              <span>प्रपत्र-३ डाऊनलोड (Excel)</span>
+              <span>प्रपत्र-३ डाऊनलोड</span>
             </button>
             <Link
               href="/bulk-upload"
-              className="inline-flex items-center gap-1.5 bg-blue-900 hover:bg-blue-800 text-white font-bold px-3.5 py-2 rounded-xl text-xs shadow-2xs transition"
+              className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 bg-blue-900 hover:bg-blue-800 text-white font-bold px-3 py-2 rounded-xl text-xs shadow-2xs transition active:scale-95"
             >
               <UploadCloud className="w-3.5 h-3.5" />
               <span>गाव डेटा अपलोड</span>
@@ -93,16 +93,16 @@ export default function DashboardPage() {
         </div>
 
         {/* Integrated Filter & Taluka Selection Row */}
-        <div className="pt-3 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
-          <div className="flex items-center gap-2 flex-1 max-w-md">
+        <div className="pt-2.5 sm:pt-3 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div className="flex items-center gap-2 flex-1 max-w-md w-full">
             <Filter className="w-3.5 h-3.5 text-blue-900 flex-shrink-0" />
-            <label className="text-xs font-bold text-slate-700 whitespace-nowrap">
-              तालुका निवडा:
+            <label className="text-xs font-bold text-slate-700 whitespace-nowrap hidden xs:inline">
+              तालुका:
             </label>
             <select
               value={taluka}
               onChange={(e) => setTaluka(e.target.value)}
-              className="flex-1 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs bg-slate-50 font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+              className="w-full sm:flex-1 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs bg-slate-50 font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
             >
               <option value="">सर्व तालुके (All 15 Talukas - District Level)</option>
               {CHANDRAPUR_TALUKAS.map((t) => (
@@ -113,7 +113,7 @@ export default function DashboardPage() {
             </select>
           </div>
 
-          <div className="flex items-center gap-2 self-end sm:self-auto">
+          <div className="flex items-center justify-between sm:justify-end gap-2 w-full sm:w-auto">
             {taluka && (
               <span className="text-[11px] font-semibold text-amber-800 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
                 फिल्टर लागू
@@ -122,7 +122,7 @@ export default function DashboardPage() {
             <button
               onClick={() => loadData(taluka)}
               disabled={loading}
-              className="inline-flex items-center gap-1.5 text-xs text-slate-600 hover:text-blue-950 font-bold px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 transition shadow-2xs"
+              className="inline-flex items-center gap-1.5 text-xs text-slate-600 hover:text-blue-950 font-bold px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 transition shadow-2xs ml-auto sm:ml-0"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-blue-900' : ''}`} />
               <span>रिफ्रेश</span>
@@ -131,10 +131,10 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Key Analytical Metric Cards (Compact 4-Column Grid) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+      {/* Key Analytical Metric Cards (Adaptive 2-col on mobile, 4-col on desktop) */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
         <MetricCard
-          titleMr="एकूण नोंदणीकृत भूखंड"
+          titleMr="नोंदणीकृत भूखंड"
           titleEn="Master Land Parcels"
           value={analytics.totalParcels}
           subtext="चंद्रपूर महसूल अभिलेख"
@@ -145,8 +145,8 @@ export default function DashboardPage() {
         />
 
         <MetricCard
-          titleMr="शर्तभंग व चौकशी प्रकरणे"
-          titleEn="Active Violations & Disputes"
+          titleMr="शर्तभंग व चौकशी"
+          titleEn="Active Violations"
           value={analytics.totalViolations}
           subtext="कलम ३६, ३६अ व ५०-५४"
           icon={AlertTriangle}
@@ -159,7 +159,7 @@ export default function DashboardPage() {
           titleMr="SDO सुनावणी प्रलंबित"
           titleEn="Hearings Scheduled"
           value={analytics.pendingHearings}
-          subtext="उपविभागीय अधिकारी न्यायालय"
+          subtext="उपविभाग न्यायालय"
           icon={Scale}
           badgeColor="bg-indigo-50 border-indigo-200"
           iconColor="text-indigo-600"
@@ -168,7 +168,7 @@ export default function DashboardPage() {
 
         <MetricCard
           titleMr="शासन जमा क्षेत्र"
-          titleEn="Total Repossessed to Govt"
+          titleEn="Repossessed to Govt"
           value={`${Number(analytics.totalRepossessedHa).toFixed(2)} Ha`}
           subtext={`${analytics.totalRepossessedCases || 1} प्रकरणे नियमित/जप्त`}
           icon={ShieldCheck}

@@ -49,7 +49,7 @@ export default function ParcelTraceDrawer({ upi, onClose, onRefresh }) {
   const tenureConfig = parcel?.tenureClass ? TENURE_CLASSES[parcel.tenureClass] : null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 md:p-6 overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 md:p-6 overflow-hidden">
       {/* Backdrop */}
       <div
         className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity animate-in fade-in duration-200"
@@ -57,38 +57,39 @@ export default function ParcelTraceDrawer({ upi, onClose, onRefresh }) {
       />
 
       {/* Centered Modal Dialog */}
-      <div className="relative z-10 w-full max-w-3xl max-h-[90vh] bg-white rounded-2xl shadow-2xl flex flex-col border border-slate-200 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+      <div className="relative z-10 w-full max-w-3xl max-h-[94vh] bg-white rounded-2xl shadow-2xl flex flex-col border border-slate-200 overflow-hidden animate-in fade-in zoom-in-95 duration-200 my-auto">
         {/* Header */}
-        <div className="px-6 py-4 bg-slate-900 text-white flex justify-between items-start border-b border-slate-800 shrink-0">
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="font-mono text-xs text-amber-400 bg-amber-950/60 px-2 py-0.5 rounded border border-amber-800/80">
+        <div className="px-4 sm:px-6 py-3 sm:py-4 bg-slate-900 text-white flex justify-between items-start border-b border-slate-800 shrink-0 gap-2">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+              <span className="font-mono text-[10px] sm:text-xs text-amber-400 bg-amber-950/60 px-2 py-0.5 rounded border border-amber-800/80 truncate">
                 UPI: {upi}
               </span>
               {parcel?.hasActiveDispute && (
-                <span className="text-xs bg-rose-950 text-rose-300 px-2 py-0.5 rounded font-semibold border border-rose-800">
-                  सक्रिय वाद (Active Dispute)
+                <span className="text-[10px] sm:text-xs bg-rose-950 text-rose-300 px-2 py-0.5 rounded font-semibold border border-rose-800">
+                  सक्रिय वाद
                 </span>
               )}
             </div>
-            <h2 className="text-lg font-bold text-white mt-1">
+            <h2 className="text-sm sm:text-lg font-bold text-white mt-1 truncate">
               {parcel?.villageName} | गट क्र. {parcel?.gatNumber}
               {parcel?.hissaNumber && parcel.hissaNumber !== '0' && ` (हिस्सा ${parcel.hissaNumber})`}
             </h2>
-            <p className="text-xs text-slate-400">
+            <p className="text-[11px] sm:text-xs text-slate-400 truncate">
               तालुका: {parcel?.taluka} | महसूल मंडळ: {parcel?.revenueCircle || '-'} | क्षेत्र: {Number(parcel?.totalAreaHa || 0).toFixed(4)} हे.
             </p>
           </div>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition"
+            className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition flex-shrink-0"
+            aria-label="Close drawer"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Content Area */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-5">
+        <div className="flex-1 overflow-y-auto p-3.5 sm:p-6 space-y-4 sm:space-y-5">
           {loading ? (
             <div className="py-20 text-center space-y-3">
               <div className="w-8 h-8 border-3 border-blue-900 border-t-transparent rounded-full animate-spin mx-auto" />
@@ -104,7 +105,7 @@ export default function ParcelTraceDrawer({ upi, onClose, onRefresh }) {
             <>
               {/* Intelligence Summary Banner */}
               {summary?.potentialIllegalAlienation && (
-                <div className="p-4 bg-amber-50 border border-amber-300 rounded-xl text-xs text-amber-900 flex items-start gap-3 shadow-sm">
+                <div className="p-3 sm:p-4 bg-amber-50 border border-amber-300 rounded-xl text-xs text-amber-900 flex items-start gap-2.5 sm:gap-3 shadow-sm">
                   <ShieldAlert className="w-5 h-5 text-amber-700 flex-shrink-0 mt-0.5" />
                   <div>
                     <p className="font-bold">संभाव्य बेकायदेशीर हस्तांतरण (Anomaly Detected)</p>
@@ -116,7 +117,7 @@ export default function ParcelTraceDrawer({ upi, onClose, onRefresh }) {
               )}
 
               {summary?.isRepossessedToGovt && (
-                <div className="p-4 bg-emerald-50 border border-emerald-300 rounded-xl text-xs text-emerald-900 flex items-start gap-3 shadow-sm">
+                <div className="p-3 sm:p-4 bg-emerald-50 border border-emerald-300 rounded-xl text-xs text-emerald-900 flex items-start gap-2.5 sm:gap-3 shadow-sm">
                   <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5" />
                   <div>
                     <p className="font-bold">शासन जमा आदेश पारित (Land Resumed to State)</p>
@@ -128,39 +129,42 @@ export default function ParcelTraceDrawer({ upi, onClose, onRefresh }) {
               )}
 
               {/* Quick Stat Pill Row */}
-              <div className="grid grid-cols-3 gap-3">
-                <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
-                  <p className="text-[11px] text-slate-500 font-medium">धारणा प्रकार (Tenure)</p>
-                  <p className="text-xs font-bold text-slate-800 mt-0.5">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">
+                <div className="p-2.5 sm:p-3 rounded-lg bg-slate-50 border border-slate-200">
+                  <p className="text-[10px] sm:text-[11px] text-slate-500 font-medium">धारणा प्रकार (Tenure)</p>
+                  <p className="text-xs font-bold text-slate-800 mt-0.5 truncate">
                     {tenureConfig?.labelMr || parcel.tenureClass}
                   </p>
                 </div>
-                <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
-                  <p className="text-[11px] text-slate-500 font-medium">१९५० मूळ खातेदार</p>
+                <div className="p-2.5 sm:p-3 rounded-lg bg-slate-50 border border-slate-200">
+                  <p className="text-[10px] sm:text-[11px] text-slate-500 font-medium">१९५० मूळ खातेदार</p>
                   <p className="text-xs font-bold text-slate-800 mt-0.5 truncate">
                     {summary?.baseline1950Epoch?.ownerName || 'नोंद प्रलंबित'}
                   </p>
                 </div>
-                <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
-                  <p className="text-[11px] text-slate-500 font-medium">अभिलेख दस्तऐवज (DMS)</p>
+                <div className="p-2.5 sm:p-3 rounded-lg bg-slate-50 border border-slate-200">
+                  <p className="text-[10px] sm:text-[11px] text-slate-500 font-medium">अभिलेख दस्तऐवज (DMS)</p>
                   <p className="text-xs font-bold text-slate-800 mt-0.5">
                     {parcel.documents?.length || 0} फायली उपलब्ध
                   </p>
                 </div>
               </div>
 
-              {/* Tabs */}
-              <div className="flex border-b border-slate-200 gap-2">
+              {/* Tabs (Horizontally Scrollable on Mobile) */}
+              <div
+                className="flex border-b border-slate-200 gap-1.5 sm:gap-2 overflow-x-auto pb-0.5 shrink-0"
+                style={{ WebkitOverflowScrolling: 'touch' }}
+              >
                 <button
                   onClick={() => setActiveTab('backward')}
-                  className={`pb-2.5 px-3 text-xs font-bold flex items-center gap-1.5 transition-colors border-b-2 ${
+                  className={`pb-2 px-2.5 sm:px-3 text-xs font-bold flex items-center gap-1.5 transition-colors border-b-2 whitespace-nowrap flex-shrink-0 ${
                     activeTab === 'backward'
                       ? 'border-blue-900 text-blue-900'
                       : 'border-transparent text-slate-500 hover:text-slate-800'
                   }`}
                 >
                   <Clock className="w-3.5 h-3.5" />
-                  <span>मागील शीर्षक साखळी (Backward 1950)</span>
+                  <span>१९५० शीर्षक साखळी</span>
                   <span className="bg-slate-100 text-slate-600 px-1.5 py-0.2 rounded-full text-[10px]">
                     {parcel.backwardHistories?.length || 0}
                   </span>
@@ -168,14 +172,14 @@ export default function ParcelTraceDrawer({ upi, onClose, onRefresh }) {
 
                 <button
                   onClick={() => setActiveTab('forward')}
-                  className={`pb-2.5 px-3 text-xs font-bold flex items-center gap-1.5 transition-colors border-b-2 ${
+                  className={`pb-2 px-2.5 sm:px-3 text-xs font-bold flex items-center gap-1.5 transition-colors border-b-2 whitespace-nowrap flex-shrink-0 ${
                     activeTab === 'forward'
                       ? 'border-blue-900 text-blue-900'
                       : 'border-transparent text-slate-500 hover:text-slate-800'
                   }`}
                 >
                   <Scale className="w-3.5 h-3.5" />
-                  <span>शर्तभंग व सुनावणी (Forward Enforcement)</span>
+                  <span>शर्तभंग व सुनावणी</span>
                   <span className="bg-slate-100 text-slate-600 px-1.5 py-0.2 rounded-full text-[10px]">
                     {parcel.forwardCases?.length || 0}
                   </span>
@@ -183,7 +187,7 @@ export default function ParcelTraceDrawer({ upi, onClose, onRefresh }) {
 
                 <button
                   onClick={() => setActiveTab('documents')}
-                  className={`pb-2.5 px-3 text-xs font-bold flex items-center gap-1.5 transition-colors border-b-2 ${
+                  className={`pb-2 px-2.5 sm:px-3 text-xs font-bold flex items-center gap-1.5 transition-colors border-b-2 whitespace-nowrap flex-shrink-0 ${
                     activeTab === 'documents'
                       ? 'border-blue-900 text-blue-900'
                       : 'border-transparent text-slate-500 hover:text-slate-800'

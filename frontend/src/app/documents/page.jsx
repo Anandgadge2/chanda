@@ -55,17 +55,17 @@ export default function DocumentsPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-6 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-3 sm:gap-4">
         <div>
           <div className="flex items-center gap-2">
             <span className="text-xs bg-purple-100 text-purple-900 font-bold px-2 py-0.5 rounded">
-              जिल्हाधिकारी अभिलेखागार (DMS Vault)
+              जिल्हाधिकारी अभिलेखागार (DMS)
             </span>
-            <span className="text-xs text-slate-500 font-medium">Cloudinary + Physical Room Mapping</span>
+            <span className="text-xs text-slate-500 font-medium">Physical Room & File Mapping</span>
           </div>
-          <h1 className="text-2xl font-black text-slate-900 mt-1">
+          <h1 className="text-lg sm:text-2xl font-black text-slate-900 mt-1 leading-tight">
             डिजिटल दस्तऐवज व भौतिक कपाट संदर्भ (Collectorate DMS)
           </h1>
           <p className="text-xs text-slate-500 mt-0.5">
@@ -73,18 +73,19 @@ export default function DocumentsPage() {
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2 w-full sm:w-auto">
           <button
             onClick={() => setUploadModalOpen(true)}
-            className="inline-flex items-center gap-2 bg-blue-900 hover:bg-blue-800 text-white font-semibold px-4 py-2.5 rounded-xl text-xs shadow-sm transition"
+            className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 bg-blue-900 hover:bg-blue-800 text-white font-semibold px-4 py-2.5 rounded-xl text-xs shadow-sm transition active:scale-95"
           >
             <Plus className="w-4 h-4 text-amber-400" />
-            <span>नवीन दस्तऐवज जोडा (Upload)</span>
+            <span>नवीन दस्तऐवज जोडा</span>
           </button>
           <button
             onClick={fetchDocs}
             disabled={loading}
-            className="p-2 border border-slate-300 rounded-xl text-slate-600 hover:bg-slate-50 transition"
+            className="p-2 border border-slate-300 rounded-xl text-slate-600 hover:bg-slate-50 transition active:scale-95"
+            aria-label="Refresh documents"
           >
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
           </button>
@@ -92,8 +93,8 @@ export default function DocumentsPage() {
       </div>
 
       {/* Filter Bar */}
-      <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex flex-wrap gap-3 items-center">
-        <form onSubmit={handleSearchSubmit} className="flex-1 min-w-[260px] relative">
+      <div className="bg-white border border-slate-200 rounded-xl p-3.5 sm:p-4 shadow-sm flex flex-col sm:flex-row gap-2.5 sm:gap-3 items-stretch sm:items-center">
+        <form onSubmit={handleSearchSubmit} className="flex-1 min-w-[200px] relative">
           <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
           <input
             type="text"
@@ -107,7 +108,7 @@ export default function DocumentsPage() {
         <select
           value={docType}
           onChange={(e) => setDocType(e.target.value)}
-          className="border border-slate-300 rounded-lg px-3 py-2 text-xs bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full sm:w-auto border border-slate-300 rounded-lg px-2.5 py-2 text-xs bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <option value="">सर्व दस्तऐवज प्रकार (All Categories)</option>
           {Object.entries(DMS_DOC_TYPES).map(([k, v]) => (
@@ -120,17 +121,22 @@ export default function DocumentsPage() {
 
       {/* Documents Table */}
       <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
-        <div className="px-5 py-3.5 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
+        <div className="px-3.5 sm:px-5 py-3 border-b border-slate-200 bg-slate-50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1.5">
           <p className="text-xs font-bold text-slate-700">
             एकूण दस्तऐवज: <span className="text-blue-900">{totalCount}</span>
           </p>
-          <span className="text-[11px] text-slate-500">
-            Cloudinary डिजिटल आर्काइव्ह व चंद्रपूर अभिलेख कक्ष कोऑर्डिनेट्स
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] text-slate-500 hidden sm:inline">
+              चंद्रपूर अभिलेख कक्ष कोऑर्डिनेट्स
+            </span>
+            <span className="text-[10px] text-amber-800 bg-amber-50 px-2 py-0.5 rounded border border-amber-200 sm:hidden">
+              तक्ता आडवा स्क्रोल करा (Swipe ↔)
+            </span>
+          </div>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
+        <div className="overflow-x-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
+          <table className="w-full text-left text-xs min-w-[720px]">
             <thead className="bg-slate-100/80 text-slate-600 font-bold border-b border-slate-200">
               <tr>
                 <th className="py-3 px-4">दस्तऐवज शीर्षक व वर्गीकरण</th>

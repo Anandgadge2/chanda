@@ -111,70 +111,70 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'login' }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden text-slate-800">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2.5 sm:p-4 bg-slate-950/70 backdrop-blur-md animate-in fade-in duration-200 overflow-y-auto">
+      <div className="relative w-full max-w-lg max-h-[94vh] flex flex-col bg-white rounded-2xl sm:rounded-3xl shadow-2xl border border-slate-200 overflow-hidden text-slate-800 my-auto">
         {/* Tricolor top border */}
-        <div className="gov-tricolor-bar" />
+        <div className="gov-tricolor-bar shrink-0" />
 
         {/* Modal Header */}
-        <div className="px-6 pt-6 pb-4 bg-gradient-to-r from-blue-50/90 via-indigo-50/60 to-slate-50 border-b border-slate-200 relative">
+        <div className="px-4 sm:px-6 pt-4 sm:pt-6 pb-3 sm:pb-4 bg-gradient-to-r from-blue-50/90 via-indigo-50/60 to-slate-50 border-b border-slate-200 relative shrink-0">
           <button
             onClick={onClose}
-            className="absolute top-5 right-5 p-2 rounded-full text-slate-400 hover:text-slate-800 hover:bg-slate-200/80 transition"
+            className="absolute top-4 right-4 sm:top-5 sm:right-5 p-1.5 sm:p-2 rounded-full text-slate-400 hover:text-slate-800 hover:bg-slate-200/80 transition"
             aria-label="Close dialog"
           >
             <X className="w-5 h-5" />
           </button>
 
-          <div className="flex items-center gap-3">
-            <ChandrapurDistrictLogo className="w-12 h-12 flex-shrink-0" />
-            <div>
-              <p className="text-xs text-amber-800 font-bold tracking-wide">
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            <ChandrapurDistrictLogo className="w-10 h-10 sm:w-12 sm:h-12 flex-shrink-0" />
+            <div className="min-w-0 pr-6">
+              <p className="text-[11px] sm:text-xs text-amber-800 font-bold tracking-wide truncate">
                 महाराष्ट्र शासन | जिल्हाधिकारी कार्यालय, चंद्रपूर
               </p>
-              <h2 className="text-lg sm:text-xl font-black tracking-tight text-slate-900 mt-0.5">
+              <h2 className="text-base sm:text-xl font-black tracking-tight text-slate-900 mt-0.5 truncate">
                 {tab === 'login' ? 'महसूल अधिकारी पोर्टल लॉगिन' : 'नागरिक व अधिकारी नोंदणी'}
               </h2>
             </div>
           </div>
 
           {/* Tab Switcher */}
-          <div className="flex bg-slate-200/70 p-1 rounded-xl mt-5 text-xs font-semibold">
+          <div className="flex bg-slate-200/70 p-1 rounded-xl mt-3 sm:mt-5 text-xs font-semibold">
             <button
               onClick={() => {
                 setTab('login');
                 setSuccessMsg('');
               }}
-              className={`flex-1 py-2 rounded-lg flex items-center justify-center gap-2 transition ${
+              className={`flex-1 py-1.5 sm:py-2 rounded-lg flex items-center justify-center gap-1.5 sm:gap-2 transition text-[11px] sm:text-xs ${
                 tab === 'login'
                   ? 'bg-blue-900 text-white shadow-xs font-bold'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              <ShieldCheck className="w-4 h-4" />
-              <span>अधिकारी लॉगिन (Officer Sign In)</span>
+              <ShieldCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <span>अधिकारी लॉगिन</span>
             </button>
             <button
               onClick={() => {
                 setTab('register');
                 setRegSubmitted(false);
               }}
-              className={`flex-1 py-2 rounded-lg flex items-center justify-center gap-2 transition ${
+              className={`flex-1 py-1.5 sm:py-2 rounded-lg flex items-center justify-center gap-1.5 sm:gap-2 transition text-[11px] sm:text-xs ${
                 tab === 'register'
                   ? 'bg-blue-900 text-white shadow-xs font-bold'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              <UserCheck className="w-4 h-4" />
-              <span>नोंदणी (Registration)</span>
+              <UserCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <span>नोंदणी (Register)</span>
             </button>
           </div>
         </div>
 
         {/* Modal Body */}
-        <div className="p-6">
+        <div className="p-4 sm:p-6 overflow-y-auto flex-1">
           {tab === 'login' ? (
-            <div className="space-y-4">
+            <div className="space-y-3.5 sm:space-y-4">
               {/* Quick Demo Login Picker */}
               <div className="p-3 bg-amber-50/80 border border-amber-200/80 rounded-2xl">
                 <div className="flex items-center gap-1.5 text-xs font-bold text-amber-900 mb-2">

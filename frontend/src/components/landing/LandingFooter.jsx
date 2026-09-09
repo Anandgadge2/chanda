@@ -16,7 +16,7 @@ export default function LandingFooter() {
   return (
     <footer className="bg-slate-100 text-slate-700 text-xs border-t border-slate-300">
       {/* Main Footer Links */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-7 sm:py-10">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
           {/* Col 1: Collectorate Identity */}
           <div className="space-y-4">
@@ -67,7 +67,7 @@ export default function LandingFooter() {
               <li>
                 <Link href="/parcels" className="text-slate-700 hover:text-blue-900 font-medium transition flex items-center gap-1.5">
                   <span className="text-amber-600 font-bold">›</span>
-                  <span>भूखंड नोंदवही व ३६०° साखळी (7/12 Trace)</span>
+                  <span>भूखंड नोंदवही व १९५० साखळी (7/12 Trace)</span>
                 </Link>
               </li>
               <li>

@@ -123,11 +123,11 @@ export default function HeroBannerSlider() {
   return (
     <section
       id="features"
-      className="py-8 bg-white text-slate-900 relative select-none border-b border-slate-200"
+      className="py-6 sm:py-8 bg-white text-slate-900 relative select-none border-b border-slate-200"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-4 pb-2.5 border-b border-slate-200 gap-3">
           <div>

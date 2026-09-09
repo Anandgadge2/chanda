@@ -56,10 +56,10 @@ const STEPS = [
 
 export default function WorkflowSection() {
   return (
-    <section id="workflow" className="py-8 bg-slate-50 text-slate-900 relative border-b border-slate-200">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="workflow" className="py-6 sm:py-8 bg-slate-50 text-slate-900 relative border-b border-slate-200">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto space-y-1.5 mb-5">
+        <div className="text-center max-w-3xl mx-auto space-y-1.5 mb-4 sm:mb-5">
           <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-900 text-xs font-bold border border-blue-300">
             <ShieldCheck className="w-3.5 h-3.5 text-blue-700" />
             <span>पारदर्शक महसूल कार्यप्रणाली (End-to-End Governance Lifecycle)</span>
