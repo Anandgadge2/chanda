@@ -13,6 +13,7 @@ import {
   Building,
   FileSpreadsheet,
 } from 'lucide-react';
+import ChandrapurDistrictLogo from './ChandrapurDistrictLogo';
 import { AshokStambhEmblem, MaharashtraSeal } from './GovEmblem';
 
 export default function LandingNavbar({ onOpenAuth }) {
@@ -29,9 +30,9 @@ export default function LandingNavbar({ onOpenAuth }) {
           {/* Official Emblem & District Title */}
           <Link href="/" className="flex items-center gap-3.5 group">
             <div className="flex items-center gap-2">
-              <AshokStambhEmblem className="w-11 h-11 drop-shadow-xs transition-transform group-hover:scale-105" />
+              <ChandrapurDistrictLogo className="w-13 h-13 drop-shadow-xs transition-transform group-hover:scale-105" />
               <div className="h-10 w-px bg-slate-200 hidden sm:block" />
-              <MaharashtraSeal className="w-11 h-11 hidden sm:block transition-transform group-hover:scale-105" />
+              <AshokStambhEmblem className="w-10 h-10 drop-shadow-xs transition-transform group-hover:scale-105 hidden sm:block" />
             </div>
 
             <div>

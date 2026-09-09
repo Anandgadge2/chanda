@@ -1,22 +1,23 @@
 'use client';
 
 import Link from 'next/link';
-import { ShieldAlert, Database, Cloud, FileSpreadsheet, Landmark, ExternalLink } from 'lucide-react';
+import { ShieldAlert, ShieldCheck, Database, FileSpreadsheet, Landmark, ExternalLink, CheckCircle } from 'lucide-react';
+import ChandrapurDistrictLogo from './landing/ChandrapurDistrictLogo';
 
 export default function Navbar() {
   return (
-    <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm">
+    <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-xs">
       <div className="gov-tricolor-bar" />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16 items-center">
           {/* Brand & Emblem */}
           <Link href="/dashboard" className="flex items-center gap-3 group">
-            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-900 to-indigo-950 flex items-center justify-center text-white shadow-md group-hover:scale-105 transition-transform">
-              <Landmark className="w-5 h-5 text-amber-400" />
+            <div className="transition-transform group-hover:scale-105">
+              <ChandrapurDistrictLogo className="w-10 h-10" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="font-bold text-slate-900 text-lg tracking-tight group-hover:text-blue-900 transition">
+                <span className="font-bold text-slate-900 text-base sm:text-lg tracking-tight group-hover:text-blue-900 transition">
                   जिल्हाधिकारी कार्यालय, चंद्रपूर
                 </span>
                 <span className="text-xs bg-amber-100 text-amber-800 font-semibold px-2 py-0.5 rounded border border-amber-200">
@@ -41,17 +42,17 @@ export default function Navbar() {
 
             <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-medium">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span>Neon PostgreSQL Connected</span>
+              <span>महसूल सर्व्हर सक्रीय</span>
             </div>
 
             <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-xs font-medium">
-              <Cloud className="w-3.5 h-3.5 text-blue-500" />
-              <span>Cloudinary DMS Live</span>
+              <ShieldCheck className="w-3.5 h-3.5 text-blue-600" />
+              <span>अभिलेख दस्तऐवज सुरक्षित</span>
             </div>
 
             <Link
               href="/reports"
-              className="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-3 py-1.5 rounded-lg shadow-sm transition"
+              className="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-3 py-1.5 rounded-lg shadow-xs transition"
             >
               <FileSpreadsheet className="w-3.5 h-3.5" />
               <span>प्रपत्र-३ डाऊनलोड</span>

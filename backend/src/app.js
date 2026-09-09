@@ -47,6 +47,14 @@ const apiIndexHandler = (req, res) => {
 app.get('/', apiIndexHandler);
 app.get('/api', apiIndexHandler);
 
+const faviconSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><circle cx="32" cy="32" r="30" fill="#1E3A8A" stroke="#F59E0B" stroke-width="2.5"/><circle cx="32" cy="32" r="26" fill="#0F172A"/><text x="32" y="38" font-size="20" font-weight="bold" fill="#F59E0B" text-anchor="middle">चं</text></svg>`;
+
+app.get('/favicon.ico', (req, res) => {
+  res.setHeader('Content-Type', 'image/svg+xml');
+  res.setHeader('Cache-Control', 'public, max-age=86400');
+  res.send(faviconSvg);
+});
+
 // Health Check
 app.get('/api/health', (req, res) => {
   res.json({

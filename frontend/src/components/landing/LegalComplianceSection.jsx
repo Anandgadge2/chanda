@@ -122,21 +122,21 @@ export default function LegalComplianceSection() {
           })}
         </div>
 
-        {/* Bottom Banner */}
-        <div className="mt-10 p-6 rounded-2xl bg-gradient-to-r from-blue-950 to-indigo-950 text-white flex flex-col sm:flex-row items-center justify-between gap-4">
+        {/* Bottom Banner in Clean Light Style */}
+        <div className="mt-10 p-6 rounded-2xl bg-gradient-to-r from-blue-50/90 via-indigo-50/60 to-slate-50 border border-blue-200/90 text-slate-900 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-2xs">
           <div className="space-y-1 text-center sm:text-left">
-            <h4 className="text-base font-bold text-amber-300">
+            <h4 className="text-base font-bold text-blue-950">
               प्रपत्र-३ वैधानिक अहवाल केंद्र (MLRC Prapatra-3 Ready)
             </h4>
-            <p className="text-xs text-slate-300">
+            <p className="text-xs text-slate-600">
               चंद्रपूर जिल्ह्यातील सर्व १५ तालुक्यांचा महसूल तपासणी प्रपत्र-३ एक्सेल फॉरमॅटमध्ये थेट डाऊनलोड करा.
             </p>
           </div>
           <Link
             href="/reports"
-            className="px-5 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-blue-950 font-black text-xs shadow-md transition flex items-center gap-1.5 flex-shrink-0"
+            className="px-5 py-2.5 rounded-xl bg-blue-900 hover:bg-blue-800 text-white font-bold text-xs shadow-sm transition flex items-center gap-1.5 flex-shrink-0"
           >
-            <FileSpreadsheet className="w-4 h-4" />
+            <FileSpreadsheet className="w-4 h-4 text-amber-400" />
             <span>प्रपत्र-३ अहवाल पहा</span>
           </Link>
         </div>

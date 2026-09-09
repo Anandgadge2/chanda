@@ -18,6 +18,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { CHANDRAPUR_TALUKAS } from '../../lib/constants';
+import ChandrapurDistrictLogo from './ChandrapurDistrictLogo';
 
 const DEMO_OFFICERS = [
   {
@@ -116,31 +117,29 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'login' }) {
         <div className="gov-tricolor-bar" />
 
         {/* Modal Header */}
-        <div className="px-6 pt-6 pb-4 bg-gradient-to-br from-blue-950 via-indigo-950 to-slate-900 text-white relative">
+        <div className="px-6 pt-6 pb-4 bg-gradient-to-r from-blue-50/90 via-indigo-50/60 to-slate-50 border-b border-slate-200 relative">
           <button
             onClick={onClose}
-            className="absolute top-5 right-5 p-2 rounded-full text-slate-400 hover:text-white hover:bg-white/10 transition"
+            className="absolute top-5 right-5 p-2 rounded-full text-slate-400 hover:text-slate-800 hover:bg-slate-200/80 transition"
             aria-label="Close dialog"
           >
             <X className="w-5 h-5" />
           </button>
 
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-400/30 flex items-center justify-center text-amber-400">
-              <Landmark className="w-5 h-5" />
-            </div>
+            <ChandrapurDistrictLogo className="w-12 h-12 flex-shrink-0" />
             <div>
-              <p className="text-xs text-amber-300 font-semibold tracking-wide">
+              <p className="text-xs text-amber-800 font-bold tracking-wide">
                 महाराष्ट्र शासन | जिल्हाधिकारी कार्यालय, चंद्रपूर
               </p>
-              <h2 className="text-xl font-bold tracking-tight text-white mt-0.5">
+              <h2 className="text-lg sm:text-xl font-black tracking-tight text-slate-900 mt-0.5">
                 {tab === 'login' ? 'महसूल अधिकारी पोर्टल लॉगिन' : 'नागरिक व अधिकारी नोंदणी'}
               </h2>
             </div>
           </div>
 
           {/* Tab Switcher */}
-          <div className="flex bg-white/10 p-1 rounded-xl mt-5 text-xs font-semibold">
+          <div className="flex bg-slate-200/70 p-1 rounded-xl mt-5 text-xs font-semibold">
             <button
               onClick={() => {
                 setTab('login');
@@ -148,8 +147,8 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'login' }) {
               }}
               className={`flex-1 py-2 rounded-lg flex items-center justify-center gap-2 transition ${
                 tab === 'login'
-                  ? 'bg-amber-500 text-slate-950 shadow-md font-bold'
-                  : 'text-slate-300 hover:text-white'
+                  ? 'bg-blue-900 text-white shadow-xs font-bold'
+                  : 'text-slate-600 hover:text-slate-900'
               }`}
             >
               <ShieldCheck className="w-4 h-4" />
@@ -162,8 +161,8 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'login' }) {
               }}
               className={`flex-1 py-2 rounded-lg flex items-center justify-center gap-2 transition ${
                 tab === 'register'
-                  ? 'bg-amber-500 text-slate-950 shadow-md font-bold'
-                  : 'text-slate-300 hover:text-white'
+                  ? 'bg-blue-900 text-white shadow-xs font-bold'
+                  : 'text-slate-600 hover:text-slate-900'
               }`}
             >
               <UserCheck className="w-4 h-4" />

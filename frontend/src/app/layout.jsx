@@ -5,6 +5,11 @@ export const metadata = {
   title: 'जिल्हाधिकारी कार्यालय, चंद्रपूर | Chandrapur District Land Governance & Revenue Portal',
   description:
     'महाराष्ट्र जमीन महसूल संहिता (MLRC) १९६६ अंतर्गत चंद्रपूर जिल्हा जमीन अभिलेख, १९५० मूळ शीर्षक साखळी, आदिवासी जमीन संरक्षण व अर्ध-न्यायिक सुनावणी पोर्टल.',
+  icons: {
+    icon: '/icon.svg',
+    shortcut: '/icon.svg',
+    apple: '/icon.svg',
+  },
 };
 
 export default function RootLayout({ children }) {
