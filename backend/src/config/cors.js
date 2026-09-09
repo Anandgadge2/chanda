@@ -1,58 +1,54 @@
 import cors from 'cors';
+import { logger } from '../utils/logger.js';
 
 /**
- * Configure Production-Ready CORS Middleware
- * Handles single domain, comma-separated domains, wildcard '*', localhost fallbacks, and Vercel preview deploys.
+ * Production-Grade Strict CORS Configuration
+ * Disallows wildcard '*', explicitly whitelists development and production domains,
+ * and strips trailing slashes to prevent false rejection.
  */
 export function configureCors() {
+  // Built-in explicit whitelist of verified environments
+  const baseWhitelist = [
+    'https://chanda-eta.vercel.app', // Production Frontend
+    'http://localhost:3000',         // Local Next.js Frontend
+    'http://127.0.0.1:3000',         // Local IP
+    'http://localhost:3001',         // Secondary local dev port
+  ];
+
+  // Merge extra origins from CORS_ORIGIN or FRONTEND_URL env variables
   const rawOrigins = process.env.CORS_ORIGIN || process.env.FRONTEND_URL || '';
-
-  // Parse comma-separated origins from env
-  const configuredOrigins = rawOrigins
+  const envOrigins = rawOrigins
     .split(',')
-    .map((o) => o.trim())
-    .filter(Boolean);
+    .map((o) => o.trim().replace(/\/$/, '')) // strip trailing slash
+    .filter((o) => o && o !== '*');         // strictly reject wildcard '*'
 
-  const allowedOrigins = [...configuredOrigins];
-
-  // In development, ensure local frontend ports are automatically whitelisted
-  if (process.env.NODE_ENV !== 'production' || allowedOrigins.length === 0) {
-    const devDefaults = [
-      'http://localhost:3000',
-      'http://127.0.0.1:3000',
-      'http://localhost:3001',
-      'http://localhost:5000',
-    ];
-    for (const origin of devDefaults) {
-      if (!allowedOrigins.includes(origin)) {
-        allowedOrigins.push(origin);
-      }
-    }
-  }
+  // Combine and deduplicate
+  const allowedOrigins = Array.from(new Set([...baseWhitelist, ...envOrigins]));
 
   return cors({
     origin: (origin, callback) => {
-      // Allow requests with no origin (curl, mobile apps, Postman, server-to-server, health checks)
-      if (!origin) return callback(null, true);
-
-      // If '*' is explicitly configured
-      if (allowedOrigins.includes('*')) {
+      // Allow non-browser requests without origin (curl, mobile apps, Postman, health checks, server-to-server)
+      if (!origin) {
         return callback(null, true);
       }
 
-      // Exact match in allowed origins list
-      if (allowedOrigins.includes(origin)) {
+      // Normalize incoming origin by removing trailing slash
+      const normalizedOrigin = origin.trim().replace(/\/$/, '');
+
+      // Check against explicit whitelist
+      if (allowedOrigins.includes(normalizedOrigin)) {
         return callback(null, true);
       }
 
-      // Allow Vercel preview deployments if enabled
-      if (process.env.ALLOW_VERCEL_PREVIEWS === 'true' && origin.endsWith('.vercel.app')) {
+      // Check Vercel preview deployments if explicitly permitted
+      if (process.env.ALLOW_VERCEL_PREVIEWS === 'true' && normalizedOrigin.endsWith('.vercel.app')) {
         return callback(null, true);
       }
 
-      // Reject other origins
-      const errorMsg = `CORS Blocked: Request origin '${origin}' is not authorized in CORS_ORIGIN settings.`;
-      return callback(new Error(errorMsg), false);
+      // Block unauthorized origins
+      const reason = `Strict CORS: Request from unauthorized origin '${origin}' was blocked. Allowed: [${allowedOrigins.join(', ')}]`;
+      logger.warn(reason, 'SECURITY-CORS');
+      return callback(new Error(reason), false);
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
@@ -69,7 +65,7 @@ export function configureCors() {
       'X-Request-Id',
       'Content-Length',
     ],
-    maxAge: 86400, // Preflight cached for 24 hours
+    maxAge: 86400, // Cache preflight checks for 24 hours
     optionsSuccessStatus: 204,
   });
 }
