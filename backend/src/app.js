@@ -1,5 +1,5 @@
 import express from 'express';
-import cors from 'cors';
+import { configureCors } from './config/cors.js';
 import { logger, requestLogger } from './utils/logger.js';
 import parcelRoutes from './routes/parcelRoutes.js';
 import reportRoutes from './routes/reportRoutes.js';
@@ -14,11 +14,10 @@ BigInt.prototype.toJSON = function () {
 
 const app = express();
 
-app.use(cors({
-  origin: '*',
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-}));
+// Production-Ready CORS Handling
+const corsMiddleware = configureCors();
+app.use(corsMiddleware);
+app.options('*', corsMiddleware);
 
 // Industry-standard HTTP request logging
 app.use(requestLogger);
