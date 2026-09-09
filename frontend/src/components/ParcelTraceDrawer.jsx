@@ -93,7 +93,7 @@ export default function ParcelTraceDrawer({ upi, onClose, onRefresh }) {
             <div className="py-20 text-center space-y-3">
               <div className="w-8 h-8 border-3 border-blue-900 border-t-transparent rounded-full animate-spin mx-auto" />
               <p className="text-xs text-slate-500 font-medium">
-                अभिलेख इतिहास व ३६०° साखळी लोड होत आहे...
+                अभिलेख इतिहास व १९५० साखळी लोड होत आहे...
               </p>
             </div>
           ) : error ? (

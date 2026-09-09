@@ -142,7 +142,7 @@ export default function ProvenanceShowcase() {
               href="/parcels"
               className="px-5 py-2.5 rounded-xl bg-blue-900 hover:bg-blue-800 text-white font-bold text-xs shadow-sm transition flex items-center gap-2 flex-shrink-0"
             >
-              <span>सर्व भूखंडांची ३६०° साखळी पहा</span>
+              <span>सर्व भूखंडांची १९५० साखळी पहा</span>
               <ArrowRight className="w-3.5 h-3.5 text-amber-400" />
             </Link>
           </div>

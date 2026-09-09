@@ -68,7 +68,7 @@ export default function DashboardPage() {
             जमीन अभिलेख व्यवस्थापन व महसूल चौकशी प्रणाली
           </h1>
           <p className="text-xs text-slate-500 mt-0.5">
-            MLRC 1966 Statutory Land Intelligence, Tribal Land Safeguard & Enforcement Platform
+            महाराष्ट्र जमीन महसूल संहिता (MLRC) १९६६ अंतर्गत महसूल संनियंत्रण, आदिवासी जमीन संरक्षण व सुनावणी प्रणाली
           </p>
         </div>
 

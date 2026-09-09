@@ -3,80 +3,76 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import {
-  ShieldCheck,
   Lock,
   UserPlus,
   LayoutDashboard,
   Menu,
   X,
-  ChevronDown,
+  ShieldCheck,
+  Search,
   Building,
   FileSpreadsheet,
+  Layers,
+  Scale,
 } from 'lucide-react';
 import ChandrapurDistrictLogo from './ChandrapurDistrictLogo';
-import { AshokStambhEmblem, MaharashtraSeal } from './GovEmblem';
 
 export default function LandingNavbar({ onOpenAuth }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-xs">
-      {/* Official Government of India Tricolor Band */}
+    <header className="sticky top-0 z-50 bg-white border-b border-slate-200 shadow-sm">
+      {/* Official Indian National Tricolor Strip */}
       <div className="gov-tricolor-bar" />
 
-      {/* Primary Top Bar */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 sm:h-18">
-          {/* Official Emblem & District Title */}
-          <Link href="/" className="flex items-center gap-3 group">
-            <div className="flex items-center gap-2">
-              <ChandrapurDistrictLogo className="w-11 h-11 sm:w-12 sm:h-12 drop-shadow-xs transition-transform group-hover:scale-105" />
-              <div className="h-8 w-px bg-slate-200 hidden sm:block" />
-              <AshokStambhEmblem className="w-8 h-8 sm:w-9 sm:h-9 drop-shadow-xs transition-transform group-hover:scale-105 hidden sm:block" />
+      {/* Top Utility Header Strip */}
+      <div className="bg-slate-100/90 border-b border-slate-200/80 px-4 sm:px-6 lg:px-8 py-1">
+        <div className="max-w-7xl mx-auto flex items-center justify-between text-[11px] text-slate-600">
+          <div className="flex items-center gap-2">
+            <span className="font-bold text-amber-900 bg-amber-200/60 px-2 py-0.5 rounded text-[10px] border border-amber-300">
+              महाराष्ट्र शासन
+            </span>
+            <span className="font-medium text-slate-700 hidden sm:inline">
+              Government of Maharashtra • महसूल व वन विभाग
+            </span>
+          </div>
+
+          <div className="flex items-center gap-4 text-[11px] font-medium">
+            <span className="text-slate-500 hidden md:inline">जिल्हा चंद्रपूर (Chandrapur District)</span>
+            <div className="flex items-center gap-1.5 text-slate-700 bg-white px-2 py-0.5 rounded border border-slate-200">
+              <span className="font-bold text-blue-900">मराठी</span>
+              <span className="text-slate-300">|</span>
+              <span className="text-slate-500">English</span>
             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Brand & Officer Actions Header */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5">
+        <div className="flex items-center justify-between">
+          {/* Official Emblem & Collectorate Title */}
+          <Link href="/" className="flex items-center gap-3.5 group">
+            <ChandrapurDistrictLogo className="w-12 h-12 sm:w-14 sm:h-14 drop-shadow-xs transition-transform group-hover:scale-105" />
 
             <div>
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] sm:text-xs font-bold text-amber-800 bg-amber-100/80 px-2 py-0.5 rounded border border-amber-300/80">
-                  महाराष्ट्र शासन
-                </span>
-                <span className="text-[10px] sm:text-[11px] font-semibold text-slate-500 uppercase tracking-wider hidden md:inline-block">
-                  Govt. of Maharashtra
-                </span>
-              </div>
-              <h1 className="text-sm sm:text-base font-black text-slate-900 leading-tight group-hover:text-blue-950 transition">
+              <h1 className="text-base sm:text-xl font-black text-slate-900 leading-tight group-hover:text-blue-950 transition tracking-tight">
                 जिल्हाधिकारी कार्यालय, चंद्रपूर
               </h1>
-              <p className="text-[10px] sm:text-[11px] text-slate-600 font-medium hidden sm:block">
-                जमीन अभिलेख, १९५० मूळ शीर्षक साखळी व महसूल संनियंत्रण प्रणाली
+              <p className="text-[10px] sm:text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                DISTRICT COLLECTORATE, CHANDRAPUR
+              </p>
+              <p className="text-[11px] text-amber-800 font-semibold hidden sm:block">
+                जमीन महसूल, भूमी अभिलेख व १९५० मूळ शीर्षक साखळी संनियंत्रण प्रणाली
               </p>
             </div>
           </Link>
 
-          {/* Desktop Navigation Links */}
-          <nav className="hidden xl:flex items-center gap-6 text-xs font-semibold text-slate-700">
-            <a href="#features" className="hover:text-blue-900 transition py-1">
-              वैशिष्ट्ये (Features)
-            </a>
-            <a href="#provenance" className="hover:text-blue-900 transition py-1">
-              १९५० साखळी (1950 Trace)
-            </a>
-            <a href="#talukas" className="hover:text-blue-900 transition py-1">
-              १५ तालुके (Talukas)
-            </a>
-            <a href="#mlrc" className="hover:text-blue-900 transition py-1">
-              MLRC १९६६ कायदे
-            </a>
-            <a href="#workflow" className="hover:text-blue-900 transition py-1">
-              कार्यप्रणाली
-            </a>
-          </nav>
-
-          {/* Action Buttons: Register, Login, Dashboard */}
+          {/* Action CTAs: Register, Login, Dashboard */}
           <div className="hidden lg:flex items-center gap-2.5">
             <button
               onClick={() => onOpenAuth('register')}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:text-blue-950 hover:bg-slate-100 border border-slate-300/80 transition shadow-2xs"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:text-blue-950 hover:bg-slate-100 border border-slate-300 transition shadow-2xs"
             >
               <UserPlus className="w-3.5 h-3.5 text-blue-900" />
               <span>नागरिक नोंदणी</span>
@@ -84,7 +80,7 @@ export default function LandingNavbar({ onOpenAuth }) {
 
             <button
               onClick={() => onOpenAuth('login')}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-blue-950 bg-amber-400 hover:bg-amber-300 border border-amber-500/50 shadow-xs hover:shadow-md transition"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-blue-950 bg-amber-400 hover:bg-amber-300 border border-amber-500/60 shadow-xs hover:shadow-md transition"
             >
               <Lock className="w-3.5 h-3.5 text-blue-950" />
               <span>अधिकारी लॉगिन</span>
@@ -92,18 +88,18 @@ export default function LandingNavbar({ onOpenAuth }) {
 
             <Link
               href="/dashboard"
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-blue-900 via-indigo-900 to-blue-950 hover:from-blue-800 hover:to-indigo-800 shadow-sm hover:shadow-md transition group"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-white bg-blue-900 hover:bg-blue-800 shadow-xs hover:shadow-md transition group"
             >
               <LayoutDashboard className="w-3.5 h-3.5 text-amber-400 group-hover:rotate-6 transition-transform" />
               <span>महसूल डॅशबोर्ड</span>
             </Link>
           </div>
 
-          {/* Mobile Menu Hamburger Button */}
+          {/* Mobile Menu Hamburger */}
           <div className="flex lg:hidden items-center gap-2">
             <button
               onClick={() => onOpenAuth('login')}
-              className="px-3 py-1.5 rounded-lg text-xs font-bold text-blue-950 bg-amber-400 hover:bg-amber-300"
+              className="px-3 py-1.5 rounded-lg text-xs font-bold text-blue-950 bg-amber-400"
             >
               लॉगिन
             </button>
@@ -118,54 +114,117 @@ export default function LandingNavbar({ onOpenAuth }) {
         </div>
       </div>
 
-      {/* Mobile Dropdown Navigation */}
+      {/* Official Navy Navigation Ribbon (Gov Strip) */}
+      <div className="bg-[#0B1E36] text-white border-t border-slate-700">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-10">
+          <nav className="hidden lg:flex items-center gap-6 text-xs font-semibold text-slate-200">
+            <a href="/" className="hover:text-amber-400 transition py-1 text-white font-bold">
+              मुख्य पृष्ठ
+            </a>
+            <a href="#search-section" className="hover:text-amber-400 transition py-1">
+              ७/१२ भूखंड शोध
+            </a>
+            <a href="#talukas" className="hover:text-amber-400 transition py-1">
+              १५ तालुके
+            </a>
+            <a href="#provenance" className="hover:text-amber-400 transition py-1">
+              १९५० मूळ शीर्षक साखळी
+            </a>
+            <a href="#mlrc" className="hover:text-amber-400 transition py-1">
+              MLRC १९६६ कायदे
+            </a>
+            <a href="#workflow" className="hover:text-amber-400 transition py-1">
+              कार्यप्रणाली
+            </a>
+            <Link href="/cases" className="hover:text-amber-400 transition py-1">
+              SDO सुनावणी खटले
+            </Link>
+            <Link href="/reports" className="hover:text-amber-400 transition py-1">
+              प्रपत्र-३ अहवाल
+            </Link>
+          </nav>
+
+          <div className="flex items-center justify-between w-full lg:w-auto text-[11px] text-slate-300">
+            <div className="flex items-center gap-1.5 text-emerald-400 font-semibold">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span>महसूल प्रणाली सक्रीय</span>
+            </div>
+            <span className="text-slate-400 text-[10px] hidden sm:inline ml-4">
+              MLRC १९६६ अधिकृत संनियंत्रण
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile Slide-Down Menu */}
       {mobileMenuOpen && (
-        <div className="lg:hidden border-t border-slate-200 bg-white px-4 pt-3 pb-5 space-y-3 animate-in slide-in-from-top-2 duration-150">
-          <div className="space-y-1 text-sm font-semibold text-slate-700">
+        <div className="lg:hidden bg-white border-b border-slate-200 px-4 pt-3 pb-5 space-y-3 shadow-xl">
+          <nav className="flex flex-col space-y-2 text-sm font-semibold text-slate-800">
             <a
-              href="#features"
+              href="/"
               onClick={() => setMobileMenuOpen(false)}
-              className="block px-3 py-2 rounded-lg hover:bg-slate-100"
+              className="px-3 py-2 rounded-lg hover:bg-slate-100"
             >
-              वैशिष्ट्ये (Features)
+              मुख्य पृष्ठ (Home)
             </a>
             <a
-              href="#provenance"
+              href="#search-section"
               onClick={() => setMobileMenuOpen(false)}
-              className="block px-3 py-2 rounded-lg hover:bg-slate-100"
+              className="px-3 py-2 rounded-lg hover:bg-slate-100"
             >
-              १९५० साखळी (1950 Trace)
+              ७/१२ भूखंड शोध (Search)
             </a>
             <a
               href="#talukas"
               onClick={() => setMobileMenuOpen(false)}
-              className="block px-3 py-2 rounded-lg hover:bg-slate-100"
+              className="px-3 py-2 rounded-lg hover:bg-slate-100"
             >
               १५ तालुके (Talukas)
             </a>
             <a
+              href="#provenance"
+              onClick={() => setMobileMenuOpen(false)}
+              className="px-3 py-2 rounded-lg hover:bg-slate-100"
+            >
+              १९५० मूळ शीर्षक साखळी (1950 Trace)
+            </a>
+            <a
               href="#mlrc"
               onClick={() => setMobileMenuOpen(false)}
-              className="block px-3 py-2 rounded-lg hover:bg-slate-100"
+              className="px-3 py-2 rounded-lg hover:bg-slate-100"
             >
-              MLRC १९६६ कायदे (Legal Mandate)
+              MLRC १९६६ कायदे (Acts)
             </a>
             <a
               href="#workflow"
               onClick={() => setMobileMenuOpen(false)}
-              className="block px-3 py-2 rounded-lg hover:bg-slate-100"
+              className="px-3 py-2 rounded-lg hover:bg-slate-100"
             >
               कार्यप्रणाली (Workflow)
             </a>
-          </div>
+            <Link
+              href="/cases"
+              onClick={() => setMobileMenuOpen(false)}
+              className="px-3 py-2 rounded-lg hover:bg-slate-100"
+            >
+              SDO सुनावणी खटले (Cases)
+            </Link>
+            <Link
+              href="/reports"
+              onClick={() => setMobileMenuOpen(false)}
+              className="px-3 py-2 rounded-lg hover:bg-slate-100"
+            >
+              प्रपत्र-३ अहवाल (Reports)
+            </Link>
+          </nav>
 
-          <div className="pt-2 border-t border-slate-100 grid grid-cols-2 gap-2">
+          <div className="pt-3 border-t border-slate-200 flex flex-col gap-2">
             <button
               onClick={() => {
                 setMobileMenuOpen(false);
                 onOpenAuth('register');
               }}
-              className="w-full py-2.5 rounded-xl border border-slate-300 text-xs font-bold text-slate-800 text-center"
+              className="w-full py-2.5 rounded-xl text-center font-semibold text-slate-700 bg-slate-100 border border-slate-300 text-xs"
             >
               नागरिक नोंदणी
             </button>
@@ -174,20 +233,18 @@ export default function LandingNavbar({ onOpenAuth }) {
                 setMobileMenuOpen(false);
                 onOpenAuth('login');
               }}
-              className="w-full py-2.5 rounded-xl bg-amber-400 text-blue-950 text-xs font-black text-center"
+              className="w-full py-2.5 rounded-xl text-center font-bold text-blue-950 bg-amber-400 text-xs"
             >
               अधिकारी लॉगिन
             </button>
+            <Link
+              href="/dashboard"
+              onClick={() => setMobileMenuOpen(false)}
+              className="w-full py-2.5 rounded-xl text-center font-bold text-white bg-blue-900 text-xs"
+            >
+              महसूल डॅशबोर्ड
+            </Link>
           </div>
-
-          <Link
-            href="/dashboard"
-            onClick={() => setMobileMenuOpen(false)}
-            className="w-full py-3 rounded-xl bg-blue-950 text-white text-xs font-bold flex items-center justify-center gap-2 text-center"
-          >
-            <LayoutDashboard className="w-4 h-4 text-amber-400" />
-            <span>महसूल डॅशबोर्ड उघडा</span>
-          </Link>
         </div>
       )}
     </header>

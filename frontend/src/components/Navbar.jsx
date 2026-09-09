@@ -25,7 +25,7 @@ export default function Navbar() {
                 </span>
               </div>
               <p className="text-xs text-slate-500 font-medium">
-                Land Intelligence & Governance Portal (जमीन महसूल अभिलेख व शर्तभंग प्रणाली)
+                जमीन महसूल व भूमी अभिलेख संनियंत्रण प्रणाली (District Collectorate, Chandrapur)
               </p>
             </div>
           </Link>

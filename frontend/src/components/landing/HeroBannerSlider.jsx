@@ -76,10 +76,10 @@ const SLIDES = [
   },
   {
     id: 'dms',
-    badge: 'डिजिटल दस्तऐवज तिजोरी',
+    badge: 'जिल्हा महसूल अभिलेखागार',
     badgeColor: 'bg-indigo-100 text-indigo-900 border-indigo-300',
-    titleMr: 'कलेक्टर कार्यालय डिजिटल अभिलेखागार (Record Room DMS)',
-    titleEn: 'Physical Rack & Bundle Mapping to Cloud DMS Vault',
+    titleMr: 'जिल्हाधिकारी कार्यालय अभिलेखागार (District Record Room)',
+    titleEn: 'Physical Rack & Bundle Mapping to Official Land Records Vault',
     desc: 'जिल्हाधिकारी व तहसील कार्यालयातील प्रत्यक्ष रेकॉर्ड रूममधील रॅक क्रमांक, बंडल क्रमांक व फाईल क्रमांकाशी मूळ स्कॅन प्रतींची १००% अचूक जोडणी.',
     points: [
       'अति-सुरक्षित शासकीय डिजिटल दस्तऐवज संग्रहण',
@@ -91,7 +91,7 @@ const SLIDES = [
     accentColor: 'from-indigo-50/80 via-white to-slate-50 border-indigo-200',
     icon: FolderArchive,
     iconColor: 'text-indigo-700',
-    stat: '२४x७ डिजिटल अभिलेख शोध',
+    stat: 'अभिलेख कक्ष रॅक व्यवस्थापन',
   },
 ];
 

@@ -14,9 +14,9 @@ import {
 const STEPS = [
   {
     step: '०१',
-    titleMr: 'गाव एक्सेल अंतर्ग्रहण व UPI निर्मिती',
-    titleEn: 'Village Excel Ingestion & Auto UPI',
-    desc: 'तलाठी व मंडळ अधिकाऱ्यांनी जमा केलेल्या गाव एक्सेल शीटचे स्वयंचलित वाचन. प्रत्येक गट व सर्व्हेसाठी मानकीकृत Unique Parcel ID (UPI) तयार केला जातो.',
+    titleMr: 'गाववार महसूल अभिलेख संकलन व गट नोंदणी',
+    titleEn: 'Village Revenue Records Ingestion & Parcel Registry',
+    desc: 'तलाठी व मंडळ अधिकाऱ्यांनी संकलित केलेल्या गाव अभिलेख नोंदवह्यांचे डिजिटायझेशन. प्रत्येक गट व सर्व्हे क्रमांकासाठी अधिकृत नोंदणी केली जाते.',
     icon: UploadCloud,
     color: 'from-blue-600 to-indigo-600',
     link: '/bulk-upload',
