@@ -206,17 +206,17 @@ export default function HeroBannerSlider() {
           </div>
 
           {/* Slide Action Bar */}
-          <div className="relative z-10 pt-4 mt-4 border-t border-slate-200/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <div className="relative z-10 pt-4 mt-4 border-t border-slate-200/80 flex flex-col sm:flex-row items-center justify-between gap-3">
             <Link
               href={slide.ctaHref}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-900 text-white hover:bg-blue-800 font-bold text-xs shadow-xs transition group"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 sm:py-2 rounded-xl bg-blue-900 text-white hover:bg-blue-800 font-bold text-xs shadow-xs transition active:scale-95 group"
             >
               <span>{slide.ctaText}</span>
               <ArrowUpRight className="w-3.5 h-3.5 text-amber-400 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
             </Link>
 
             {/* Indicator Dots */}
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center justify-center gap-1.5 py-0.5">
               {SLIDES.map((s, idx) => (
                 <button
                   key={s.id}
