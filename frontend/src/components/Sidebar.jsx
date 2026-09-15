@@ -72,37 +72,41 @@ export default function Sidebar({
 
   return (
     <>
-      {/* Desktop Sidebar (Silky Smooth Collapse & Expand Animation) */}
+      {/* Desktop Sidebar (Smooth Collapse to 72px Icon Rail) */}
       <aside
         className={clsx(
           'flex-shrink-0 hidden lg:block transition-[width] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] will-change-[width]',
-          collapsed ? 'w-18' : 'w-64'
+          collapsed ? 'w-[72px]' : 'w-64'
         )}
       >
-        <div className="sticky top-20 bg-white border border-slate-200 rounded-2xl p-2.5 shadow-2xs space-y-3 transition-shadow hover:shadow-xs">
-          {/* Header Row: Title & Smooth Rotate Collapse Toggle */}
-          <div className="flex items-center justify-between px-2 py-1 min-h-[32px]">
-            <span
-              className={clsx(
-                'text-[11px] font-bold text-slate-400 uppercase tracking-wider overflow-hidden transition-all duration-300 ease-in-out whitespace-nowrap',
-                collapsed ? 'max-w-0 opacity-0' : 'max-w-[140px] opacity-100'
-              )}
-            >
-              मुख्य विभाग
-            </span>
+        <div
+          className={clsx(
+            'sticky top-20 bg-white border border-slate-200 rounded-2xl shadow-2xs space-y-2 transition-all duration-300',
+            collapsed ? 'p-2' : 'p-2.5'
+          )}
+        >
+          {/* Header Row: Title & Collapse Toggle */}
+          <div
+            className={clsx(
+              'flex items-center min-h-[32px] mb-1',
+              collapsed ? 'justify-center px-0' : 'justify-between px-2 py-0.5'
+            )}
+          >
+            {!collapsed && (
+              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider whitespace-nowrap">
+                मुख्य विभाग
+              </span>
+            )}
             <button
               onClick={onToggleCollapse}
               title={collapsed ? 'साइडबार विस्तृत करा (Expand Sidebar)' : 'साइडबार संक्षिप्त करा (Collapse Sidebar)'}
-              className={clsx(
-                'p-1.5 rounded-lg text-slate-400 hover:text-blue-950 hover:bg-slate-100 transition-all flex items-center justify-center group',
-                collapsed && 'mx-auto'
-              )}
+              className="p-1.5 rounded-lg text-slate-400 hover:text-blue-950 hover:bg-slate-100 transition-all flex items-center justify-center cursor-pointer group"
               aria-label="Toggle Sidebar Width"
             >
               <PanelLeftClose
                 className={clsx(
                   'w-4 h-4 transition-transform duration-300 ease-in-out',
-                  collapsed ? 'rotate-180 text-blue-900 scale-110' : 'group-hover:-translate-x-0.5'
+                  collapsed ? 'rotate-180 text-blue-900 scale-110' : 'text-slate-500 group-hover:-translate-x-0.5'
                 )}
               />
             </button>
@@ -117,17 +121,18 @@ export default function Sidebar({
                 <Link
                   key={item.href}
                   href={item.href}
-                  title={collapsed ? `${item.labelMr} - ${item.labelEn}` : undefined}
                   className={clsx(
                     'group relative flex items-center rounded-xl transition-all duration-200 ease-in-out',
-                    collapsed ? 'justify-center p-2.5 my-1' : 'px-3 py-2.5 justify-between',
+                    collapsed
+                      ? 'w-11 h-11 mx-auto justify-center p-0 my-1'
+                      : 'px-3 py-2.5 justify-between w-full',
                     isActive
                       ? 'bg-blue-900 text-white shadow-xs font-bold'
                       : 'text-slate-700 hover:bg-slate-100/90 hover:text-blue-950'
                   )}
                 >
-                  <div className="flex items-center">
-                    {/* Icon with Hover Scale */}
+                  <div className={clsx('flex items-center min-w-0', collapsed && 'justify-center')}>
+                    {/* Icon */}
                     <Icon
                       className={clsx(
                         'w-4 h-4 transition-all duration-200 flex-shrink-0',
@@ -137,71 +142,79 @@ export default function Sidebar({
                       )}
                     />
 
-                    {/* Smooth Fade & Slide-Fold Text Container */}
-                    <div
-                      className={clsx(
-                        'overflow-hidden transition-all duration-300 ease-in-out whitespace-nowrap',
-                        collapsed
-                          ? 'max-w-0 opacity-0 -translate-x-2'
-                          : 'max-w-[170px] opacity-100 translate-x-0 ml-3'
-                      )}
-                    >
-                      <p className="leading-tight text-xs font-bold truncate">{item.labelMr}</p>
-                      <p
-                        className={clsx(
-                          'text-[10px] truncate transition-colors',
-                          isActive ? 'text-blue-200' : 'text-slate-500'
-                        )}
-                      >
-                        {item.labelEn}
-                      </p>
-                    </div>
+                    {/* Text Container (Expanded State) */}
+                    {!collapsed && (
+                      <div className="overflow-hidden whitespace-nowrap ml-3 text-left min-w-0">
+                        <p className="leading-tight text-xs font-bold truncate">{item.labelMr}</p>
+                        <p
+                          className={clsx(
+                            'text-[10px] truncate transition-colors mt-0.5',
+                            isActive ? 'text-blue-200' : 'text-slate-500'
+                          )}
+                        >
+                          {item.labelEn}
+                        </p>
+                      </div>
+                    )}
                   </div>
 
-                  {/* Subtle Active Arrow Indicator */}
-                  <div
-                    className={clsx(
-                      'overflow-hidden transition-all duration-300 ease-in-out flex-shrink-0',
-                      collapsed ? 'max-w-0 opacity-0' : 'max-w-[16px] opacity-100'
-                    )}
-                  >
+                  {/* Active Indicator Arrow (Expanded State) */}
+                  {!collapsed && (
                     <ChevronRight
                       className={clsx(
-                        'w-3.5 h-3.5 transition-all duration-200',
+                        'w-3.5 h-3.5 transition-all duration-200 flex-shrink-0',
                         isActive
                           ? 'opacity-100 text-amber-400 translate-x-0'
                           : 'opacity-0 -translate-x-1 group-hover:opacity-70 group-hover:translate-x-0'
                       )}
                     />
-                  </div>
+                  )}
+
+                  {/* Floating Tooltip for Collapsed State */}
+                  {collapsed && (
+                    <div className="absolute left-full ml-3 px-3 py-1.5 bg-slate-900/95 text-white rounded-xl shadow-xl opacity-0 pointer-events-none group-hover:opacity-100 transition-all duration-200 z-50 whitespace-nowrap -translate-x-1 group-hover:translate-x-0 border border-slate-700/60">
+                      <p className="text-xs font-bold text-white">{item.labelMr}</p>
+                      <p className="text-[10px] text-slate-300 font-medium">{item.labelEn}</p>
+                    </div>
+                  )}
                 </Link>
               );
             })}
           </nav>
 
-          {/* Collapsed Guide Tooltip Icon / Expanded Statutory Box */}
-          <div
-            className={clsx(
-              'overflow-hidden transition-all duration-300 ease-in-out',
-              collapsed
-                ? 'max-h-0 opacity-0 -translate-y-2 pointer-events-none mt-0'
-                : 'max-h-48 opacity-100 translate-y-0 pt-2 border-t border-slate-100'
-            )}
-          >
-            <div className="p-3 bg-gradient-to-br from-amber-50 to-orange-50/70 border border-amber-200 rounded-xl space-y-1">
-              <div className="flex items-center gap-1.5 text-amber-950 font-bold text-xs">
-                <Layers className="w-3.5 h-3.5 text-amber-700 flex-shrink-0" />
-                <span>वैधानिक मार्गदर्शक</span>
+          {/* Statutory Guide (Collapses to Compact Icon with Tooltip) */}
+          {collapsed ? (
+            <div className="pt-2 border-t border-slate-100 flex justify-center">
+              <div className="group relative w-11 h-11 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center cursor-pointer hover:bg-amber-100 transition shadow-2xs">
+                <Layers className="w-4 h-4 text-amber-700" />
+                <div className="absolute left-full ml-3 px-3.5 py-2.5 bg-slate-900/95 text-white rounded-xl shadow-xl opacity-0 pointer-events-none group-hover:opacity-100 transition-all duration-200 z-50 w-60 text-left border border-slate-700/60 -translate-x-1 group-hover:translate-x-0">
+                  <div className="flex items-center gap-1.5 text-amber-400 font-bold text-xs mb-1">
+                    <Layers className="w-3.5 h-3.5 text-amber-400 flex-shrink-0" />
+                    <span>वैधानिक मार्गदर्शक</span>
+                  </div>
+                  <p className="text-[11px] text-slate-200 leading-relaxed font-normal">
+                    महाराष्ट्र जमीन महसूल संहिता (MLRC) १९६६ च्या कलम ३६, ३६अ व ५०-५४ अंतर्गत आदिवासी व शासकीय जमिनीचे संरक्षण.
+                  </p>
+                </div>
               </div>
-              <p className="text-[11px] text-amber-900 leading-relaxed font-medium">
-                महाराष्ट्र जमीन महसूल संहिता (MLRC) १९६६ च्या कलम ३६, ३६अ व ५०-५४ अंतर्गत आदिवासी व शासकीय जमिनीचे संरक्षण.
-              </p>
             </div>
-          </div>
+          ) : (
+            <div className="pt-2 border-t border-slate-100">
+              <div className="p-3 bg-gradient-to-br from-amber-50 to-orange-50/70 border border-amber-200 rounded-xl space-y-1">
+                <div className="flex items-center gap-1.5 text-amber-950 font-bold text-xs">
+                  <Layers className="w-3.5 h-3.5 text-amber-700 flex-shrink-0" />
+                  <span>वैधानिक मार्गदर्शक</span>
+                </div>
+                <p className="text-[11px] text-amber-900 leading-relaxed font-medium">
+                  महाराष्ट्र जमीन महसूल संहिता (MLRC) १९६६ च्या कलम ३६, ३६अ व ५०-५४ अंतर्गत आदिवासी व शासकीय जमिनीचे संरक्षण.
+                </p>
+              </div>
+            </div>
+          )}
         </div>
       </aside>
 
-      {/* Mobile Drawer (Silky Smooth 60fps Hardware-Accelerated Sliding Animation) */}
+      {/* Mobile Drawer */}
       <div
         className={clsx(
           'fixed inset-0 z-50 lg:hidden transition-opacity duration-300 ease-in-out',
@@ -227,7 +240,7 @@ export default function Sidebar({
             </div>
             <button
               onClick={onCloseMobile}
-              className="p-1.5 rounded-lg text-slate-500 hover:bg-slate-100 transition"
+              className="p-1.5 rounded-lg text-slate-500 hover:bg-slate-100 transition cursor-pointer"
               aria-label="Close menu"
             >
               <X className="w-5 h-5" />

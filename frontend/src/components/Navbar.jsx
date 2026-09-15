@@ -35,15 +35,7 @@ export default function Navbar({
               )}
             </button>
 
-            {/* Mobile Drawer Menu Toggle Button (Comfortable 40px Touch Target) */}
-            <button
-              onClick={onToggleMobileSidebar}
-              className="lg:hidden flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-100 active:bg-slate-200 transition shadow-2xs flex-shrink-0"
-              aria-label="Open Navigation Drawer"
-            >
-              <Menu className="w-5 h-5" />
-            </button>
-
+          
             {/* Brand Logo & Collectorate Office Title */}
             <Link href="/dashboard" className="flex items-center gap-2 sm:gap-3 group min-w-0">
               <div className="transition-transform group-hover:scale-105 flex-shrink-0">
