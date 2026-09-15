@@ -74,7 +74,6 @@ export default function DashboardPage() {
 
           {/* Action CTAs */}
           <div className="flex items-center gap-2 shrink-0">
-         
             <Link
               href="/bulk-upload"
               className="inline-flex items-center justify-center gap-1.5 bg-blue-900 hover:bg-blue-800 text-white font-bold px-2.5 py-1.5 rounded-lg text-xs shadow-2xs transition active:scale-95"
@@ -105,11 +104,11 @@ export default function DashboardPage() {
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
-            {taluka && (
-              <span className="text-[10px] font-bold text-amber-800 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+            {taluka ? (
+              <span key="taluka-filter-badge" className="text-[10px] font-bold text-amber-800 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
                 फिल्टर सक्रीय
               </span>
-            )}
+            ) : null}
             <button
               onClick={() => loadData(taluka, true)}
               disabled={loading}

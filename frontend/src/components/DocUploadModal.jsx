@@ -61,10 +61,10 @@ export default function DocUploadModal({ isOpen, onClose, parcelId, caseId, onUp
           <div>
             <h2 className="text-sm sm:text-base font-bold flex items-center gap-2">
               <Upload className="w-4 h-4 text-amber-400" />
-              <span>दस्तावेज अपलोड व अभिलेख नोंद (Upload to DMS)</span>
+              <span>दस्तावेज अपलोड व अभिलेख नोंद</span>
             </h2>
             <p className="text-[11px] sm:text-xs text-slate-400">
-              Cloudinary Storage & Physical Record Room Mapping
+              डिजिटल व भौतिक अभिलेखागार संकलन
             </p>
           </div>
           <button
@@ -97,7 +97,7 @@ export default function DocUploadModal({ isOpen, onClose, parcelId, caseId, onUp
 
           <div>
             <label className="text-xs font-semibold text-slate-700 block">
-              दस्तावेज शीर्षक (Title / Subject) <span className="text-rose-500">*</span>
+              दस्तावेज शीर्षक <span className="text-rose-500">*</span>
             </label>
             <input
               type="text"
@@ -111,26 +111,26 @@ export default function DocUploadModal({ isOpen, onClose, parcelId, caseId, onUp
 
           <div>
             <label className="text-xs font-semibold text-slate-700 block">
-              दस्तावेज प्रकार (Document Classification) <span className="text-rose-500">*</span>
+              दस्तावेज प्रकार <span className="text-rose-500">*</span>
             </label>
             <select
               value={docType}
               onChange={(e) => setDocType(e.target.value)}
               className="w-full border border-slate-300 rounded-lg p-2.5 text-xs mt-1 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
             >
-              <option value="SDO_ORDER">SDO Order (उपविभागीय अधिकारी आदेश)</option>
-              <option value="COLLECTOR_ORDER">Collector Order (जिल्हाधिकारी आदेश - शासन जमा)</option>
-              <option value="FIELD_PANCHNAMA">Field Panchnama (स्थळ पंचनामा व छायाचित्रे)</option>
-              <option value="OLD_7_12_ARCHIVE">1950 Archive 7/12 (सन १९५० जुना सातबारा)</option>
-              <option value="FERFAR_REGISTER_COPY">Village Form VI Extract (गाव नमुना ६ फेरफार)</option>
-              <option value="SHOW_CAUSE_NOTICE">Show-Cause Notice (कारणे दाखवा नोटीस)</option>
+              <option value="SDO_ORDER">उपविभागीय अधिकारी (SDO) आदेश</option>
+              <option value="COLLECTOR_ORDER">जिल्हाधिकारी आदेश (शासन जमा)</option>
+              <option value="FIELD_PANCHNAMA">स्थळ पंचनामा व छायाचित्रे</option>
+              <option value="OLD_7_12_ARCHIVE">सन १९५० जुना सातबारा</option>
+              <option value="FERFAR_REGISTER_COPY">गाव नमुना ६ फेरफार</option>
+              <option value="SHOW_CAUSE_NOTICE">कारणे दाखवा नोटीस</option>
             </select>
           </div>
 
           {/* Physical Coordinate Fields */}
           <div className="bg-slate-50 p-3 rounded-lg border border-slate-200">
             <p className="text-[11px] font-bold text-slate-600 uppercase tracking-wide mb-2">
-              भौतिक अभिलेखागार स्थान (Physical Record Room Coordinates)
+              भौतिक अभिलेखागार स्थान
             </p>
             <div className="grid grid-cols-3 gap-2">
               <div>

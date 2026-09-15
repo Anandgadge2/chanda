@@ -48,9 +48,16 @@ export default class ErrorBoundary extends React.Component {
               An unexpected system error occurred while processing your request
             </p>
 
-            <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-left text-xs font-mono text-slate-700 max-h-28 overflow-y-auto mb-5 break-words">
+            <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-left text-xs font-mono text-slate-700 max-h-28 overflow-y-auto mb-3 break-words">
               {this.state.error?.message || 'अज्ञात त्रुटी (Unknown runtime exception)'}
             </div>
+
+            {this.state.error?.message?.includes('insertBefore') ||
+            this.state.error?.message?.includes('not a child of this node') ? (
+              <p className="text-[11px] text-amber-800 bg-amber-50 border border-amber-200 rounded-lg p-2.5 mb-4 text-left leading-relaxed">
+                💡 <strong>टीप:</strong> ब्राउझर ऑटो-ट्रान्सलेटर (Google Translate) किंवा भाषा विस्तारकांमुळे ही त्रुटी उद्भवते. आम्ही प्रणाली सुरक्षित केली आहे; कृपया खालील बटणावर क्लिक करून पृष्ठ रिफ्रेश करा.
+              </p>
+            ) : null}
 
             <div className="flex flex-col sm:flex-row items-center gap-2.5">
               <button

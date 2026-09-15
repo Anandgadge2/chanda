@@ -47,7 +47,7 @@ export default function AddHearingModal({ isOpen, onClose, caseItem, onHearingAd
           <div>
             <h2 className="text-sm sm:text-base font-bold flex items-center gap-2">
               <Scale className="w-4 h-4 text-amber-400" />
-              <span>सुनावणी इतिवृत्त नोंद (Log Hearing)</span>
+              <span>सुनावणी इतिवृत्त नोंद</span>
             </h2>
             <p className="text-[11px] sm:text-xs text-slate-400">
               केस क्र.: {caseItem.caseNumber} ({caseItem.parcel?.villageName || ''})
@@ -104,7 +104,7 @@ export default function AddHearingModal({ isOpen, onClose, caseItem, onHearingAd
           </div>
 
           <div>
-            <label className="text-xs font-semibold text-slate-700 block">सुनावणी प्राधिकारी (Authority)</label>
+            <label className="text-xs font-semibold text-slate-700 block">सुनावणी प्राधिकारी</label>
             <select
               value={authority}
               onChange={(e) => setAuthority(e.target.value)}
@@ -114,14 +114,14 @@ export default function AddHearingModal({ isOpen, onClose, caseItem, onHearingAd
               <option value="Sub-Divisional Officer (SDO) Rajura">उपविभागीय अधिकारी (SDO) राजुरा</option>
               <option value="Sub-Divisional Officer (SDO) Chandrapur">उपविभागीय अधिकारी (SDO) चंद्रपूर</option>
               <option value="Tehsildar Mul">तहसीलदार मूल</option>
-              <option value="District Collector Chandrapur">जिल्हाधिकारी चंद्रपूर (District Collector)</option>
+              <option value="District Collector Chandrapur">जिल्हाधिकारी चंद्रपूर</option>
               <option value="Resident Deputy Collector (RDC)">निवासी उपजिल्हाधिकारी (RDC)</option>
             </select>
           </div>
 
           <div>
             <label className="text-xs font-semibold text-slate-700 block">
-              सुनावणी इतिवृत्त व आदेश शेरा (Proceedings Summary) <span className="text-rose-500">*</span>
+              सुनावणी इतिवृत्त व आदेश शेरा <span className="text-rose-500">*</span>
             </label>
             <textarea
               rows={4}

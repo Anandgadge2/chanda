@@ -60,12 +60,12 @@ export default function BulkUploadPage() {
         <div>
           <div className="flex items-center gap-2">
             <span className="text-xs bg-emerald-100 text-emerald-900 font-bold px-2 py-0.5 rounded">
-              स्वयंचलित अभिलेख अंतर्ग्रहण (Batch Ingestion)
+              स्वयंचलित अभिलेख अंतर्ग्रहण
             </span>
-            <span className="text-xs text-slate-500 font-medium">ExcelJS Streaming Parser</span>
+            <span className="text-xs text-slate-500 font-medium">अभिलेख अंतर्ग्रहण प्रणाली</span>
           </div>
           <h1 className="text-lg sm:text-2xl font-black text-slate-900 mt-1 leading-tight">
-            गाव नमुना एक्सेल डेटा आयात (Raw Village Ingestion)
+            गाव नमुना एक्सेल डेटा आयात
           </h1>
           <p className="text-xs text-slate-500 mt-0.5">
             तलाठी कार्यालयाकडील कच्च्या एक्सेल पत्रकाचे थेट भूखंड नोंदवहीत रूपांतर व स्वयंचलित UPI निर्मिती
@@ -78,7 +78,7 @@ export default function BulkUploadPage() {
           className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-4 py-2.5 rounded-xl text-xs shadow-sm transition active:scale-95 flex-shrink-0"
         >
           <Download className="w-4 h-4" />
-          <span>नमुना एक्सेल डाऊनलोड (Template)</span>
+          <span>नमुना एक्सेल डाऊनलोड</span>
         </a>
       </div>
 

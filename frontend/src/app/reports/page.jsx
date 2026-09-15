@@ -59,14 +59,14 @@ export default function ReportsPage() {
         <div>
           <div className="flex items-center gap-2">
             <span className="text-xs bg-emerald-100 text-emerald-900 font-bold px-2 py-0.5 rounded">
-              वैधानिक अहवाल (Statutory Compliance)
+              वैधानिक अहवाल
             </span>
             <span className="text-xs text-slate-500 font-medium">
               महसूल व वन विभाग, महाराष्ट्र शासन
             </span>
           </div>
           <h1 className="text-lg sm:text-2xl font-black text-slate-900 mt-1 leading-tight">
-            प्रपत्र-३ अहवाल निर्यात केंद्र (Prapatra-3 Government Booklet)
+            प्रपत्र-३ अहवाल निर्यात केंद्र
           </h1>
           <p className="text-xs text-slate-500 mt-0.5">
             भोगवटादार वर्ग-२ व शासकीय जमीन शर्तभंग, आदिवासी जमीन हस्तांतरण (कलम ३६/३६अ) व अतिक्रमण अहवाल
@@ -92,10 +92,10 @@ export default function ReportsPage() {
             onChange={(e) => setTaluka(e.target.value)}
             className="w-full border border-slate-300 rounded-lg px-2.5 py-2 text-xs bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            <option value="">सर्व तालुके (District Wide)</option>
+            <option value="">सर्व तालुके</option>
             {CHANDRAPUR_TALUKAS.map((t) => (
               <option key={t.id} value={t.id}>
-                {t.nameEn} ({t.nameMr})
+                {t.nameMr}
               </option>
             ))}
           </select>

@@ -108,7 +108,7 @@ export default function ParcelTraceDrawer({ upi, onClose, onRefresh }) {
                 <div className="p-3 sm:p-4 bg-amber-50 border border-amber-300 rounded-xl text-xs text-amber-900 flex items-start gap-2.5 sm:gap-3 shadow-sm">
                   <ShieldAlert className="w-5 h-5 text-amber-700 flex-shrink-0 mt-0.5" />
                   <div>
-                    <p className="font-bold">संभाव्य बेकायदेशीर हस्तांतरण (Anomaly Detected)</p>
+                    <p className="font-bold">संभाव्य बेकायदेशीर हस्तांतरण</p>
                     <p className="mt-0.5 text-amber-800">
                       हा भूखंड सन १९५० च्या अभिलेखात शासकीय/इनाम सदरी होता, परंतु सध्या खाजगी धारणेवर नोंदवला गेला आहे.
                     </p>
@@ -120,7 +120,7 @@ export default function ParcelTraceDrawer({ upi, onClose, onRefresh }) {
                 <div className="p-3 sm:p-4 bg-emerald-50 border border-emerald-300 rounded-xl text-xs text-emerald-900 flex items-start gap-2.5 sm:gap-3 shadow-sm">
                   <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5" />
                   <div>
-                    <p className="font-bold">शासन जमा आदेश पारित (Land Resumed to State)</p>
+                    <p className="font-bold">शासन जमा आदेश पारित</p>
                     <p className="mt-0.5 text-emerald-800">
                       जिल्हाधिकारी कार्यालयाच्या अंतिम आदेशानुसार हा भूखंड अनधिकृत कब्जेदारामधून काढून पुन्हा शासकीय सदरी नोंदवला आहे.
                     </p>
@@ -131,7 +131,7 @@ export default function ParcelTraceDrawer({ upi, onClose, onRefresh }) {
               {/* Quick Stat Pill Row */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">
                 <div className="p-2.5 sm:p-3 rounded-lg bg-slate-50 border border-slate-200">
-                  <p className="text-[10px] sm:text-[11px] text-slate-500 font-medium">धारणा प्रकार (Tenure)</p>
+                  <p className="text-[10px] sm:text-[11px] text-slate-500 font-medium">धारणा प्रकार</p>
                   <p className="text-xs font-bold text-slate-800 mt-0.5 truncate">
                     {tenureConfig?.labelMr || parcel.tenureClass}
                   </p>
@@ -253,7 +253,7 @@ export default function ParcelTraceDrawer({ upi, onClose, onRefresh }) {
                               हस्तांतरण प्रकार: <span className="font-semibold">{epoch.mutationType || '-'}</span>
                             </div>
                             <div>
-                              शासकीय जमीन: <span className="font-semibold">{epoch.wasGovtLand ? 'होय (Govt)' : 'नाही'}</span>
+                              शासकीय जमीन: <span className="font-semibold">{epoch.wasGovtLand ? 'होय' : 'नाही'}</span>
                             </div>
                           </div>
 
@@ -313,7 +313,7 @@ export default function ParcelTraceDrawer({ upi, onClose, onRefresh }) {
                               नोटीस दिनांक: <span className="font-semibold">{item.showCauseNoticeDate ? new Date(item.showCauseNoticeDate).toLocaleDateString('mr-IN') : '-'}</span>
                             </div>
                             <div>
-                              शासन जमा: <span className="font-bold text-emerald-700">{item.isRepossessedToGovt ? 'होय (शासन जमा)' : 'नाही'}</span>
+                              शासन जमा: <span className="font-bold text-emerald-700">{item.isRepossessedToGovt ? 'होय' : 'नाही'}</span>
                             </div>
                           </div>
 
@@ -327,7 +327,7 @@ export default function ParcelTraceDrawer({ upi, onClose, onRefresh }) {
                           {/* Hearings Log */}
                           {item.hearings?.length > 0 && (
                             <div className="pt-2 border-t border-slate-200 space-y-2">
-                              <p className="text-[11px] font-bold text-slate-700">सुनावणी इतिवृत्त (Proceedings Log):</p>
+                              <p className="text-[11px] font-bold text-slate-700">सुनावणी इतिवृत्त:</p>
                               <div className="space-y-2">
                                 {item.hearings.map((h) => (
                                   <div key={h.id} className="p-2.5 bg-slate-50 rounded border border-slate-200 text-xs space-y-1">
