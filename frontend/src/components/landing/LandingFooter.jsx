@@ -47,7 +47,7 @@ export default function LandingFooter() {
   return (
     <footer
       className="relative bg-gradient-to-b from-slate-950 via-[#0a1527] to-[#040814] text-slate-300 text-xs border-t border-slate-800 selection:bg-amber-500 selection:text-slate-950"
-      aria-label="शासकीय पादटीप (Portal Footer)"
+      aria-label="शासकीय पादटीप"
     >
       {/* Top National Tricolor Glow Ribbon */}
       <div className="gov-tricolor-bar shadow-sm shadow-amber-500/20" />
@@ -75,9 +75,6 @@ export default function LandingFooter() {
                   <div className="flex items-center gap-2">
                     <span className="px-2 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-300 text-[10px] font-bold tracking-wide uppercase">
                       महाराष्ट्र शासन
-                    </span>
-                    <span className="text-slate-400 text-[11px] font-medium hidden sm:inline">
-                      Government of Maharashtra
                     </span>
                   </div>
                   <h2 className="text-lg sm:text-2xl font-black text-white tracking-tight mt-1">
@@ -179,7 +176,7 @@ export default function LandingFooter() {
                   className="group text-slate-300 hover:text-amber-300 font-medium transition flex items-center gap-2"
                 >
                   <ChevronRight className="w-3 h-3 text-amber-500/70 group-hover:translate-x-1 group-hover:text-amber-400 transition-transform" />
-                  <span>महसूल अधिकारी डॅशबोर्ड (Dashboard)</span>
+                  <span>महसूल अधिकारी डॅशबोर्ड</span>
                 </Link>
               </li>
               <li>
@@ -188,7 +185,7 @@ export default function LandingFooter() {
                   className="group text-slate-300 hover:text-amber-300 font-medium transition flex items-center gap-2"
                 >
                   <ChevronRight className="w-3 h-3 text-amber-500/70 group-hover:translate-x-1 group-hover:text-amber-400 transition-transform" />
-                  <span>भूखंड नोंदवही व १९५० साखळी (7/12 Trace)</span>
+                  <span>भूखंड नोंदवही व १९५० साखळी</span>
                 </Link>
               </li>
               <li>
@@ -197,7 +194,7 @@ export default function LandingFooter() {
                   className="group text-slate-300 hover:text-amber-300 font-medium transition flex items-center gap-2"
                 >
                   <ChevronRight className="w-3 h-3 text-amber-500/70 group-hover:translate-x-1 group-hover:text-amber-400 transition-transform" />
-                  <span>शर्तभंग व SDO सुनावणी खटले (Hearings)</span>
+                  <span>शर्तभंग व SDO सुनावणी खटले</span>
                 </Link>
               </li>
               <li>
@@ -206,7 +203,7 @@ export default function LandingFooter() {
                   className="group text-slate-300 hover:text-amber-300 font-medium transition flex items-center gap-2"
                 >
                   <ChevronRight className="w-3 h-3 text-amber-500/70 group-hover:translate-x-1 group-hover:text-amber-400 transition-transform" />
-                  <span>अभिलेखागार रॅक व फाईल शोध (DMS Vault)</span>
+                  <span>अभिलेखागार रॅक व फाईल शोध</span>
                 </Link>
               </li>
               <li>
@@ -215,7 +212,7 @@ export default function LandingFooter() {
                   className="group text-slate-300 hover:text-amber-300 font-medium transition flex items-center gap-2"
                 >
                   <ChevronRight className="w-3 h-3 text-amber-500/70 group-hover:translate-x-1 group-hover:text-amber-400 transition-transform" />
-                  <span>गाव एक्सेल डेटा अपलोड (Bulk Upload)</span>
+                  <span>गाव एक्सेल डेटा अपलोड</span>
                 </Link>
               </li>
               <li>
@@ -224,7 +221,16 @@ export default function LandingFooter() {
                   className="group text-slate-300 hover:text-amber-300 font-medium transition flex items-center gap-2"
                 >
                   <ChevronRight className="w-3 h-3 text-amber-500/70 group-hover:translate-x-1 group-hover:text-amber-400 transition-transform" />
-                  <span>प्रपत्र-३ वैधानिक अहवाल केंद्र (Export)</span>
+                  <span>प्रपत्र-३ वैधानिक अहवाल केंद्र</span>
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/glossary"
+                  className="group text-amber-300 hover:text-amber-200 font-bold transition flex items-center gap-2"
+                >
+                  <ChevronRight className="w-3 h-3 text-amber-400 group-hover:translate-x-1 transition-transform" />
+                  <span>महसूल शब्दावली व संक्षिप्त रूपे (Glossary)</span>
                 </Link>
               </li>
             </ul>
@@ -426,21 +432,21 @@ export default function LandingFooter() {
               href="/privacy-policy"
               className="hover:text-amber-300 transition focus:outline-hidden focus:ring-1 focus:ring-amber-400 rounded px-1"
             >
-              गोपनीयता धोरण (Privacy Policy)
+              गोपनीयता धोरण
             </Link>
             <span className="text-slate-700" aria-hidden="true">|</span>
             <Link
               href="/terms"
               className="hover:text-amber-300 transition focus:outline-hidden focus:ring-1 focus:ring-amber-400 rounded px-1"
             >
-              नियम व अटी (Terms)
+              नियम व अटी
             </Link>
             <span className="text-slate-700" aria-hidden="true">|</span>
             <Link
               href="/accessibility-statement"
               className="hover:text-amber-300 transition focus:outline-hidden focus:ring-1 focus:ring-amber-400 rounded px-1"
             >
-              सुलभता विधान (Accessibility)
+              सुलभता विधान
             </Link>
 
             {/* Accessible Smooth Scroll to Top Button */}
@@ -448,7 +454,7 @@ export default function LandingFooter() {
               onClick={scrollToTop}
               type="button"
               className="inline-flex items-center gap-1.5 ml-0 sm:ml-2 px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-700/80 hover:border-amber-500/50 shadow-xs transition-all duration-200 focus:outline-hidden focus:ring-2 focus:ring-amber-400 cursor-pointer"
-              aria-label="पृष्ठाच्या सुरुवातीला जा (Scroll to top)"
+              aria-label="पृष्ठाच्या सुरुवातीला जा"
             >
               <ArrowUp className="w-3.5 h-3.5 text-amber-400" aria-hidden="true" />
               <span className="text-[10px] font-bold">वरती स्क्रोल करा</span>

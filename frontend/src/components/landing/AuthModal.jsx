@@ -207,7 +207,7 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'login' }) {
               }`}
             >
               <UserCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-              <span>नोंदणी (Register)</span>
+              <span>नोंदणी</span>
             </button>
           </div>
         </div>
@@ -220,7 +220,7 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'login' }) {
               <div className="p-3 bg-amber-50/80 border border-amber-200/80 rounded-2xl">
                 <div className="flex items-center gap-1.5 text-xs font-bold text-amber-900 mb-2">
                   <Sparkles className="w-3.5 h-3.5 text-amber-600" />
-                  <span>एक-क्लिक चाचणी लॉगिन (Evaluation Accounts):</span>
+                  <span>एक-क्लिक चाचणी लॉगिन:</span>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                   {DEFAULT_OFFICERS.map((officer) => (
@@ -258,7 +258,7 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'login' }) {
               <form onSubmit={handleLoginSubmit} className="space-y-3.5">
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">
-                    शासकीय ईमेल (Government Email)
+                    शासकीय ईमेल
                   </label>
                   <div className="relative">
                     <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
@@ -275,7 +275,7 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'login' }) {
 
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">
-                    संकेतशब्द (Password)
+                    संकेतशब्द
                   </label>
                   <div className="relative">
                     <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-3 pointer-events-none" />
@@ -349,7 +349,7 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'login' }) {
 
                   <div>
                     <label className="block text-xs font-bold text-slate-700 mb-1">
-                      पूर्ण नाव (Full Name)
+                      पूर्ण नाव
                     </label>
                     <div className="relative">
                       <User className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
@@ -367,7 +367,7 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'login' }) {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                       <label className="block text-xs font-bold text-slate-700 mb-1">
-                        ईमेल (Email)
+                        ईमेल
                       </label>
                       <div className="relative">
                         <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
@@ -384,7 +384,7 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'login' }) {
 
                     <div>
                       <label className="block text-xs font-bold text-slate-700 mb-1">
-                        मोबाईल (Mobile)
+                        मोबाईल
                       </label>
                       <div className="relative">
                         <Phone className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
@@ -402,7 +402,7 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'login' }) {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                       <label className="block text-xs font-bold text-slate-700 mb-1">
-                        तालुका (Taluka)
+                        तालुका
                       </label>
                       <select
                         value={regTaluka}
@@ -411,7 +411,7 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'login' }) {
                       >
                         {CHANDRAPUR_TALUKAS.map((t) => (
                           <option key={t.id} value={t.id}>
-                            {t.nameMr} ({t.nameEn})
+                            {t.nameMr}
                           </option>
                         ))}
                       </select>
@@ -419,7 +419,7 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'login' }) {
 
                     <div>
                       <label className="block text-xs font-bold text-slate-700 mb-1">
-                        संकेतशब्द (Password)
+                        संकेतशब्द
                       </label>
                       <div className="relative">
                         <input

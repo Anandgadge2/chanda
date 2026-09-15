@@ -98,13 +98,12 @@ export default function TalukaSlider() {
             <h3 className="text-base font-bold text-slate-900 group-hover:text-blue-950 transition">
               तालुका {t.nameMr}
             </h3>
-            <p className="text-[11px] text-slate-500 font-medium">{t.nameEn} Taluka</p>
           </div>
 
           {/* Details list */}
           <div className="space-y-1.5 text-xs text-slate-600 pt-2 border-t border-slate-100">
             <div className="flex items-center justify-between">
-              <span className="text-slate-500">उपविभाग (SDO):</span>
+              <span className="text-slate-500">उपविभाग:</span>
               <span className="font-semibold text-slate-800">{t.sdo}</span>
             </div>
             <div className="flex items-center justify-between">

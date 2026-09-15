@@ -149,7 +149,7 @@ export default function ShasanJamaModal({ isOpen, onClose, caseItem, onSuccess =
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-bold text-slate-700 mb-1">
-                अधिकृत आदेश क्रमांक (Order No.) *
+                अधिकृत आदेश क्रमांक *
               </label>
               <input
                 type="text"
@@ -163,7 +163,7 @@ export default function ShasanJamaModal({ isOpen, onClose, caseItem, onSuccess =
 
             <div>
               <label className="block text-xs font-bold text-slate-700 mb-1">
-                आदेश दिनांक (Order Date) *
+                आदेश दिनांक *
               </label>
               <input
                 type="date"
@@ -190,7 +190,7 @@ export default function ShasanJamaModal({ isOpen, onClose, caseItem, onSuccess =
 
           <div>
             <label className="block text-xs font-bold text-slate-700 mb-1">
-              आदेशाचा संक्षिप्त कायदेशीर तपशील (Legal Order Summary in Marathi) *
+              आदेशाचा संक्षिप्त कायदेशीर तपशील *
             </label>
             <textarea
               required
@@ -205,7 +205,7 @@ export default function ShasanJamaModal({ isOpen, onClose, caseItem, onSuccess =
           {/* Signed PDF File Upload */}
           <div>
             <label className="block text-xs font-bold text-slate-700 mb-1">
-              स्वाक्षरी केलेली आदेश प्रत (Signed PDF Document)
+              स्वाक्षरी केलेली आदेश प्रत
             </label>
             <div className="flex items-center gap-3">
               <label className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-dashed border-blue-400 bg-blue-50/60 hover:bg-blue-100/70 text-xs font-bold text-blue-900 transition">

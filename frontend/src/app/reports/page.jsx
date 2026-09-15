@@ -153,7 +153,7 @@ export default function ReportsPage() {
               डाऊनलोड होणाऱ्या एक्सेल पत्रकातील हुबेहूब रचना
             </span>
             <span className="text-[10px] text-amber-800 bg-amber-50 px-2 py-0.5 rounded border border-amber-200 sm:hidden">
-              तक्ता आडवा स्क्रोल करा (Swipe ↔)
+              तक्ता आडवा स्क्रोल करा
             </span>
           </div>
         </div>

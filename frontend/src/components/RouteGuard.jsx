@@ -2,19 +2,24 @@
 
 import React from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { ShieldAlert, LogIn, ArrowLeft, Lock } from 'lucide-react';
 import { useAuth } from './AuthContext';
 import ChandrapurDistrictLogo from './landing/ChandrapurDistrictLogo';
 
 export default function RouteGuard({ children, allowedRoles = [] }) {
   const { user, loading, openLoginModal } = useAuth();
+  const pathname = usePathname();
+
+  if (pathname === '/glossary') {
+    return <>{children}</>;
+  }
 
   if (loading) {
     return (
       <div className="min-h-[50vh] flex flex-col items-center justify-center p-8">
         <div className="w-12 h-12 rounded-full border-3 border-blue-900 border-t-transparent animate-spin mb-4" />
         <p className="text-sm font-bold text-slate-700">सत्र पडताळणी सुरू आहे...</p>
-        <p className="text-xs text-slate-500 mt-1">Verifying Officer Session with District Collectorate...</p>
       </div>
     );
   }
@@ -36,7 +41,7 @@ export default function RouteGuard({ children, allowedRoles = [] }) {
           </div>
 
           <h2 className="text-lg sm:text-xl font-black text-slate-900 mb-2">
-            प्रवेश निर्बंधित (Officer Authentication Required)
+            प्रवेश निर्बंधित
           </h2>
           <p className="text-xs sm:text-sm text-slate-600 mb-6 leading-relaxed">
             हे पृष्ठ केवळ अधिकृत महसूल अधिकाऱ्यांसाठी (Collector / SDO / तहसीलदार / तलाठी) उपलब्ध आहे. कृपया पुढे जाण्यापूर्वी लॉगिन करा.
@@ -49,7 +54,7 @@ export default function RouteGuard({ children, allowedRoles = [] }) {
               className="w-full flex items-center justify-center gap-2 bg-blue-900 hover:bg-blue-800 text-white font-bold text-sm py-2.5 px-4 rounded-xl shadow-md transition active:scale-98"
             >
               <LogIn className="w-4 h-4" />
-              <span>अधिकारी लॉगिन करा (Officer Login)</span>
+              <span>अधिकारी लॉगिन करा</span>
             </button>
 
             <Link
@@ -57,7 +62,7 @@ export default function RouteGuard({ children, allowedRoles = [] }) {
               className="w-full flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs py-2.5 px-4 rounded-xl transition"
             >
               <ArrowLeft className="w-4 h-4" />
-              <span>मुख्य सार्वजनिक पृष्ठावर परत जा (Public Portal)</span>
+              <span>मुख्य सार्वजनिक पृष्ठावर परत जा</span>
             </Link>
           </div>
         </div>

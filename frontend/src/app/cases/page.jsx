@@ -15,6 +15,7 @@ import {
   Upload,
   User,
   Eye,
+  BookOpen,
 } from 'lucide-react';
 import { api } from '../../lib/api';
 import {
@@ -26,6 +27,7 @@ import AddHearingModal from '../../components/AddHearingModal';
 import DocUploadModal from '../../components/DocUploadModal';
 import ParcelTraceDrawer from '../../components/ParcelTraceDrawer';
 import ShasanJamaModal from '../../components/ShasanJamaModal';
+import RevenueShortcutGuideModal from '../../components/RevenueShortcutGuideModal';
 import Pagination from '../../components/Pagination';
 import { useAuth } from '../../components/AuthContext';
 
@@ -50,6 +52,7 @@ export default function CasesPage() {
   const [uploadDocCaseId, setUploadDocCaseId] = useState(null);
   const [traceUpi, setTraceUpi] = useState(null);
   const [shasanJamaCase, setShasanJamaCase] = useState(null);
+  const [glossaryModalOpen, setGlossaryModalOpen] = useState(false);
 
   const fetchCases = async (targetPage = page) => {
     setLoading(true);
@@ -100,14 +103,26 @@ export default function CasesPage() {
           </p>
         </div>
 
-        <button
-          onClick={fetchCases}
-          disabled={loading}
-          className="p-2 border border-slate-300 rounded-xl text-slate-600 hover:bg-slate-50 transition active:scale-95 self-end sm:self-auto"
-          aria-label="Refresh cases"
-        >
-          <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-        </button>
+        <div className="flex items-center gap-2 self-end sm:self-auto flex-wrap">
+          <button
+            type="button"
+            onClick={() => setGlossaryModalOpen(true)}
+            className="inline-flex items-center justify-center gap-1.5 px-3 py-2 border border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-950 rounded-xl text-xs font-bold transition active:scale-95 shadow-2xs"
+            title="शर्तभंग व महसूल शब्दावली मदत"
+          >
+            <BookOpen className="w-4 h-4 text-amber-700" />
+            <span>शर्तभंग व संक्षिप्त रूपे मदत</span>
+          </button>
+
+          <button
+            onClick={fetchCases}
+            disabled={loading}
+            className="p-2 border border-slate-300 rounded-xl text-slate-600 hover:bg-slate-50 transition active:scale-95"
+            aria-label="Refresh cases"
+          >
+            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+          </button>
+        </div>
       </div>
 
       {/* Filter Bar */}
@@ -370,6 +385,13 @@ export default function CasesPage() {
           onRefresh={fetchCases}
         />
       )}
+
+      {/* Revenue Glossary Modal */}
+      <RevenueShortcutGuideModal
+        isOpen={glossaryModalOpen}
+        onClose={() => setGlossaryModalOpen(false)}
+        initialCategory="VIOLATION"
+      />
     </div>
   );
 }

@@ -99,9 +99,6 @@ export default function WorkflowSection() {
                     <h3 className="text-base font-black text-slate-900 leading-snug">
                       {stepItem.titleMr}
                     </h3>
-                    <p className="text-[11px] text-slate-500 font-semibold mt-1">
-                      {stepItem.titleEn}
-                    </p>
                   </div>
 
                   <p className="text-xs text-slate-600 leading-relaxed">{stepItem.desc}</p>

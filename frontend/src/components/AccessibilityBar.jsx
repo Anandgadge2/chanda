@@ -51,13 +51,13 @@ export default function AccessibilityBar() {
             href="#main-content"
             className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:px-3 focus:py-1 focus:bg-amber-400 focus:text-blue-950 focus:font-bold focus:rounded focus:outline-none"
           >
-            मुख्य सामग्रीकडे जा (Skip to Main Content)
+            मुख्य सामग्रीकडे जा
           </a>
 
           <div className="flex items-center gap-1.5 text-[10px] sm:text-[11px] text-amber-300 font-semibold tracking-wide truncate">
-            <span className="hidden sm:inline">भारत सरकार / Government of India</span>
+            <span className="hidden sm:inline">भारत सरकार</span>
             <span className="hidden sm:inline text-slate-500">|</span>
-            <span>महाराष्ट्र शासन / Government of Maharashtra</span>
+            <span>महाराष्ट्र शासन</span>
           </div>
         </div>
 
@@ -72,7 +72,7 @@ export default function AccessibilityBar() {
               className={`px-1 rounded hover:text-white transition ${
                 fontSize === 'sm' ? 'bg-amber-400 text-slate-950 font-bold' : 'text-slate-300'
               }`}
-              title="लहान मजकूर (Decrease font size)"
+              title="लहान मजकूर"
               aria-label="Decrease font size"
             >
               A-
@@ -83,7 +83,7 @@ export default function AccessibilityBar() {
               className={`px-1 rounded hover:text-white transition ${
                 fontSize === 'md' ? 'bg-amber-400 text-slate-950 font-bold' : 'text-slate-300'
               }`}
-              title="सामान्य मजकूर (Reset font size)"
+              title="सामान्य मजकूर"
               aria-label="Reset font size"
             >
               A
@@ -94,7 +94,7 @@ export default function AccessibilityBar() {
               className={`px-1 rounded hover:text-white transition ${
                 fontSize === 'lg' ? 'bg-amber-400 text-slate-950 font-bold' : 'text-slate-300'
               }`}
-              title="मोठा मजकूर (Increase font size)"
+              title="मोठा मजकूर"
               aria-label="Increase font size"
             >
               A+
@@ -110,7 +110,7 @@ export default function AccessibilityBar() {
                 ? 'bg-amber-400 text-slate-950 border-amber-300 font-bold'
                 : 'bg-slate-900/60 text-slate-300 border-slate-700/60 hover:text-white'
             }`}
-            title="प्रखर रंगछटा (Toggle High Contrast)"
+            title="प्रखर रंगछटा"
             aria-label="Toggle High Contrast"
           >
             <Eye className="w-3 h-3" />

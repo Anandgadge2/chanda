@@ -93,7 +93,7 @@ export default function ProvenanceShowcase() {
                 </div>
                 <div className="flex justify-between items-start gap-2">
                   <span className="text-slate-500 flex-shrink-0">प्रस्तावित कृती:</span>
-                  <span className="font-bold text-amber-800 text-right">शासन जमा (Govt Repossession)</span>
+                  <span className="font-bold text-amber-800 text-right">शासन जमा</span>
                 </div>
               </div>
             </div>

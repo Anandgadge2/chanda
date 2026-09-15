@@ -26,8 +26,7 @@ const CHANDRAPUR_BANNERS = [
     id: 'collectorate',
     image: '/images/chandrapur_collectorate.jpg',
     badge: 'जिल्हा मुख्यालय • चंद्रपूर',
-    titleMr: 'जिल्हाधिकारी कार्यालय, चंद्रपूर (District Collectorate)',
-    titleEn: 'Main Administrative Complex & Revenue Headquarters of Chandrapur District',
+    titleMr: 'जिल्हाधिकारी कार्यालय, चंद्रपूर',
     tag: 'MLRC १९६६ अपेक्स प्रशासन',
     href: '/cases',
   },
@@ -35,8 +34,7 @@ const CHANDRAPUR_BANNERS = [
     id: 'fort',
     image: '/images/chandrapur_fort.jpg',
     badge: 'ऐतिहासिक वारसा • चंद्रपूर',
-    titleMr: 'चांदा किल्ला व ऐतिहासिक तटबंदी (Historic Chandrapur Fort)',
-    titleEn: 'Heritage Ramparts & Historical Land Boundaries of Gond Dynasty',
+    titleMr: 'चांदा किल्ला व ऐतिहासिक तटबंदी',
     tag: 'ऐतिहासिक भूमी अभिलेख',
     href: '/parcels?taluka=chandrapur',
   },
@@ -44,8 +42,7 @@ const CHANDRAPUR_BANNERS = [
     id: 'tadoba',
     image: '/images/tadoba_reserve.jpg',
     badge: 'नैसर्गिक जलसंपदा व वनक्षेत्र',
-    titleMr: 'ताडोबा-अंधारी वनसंपदा व इरई खोरे (Tadoba & Erai Basin)',
-    titleEn: 'Ecological Heritage & Irrigation Land Resources of Chandrapur',
+    titleMr: 'ताडोबा-अंधारी वनसंपदा व इरई खोरे',
     tag: 'गायरान व वनजमीन संरक्षण',
     href: '/parcels',
   },
@@ -53,8 +50,7 @@ const CHANDRAPUR_BANNERS = [
     id: 'mahakali',
     image: '/images/mahakali_temple.jpg',
     badge: 'धार्मिक व ऐतिहासिक देवस्थान',
-    titleMr: 'श्री महाकाली देवी मंदिर देवस्थान (Mahakali Temple)',
-    titleEn: 'Ancient Religious Heritage, Devasthan Inam & Public Trust Land Records',
+    titleMr: 'श्री महाकाली देवी मंदिर देवस्थान',
     tag: 'देवस्थान इनाम व विश्वस्त जमीन',
     href: '/parcels?taluka=chandrapur',
   },
@@ -62,8 +58,7 @@ const CHANDRAPUR_BANNERS = [
     id: 'ballarpur',
     image: '/images/ballarpur_industrial.jpg',
     badge: 'औद्योगिक व खनिज पट्टा',
-    titleMr: 'बल्लारपूर कोळसा व औद्योगिक क्षेत्र (Ballarpur Industrial Belt)',
-    titleEn: 'Western Coalfields, Paper Industry & Mineral Land Lease Governance',
+    titleMr: 'बल्लारपूर कोळसा व औद्योगिक क्षेत्र',
     tag: 'खनिज भाडेपट्टा व औद्योगिक भूखंड',
     href: '/parcels?taluka=ballarpur',
   },
@@ -71,8 +66,7 @@ const CHANDRAPUR_BANNERS = [
     id: 'anandwan',
     image: '/images/anandwan_warora.jpg',
     badge: 'समाजसेवा भूमी वारसा',
-    titleMr: 'आनंदवन, वरोरा (Anandwan Eco-Community Heritage)',
-    titleEn: 'Baba Amte Humanitarian Legacy & Community Land Trust Administration',
+    titleMr: 'आनंदवन, वरोरा',
     tag: 'सामाजिक संस्था व भू-संपादन',
     href: '/parcels?taluka=warora',
   },
@@ -212,9 +206,6 @@ export default function LandingHero({ onOpenAuth }) {
                       <h3 className="text-lg sm:text-2xl lg:text-3xl font-black text-white leading-tight drop-shadow-md">
                         {banner.titleMr}
                       </h3>
-                      <p className="text-[11px] sm:text-xs lg:text-sm text-slate-200 drop-shadow-sm font-medium line-clamp-1 sm:line-clamp-2">
-                        {banner.titleEn}
-                      </p>
                     </div>
                   </div>
                 </div>

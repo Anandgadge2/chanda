@@ -56,7 +56,7 @@ export default function Pagination({
           onClick={() => onPageChange(currentPage - 1)}
           disabled={currentPage <= 1}
           className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:hover:bg-transparent disabled:cursor-not-allowed transition active:scale-95"
-          aria-label="मागील पृष्ठ (Previous page)"
+          aria-label="मागील पृष्ठ"
         >
           <ChevronLeft className="w-4 h-4" />
           <span className="hidden sm:inline">मागील</span>
@@ -92,7 +92,7 @@ export default function Pagination({
           onClick={() => onPageChange(currentPage + 1)}
           disabled={currentPage >= totalPages}
           className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:hover:bg-transparent disabled:cursor-not-allowed transition active:scale-95"
-          aria-label="पुढील पृष्ठ (Next page)"
+          aria-label="पुढील पृष्ठ"
         >
           <span className="hidden sm:inline">पुढील</span>
           <ChevronRight className="w-4 h-4" />

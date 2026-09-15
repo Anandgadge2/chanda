@@ -46,23 +46,114 @@ const fetchSummaryFromDatabase = async (taluka) => {
        WHERE fec.is_repossessed_to_govt = true AND (${talukaParam}::text IS NULL OR LOWER(lp.taluka) = LOWER(${talukaParam}))) as "totalRepossessedCases",
 
       -- Violations Grouped by Statutory Category
-      (SELECT COALESCE(json_agg(json_build_object('type', vt.violation_type, 'count', vt.cnt)), '[]'::json)
+      (SELECT COALESCE(json_agg(json_build_object(
+        'type', vt.violation_type,
+        'count', vt.cnt,
+        'encroachedAreaHa', vt.total_encroached_ha
+      )), '[]'::json)
        FROM (
-         SELECT fec.violation_type::text as violation_type, COUNT(*)::int as cnt
+         SELECT 
+           fec.violation_type::text as violation_type, 
+           COUNT(*)::int as cnt,
+           COALESCE(SUM(fec.encroached_area_ha), 0)::float as total_encroached_ha
          FROM forward_enforcement_cases fec
          LEFT JOIN land_parcels lp ON fec.parcel_id = lp.id
          WHERE (${talukaParam}::text IS NULL OR LOWER(lp.taluka) = LOWER(${talukaParam}))
          GROUP BY fec.violation_type
        ) vt) as "violationsByType",
 
-      -- Land Tenure Distribution
-      (SELECT COALESCE(json_agg(json_build_object('tenure', td.tenure_class, 'count', td.cnt)), '[]'::json)
+      -- Land Tenure Distribution with Total Area (Ha)
+      (SELECT COALESCE(json_agg(json_build_object(
+        'tenure', td.tenure_class,
+        'count', td.cnt,
+        'totalAreaHa', td.total_area_ha
+      )), '[]'::json)
        FROM (
-         SELECT lp.tenure_class::text as tenure_class, COUNT(*)::int as cnt
+         SELECT 
+           lp.tenure_class::text as tenure_class, 
+           COUNT(*)::int as cnt,
+           COALESCE(SUM(lp.total_area_ha), 0)::float as total_area_ha
          FROM land_parcels lp
          WHERE (${talukaParam}::text IS NULL OR LOWER(lp.taluka) = LOWER(${talukaParam}))
          GROUP BY lp.tenure_class
        ) td) as "tenureDistribution",
+
+      -- Taluka-wise Distribution & Comparative Analysis
+      (SELECT COALESCE(json_agg(json_build_object(
+        'taluka', t.taluka,
+        'parcelCount', t.parcel_cnt,
+        'totalAreaHa', t.total_area_ha,
+        'violationCount', t.violation_cnt,
+        'disputeCount', t.dispute_cnt
+      )), '[]'::json)
+       FROM (
+         SELECT 
+           lp.taluka,
+           COUNT(DISTINCT lp.id)::int as parcel_cnt,
+           COALESCE(SUM(lp.total_area_ha), 0)::float as total_area_ha,
+           COUNT(DISTINCT fec.id)::int as violation_cnt,
+           COUNT(DISTINCT CASE WHEN lp.has_active_dispute THEN lp.id END)::int as dispute_cnt
+         FROM land_parcels lp
+         LEFT JOIN forward_enforcement_cases fec ON fec.parcel_id = lp.id
+         WHERE (${talukaParam}::text IS NULL OR LOWER(lp.taluka) = LOWER(${talukaParam}))
+         GROUP BY lp.taluka
+         ORDER BY parcel_cnt DESC, total_area_ha DESC
+       ) t) as "talukaDistribution",
+
+      -- Enforcement Pipeline Status Distribution
+      (SELECT COALESCE(json_agg(json_build_object(
+        'status', es.status,
+        'count', es.cnt
+      )), '[]'::json)
+       FROM (
+         SELECT fec.status::text as status, COUNT(*)::int as cnt
+         FROM forward_enforcement_cases fec
+         LEFT JOIN land_parcels lp ON fec.parcel_id = lp.id
+         WHERE (${talukaParam}::text IS NULL OR LOWER(lp.taluka) = LOWER(${talukaParam}))
+         GROUP BY fec.status
+       ) es) as "statusDistribution",
+
+      -- Land Usability (Potkharaba vs Cultivable Area)
+      (SELECT COALESCE(SUM(lp.potkharaba_area_ha), 0)::float FROM land_parcels lp 
+       WHERE (${talukaParam}::text IS NULL OR LOWER(lp.taluka) = LOWER(${talukaParam}))) as "totalPotkharabaHa",
+      (SELECT COALESCE(SUM(lp.total_area_ha - lp.potkharaba_area_ha), 0)::float FROM land_parcels lp 
+       WHERE (${talukaParam}::text IS NULL OR LOWER(lp.taluka) = LOWER(${talukaParam}))) as "totalCultivableHa",
+
+      -- Top Survey No & Gat Number Parcels Analysis
+      (SELECT COALESCE(json_agg(json_build_object(
+        'upi', g.upi,
+        'gatNumber', g.gat_number,
+        'oldSurveyNo', g.old_survey_no,
+        'villageName', g.village_name,
+        'taluka', g.taluka,
+        'tenureClass', g.tenure_class::text,
+        'totalAreaHa', g.total_area_ha::float,
+        'potkharabaAreaHa', g.potkharaba_area_ha::float,
+        'cultivableAreaHa', g.cultivable_area_ha::float,
+        'hasActiveDispute', g.has_active_dispute,
+        'violationType', g.violation_type,
+        'caseNumber', g.case_number
+      )), '[]'::json)
+       FROM (
+         SELECT 
+           lp.upi,
+           lp.gat_number,
+           lp.old_survey_no,
+           lp.village_name,
+           lp.taluka,
+           lp.tenure_class,
+           lp.total_area_ha,
+           lp.potkharaba_area_ha,
+           (lp.total_area_ha - lp.potkharaba_area_ha) as cultivable_area_ha,
+           lp.has_active_dispute,
+           fec.violation_type::text as violation_type,
+           fec.case_number
+         FROM land_parcels lp
+         LEFT JOIN forward_enforcement_cases fec ON fec.parcel_id = lp.id
+         WHERE (${talukaParam}::text IS NULL OR LOWER(lp.taluka) = LOWER(${talukaParam}))
+         ORDER BY lp.total_area_ha DESC
+         LIMIT 10
+       ) g) as "topGatParcels",
 
       -- Latest 5 Quasi-Judicial Hearings with Parcel and Case Context
       (SELECT COALESCE(json_agg(h), '[]'::json)
@@ -106,6 +197,11 @@ const fetchSummaryFromDatabase = async (taluka) => {
     totalRepossessedCases: Number(row.totalRepossessedCases || 0),
     violationsByType: row.violationsByType || [],
     tenureDistribution: row.tenureDistribution || [],
+    talukaDistribution: row.talukaDistribution || [],
+    statusDistribution: row.statusDistribution || [],
+    totalPotkharabaHa: Number(row.totalPotkharabaHa || 0),
+    totalCultivableHa: Number(row.totalCultivableHa || 0),
+    topGatParcels: row.topGatParcels || [],
     recentHearings: row.recentHearings || [],
   };
 };

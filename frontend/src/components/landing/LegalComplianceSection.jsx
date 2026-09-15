@@ -10,6 +10,7 @@ import {
   AlertOctagon,
   ArrowRight,
   Landmark,
+  BookOpen,
 } from 'lucide-react';
 
 const STATUTES = [
@@ -38,16 +39,16 @@ const STATUTES = [
     penalty: 'निष्कासन नोटीस + चालू आकारणीच्या २५ पट दंड',
   },
   {
-    section: 'कलम ४४',
-    titleEn: 'Section 44 (Unauthorized NA Use)',
-    titleMr: 'अनधिकृत अकृषिक (NA) वापर व शर्तभंग',
-    authority: 'जिल्हाधिकारी / उपविभागीय अधिकारी',
+    section: 'कलम ४२, ४४ व ४५',
+    titleEn: 'Section 42-45 (Unauthorized NA Use)',
+    titleMr: 'विनापरवानगी अ.कृ. वापर व शर्तभंग',
+    authority: 'जिल्हाधिकारी / उपविभागीय अधिकारी (SDO)',
     color: 'border-indigo-400 bg-indigo-50/50',
     tagColor: 'bg-indigo-100 text-indigo-900 border-indigo-300',
     icon: AlertOctagon,
     iconColor: 'text-indigo-600',
-    desc: 'कृषी प्रयोजनासाठी दिलेल्या किंवा भोगवटादार वर्ग-२ अंतर्गत वाटप केलेल्या जमिनीचा पूर्वपरवानगीशिवाय निवासी, व्यावसायिक अथवा औद्योगिक कारणासाठी वापर केल्यास तो गंभीर शर्तभंग मानला जातो.',
-    penalty: 'अकृषिक कर आकारणी + शासन जमा आदेश',
+    desc: 'कृषी जमिनीचा अथवा भोगवटादार वर्ग-२ जमिनीचा सक्षम महसूल प्राधिकाऱ्यांच्या पूर्वपरवानगीशिवाय निवासी, व्यावसायिक अथवा औद्योगिक कारणासाठी वापर (विनापरवानगी अ.कृ. वापर) केल्यास तो गंभीर शर्तभंग मानला जातो.',
+    penalty: '२५ पट दंड + अकृषिक कर + शासन जमा',
   },
   {
     section: 'प्रपत्र-३ नियम',
@@ -102,7 +103,6 @@ export default function LegalComplianceSection() {
 
                   <div>
                     <h3 className="text-base sm:text-lg font-black text-slate-900">{statute.titleMr}</h3>
-                    <p className="text-[11px] sm:text-xs text-slate-500 font-medium mt-0.5">{statute.titleEn}</p>
                   </div>
 
                   <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">{statute.desc}</p>
@@ -122,7 +122,30 @@ export default function LegalComplianceSection() {
           })}
         </div>
 
-        
+        {/* Glossary Reference Banner */}
+        <div className="mt-4 sm:mt-6 p-4 rounded-2xl bg-gradient-to-r from-blue-950 via-slate-900 to-indigo-950 text-white flex flex-col sm:flex-row items-center justify-between gap-3 shadow-md border border-slate-800">
+          <div className="flex items-center gap-3 text-center sm:text-left">
+            <div className="p-2 rounded-xl bg-amber-400/20 text-amber-400 border border-amber-400/30 shrink-0">
+              <BookOpen className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="text-xs sm:text-sm font-bold text-white">
+                ७/१२ उताऱ्यावरील इतर हक्क व संक्षिप्त शब्दांचा अर्थ जाणून घ्यायचा आहे का?
+              </h3>
+              <p className="text-[11px] text-slate-300 mt-0.5">
+                अ.कृ., विनापरवानगी अ.कृ. वापर, भोगवटादार वर्ग १/२, ख.ख., ह.सो.प., बो., फे.नं. इत्यादींचा संपूर्ण शब्दकोश.
+              </p>
+            </div>
+          </div>
+
+          <Link
+            href="/glossary"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-blue-950 font-black text-xs transition shrink-0 shadow-xs hover:shadow-md"
+          >
+            <span>महसूल शब्दावली मार्गदर्शक पहा</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+        </div>
       </div>
     </section>
   );

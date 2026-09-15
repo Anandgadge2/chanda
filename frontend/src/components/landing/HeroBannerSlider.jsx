@@ -21,8 +21,7 @@ const SLIDES = [
     id: 'provenance',
     badge: 'ऐतिहासिक अभिलेख साखळी',
     badgeColor: 'bg-emerald-100 text-emerald-900 border-emerald-300',
-    titleMr: '१९५० च्या मूळ नोंदवह्यांशी थेट डिजिटल सांधा (1950 Provenance)',
-    titleEn: 'Backward Title Trace to 1950 Baseline Registers',
+    titleMr: '१९५० च्या मूळ नोंदवह्यांशी थेट डिजिटल सांधा',
     desc: 'स्वातंत्र्योत्तर काळातील मूळ भोगवटादार वर्ग व ऐतिहासिक हक्कनोंदींशी विद्यमान ७/१२ ची जोडणी. बु.ग.दे. (बुडीत गट) व ता.ग.दे. (तात्पुरता गट) मधील पोकळ नोंदी तात्काळ निष्पन्न करणारी प्रणाली.',
     points: [
       '१९५० मूळ अधिकार अभिलेख व फेरफार साखळी अखंडता तपासणी',
@@ -40,8 +39,7 @@ const SLIDES = [
     id: 'tribal',
     badge: 'MLRC १९६६ वैधानिक संरक्षण',
     badgeColor: 'bg-amber-100 text-amber-900 border-amber-300',
-    titleMr: 'आदिवासी व शासकीय जमीन संरक्षण (Tribal Land Safeguards)',
-    titleEn: 'MLRC Sections 36, 36A & 50-54 Encroachment Eviction',
+    titleMr: 'आदिवासी व शासकीय जमीन संरक्षण',
     desc: 'महाराष्ट्र जमीन महसूल संहिता १९६६ च्या कलम ३६ व ३६अ अन्वये सक्षम प्राधिकारी पूर्वपरवानगीशिवाय झालेले सर्व बिगर-आदिवासी व्यवहार रद्दबातल ठरवून जमीन मूळ आदिवासी किंवा शासनाकडे जमा.',
     points: [
       'कलम ३६ व ३६अ अनधिकृत खरेदी-विक्री व्यवहारांवर तात्काळ लाल ध्वज',
@@ -60,7 +58,6 @@ const SLIDES = [
     badge: 'अर्ध-न्यायिक सुनावणी न्यायालय',
     badgeColor: 'bg-blue-100 text-blue-900 border-blue-300',
     titleMr: 'उपविभागीय अधिकारी (SDO) न्यायालय व शासन जमा आदेश',
-    titleEn: 'Quasi-Judicial Proceedings & Govt Repossession Orders',
     desc: 'तहसीलदार व उपविभागीय अधिकारी (SDO) न्यायालयात चालणाऱ्या शर्तभंग खटल्यांची डिजिटल दैनंदिनी. नोटीस बजावणी, जागेचा प्रत्यक्ष पंचनामा व अंतिम शासन जमा आदेशांची नोंद.',
     points: [
       'लाईव्ह सुनावणी तारीख व प्रोसिडिंग्ज लॉग अद्ययावतीकरण',
@@ -78,8 +75,7 @@ const SLIDES = [
     id: 'dms',
     badge: 'जिल्हा महसूल अभिलेखागार',
     badgeColor: 'bg-indigo-100 text-indigo-900 border-indigo-300',
-    titleMr: 'जिल्हाधिकारी कार्यालय अभिलेखागार (District Record Room)',
-    titleEn: 'Physical Rack & Bundle Mapping to Official Land Records Vault',
+    titleMr: 'जिल्हाधिकारी कार्यालय अभिलेखागार',
     desc: 'जिल्हाधिकारी व तहसील कार्यालयातील प्रत्यक्ष रेकॉर्ड रूममधील रॅक क्रमांक, बंडल क्रमांक व फाईल क्रमांकाशी मूळ स्कॅन प्रतींची १००% अचूक जोडणी.',
     points: [
       'अति-सुरक्षित शासकीय डिजिटल दस्तऐवज संग्रहण',
@@ -188,7 +184,6 @@ export default function HeroBannerSlider() {
               <h3 className="text-lg sm:text-xl font-black text-slate-900 leading-tight">
                 {slide.titleMr}
               </h3>
-              <p className="text-xs text-slate-600 font-semibold mt-0.5">{slide.titleEn}</p>
             </div>
 
             {/* Slide Description */}

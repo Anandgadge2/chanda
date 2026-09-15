@@ -14,11 +14,13 @@ import {
   Plus,
   RefreshCw,
   FolderArchive,
+  BookOpen,
 } from 'lucide-react';
 import { api } from '../../lib/api';
 import { CHANDRAPUR_TALUKAS, TENURE_CLASSES } from '../../lib/constants';
 import ParcelTraceDrawer from '../../components/ParcelTraceDrawer';
 import DocUploadModal from '../../components/DocUploadModal';
+import RevenueShortcutGuideModal from '../../components/RevenueShortcutGuideModal';
 import Pagination from '../../components/Pagination';
 
 export default function ParcelsPage() {
@@ -38,6 +40,7 @@ export default function ParcelsPage() {
   // Drawers & Modals
   const [selectedUpi, setSelectedUpi] = useState(null);
   const [uploadModalParcelId, setUploadModalParcelId] = useState(null);
+  const [glossaryModalOpen, setGlossaryModalOpen] = useState(false);
 
   const fetchParcels = async (targetPage = page) => {
     setLoading(true);
@@ -94,7 +97,17 @@ export default function ParcelsPage() {
           </p>
         </div>
 
-        <div className="flex items-center gap-2 w-full sm:w-auto">
+        <div className="flex items-center gap-2 w-full sm:w-auto flex-wrap">
+          <button
+            type="button"
+            onClick={() => setGlossaryModalOpen(true)}
+            className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3 py-2 border border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-950 rounded-xl text-xs font-bold transition active:scale-95 shadow-2xs"
+            title="७/१२ व महसूल संक्षिप्त रूपे मार्गदर्शक (Glossary)"
+          >
+            <BookOpen className="w-4 h-4 text-amber-700" />
+            <span>७/१२ संक्षिप्त रूपे मदत</span>
+          </button>
+
           <a
             href={api.getSampleTemplateUrl()}
             download
@@ -337,6 +350,12 @@ export default function ParcelsPage() {
           onUploadSuccess={fetchParcels}
         />
       )}
+
+      {/* Revenue Glossary Modal */}
+      <RevenueShortcutGuideModal
+        isOpen={glossaryModalOpen}
+        onClose={() => setGlossaryModalOpen(false)}
+      />
     </div>
   );
 }

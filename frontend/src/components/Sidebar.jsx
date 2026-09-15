@@ -11,6 +11,7 @@ import {
   UploadCloud,
   FileSpreadsheet,
   Layers,
+  BookOpen,
   ChevronRight,
   PanelLeftClose,
   X,
@@ -47,6 +48,11 @@ const navItems = [
     href: '/reports',
     labelMr: 'प्रपत्र-३ वैधानिक अहवाल',
     icon: FileSpreadsheet,
+  },
+  {
+    href: '/glossary',
+    labelMr: 'महसूल शब्दावली व संक्षिप्त रूपे',
+    icon: BookOpen,
   },
 ];
 

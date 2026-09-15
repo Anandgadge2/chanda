@@ -47,7 +47,7 @@ export default function BulkUploadPage() {
       const data = await api.uploadVillageExcel(formData);
       setResult(data);
     } catch (err) {
-      setError(err.message || 'एक्सेल आयात अयशस्वी (Upload failed)');
+      setError(err.message || 'एक्सेल आयात अयशस्वी');
     } finally {
       setUploading(false);
     }

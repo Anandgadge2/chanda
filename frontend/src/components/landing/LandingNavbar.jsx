@@ -14,6 +14,7 @@ import {
   FileSpreadsheet,
   Layers,
   Scale,
+  BookOpen,
   LogOut,
 } from 'lucide-react';
 import ChandrapurDistrictLogo from './ChandrapurDistrictLogo';
@@ -101,6 +102,13 @@ export default function LandingNavbar({ onOpenAuth }) {
                
               </>
             )}
+            <Link
+              href="/glossary"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-700 hover:text-blue-950 hover:bg-slate-100 border border-slate-300 transition shadow-2xs"
+            >
+              <BookOpen className="w-3.5 h-3.5 text-amber-600" />
+              <span>महसूल शब्दावली</span>
+            </Link>
           </div>
 
           {/* Mobile Menu Hamburger */}
@@ -142,56 +150,64 @@ export default function LandingNavbar({ onOpenAuth }) {
               onClick={() => setMobileMenuOpen(false)}
               className="px-3 py-2 rounded-lg hover:bg-slate-100"
             >
-              मुख्य पृष्ठ (Home)
+              मुख्य पृष्ठ
             </a>
             <a
               href="#search-section"
               onClick={() => setMobileMenuOpen(false)}
               className="px-3 py-2 rounded-lg hover:bg-slate-100"
             >
-              ७/१२ भूखंड शोध (Search)
+              ७/१२ भूखंड शोध
             </a>
             <a
               href="#talukas"
               onClick={() => setMobileMenuOpen(false)}
               className="px-3 py-2 rounded-lg hover:bg-slate-100"
             >
-              १५ तालुके (Talukas)
+              १५ तालुके
             </a>
             <a
               href="#provenance"
               onClick={() => setMobileMenuOpen(false)}
               className="px-3 py-2 rounded-lg hover:bg-slate-100"
             >
-              १९५० मूळ शीर्षक साखळी (1950 Trace)
+              १९५० मूळ शीर्षक साखळी
             </a>
             <a
               href="#mlrc"
               onClick={() => setMobileMenuOpen(false)}
               className="px-3 py-2 rounded-lg hover:bg-slate-100"
             >
-              MLRC १९६६ कायदे (Acts)
+              MLRC १९६६ कायदे
             </a>
             <a
               href="#workflow"
               onClick={() => setMobileMenuOpen(false)}
               className="px-3 py-2 rounded-lg hover:bg-slate-100"
             >
-              कार्यप्रणाली (Workflow)
+              कार्यप्रणाली
             </a>
             <Link
               href="/cases"
               onClick={() => setMobileMenuOpen(false)}
               className="px-3 py-2 rounded-lg hover:bg-slate-100"
             >
-              SDO सुनावणी खटले (Cases)
+              SDO सुनावणी खटले
             </Link>
             <Link
               href="/reports"
               onClick={() => setMobileMenuOpen(false)}
               className="px-3 py-2 rounded-lg hover:bg-slate-100"
             >
-              प्रपत्र-३ अहवाल (Reports)
+              प्रपत्र-३ अहवाल
+            </Link>
+            <Link
+              href="/glossary"
+              onClick={() => setMobileMenuOpen(false)}
+              className="px-3 py-2 rounded-lg hover:bg-slate-100 flex items-center gap-2 text-blue-950 font-bold"
+            >
+              <BookOpen className="w-4 h-4 text-amber-600" />
+              <span>महसूल शब्दावली व संक्षिप्त रूपे (Glossary)</span>
             </Link>
           </nav>
 
