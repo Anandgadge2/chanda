@@ -66,3 +66,10 @@ temp/
 scratch/
 uploads/
 *.tmp
+
+# ==========================================
+# Postman Collections & Local Workspaces
+# ==========================================
+.postman/
+postman/
+
