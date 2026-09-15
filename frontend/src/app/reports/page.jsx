@@ -82,43 +82,7 @@ export default function ReportsPage() {
         </button>
       </div>
 
-      {/* Statutory Mapping Guidelines */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-5 shadow-xs space-y-2.5 sm:space-y-3">
-        <div className="flex items-center gap-2">
-          <Landmark className="w-4 h-4 text-blue-900 flex-shrink-0" />
-          <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wide">
-            प्रपत्र-३ शासन नियमावली व १३ अधिकृत वैधानिक स्तंभ (13 Statutory Columns)
-          </h3>
-        </div>
-        <p className="text-xs text-slate-600 leading-relaxed">
-          हा अहवाल महाराष्ट्र जमीन महसूल संहिता (MLRC) १९६६ च्या तरतुदीनुसार प्रत्यक्ष क्षेत्रीय पडताळणी, सन १९५० ची मूळ मालकी साखळी व उपविभागीय अधिकारी यांच्या अर्ध-न्यायिक आदेशांचा समावेश करून १३ अधिकृत शासकीय स्तंभांमध्ये तयार केला जातो.
-        </p>
-
-        <div className="flex flex-wrap gap-1.5 pt-1">
-          {[
-            '१. अ.क्र.',
-            '२. तालुका/उपविभाग',
-            '३. महसूल मंडळ व गाव',
-            '४. स.नं./गट क्र.',
-            '५. हिस्सा',
-            '६. एकूण क्षेत्र',
-            '७. मूळ खातेदार (सन १९५०)',
-            '८. धारणा प्रकार',
-            '९. सद्यस्थितीतील कब्जेदार',
-            '१०. उल्लंघनाचे स्वरूप',
-            '११. सक्षम प्राधिकारी स्थिती',
-            '१२. आदेश क्र. व दिनांक',
-            '१३. शेरा व DMS संदर्भ',
-          ].map((col, idx) => (
-            <span
-              key={idx}
-              className="text-[10px] sm:text-[11px] bg-slate-100 text-slate-700 font-medium px-2 py-0.5 rounded border border-slate-200"
-            >
-              {col}
-            </span>
-          ))}
-        </div>
-      </div>
+     
 
       {/* Filter Bar */}
       <div className="bg-white border border-slate-200 rounded-xl p-3.5 sm:p-4 shadow-sm flex flex-col sm:flex-row gap-2.5 sm:gap-3 items-stretch sm:items-center justify-between">

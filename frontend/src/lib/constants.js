@@ -9,6 +9,11 @@ export const CHANDRAPUR_TALUKAS = [
   { id: 'Sindewahi', nameMr: 'सिंदेवाही', nameEn: 'Sindewahi' },
   { id: 'Brahmapuri', nameMr: 'ब्रह्मपुरी', nameEn: 'Brahmapuri' },
   { id: 'Nagbhid', nameMr: 'नागभीड', nameEn: 'Nagbhid' },
+  { id: 'Gondpipri', nameMr: 'गोंडपिपरी', nameEn: 'Gondpipri' },
+  { id: 'Korpana', nameMr: 'कोरपना', nameEn: 'Korpana' },
+  { id: 'Pombhurna', nameMr: 'पोंभुर्णा', nameEn: 'Pombhurna' },
+  { id: 'Saoli', nameMr: 'सावली', nameEn: 'Saoli' },
+  { id: 'Jivati', nameMr: 'जिवती', nameEn: 'Jivati' },
 ];
 
 export const TENURE_CLASSES = {

@@ -1,14 +1,55 @@
 import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
 
 async function main() {
   console.log('🌱 Clearing existing database records for fresh seed...');
+  await prisma.session.deleteMany({});
+  await prisma.auditLog.deleteMany({});
+  await prisma.user.deleteMany({});
   await prisma.caseHearing.deleteMany({});
   await prisma.dmsDocument.deleteMany({});
   await prisma.forwardEnforcementCase.deleteMany({});
   await prisma.backwardHistory.deleteMany({});
   await prisma.landParcel.deleteMany({});
+
+  console.log('👥 Seeding Chandrapur District Collectorate Officer Accounts...');
+  const defaultPasswordHash = await bcrypt.hash('111111', 12);
+
+  await prisma.user.createMany({
+    data: [
+      {
+        fullName: 'जिल्हाधिकारी, चंद्रपूर',
+        email: 'collector.chandrapur@maharashtra.gov.in',
+        mobile: '9172251100',
+        passwordHash: defaultPasswordHash,
+        role: 'COLLECTOR',
+        designation: 'जिल्हाधिकारी (District Collector)',
+        isActive: true,
+      },
+      {
+        fullName: 'उपविभागीय अधिकारी, वरोरा',
+        email: 'sdo.warora@maharashtra.gov.in',
+        mobile: '9172252200',
+        passwordHash: defaultPasswordHash,
+        role: 'SDO',
+        taluka: 'Warora',
+        designation: 'उपविभागीय अधिकारी (SDO Warora)',
+        isActive: true,
+      },
+      {
+        fullName: 'तहसीलदार, चंद्रपूर',
+        email: 'teh.chandrapur@maharashtra.gov.in',
+        mobile: '9172253300',
+        passwordHash: defaultPasswordHash,
+        role: 'TEHSILDAR',
+        taluka: 'Chandrapur',
+        designation: 'तहसीलदार (Tehsildar Chandrapur)',
+        isActive: true,
+      },
+    ],
+  });
 
   console.log('🏛️ Seeding Chandrapur District Land Parcels, Backward Histories & Enforcement Cases...');
 

@@ -25,12 +25,6 @@ const navItems = [
     icon: LayoutDashboard,
   },
   {
-    href: '/',
-    labelMr: 'सार्वजनिक पोर्टल',
-    labelEn: 'Public Landing Page',
-    icon: Home,
-  },
-  {
     href: '/parcels',
     labelMr: 'भूखंड नोंदवही (७/१२)',
     labelEn: 'Land Parcels & 1950 Trace',

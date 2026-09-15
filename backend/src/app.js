@@ -1,6 +1,9 @@
 import express from 'express';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
 import { configureCors } from './config/cors.js';
 import { logger, requestLogger } from './utils/logger.js';
+import authRoutes from './routes/authRoutes.js';
 import parcelRoutes from './routes/parcelRoutes.js';
 import reportRoutes from './routes/reportRoutes.js';
 import documentRoutes from './routes/documentRoutes.js';
@@ -13,6 +16,26 @@ BigInt.prototype.toJSON = function () {
 };
 
 const app = express();
+
+// Security HTTP headers
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+  })
+);
+
+// Rate limiter for authentication endpoints to prevent brute-force attacks
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 20, // 20 login attempts per window
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    success: false,
+    error: 'खूप जास्त लॉगिन प्रयत्न. कृपया १५ मिनिटांनंतर पुन्हा प्रयत्न करा. (Too many login attempts. Try again after 15 minutes.)',
+  },
+});
+app.use('/api/auth/login', authLimiter);
 
 // Production-Ready CORS Handling
 const corsMiddleware = configureCors();
@@ -35,6 +58,7 @@ const apiIndexHandler = (req, res) => {
     timestamp: new Date().toISOString(),
     endpoints: {
       health: '/api/health',
+      auth: '/api/auth',
       parcels: '/api/parcels',
       cases: '/api/cases',
       reports: '/api/reports',
@@ -66,6 +90,7 @@ app.get('/api/health', (req, res) => {
 });
 
 // Mount Routes
+app.use('/api/auth', authRoutes);
 app.use('/api/parcels', parcelRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/documents', documentRoutes);

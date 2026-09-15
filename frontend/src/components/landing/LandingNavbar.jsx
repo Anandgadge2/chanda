@@ -21,7 +21,7 @@ export default function LandingNavbar({ onOpenAuth }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 bg-white border-b border-slate-200 shadow-xs">
+    <header className="sticky top-0 z-50 bg-white border-b border-slate-200">
       {/* Main Brand & Officer Actions Header */}
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-2.5 sm:py-3">
         <div className="flex items-center justify-between gap-2">
@@ -33,9 +33,7 @@ export default function LandingNavbar({ onOpenAuth }) {
               <h1 className="text-sm sm:text-xl font-black text-slate-900 leading-tight group-hover:text-blue-950 transition tracking-tight truncate">
                 जिल्हाधिकारी कार्यालय, चंद्रपूर
               </h1>
-              <p className="text-[9px] sm:text-[11px] font-bold text-slate-500 uppercase tracking-wider truncate">
-                DISTRICT COLLECTORATE, CHANDRAPUR
-              </p>
+              
               <p className="text-[11px] text-amber-800 font-semibold hidden md:block truncate">
                 जमीन महसूल, भूमी अभिलेख व १९५० मूळ शीर्षक साखळी संनियंत्रण प्रणाली
               </p>
@@ -88,47 +86,7 @@ export default function LandingNavbar({ onOpenAuth }) {
         </div>
       </div>
 
-      {/* Official Navy Navigation Ribbon (Gov Strip) */}
-      <div className="bg-[#0B1E36] text-white border-t border-slate-700">
-        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 flex items-center justify-between h-9 sm:h-10">
-          <nav className="hidden lg:flex items-center gap-6 text-xs font-semibold text-slate-200">
-            <a href="/" className="hover:text-amber-400 transition py-1 text-white font-bold">
-              मुख्य पृष्ठ
-            </a>
-            <a href="#search-section" className="hover:text-amber-400 transition py-1">
-              ७/१२ भूखंड शोध
-            </a>
-            <a href="#talukas" className="hover:text-amber-400 transition py-1">
-              १५ तालुके
-            </a>
-            <a href="#provenance" className="hover:text-amber-400 transition py-1">
-              १९५० मूळ शीर्षक साखळी
-            </a>
-            <a href="#mlrc" className="hover:text-amber-400 transition py-1">
-              MLRC १९६६ कायदे
-            </a>
-            <a href="#workflow" className="hover:text-amber-400 transition py-1">
-              कार्यप्रणाली
-            </a>
-            <Link href="/cases" className="hover:text-amber-400 transition py-1">
-              SDO सुनावणी खटले
-            </Link>
-            <Link href="/reports" className="hover:text-amber-400 transition py-1">
-              प्रपत्र-३ अहवाल
-            </Link>
-          </nav>
-
-          <div className="flex items-center justify-between w-full lg:w-auto text-[11px] text-slate-300">
-            <div className="flex items-center gap-1.5 text-emerald-400 font-semibold">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span>महसूल प्रणाली सक्रीय</span>
-            </div>
-            <span className="text-slate-400 text-[10px] hidden sm:inline ml-4">
-              MLRC १९६६ अधिकृत संनियंत्रण
-            </span>
-          </div>
-        </div>
-      </div>
+      
 
       {/* Mobile Slide-Down Menu */}
       {mobileMenuOpen && (

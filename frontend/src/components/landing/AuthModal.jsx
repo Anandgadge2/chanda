@@ -13,55 +13,63 @@ import {
   Building,
   KeyRound,
   CheckCircle2,
+  AlertCircle,
   ArrowRight,
   Landmark,
   Sparkles,
 } from 'lucide-react';
 import { CHANDRAPUR_TALUKAS } from '../../lib/constants';
 import ChandrapurDistrictLogo from './ChandrapurDistrictLogo';
+import { useAuth } from '../AuthContext';
+import { api } from '../../lib/api';
 
-const DEMO_OFFICERS = [
+const DEFAULT_OFFICERS = [
   {
-    role: 'SDO_CHANDRAPUR',
-    title: 'उपविभागीय अधिकारी (SDO), चंद्रपूर',
-    badge: 'SDO Court',
-    id: 'sdo.chandrapur@maharashtra.gov.in',
-    pin: '7890',
-  },
-  {
-    role: 'TEHSILDAR_WARORA',
-    title: 'तहसीलदार, वरोरा',
-    badge: 'Tehsildar Office',
-    id: 'teh.warora@maharashtra.gov.in',
-    pin: '4560',
-  },
-  {
-    role: 'COLLECTOR_DISTRICT',
-    title: 'जिल्हाधिकारी, चंद्रपूर कार्यालय',
+    role: 'COLLECTOR',
+    title: 'जिल्हाधिकारी, चंद्रपूर',
     badge: 'Collectorate Apex',
-    id: 'collector.chandrapur@gov.in',
-    pin: '1234',
+    email: 'collector.chandrapur@maharashtra.gov.in',
+    password: 'Chanda@2026',
+  },
+  {
+    role: 'SDO',
+    title: 'उपविभागीय अधिकारी (SDO), वरोरा',
+    badge: 'SDO Warora Court',
+    email: 'sdo.warora@maharashtra.gov.in',
+    password: 'Chanda@2026',
+  },
+  {
+    role: 'TEHSILDAR',
+    title: 'तहसीलदार, चंद्रपूर',
+    badge: 'Tehsildar Office',
+    email: 'teh.chandrapur@maharashtra.gov.in',
+    password: 'Chanda@2026',
   },
 ];
 
 export default function AuthModal({ isOpen, onClose, initialTab = 'login' }) {
   const router = useRouter();
+  const { login } = useAuth();
+
   const [tab, setTab] = useState(initialTab);
-  const [role, setRole] = useState('SDO_CHANDRAPUR');
-  const [officerId, setOfficerId] = useState('sdo.chandrapur@maharashtra.gov.in');
-  const [pin, setPin] = useState('••••••••');
+  const [email, setEmail] = useState('collector.chandrapur@maharashtra.gov.in');
+  const [password, setPassword] = useState('Chanda@2026');
   const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
 
   // Register form state
   const [regName, setRegName] = useState('');
+  const [regEmail, setRegEmail] = useState('');
   const [regMobile, setRegMobile] = useState('');
-  const [regTaluka, setRegTaluka] = useState('chandrapur');
-  const [regType, setRegType] = useState('citizen');
+  const [regPassword, setRegPassword] = useState('');
+  const [regTaluka, setRegTaluka] = useState('Chandrapur');
+  const [regRole, setRegRole] = useState('CITIZEN');
   const [regSubmitted, setRegSubmitted] = useState(false);
 
   useEffect(() => {
     setTab(initialTab);
+    setErrorMsg('');
     setSuccessMsg('');
     setRegSubmitted(false);
   }, [initialTab, isOpen]);
@@ -79,35 +87,65 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'login' }) {
 
   if (!isOpen) return null;
 
-  const handleQuickDemo = (demo) => {
-    setRole(demo.role);
-    setOfficerId(demo.id);
-    setPin('••••••••');
-    setSuccessMsg(`प्रमाणीकरण यशस्वी! ${demo.title} म्हणून लॉगिन होत आहे...`);
+  const handleQuickLogin = async (officer) => {
+    setEmail(officer.email);
+    setPassword(officer.password);
+    setErrorMsg('');
     setLoading(true);
-    setTimeout(() => {
-      onClose();
-      router.push('/dashboard');
-    }, 1200);
-  };
 
-  const handleLoginSubmit = (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setSuccessMsg('सुरक्षित महसूल लॉगिन यशस्वी! डॅशबोर्डवर पुनर्निर्देशित केले जात आहे...');
-    setTimeout(() => {
-      onClose();
-      router.push('/dashboard');
-    }, 1200);
-  };
-
-  const handleRegisterSubmit = (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setTimeout(() => {
+    try {
+      await login(officer.email, officer.password);
+      setSuccessMsg(`प्रमाणीकरण यशस्वी! ${officer.title} म्हणून लॉगिन झाले.`);
+      setTimeout(() => {
+        onClose();
+        router.push('/dashboard');
+      }, 500);
+    } catch (err) {
+      setErrorMsg(err.message || 'लॉगिन अयशस्वी झाले.');
+    } finally {
       setLoading(false);
+    }
+  };
+
+  const handleLoginSubmit = async (e) => {
+    e.preventDefault();
+    setErrorMsg('');
+    setLoading(true);
+
+    try {
+      await login(email, password);
+      setSuccessMsg('सुरक्षित महसूल लॉगिन यशस्वी! डॅशबोर्डवर पुनर्निर्देशित केले जात आहे...');
+      setTimeout(() => {
+        onClose();
+        router.push('/dashboard');
+      }, 500);
+    } catch (err) {
+      setErrorMsg(err.message || 'अवैध ईमेल किंवा संकेतशब्द.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRegisterSubmit = async (e) => {
+    e.preventDefault();
+    setErrorMsg('');
+    setLoading(true);
+
+    try {
+      await api.register({
+        fullName: regName,
+        email: regEmail,
+        mobile: regMobile,
+        password: regPassword,
+        role: regRole,
+        taluka: regTaluka,
+      });
       setRegSubmitted(true);
-    }, 1000);
+    } catch (err) {
+      setErrorMsg(err.message || 'नोंदणी अयशस्वी झाली.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -119,6 +157,7 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'login' }) {
         {/* Modal Header */}
         <div className="px-4 sm:px-6 pt-4 sm:pt-6 pb-3 sm:pb-4 bg-gradient-to-r from-blue-50/90 via-indigo-50/60 to-slate-50 border-b border-slate-200 relative shrink-0">
           <button
+            type="button"
             onClick={onClose}
             className="absolute top-4 right-4 sm:top-5 sm:right-5 p-1.5 sm:p-2 rounded-full text-slate-400 hover:text-slate-800 hover:bg-slate-200/80 transition"
             aria-label="Close dialog"
@@ -141,8 +180,10 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'login' }) {
           {/* Tab Switcher */}
           <div className="flex bg-slate-200/70 p-1 rounded-xl mt-3 sm:mt-5 text-xs font-semibold">
             <button
+              type="button"
               onClick={() => {
                 setTab('login');
+                setErrorMsg('');
                 setSuccessMsg('');
               }}
               className={`flex-1 py-1.5 sm:py-2 rounded-lg flex items-center justify-center gap-1.5 sm:gap-2 transition text-[11px] sm:text-xs ${
@@ -155,8 +196,10 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'login' }) {
               <span>अधिकारी लॉगिन</span>
             </button>
             <button
+              type="button"
               onClick={() => {
                 setTab('register');
+                setErrorMsg('');
                 setRegSubmitted(false);
               }}
               className={`flex-1 py-1.5 sm:py-2 rounded-lg flex items-center justify-center gap-1.5 sm:gap-2 transition text-[11px] sm:text-xs ${
@@ -175,29 +218,36 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'login' }) {
         <div className="p-4 sm:p-6 overflow-y-auto flex-1">
           {tab === 'login' ? (
             <div className="space-y-3.5 sm:space-y-4">
-              {/* Quick Demo Login Picker */}
+              {/* Quick Testing Login Picker */}
               <div className="p-3 bg-amber-50/80 border border-amber-200/80 rounded-2xl">
                 <div className="flex items-center gap-1.5 text-xs font-bold text-amber-900 mb-2">
                   <Sparkles className="w-3.5 h-3.5 text-amber-600" />
-                  <span>एक-क्लिक त्वरित चाचणी लॉगिन (Evaluation Demo):</span>
+                  <span>एक-क्लिक चाचणी लॉगिन (Evaluation Accounts):</span>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                  {DEMO_OFFICERS.map((demo) => (
+                  {DEFAULT_OFFICERS.map((officer) => (
                     <button
-                      key={demo.role}
+                      key={officer.role}
                       type="button"
-                      onClick={() => handleQuickDemo(demo)}
+                      onClick={() => handleQuickLogin(officer)}
                       disabled={loading}
-                      className="text-left p-2 rounded-xl bg-white border border-amber-300/80 hover:border-amber-500 hover:shadow-sm text-[11px] transition group flex flex-col justify-between"
+                      className="text-left p-2 rounded-xl bg-white border border-amber-300/80 hover:border-amber-500 hover:shadow-sm text-[11px] transition group flex flex-col justify-between active:scale-95"
                     >
                       <span className="font-bold text-slate-900 line-clamp-1 group-hover:text-blue-900">
-                        {demo.badge}
+                        {officer.badge}
                       </span>
-                      <span className="text-[10px] text-amber-700 font-medium">क्लिक करून उघडा →</span>
+                      <span className="text-[10px] text-amber-700 font-medium mt-1">लॉगिन करा →</span>
                     </button>
                   ))}
                 </div>
               </div>
+
+              {errorMsg && (
+                <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-semibold flex items-center gap-2 animate-in fade-in">
+                  <AlertCircle className="w-4 h-4 text-rose-600 flex-shrink-0" />
+                  <span>{errorMsg}</span>
+                </div>
+              )}
 
               {successMsg && (
                 <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold flex items-center gap-2 animate-in fade-in">
@@ -210,36 +260,16 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'login' }) {
               <form onSubmit={handleLoginSubmit} className="space-y-3.5">
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">
-                    अधिकारी पद / पदनिर्देश (Designation / Jurisdiction)
-                  </label>
-                  <div className="relative">
-                    <Building className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
-                    <select
-                      value={role}
-                      onChange={(e) => setRole(e.target.value)}
-                      className="w-full pl-9 pr-3 py-2 text-xs border border-slate-300 rounded-xl bg-slate-50 font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                      <option value="COLLECTOR_DISTRICT">जिल्हाधिकारी कार्यालय (Collector Apex Authority)</option>
-                      <option value="SDO_CHANDRAPUR">उपविभागीय अधिकारी (SDO Court - MLRC 1966)</option>
-                      <option value="TEHSILDAR_WARORA">तहसीलदार कार्यालय (Tehsildar Quasi-Judicial)</option>
-                      <option value="CIRCLE_OFFICER">मंडळ अधिकारी / तलाठी (Circle Revenue Inspector)</option>
-                      <option value="AUDIT_OFFICER">महसूल लेखापरीक्षक (Prapatra-3 Auditor)</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    शासकीय ईमेल किंवा अधिकारी आयडी (Government Email / Staff ID)
+                    शासकीय ईमेल (Government Email)
                   </label>
                   <div className="relative">
                     <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
                     <input
-                      type="text"
+                      type="email"
                       required
-                      value={officerId}
-                      onChange={(e) => setOfficerId(e.target.value)}
-                      placeholder="उदा. sdo.chandrapur@maharashtra.gov.in"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="उदा. collector.chandrapur@maharashtra.gov.in"
                       className="w-full pl-9 pr-3 py-2 text-xs border border-slate-300 rounded-xl bg-slate-50 font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
@@ -247,35 +277,25 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'login' }) {
 
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">
-                    सुरक्षा पिन / पासवर्ड (Security PIN / Password)
+                    संकेतशब्द (Password)
                   </label>
                   <div className="relative">
                     <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
                     <input
                       type="password"
                       required
-                      value={pin}
-                      onChange={(e) => setPin(e.target.value)}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
                       placeholder="••••••••"
                       className="w-full pl-9 pr-3 py-2 text-xs border border-slate-300 rounded-xl bg-slate-50 font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between text-[11px] pt-1">
-                  <label className="flex items-center gap-1.5 text-slate-600 cursor-pointer">
-                    <input type="checkbox" defaultChecked className="rounded border-slate-300 text-blue-900" />
-                    <span>सत्र लक्षात ठेवा (Remember device)</span>
-                  </label>
-                  <a href="#help" onClick={(e) => { e.preventDefault(); alert('कृपया जिल्हा एनआयसी / महसूल कक्षाशी संपर्क साधा: +91 7172 251100'); }} className="text-blue-700 hover:underline font-semibold">
-                    पिन विसरलात का?
-                  </a>
-                </div>
-
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full py-2.5 rounded-xl bg-gradient-to-r from-blue-900 to-indigo-900 hover:from-blue-800 hover:to-indigo-800 text-white font-bold text-xs shadow-md hover:shadow-lg transition flex items-center justify-center gap-2"
+                  className="w-full py-2.5 rounded-xl bg-gradient-to-r from-blue-900 to-indigo-900 hover:from-blue-800 hover:to-indigo-800 text-white font-bold text-xs shadow-md hover:shadow-lg transition flex items-center justify-center gap-2 active:scale-98 disabled:opacity-50"
                 >
                   {loading ? (
                     <span>प्रमाणीकरण चालू आहे...</span>
@@ -296,9 +316,9 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'login' }) {
                   <div className="w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto">
                     <CheckCircle2 className="w-7 h-7" />
                   </div>
-                  <h3 className="text-base font-bold text-slate-900">नोंदणी अर्ज यशस्वीरीत्या प्राप्त झाला!</h3>
+                  <h3 className="text-base font-bold text-slate-900">नोंदणी यशस्वी झाली!</h3>
                   <p className="text-xs text-slate-600 max-w-sm mx-auto leading-relaxed">
-                    आपला अर्ज जिल्हा महसूल कक्षाकडे मंजुरीसाठी पाठविला गेला आहे. लवकरच आपल्या नोंदणीकृत मोबाईलवर एसएमएस द्वारे तात्पुरता लॉगिन पिन पाठवला जाईल.
+                    आपले खाते तयार झाले आहे. आपण आता दिलेल्या ईमेल व पासवर्डने लॉगिन करू शकता.
                   </p>
                   <button
                     type="button"
@@ -308,14 +328,21 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'login' }) {
                     }}
                     className="mt-3 px-5 py-2 rounded-xl bg-blue-900 text-white text-xs font-bold hover:bg-blue-800 transition"
                   >
-                    अधिकारी लॉगिनकडे जा
+                    लॉगिन पृष्ठाकडे जा
                   </button>
                 </div>
               ) : (
                 <form onSubmit={handleRegisterSubmit} className="space-y-3">
+                  {errorMsg && (
+                    <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-semibold flex items-center gap-2 animate-in fade-in">
+                      <AlertCircle className="w-4 h-4 text-rose-600 flex-shrink-0" />
+                      <span>{errorMsg}</span>
+                    </div>
+                  )}
+
                   <div>
                     <label className="block text-xs font-bold text-slate-700 mb-1">
-                      पूर्ण नाव (Full Name as per Aadhaar/Service Record)
+                      पूर्ण नाव (Full Name)
                     </label>
                     <div className="relative">
                       <User className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
@@ -333,16 +360,16 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'login' }) {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                       <label className="block text-xs font-bold text-slate-700 mb-1">
-                        मोबाईल क्रमांक (Mobile)
+                        ईमेल (Email)
                       </label>
                       <div className="relative">
-                        <Phone className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                        <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
                         <input
-                          type="tel"
+                          type="email"
                           required
-                          value={regMobile}
-                          onChange={(e) => setRegMobile(e.target.value)}
-                          placeholder="९८xxxxxxxx"
+                          value={regEmail}
+                          onChange={(e) => setRegEmail(e.target.value)}
+                          placeholder="user@example.com"
                           className="w-full pl-9 pr-3 py-2 text-xs border border-slate-300 rounded-xl bg-slate-50 font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
                       </div>
@@ -350,65 +377,65 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'login' }) {
 
                     <div>
                       <label className="block text-xs font-bold text-slate-700 mb-1">
-                        वापरकर्ता प्रकार (User Role)
+                        मोबाईल (Mobile)
                       </label>
-                      <select
-                        value={regType}
-                        onChange={(e) => setRegType(e.target.value)}
-                        className="w-full px-3 py-2 text-xs border border-slate-300 rounded-xl bg-slate-50 font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      >
-                        <option value="citizen">नागरिक / भूधारक (Citizen / Landowner)</option>
-                        <option value="officer">महसूल कर्मचारी (Revenue Staff / Talathi)</option>
-                        <option value="advocate">विधी सल्लागार / वकील (Legal Representative)</option>
-                      </select>
+                      <div className="relative">
+                        <Phone className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                        <input
+                          type="tel"
+                          value={regMobile}
+                          onChange={(e) => setRegMobile(e.target.value)}
+                          placeholder="९८xxxxxxxx"
+                          className="w-full pl-9 pr-3 py-2 text-xs border border-slate-300 rounded-xl bg-slate-50 font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
                     </div>
                   </div>
 
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">
-                      संबंधित तालुका (Select Home Taluka)
-                    </label>
-                    <select
-                      value={regTaluka}
-                      onChange={(e) => setRegTaluka(e.target.value)}
-                      className="w-full px-3 py-2 text-xs border border-slate-300 rounded-xl bg-slate-50 font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                      {CHANDRAPUR_TALUKAS.map((t) => (
-                        <option key={t.id} value={t.id}>
-                          {t.nameMr} ({t.nameEn})
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">
+                        तालुका (Taluka)
+                      </label>
+                      <select
+                        value={regTaluka}
+                        onChange={(e) => setRegTaluka(e.target.value)}
+                        className="w-full px-3 py-2 text-xs border border-slate-300 rounded-xl bg-slate-50 font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        {CHANDRAPUR_TALUKAS.map((t) => (
+                          <option key={t.id} value={t.id}>
+                            {t.nameMr} ({t.nameEn})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
 
-                  <p className="text-[11px] text-slate-500 leading-relaxed pt-1">
-                    * नोंदणी सबमिट केल्यावर महाराष्ट्र जमीन महसूल संहिता (MLRC) अंतर्गत भूखंड पडताळणी, सुनावणी नोटीस व प्रपत्र-३ चे डिजिटल अधिकार उपलब्ध होतील.
-                  </p>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">
+                        संकेतशब्द (Password)
+                      </label>
+                      <input
+                        type="password"
+                        required
+                        value={regPassword}
+                        onChange={(e) => setRegPassword(e.target.value)}
+                        placeholder="किमान ६ अक्षरे"
+                        className="w-full px-3 py-2 text-xs border border-slate-300 rounded-xl bg-slate-50 font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                  </div>
 
                   <button
                     type="submit"
                     disabled={loading}
-                    className="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md hover:shadow-lg transition flex items-center justify-center gap-2"
+                    className="w-full mt-2 py-2.5 rounded-xl bg-blue-900 hover:bg-blue-800 text-white font-bold text-xs shadow-md transition flex items-center justify-center gap-2 disabled:opacity-50"
                   >
-                    {loading ? (
-                      <span>नोंदणी प्रक्रिया चालू आहे...</span>
-                    ) : (
-                      <>
-                        <UserCheck className="w-4 h-4" />
-                        <span>नोंदणी अर्ज सादर करा (Submit Registration)</span>
-                      </>
-                    )}
+                    {loading ? <span>नोंदणी होत आहे...</span> : <span>नोंदणी पूर्ण करा</span>}
                   </button>
                 </form>
               )}
             </div>
           )}
-        </div>
-
-        {/* Modal Footer Note */}
-        <div className="px-6 py-3 bg-slate-50 border-t border-slate-200 text-center text-[11px] text-slate-500 flex items-center justify-center gap-1.5">
-          <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-          <span>२५६-बिट एसएसएल एनक्रिप्टेड • राष्ट्रीय माहिती विज्ञान केंद्र (NIC) सुरक्षा मार्गदर्शक</span>
         </div>
       </div>
     </div>

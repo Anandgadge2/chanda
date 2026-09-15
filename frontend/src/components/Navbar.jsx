@@ -7,14 +7,17 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   Menu,
+  LogOut,
 } from 'lucide-react';
 import ChandrapurDistrictLogo from './landing/ChandrapurDistrictLogo';
+import { useAuth } from './AuthContext';
 
 export default function Navbar({
   sidebarCollapsed = false,
   onToggleSidebar = () => {},
   onToggleMobileSidebar = () => {},
 }) {
+  const { user, logout } = useAuth();
   return (
     <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-2xs">
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
@@ -70,15 +73,31 @@ export default function Navbar({
               <span className="sm:hidden">प्रपत्र-३</span>
             </Link>
 
-            {/* Officer Profile Badge */}
-            <div className="hidden lg:flex items-center gap-2 pl-2 border-l border-slate-200">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-900 to-indigo-900 text-white font-bold text-xs flex items-center justify-center shadow-xs">
-                अ
+            {/* Officer Profile Badge & Logout */}
+            <div className="flex items-center gap-2 pl-2 border-l border-slate-200">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-900 to-indigo-900 text-white font-bold text-xs flex items-center justify-center shadow-xs flex-shrink-0">
+                {user?.fullName ? user.fullName.charAt(0) : 'अ'}
               </div>
-              <div className="text-left">
-                <p className="text-xs font-bold text-slate-900 leading-none">महसूल अधिकारी</p>
-                <p className="text-[10px] text-slate-500 leading-none mt-0.5">SDO / तहसीलदार</p>
+              <div className="text-left hidden lg:block max-w-[130px] xl:max-w-[170px]">
+                <p className="text-xs font-bold text-slate-900 leading-none truncate">
+                  {user?.fullName || 'महसूल अधिकारी'}
+                </p>
+                <p className="text-[10px] text-slate-500 leading-none mt-0.5 truncate">
+                  {user?.designation || user?.role || 'SDO / तहसीलदार'}
+                </p>
               </div>
+
+              {user && (
+                <button
+                  type="button"
+                  onClick={logout}
+                  className="p-1.5 rounded-lg text-slate-500 hover:text-rose-600 hover:bg-rose-50 transition active:scale-95"
+                  title="लॉगआउट करा (Logout)"
+                  aria-label="Logout"
+                >
+                  <LogOut className="w-4 h-4" />
+                </button>
+              )}
             </div>
           </div>
         </div>

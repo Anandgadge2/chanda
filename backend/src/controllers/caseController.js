@@ -1,5 +1,6 @@
 import prisma from '../config/prisma.js';
 import { invalidateAnalyticsCache } from './analyticsController.js';
+import { logAudit } from '../middleware/auditMiddleware.js';
 
 /**
  * Get forward quasi-judicial enforcement cases
@@ -170,6 +171,10 @@ export const updateCaseStatus = async (req, res) => {
     if (finalOrderDetails) data.finalOrderDetails = finalOrderDetails;
     if (orderDate) data.orderDate = new Date(orderDate);
 
+    const existingCase = await prisma.forwardEnforcementCase.findUnique({
+      where: { id },
+    });
+
     const updatedCase = await prisma.forwardEnforcementCase.update({
       where: { id },
       data,
@@ -177,6 +182,17 @@ export const updateCaseStatus = async (req, res) => {
         parcel: true,
         hearings: true,
       },
+    });
+
+    // Audit log
+    await logAudit({
+      userId: req.user?.id || null,
+      action: isRepossessedToGovt ? 'MARK_SHASAN_JAMA' : `UPDATE_CASE_STATUS_${status || 'CHANGED'}`,
+      entityType: 'ForwardEnforcementCase',
+      entityId: updatedCase.id,
+      previousData: existingCase,
+      newData: updatedCase,
+      req,
     });
 
     // If case is dismissed or rectified, check if parcel has any other active cases

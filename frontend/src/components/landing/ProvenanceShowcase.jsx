@@ -138,13 +138,7 @@ export default function ProvenanceShowcase() {
             <p className="text-xs text-slate-600">
               चंद्रपूर जिल्ह्यातील कोणत्याही भूखंडाची १९५० साखळी व कागदपत्रे पाहण्यासाठी खालील बटणावर क्लिक करा.
             </p>
-            <Link
-              href="/parcels"
-              className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-blue-900 hover:bg-blue-800 text-white font-bold text-xs shadow-sm transition flex items-center justify-center gap-2 flex-shrink-0 active:scale-95"
-            >
-              <span>सर्व भूखंडांची १९५० साखळी पहा</span>
-              <ArrowRight className="w-3.5 h-3.5 text-amber-400" />
-            </Link>
+            
           </div>
         </div>
       </div>

@@ -2,6 +2,7 @@ import ExcelJS from 'exceljs';
 import prisma from '../config/prisma.js';
 import { generateSampleVillageTemplate } from '../utils/excelGenerator.js';
 import { invalidateAnalyticsCache } from './analyticsController.js';
+import { logAudit } from '../middleware/auditMiddleware.js';
 
 /**
  * Bulk Ingest Village Excel Records
@@ -81,6 +82,18 @@ export const bulkUpload = async (req, res) => {
     const batchResult = await prisma.landParcel.createMany({
       data: records,
       skipDuplicates: true,
+    });
+
+    await logAudit({
+      userId: req.user?.id || null,
+      action: 'BULK_UPLOAD_PARCELS',
+      entityType: 'LandParcel',
+      newData: {
+        insertedCount: batchResult.count,
+        totalRowsProcessed: records.length,
+        skippedDuplicates: records.length - batchResult.count,
+      },
+      req,
     });
 
     invalidateAnalyticsCache();
@@ -300,6 +313,15 @@ export const createParcel = async (req, res) => {
         tenureClass: tenureClass || 'BHOGVATDAR_CLASS_2',
         metadata: metadata || null,
       },
+    });
+
+    await logAudit({
+      userId: req.user?.id || null,
+      action: 'CREATE_PARCEL',
+      entityType: 'LandParcel',
+      entityId: parcel.id,
+      newData: { upi: parcel.upi, taluka: parcel.taluka, gatNumber: parcel.gatNumber },
+      req,
     });
 
     invalidateAnalyticsCache();

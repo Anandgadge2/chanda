@@ -114,7 +114,7 @@ export default function TalukaSlider() {
           </div>
         </div>
 
-        {/* Action Link */}
+        {/* Action Link
         <div className="pt-4 mt-4 border-t border-slate-100">
           <Link
             href={`/parcels?taluka=${t.id}`}
@@ -123,7 +123,7 @@ export default function TalukaSlider() {
             <span>भूखंड ७/१२ शोधा</span>
             <ArrowRight className="w-3.5 h-3.5 group-hover/btn:translate-x-1 transition-transform" />
           </Link>
-        </div>
+        </div> */}
       </div>
     </div>
   );

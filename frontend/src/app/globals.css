@@ -243,6 +243,63 @@ body {
   box-shadow: 0 2px 10px rgba(251, 191, 36, 0.7) !important;
 }
 
+/* ==========================================================================
+   GIGW 3.0 ACCESSIBILITY & HIGH CONTRAST STYLES
+   ========================================================================== */
 
+/* Font Size Scaling */
+html.font-sm {
+  font-size: 14px;
+}
+html.font-md {
+  font-size: 16px;
+}
+html.font-lg {
+  font-size: 18px;
+}
+html.font-xl {
+  font-size: 20px;
+}
 
+/* High Contrast Theme */
+body.high-contrast {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+}
 
+body.high-contrast .bg-white,
+body.high-contrast .bg-slate-50,
+body.high-contrast .bg-slate-100,
+body.high-contrast .bg-slate-200 {
+  background-color: #121212 !important;
+  color: #ffffff !important;
+  border-color: #444444 !important;
+}
+
+body.high-contrast .text-slate-900,
+body.high-contrast .text-slate-800,
+body.high-contrast .text-slate-700,
+body.high-contrast .text-slate-600 {
+  color: #ffffff !important;
+}
+
+body.high-contrast .text-slate-500,
+body.high-contrast .text-slate-400 {
+  color: #dddddd !important;
+}
+
+body.high-contrast .border-slate-200,
+body.high-contrast .border-slate-300 {
+  border-color: #555555 !important;
+}
+
+body.high-contrast button,
+body.high-contrast a {
+  text-decoration-color: #fbbf24 !important;
+}
+
+body.high-contrast .bg-blue-900,
+body.high-contrast .bg-indigo-900 {
+  background-color: #1e3a8a !important;
+  border: 1px solid #fbbf24 !important;
+}

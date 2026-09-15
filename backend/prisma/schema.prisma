@@ -50,6 +50,16 @@ enum DMSDocType {
   SHOW_CAUSE_NOTICE         // Formal legal notice
 }
 
+enum UserRole {
+  COLLECTOR          // जिल्हाधिकारी — Apex authority
+  SDO                // उपविभागीय अधिकारी — Sub-Divisional Officer
+  TEHSILDAR          // तहसीलदार
+  NAIB_TEHSILDAR     // नायब तहसीलदार
+  TALATHI            // तलाठी — Village-level data entry
+  CIRCLE_OFFICER     // महसूल मंडळ अधिकारी
+  CITIZEN            // नागरिक — Public read-only
+}
+
 // -------------------------------------------------------------
 // CORE PARCEL REGISTRY (Master Record)
 // -------------------------------------------------------------
@@ -216,4 +226,65 @@ model DmsDocument {
   @@index([parcelId], name: "idx_dms_parcel")
   @@index([caseId], name: "idx_dms_case")
   @@map("dms_documents")
+}
+
+// -------------------------------------------------------------
+// AUTHENTICATION, ROLES & AUDIT TRAILS (GIGW & Security)
+// -------------------------------------------------------------
+
+model User {
+  id             String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  fullName       String     @map("full_name") @db.VarChar(255)
+  email          String     @unique @db.VarChar(255)
+  mobile         String?    @db.VarChar(20)
+  passwordHash   String     @map("password_hash") @db.VarChar(512)
+  role           UserRole   @default(CITIZEN)
+  taluka         String?    @db.VarChar(64)        // Jurisdiction scope
+  designation    String?    @db.VarChar(128)       // Official title
+  isActive       Boolean    @default(true) @map("is_active")
+  lastLoginAt    DateTime?  @map("last_login_at") @db.Timestamptz
+  createdAt      DateTime   @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt      DateTime   @updatedAt @map("updated_at") @db.Timestamptz
+
+  sessions       Session[]
+  auditLogs      AuditLog[]
+
+  @@index([role], name: "idx_user_role")
+  @@map("users")
+}
+
+model Session {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId       String   @map("user_id") @db.Uuid
+  token        String   @unique @db.VarChar(512)   // JWT or session token
+  ipAddress    String?  @map("ip_address") @db.VarChar(64)
+  userAgent    String?  @map("user_agent") @db.VarChar(512)
+  expiresAt    DateTime @map("expires_at") @db.Timestamptz
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([token], name: "idx_session_token")
+  @@index([userId], name: "idx_session_user")
+  @@map("sessions")
+}
+
+model AuditLog {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId         String?  @map("user_id") @db.Uuid
+  action         String   @db.VarChar(128)           // CREATE_PARCEL, MARK_SHASAN_JAMA, etc.
+  entityType     String   @map("entity_type") @db.VarChar(64) // LandParcel, ForwardEnforcementCase, etc.
+  entityId       String?  @map("entity_id") @db.Uuid
+  previousData   Json?    @map("previous_data") @db.JsonB
+  newData        Json?    @map("new_data") @db.JsonB
+  ipAddress      String?  @map("ip_address") @db.VarChar(64)
+  userAgent      String?  @map("user_agent") @db.VarChar(512)
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  user           User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId], name: "idx_audit_user")
+  @@index([entityType, entityId], name: "idx_audit_entity")
+  @@index([createdAt(sort: Desc)], name: "idx_audit_created")
+  @@map("audit_logs")
 }

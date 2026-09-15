@@ -17,27 +17,32 @@ import {
 import { api } from '../../lib/api';
 import { DMS_DOC_TYPES } from '../../lib/constants';
 import DocUploadModal from '../../components/DocUploadModal';
+import Pagination from '../../components/Pagination';
 
 export default function DocumentsPage() {
   const [documents, setDocuments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [totalCount, setTotalCount] = useState(0);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const limit = 15;
 
   // Filters
   const [docType, setDocType] = useState('');
   const [search, setSearch] = useState('');
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
 
-  const fetchDocs = async () => {
+  const fetchDocs = async (targetPage = page) => {
     setLoading(true);
     try {
-      const params = {};
+      const params = { page: targetPage, limit };
       if (docType) params.docType = docType;
       if (search) params.search = search;
 
       const data = await api.getDocuments(params);
       setDocuments(data.documents || []);
       setTotalCount(data.pagination?.total || 0);
+      setTotalPages(data.pagination?.totalPages || 1);
     } catch (err) {
       console.error('Failed to load documents:', err);
     } finally {
@@ -46,12 +51,19 @@ export default function DocumentsPage() {
   };
 
   useEffect(() => {
-    fetchDocs();
+    setPage(1);
+    fetchDocs(1);
   }, [docType]);
+
+  const handlePageChange = (newPage) => {
+    setPage(newPage);
+    fetchDocs(newPage);
+  };
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
-    fetchDocs();
+    setPage(1);
+    fetchDocs(1);
   };
 
   return (
@@ -245,6 +257,15 @@ export default function DocumentsPage() {
           </table>
         </div>
       </div>
+
+      {/* Pagination Controls */}
+      <Pagination
+        currentPage={page}
+        totalPages={totalPages}
+        totalCount={totalCount}
+        limit={limit}
+        onPageChange={handlePageChange}
+      />
 
       {/* Upload Modal */}
       {uploadModalOpen && (

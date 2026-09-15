@@ -83,7 +83,7 @@ export default function BulkUploadPage() {
       </div>
 
       {/* Instructions Card */}
-      <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-2xl p-4 sm:p-5 shadow-xs flex items-start gap-3 sm:gap-4">
+      {/* <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-2xl p-4 sm:p-5 shadow-xs flex items-start gap-3 sm:gap-4">
         <Info className="w-5 h-5 text-blue-800 flex-shrink-0 mt-0.5" />
         <div className="text-xs text-blue-950 space-y-1.5">
           <p className="font-bold">एक्सेल डेटा अपलोड नियमावली व स्तंभ रचना (Column Specifications):</p>
@@ -102,7 +102,7 @@ export default function BulkUploadPage() {
             * सिस्टीम आपोआप मानकीकृत UPI तयार करते आणि आधीपासून अस्तित्वात असलेले गट वगळते (Skip Duplicates).
           </p>
         </div>
-      </div>
+      </div> */}
 
       {/* Upload Box */}
       <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-8 shadow-sm">
@@ -152,6 +152,19 @@ export default function BulkUploadPage() {
                   <span className="text-sm sm:text-base font-black text-slate-600">{result.skippedDuplicates}</span>
                 </div>
               </div>
+
+              {result.errors && result.errors.length > 0 && (
+                <div className="p-3 bg-amber-100/70 border border-amber-300 rounded-xl space-y-1.5">
+                  <span className="font-bold text-amber-900 block text-[11px]">
+                    ⚠️ काही ओळींमध्ये त्रुटी आढळल्या ({result.errors.length}):
+                  </span>
+                  <ul className="list-disc list-inside text-[11px] text-amber-800 space-y-0.5 max-h-36 overflow-y-auto">
+                    {result.errors.map((err, idx) => (
+                      <li key={idx}>{err}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
 
               <div className="pt-2 text-right">
                 <Link

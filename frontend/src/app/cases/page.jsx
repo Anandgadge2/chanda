@@ -25,11 +25,19 @@ import {
 import AddHearingModal from '../../components/AddHearingModal';
 import DocUploadModal from '../../components/DocUploadModal';
 import ParcelTraceDrawer from '../../components/ParcelTraceDrawer';
+import ShasanJamaModal from '../../components/ShasanJamaModal';
+import Pagination from '../../components/Pagination';
+import { useAuth } from '../../components/AuthContext';
 
 export default function CasesPage() {
+  const { hasRole } = useAuth();
+
   const [cases, setCases] = useState([]);
   const [loading, setLoading] = useState(true);
   const [totalCount, setTotalCount] = useState(0);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const limit = 10;
 
   // Filters
   const [taluka, setTaluka] = useState('');
@@ -41,11 +49,12 @@ export default function CasesPage() {
   const [selectedCaseForHearing, setSelectedCaseForHearing] = useState(null);
   const [uploadDocCaseId, setUploadDocCaseId] = useState(null);
   const [traceUpi, setTraceUpi] = useState(null);
+  const [shasanJamaCase, setShasanJamaCase] = useState(null);
 
-  const fetchCases = async () => {
+  const fetchCases = async (targetPage = page) => {
     setLoading(true);
     try {
-      const params = {};
+      const params = { page: targetPage, limit };
       if (taluka) params.taluka = taluka;
       if (violationType) params.violationType = violationType;
       if (status) params.status = status;
@@ -54,6 +63,7 @@ export default function CasesPage() {
       const data = await api.getCases(params);
       setCases(data.cases || []);
       setTotalCount(data.pagination?.total || 0);
+      setTotalPages(data.pagination?.totalPages || 1);
     } catch (err) {
       console.error('Failed to load cases:', err);
     } finally {
@@ -62,26 +72,13 @@ export default function CasesPage() {
   };
 
   useEffect(() => {
-    fetchCases();
+    setPage(1);
+    fetchCases(1);
   }, [taluka, violationType, status, isRepossessedToGovt]);
 
-  const handleMarkShasanJama = async (caseItem) => {
-    const confirm = window.confirm(
-      `केस क्र. ${caseItem.caseNumber} अंतर्गत जमीन 'शासन जमा' (Repossess to Government) म्हणून घोषित करायची आहे का?`
-    );
-    if (!confirm) return;
-
-    try {
-      await api.updateCaseStatus(caseItem.id, {
-        status: 'FINAL_ORDER_PASSED',
-        isRepossessedToGovt: true,
-        orderDate: new Date().toISOString(),
-        finalOrderDetails: 'जिल्हाधिकारी यांच्या अंतिम आदेशानुसार जमीन विनाअडथळा शासन जमा करण्यात आली.',
-      });
-      fetchCases();
-    } catch (err) {
-      alert('अपडेट अयशस्वी: ' + err.message);
-    }
+  const handlePageChange = (newPage) => {
+    setPage(newPage);
+    fetchCases(newPage);
   };
 
   return (
@@ -308,13 +305,15 @@ export default function CasesPage() {
                     <span>सुनावणी नोंदवा</span>
                   </button>
 
-                  {!c.isRepossessedToGovt && (
+                  {!c.isRepossessedToGovt && hasRole('COLLECTOR', 'SDO') && (
                     <button
-                      onClick={() => handleMarkShasanJama(c)}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg text-xs transition shadow-xs active:scale-95"
+                      type="button"
+                      onClick={() => setShasanJamaCase(c)}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-rose-700 hover:bg-rose-800 text-white font-semibold rounded-lg text-xs transition shadow-xs active:scale-95"
+                      title="सक्षम प्राधिकारी अंतिम आदेश (Collector/SDO only)"
                     >
                       <ShieldCheck className="w-3.5 h-3.5" />
-                      <span>शासन जमा करा</span>
+                      <span>शासन जमा आदेश</span>
                     </button>
                   )}
                 </div>
@@ -323,6 +322,25 @@ export default function CasesPage() {
           })
         )}
       </div>
+
+      {/* Pagination Controls */}
+      <Pagination
+        currentPage={page}
+        totalPages={totalPages}
+        totalCount={totalCount}
+        limit={limit}
+        onPageChange={handlePageChange}
+      />
+
+      {/* Formal Shasan Jama Order Modal */}
+      {shasanJamaCase && (
+        <ShasanJamaModal
+          isOpen={Boolean(shasanJamaCase)}
+          onClose={() => setShasanJamaCase(null)}
+          caseItem={shasanJamaCase}
+          onSuccess={fetchCases}
+        />
+      )}
 
       {/* Add Hearing Modal */}
       {selectedCaseForHearing && (

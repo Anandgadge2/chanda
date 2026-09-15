@@ -107,16 +107,7 @@ export default function WorkflowSection() {
                   <p className="text-xs text-slate-600 leading-relaxed">{stepItem.desc}</p>
                 </div>
 
-                {/* Link */}
-                <div className="pt-3 border-t border-slate-100">
-                  <Link
-                    href={stepItem.link}
-                    className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-900 hover:text-blue-700 transition"
-                  >
-                    <span>{stepItem.linkText}</span>
-                    <ArrowRight className="w-3.5 h-3.5 text-amber-500" />
-                  </Link>
-                </div>
+              
               </div>
             );
           })}

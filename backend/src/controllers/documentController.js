@@ -1,5 +1,6 @@
 import prisma from '../config/prisma.js';
 import { uploadToCloudinary } from '../config/cloudinary.js';
+import { logAudit } from '../middleware/auditMiddleware.js';
 
 /**
  * Upload document to Cloudinary and catalog physical record room coordinates
@@ -52,6 +53,20 @@ export const uploadDocument = async (req, res) => {
           select: { caseNumber: true, status: true },
         },
       },
+    });
+
+    await logAudit({
+      userId: req.user?.id || null,
+      action: 'UPLOAD_DOCUMENT',
+      entityType: 'DmsDocument',
+      entityId: documentRecord.id,
+      newData: {
+        title: documentRecord.title,
+        docType: documentRecord.docType,
+        parcelId: documentRecord.parcelId,
+        caseId: documentRecord.caseId,
+      },
+      req,
     });
 
     res.status(201).json({

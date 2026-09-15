@@ -191,14 +191,30 @@ export default function LandingFooter() {
           </div>
         </div>
 
-        {/* Disclaimer & Copyright */}
+        {/* Disclaimer, Policy Links & Copyright */}
         <div className="mt-8 pt-4 border-t border-slate-200 flex flex-col md:flex-row items-center justify-between gap-3 text-center md:text-left text-[11px] text-slate-600">
-          <p>
-            © २०२६ जिल्हाधिकारी कार्यालय, चंद्रपूर (Collectorate Chandrapur). सर्व हक्क सुरक्षित.
-          </p>
-          <p>
-            महसूल व भूमी अभिलेख विभाग, जिल्हा चंद्रपूर (महाराष्ट्र)
-          </p>
+          <div>
+            <p className="font-bold text-slate-800">
+              © २०२६ जिल्हाधिकारी कार्यालय, चंद्रपूर (Collectorate Chandrapur). सर्व हक्क सुरक्षित.
+            </p>
+            <p className="text-[10px] text-slate-500">
+              महसूल व भूमी अभिलेख विभाग, जिल्हा चंद्रपूर (महाराष्ट्र)
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 text-[11px] font-semibold">
+            <Link href="/privacy-policy" className="hover:text-blue-900 transition">
+              गोपनीयता धोरण (Privacy Policy)
+            </Link>
+            <span className="text-slate-300">|</span>
+            <Link href="/terms" className="hover:text-blue-900 transition">
+              नियम व अटी (Terms)
+            </Link>
+            <span className="text-slate-300">|</span>
+            <Link href="/accessibility-statement" className="hover:text-blue-900 transition">
+              सुलभता विधान (Accessibility)
+            </Link>
+          </div>
         </div>
       </div>
 

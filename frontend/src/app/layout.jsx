@@ -1,5 +1,7 @@
 import './globals.css';
 import PortalLayout from '../components/PortalLayout';
+import { AuthProvider } from '../components/AuthContext';
+import ErrorBoundary from '../components/ErrorBoundary';
 
 export const metadata = {
   title: 'जिल्हाधिकारी कार्यालय, चंद्रपूर | Chandrapur District Land Governance & Revenue Portal',
@@ -19,7 +21,11 @@ export default function RootLayout({ children }) {
   return (
     <html lang="mr">
       <body className="bg-slate-50 text-slate-900 antialiased min-h-screen flex flex-col">
-        <PortalLayout>{children}</PortalLayout>
+        <ErrorBoundary>
+          <AuthProvider>
+            <PortalLayout>{children}</PortalLayout>
+          </AuthProvider>
+        </ErrorBoundary>
       </body>
     </html>
   );

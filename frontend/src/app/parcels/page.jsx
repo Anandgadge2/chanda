@@ -19,11 +19,15 @@ import { api } from '../../lib/api';
 import { CHANDRAPUR_TALUKAS, TENURE_CLASSES } from '../../lib/constants';
 import ParcelTraceDrawer from '../../components/ParcelTraceDrawer';
 import DocUploadModal from '../../components/DocUploadModal';
+import Pagination from '../../components/Pagination';
 
 export default function ParcelsPage() {
   const [parcels, setParcels] = useState([]);
   const [loading, setLoading] = useState(true);
   const [totalCount, setTotalCount] = useState(0);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const limit = 20;
 
   // Filters
   const [taluka, setTaluka] = useState('');
@@ -35,10 +39,10 @@ export default function ParcelsPage() {
   const [selectedUpi, setSelectedUpi] = useState(null);
   const [uploadModalParcelId, setUploadModalParcelId] = useState(null);
 
-  const fetchParcels = async () => {
+  const fetchParcels = async (targetPage = page) => {
     setLoading(true);
     try {
-      const params = {};
+      const params = { page: targetPage, limit };
       if (taluka) params.taluka = taluka;
       if (tenureClass) params.tenureClass = tenureClass;
       if (hasActiveDispute !== '') params.hasActiveDispute = hasActiveDispute;
@@ -47,6 +51,7 @@ export default function ParcelsPage() {
       const data = await api.getParcels(params);
       setParcels(data.parcels || []);
       setTotalCount(data.pagination?.total || 0);
+      setTotalPages(data.pagination?.totalPages || 1);
     } catch (err) {
       console.error('Failed to load parcels:', err);
     } finally {
@@ -55,12 +60,19 @@ export default function ParcelsPage() {
   };
 
   useEffect(() => {
-    fetchParcels();
+    setPage(1);
+    fetchParcels(1);
   }, [taluka, tenureClass, hasActiveDispute]);
+
+  const handlePageChange = (newPage) => {
+    setPage(newPage);
+    fetchParcels(newPage);
+  };
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
-    fetchParcels();
+    setPage(1);
+    fetchParcels(1);
   };
 
   return (
@@ -105,7 +117,7 @@ export default function ParcelsPage() {
       {/* Filter Bar */}
       <div className="bg-white border border-slate-200 rounded-xl p-3.5 sm:p-4 shadow-sm space-y-3">
         <form onSubmit={handleSearchSubmit} className="grid grid-cols-1 sm:grid-cols-2 lg:flex lg:flex-wrap gap-2.5 sm:gap-3 items-center">
-          <div className="sm:col-span-2 lg:flex-1 min-w-[200px] relative">
+          <div className="sm:col-span-2 lg:flex min-w-[200px] relative">
             <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
             <input
               type="text"
@@ -119,7 +131,7 @@ export default function ParcelsPage() {
           <select
             value={taluka}
             onChange={(e) => setTaluka(e.target.value)}
-            className="w-full border border-slate-300 rounded-lg px-2.5 py-2 text-xs bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-auto border border-slate-300 rounded-lg px-2.5 py-2 text-xs bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">सर्व तालुके (All Talukas)</option>
             {CHANDRAPUR_TALUKAS.map((t) => (
@@ -132,7 +144,7 @@ export default function ParcelsPage() {
           <select
             value={tenureClass}
             onChange={(e) => setTenureClass(e.target.value)}
-            className="w-full border border-slate-300 rounded-lg px-2.5 py-2 text-xs bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-auto border border-slate-300 rounded-lg px-2.5 py-2 text-xs bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">सर्व धारणा प्रकार (All Tenures)</option>
             {Object.entries(TENURE_CLASSES).map(([k, v]) => (
@@ -145,7 +157,7 @@ export default function ParcelsPage() {
           <select
             value={hasActiveDispute}
             onChange={(e) => setHasActiveDispute(e.target.value)}
-            className="w-full sm:col-span-2 lg:w-auto border border-slate-300 rounded-lg px-2.5 py-2 text-xs bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-auto sm:col-span-2 lg:w-auto border border-slate-300 rounded-lg px-2.5 py-2 text-xs bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">सर्व वाद स्थिती (All Dispute Status)</option>
             <option value="true">सक्रिय वाद / शर्तभंग (In Dispute)</option>
@@ -154,7 +166,7 @@ export default function ParcelsPage() {
 
           <button
             type="submit"
-            className="w-full sm:col-span-2 lg:w-auto bg-blue-900 hover:bg-blue-800 text-white font-bold px-4 py-2 rounded-lg text-xs transition shadow-xs active:scale-95"
+            className="w-auto sm:col-span-2 lg:w-auto bg-blue-900 hover:bg-blue-800 text-white font-bold px-4 py-2 rounded-lg text-xs transition shadow-xs active:scale-95"
           >
             शोधा (Search)
           </button>
@@ -297,6 +309,15 @@ export default function ParcelsPage() {
           </table>
         </div>
       </div>
+
+      {/* Pagination Controls */}
+      <Pagination
+        currentPage={page}
+        totalPages={totalPages}
+        totalCount={totalCount}
+        limit={limit}
+        onPageChange={handlePageChange}
+      />
 
       {/* 360 Trace Drawer */}
       {selectedUpi && (
