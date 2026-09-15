@@ -16,29 +16,29 @@ export default function MetricCard({
   return (
     <div
       className={clsx(
-        'p-3.5 sm:p-4 bg-white border rounded-xl shadow-2xs glass-card-hover transition-all duration-200 flex flex-col justify-between',
+        'p-3 sm:p-3.5 bg-white border rounded-xl shadow-2xs hover:shadow-xs hover:border-slate-300 transition-all duration-150 flex flex-col justify-between',
         borderColor
       )}
     >
-      <div className="flex items-start justify-between gap-2">
-        <div className="min-w-0">
-          <p className="text-xs font-bold text-slate-800 leading-tight">{titleMr}</p>
-        </div>
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-xs font-bold text-slate-700 truncate leading-tight">
+          {titleMr}
+        </span>
         {Icon && (
-          <div className={clsx('p-2 rounded-lg border flex items-center justify-center flex-shrink-0', badgeColor)}>
-            <Icon className={clsx('w-4 h-4', iconColor)} />
+          <div className={clsx('w-7 h-7 rounded-lg border flex items-center justify-center shrink-0', badgeColor)}>
+            <Icon className={clsx('w-3.5 h-3.5', iconColor)} />
           </div>
         )}
       </div>
 
-      <div className="mt-2.5">
-        <p className={clsx('text-2xl sm:text-3xl font-black tracking-tight leading-none', textColor)}>
+      <div className="mt-1.5 flex items-baseline justify-between gap-1 flex-wrap sm:flex-nowrap">
+        <p className={clsx('text-xl sm:text-2xl font-black tracking-tight leading-tight', textColor)}>
           {value}
         </p>
         {subtext && (
-          <p className="text-[11px] text-slate-500 mt-1 flex items-center gap-1 font-medium leading-none">
+          <span className="text-[10px] text-slate-400 font-medium truncate leading-tight max-w-[140px]">
             {subtext}
-          </p>
+          </span>
         )}
       </div>
     </div>

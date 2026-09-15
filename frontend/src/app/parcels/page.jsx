@@ -87,7 +87,7 @@ export default function ParcelsPage() {
             <span className="text-xs text-slate-500 font-medium">गाव नमुना ७/१२ अभिलेख</span>
           </div>
           <h1 className="text-lg sm:text-2xl font-black text-slate-900 mt-1 leading-tight">
-            भूखंड नोंदवही व १९५० शीर्षक साखळी (Parcel Registry)
+            भूखंड नोंदवही व १९५० शीर्षक साखळी
           </h1>
           <p className="text-xs text-slate-500 mt-0.5">
             ऐतिहासिक १९५० मूळ मालकी, फेरफार नोंदी व चालू शर्तभंग चौकशी
@@ -133,10 +133,10 @@ export default function ParcelsPage() {
             onChange={(e) => setTaluka(e.target.value)}
             className="w-auto border border-slate-300 rounded-lg px-2.5 py-2 text-xs bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            <option value="">सर्व तालुके (All Talukas)</option>
+            <option value="">सर्व तालुके</option>
             {CHANDRAPUR_TALUKAS.map((t) => (
               <option key={t.id} value={t.id}>
-                {t.nameEn} ({t.nameMr})
+                {t.nameMr}
               </option>
             ))}
           </select>
@@ -146,7 +146,7 @@ export default function ParcelsPage() {
             onChange={(e) => setTenureClass(e.target.value)}
             className="w-auto border border-slate-300 rounded-lg px-2.5 py-2 text-xs bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            <option value="">सर्व धारणा प्रकार (All Tenures)</option>
+            <option value="">सर्व धारणा प्रकार</option>
             {Object.entries(TENURE_CLASSES).map(([k, v]) => (
               <option key={k} value={k}>
                 {v.labelMr}
@@ -159,16 +159,16 @@ export default function ParcelsPage() {
             onChange={(e) => setHasActiveDispute(e.target.value)}
             className="w-auto sm:col-span-2 lg:w-auto border border-slate-300 rounded-lg px-2.5 py-2 text-xs bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            <option value="">सर्व वाद स्थिती (All Dispute Status)</option>
-            <option value="true">सक्रिय वाद / शर्तभंग (In Dispute)</option>
-            <option value="false">विवादरहित (Clear Title)</option>
+            <option value="">सर्व वाद स्थिती</option>
+            <option value="true">सक्रिय वाद / शर्तभंग</option>
+            <option value="false">विवादरहित</option>
           </select>
 
           <button
             type="submit"
             className="w-auto sm:col-span-2 lg:w-auto bg-blue-900 hover:bg-blue-800 text-white font-bold px-4 py-2 rounded-lg text-xs transition shadow-xs active:scale-95"
           >
-            शोधा (Search)
+            शोधा
           </button>
         </form>
       </div>
@@ -184,7 +184,7 @@ export default function ParcelsPage() {
               ओळीवर क्लिक करून १९५० शीर्षक इतिहास व पुरावे पहा
             </span>
             <span className="text-[10px] text-amber-800 bg-amber-50 px-2 py-0.5 rounded border border-amber-200 sm:hidden">
-              तक्ता आडवा स्क्रोल करा (Swipe ↔)
+              तक्ता आडवा स्क्रोल करा
             </span>
           </div>
         </div>
@@ -201,7 +201,7 @@ export default function ParcelsPage() {
                 <th className="py-3 px-3">धारणा प्रकार</th>
                 <th className="py-3 px-3 text-center">वाद स्थिती</th>
                 <th className="py-3 px-3 text-center">DMS फायली</th>
-                <th className="py-3 px-4 text-right">कृती (Actions)</th>
+                <th className="py-3 px-4 text-right">कृती</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">

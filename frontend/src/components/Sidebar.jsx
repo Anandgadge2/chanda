@@ -88,7 +88,7 @@ export default function Sidebar({
             <div className="relative group">
               <button
                 onClick={onToggleCollapse}
-                title={collapsed ? 'साइडबार विस्तृत करा (Expand Sidebar)' : 'साइडबार संक्षिप्त करा (Collapse Sidebar)'}
+                title={collapsed ? 'साइडबार विस्तृत करा' : 'साइडबार संक्षिप्त करा'}
                 className={clsx(
                   'rounded-xl text-slate-400 hover:text-blue-950 hover:bg-slate-100 transition-all flex items-center justify-center cursor-pointer',
                   collapsed ? 'w-11 h-11 text-slate-600 hover:bg-slate-100' : 'p-1.5'
@@ -105,7 +105,7 @@ export default function Sidebar({
               {collapsed && (
                 <div className="absolute left-full ml-3 top-1/2 -translate-y-1/2 px-2.5 py-1.5 bg-slate-900 text-white rounded-lg shadow-xl opacity-0 pointer-events-none group-hover:opacity-100 transition-all duration-150 z-50 whitespace-nowrap text-xs font-medium border border-slate-800 -translate-x-1 group-hover:translate-x-0">
                   <div className="absolute top-1/2 -translate-y-1/2 -left-1 w-2 h-2 bg-slate-900 border-l border-b border-slate-800 rotate-45" />
-                  <span>साइडबार उघडा (Expand)</span>
+                  <span>साइडबार उघडा</span>
                 </div>
               )}
             </div>
@@ -169,7 +169,6 @@ export default function Sidebar({
                     <div className="absolute left-full ml-3 top-1/2 -translate-y-1/2 px-3 py-1.5 bg-slate-900 text-white rounded-xl shadow-xl opacity-0 pointer-events-none group-hover:opacity-100 transition-all duration-150 z-50 whitespace-nowrap border border-slate-800 -translate-x-1 group-hover:translate-x-0">
                       <div className="absolute top-1/2 -translate-y-1/2 -left-1 w-2 h-2 bg-slate-900 border-l border-b border-slate-800 rotate-45" />
                       <p className="text-xs font-bold text-white relative z-10 leading-tight">{item.labelMr}</p>
-                      <p className="text-[10px] text-slate-300 font-medium relative z-10 leading-tight mt-0.5">{item.labelEn}</p>
                     </div>
                   )}
                 </Link>
@@ -268,9 +267,6 @@ export default function Sidebar({
                     />
                     <div>
                       <p className="leading-tight text-xs font-bold">{item.labelMr}</p>
-                      <p className={clsx('text-[11px]', isActive ? 'text-blue-200' : 'text-slate-500')}>
-                        {item.labelEn}
-                      </p>
                     </div>
                   </div>
                   <ChevronRight className="w-3.5 h-3.5 opacity-60" />

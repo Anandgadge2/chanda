@@ -93,7 +93,7 @@ export default function CasesPage() {
             <span className="text-xs text-slate-500 font-medium">कलम ३६, ३६अ व ५०-५४</span>
           </div>
           <h1 className="text-lg sm:text-2xl font-black text-slate-900 mt-1 leading-tight">
-            शर्तभंग व अर्ध-न्यायिक सुनावणी कक्ष (Enforcement & Cases)
+            शर्तभंग व अर्ध-न्यायिक सुनावणी कक्ष
           </h1>
           <p className="text-xs text-slate-500 mt-0.5">
             SDO व तहसीलदार न्यायालयातील सुनावण्या, स्थळ पंचनामे व शासन जमा आदेश
@@ -117,10 +117,10 @@ export default function CasesPage() {
           onChange={(e) => setTaluka(e.target.value)}
           className="w-full lg:w-auto border border-slate-300 rounded-lg px-2.5 py-2 text-xs bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
-          <option value="">सर्व तालुके (All Talukas)</option>
+          <option value="">सर्व तालुके</option>
           {CHANDRAPUR_TALUKAS.map((t) => (
             <option key={t.id} value={t.id}>
-              {t.nameEn} ({t.nameMr})
+              {t.nameMr}
             </option>
           ))}
         </select>
@@ -130,7 +130,7 @@ export default function CasesPage() {
           onChange={(e) => setViolationType(e.target.value)}
           className="w-full lg:w-auto border border-slate-300 rounded-lg px-2.5 py-2 text-xs bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
-          <option value="">सर्व उल्लंघन प्रकार (All Violations)</option>
+          <option value="">सर्व उल्लंघन प्रकार</option>
           {Object.entries(VIOLATION_TYPES).map(([k, v]) => (
             <option key={k} value={k}>
               {v.labelMr}
@@ -143,7 +143,7 @@ export default function CasesPage() {
           onChange={(e) => setStatus(e.target.value)}
           className="w-full lg:w-auto border border-slate-300 rounded-lg px-2.5 py-2 text-xs bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
-          <option value="">सर्व सद्यस्थिती (All Statuses)</option>
+          <option value="">सर्व सद्यस्थिती</option>
           {Object.entries(ENFORCEMENT_STATUSES).map(([k, v]) => (
             <option key={k} value={k}>
               {v.labelMr}
@@ -157,8 +157,8 @@ export default function CasesPage() {
           className="w-full lg:w-auto border border-slate-300 rounded-lg px-2.5 py-2 text-xs bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <option value="">सर्व शासन जमा स्थिती</option>
-          <option value="true">शासन जमा (Shasan Jama Resumed)</option>
-          <option value="false">प्रलंबित प्रकरणे (Pending)</option>
+          <option value="true">शासन जमा</option>
+          <option value="false">प्रलंबित प्रकरणे</option>
         </select>
       </div>
 
@@ -196,7 +196,7 @@ export default function CasesPage() {
                     {c.isRepossessedToGovt && (
                       <span className="text-[10px] sm:text-[11px] font-bold px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-900 border border-emerald-300 flex items-center gap-1">
                         <ShieldCheck className="w-3.5 h-3.5 text-emerald-700" />
-                        <span>शासन जमा (Resumed)</span>
+                        <span>शासन जमा</span>
                       </span>
                     )}
                   </div>

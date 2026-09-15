@@ -67,7 +67,7 @@ export default function PortalLayout({ children }) {
         onToggleSidebar={() => setSidebarCollapsed((prev) => !prev)}
         onToggleMobileSidebar={() => setMobileSidebarOpen((prev) => !prev)}
       />
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 w-full flex-1 py-3.5 sm:py-5 flex gap-3 sm:gap-5">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 w-full flex-1 py-2.5 sm:py-3.5 flex gap-3 sm:gap-4">
         <Sidebar
           collapsed={sidebarCollapsed}
           mobileOpen={mobileSidebarOpen}
