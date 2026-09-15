@@ -1,17 +1,16 @@
 'use client';
 
-import { useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import Slider from 'react-slick';
+import 'slick-carousel/slick/slick.css';
+import 'slick-carousel/slick/slick-theme.css';
 import {
   ChevronLeft,
   ChevronRight,
-  MapPin,
-  Building,
   ArrowRight,
   Compass,
-  Landmark,
 } from 'lucide-react';
-import { CHANDRAPUR_TALUKAS } from '../../lib/constants';
 
 const TALUKA_DETAILS = [
   { id: 'chandrapur', nameMr: 'चंद्रपूर', nameEn: 'Chandrapur', code: 'CHA', sdo: 'चंद्रपूर उपविभाग', villages: 118, highlight: 'जिल्हा मुख्यालय' },
@@ -32,17 +31,105 @@ const TALUKA_DETAILS = [
 ];
 
 export default function TalukaSlider() {
-  const scrollContainerRef = useRef(null);
+  const sliderRef = useRef(null);
+  const [isMounted, setIsMounted] = useState(false);
 
-  const scroll = (direction) => {
-    if (scrollContainerRef.current) {
-      const scrollAmount = direction === 'left' ? -340 : 340;
-      scrollContainerRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
-    }
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  const settings = {
+    dots: true,
+    infinite: true,
+    speed: 700,
+    slidesToShow: 4,
+    slidesToScroll: 1,
+    autoplay: true,
+    autoplaySpeed: 1000,
+    pauseOnHover: true,
+    pauseOnFocus: true,
+    pauseOnDotsHover: true,
+    cssEase: 'cubic-bezier(0.25, 1, 0.5, 1)',
+    arrows: false,
+    swipe: true,
+    swipeToSlide: true,
+    touchMove: true,
+    responsive: [
+      {
+        breakpoint: 1280,
+        settings: {
+          slidesToShow: 3,
+          slidesToScroll: 1,
+        },
+      },
+      {
+        breakpoint: 900,
+        settings: {
+          slidesToShow: 2,
+          slidesToScroll: 1,
+        },
+      },
+      {
+        breakpoint: 580,
+        settings: {
+          slidesToShow: 1,
+          slidesToScroll: 1,
+        },
+      },
+    ],
   };
 
+  const renderCard = (t) => (
+    <div key={t.id} className="px-2 py-1 outline-none h-full">
+      <div className="h-full bg-white rounded-xl border border-slate-200 p-3.5 shadow-2xs hover:shadow-md transition-all duration-200 flex flex-col justify-between group hover:-translate-y-1">
+        <div className="space-y-2.5">
+          {/* Header with Code */}
+          <div className="flex items-center justify-between">
+            <span className="px-2 py-0.5 rounded bg-blue-50 border border-blue-200 text-blue-900 font-mono text-[11px] font-black">
+              {t.code}
+            </span>
+            <span className="text-[10px] font-semibold text-amber-800 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">
+              {t.highlight}
+            </span>
+          </div>
+
+          {/* Taluka Title */}
+          <div>
+            <h3 className="text-base font-bold text-slate-900 group-hover:text-blue-950 transition">
+              तालुका {t.nameMr}
+            </h3>
+            <p className="text-[11px] text-slate-500 font-medium">{t.nameEn} Taluka</p>
+          </div>
+
+          {/* Details list */}
+          <div className="space-y-1.5 text-xs text-slate-600 pt-2 border-t border-slate-100">
+            <div className="flex items-center justify-between">
+              <span className="text-slate-500">उपविभाग (SDO):</span>
+              <span className="font-semibold text-slate-800">{t.sdo}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-slate-500">महसूल गावे:</span>
+              <span className="font-mono font-bold text-slate-900">~{t.villages} गावे</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Action Link */}
+        <div className="pt-4 mt-4 border-t border-slate-100">
+          <Link
+            href={`/parcels?taluka=${t.id}`}
+            className="w-full py-2 px-3 rounded-xl bg-slate-50 hover:bg-blue-900 hover:text-white text-blue-900 text-xs font-bold transition flex items-center justify-between group/btn"
+          >
+            <span>भूखंड ७/१२ शोधा</span>
+            <ArrowRight className="w-3.5 h-3.5 group-hover/btn:translate-x-1 transition-transform" />
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
-    <section id="talukas" className="py-6 sm:py-8 bg-slate-50 border-y border-slate-200">
+    <section id="talukas" className="py-6 sm:py-8 bg-slate-50 border-y border-slate-200 overflow-hidden">
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-3 sm:mb-4 gap-2.5 sm:gap-3">
@@ -59,80 +146,44 @@ export default function TalukaSlider() {
             </p>
           </div>
 
-          {/* Carousel Arrows */}
+          {/* Carousel Arrows and Pause on Hover Badge */}
           <div className="flex items-center gap-2 self-end md:self-auto">
+            <span className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-50 border border-blue-200 text-blue-800 text-[11px] font-semibold mr-1 shadow-2xs">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+              <span>ऑटो-स्क्रोल (होव्हरवर थांबेल)</span>
+            </span>
             <button
-              onClick={() => scroll('left')}
-              className="p-1.5 rounded-lg bg-white border border-slate-300 text-slate-700 hover:bg-slate-100 hover:text-blue-900 shadow-2xs transition"
-              aria-label="Scroll left"
+              type="button"
+              onClick={() => sliderRef.current?.slickPrev()}
+              className="p-1.5 rounded-lg bg-white border border-slate-300 text-slate-700 hover:bg-slate-100 hover:text-blue-900 shadow-2xs transition active:scale-95 cursor-pointer"
+              aria-label="Previous slide"
+              title="मागील तालुका"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
             <button
-              onClick={() => scroll('right')}
-              className="p-1.5 rounded-lg bg-white border border-slate-300 text-slate-700 hover:bg-slate-100 hover:text-blue-900 shadow-2xs transition"
-              aria-label="Scroll right"
+              type="button"
+              onClick={() => sliderRef.current?.slickNext()}
+              className="p-1.5 rounded-lg bg-white border border-slate-300 text-slate-700 hover:bg-slate-100 hover:text-blue-900 shadow-2xs transition active:scale-95 cursor-pointer"
+              aria-label="Next slide"
+              title="पुढील तालुका"
             >
               <ChevronRight className="w-4 h-4" />
             </button>
           </div>
         </div>
 
-        {/* Horizontal Scrolling Card Track */}
-        <div
-          ref={scrollContainerRef}
-          className="flex gap-2.5 sm:gap-3 overflow-x-auto pb-3 pt-1 snap-x snap-mandatory scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-transparent"
-          style={{ scrollbarWidth: 'thin', WebkitOverflowScrolling: 'touch' }}
-        >
-          {TALUKA_DETAILS.map((t) => (
-            <div
-              key={t.id}
-              className="w-[210px] sm:w-[250px] flex-shrink-0 snap-start bg-white rounded-xl border border-slate-200 p-3.5 shadow-2xs hover:shadow-xs transition-all duration-200 flex flex-col justify-between group hover:-translate-y-0.5"
-            >
-              <div className="space-y-2.5">
-                {/* Header with Code */}
-                <div className="flex items-center justify-between">
-                  <span className="px-2 py-0.5 rounded bg-blue-50 border border-blue-200 text-blue-900 font-mono text-[11px] font-black">
-                    {t.code}
-                  </span>
-                  <span className="text-[10px] font-semibold text-amber-800 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">
-                    {t.highlight}
-                  </span>
-                </div>
-
-                {/* Taluka Title */}
-                <div>
-                  <h3 className="text-base font-bold text-slate-900 group-hover:text-blue-950 transition">
-                    तालुका {t.nameMr}
-                  </h3>
-                  <p className="text-[11px] text-slate-500 font-medium">{t.nameEn} Taluka</p>
-                </div>
-
-                {/* Details list */}
-                <div className="space-y-1.5 text-xs text-slate-600 pt-2 border-t border-slate-100">
-                  <div className="flex items-center justify-between">
-                    <span className="text-slate-500">उपविभाग (SDO):</span>
-                    <span className="font-semibold text-slate-800">{t.sdo}</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-slate-500">महसूल गावे:</span>
-                    <span className="font-mono font-bold text-slate-900">~{t.villages} गावे</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Action Link */}
-              <div className="pt-4 mt-4 border-t border-slate-100">
-                <Link
-                  href={`/parcels?taluka=${t.id}`}
-                  className="w-full py-2 px-3 rounded-xl bg-slate-50 hover:bg-blue-900 hover:text-white text-blue-900 text-xs font-bold transition flex items-center justify-between group/btn"
-                >
-                  <span>भूखंड ७/१२ शोधा</span>
-                  <ArrowRight className="w-3.5 h-3.5 group-hover/btn:translate-x-1 transition-transform" />
-                </Link>
-              </div>
+        {/* Carousel Slider */}
+        <div className="taluka-slick-slider">
+          {isMounted ? (
+            <Slider ref={sliderRef} {...settings}>
+              {TALUKA_DETAILS.map(renderCard)}
+            </Slider>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 pb-3 pt-1">
+              {TALUKA_DETAILS.slice(0, 4).map(renderCard)}
             </div>
-          ))}
+          )}
         </div>
       </div>
     </section>
