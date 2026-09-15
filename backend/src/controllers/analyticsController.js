@@ -152,8 +152,26 @@ const fetchSummaryFromDatabase = async (taluka) => {
          LEFT JOIN forward_enforcement_cases fec ON fec.parcel_id = lp.id
          WHERE (${talukaParam}::text IS NULL OR LOWER(lp.taluka) = LOWER(${talukaParam}))
          ORDER BY lp.total_area_ha DESC
-         LIMIT 10
+         LIMIT 25
        ) g) as "topGatParcels",
+
+      -- Historical Timeline Progression (Epochs from 1950 baseline)
+      (SELECT COALESCE(json_agg(json_build_object(
+        'epochYear', bh.epoch_year,
+        'recordsCount', bh.cnt,
+        'totalAreaHa', bh.total_area_ha::float
+      )), '[]'::json)
+       FROM (
+         SELECT 
+           b.epoch_year, 
+           COUNT(*)::int as cnt, 
+           COALESCE(SUM(b.area_ha), 0)::float as total_area_ha
+         FROM backward_histories b
+         LEFT JOIN land_parcels lp ON b.parcel_id = lp.id
+         WHERE (${talukaParam}::text IS NULL OR LOWER(lp.taluka) = LOWER(${talukaParam}))
+         GROUP BY b.epoch_year
+         ORDER BY b.epoch_year ASC
+       ) bh) as "historicalTimeline",
 
       -- Latest 5 Quasi-Judicial Hearings with Parcel and Case Context
       (SELECT COALESCE(json_agg(h), '[]'::json)
@@ -202,6 +220,7 @@ const fetchSummaryFromDatabase = async (taluka) => {
     totalPotkharabaHa: Number(row.totalPotkharabaHa || 0),
     totalCultivableHa: Number(row.totalCultivableHa || 0),
     topGatParcels: row.topGatParcels || [],
+    historicalTimeline: row.historicalTimeline || [],
     recentHearings: row.recentHearings || [],
   };
 };

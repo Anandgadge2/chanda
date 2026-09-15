@@ -49,9 +49,6 @@ export default function LandingFooter() {
       className="relative bg-gradient-to-b from-slate-950 via-[#0a1527] to-[#040814] text-slate-300 text-xs border-t border-slate-800 selection:bg-amber-500 selection:text-slate-950"
       aria-label="शासकीय पादटीप"
     >
-      {/* Top National Tricolor Glow Ribbon */}
-      <div className="gov-tricolor-bar shadow-sm shadow-amber-500/20" />
-
       {/* Decorative Subtle Background Grid */}
       <div
         className="absolute inset-0 bg-[radial-gradient(#1e3a8a_1px,transparent_1px)] [background-size:24px_24px] opacity-10 pointer-events-none"
@@ -462,9 +459,6 @@ export default function LandingFooter() {
           </div>
         </div>
       </div>
-
-      {/* Bottom Tricolor Accent Bar */}
-      <div className="gov-tricolor-bar opacity-80" />
     </footer>
   );
 }

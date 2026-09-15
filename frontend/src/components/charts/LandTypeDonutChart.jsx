@@ -124,115 +124,131 @@ export default function LandTypeDonutChart({ data = [] }) {
         </div>
       </div>
 
-      {/* Chart Visual + Dynamic Center KPI */}
-      <div className="relative my-2 h-56 w-full flex items-center justify-center" aria-label="Tenure distribution donut chart">
-        {chartData.length === 0 ? (
-          <div className="flex flex-col items-center justify-center text-slate-400 py-8">
-            <PieIcon className="w-8 h-8 stroke-[1.5] mb-2 opacity-40" />
-            <p className="text-xs font-semibold">या निवडीसाठी भूखंड नोंदी उपलब्ध नाहीत.</p>
-          </div>
-        ) : (
-          <>
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={chartData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={88}
-                  paddingAngle={3}
-                  dataKey="value"
-                  stroke="#ffffff"
-                  strokeWidth={2}
-                  onMouseEnter={(_, index) => setActiveIndex(index)}
-                  onMouseLeave={() => setActiveIndex(null)}
-                >
-                  {chartData.map((entry, index) => (
-                    <Cell
-                      key={`cell-${entry.tenure}`}
-                      fill={entry.color}
-                      opacity={activeIndex === null || activeIndex === index ? 1 : 0.45}
-                      className="transition-all duration-200 cursor-pointer"
-                    />
-                  ))}
-                </Pie>
-                <Tooltip content={<CustomTooltip />} />
-              </PieChart>
-            </ResponsiveContainer>
-
-            {/* Dynamic Center Hero Inspector */}
-            <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none p-2">
-              {activeItem ? (
-                <div className="flex flex-col items-center justify-center text-center transition-all duration-150">
-                  <span
-                    className="inline-flex items-center gap-1 text-[10px] font-extrabold px-2 py-0.5 rounded-full border shadow-2xs mb-0.5"
-                    style={{
-                      backgroundColor: `${activeItem.color}15`,
-                      color: activeItem.color,
-                      borderColor: `${activeItem.color}40`,
-                    }}
-                  >
-                    <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: activeItem.color }} />
-                    <span className="truncate max-w-[110px]">{activeItem.nameMr}</span>
-                  </span>
-                  <span className="text-base sm:text-lg font-black text-slate-900 tracking-tight leading-none my-0.5">
-                    {metricType === 'area' ? `${activeItem.areaHa.toFixed(2)} Ha` : `${activeItem.count} भूखंड`}
-                  </span>
-                  <span className="text-[10px] font-bold text-slate-500">
-                    वाटा {totalValue > 0 ? ((activeItem.value / totalValue) * 100).toFixed(1) : 0}% • {metricType === 'area' ? `${activeItem.count} भूखंड` : `${activeItem.areaHa.toFixed(2)} Ha`}
-                  </span>
-                </div>
-              ) : (
-                <div className="flex flex-col items-center justify-center text-center">
-                  <span className="text-[10px] uppercase tracking-wider font-bold text-slate-400">
-                    {metricType === 'area' ? 'एकूण क्षेत्र' : 'एकूण भूखंड'}
-                  </span>
-                  <span className="text-base sm:text-lg font-black text-slate-900 tracking-tight leading-none my-0.5">
-                    {metricType === 'area' ? `${totalArea.toFixed(2)} Ha` : totalParcels}
-                  </span>
-                  <span className="text-[9px] text-slate-500 font-medium">
-                    {metricType === 'area' ? `${totalParcels} भूखंड` : `${totalArea.toFixed(2)} Ha`}
-                  </span>
-                </div>
-              )}
+      {/* Side-by-Side Chart & Metric Breakdown (Matching Image 2 Reference) */}
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center my-1">
+        {/* Left: Donut Chart with Dynamic Center KPI */}
+        <div className="md:col-span-6 relative h-52 flex items-center justify-center">
+          {chartData.length === 0 ? (
+            <div className="flex flex-col items-center justify-center text-slate-400 py-6">
+              <PieIcon className="w-8 h-8 stroke-[1.5] mb-2 opacity-40" />
+              <p className="text-xs font-semibold">नोंदी उपलब्ध नाहीत.</p>
             </div>
-          </>
-        )}
+          ) : (
+            <>
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={chartData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={58}
+                    outerRadius={84}
+                    paddingAngle={3}
+                    dataKey="value"
+                    stroke="#ffffff"
+                    strokeWidth={2}
+                    onMouseEnter={(_, index) => setActiveIndex(index)}
+                    onMouseLeave={() => setActiveIndex(null)}
+                  >
+                    {chartData.map((entry, index) => (
+                      <Cell
+                        key={`cell-${entry.tenure}`}
+                        fill={entry.color}
+                        opacity={activeIndex === null || activeIndex === index ? 1 : 0.4}
+                        className="transition-all duration-200 cursor-pointer"
+                      />
+                    ))}
+                  </Pie>
+                  <Tooltip content={<CustomTooltip />} />
+                </PieChart>
+              </ResponsiveContainer>
+
+              {/* Dynamic Center Hero Inspector */}
+              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none p-1">
+                {activeItem ? (
+                  <div className="flex flex-col items-center justify-center text-center">
+                    <span
+                      className="text-[9px] font-extrabold px-1.5 py-0.2 rounded-full border shadow-2xs mb-0.5 truncate max-w-[100px]"
+                      style={{
+                        backgroundColor: `${activeItem.color}15`,
+                        color: activeItem.color,
+                        borderColor: `${activeItem.color}40`,
+                      }}
+                    >
+                      {activeItem.nameMr}
+                    </span>
+                    <span className="text-base sm:text-lg font-black text-slate-900 tracking-tight leading-none my-0.5">
+                      {metricType === 'area' ? `${activeItem.areaHa.toFixed(2)} Ha` : `${activeItem.count}`}
+                    </span>
+                    <span className="text-[9px] font-bold text-slate-500">
+                      {totalValue > 0 ? ((activeItem.value / totalValue) * 100).toFixed(1) : 0}% वाटा
+                    </span>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center text-center">
+                    <span className="text-[9px] uppercase tracking-wider font-bold text-slate-400">
+                      {metricType === 'area' ? 'एकूण क्षेत्र' : 'एकूण भूखंड'}
+                    </span>
+                    <span className="text-base sm:text-lg font-black text-slate-900 tracking-tight leading-none my-0.5">
+                      {metricType === 'area' ? `${totalArea.toFixed(2)} Ha` : totalParcels}
+                    </span>
+                    <span className="text-[9px] text-slate-500 font-medium">
+                      {metricType === 'area' ? `${totalParcels} भूखंड` : `${totalArea.toFixed(2)} Ha`}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* Right: Clean Metric List with Circular Dots & Bold Values */}
+        <div className="md:col-span-6 space-y-2">
+          {chartData.map((item, index) => {
+            const pct = totalValue > 0 ? ((item.value / totalValue) * 100).toFixed(1) : 0;
+            const isHighlighted = activeIndex === index;
+
+            return (
+              <div
+                key={item.tenure}
+                onMouseEnter={() => setActiveIndex(index)}
+                onMouseLeave={() => setActiveIndex(null)}
+                className={`p-1.5 rounded-lg border transition-all duration-150 flex items-center justify-between cursor-pointer ${
+                  isHighlighted
+                    ? 'border-blue-300 bg-blue-50/70 shadow-2xs'
+                    : 'border-slate-100 bg-slate-50/50 hover:bg-slate-50'
+                }`}
+              >
+                <div className="flex items-center gap-2 min-w-0 pr-2">
+                  <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: item.color }} />
+                  <div className="min-w-0">
+                    <p className={`text-xs truncate ${isHighlighted ? 'font-black text-blue-950' : 'font-bold text-slate-800'}`}>
+                      {item.nameMr}
+                    </p>
+                    <p className="text-[10px] text-slate-400 font-medium truncate">{item.nameEn}</p>
+                  </div>
+                </div>
+
+                <div className="text-right shrink-0">
+                  <span className={`text-xs font-black block ${isHighlighted ? 'text-blue-900' : 'text-slate-900'}`}>
+                    {metricType === 'area' ? `${item.areaHa.toFixed(2)} Ha` : `${item.count} भूखंड`}
+                  </span>
+                  <span className="text-[10px] text-slate-500 font-semibold">{pct}%</span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
 
-      {/* Interactive Legend Grid with 2-Way Hover Synchronization */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 pt-2 border-t border-slate-100">
-        {chartData.map((item, index) => {
-          const pct = totalValue > 0 ? ((item.value / totalValue) * 100).toFixed(0) : 0;
-          const isHighlighted = activeIndex === index;
-
-          return (
-            <div
-              key={item.tenure}
-              onMouseEnter={() => setActiveIndex(index)}
-              onMouseLeave={() => setActiveIndex(null)}
-              className={`flex items-center justify-between p-1.5 rounded-lg border transition-all duration-150 text-xs cursor-pointer ${
-                isHighlighted
-                  ? 'border-blue-300 bg-blue-50/70 shadow-2xs scale-[1.01]'
-                  : 'border-slate-100 bg-slate-50/50 hover:bg-slate-50'
-              }`}
-            >
-              <div className="flex items-center gap-1.5 min-w-0 pr-1">
-                <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: item.color }} />
-                <span className={`truncate text-[11px] ${isHighlighted ? 'font-bold text-blue-950' : 'font-semibold text-slate-800'}`}>
-                  {item.nameMr}
-                </span>
-              </div>
-              <div className="flex items-center gap-1.5 shrink-0 text-[11px]">
-                <span className={`font-bold ${isHighlighted ? 'text-blue-900' : 'text-slate-900'}`}>
-                  {metricType === 'area' ? `${item.areaHa} Ha` : item.count}
-                </span>
-                <span className="text-[10px] text-slate-400 font-semibold">({pct}%)</span>
-              </div>
-            </div>
-          );
-        })}
+      {/* Footer Outlay Tag (Matching Reference Image 2) */}
+      <div className="flex items-center justify-between pt-2 border-t border-slate-100 text-xs text-slate-600">
+        <span className="text-[11px] font-medium text-slate-500">
+          एकूण महसूल नोंदणी:
+        </span>
+        <span className="font-black text-slate-900 text-[11px] bg-slate-100 px-2 py-0.5 rounded-md">
+          {totalArea.toFixed(2)} Ha • {totalParcels} भूखंड
+        </span>
       </div>
     </div>
   );

@@ -63,51 +63,49 @@ export default function RevenueShortcutGuideModal({
       {/* Modal Dialog */}
       <div className="relative z-10 w-full max-w-4xl max-h-[92vh] bg-white rounded-2xl shadow-2xl flex flex-col border border-slate-200 overflow-hidden animate-in fade-in zoom-in-95 duration-200 my-auto">
         {/* Header */}
-        <div className="px-4 sm:px-6 py-3 sm:py-4 bg-gradient-to-r from-blue-950 via-slate-900 to-indigo-950 text-white flex justify-between items-start border-b border-slate-800 shrink-0 gap-3">
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="p-1 rounded bg-amber-400/20 border border-amber-400/40 text-amber-300">
-                <BookOpen className="w-4 h-4" />
-              </span>
-              <span className="text-[11px] font-bold uppercase tracking-wider text-amber-300">
-                महाराष्ट्र जमीन महसूल संदर्भ व ७/१२ संक्षिप्त रूपे
-              </span>
+        <div className="px-4 sm:px-6 py-2.5 sm:py-3 bg-white border-b border-slate-200 flex justify-between items-center shrink-0 gap-3">
+          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+            <div className="w-8 h-8 rounded-lg bg-blue-50 border border-blue-200/80 text-blue-900 flex items-center justify-center shrink-0">
+              <BookOpen className="w-4 h-4" />
             </div>
-            <h2
-              id="glossary-modal-title"
-              className="text-base sm:text-xl font-black text-white mt-1"
-            >
-              जमीन महसूल शब्दावली व संक्षिप्त रूपे (Glossary)
-            </h2>
-            <p className="text-[11px] sm:text-xs text-slate-300 mt-0.5">
-              ७/१२ उतारा, फेरफार नोंदवही (गाव नमुना ६) व महसूल आदेशांमधील संक्षिप्त शब्दांचे अर्थ व वैधानिक कलमे
-            </p>
+            <div className="min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h2
+                  id="glossary-modal-title"
+                  className="text-sm sm:text-base font-bold text-slate-900 leading-tight"
+                >
+                  जमीन महसूल शब्दावली व संक्षिप्त रूपे
+                </h2>
+                <span className="text-[10px] font-semibold bg-blue-50 text-blue-800 px-1.5 py-0.5 rounded border border-blue-200">
+                  Glossary
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-500 truncate mt-0.5 hidden sm:block">
+                ७/१२ उतारा, फेरफार नोंदवही (गाव नमुना ६) व महसूल आदेशांमधील संक्षिप्त संज्ञा
+              </p>
+            </div>
           </div>
 
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800 transition shrink-0"
+            className="text-slate-400 hover:text-slate-700 hover:bg-slate-100 p-1.5 rounded-lg transition shrink-0"
             aria-label="Close glossary modal"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4 sm:w-5 sm:h-5" />
           </button>
         </div>
 
-        {/* Highlighted Banner for 'विनापरवानगी अ.कृ. वापर' */}
-        <div className="bg-amber-50/90 border-b border-amber-200 px-4 sm:px-6 py-2.5 text-xs text-amber-950 flex items-start gap-2.5 shrink-0">
-          <AlertTriangle className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
-          <div className="leading-snug">
-            <span className="font-bold text-amber-900">
-              महत्त्वाची सूचना (विनापरवानगी अ.कृ. वापर):{' '}
-            </span>
-            <span>
-              शेतजमिनीचा निवासी, व्यावसायिक अथवा औद्योगिक कारणासाठी विनापरवानगी वापर केल्यास तो MLRC कलम ४४/४५ अन्वये गंभीर शर्तभंग मानला जातो आणि त्यावर २५ पट दंड अथवा जमीन शासन जमा कारवाई होते.
-            </span>
-          </div>
+        {/* Compact Alert Notice Banner */}
+        <div className="bg-amber-50/90 border-b border-amber-200/80 px-4 sm:px-6 py-2 text-[11px] sm:text-xs text-amber-950 flex items-center gap-2 shrink-0">
+          <AlertTriangle className="w-3.5 h-3.5 text-amber-700 shrink-0" />
+          <p className="leading-normal truncate sm:whitespace-normal">
+            <span className="font-bold text-amber-900">महत्त्वाची सूचना: </span>
+            विनापरवानगी अ.कृ. वापर हा MLRC कलम ४४/४५ अन्वये गंभीर शर्तभंग असून त्यावर २५ पट दंड अथवा जमीन शासन जमा कारवाई होते.
+          </p>
         </div>
 
         {/* Search & Category Filter Strip */}
-        <div className="p-3 sm:p-4 bg-slate-50 border-b border-slate-200 space-y-2.5 shrink-0">
+        <div className="p-2.5 sm:p-3 bg-slate-50/70 border-b border-slate-200 space-y-2 shrink-0">
           <div className="relative">
             <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
             <input
@@ -115,7 +113,7 @@ export default function RevenueShortcutGuideModal({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="संक्षिप्त रूप शोधा... (उदा. अ.कृ., विनापरवानगी, ख.ख., भो.व., बो., फे.नं.)"
-              className="w-full pl-9 pr-8 py-2 text-xs sm:text-sm bg-white border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-900/30 focus:border-blue-900"
+              className="w-full pl-9 pr-8 py-1.5 text-xs sm:text-sm bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-900/20 focus:border-blue-800"
             />
             {searchQuery && (
               <button
@@ -129,15 +127,15 @@ export default function RevenueShortcutGuideModal({
           </div>
 
           {/* Category Filter Pills */}
-          <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-none text-[11px]">
+          <div className="flex gap-1.5 overflow-x-auto pb-0.5 scrollbar-none text-[11px]">
             {REVENUE_GLOSSARY_CATEGORIES.map((cat) => (
               <button
                 key={cat.id}
                 onClick={() => setSelectedCategory(cat.id)}
-                className={`px-2.5 py-1 rounded-lg font-semibold whitespace-nowrap transition-colors shrink-0 ${
+                className={`px-2.5 py-1 rounded-md font-semibold whitespace-nowrap transition-colors shrink-0 ${
                   selectedCategory === cat.id
-                    ? 'bg-blue-950 text-white shadow-2xs'
-                    : 'bg-white text-slate-700 hover:bg-slate-200 border border-slate-200'
+                    ? 'bg-slate-900 text-white shadow-2xs'
+                    : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
                 }`}
               >
                 {cat.labelMr}
