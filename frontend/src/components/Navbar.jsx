@@ -54,6 +54,10 @@ export default function Navbar({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [profileTrayOpen]);
 
+  const cleanDesignation = (user?.designation || (user?.role === 'COLLECTOR' ? 'जिल्हाधिकारी' : user?.role) || 'महसूल अधिकारी')
+    .replace(/\s*\([^)]*[a-zA-Z][^)]*\)/g, '')
+    .trim();
+
   return (
     <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-2xs">
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
@@ -125,7 +129,7 @@ export default function Navbar({
                     </div>
                     <span
                       className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 border-2 border-white rounded-full"
-                      title="सत्र सक्रीय (Active Session)"
+                      title="सत्र सक्रीय"
                     />
                   </div>
 
@@ -142,7 +146,7 @@ export default function Navbar({
                       />
                     </div>
                     <span className="text-[10px] sm:text-[11px] font-bold text-blue-900 block leading-normal mt-0.5 truncate max-w-[170px] lg:max-w-[220px]">
-                      {user.designation || (user.role === 'COLLECTOR' ? 'जिल्हाधिकारी' : user.role) || 'महसूल अधिकारी'}
+                      {cleanDesignation}
                     </span>
                   </div>
 
@@ -176,7 +180,7 @@ export default function Navbar({
                             {user.fullName}
                           </h3>
                           <p className="text-[11px] sm:text-xs font-bold text-blue-900 mt-0.5 leading-snug">
-                            {user.designation || (user.role === 'COLLECTOR' ? 'जिल्हाधिकारी (District Collector)' : user.role)}
+                            {cleanDesignation}
                           </p>
                           <div className="flex items-center gap-1.5 text-xs text-slate-600 mt-1 font-medium">
                             <Mail className="w-3.5 h-3.5 text-slate-400 shrink-0" />
