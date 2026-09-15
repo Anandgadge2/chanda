@@ -31,21 +31,21 @@ const DEFAULT_OFFICERS = [
     title: 'जिल्हाधिकारी, चंद्रपूर',
     badge: 'Collectorate Apex',
     email: 'collector.chandrapur@maharashtra.gov.in',
-    password: 'Chanda@2026',
+    password: '111111',
   },
   {
     role: 'SDO',
     title: 'उपविभागीय अधिकारी (SDO), वरोरा',
     badge: 'SDO Warora Court',
     email: 'sdo.warora@maharashtra.gov.in',
-    password: 'Chanda@2026',
+    password: '111111',
   },
   {
     role: 'TEHSILDAR',
     title: 'तहसीलदार, चंद्रपूर',
     badge: 'Tehsildar Office',
     email: 'teh.chandrapur@maharashtra.gov.in',
-    password: 'Chanda@2026',
+    password: '111111',
   },
 ];
 
@@ -149,34 +149,31 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'login' }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-2.5 sm:p-4 bg-slate-950/70 backdrop-blur-md animate-in fade-in duration-200 overflow-y-auto">
       <div className="relative w-full max-w-lg max-h-[94vh] flex flex-col bg-white rounded-2xl sm:rounded-3xl shadow-2xl border border-slate-200 overflow-hidden text-slate-800 my-auto">
-        {/* Tricolor top border */}
-        <div className="gov-tricolor-bar shrink-0" />
-
         {/* Modal Header */}
-        <div className="px-4 sm:px-6 pt-4 sm:pt-6 pb-3 sm:pb-4 bg-gradient-to-r from-blue-50/90 via-indigo-50/60 to-slate-50 border-b border-slate-200 relative shrink-0">
+        <div className="px-4 sm:px-6 pt-3.5 sm:pt-4 pb-2.5 sm:pb-3 bg-white border-b border-slate-200 relative shrink-0">
           <button
             type="button"
             onClick={onClose}
-            className="absolute top-4 right-4 sm:top-5 sm:right-5 p-1.5 sm:p-2 rounded-full text-slate-400 hover:text-slate-800 hover:bg-slate-200/80 transition"
+            className="absolute top-3 right-3 sm:top-3.5 sm:right-3.5 p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition"
             aria-label="Close dialog"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4 sm:w-5 sm:h-5" />
           </button>
 
           <div className="flex items-center gap-2.5 sm:gap-3">
-            <ChandrapurDistrictLogo className="w-10 h-10 sm:w-12 sm:h-12 flex-shrink-0" />
-            <div className="min-w-0 pr-6">
-              <p className="text-[11px] sm:text-xs text-amber-800 font-bold tracking-wide truncate">
+            <ChandrapurDistrictLogo className="w-9 h-9 sm:w-10 sm:h-10 flex-shrink-0" />
+            <div className="min-w-0 pr-8">
+              <p className="text-[10px] sm:text-[11px] text-amber-800 font-bold tracking-wide truncate">
                 महाराष्ट्र शासन | जिल्हाधिकारी कार्यालय, चंद्रपूर
               </p>
-              <h2 className="text-base sm:text-xl font-black tracking-tight text-slate-900 mt-0.5 truncate">
+              <h2 className="text-sm sm:text-base font-bold tracking-tight text-slate-900 mt-0.5 truncate">
                 {tab === 'login' ? 'महसूल अधिकारी पोर्टल लॉगिन' : 'नागरिक व अधिकारी नोंदणी'}
               </h2>
             </div>
           </div>
 
           {/* Tab Switcher */}
-          <div className="flex bg-slate-200/70 p-1 rounded-xl mt-3 sm:mt-5 text-xs font-semibold">
+          <div className="flex bg-slate-100 p-1 rounded-xl mt-2.5 sm:mt-3 text-xs font-semibold border border-slate-200/60">
             <button
               type="button"
               onClick={() => {

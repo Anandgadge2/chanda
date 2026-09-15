@@ -16,9 +16,12 @@ import {
 } from 'lucide-react';
 import MetricCard from '../../components/MetricCard';
 import LandTypeDonutChart from '../../components/charts/LandTypeDonutChart';
-import TalukaComparisonChart from '../../components/charts/TalukaComparisonChart';
-import ShartbhangAnalyticsChart from '../../components/charts/ShartbhangAnalyticsChart';
+import EnforcementDisposalDonut from '../../components/charts/EnforcementDisposalDonut';
+import HistoricalProvenanceTrendChart from '../../components/charts/HistoricalProvenanceTrendChart';
+import TalukaMountainChart from '../../components/charts/TalukaMountainChart';
+import ComplianceSpeedometerGauge from '../../components/charts/ComplianceSpeedometerGauge';
 import GatSurveyVisualizer from '../../components/charts/GatSurveyVisualizer';
+import GatSurveyLedgerTable from '../../components/charts/GatSurveyLedgerTable';
 import { api } from '../../lib/api';
 import { CHANDRAPUR_TALUKAS, VIOLATION_TYPES } from '../../lib/constants';
 
@@ -38,6 +41,7 @@ export default function DashboardPage() {
     totalPotkharabaHa: 0,
     totalCultivableHa: 0,
     topGatParcels: [],
+    historicalTimeline: [],
     recentHearings: [],
   });
 
@@ -159,20 +163,32 @@ export default function DashboardPage() {
         />
       </div>
 
-      {/* Graphical Analytics Row 1: Land Type / Tenure Donut & Shartbhang Violations */}
+      {/* Visual Analytics Row 1: Dual Donut Cards with Side Metrics (Image 2 Reference Style) */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-2.5 sm:gap-3">
         <LandTypeDonutChart data={analytics.tenureDistribution} />
-        <ShartbhangAnalyticsChart
-          violations={analytics.violationsByType}
+        <EnforcementDisposalDonut
           statuses={analytics.statusDistribution}
+          totalViolations={analytics.totalViolations}
+          repossessedArea={analytics.totalRepossessedHa}
         />
       </div>
 
-      {/* Graphical Analytics Row 2: Taluka Comparison Bar Chart & Gat/Survey Land Usability */}
+      {/* Visual Analytics Row 2: 1950 Provenance Trend & Taluka Mountain/Bar Spectrum (Image 2, 3 & 5 Style) */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-2.5 sm:gap-3">
-        <TalukaComparisonChart
+        <HistoricalProvenanceTrendChart data={analytics.historicalTimeline} />
+        <TalukaMountainChart
           data={analytics.talukaDistribution}
           selectedTaluka={taluka}
+        />
+      </div>
+
+      {/* Visual Analytics Row 3: Speedometer Compliance Gauge & Gat Land Usability (Image 4 Style) */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-2.5 sm:gap-3">
+        <ComplianceSpeedometerGauge
+          totalParcels={analytics.totalParcels}
+          totalViolations={analytics.totalViolations}
+          repossessedCount={analytics.totalRepossessedCases}
+          pendingHearings={analytics.pendingHearings}
         />
         <GatSurveyVisualizer
           parcels={analytics.topGatParcels}
@@ -180,6 +196,9 @@ export default function DashboardPage() {
           totalCultivableHa={analytics.totalCultivableHa}
         />
       </div>
+
+      {/* Visual Analytics Row 4: Comprehensive Survey & Gat Ledger Table */}
+      <GatSurveyLedgerTable parcels={analytics.topGatParcels} />
 
       {/* Statutory Guidance & Quick Links Grid */}
       <div className="grid grid-cols-1 gap-2.5 sm:gap-3">

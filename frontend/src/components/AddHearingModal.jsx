@@ -42,23 +42,27 @@ export default function AddHearingModal({ isOpen, onClose, caseItem, onHearingAd
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-2.5 sm:p-4 animate-in fade-in duration-200 overflow-y-auto">
       <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 max-w-lg w-full max-h-[94vh] flex flex-col overflow-hidden my-auto">
-        {/* Header */}
-        <div className="px-4 sm:px-6 py-3.5 sm:py-4 bg-slate-900 text-white flex justify-between items-center shrink-0">
-          <div>
-            <h2 className="text-sm sm:text-base font-bold flex items-center gap-2">
-              <Scale className="w-4 h-4 text-amber-400" />
-              <span>सुनावणी इतिवृत्त नोंद</span>
-            </h2>
-            <p className="text-[11px] sm:text-xs text-slate-400">
-              केस क्र.: {caseItem.caseNumber} ({caseItem.parcel?.villageName || ''})
-            </p>
+        {/* Modal Header */}
+        <div className="px-4 sm:px-6 py-3 sm:py-3.5 bg-white border-b border-slate-200 flex justify-between items-center shrink-0">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-8 h-8 rounded-lg bg-amber-50 border border-amber-200/80 flex items-center justify-center shrink-0 text-amber-700">
+              <Scale className="w-4 h-4" />
+            </div>
+            <div className="min-w-0">
+              <h2 className="text-sm sm:text-base font-bold text-slate-900 leading-tight">
+                सुनावणी इतिवृत्त नोंद
+              </h2>
+              <p className="text-[11px] text-slate-500 truncate mt-0.5">
+                केस क्र.: <span className="font-semibold text-slate-700">{caseItem.caseNumber}</span> {caseItem.parcel?.villageName ? `(${caseItem.parcel.villageName})` : ''}
+              </p>
+            </div>
           </div>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition"
+            className="text-slate-400 hover:text-slate-700 hover:bg-slate-100 p-1.5 rounded-lg transition shrink-0"
             aria-label="Close dialog"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4 sm:w-5 sm:h-5" />
           </button>
         </div>
 

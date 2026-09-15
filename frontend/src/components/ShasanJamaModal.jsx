@@ -91,30 +91,28 @@ export default function ShasanJamaModal({ isOpen, onClose, caseItem, onSuccess =
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/70 backdrop-blur-sm animate-in fade-in overflow-y-auto">
       <div className="relative w-full max-w-xl bg-white rounded-2xl sm:rounded-3xl shadow-2xl border border-slate-200 overflow-hidden text-slate-800 my-auto max-h-[92vh] flex flex-col">
-        {/* Red/Saffron Warning Stripe */}
-        <div className="h-1.5 bg-gradient-to-r from-red-600 via-amber-500 to-red-600" />
-
         {/* Modal Header */}
-        <div className="px-5 py-4 bg-gradient-to-r from-rose-50/80 to-amber-50/80 border-b border-rose-100 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-rose-600 text-white flex items-center justify-center shadow-sm">
-              <Scale className="w-5 h-5" />
+        <div className="px-4 sm:px-6 py-3 sm:py-3.5 bg-white border-b border-slate-200 flex items-center justify-between shrink-0">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-8 h-8 rounded-lg bg-rose-50 border border-rose-200/80 text-rose-700 flex items-center justify-center shrink-0">
+              <Scale className="w-4 h-4" />
             </div>
-            <div>
-              <h3 className="text-base font-black text-slate-900 leading-snug">
+            <div className="min-w-0">
+              <h3 className="text-sm sm:text-base font-bold text-slate-900 leading-tight">
                 शासन जमा अंतिम आदेश पारित करा
               </h3>
-              <p className="text-xs text-rose-800 font-semibold">
-                प्रकरण क्र. {caseItem.caseNumber} | MLRC 1966 कलम ५०/५४/३६अ
+              <p className="text-[11px] text-slate-500 truncate mt-0.5">
+                प्रकरण क्र. <span className="font-semibold text-rose-700">{caseItem.caseNumber}</span> | MLRC १९६६ कलम ५०/५४/३६अ
               </p>
             </div>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition"
+            className="text-slate-400 hover:text-slate-700 hover:bg-slate-100 p-1.5 rounded-lg transition shrink-0"
+            aria-label="Close dialog"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4 sm:w-5 sm:h-5" />
           </button>
         </div>
 

@@ -14,7 +14,7 @@ const STANDALONE_PUBLIC_ROUTES = ['/', '/privacy-policy', '/terms', '/accessibil
 export default function PortalLayout({ children }) {
   const pathname = usePathname();
   const { user, loading, isLoginModalOpen, closeLoginModal } = useAuth();
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   const isStandalone = STANDALONE_PUBLIC_ROUTES.includes(pathname);
@@ -53,7 +53,7 @@ export default function PortalLayout({ children }) {
           onToggleMobileSidebar={() => {}}
           hideSidebarToggle={true}
         />
-        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 w-full flex-1 py-4 sm:py-6">
+        <div className="w-full px-3 sm:px-5 lg:px-6 flex-1 py-4 sm:py-6">
           <main id="main-content" className="w-full">
             {children}
           </main>
@@ -91,14 +91,14 @@ export default function PortalLayout({ children }) {
         onToggleSidebar={() => setSidebarCollapsed((prev) => !prev)}
         onToggleMobileSidebar={() => setMobileSidebarOpen((prev) => !prev)}
       />
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 w-full flex-1 py-2.5 sm:py-3.5 flex gap-3 sm:gap-4">
+      <div className="w-full px-3 sm:px-5 lg:px-6 flex-1 py-2.5 sm:py-3.5 flex gap-3 sm:gap-4">
         <Sidebar
           collapsed={sidebarCollapsed}
           mobileOpen={mobileSidebarOpen}
           onCloseMobile={() => setMobileSidebarOpen(false)}
           onToggleCollapse={() => setSidebarCollapsed((prev) => !prev)}
         />
-        <main id="main-content" className="flex-1 min-w-0 transition-all duration-300">
+        <main id="main-content" className="flex-1 min-w-0">
           <RouteGuard>{children}</RouteGuard>
         </main>
       </div>

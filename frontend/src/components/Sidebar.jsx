@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
@@ -57,122 +58,155 @@ const navItems = [
 ];
 
 export default function Sidebar({
-  collapsed = false,
+  collapsed = true,
   mobileOpen = false,
   onCloseMobile = () => {},
   onToggleCollapse = () => {},
 }) {
   const pathname = usePathname();
+  const [isHovered, setIsHovered] = useState(false);
+  const hoverTimeoutRef = useRef(null);
+
+  // Close hover state when navigating to a new page
+  useEffect(() => {
+    setIsHovered(false);
+  }, [pathname]);
+
+  // Clean up hover debounce timer
+  useEffect(() => {
+    return () => {
+      if (hoverTimeoutRef.current) {
+        clearTimeout(hoverTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const handleMouseEnter = () => {
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current);
+      hoverTimeoutRef.current = null;
+    }
+    setIsHovered(true);
+  };
+
+  const handleMouseLeave = () => {
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current);
+    }
+    hoverTimeoutRef.current = setTimeout(() => {
+      setIsHovered(false);
+    }, 150);
+  };
+
+  // When collapsed is true (auto-close mode), hover opens the sidebar
+  // When collapsed is false (pinned open mode), it stays open
+  const effectiveCollapsed = collapsed ? !isHovered : false;
 
   return (
     <>
-      {/* Desktop Sidebar (Smooth Collapse to 72px Icon Rail) */}
+      {/* Desktop Sidebar (Auto-closed & Opened on Hover) */}
       <aside
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
         className={clsx(
-          'flex-shrink-0 hidden lg:block transition-[width] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] will-change-[width] z-30',
-          collapsed ? 'w-[72px]' : 'w-64'
+          'flex-shrink-0 hidden lg:block transition-[width] duration-300 ease-out z-30',
+          effectiveCollapsed ? 'w-[72px]' : 'w-64'
         )}
       >
-        <div
-          className={clsx(
-            'sticky top-20 bg-white border border-slate-200 rounded-2xl shadow-2xs space-y-2 transition-all duration-300',
-            collapsed ? 'p-2' : 'p-2.5'
-          )}
-        >
+        <div className="sticky top-20 bg-white border border-slate-200 rounded-2xl shadow-2xs space-y-2 p-2">
           {/* Header Row: Title & Collapse Toggle */}
-          <div
-            className={clsx(
-              'flex items-center min-h-[36px] mb-1',
-              collapsed ? 'justify-center px-0' : 'justify-between px-2 py-0.5'
+          <div className="h-10 flex items-center mb-1">
+            {effectiveCollapsed ? (
+              <div className="w-10 h-10 mx-auto flex items-center justify-center">
+                <button
+                  onClick={onToggleCollapse}
+                  title="साइडबार कायम उघडा ठेवा (पिन करा)"
+                  className="w-10 h-10 rounded-xl text-slate-500 hover:text-blue-950 hover:bg-slate-100 transition-colors flex items-center justify-center cursor-pointer"
+                  aria-label="Toggle Sidebar Width"
+                >
+                  <PanelLeftClose className="w-4 h-4 rotate-180 text-blue-900 scale-110" />
+                </button>
+              </div>
+            ) : (
+              <div className="w-full flex items-center justify-between px-2">
+                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider whitespace-nowrap">
+                  मुख्य विभाग
+                </span>
+                <button
+                  onClick={onToggleCollapse}
+                  title="ऑटो-क्लोज सक्षम करा"
+                  className="w-8 h-8 rounded-lg text-slate-400 hover:text-blue-950 hover:bg-slate-100 transition-colors flex items-center justify-center cursor-pointer"
+                  aria-label="Toggle Sidebar Width"
+                >
+                  <PanelLeftClose className="w-4 h-4 text-slate-500" />
+                </button>
+              </div>
             )}
-          >
-            {!collapsed && (
-              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider whitespace-nowrap">
-                मुख्य विभाग
-              </span>
-            )}
-            <div className="relative group">
-              <button
-                onClick={onToggleCollapse}
-                title={collapsed ? 'साइडबार विस्तृत करा' : 'साइडबार संक्षिप्त करा'}
-                className={clsx(
-                  'rounded-xl text-slate-400 hover:text-blue-950 hover:bg-slate-100 transition-all flex items-center justify-center cursor-pointer',
-                  collapsed ? 'w-11 h-11 text-slate-600 hover:bg-slate-100' : 'p-1.5'
-                )}
-                aria-label="Toggle Sidebar Width"
-              >
-                <PanelLeftClose
-                  className={clsx(
-                    'w-4 h-4 transition-transform duration-300 ease-in-out',
-                    collapsed ? 'rotate-180 text-blue-900 scale-110' : 'text-slate-500 group-hover:-translate-x-0.5'
-                  )}
-                />
-              </button>
-              {collapsed && (
-                <div className="absolute left-full ml-3 top-1/2 -translate-y-1/2 px-2.5 py-1.5 bg-slate-900 text-white rounded-lg shadow-xl opacity-0 pointer-events-none group-hover:opacity-100 transition-all duration-150 z-50 whitespace-nowrap text-xs font-medium border border-slate-800 -translate-x-1 group-hover:translate-x-0">
-                  <div className="absolute top-1/2 -translate-y-1/2 -left-1 w-2 h-2 bg-slate-900 border-l border-b border-slate-800 rotate-45" />
-                  <span>साइडबार उघडा</span>
-                </div>
-              )}
-            </div>
           </div>
 
           {/* Navigation Links */}
-          <nav className="space-y-1">
+          <nav className="space-y-1.5">
             {navItems.map((item) => {
               const Icon = item.icon;
-              const isActive = item.href === '/'
-                ? pathname === '/'
-                : pathname === item.href || (pathname.startsWith(item.href + '/') && item.href !== '/');
+              const isActive =
+                item.href === '/'
+                  ? pathname === '/'
+                  : pathname === item.href || (pathname.startsWith(item.href + '/') && item.href !== '/');
               return (
                 <Link
                   key={item.href}
                   href={item.href}
                   className={clsx(
-                    'group relative flex items-center rounded-xl transition-all duration-200 ease-in-out',
-                    collapsed
-                      ? 'w-11 h-11 mx-auto justify-center p-0 my-1'
-                      : 'px-3 py-2.5 justify-between w-full',
+                    'group relative flex items-center rounded-xl transition-colors duration-150 h-10',
+                    effectiveCollapsed
+                      ? 'w-10 mx-auto justify-center'
+                      : 'w-full justify-between pr-2',
                     isActive
                       ? 'bg-blue-900 text-white shadow-xs font-bold'
                       : 'text-slate-700 hover:bg-slate-100/90 hover:text-blue-950'
                   )}
                 >
-                  <div className={clsx('flex items-center min-w-0', collapsed && 'justify-center')}>
-                    {/* Icon */}
-                    <Icon
+                  <div className="flex items-center min-w-0">
+                    {/* Fixed 40px icon box matching collapsed button size */}
+                    <div
                       className={clsx(
-                        'w-4 h-4 transition-all duration-200 flex-shrink-0',
-                        isActive
-                          ? 'text-amber-400 scale-105'
-                          : 'text-slate-400 group-hover:text-blue-900 group-hover:scale-110'
+                        'w-10 h-10 flex items-center justify-center shrink-0',
+                        !effectiveCollapsed && 'ml-1'
                       )}
-                    />
+                    >
+                      <Icon
+                        className={clsx(
+                          'w-4 h-4 transition-transform duration-150 shrink-0',
+                          isActive
+                            ? 'text-amber-400 scale-105'
+                            : 'text-slate-400 group-hover:text-blue-900 group-hover:scale-110'
+                        )}
+                      />
+                    </div>
 
                     {/* Text Container (Expanded State) */}
-                    {!collapsed && (
-                      <div className="overflow-hidden whitespace-nowrap ml-3 text-left min-w-0">
+                    {!effectiveCollapsed && (
+                      <div className="overflow-hidden whitespace-nowrap ml-2 text-left min-w-0 flex-1 animate-in fade-in duration-200">
                         <p className="leading-tight text-xs font-bold truncate">{item.labelMr}</p>
-                        
                       </div>
                     )}
                   </div>
 
                   {/* Active Indicator Arrow (Expanded State) */}
-                  {!collapsed && (
+                  {!effectiveCollapsed && (
                     <ChevronRight
                       className={clsx(
-                        'w-3.5 h-3.5 transition-all duration-200 flex-shrink-0',
+                        'w-3.5 h-3.5 transition-all duration-150 shrink-0',
                         isActive
-                          ? 'opacity-100 text-amber-400 translate-x-0'
+                          ? 'opacity-100 text-amber-400'
                           : 'opacity-0 -translate-x-1 group-hover:opacity-70 group-hover:translate-x-0'
                       )}
                     />
                   )}
 
                   {/* Floating Tooltip for Collapsed State */}
-                  {collapsed && (
-                    <div className="absolute left-full ml-3 top-1/2 -translate-y-1/2 px-3 py-1.5 bg-slate-900 text-white rounded-xl shadow-xl opacity-0 pointer-events-none group-hover:opacity-100 transition-all duration-150 z-50 whitespace-nowrap border border-slate-800 -translate-x-1 group-hover:translate-x-0">
+                  {effectiveCollapsed && !isHovered && (
+                    <div className="absolute left-full ml-3 top-1/2 -translate-y-1/2 px-2.5 py-1.5 bg-slate-900 text-white rounded-xl shadow-xl opacity-0 pointer-events-none group-hover:opacity-100 transition-all duration-150 z-50 whitespace-nowrap border border-slate-800 -translate-x-1 group-hover:translate-x-0">
                       <div className="absolute top-1/2 -translate-y-1/2 -left-1 w-2 h-2 bg-slate-900 border-l border-b border-slate-800 rotate-45" />
                       <p className="text-xs font-bold text-white relative z-10 leading-tight">{item.labelMr}</p>
                     </div>
@@ -183,10 +217,10 @@ export default function Sidebar({
           </nav>
 
           {/* Statutory Guide (Collapses to Compact Icon with Tooltip) */}
-          {collapsed ? (
+          {effectiveCollapsed ? (
             <div className="pt-2 border-t border-slate-100 flex justify-center">
-              <div className="group relative w-11 h-11 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center cursor-pointer hover:bg-amber-100 transition shadow-2xs">
-                <Layers className="w-4 h-4 text-amber-700" />
+              <div className="group relative w-10 h-10 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center cursor-pointer hover:bg-amber-100 transition shadow-2xs">
+                <Layers className="w-4 h-4 text-amber-700 shrink-0" />
                 <div className="absolute left-full ml-3 top-1/2 -translate-y-1/2 px-3.5 py-2.5 bg-slate-900 text-white rounded-xl shadow-xl opacity-0 pointer-events-none group-hover:opacity-100 transition-all duration-150 z-50 w-64 text-left border border-slate-800 -translate-x-1 group-hover:translate-x-0">
                   <div className="absolute top-1/2 -translate-y-1/2 -left-1 w-2 h-2 bg-slate-900 border-l border-b border-slate-800 rotate-45" />
                   <div className="flex items-center gap-1.5 text-amber-400 font-bold text-xs mb-1 relative z-10">
@@ -201,7 +235,7 @@ export default function Sidebar({
             </div>
           ) : (
             <div className="pt-2 border-t border-slate-100">
-              <div className="p-3 bg-gradient-to-br from-amber-50 to-orange-50/70 border border-amber-200 rounded-xl space-y-1">
+              <div className="p-2.5 bg-gradient-to-br from-amber-50 to-orange-50/70 border border-amber-200 rounded-xl space-y-1 animate-in fade-in duration-200">
                 <div className="flex items-center gap-1.5 text-amber-950 font-bold text-xs">
                   <Layers className="w-3.5 h-3.5 text-amber-700 flex-shrink-0" />
                   <span>वैधानिक मार्गदर्शक</span>

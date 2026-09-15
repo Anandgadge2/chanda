@@ -44,7 +44,7 @@ export default function AccessibilityBar() {
 
   return (
     <div className="bg-[#0B1E36] text-slate-200 text-[11px] border-b border-blue-950 select-none">
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-1 flex items-center justify-between gap-2">
+      <div className="w-full px-3 sm:px-5 lg:px-6 py-1 flex items-center justify-between gap-2">
         {/* Left: Skip link and Government attribution */}
         <div className="flex items-center gap-2 sm:gap-3 min-w-0">
           <a

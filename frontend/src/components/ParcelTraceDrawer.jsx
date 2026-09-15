@@ -115,45 +115,36 @@ export default function ParcelTraceDrawer({ upi, onClose, onRefresh }) {
             : 'max-w-7xl max-h-[95vh] h-[92vh]'
         }`}
       >
-        {/* Tricolor Subtle Top Bar Accent */}
-        <div className="h-1 bg-gradient-to-r from-amber-500 via-white to-emerald-600 shrink-0" />
-
         {/* Executive Government Header */}
-        <div className="px-4 sm:px-6 py-3.5 bg-gradient-to-r from-slate-950 via-slate-900 to-indigo-950 text-white flex justify-between items-center border-b border-slate-800 shrink-0 gap-3">
+        <div className="px-4 sm:px-6 py-2.5 sm:py-3 bg-white text-slate-900 flex justify-between items-center border-b border-slate-200 shrink-0 gap-3">
           <div className="min-w-0 flex-1">
-            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
-              <span className="font-mono text-[10px] sm:text-xs text-amber-400 bg-amber-950/70 px-2 py-0.5 rounded font-bold border border-amber-800/80 shadow-xs">
-                UPI: {upi}
-              </span>
-              {parcel?.hasActiveDispute ? (
-                <span className="text-[10px] sm:text-xs bg-rose-950/90 text-rose-300 px-2 py-0.5 rounded font-bold border border-rose-700 flex items-center gap-1 animate-dispute-pulse">
-                  <span className="w-1.5 h-1.5 rounded-full bg-rose-400" />
-                  सक्रिय वाद (Active Dispute)
-                </span>
-              ) : (
-                <span className="text-[10px] sm:text-xs bg-emerald-950/80 text-emerald-300 px-2 py-0.5 rounded font-bold border border-emerald-800 flex items-center gap-1">
-                  <CheckCircle2 className="w-3 h-3 text-emerald-400" />
-                  निर्वैध नोंद (Clear Record)
-                </span>
-              )}
-              <span className="text-[10px] sm:text-xs bg-blue-950/80 text-blue-300 px-2 py-0.5 rounded font-medium border border-blue-800/80 hidden sm:inline-block">
-                {parcel?.villageName || 'गाव'}
-              </span>
-            </div>
-
-            <div className="flex items-center gap-2 mt-1">
-              <h2 className="text-sm sm:text-lg font-extrabold text-white truncate tracking-tight">
+            <div className="flex flex-wrap items-center gap-2">
+              <h2 className="text-sm sm:text-base font-bold text-slate-900 truncate tracking-tight">
                 {parcel?.villageName} | गट क्र. {parcel?.gatNumber}
                 {parcel?.hissaNumber && parcel.hissaNumber !== '0' && ` (हिस्सा ${parcel.hissaNumber})`}
               </h2>
+              <span className="font-mono text-[10px] sm:text-xs text-slate-700 bg-slate-100 px-2 py-0.5 rounded font-bold border border-slate-200">
+                UPI: {upi}
+              </span>
+              {parcel?.hasActiveDispute ? (
+                <span className="text-[10px] sm:text-xs bg-rose-50 text-rose-700 px-2 py-0.5 rounded font-semibold border border-rose-200 flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" />
+                  सक्रिय वाद
+                </span>
+              ) : (
+                <span className="text-[10px] sm:text-xs bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded font-semibold border border-emerald-200 flex items-center gap-1">
+                  <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                  निर्वैध नोंद
+                </span>
+              )}
             </div>
 
-            <p className="text-[11px] sm:text-xs text-slate-400 truncate flex items-center gap-2 mt-0.5">
-              <span>तालुका: <strong className="text-slate-200">{parcel?.taluka}</strong></span>
+            <p className="text-[11px] sm:text-xs text-slate-500 truncate flex items-center gap-2 mt-0.5">
+              <span>तालुका: <strong className="text-slate-700 font-semibold">{parcel?.taluka}</strong></span>
               <span>•</span>
-              <span>महसूल मंडळ: <strong className="text-slate-200">{parcel?.revenueCircle || '-'}</strong></span>
+              <span>महसूल मंडळ: <strong className="text-slate-700 font-semibold">{parcel?.revenueCircle || '-'}</strong></span>
               <span>•</span>
-              <span>क्षेत्र: <strong className="text-amber-400 font-mono">{Number(parcel?.totalAreaHa || 0).toFixed(4)} हे.</strong></span>
+              <span>क्षेत्र: <strong className="text-amber-700 font-mono font-semibold">{Number(parcel?.totalAreaHa || 0).toFixed(4)} हे.</strong></span>
             </p>
           </div>
 
@@ -166,10 +157,10 @@ export default function ParcelTraceDrawer({ upi, onClose, onRefresh }) {
                 setGlossaryInitialQuery('');
                 setGlossaryModalOpen(true);
               }}
-              className="px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-lg text-xs font-bold bg-amber-400/20 hover:bg-amber-400/30 text-amber-300 border border-amber-400/40 transition flex items-center gap-1.5 shadow-2xs"
+              className="px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-lg text-xs font-semibold bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 transition flex items-center gap-1.5"
               title="७/१२ संक्षिप्त रूपे मार्गदर्शक (Glossary)"
             >
-              <BookOpen className="w-3.5 h-3.5" />
+              <BookOpen className="w-3.5 h-3.5 text-amber-700" />
               <span className="hidden sm:inline">संक्षिप्त रूपे मदत</span>
             </button>
 
@@ -179,12 +170,12 @@ export default function ParcelTraceDrawer({ upi, onClose, onRefresh }) {
               onClick={() => setIsSplitView((prev) => !prev)}
               className={`p-1.5 sm:px-2.5 sm:py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition border ${
                 isSplitView
-                  ? 'bg-blue-900/60 text-blue-200 border-blue-700'
-                  : 'bg-slate-800 text-slate-300 border-slate-700 hover:text-white'
+                  ? 'bg-blue-50 text-blue-800 border-blue-300'
+                  : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
               } hidden md:flex`}
               title="बाजू-बाजूने स्कॅन दृश्य टॉगल करा"
             >
-              <Columns className="w-3.5 h-3.5 text-amber-400" />
+              <Columns className="w-3.5 h-3.5 text-blue-700" />
               <span className="hidden lg:inline">{isSplitView ? 'बाजू-बाजूने दृश्य' : 'केवळ माहिती'}</span>
             </button>
 
@@ -192,7 +183,7 @@ export default function ParcelTraceDrawer({ upi, onClose, onRefresh }) {
             <button
               type="button"
               onClick={() => setIsFullscreen((prev) => !prev)}
-              className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition border border-slate-800 hidden sm:block"
+              className="p-1.5 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition border border-slate-200 hidden sm:block"
               title={isFullscreen ? 'सामान्य आकार' : 'विस्तारित आकार'}
             >
               {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
@@ -202,10 +193,10 @@ export default function ParcelTraceDrawer({ upi, onClose, onRefresh }) {
             <button
               type="button"
               onClick={onClose}
-              className="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800 transition border border-transparent hover:border-slate-700"
+              className="text-slate-400 hover:text-slate-700 hover:bg-slate-100 p-1.5 rounded-lg transition"
               aria-label="Close dialog"
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
           </div>
         </div>
