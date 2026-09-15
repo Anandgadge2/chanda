@@ -75,10 +75,10 @@ export default function DocumentsPage() {
             <span className="text-xs bg-purple-100 text-purple-900 font-bold px-2 py-0.5 rounded">
               जिल्हाधिकारी अभिलेखागार (DMS)
             </span>
-            <span className="text-xs text-slate-500 font-medium">Physical Room & File Mapping</span>
+            <span className="text-xs text-slate-500 font-medium">अभिलेखागार संदर्भ</span>
           </div>
           <h1 className="text-lg sm:text-2xl font-black text-slate-900 mt-1 leading-tight">
-            डिजिटल दस्तऐवज व भौतिक कपाट संदर्भ (Collectorate DMS)
+            डिजिटल दस्तऐवज व भौतिक कपाट संदर्भ
           </h1>
           <p className="text-xs text-slate-500 mt-0.5">
             सन १९५० जुने सातबारे, फेरफार पत्रके, उपविभागीय अधिकारी व जिल्हाधिकारी आदेश
@@ -122,7 +122,7 @@ export default function DocumentsPage() {
           onChange={(e) => setDocType(e.target.value)}
           className="w-full sm:w-auto border border-slate-300 rounded-lg px-2.5 py-2 text-xs bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
-          <option value="">सर्व दस्तऐवज प्रकार (All Categories)</option>
+          <option value="">सर्व दस्तऐवज प्रकार</option>
           {Object.entries(DMS_DOC_TYPES).map(([k, v]) => (
             <option key={k} value={k}>
               {v.labelMr}
@@ -142,7 +142,7 @@ export default function DocumentsPage() {
               चंद्रपूर अभिलेख कक्ष कोऑर्डिनेट्स
             </span>
             <span className="text-[10px] text-amber-800 bg-amber-50 px-2 py-0.5 rounded border border-amber-200 sm:hidden">
-              तक्ता आडवा स्क्रोल करा (Swipe ↔)
+              तक्ता आडवा स्क्रोल करा
             </span>
           </div>
         </div>
@@ -153,12 +153,12 @@ export default function DocumentsPage() {
               <tr>
                 <th className="py-3 px-4">दस्तऐवज शीर्षक व वर्गीकरण</th>
                 <th className="py-3 px-3">संलग्न भूखंड / केस</th>
-                <th className="py-3 px-3">भौतिक रॅक (Rack)</th>
-                <th className="py-3 px-3">गठ्ठा (Bundle)</th>
+                <th className="py-3 px-3">भौतिक रॅक</th>
+                <th className="py-3 px-3">गठ्ठा</th>
                 <th className="py-3 px-3">फाईल क्र.</th>
-                <th className="py-3 px-3">साकार (Size)</th>
+                <th className="py-3 px-3">आकार</th>
                 <th className="py-3 px-3">अपलोड दिनांक</th>
-                <th className="py-3 px-4 text-right">डिजिटल प्रत (Cloud)</th>
+                <th className="py-3 px-4 text-right">डिजिटल प्रत</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
