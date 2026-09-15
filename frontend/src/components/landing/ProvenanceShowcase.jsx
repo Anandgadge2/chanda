@@ -22,7 +22,7 @@ export default function ProvenanceShowcase() {
         <div className="text-center max-w-3xl mx-auto space-y-1.5 mb-4 sm:mb-5">
           <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-900 text-xs font-bold border border-emerald-300">
             <History className="w-3.5 h-3.5 text-emerald-700" />
-            <span>१९५० मूळ शीर्षक साखळी (1950 Backward Provenance)</span>
+            <span>१९५० मूळ शीर्षक साखळी</span>
           </div>
           <h2 className="text-base sm:text-2xl font-black text-slate-900 tracking-tight">
             ऐतिहासिक हक्कनोंदी व विद्यमान ७/१२ मधील तफावत शोध
@@ -103,7 +103,7 @@ export default function ProvenanceShowcase() {
           <div className="space-y-2.5 pt-3 border-t border-slate-200">
             <h4 className="text-xs font-bold text-amber-800 uppercase tracking-wider flex items-center gap-1.5">
               <Layers className="w-4 h-4 text-amber-600 flex-shrink-0" />
-              <span>हक्कनोंदी व फेरफार साखळी अखंडता (Provenance Mutation Chain)</span>
+              <span>हक्कनोंदी व फेरफार साखळी अखंडता</span>
             </h4>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 text-xs">

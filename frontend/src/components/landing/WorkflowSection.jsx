@@ -62,7 +62,7 @@ export default function WorkflowSection() {
         <div className="text-center max-w-3xl mx-auto space-y-1.5 mb-4 sm:mb-5">
           <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-900 text-xs font-bold border border-blue-300">
             <ShieldCheck className="w-3.5 h-3.5 text-blue-700" />
-            <span>पारदर्शक महसूल कार्यप्रणाली (End-to-End Governance Lifecycle)</span>
+            <span>पारदर्शक महसूल कार्यप्रणाली</span>
           </div>
           <h2 className="text-lg sm:text-2xl font-black text-slate-900 tracking-tight">
             गाव स्तरापासून ते शासन जमा आदेशापर्यंतची प्रक्रिया

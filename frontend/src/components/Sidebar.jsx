@@ -21,37 +21,31 @@ const navItems = [
   {
     href: '/dashboard',
     labelMr: 'महसूल डॅशबोर्ड',
-    labelEn: 'Officer Dashboard',
     icon: LayoutDashboard,
   },
   {
     href: '/parcels',
     labelMr: 'भूखंड नोंदवही (७/१२)',
-    labelEn: 'Land Parcels & 1950 Trace',
     icon: MapPin,
   },
   {
     href: '/cases',
     labelMr: 'शर्तभंग व सुनावणी प्रकरणे',
-    labelEn: 'SDO Hearings & Cases',
     icon: Scale,
   },
   {
     href: '/documents',
     labelMr: 'जिल्हा अभिलेखागार',
-    labelEn: 'Collectorate Record Room',
     icon: FolderArchive,
   },
   {
     href: '/bulk-upload',
     labelMr: 'गाव एक्सेल अपलोड',
-    labelEn: 'Raw Excel Bulk Ingestion',
     icon: UploadCloud,
   },
   {
     href: '/reports',
     labelMr: 'प्रपत्र-३ वैधानिक अहवाल',
-    labelEn: 'Prapatra-3 Statutory Export',
     icon: FileSpreadsheet,
   },
 ];
@@ -153,14 +147,7 @@ export default function Sidebar({
                     {!collapsed && (
                       <div className="overflow-hidden whitespace-nowrap ml-3 text-left min-w-0">
                         <p className="leading-tight text-xs font-bold truncate">{item.labelMr}</p>
-                        <p
-                          className={clsx(
-                            'text-[10px] truncate transition-colors mt-0.5',
-                            isActive ? 'text-blue-200' : 'text-slate-500'
-                          )}
-                        >
-                          {item.labelEn}
-                        </p>
+                        
                       </div>
                     )}
                   </div>

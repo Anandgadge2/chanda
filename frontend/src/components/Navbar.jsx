@@ -42,7 +42,7 @@ export default function Navbar({
                   </span>
                 </div>
                 <p className="text-[10px] sm:text-[11px] text-slate-500 font-medium hidden md:block truncate">
-                  जमीन महसूल व भूमी अभिलेख संनियंत्रण प्रणाली (Collectorate Chandrapur)
+                  जमीन महसूल व भूमी अभिलेख संनियंत्रण प्रणाली
                 </p>
               </div>
             </Link>
@@ -59,19 +59,7 @@ export default function Navbar({
               <span className="md:hidden">पोर्टल</span>
             </Link>
 
-            <div className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-semibold">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span>महसूल सर्व्हर सक्रीय</span>
-            </div>
-
-            <Link
-              href="/reports"
-              className="inline-flex items-center gap-1 sm:gap-1.5 bg-blue-900 hover:bg-blue-800 text-white text-[11px] sm:text-xs font-bold px-2.5 sm:px-3.5 py-1.5 rounded-lg shadow-xs transition active:scale-95"
-            >
-              <FileSpreadsheet className="w-3.5 h-3.5 text-amber-400 flex-shrink-0" />
-              <span className="hidden sm:inline">प्रपत्र-३ डाऊनलोड</span>
-              <span className="sm:hidden">प्रपत्र-३</span>
-            </Link>
+           
 
             {/* Officer Profile Badge & Logout */}
             <div className="flex items-center gap-2 pl-2 border-l border-slate-200">

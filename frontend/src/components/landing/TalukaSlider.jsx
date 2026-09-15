@@ -136,7 +136,7 @@ export default function TalukaSlider() {
           <div>
             <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-blue-100/80 text-blue-900 text-xs font-bold border border-blue-200">
               <Compass className="w-3.5 h-3.5 text-blue-700" />
-              <span>प्रशासकीय कार्यक्षेत्र (Jurisdiction Map)</span>
+              <span>प्रशासकीय कार्यक्षेत्र</span>
             </div>
             <h2 className="text-base sm:text-xl font-black text-slate-900 mt-1">
               चंद्रपूर जिल्ह्यातील १५ तालुके व महसूल मंडळे
@@ -148,10 +148,7 @@ export default function TalukaSlider() {
 
           {/* Carousel Arrows and Pause on Hover Badge */}
           <div className="flex items-center gap-2 self-end md:self-auto">
-            <span className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-50 border border-blue-200 text-blue-800 text-[11px] font-semibold mr-1 shadow-2xs">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-              <span>ऑटो-स्क्रोल (होव्हरवर थांबेल)</span>
-            </span>
+           
             <button
               type="button"
               onClick={() => sliderRef.current?.slickPrev()}
