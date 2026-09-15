@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { api, getAuthToken, setAuthToken } from '../lib/api';
 
 const AuthContext = createContext({
@@ -56,6 +57,8 @@ export function AuthProvider({ children }) {
     initAuth();
   }, []);
 
+  const router = useRouter();
+
   const login = async (email, password) => {
     const data = await api.login(email, password);
     if (data.success && data.token) {
@@ -66,17 +69,20 @@ export function AuthProvider({ children }) {
     return data;
   };
 
-  const logout = async () => {
-    try {
-      await api.logout();
-    } finally {
-      setToken(null);
-      setUser(null);
-      if (typeof window !== 'undefined' && window.location.pathname !== '/') {
-        window.location.href = '/';
-      }
+  const logout = useCallback(() => {
+    // 1. Immediately reset client state and token for zero-delay UI update
+    setToken(null);
+    setUser(null);
+    setAuthToken(null);
+
+    // 2. Notify backend in background without awaiting or blocking UI
+    api.logout().catch(() => {});
+
+    // 3. Instant client-side redirect to home
+    if (typeof window !== 'undefined' && window.location.pathname !== '/') {
+      router.push('/');
     }
-  };
+  }, [router]);
 
   const hasRole = (...roles) => {
     if (!user || !user.role) return false;

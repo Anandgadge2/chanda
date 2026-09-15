@@ -23,7 +23,6 @@ export default function MetricCard({
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
           <p className="text-xs font-bold text-slate-800 leading-tight">{titleMr}</p>
-          <p className="text-[10px] text-slate-500 font-medium leading-tight mt-0.5">{titleEn}</p>
         </div>
         {Icon && (
           <div className={clsx('p-2 rounded-lg border flex items-center justify-center flex-shrink-0', badgeColor)}>

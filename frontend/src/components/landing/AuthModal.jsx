@@ -17,6 +17,8 @@ import {
   ArrowRight,
   Landmark,
   Sparkles,
+  Eye,
+  EyeOff,
 } from 'lucide-react';
 import { CHANDRAPUR_TALUKAS } from '../../lib/constants';
 import ChandrapurDistrictLogo from './ChandrapurDistrictLogo';
@@ -54,6 +56,8 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'login' }) {
   const [tab, setTab] = useState(initialTab);
   const [email, setEmail] = useState('collector.chandrapur@maharashtra.gov.in');
   const [password, setPassword] = useState('Chanda@2026');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showRegPassword, setShowRegPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
@@ -95,11 +99,8 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'login' }) {
 
     try {
       await login(officer.email, officer.password);
-      setSuccessMsg(`प्रमाणीकरण यशस्वी! ${officer.title} म्हणून लॉगिन झाले.`);
-      setTimeout(() => {
-        onClose();
-        router.push('/dashboard');
-      }, 500);
+      onClose();
+      router.push('/dashboard');
     } catch (err) {
       setErrorMsg(err.message || 'लॉगिन अयशस्वी झाले.');
     } finally {
@@ -114,11 +115,8 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'login' }) {
 
     try {
       await login(email, password);
-      setSuccessMsg('सुरक्षित महसूल लॉगिन यशस्वी! डॅशबोर्डवर पुनर्निर्देशित केले जात आहे...');
-      setTimeout(() => {
-        onClose();
-        router.push('/dashboard');
-      }, 500);
+      onClose();
+      router.push('/dashboard');
     } catch (err) {
       setErrorMsg(err.message || 'अवैध ईमेल किंवा संकेतशब्द.');
     } finally {
@@ -280,15 +278,24 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'login' }) {
                     संकेतशब्द (Password)
                   </label>
                   <div className="relative">
-                    <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                    <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-3 pointer-events-none" />
                     <input
-                      type="password"
+                      type={showPassword ? 'text' : 'password'}
                       required
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="••••••••"
-                      className="w-full pl-9 pr-3 py-2 text-xs border border-slate-300 rounded-xl bg-slate-50 font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full pl-9 pr-9 py-2 text-xs border border-slate-300 rounded-xl bg-slate-50 font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((prev) => !prev)}
+                      className="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-700 p-0.5 rounded transition focus:outline-none"
+                      title={showPassword ? 'संकेतशब्द लपवा' : 'संकेतशब्द दाखवा'}
+                      aria-label={showPassword ? 'संकेतशब्द लपवा' : 'संकेतशब्द दाखवा'}
+                    >
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
                   </div>
                 </div>
 
@@ -414,14 +421,25 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'login' }) {
                       <label className="block text-xs font-bold text-slate-700 mb-1">
                         संकेतशब्द (Password)
                       </label>
-                      <input
-                        type="password"
-                        required
-                        value={regPassword}
-                        onChange={(e) => setRegPassword(e.target.value)}
-                        placeholder="किमान ६ अक्षरे"
-                        className="w-full px-3 py-2 text-xs border border-slate-300 rounded-xl bg-slate-50 font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
+                      <div className="relative">
+                        <input
+                          type={showRegPassword ? 'text' : 'password'}
+                          required
+                          value={regPassword}
+                          onChange={(e) => setRegPassword(e.target.value)}
+                          placeholder="किमान ६ अक्षरे"
+                          className="w-full pl-3 pr-9 py-2 text-xs border border-slate-300 rounded-xl bg-slate-50 font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowRegPassword((prev) => !prev)}
+                          className="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-700 p-0.5 rounded transition focus:outline-none"
+                          title={showRegPassword ? 'संकेतशब्द लपवा' : 'संकेतशब्द दाखवा'}
+                          aria-label={showRegPassword ? 'संकेतशब्द लपवा' : 'संकेतशब्द दाखवा'}
+                        >
+                          {showRegPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        </button>
+                      </div>
                     </div>
                   </div>
 

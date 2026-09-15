@@ -66,51 +66,55 @@ export const login = async (req, res) => {
       { expiresIn }
     );
 
-    // Save session in DB
+    // Prepare user payload
+    const userPayload = {
+      id: user.id,
+      fullName: user.fullName,
+      email: user.email,
+      mobile: user.mobile,
+      role: user.role,
+      taluka: user.taluka,
+      designation: user.designation,
+    };
+
+    // Return instant success response to client immediately
+    res.json({
+      success: true,
+      token,
+      user: userPayload,
+    });
+
+    // Save session in DB & audit log asynchronously in background
     const ipAddress =
       req.headers['x-forwarded-for']?.toString().split(',')[0].trim() ||
       req.socket.remoteAddress ||
       'unknown';
     const userAgent = req.headers['user-agent'] || 'unknown';
 
-    await prisma.session.create({
-      data: {
+    Promise.allSettled([
+      prisma.session.create({
+        data: {
+          userId: user.id,
+          token,
+          ipAddress: ipAddress.slice(0, 64),
+          userAgent: userAgent.slice(0, 512),
+          expiresAt,
+        },
+      }),
+      prisma.user.update({
+        where: { id: user.id },
+        data: { lastLoginAt: new Date() },
+      }),
+      logAudit({
         userId: user.id,
-        token,
-        ipAddress: ipAddress.slice(0, 64),
-        userAgent: userAgent.slice(0, 512),
-        expiresAt,
-      },
-    });
-
-    // Update last login
-    await prisma.user.update({
-      where: { id: user.id },
-      data: { lastLoginAt: new Date() },
-    });
-
-    // Audit log
-    await logAudit({
-      userId: user.id,
-      action: 'USER_LOGIN',
-      entityType: 'User',
-      entityId: user.id,
-      newData: { email: user.email, role: user.role },
-      req,
-    });
-
-    return res.json({
-      success: true,
-      token,
-      user: {
-        id: user.id,
-        fullName: user.fullName,
-        email: user.email,
-        mobile: user.mobile,
-        role: user.role,
-        taluka: user.taluka,
-        designation: user.designation,
-      },
+        action: 'USER_LOGIN',
+        entityType: 'User',
+        entityId: user.id,
+        newData: { email: user.email, role: user.role },
+        req,
+      }),
+    ]).catch((err) => {
+      console.warn('Background login tracking warning:', err?.message);
     });
   } catch (error) {
     console.error('Error in login:', error);
@@ -147,33 +151,45 @@ export const getMe = async (req, res) => {
 export const logout = async (req, res) => {
   try {
     const authHeader = req.headers.authorization;
-    if (authHeader && authHeader.startsWith('Bearer ')) {
-      const token = authHeader.split(' ')[1];
-      await prisma.session.deleteMany({
-        where: { token },
-      });
-    }
+    const token = authHeader && authHeader.startsWith('Bearer ') ? authHeader.split(' ')[1] : null;
 
-    if (req.user) {
-      await logAudit({
-        userId: req.user.id,
-        action: 'USER_LOGOUT',
-        entityType: 'User',
-        entityId: req.user.id,
-        req,
-      });
-    }
-
-    return res.json({
+    // Return immediate success so logout is 100% instant
+    res.json({
       success: true,
       message: 'सत्र यशस्वीरित्या समाप्त झाले. (Logged out successfully)',
     });
+
+    const tasks = [];
+    if (token) {
+      tasks.push(
+        prisma.session.deleteMany({
+          where: { token },
+        })
+      );
+    }
+
+    if (req.user) {
+      tasks.push(
+        logAudit({
+          userId: req.user.id,
+          action: 'USER_LOGOUT',
+          entityType: 'User',
+          entityId: req.user.id,
+          req,
+        })
+      );
+    }
+
+    if (tasks.length > 0) {
+      Promise.allSettled(tasks).catch((err) => {
+        console.warn('Background logout task warning:', err?.message);
+      });
+    }
   } catch (error) {
     console.error('Error in logout:', error);
-    return res.status(500).json({
-      success: false,
-      error: 'लॉगआउट करताना त्रुटी. (Failed to logout)',
-    });
+    if (!res.headersSent) {
+      return res.json({ success: true });
+    }
   }
 };
 

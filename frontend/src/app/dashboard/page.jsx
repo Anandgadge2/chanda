@@ -104,10 +104,10 @@ export default function DashboardPage() {
               onChange={(e) => setTaluka(e.target.value)}
               className="w-full sm:flex-1 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs bg-slate-50 font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
             >
-              <option value="">सर्व तालुके (All 15 Talukas - District Level)</option>
+              <option value="">सर्व तालुके</option>
               {CHANDRAPUR_TALUKAS.map((t) => (
                 <option key={t.id} value={t.id}>
-                  {t.nameMr} ({t.nameEn})
+                  {t.nameMr}
                 </option>
               ))}
             </select>
@@ -135,7 +135,6 @@ export default function DashboardPage() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
         <MetricCard
           titleMr="नोंदणीकृत भूखंड"
-          titleEn="Master Land Parcels"
           value={analytics.totalParcels}
           subtext="चंद्रपूर महसूल अभिलेख"
           icon={Landmark}
@@ -146,7 +145,6 @@ export default function DashboardPage() {
 
         <MetricCard
           titleMr="शर्तभंग व चौकशी"
-          titleEn="Active Violations"
           value={analytics.totalViolations}
           subtext="कलम ३६, ३६अ व ५०-५४"
           icon={AlertTriangle}
@@ -157,7 +155,6 @@ export default function DashboardPage() {
 
         <MetricCard
           titleMr="SDO सुनावणी प्रलंबित"
-          titleEn="Hearings Scheduled"
           value={analytics.pendingHearings}
           subtext="उपविभाग न्यायालय"
           icon={Scale}
@@ -168,7 +165,6 @@ export default function DashboardPage() {
 
         <MetricCard
           titleMr="शासन जमा क्षेत्र"
-          titleEn="Repossessed to Govt"
           value={`${Number(analytics.totalRepossessedHa).toFixed(2)} Ha`}
           subtext={`${analytics.totalRepossessedCases || 1} प्रकरणे नियमित/जप्त`}
           icon={ShieldCheck}
@@ -185,9 +181,8 @@ export default function DashboardPage() {
           <div className="flex justify-between items-center border-b border-slate-100 pb-2.5">
             <div>
               <h3 className="text-sm font-bold text-slate-900">
-                उल्लंघन प्रकारानुसार प्रकरणे (Violations by Statutory Category)
+                उल्लंघन प्रकारानुसार प्रकरणे
               </h3>
-              <p className="text-[11px] text-slate-500">Maharashtra Land Revenue Code Audit Flags</p>
             </div>
             <Link
               href="/cases"
@@ -210,7 +205,6 @@ export default function DashboardPage() {
                 >
                   <div className="min-w-0 pr-2">
                     <p className="text-xs font-bold text-slate-800 truncate">{config.labelMr}</p>
-                    <p className="text-[10px] text-slate-500 truncate">{config.labelEn}</p>
                   </div>
                   <span className="px-2.5 py-0.5 rounded-lg font-black text-xs bg-white border border-slate-200 text-slate-900 shadow-2xs flex-shrink-0">
                     {count}
@@ -260,9 +254,8 @@ export default function DashboardPage() {
         <div className="flex justify-between items-center border-b border-slate-100 pb-2.5">
           <div>
             <h3 className="text-sm font-bold text-slate-900">
-              अलिकडील अर्ध-न्यायिक सुनावणी नोंदी (Recent SDO / Collector Proceedings)
+              अलिकडील अर्ध-न्यायिक सुनावणी नोंदी
             </h3>
-            <p className="text-[11px] text-slate-500">Live Quasi-Judicial Court Logs</p>
           </div>
           <Link
             href="/cases"

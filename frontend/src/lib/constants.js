@@ -51,7 +51,7 @@ export const TENURE_CLASSES = {
 
 export const VIOLATION_TYPES = {
   SHARTBHANG: {
-    labelMr: 'शर्तभंग (Breach of Conditions)',
+    labelMr: 'शर्तभंग',
     labelEn: 'Breach of Allotment Conditions',
     badgeClass: 'bg-rose-50 text-rose-700 border-rose-200',
   },
@@ -61,7 +61,7 @@ export const VIOLATION_TYPES = {
     badgeClass: 'bg-red-50 text-red-700 border-red-200',
   },
   UNAUTHORIZED_NA_CONVERSION: {
-    labelMr: 'विनापरवानगी अ.कृ. वापर (Unauthorized NA)',
+    labelMr: 'विनापरवानगी अ.कृ. वापर',
     labelEn: 'Unauthorized Non-Agricultural Use',
     badgeClass: 'bg-orange-50 text-orange-700 border-orange-200',
   },
@@ -71,7 +71,7 @@ export const VIOLATION_TYPES = {
     badgeClass: 'bg-amber-50 text-amber-800 border-amber-200',
   },
   POKALIST_NONDI: {
-    labelMr: 'पोकळीस्त नोंदी (Bu.Ga.De / Ta.Ga.De)',
+    labelMr: 'पोकळीस्त नोंदी',
     labelEn: 'Defunct Hollow Mutation Remarks',
     badgeClass: 'bg-yellow-50 text-yellow-800 border-yellow-200',
   },
@@ -84,7 +84,7 @@ export const VIOLATION_TYPES = {
 
 export const ENFORCEMENT_STATUSES = {
   FLAGGED_IN_AUDIT: {
-    labelMr: 'लेखापरीक्षणात नोंद (Flagged)',
+    labelMr: 'लेखापरीक्षणात नोंद',
     labelEn: 'Audit Flagged',
     color: 'bg-slate-100 text-slate-700 border-slate-200',
   },
@@ -99,7 +99,7 @@ export const ENFORCEMENT_STATUSES = {
     color: 'bg-amber-50 text-amber-700 border-amber-200',
   },
   HEARING_SCHEDULED: {
-    labelMr: 'सुनावणी सुरू (SDO/Tehsildar)',
+    labelMr: 'सुनावणी सुरू',
     labelEn: 'Hearing Scheduled',
     color: 'bg-indigo-50 text-indigo-700 border-indigo-200',
   },
@@ -147,7 +147,7 @@ export const DMS_DOC_TYPES = {
     iconName: 'Landmark',
   },
   SHOW_CAUSE_NOTICE: {
-    labelMr: 'कारणे दाखवा नोटीस (Show Cause)',
+    labelMr: 'कारणे दाखवा नोटीस',
     labelEn: 'Show-Cause Legal Notice',
     iconName: 'MailWarning',
   },
