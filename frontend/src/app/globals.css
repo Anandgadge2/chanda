@@ -141,3 +141,108 @@ body {
   border-radius: 9999px !important;
 }
 
+/* Center Mode Banner Carousel (No outer frame, clean slide scaling) */
+.banner-center-slider {
+  position: relative;
+}
+
+.banner-center-slider .slick-list {
+  padding-top: 4px !important;
+  padding-bottom: 16px !important;
+}
+
+.banner-center-slider .slick-track {
+  display: flex !important;
+  align-items: center !important;
+}
+
+.banner-center-slider .slick-slide {
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 0 3px;
+  opacity: 0.6;
+  transform: scaleY(0.94) scaleX(0.985);
+  filter: brightness(0.8);
+  cursor: pointer;
+}
+
+.banner-center-slider .slick-slide:not(.slick-center):hover {
+  opacity: 0.85;
+  filter: brightness(0.95);
+  transform: scaleY(0.96) scaleX(0.99);
+}
+
+.banner-center-slider .slick-slide.slick-center {
+  opacity: 1 !important;
+  transform: scale(1) !important;
+  filter: brightness(1) !important;
+  z-index: 20 !important;
+  cursor: default;
+}
+
+.banner-center-slider .slick-slide.slick-center .banner-card {
+  border-color: rgba(251, 191, 36, 0.85) !important;
+  box-shadow: 0 20px 45px -10px rgba(15, 23, 42, 0.4), 0 0 25px rgba(251, 191, 36, 0.2) !important;
+}
+
+/* Bottom Pagination Dots for Banner (Clean transparent without background) */
+.banner-center-slider .slick-dots {
+  position: absolute !important;
+  bottom: 12px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  margin: 0 !important;
+  display: flex !important;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  list-style: none;
+  padding: 0 !important;
+  background: transparent !important;
+  backdrop-filter: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  z-index: 30;
+}
+
+.banner-center-slider .slick-dots li {
+  width: auto !important;
+  height: auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  display: inline-flex;
+}
+
+.banner-center-slider .slick-dots li button {
+  width: 9px !important;
+  height: 9px !important;
+  padding: 0 !important;
+  border-radius: 9999px !important;
+  background-color: rgba(255, 255, 255, 0.5) !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.6) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  font-size: 0 !important;
+  line-height: 0 !important;
+  cursor: pointer;
+}
+
+.banner-center-slider .slick-dots li button:hover {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+}
+
+.banner-center-slider .slick-dots li button:before {
+  display: none !important;
+  content: '' !important;
+}
+
+.banner-center-slider .slick-dots li.slick-active button {
+  width: 30px !important;
+  background-color: #fbbf24 !important;
+  border-radius: 9999px !important;
+  box-shadow: 0 2px 10px rgba(251, 191, 36, 0.7) !important;
+}
+
+
+
+

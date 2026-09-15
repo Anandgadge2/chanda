@@ -1,8 +1,11 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import Slider from 'react-slick';
+import 'slick-carousel/slick/slick.css';
+import 'slick-carousel/slick/slick-theme.css';
 import {
   Search,
   ShieldCheck,
@@ -11,7 +14,6 @@ import {
   ArrowRight,
   ChevronLeft,
   ChevronRight,
-  Lock,
   FileSpreadsheet,
   Building,
   Compass,
@@ -21,53 +23,123 @@ import { CHANDRAPUR_TALUKAS } from '../../lib/constants';
 
 const CHANDRAPUR_BANNERS = [
   {
+    id: 'collectorate',
     image: '/images/chandrapur_collectorate.jpg',
     badge: 'जिल्हा मुख्यालय • चंद्रपूर',
     titleMr: 'जिल्हाधिकारी कार्यालय, चंद्रपूर (District Collectorate)',
     titleEn: 'Main Administrative Complex & Revenue Headquarters of Chandrapur District',
     tag: 'MLRC १९६६ अपेक्स प्रशासन',
+    href: '/cases',
   },
   {
+    id: 'fort',
     image: '/images/chandrapur_fort.jpg',
     badge: 'ऐतिहासिक वारसा • चंद्रपूर',
     titleMr: 'चांदा किल्ला व ऐतिहासिक तटबंदी (Historic Chandrapur Fort)',
     titleEn: 'Heritage Ramparts & Historical Land Boundaries of Gond Dynasty',
     tag: 'ऐतिहासिक भूमी अभिलेख',
+    href: '/parcels?taluka=chandrapur',
   },
   {
+    id: 'tadoba',
     image: '/images/tadoba_reserve.jpg',
     badge: 'नैसर्गिक जलसंपदा व वनक्षेत्र',
     titleMr: 'ताडोबा-अंधारी वनसंपदा व इरई खोरे (Tadoba & Erai Basin)',
     titleEn: 'Ecological Heritage & Irrigation Land Resources of Chandrapur',
     tag: 'गायरान व वनजमीन संरक्षण',
+    href: '/parcels',
+  },
+  {
+    id: 'mahakali',
+    image: '/images/mahakali_temple.jpg',
+    badge: 'धार्मिक व ऐतिहासिक देवस्थान',
+    titleMr: 'श्री महाकाली देवी मंदिर देवस्थान (Mahakali Temple)',
+    titleEn: 'Ancient Religious Heritage, Devasthan Inam & Public Trust Land Records',
+    tag: 'देवस्थान इनाम व विश्वस्त जमीन',
+    href: '/parcels?taluka=chandrapur',
+  },
+  {
+    id: 'ballarpur',
+    image: '/images/ballarpur_industrial.jpg',
+    badge: 'औद्योगिक व खनिज पट्टा',
+    titleMr: 'बल्लारपूर कोळसा व औद्योगिक क्षेत्र (Ballarpur Industrial Belt)',
+    titleEn: 'Western Coalfields, Paper Industry & Mineral Land Lease Governance',
+    tag: 'खनिज भाडेपट्टा व औद्योगिक भूखंड',
+    href: '/parcels?taluka=ballarpur',
+  },
+  {
+    id: 'anandwan',
+    image: '/images/anandwan_warora.jpg',
+    badge: 'समाजसेवा भूमी वारसा',
+    titleMr: 'आनंदवन, वरोरा (Anandwan Eco-Community Heritage)',
+    titleEn: 'Baba Amte Humanitarian Legacy & Community Land Trust Administration',
+    tag: 'सामाजिक संस्था व भू-संपादन',
+    href: '/parcels?taluka=warora',
   },
 ];
 
 export default function LandingHero({ onOpenAuth }) {
   const router = useRouter();
-  const [currentSlide, setCurrentSlide] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
-  const timerRef = useRef(null);
+  const bannerSliderRef = useRef(null);
+  const [isMounted, setIsMounted] = useState(false);
 
   const [searchTaluka, setSearchTaluka] = useState('');
   const [searchGat, setSearchGat] = useState('');
 
-  // Auto-scrolling banner timer (5s)
   useEffect(() => {
-    if (!isPaused) {
-      timerRef.current = setInterval(() => {
-        setCurrentSlide((prev) => (prev + 1) % CHANDRAPUR_BANNERS.length);
-      }, 5000);
-    }
-    return () => clearInterval(timerRef.current);
-  }, [isPaused]);
+    setIsMounted(true);
+  }, []);
 
-  const handlePrevSlide = () => {
-    setCurrentSlide((prev) => (prev === 0 ? CHANDRAPUR_BANNERS.length - 1 : prev - 1));
-  };
-
-  const handleNextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % CHANDRAPUR_BANNERS.length);
+  const bannerSettings = {
+    className: 'center banner-center-slider',
+    centerMode: true,
+    infinite: true,
+    centerPadding: '70px',
+    slidesToShow: 1,
+    speed: 600,
+    autoplay: true,
+    autoplaySpeed: 2500,
+    pauseOnHover: true,
+    pauseOnFocus: true,
+    pauseOnDotsHover: true,
+    focusOnSelect: true,
+    cssEase: 'cubic-bezier(0.25, 1, 0.5, 1)',
+    arrows: false,
+    dots: true,
+    responsive: [
+      {
+        breakpoint: 1400,
+        settings: {
+          slidesToShow: 1,
+          centerMode: true,
+          centerPadding: '55px',
+        },
+      },
+      {
+        breakpoint: 1024,
+        settings: {
+          slidesToShow: 1,
+          centerMode: true,
+          centerPadding: '40px',
+        },
+      },
+      {
+        breakpoint: 768,
+        settings: {
+          slidesToShow: 1,
+          centerMode: true,
+          centerPadding: '24px',
+        },
+      },
+      {
+        breakpoint: 480,
+        settings: {
+          slidesToShow: 1,
+          centerMode: true,
+          centerPadding: '10px',
+        },
+      },
+    ],
   };
 
   const handleSearch = (e) => {
@@ -78,92 +150,95 @@ export default function LandingHero({ onOpenAuth }) {
     router.push(`/parcels?${queryParams.toString()}`);
   };
 
-  const activeBanner = CHANDRAPUR_BANNERS[currentSlide];
-
   return (
     <section
       id="search-section"
-      className="relative bg-gradient-to-b from-blue-50/30 via-slate-50 to-white text-slate-900 pt-4 pb-8 overflow-hidden border-b border-slate-200"
+      className="relative bg-gradient-to-b from-blue-50/30 via-slate-50 to-white text-slate-900 pt-2 sm:pt-3 pb-8 overflow-hidden border-b border-slate-200"
     >
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 space-y-3 sm:space-y-4">
-        {/* Full-Width Grand Photographic District Banner */}
-        <div
-          className="relative w-full rounded-2xl sm:rounded-3xl overflow-hidden shadow-md border border-slate-200 bg-slate-950 group h-[270px] sm:h-[380px] lg:h-[440px]"
-          onMouseEnter={() => setIsPaused(true)}
-          onMouseLeave={() => setIsPaused(false)}
-        >
-          {/* Carousel Images */}
-          {CHANDRAPUR_BANNERS.map((banner, index) => (
-            <div
-              key={index}
-              className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
-                index === currentSlide ? 'opacity-100 z-10' : 'opacity-0 z-0'
-              }`}
-            >
+      {/* Widescreen Grand Photographic District Banner with Side Peeks */}
+      <div className="w-full max-w-[1600px] mx-auto px-2 sm:px-4 lg:px-6 mb-3 sm:mb-4">
+        <div className="banner-center-slider relative w-full">
+          {/* Floating Navigation Controls (Positioned on Center Banner Edges) */}
+          <button
+            type="button"
+            onClick={() => bannerSliderRef.current?.slickPrev()}
+            className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-30 p-2 sm:p-2.5 rounded-full bg-slate-950/45 hover:bg-slate-950/80 text-white/90 hover:text-white backdrop-blur-sm border border-white/20 shadow-xl transition-all duration-200 active:scale-90 cursor-pointer"
+            aria-label="Previous Banner"
+            title="मागील (Previous)"
+          >
+            <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
+          </button>
+          <button
+            type="button"
+            onClick={() => bannerSliderRef.current?.slickNext()}
+            className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-30 p-2 sm:p-2.5 rounded-full bg-slate-950/45 hover:bg-slate-950/80 text-white/90 hover:text-white backdrop-blur-sm border border-white/20 shadow-xl transition-all duration-200 active:scale-90 cursor-pointer"
+            aria-label="Next Banner"
+            title="पुढील (Next)"
+          >
+            <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
+          </button>
+
+          {/* Center Mode Carousel */}
+          {isMounted ? (
+            <Slider ref={bannerSliderRef} {...bannerSettings}>
+              {CHANDRAPUR_BANNERS.map((banner, index) => (
+                <div key={index} className="px-1 sm:px-1.5 py-1 outline-none">
+                  <div
+                    className="banner-card block relative w-full h-[250px] sm:h-[320px] lg:h-[455px] rounded-2xl sm:rounded-3xl overflow-hidden border border-slate-700/60 shadow-lg group transition-all duration-500 bg-slate-950 select-none"
+                  >
+                    {/* Image with 50% Reduced Scale on Hover */}
+                    <img
+                      src={banner.image}
+                      alt={banner.titleMr}
+                      className="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-[1.015]"
+                    />
+                    {/* Gradient Overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-950/40 to-transparent" />
+
+                    {/* Top Badges */}
+                    <div className="absolute top-3 sm:top-4 left-4 sm:left-6 right-4 sm:right-6 flex items-center justify-between gap-2 z-10">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="px-3 py-0.5 rounded-full text-[11px] sm:text-xs font-bold bg-amber-400 text-slate-950 shadow-md">
+                          {banner.badge}
+                        </span>
+                        <span className="px-3 py-0.5 rounded-full text-[11px] sm:text-xs font-semibold bg-white/20 backdrop-blur-md border border-white/30 text-white shadow-xs">
+                          {banner.tag}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Content */}
+                    <div className="absolute inset-x-0 bottom-0 z-10 p-4 sm:p-5 lg:p-6 text-white space-y-1 sm:space-y-1.5 max-w-4xl">
+                      <h3 className="text-lg sm:text-2xl lg:text-3xl font-black text-white leading-tight drop-shadow-md">
+                        {banner.titleMr}
+                      </h3>
+                      <p className="text-[11px] sm:text-xs lg:text-sm text-slate-200 drop-shadow-sm font-medium line-clamp-1 sm:line-clamp-2">
+                        {banner.titleEn}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </Slider>
+          ) : (
+            <div className="relative w-full h-[250px] sm:h-[320px] lg:h-[455px] rounded-2xl sm:rounded-3xl overflow-hidden bg-slate-950 shadow-lg">
               <img
-                src={banner.image}
-                alt={banner.titleMr}
-                className="w-full h-full object-cover object-center"
+                src={CHANDRAPUR_BANNERS[0].image}
+                alt={CHANDRAPUR_BANNERS[0].titleMr}
+                className="w-full h-full object-cover object-center opacity-90"
               />
-              {/* High-Contrast Readability Gradient Overlay */}
               <div className="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-950/45 to-transparent" />
-            </div>
-          ))}
-
-          {/* Banner Slide Content Overlay */}
-          <div className="absolute inset-x-0 bottom-0 z-20 p-3.5 sm:p-5 lg:p-7 flex flex-col sm:flex-row sm:items-end justify-between gap-2.5 sm:gap-4 text-white">
-            <div className="max-w-3xl space-y-1.5 sm:space-y-2">
-              <div className="flex items-center gap-1.5 sm:gap-2">
-                <span className="px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-bold bg-amber-400 text-slate-950 shadow-xs">
-                  {activeBanner.badge}
-                </span>
-                <span className="px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-semibold bg-white/20 backdrop-blur-md border border-white/30 text-white truncate">
-                  {activeBanner.tag}
-                </span>
-              </div>
-
-              <h2 className="text-base sm:text-2xl lg:text-4xl font-black text-white leading-tight drop-shadow-md">
-                {activeBanner.titleMr}
-              </h2>
-              <p className="text-[11px] sm:text-sm text-slate-200 drop-shadow-sm font-medium line-clamp-1 sm:line-clamp-2">
-                {activeBanner.titleEn}
-              </p>
-            </div>
-
-            {/* Carousel Controls */}
-            <div className="flex items-center gap-2.5 self-end sm:self-auto flex-shrink-0">
-              <div className="flex items-center gap-1.5">
-                {CHANDRAPUR_BANNERS.map((_, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => setCurrentSlide(idx)}
-                    className={`h-1.5 sm:h-2 rounded-full transition-all duration-300 ${
-                      idx === currentSlide ? 'w-5 sm:w-7 bg-amber-400' : 'w-1.5 sm:w-2 bg-white/40 hover:bg-white/70'
-                    }`}
-                    aria-label={`Slide ${idx + 1}`}
-                  />
-                ))}
-              </div>
-
-              <div className="flex items-center gap-1 ml-1">
-                <button
-                  onClick={handlePrevSlide}
-                  className="p-1.5 sm:p-2 rounded-xl bg-white/20 hover:bg-white/30 backdrop-blur-md text-white border border-white/25 transition"
-                  aria-label="Previous Slide"
-                >
-                  <ChevronLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                </button>
-                <button
-                  onClick={handleNextSlide}
-                  className="p-1.5 sm:p-2 rounded-xl bg-white/20 hover:bg-white/30 backdrop-blur-md text-white border border-white/25 transition"
-                  aria-label="Next Slide"
-                >
-                  <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                </button>
+              <div className="absolute inset-x-0 bottom-0 p-6 text-white">
+                <h2 className="text-xl sm:text-2xl font-black text-white">
+                  {CHANDRAPUR_BANNERS[0].titleMr}
+                </h2>
               </div>
             </div>
-          </div>
+          )}
         </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 space-y-4">
 
         {/* Unified 7/12 Land Record Search Card */}
         <div className="bg-white rounded-2xl sm:rounded-3xl p-3.5 sm:p-5 shadow-xs border border-slate-200 space-y-3">
@@ -217,7 +292,7 @@ export default function LandingHero({ onOpenAuth }) {
 
             <button
               type="submit"
-              className="w-full sm:w-auto px-6 py-2.5 sm:py-2 rounded-lg bg-blue-900 hover:bg-blue-800 text-white font-bold text-xs shadow-xs transition flex items-center justify-center gap-1.5 flex-shrink-0 active:scale-95"
+              className="w-full sm:w-auto px-6 py-2.5 sm:py-2 rounded-lg bg-blue-900 hover:bg-blue-800 text-white font-bold text-xs shadow-xs transition flex items-center justify-center gap-1.5 flex-shrink-0 active:scale-95 cursor-pointer"
             >
               <span>शोधा (Search 7/12)</span>
               <ArrowRight className="w-3.5 h-3.5 text-amber-400" />
