@@ -1,4 +1,5 @@
 import prisma from '../config/prisma.js';
+import { invalidateAnalyticsCache } from './analyticsController.js';
 
 /**
  * Get forward quasi-judicial enforcement cases
@@ -104,6 +105,8 @@ export const createCase = async (req, res) => {
       data: { hasActiveDispute: true },
     });
 
+    invalidateAnalyticsCache();
+
     res.status(201).json({ success: true, case: newCase });
   } catch (err) {
     console.error('Create case error:', err);
@@ -142,6 +145,8 @@ export const addHearing = async (req, res) => {
       where: { id },
       data: { status: 'HEARING_SCHEDULED' },
     });
+
+    invalidateAnalyticsCache();
 
     res.status(201).json({ success: true, hearing });
   } catch (err) {
@@ -197,6 +202,8 @@ export const updateCaseStatus = async (req, res) => {
         data: { tenureClass: 'SARKAR_SHASAN' },
       });
     }
+
+    invalidateAnalyticsCache();
 
     res.json({ success: true, case: updatedCase });
   } catch (err) {

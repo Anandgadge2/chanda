@@ -34,10 +34,10 @@ export default function DashboardPage() {
     recentHearings: [],
   });
 
-  const loadData = async (selectedTaluka = taluka) => {
+  const loadData = async (selectedTaluka = taluka, forceRefresh = false) => {
     setLoading(true);
     try {
-      const data = await api.getAnalyticsSummary(selectedTaluka);
+      const data = await api.getAnalyticsSummary(selectedTaluka, forceRefresh);
       setAnalytics(data);
     } catch (err) {
       console.error('Failed to load dashboard data:', err);
@@ -120,9 +120,9 @@ export default function DashboardPage() {
               </span>
             )}
             <button
-              onClick={() => loadData(taluka)}
+              onClick={() => loadData(taluka, true)}
               disabled={loading}
-              className="inline-flex items-center gap-1.5 text-xs text-slate-600 hover:text-blue-950 font-bold px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 transition shadow-2xs ml-auto sm:ml-0"
+              className="inline-flex items-center gap-1.5 text-xs text-slate-600 hover:text-blue-950 font-bold px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 transition shadow-2xs ml-auto sm:ml-0 cursor-pointer"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-blue-900' : ''}`} />
               <span>रिफ्रेश</span>

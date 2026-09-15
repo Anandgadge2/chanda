@@ -21,19 +21,7 @@ export default function Navbar({
         <div className="flex justify-between h-14 sm:h-16 items-center gap-2 sm:gap-3">
           {/* Left: Sidebar Collapse/Open Button & Brand Emblem */}
           <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-            {/* Desktop Small Collapse / Open Button */}
-            <button
-              onClick={onToggleSidebar}
-              title={sidebarCollapsed ? 'साइडबार उघडा (Expand Sidebar)' : 'साइडबार संक्षिप्त करा (Collapse Sidebar)'}
-              className="hidden lg:flex items-center justify-center p-2 rounded-xl border border-slate-200 text-slate-600 hover:text-blue-950 hover:bg-slate-100 hover:border-slate-300 transition shadow-2xs group"
-              aria-label="Toggle Sidebar"
-            >
-              {sidebarCollapsed ? (
-                <PanelLeftOpen className="w-4 h-4 text-blue-900 group-hover:scale-110 transition-transform" />
-              ) : (
-                <PanelLeftClose className="w-4 h-4 text-slate-600 group-hover:scale-110 transition-transform" />
-              )}
-            </button>
+           
 
           
             {/* Brand Logo & Collectorate Office Title */}

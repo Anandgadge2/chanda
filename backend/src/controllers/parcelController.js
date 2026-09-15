@@ -1,6 +1,7 @@
 import ExcelJS from 'exceljs';
 import prisma from '../config/prisma.js';
 import { generateSampleVillageTemplate } from '../utils/excelGenerator.js';
+import { invalidateAnalyticsCache } from './analyticsController.js';
 
 /**
  * Bulk Ingest Village Excel Records
@@ -81,6 +82,8 @@ export const bulkUpload = async (req, res) => {
       data: records,
       skipDuplicates: true,
     });
+
+    invalidateAnalyticsCache();
 
     res.status(201).json({
       success: true,
@@ -298,6 +301,8 @@ export const createParcel = async (req, res) => {
         metadata: metadata || null,
       },
     });
+
+    invalidateAnalyticsCache();
 
     res.status(201).json({ success: true, parcel });
   } catch (err) {

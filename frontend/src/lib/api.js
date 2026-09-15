@@ -2,8 +2,11 @@ const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
 export const api = {
   // Analytics
-  getAnalyticsSummary: async (taluka = '') => {
-    const q = taluka ? `?taluka=${encodeURIComponent(taluka)}` : '';
+  getAnalyticsSummary: async (taluka = '', forceRefresh = false) => {
+    const params = new URLSearchParams();
+    if (taluka) params.set('taluka', taluka);
+    if (forceRefresh) params.set('refresh', 'true');
+    const q = params.toString() ? `?${params.toString()}` : '';
     const res = await fetch(`${BASE_URL}/api/analytics/summary${q}`, { cache: 'no-store' });
     if (!res.ok) throw new Error('Failed to fetch analytics summary');
     return res.json();
