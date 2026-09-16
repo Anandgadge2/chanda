@@ -389,4 +389,68 @@ export const api = {
   },
 
   getSampleTemplateUrl: () => `${BASE_URL}/api/parcels/sample-template`,
+
+  // DPDPA 2023 Data Principal Rights
+  exportDpdpaData: async () => {
+    const res = await fetch(`${BASE_URL}/api/auth/dpdpa/export`, {
+      headers: {
+        ...getAuthHeaders(),
+      },
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ error: 'डेटा निर्यात अयशस्वी झाले.' }));
+      throw new Error(err.error || 'डेटा निर्यात अयशस्वी झाले.');
+    }
+    return res.json();
+  },
+
+  requestDpdpaErasure: async (reason) => {
+    const res = await fetch(`${BASE_URL}/api/auth/dpdpa/erasure-request`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...getAuthHeaders(),
+      },
+      body: JSON.stringify({ reason }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ error: 'विनंती नोंदवणे अयशस्वी झाले.' }));
+      throw new Error(err.error || 'विनंती नोंदवणे अयशस्वी झाले.');
+    }
+    return data;
+  },
+
+  updateProfile: async (payload) => {
+    const res = await fetch(`${BASE_URL}/api/auth/profile`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        ...getAuthHeaders(),
+      },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.error || 'प्रोफाइल अद्यतन अयशस्वी झाले.');
+    }
+    return data;
+  },
+
+  changePassword: async (currentPassword, newPassword) => {
+    const res = await fetch(`${BASE_URL}/api/auth/change-password`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...getAuthHeaders(),
+      },
+      body: JSON.stringify({ currentPassword, newPassword }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.error || 'संकेतशब्द बदलणे अयशस्वी झाले.');
+    }
+    return data;
+  },
 };
+

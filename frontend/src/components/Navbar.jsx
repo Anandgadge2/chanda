@@ -15,9 +15,11 @@ import {
   FileSpreadsheet,
   BookOpen,
   Lock,
+  Settings,
 } from 'lucide-react';
 import ChandrapurDistrictLogo from './landing/ChandrapurDistrictLogo';
 import { useAuth } from './AuthContext';
+import DpdpaRightsModal from './DpdpaRightsModal';
 
 export default function Navbar({
   sidebarCollapsed = false,
@@ -27,6 +29,7 @@ export default function Navbar({
 }) {
   const { user, logout, openLoginModal } = useAuth();
   const [profileTrayOpen, setProfileTrayOpen] = useState(false);
+  const [dpdpaModalOpen, setDpdpaModalOpen] = useState(false);
   const trayRef = useRef(null);
 
   // Close dropdown on click outside
@@ -201,6 +204,32 @@ export default function Navbar({
                       </div>
                     </div>
 
+                    {/* Account Settings & Security */}
+                    <div className="p-3 bg-slate-50/80 border-t border-slate-100 space-y-2">
+                      <Link
+                        href="/settings"
+                        onClick={() => setProfileTrayOpen(false)}
+                        className="w-full flex items-center justify-between p-2.5 rounded-xl bg-white hover:bg-blue-50/80 border border-slate-200 hover:border-blue-300 transition text-left group shadow-2xs cursor-pointer"
+                      >
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-8 h-8 rounded-lg bg-blue-100/80 text-blue-900 border border-blue-200 flex items-center justify-center shrink-0 group-hover:scale-105 transition">
+                            <Settings className="w-4 h-4 text-blue-800" />
+                          </div>
+                          <div>
+                            <p className="text-xs font-bold text-slate-900 group-hover:text-blue-900 leading-tight">
+                              खाते व सुरक्षा सेटिंग्ज (Settings)
+                            </p>
+                            <p className="text-[10px] text-slate-500 font-medium mt-0.5 leading-tight">
+                              मोबाईल, ईमेल, पासवर्ड व DPDPA अधिकार
+                            </p>
+                          </div>
+                        </div>
+                        <span className="text-xs text-blue-700 font-bold group-hover:translate-x-0.5 transition">
+                          →
+                        </span>
+                      </Link>
+                    </div>
+
                     {/* Instant Logout Action */}
                     <div className="p-3 bg-slate-50 border-t border-slate-100">
                       <button
@@ -217,6 +246,13 @@ export default function Navbar({
                     </div>
                   </div>
                 )}
+
+                {/* DPDPA Rights Modal Dialog */}
+                <DpdpaRightsModal
+                  isOpen={dpdpaModalOpen}
+                  onClose={() => setDpdpaModalOpen(false)}
+                  user={user}
+                />
               </div>
             ) : (
               /* Unauthenticated: Show Clean Officer Login Action */

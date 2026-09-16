@@ -48,9 +48,6 @@ export default function CookieConsentBanner() {
       className="fixed bottom-3 sm:bottom-6 inset-x-3 sm:inset-x-6 max-w-5xl mx-auto z-50 transition-all duration-300 animate-in fade-in slide-in-from-bottom-5"
     >
       <div className="bg-white/95 backdrop-blur-xl border border-slate-200/90 shadow-[0_20px_60px_-15px_rgba(15,23,42,0.2)] rounded-2xl sm:rounded-3xl overflow-hidden">
-        {/* Subtle Government Tricolor / Brand Top Accent Bar */}
-        <div className="h-1 w-full bg-gradient-to-r from-amber-500 via-blue-600 to-emerald-600" />
-
         <div className="relative p-4 sm:p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 sm:gap-6">
           {/* Dismiss Icon */}
           <button

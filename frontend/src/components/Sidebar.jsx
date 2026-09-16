@@ -16,6 +16,7 @@ import {
   ChevronRight,
   PanelLeftClose,
   X,
+  Settings,
 } from 'lucide-react';
 import clsx from 'clsx';
 import { useFocusTrap } from '../hooks/useFocusTrap';
@@ -55,6 +56,11 @@ const navItems = [
     href: '/glossary',
     labelMr: 'महसूल शब्दावली व संक्षिप्त रूपे',
     icon: BookOpen,
+  },
+  {
+    href: '/settings',
+    labelMr: 'खाते व सुरक्षा सेटिंग्ज',
+    icon: Settings,
   },
 ];
 
@@ -108,7 +114,7 @@ export default function Sidebar({
     }
     hoverTimeoutRef.current = setTimeout(() => {
       setIsHovered(false);
-    }, 150);
+    }, 180);
   };
 
   // When collapsed is true (auto-close mode), hover opens the sidebar
@@ -117,12 +123,12 @@ export default function Sidebar({
 
   return (
     <>
-      {/* Desktop Sidebar (Auto-closed & Opened on Hover) */}
+      {/* Desktop Sidebar (Smooth fluid width with zero layout jitter) */}
       <aside
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         className={clsx(
-          'flex-shrink-0 hidden lg:block transition-[width] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] will-change-[width] z-30',
+          'flex-shrink-0 hidden lg:block transition-[width] duration-300 ease-[cubic-bezier(0.2,0,0,1)] will-change-[width] z-30 select-none',
           effectiveCollapsed ? 'w-[72px]' : 'w-64'
         )}
       >
@@ -164,7 +170,7 @@ export default function Sidebar({
           </div>
 
           {/* Navigation Links */}
-          <nav className="space-y-1.5">
+          <nav className="space-y-1">
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive =
@@ -177,52 +183,47 @@ export default function Sidebar({
                   href={item.href}
                   aria-current={isActive ? 'page' : undefined}
                   className={clsx(
-                    'group relative flex items-center rounded-xl transition-colors duration-150 h-10',
-                    effectiveCollapsed
-                      ? 'w-10 mx-auto justify-center'
-                      : 'w-full justify-between pr-2',
+                    'group relative flex items-center rounded-xl h-10 w-full px-2 transition-all duration-200',
                     isActive
                       ? 'bg-blue-900 text-white shadow-xs font-bold'
                       : 'text-slate-700 hover:bg-slate-100/90 hover:text-blue-950'
                   )}
                 >
-                  <div className="flex items-center min-w-0">
-                    {/* Fixed 40px icon box matching collapsed button size */}
-                    <div
+                  {/* Stable fixed icon box - identical position in both collapsed and expanded states */}
+                  <div className="w-8 h-8 flex items-center justify-center shrink-0">
+                    <Icon
                       className={clsx(
-                        'w-10 h-10 flex items-center justify-center shrink-0',
-                        !effectiveCollapsed && 'ml-1'
-                      )}
-                    >
-                      <Icon
-                        className={clsx(
-                          'w-4 h-4 transition-transform duration-150 shrink-0',
-                          isActive
-                            ? 'text-amber-400 scale-105'
-                            : 'text-slate-400 group-hover:text-blue-900 group-hover:scale-110'
-                        )}
-                      />
-                    </div>
-
-                    {/* Text Container (Expanded State) */}
-                    {!effectiveCollapsed && (
-                      <div className="overflow-hidden whitespace-nowrap ml-2 text-left min-w-0 flex-1 animate-in fade-in duration-200">
-                        <p className="leading-tight text-xs font-bold truncate">{item.labelMr}</p>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Active Indicator Arrow (Expanded State) */}
-                  {!effectiveCollapsed && (
-                    <ChevronRight
-                      className={clsx(
-                        'w-3.5 h-3.5 transition-all duration-150 shrink-0',
+                        'w-4 h-4 transition-transform duration-200 shrink-0',
                         isActive
-                          ? 'opacity-100 text-amber-400'
-                          : 'opacity-0 -translate-x-1 group-hover:opacity-70 group-hover:translate-x-0'
+                          ? 'text-amber-400 scale-110'
+                          : 'text-slate-400 group-hover:text-blue-900 group-hover:scale-110'
                       )}
                     />
-                  )}
+                  </div>
+
+                  {/* Smooth Fluid Text Container (Always mounted, zero pop-in layout jitter) */}
+                  <div
+                    className={clsx(
+                      'overflow-hidden whitespace-nowrap text-left transition-all duration-300 ease-out flex-1 min-w-0',
+                      effectiveCollapsed
+                        ? 'max-w-0 opacity-0 pointer-events-none'
+                        : 'max-w-[170px] opacity-100 ml-2.5'
+                    )}
+                  >
+                    <p className="leading-tight text-xs font-bold truncate">{item.labelMr}</p>
+                  </div>
+
+                  {/* Active Indicator Arrow */}
+                  <ChevronRight
+                    className={clsx(
+                      'w-3.5 h-3.5 transition-all duration-200 shrink-0',
+                      effectiveCollapsed
+                        ? 'opacity-0 max-w-0 pointer-events-none'
+                        : isActive
+                        ? 'opacity-100 text-amber-400'
+                        : 'opacity-0 -translate-x-1 group-hover:opacity-70 group-hover:translate-x-0'
+                    )}
+                  />
 
                   {/* Floating Tooltip for Collapsed State */}
                   {effectiveCollapsed && !isHovered && (
@@ -235,8 +236,6 @@ export default function Sidebar({
               );
             })}
           </nav>
-
-        
         </div>
       </aside>
 

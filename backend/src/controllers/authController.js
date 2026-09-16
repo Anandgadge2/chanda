@@ -394,3 +394,151 @@ export const requestErasure = async (req, res) => {
   }
 };
 
+/**
+ * PUT /api/auth/profile
+ * Update officer / user profile (fullName, mobile, email, designation)
+ */
+export const updateProfile = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { fullName, mobile, email, designation } = req.body;
+
+    const dataToUpdate = {};
+    if (fullName && fullName.trim()) dataToUpdate.fullName = fullName.trim();
+    if (mobile !== undefined) dataToUpdate.mobile = mobile.trim();
+    if (designation && designation.trim()) dataToUpdate.designation = designation.trim();
+
+    if (email && email.trim()) {
+      const normalizedEmail = email.trim().toLowerCase();
+      if (normalizedEmail !== req.user.email) {
+        // Check if email already in use
+        const existing = await prisma.user.findUnique({
+          where: { email: normalizedEmail },
+        });
+        if (existing && existing.id !== userId) {
+          return res.status(400).json({
+            success: false,
+            error: 'हा ईमेल पत्ता आधीपासूनच दुसऱ्या खात्यासाठी वापरला गेला आहे. (Email is already registered)',
+          });
+        }
+        dataToUpdate.email = normalizedEmail;
+      }
+    }
+
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: dataToUpdate,
+      select: {
+        id: true,
+        fullName: true,
+        email: true,
+        mobile: true,
+        role: true,
+        taluka: true,
+        designation: true,
+        consentGiven: true,
+        consentAt: true,
+        consentVersion: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+
+    await logAudit({
+      userId,
+      action: 'USER_PROFILE_UPDATED',
+      entityType: 'User',
+      entityId: userId,
+      previousData: { email: req.user.email, mobile: req.user.mobile, designation: req.user.designation },
+      newData: dataToUpdate,
+      req,
+    });
+
+    return res.json({
+      success: true,
+      message: 'प्रोफाइल माहिती यशस्वीरित्या अद्यतनित करण्यात आली. (Profile updated successfully)',
+      user: updatedUser,
+    });
+  } catch (error) {
+    console.error('Error in updateProfile:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'प्रोफाइल अद्यतन करताना त्रुटी. (Failed to update profile)',
+    });
+  }
+};
+
+/**
+ * POST /api/auth/change-password
+ * Change officer password with current password verification
+ */
+export const changePassword = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({
+        success: false,
+        error: 'कृपया चालू संकेतशब्द आणि नवीन संकेतशब्द दोन्ही प्रविष्ट करा. (Both current and new passwords are required)',
+      });
+    }
+
+    if (newPassword.length < 8) {
+      return res.status(400).json({
+        success: false,
+        error: 'नवीन संकेतशब्द किमान ८ अक्षरांचा असावा. (Password must be at least 8 characters)',
+      });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: 'वापरकर्ता सापडला नाही. (User not found)',
+      });
+    }
+
+    const isMatch = await bcrypt.compare(currentPassword, user.passwordHash);
+    if (!isMatch) {
+      return res.status(400).json({
+        success: false,
+        error: 'चालू संकेतशब्द चुकीचा आहे. (Current password is incorrect)',
+      });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const newPasswordHash = await bcrypt.hash(newPassword, salt);
+
+    await prisma.user.update({
+      where: { id: userId },
+      data: {
+        passwordHash: newPasswordHash,
+      },
+    });
+
+    await logAudit({
+      userId,
+      action: 'USER_PASSWORD_CHANGED',
+      entityType: 'User',
+      entityId: userId,
+      req,
+    });
+
+    return res.json({
+      success: true,
+      message: 'संकेतशब्द यशस्वीरित्या बदलण्यात आला. (Password changed successfully)',
+    });
+  } catch (error) {
+    console.error('Error in changePassword:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'संकेतशब्द बदलताना त्रुटी. (Failed to change password)',
+    });
+  }
+};
+
+
