@@ -19,21 +19,21 @@ export const generateBookletExcel = async (type, cases, stream, filters = {}) =>
 
   // Row 1: Title
   const titleRow1 = sheet.addRow(['महाराष्ट्र शासन - महसूल व वन विभाग']);
-  titleRow1.font = { name: 'Mangal', size: 14, bold: true, color: { argb: 'FFFFFFFF' } };
+  titleRow1.font = { name: 'Nirmala UI', size: 14, bold: true, color: { argb: 'FFFFFFFF' } };
   titleRow1.alignment = { horizontal: 'center', vertical: 'middle' };
   titleRow1.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF800000' } };
   sheet.mergeCells(`A1:${lastColLetter}1`);
 
   // Row 2: Subtitle
   const titleRow2 = sheet.addRow([getTitle2(type)]);
-  titleRow2.font = { name: 'Mangal', size: 12, bold: true, color: { argb: 'FF000000' } };
+  titleRow2.font = { name: 'Nirmala UI', size: 12, bold: true, color: { argb: 'FF000000' } };
   titleRow2.alignment = { horizontal: 'center', vertical: 'middle' };
   titleRow2.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFD966' } };
   sheet.mergeCells(`A2:${lastColLetter}2`);
 
   // Row 3: Prapatra label
   const formRow = sheet.addRow([getFormNumber(type)]);
-  formRow.font = { name: 'Mangal', size: 11, bold: true };
+  formRow.font = { name: 'Nirmala UI', size: 11, bold: true };
   formRow.alignment = { horizontal: 'center', vertical: 'middle' };
   formRow.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF2F2F2' } };
   sheet.mergeCells(`A3:${lastColLetter}3`);
@@ -41,20 +41,20 @@ export const generateBookletExcel = async (type, cases, stream, filters = {}) =>
   // Row 4: Taluka
   const talukaVal = filters.taluka ? filters.taluka : 'सर्व';
   const talukaRow = sheet.addRow([`तालुका - ${talukaVal}`]);
-  talukaRow.font = { name: 'Mangal', size: 10, bold: true };
+  talukaRow.font = { name: 'Nirmala UI', size: 10, bold: true };
   talukaRow.alignment = { horizontal: 'left', vertical: 'middle' };
   sheet.mergeCells(`A4:${lastColLetter}4`);
 
   // Row 5: Village and Saza
   const villageVal = filters.village ? filters.village : 'सर्व';
   const villageRow = sheet.addRow([`गावाचे नाव- ${villageVal}                                                                ग्राम महसूल अधिकारी साझा - `]);
-  villageRow.font = { name: 'Mangal', size: 10, bold: true };
+  villageRow.font = { name: 'Nirmala UI', size: 10, bold: true };
   villageRow.alignment = { horizontal: 'left', vertical: 'middle' };
   sheet.mergeCells(`A5:${lastColLetter}5`);
 
   // Row 6: Headers
   const headerRow = sheet.addRow(columns.map(c => c.headerTitle));
-  headerRow.font = { name: 'Mangal', size: 10, bold: true };
+  headerRow.font = { name: 'Nirmala UI', size: 10, bold: true };
   headerRow.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
   headerRow.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFD9E1F2' } };
   headerRow.height = 36;
@@ -73,7 +73,7 @@ export const generateBookletExcel = async (type, cases, stream, filters = {}) =>
     const rowData = getRowData(type, item, idx);
     const row = sheet.addRow(rowData);
     
-    row.font = { name: 'Mangal', size: 10 };
+    row.font = { name: 'Nirmala UI', size: 10 };
     row.alignment = { vertical: 'middle', wrapText: true, horizontal: 'center' };
     
     row.eachCell((cell) => {
@@ -89,10 +89,10 @@ export const generateBookletExcel = async (type, cases, stream, filters = {}) =>
   // Footer Signature Block
   sheet.addRow([]);
   const sigRow1 = sheet.addRow(['माहिती तयार करणाराचे नाव व पदनाम (तलाठी / महसूल सहाय्यक)', '', '', '', 'दिनांक -', '', 'स्वाक्षरी -']);
-  sigRow1.font = { name: 'Mangal', size: 10, bold: true };
+  sigRow1.font = { name: 'Nirmala UI', size: 10, bold: true };
   sheet.addRow([]);
   const sigRow2 = sheet.addRow(['माहिती तपासणी करणाऱ्या अधिकाऱ्याचे नाव व पदनाम (मंडळ अधिकारी / नायब तहसीलदार)', '', '', '', 'दिनांक -', '', 'स्वाक्षरी -']);
-  sigRow2.font = { name: 'Mangal', size: 10, bold: true };
+  sigRow2.font = { name: 'Nirmala UI', size: 10, bold: true };
 
   await workbook.commit();
 };

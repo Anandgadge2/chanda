@@ -48,7 +48,7 @@ export const generatePrapatra3Workbook = async (cases, stream) => {
 
   // Title Row 1
   const titleRow1 = sheet.addRow(['महाराष्ट्र शासन - महसूल व वन विभाग (Government of Maharashtra - Revenue & Forest Department)']);
-  titleRow1.font = { name: 'Arial', size: 14, bold: true, color: { argb: 'FFFFFFFF' } };
+  titleRow1.font = { name: 'Nirmala UI', size: 14, bold: true, color: { argb: 'FFFFFFFF' } };
   titleRow1.alignment = { horizontal: 'center', vertical: 'middle' };
   titleRow1.fill = {
     type: 'pattern',
@@ -60,7 +60,7 @@ export const generatePrapatra3Workbook = async (cases, stream) => {
 
   // Title Row 2
   const titleRow2 = sheet.addRow(['जिल्हाधिकारी कार्यालय, चंद्रपूर | प्रपत्र-३: भोगवटादार वर्ग-२ व शासकीय जमीन शर्तभंग व आदिवासी जमीन हस्तांतरण चौकशी अहवाल']);
-  titleRow2.font = { name: 'Arial', size: 11, bold: true, color: { argb: 'FFFFFFFF' } };
+  titleRow2.font = { name: 'Nirmala UI', size: 11, bold: true, color: { argb: 'FFFFFFFF' } };
   titleRow2.alignment = { horizontal: 'center', vertical: 'middle' };
   titleRow2.fill = {
     type: 'pattern',
@@ -72,7 +72,7 @@ export const generatePrapatra3Workbook = async (cases, stream) => {
 
   // Metadata Row
   const metaRow = sheet.addRow([`तपासणी दिनांक: ${new Date().toLocaleDateString('mr-IN')} | अहवाल निर्मिती: जमीन अभिलेख व्यवस्थापन प्रणाली (Land Intelligence Portal)`]);
-  metaRow.font = { name: 'Arial', size: 9, italic: true, color: { argb: 'FF475569' } };
+  metaRow.font = { name: 'Nirmala UI', size: 9, italic: true, color: { argb: 'FF475569' } };
   metaRow.alignment = { horizontal: 'right', vertical: 'middle' };
   sheet.mergeCells('A3:M3');
   metaRow.commit();
@@ -95,7 +95,7 @@ export const generatePrapatra3Workbook = async (cases, stream) => {
   ];
 
   const row4 = sheet.addRow(headerMarathi);
-  row4.font = { name: 'Arial', size: 10, bold: true, color: { argb: 'FF0F172A' } };
+  row4.font = { name: 'Nirmala UI', size: 10, bold: true, color: { argb: 'FF0F172A' } };
   row4.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
   row4.fill = {
     type: 'pattern',
@@ -123,7 +123,7 @@ export const generatePrapatra3Workbook = async (cases, stream) => {
   ];
 
   const row5 = sheet.addRow(headerEnglish);
-  row5.font = { name: 'Arial', size: 8, italic: true, color: { argb: 'FF334155' } };
+  row5.font = { name: 'Nirmala UI', size: 8, italic: true, color: { argb: 'FF334155' } };
   row5.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
   row5.fill = {
     type: 'pattern',
@@ -190,7 +190,7 @@ export const generatePrapatra3Workbook = async (cases, stream) => {
       remarksDms: dmsRef,
     });
 
-    row.font = { name: 'Arial', size: 9 };
+    row.font = { name: 'Nirmala UI', size: 9 };
     row.alignment = { vertical: 'middle', wrapText: true };
     row.commit();
   });

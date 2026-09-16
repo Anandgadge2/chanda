@@ -29,7 +29,7 @@ const DEFAULT_OFFICERS = [
   {
     role: 'COLLECTOR',
     title: 'जिल्हाधिकारी, चंद्रपूर',
-    badge: 'Collectorate Apex',
+    badge: 'Collectorate',
     email: 'collector.chandrapur@maharashtra.gov.in',
     password: '111111',
   },
