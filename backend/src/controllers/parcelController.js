@@ -128,8 +128,19 @@ export const getSampleTemplate = async (req, res) => {
   }
 };
 
+// High-Performance In-Memory Cache with TTL & Request Deduplication
+const TRACE_CACHE_TTL_MS = 60 * 1000; // 60 seconds TTL
+const traceCache = new Map();
+const inFlightTraces = new Map();
+
+const inFlightParcelLists = new Map();
+
+export const invalidateParcelCache = () => {
+  traceCache.clear();
+};
+
 /**
- * Get Paginated and Filtered Parcels List
+ * List Parcels with Filtering & Pagination
  * GET /api/parcels
  */
 export const getParcels = async (req, res) => {
@@ -168,33 +179,43 @@ export const getParcels = async (req, res) => {
       ];
     }
 
-    const [parcels, totalCount] = await Promise.all([
-      prisma.landParcel.findMany({
-        where,
-        skip,
-        take,
-        orderBy: [{ taluka: 'asc' }, { villageName: 'asc' }, { gatNumber: 'asc' }],
-        include: {
-          _count: {
-            select: {
-              backwardHistories: true,
-              forwardCases: true,
-              documents: true,
+    const cacheKey = JSON.stringify({ taluka, villageCode, villageName, tenureClass, hasActiveDispute, search, pageNum, take });
+    let pending = inFlightParcelLists.get(cacheKey);
+
+    if (!pending) {
+      pending = Promise.all([
+        prisma.landParcel.findMany({
+          where,
+          skip,
+          take,
+          orderBy: [{ taluka: 'asc' }, { villageName: 'asc' }, { gatNumber: 'asc' }],
+          include: {
+            _count: {
+              select: {
+                backwardHistories: true,
+                forwardCases: true,
+                documents: true,
+              },
+            },
+            forwardCases: {
+              select: {
+                id: true,
+                caseNumber: true,
+                violationType: true,
+                status: true,
+                isRepossessedToGovt: true,
+              },
             },
           },
-          forwardCases: {
-            select: {
-              id: true,
-              caseNumber: true,
-              violationType: true,
-              status: true,
-              isRepossessedToGovt: true,
-            },
-          },
-        },
-      }),
-      prisma.landParcel.count({ where }),
-    ]);
+        }),
+        prisma.landParcel.count({ where }),
+      ]).finally(() => {
+        inFlightParcelLists.delete(cacheKey);
+      });
+      inFlightParcelLists.set(cacheKey, pending);
+    }
+
+    const [parcels, totalCount] = await pending;
 
     res.json({
       success: true,
@@ -219,55 +240,83 @@ export const getParcels = async (req, res) => {
 export const getParcelTrace = async (req, res) => {
   try {
     const { upi } = req.params;
+    const { refresh } = req.query;
+    const now = Date.now();
 
-    const parcel = await prisma.landParcel.findUnique({
-      where: { upi },
-      include: {
-        backwardHistories: {
-          orderBy: { epochYear: 'asc' },
+    if (refresh !== 'true') {
+      const cached = traceCache.get(upi);
+      if (cached && now - cached.timestamp < TRACE_CACHE_TTL_MS) {
+        return res.json(cached.data);
+      }
+    }
+
+    let pending = inFlightTraces.get(upi);
+    if (!pending) {
+      pending = (async () => {
+        const parcel = await prisma.landParcel.findUnique({
+          where: { upi },
           include: {
-            documents: true,
-          },
-        },
-        forwardCases: {
-          orderBy: { createdAt: 'desc' },
-          include: {
-            hearings: {
-              orderBy: { hearingDate: 'desc' },
+            backwardHistories: {
+              orderBy: { epochYear: 'asc' },
+              include: {
+                documents: true,
+              },
             },
-            documents: true,
+            forwardCases: {
+              orderBy: { createdAt: 'desc' },
+              include: {
+                hearings: {
+                  orderBy: { hearingDate: 'desc' },
+                },
+                documents: true,
+              },
+            },
+            documents: {
+              orderBy: { uploadedAt: 'desc' },
+            },
           },
-        },
-        documents: {
-          orderBy: { uploadedAt: 'desc' },
-        },
-      },
-    });
+        });
 
-    if (!parcel) {
+        if (!parcel) {
+          return null;
+        }
+
+        // Identify 1950 baseline and flag anomalies
+        const baseline1950 = parcel.backwardHistories.find((b) => b.epochYear === 1950);
+        const hasGovtHistoricalRoot = parcel.backwardHistories.some((b) => b.wasGovtLand || b.tenureClass === 'SARKAR_SHASAN');
+        const isCurrentlyPrivate = parcel.tenureClass === 'BHOGVATDAR_CLASS_1' || parcel.tenureClass === 'BHOGVATDAR_CLASS_2';
+
+        // Discrepancy detection: Was once government land but now private without legal order
+        const potentialIllegalAlienation = hasGovtHistoricalRoot && isCurrentlyPrivate && parcel.forwardCases.length === 0;
+
+        const result = {
+          success: true,
+          parcel,
+          intelligenceSummary: {
+            baseline1950Epoch: baseline1950 || null,
+            historicalEpochsCount: parcel.backwardHistories.length,
+            activeViolationsCount: parcel.forwardCases.filter((c) => c.status !== 'DISMISSED' && c.status !== 'RECTIFIED_7_12').length,
+            isRepossessedToGovt: parcel.forwardCases.some((c) => c.isRepossessedToGovt),
+            potentialIllegalAlienation,
+            totalDocumentsCount: parcel.documents.length,
+          },
+        };
+
+        traceCache.set(upi, { data: result, timestamp: Date.now() });
+        return result;
+      })().finally(() => {
+        inFlightTraces.delete(upi);
+      });
+
+      inFlightTraces.set(upi, pending);
+    }
+
+    const data = await pending;
+    if (!data) {
       return res.status(404).json({ success: false, error: `Parcel with UPI ${upi} not found` });
     }
 
-    // Identify 1950 baseline and flag anomalies
-    const baseline1950 = parcel.backwardHistories.find((b) => b.epochYear === 1950);
-    const hasGovtHistoricalRoot = parcel.backwardHistories.some((b) => b.wasGovtLand || b.tenureClass === 'SARKAR_SHASAN');
-    const isCurrentlyPrivate = parcel.tenureClass === 'BHOGVATDAR_CLASS_1' || parcel.tenureClass === 'BHOGVATDAR_CLASS_2';
-
-    // Discrepancy detection: Was once government land but now private without legal order
-    const potentialIllegalAlienation = hasGovtHistoricalRoot && isCurrentlyPrivate && parcel.forwardCases.length === 0;
-
-    res.json({
-      success: true,
-      parcel,
-      intelligenceSummary: {
-        baseline1950Epoch: baseline1950 || null,
-        historicalEpochsCount: parcel.backwardHistories.length,
-        activeViolationsCount: parcel.forwardCases.filter((c) => c.status !== 'DISMISSED' && c.status !== 'RECTIFIED_7_12').length,
-        isRepossessedToGovt: parcel.forwardCases.some((c) => c.isRepossessedToGovt),
-        potentialIllegalAlienation,
-        totalDocumentsCount: parcel.documents.length,
-      },
-    });
+    res.json(data);
   } catch (err) {
     console.error('Parcel trace error:', err);
     res.status(500).json({ success: false, error: err.message });

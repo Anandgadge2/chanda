@@ -31,6 +31,39 @@ const getAuthHeaders = () => {
   return token ? { Authorization: `Bearer ${token}` } : {};
 };
 
+// In-flight GET request deduplication for React dev mode & parallel triggers
+const inFlightRequests = new Map();
+
+async function dedupedFetch(url, options = {}) {
+  const method = (options.method || 'GET').toUpperCase();
+  if (method !== 'GET') {
+    return fetch(url, options);
+  }
+
+  const authHeader = options.headers?.Authorization || '';
+  const dedupKey = `${url}::${authHeader}`;
+
+  if (inFlightRequests.has(dedupKey)) {
+    const originalRes = await inFlightRequests.get(dedupKey);
+    return originalRes.clone();
+  }
+
+  const promise = (async () => {
+    try {
+      const res = await fetch(url, options);
+      return res;
+    } finally {
+      setTimeout(() => {
+        inFlightRequests.delete(dedupKey);
+      }, 150);
+    }
+  })();
+
+  inFlightRequests.set(dedupKey, promise);
+  const res = await promise;
+  return res.clone();
+}
+
 export const api = {
   // Authentication
   login: async (email, password) => {
@@ -62,7 +95,7 @@ export const api = {
   },
 
   getMe: async () => {
-    const res = await fetch(`${BASE_URL}/api/auth/me`, {
+    const res = await dedupedFetch(`${BASE_URL}/api/auth/me`, {
       headers: {
         ...getAuthHeaders(),
       },
@@ -94,7 +127,7 @@ export const api = {
     if (taluka) params.set('taluka', taluka);
     if (forceRefresh) params.set('refresh', 'true');
     const q = params.toString() ? `?${params.toString()}` : '';
-    const res = await fetch(`${BASE_URL}/api/analytics/summary${q}`, {
+    const res = await dedupedFetch(`${BASE_URL}/api/analytics/summary${q}`, {
       headers: {
         ...getAuthHeaders(),
       },
@@ -107,7 +140,7 @@ export const api = {
   // Parcels
   getParcels: async (params = {}) => {
     const query = new URLSearchParams(params).toString();
-    const res = await fetch(`${BASE_URL}/api/parcels?${query}`, {
+    const res = await dedupedFetch(`${BASE_URL}/api/parcels?${query}`, {
       headers: {
         ...getAuthHeaders(),
       },
@@ -118,7 +151,7 @@ export const api = {
   },
 
   getParcelTrace: async (upi) => {
-    const res = await fetch(`${BASE_URL}/api/parcels/${encodeURIComponent(upi)}/trace`, {
+    const res = await dedupedFetch(`${BASE_URL}/api/parcels/${encodeURIComponent(upi)}/trace`, {
       headers: {
         ...getAuthHeaders(),
       },
@@ -144,7 +177,7 @@ export const api = {
   // Cases & Hearings
   getCases: async (params = {}) => {
     const query = new URLSearchParams(params).toString();
-    const res = await fetch(`${BASE_URL}/api/cases?${query}`, {
+    const res = await dedupedFetch(`${BASE_URL}/api/cases?${query}`, {
       headers: {
         ...getAuthHeaders(),
       },
@@ -212,7 +245,7 @@ export const api = {
 
   getDocuments: async (params = {}) => {
     const query = new URLSearchParams(params).toString();
-    const res = await fetch(`${BASE_URL}/api/documents?${query}`, {
+    const res = await dedupedFetch(`${BASE_URL}/api/documents?${query}`, {
       headers: {
         ...getAuthHeaders(),
       },
@@ -225,7 +258,7 @@ export const api = {
   // Reports
   getPrapatra3Preview: async (params = {}) => {
     const query = new URLSearchParams(params).toString();
-    const res = await fetch(`${BASE_URL}/api/reports/prapatra-3/preview?${query}`, {
+    const res = await dedupedFetch(`${BASE_URL}/api/reports/prapatra-3/preview?${query}`, {
       headers: {
         ...getAuthHeaders(),
       },
