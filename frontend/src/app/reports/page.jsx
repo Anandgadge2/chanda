@@ -215,51 +215,53 @@ export default function ReportsPage() {
   const headers = getHeaders();
 
   return (
-    <div className="space-y-4 sm:space-y-6">
-      {/* Header Banner */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-6 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-xs bg-emerald-100 text-emerald-900 font-bold px-2.5 py-0.5 rounded-full border border-emerald-200">
-              वैधानिक अहवाल प्रणाली
-            </span>
-            <span className="text-xs text-slate-500 font-medium">
-              महसूल व वन विभाग, महाराष्ट्र शासन (जिल्हा चंद्रपूर)
-            </span>
+    <div className="space-y-3.5 sm:space-y-4">
+      {/* Sleek, Low-Profile Compact Header */}
+      <div className="bg-white border border-slate-200 rounded-xl px-4 py-3 shadow-2xs flex flex-col md:flex-row justify-between items-start md:items-center gap-2.5">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center shrink-0 text-emerald-900">
+            <FileText className="w-5 h-5" />
           </div>
-          <h1 className="text-xl sm:text-2xl font-black text-slate-900 mt-1 leading-tight tracking-tight">
-            अहवाल व प्रपत्र जनरेशन (Booklet Generation)
-          </h1>
-          <p className="text-xs text-slate-600 mt-1 font-medium">
-            मा. महसूल मंत्री महोदयांच्या निर्देशानूसार सिलिंग (प्रपत्र-१), भुदान (प्रपत्र-२), आदिवासी जमीन (प्रपत्र-३) व कुळवहिवाट कलम ८९-अ (प्रपत्र-४) चे अधिकृत बुकलेट
-          </p>
+          <div>
+            <div className="flex items-center gap-2 flex-wrap">
+              <h1 className="text-base sm:text-lg font-black text-slate-900 leading-tight">
+                अहवाल व प्रपत्र जनरेशन (Booklet Generation)
+              </h1>
+              <span className="text-[10px] font-bold bg-emerald-100 text-emerald-900 px-2 py-0.5 rounded border border-emerald-300">
+                वैधानिक अहवाल
+              </span>
+            </div>
+            <p className="text-xs text-slate-500 mt-0.5">
+              सिलिंग (प्रपत्र-१), भुदान (प्रपत्र-२), आदिवासी जमीन (प्रपत्र-३) व कुळवहिवाट कलम ८९-अ (प्रपत्र-४) चे अधिकृत बुकलेट
+            </p>
+          </div>
         </div>
 
         {/* Action Export Buttons */}
-        <div className="flex flex-wrap sm:flex-nowrap gap-2 w-full sm:w-auto">
+        <div className="flex items-center gap-2 shrink-0 self-end md:self-auto flex-wrap">
           <button
             onClick={handleDownloadPdf}
             disabled={downloadingPdf || loading}
-            className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 bg-rose-700 hover:bg-rose-800 disabled:opacity-50 text-white font-semibold px-4 py-2.5 rounded-xl text-xs shadow-sm transition active:scale-95 cursor-pointer"
+            className="inline-flex items-center justify-center gap-1.5 bg-rose-700 hover:bg-rose-800 disabled:opacity-50 text-white font-bold px-3 py-1.5 rounded-lg text-xs shadow-2xs transition active:scale-95 cursor-pointer"
             title="अधिकृत पीडीएफ बुकलेट डाऊनलोड करा"
           >
             {downloadingPdf ? (
-              <RefreshCw className="w-4 h-4 animate-spin" />
+              <RefreshCw className="w-3.5 h-3.5 animate-spin" />
             ) : (
-              <Download className="w-4 h-4" />
+              <Download className="w-3.5 h-3.5" />
             )}
             <span>PDF बुकलेट</span>
           </button>
           <button
             onClick={handleDownloadExcel}
             disabled={downloadingExcel || loading}
-            className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 bg-emerald-700 hover:bg-emerald-800 disabled:opacity-50 text-white font-semibold px-4 py-2.5 rounded-xl text-xs shadow-sm transition active:scale-95 cursor-pointer"
+            className="inline-flex items-center justify-center gap-1.5 bg-emerald-700 hover:bg-emerald-800 disabled:opacity-50 text-white font-bold px-3 py-1.5 rounded-lg text-xs shadow-2xs transition active:scale-95 cursor-pointer"
             title="अधिकृत एक्सेल स्प्रेडशीट डाऊनलोड करा"
           >
             {downloadingExcel ? (
-              <RefreshCw className="w-4 h-4 animate-spin" />
+              <RefreshCw className="w-3.5 h-3.5 animate-spin" />
             ) : (
-              <FileSpreadsheet className="w-4 h-4" />
+              <FileSpreadsheet className="w-3.5 h-3.5" />
             )}
             <span>Excel बुकलेट</span>
           </button>

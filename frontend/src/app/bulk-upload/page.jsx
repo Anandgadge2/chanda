@@ -54,32 +54,39 @@ export default function BulkUploadPage() {
   };
 
   return (
-    <div className="space-y-4 sm:space-y-6">
-      {/* Header */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-6 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-3 sm:gap-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="text-xs bg-emerald-100 text-emerald-900 font-bold px-2 py-0.5 rounded">
-              स्वयंचलित अभिलेख अंतर्ग्रहण
-            </span>
-            <span className="text-xs text-slate-500 font-medium">अभिलेख अंतर्ग्रहण प्रणाली</span>
+    <div className="space-y-3.5 sm:space-y-4">
+      {/* Sleek, Low-Profile Compact Header */}
+      <div className="bg-white border border-slate-200 rounded-xl px-4 py-3 shadow-2xs flex flex-col md:flex-row justify-between items-start md:items-center gap-2.5">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center shrink-0 text-emerald-900">
+            <FileSpreadsheet className="w-5 h-5" />
           </div>
-          <h1 className="text-lg sm:text-2xl font-black text-slate-900 mt-1 leading-tight">
-            गाव नमुना एक्सेल डेटा आयात
-          </h1>
-          <p className="text-xs text-slate-500 mt-0.5">
-            तलाठी कार्यालयाकडील कच्च्या एक्सेल पत्रकाचे थेट भूखंड नोंदवहीत रूपांतर व स्वयंचलित UPI निर्मिती
-          </p>
+          <div>
+            <div className="flex items-center gap-2">
+              <h1 className="text-base sm:text-lg font-black text-slate-900 leading-tight">
+                गाव नमुना एक्सेल डेटा आयात
+              </h1>
+              <span className="text-[10px] font-bold bg-emerald-100 text-emerald-900 px-2 py-0.5 rounded border border-emerald-300">
+                डेटा अंतर्ग्रहण
+              </span>
+            </div>
+            <p className="text-xs text-slate-500 mt-0.5">
+              तलाठी कार्यालयाकडील कच्च्या एक्सेल पत्रकाचे थेट भूखंड नोंदवहीत रूपांतर व स्वयंचलित UPI निर्मिती
+            </p>
+          </div>
         </div>
 
-        <a
-          href={api.getSampleTemplateUrl()}
-          download="गाव_नमुना_नोंदणी.xlsx"
-          className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-4 py-2.5 rounded-xl text-xs shadow-sm transition active:scale-95 flex-shrink-0"
-        >
-          <Download className="w-4 h-4" />
-          <span>नमुना एक्सेल डाऊनलोड</span>
-        </a>
+        <div className="flex items-center gap-2 shrink-0 self-end md:self-auto">
+          <a
+            href={api.getSampleTemplateUrl()}
+            download="गाव_नमुना_नोंदणी.xlsx"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg text-xs font-bold transition shadow-2xs active:scale-95"
+            title="नमुना एक्सेल डाऊनलोड"
+          >
+            <Download className="w-3.5 h-3.5" />
+            <span>नमुना एक्सेल डाऊनलोड</span>
+          </a>
+        </div>
       </div>
 
       {/* Instructions Card */}

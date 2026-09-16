@@ -53,47 +53,44 @@ export default function RevenueGlossaryPage() {
   }, [searchQuery, selectedCategory]);
 
   return (
-    <div className="w-full space-y-4 sm:space-y-6">
-      {/* Header Bar */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-6 shadow-xs flex flex-col md:flex-row justify-between items-start md:items-center gap-3 sm:gap-4">
-        <div className="flex items-start gap-3 sm:gap-4">
-          <div className="p-2 rounded-2xl bg-white border border-slate-200 shadow-2xs shrink-0">
-            <ChandrapurDistrictLogo className="w-10 h-10 sm:w-14 sm:h-14" />
+    <div className="w-full space-y-3.5 sm:space-y-4">
+      {/* Sleek, Low-Profile Compact Header */}
+      <div className="bg-white border border-slate-200 rounded-xl px-4 py-3 shadow-2xs flex flex-col md:flex-row justify-between items-start md:items-center gap-2.5">
+        <div className="flex items-center gap-3">
+          <div className="p-1 rounded-xl bg-white border border-slate-200 shadow-2xs shrink-0">
+            <ChandrapurDistrictLogo className="w-8 h-8" />
           </div>
           <div>
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-xs bg-amber-100 text-amber-950 font-bold px-2.5 py-0.5 rounded border border-amber-300">
-                MLRC 1966 वैधानिक प्रमाण
-              </span>
-              <span className="text-xs text-slate-500 font-medium hidden sm:inline">
-                जिल्हाधिकारी कार्यालय, चंद्रपूर | महसूल व भूमी अभिलेख
+              <h1 className="text-base sm:text-lg font-black text-slate-900 leading-tight tracking-tight">
+                जमीन महसूल शब्दावली व संक्षिप्त रूपे (Glossary)
+              </h1>
+              <span className="text-[10px] font-bold bg-amber-100 text-amber-950 px-2 py-0.5 rounded border border-amber-300">
+                MLRC १९६६
               </span>
             </div>
-            <h1 className="text-lg sm:text-2xl font-black text-slate-900 mt-1 leading-tight tracking-tight">
-              जमीन महसूल शब्दावली व संक्षिप्त रूपे (Glossary)
-            </h1>
-            <p className="text-xs text-slate-500 mt-0.5 max-w-2xl leading-relaxed">
-              गाव नमुना ७/१२ उतारा, फेरफार नोंदवही (गाव नमुना ६) व मिळकत पत्रिकेतील संक्षिप्त शब्द, व्याख्या व कायदेशीर कलमे
+            <p className="text-xs text-slate-500 mt-0.5 max-w-2xl">
+              गाव नमुना ७/१२ उतारा, फेरफार नोंदवही (गाव नमुना ६) व मिळकत पत्रिकेतील संक्षिप्त शब्द व कायदेशीर कलमे
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2 w-full md:w-auto justify-end flex-wrap">
+        <div className="flex items-center gap-2 shrink-0 self-end md:self-auto flex-wrap">
           <button
             type="button"
             onClick={() => window.print()}
-            className="inline-flex items-center gap-1.5 px-3 py-2 border border-slate-300 rounded-xl text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 shadow-2xs transition active:scale-95"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-slate-300 rounded-lg text-xs font-bold text-slate-700 bg-white hover:bg-slate-50 shadow-2xs transition active:scale-95"
             title="शब्दावली अहवाल मुद्रित करा"
           >
-            <Printer className="w-4 h-4 text-slate-500" />
+            <Printer className="w-3.5 h-3.5 text-slate-500" />
             <span className="hidden sm:inline">प्रत मुद्रित करा</span>
             <span className="sm:hidden">Print</span>
           </button>
           <Link
             href={user ? '/dashboard' : '/'}
-            className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-950 hover:text-blue-800 bg-slate-100 hover:bg-slate-200 px-3.5 py-2 rounded-xl transition shadow-2xs active:scale-95"
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-950 hover:text-blue-800 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-lg transition shadow-2xs active:scale-95"
           >
-            <ArrowLeft className="w-4 h-4" />
+            <ArrowLeft className="w-3.5 h-3.5" />
             <span>{user ? 'महसूल डॅशबोर्ड' : 'मुख्य पृष्ठ'}</span>
           </Link>
         </div>

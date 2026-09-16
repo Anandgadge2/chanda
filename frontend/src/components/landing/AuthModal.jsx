@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
 import {
   X,
@@ -54,6 +55,23 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'login' }) {
   const router = useRouter();
   const { login } = useAuth();
   const trapRef = useFocusTrap(isOpen);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
 
   const [tab, setTab] = useState(initialTab);
   const [email, setEmail] = useState('collector.chandrapur@maharashtra.gov.in');
@@ -93,7 +111,7 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'login' }) {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onClose]);
 
-  if (!isOpen) return null;
+  if (!isOpen || !mounted) return null;
 
   const handleQuickLogin = async (officer) => {
     setEmail(officer.email);
@@ -155,9 +173,9 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'login' }) {
     }
   };
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center p-2.5 sm:p-4 bg-slate-950/75 backdrop-blur-sm animate-in fade-in duration-150 overflow-y-auto"
+      className="fixed inset-0 z-[100] flex items-center justify-center p-2.5 sm:p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-150 overflow-y-auto"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
@@ -516,6 +534,7 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'login' }) {
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
