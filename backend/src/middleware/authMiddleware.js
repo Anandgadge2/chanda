@@ -8,18 +8,17 @@ const JWT_SECRET = process.env.JWT_SECRET || 'chandrapur-collectorate-secure-jwt
 export const authenticate = async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return res.status(401).json({
-        success: false,
-        error: 'अनधिकृत प्रवेश. कृपया लॉगिन करा. (Authentication required: Missing or invalid token)',
-      });
+    let token = null;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      token = authHeader.split(' ')[1];
+    } else if (req.query.token) {
+      token = req.query.token;
     }
 
-    const token = authHeader.split(' ')[1];
     if (!token) {
       return res.status(401).json({
         success: false,
-        error: 'प्रवेश टोकन आढळले नाही. (Token not provided)',
+        error: 'अनधिकृत प्रवेश. कृपया लॉगिन करा. (Authentication required: Missing or invalid token)',
       });
     }
 

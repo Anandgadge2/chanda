@@ -1,243 +1,557 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   FileSpreadsheet,
   Download,
-  Filter,
-  CheckCircle2,
-  AlertTriangle,
   RefreshCw,
-  Landmark,
-  ShieldCheck,
-  Eye,
+  Layers,
+  Filter,
+  AlertCircle,
+  CheckCircle2,
+  Building2,
+  FileText,
+  MapPin,
+  LandPlot,
 } from 'lucide-react';
+import { CHANDRAPUR_TALUKAS, TENURE_CLASSES } from '../../lib/constants';
 import { api } from '../../lib/api';
-import {
-  CHANDRAPUR_TALUKAS,
-  VIOLATION_TYPES,
-  ENFORCEMENT_STATUSES,
-  TENURE_CLASSES,
-} from '../../lib/constants';
+
+const BOOKLET_TYPES = [
+  {
+    id: 'ceiling',
+    prapatra: 'प्रपत्र - १',
+    nameMr: 'सिलिंग कायद्यान्वये वाटप',
+    nameEn: 'Ceiling Act Allotment',
+    color: 'border-blue-500 text-blue-800 bg-blue-50/50',
+    desc: 'मा. महसूल मंत्री महोदय यांचे निर्देशानूसार सिलींग कायद्यानूसार वाटप जमिनींचे बुकलेट',
+  },
+  {
+    id: 'bhudan',
+    prapatra: 'प्रपत्र - २',
+    nameMr: 'भुदान कायद्यान्वये वाटप',
+    nameEn: 'Bhudan Act Allotment',
+    color: 'border-amber-500 text-amber-800 bg-amber-50/50',
+    desc: 'मा. महसूल मंत्री महोदय यांचे निर्देशानूसार भुदान कायद्यानूसार वाटप जमिनींचे बुकलेट',
+  },
+  {
+    id: 'tribal',
+    prapatra: 'प्रपत्र - ३',
+    nameMr: 'आदिवासी जमीन संरक्षण',
+    nameEn: 'Tribal Land Protection',
+    color: 'border-emerald-500 text-emerald-800 bg-emerald-50/50',
+    desc: 'मा. महसूल मंत्री महोदय यांचे निर्देशानूसार आदिवासी जमीन बाबत वाटप बुकलेट (कलम ३६/३६अ)',
+  },
+  {
+    id: 'tenancy89a',
+    prapatra: 'प्रपत्र - ४',
+    nameMr: 'कुळवहिवाट कलम ८९-अ मॅपिंग',
+    nameEn: 'Tenancy Sec 89-A Industrial Mapping',
+    color: 'border-purple-500 text-purple-800 bg-purple-50/50',
+    desc: 'महाराष्ट्र कुळवहिवाट व शेतजमीन अधिनियम १९५८ चे कलम ८९-अ जमीन मॅपिंग बुकलेट',
+  },
+];
 
 export default function ReportsPage() {
+  const [bookletType, setBookletType] = useState('ceiling');
   const [taluka, setTaluka] = useState('');
-  const [violationType, setViolationType] = useState('');
-  const [status, setStatus] = useState('');
-  const [loading, setLoading] = useState(true);
+  const [village, setVillage] = useState('');
+  const [surveyNo, setSurveyNo] = useState('');
+  const [gatNo, setGatNo] = useState('');
+  const [tenure, setTenure] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [downloadingExcel, setDownloadingExcel] = useState(false);
+  const [downloadingPdf, setDownloadingPdf] = useState(false);
   const [previewData, setPreviewData] = useState([]);
+  const [summary, setSummary] = useState({ totalCount: 0, totalAreaHa: '0.0000', breachesCount: 0 });
+  const [errorMessage, setErrorMessage] = useState('');
 
-  const fetchPreview = async () => {
+  const fetchPreview = useCallback(async () => {
     setLoading(true);
+    setErrorMessage('');
     try {
-      const params = {};
-      if (taluka) params.taluka = taluka;
-      if (violationType) params.violationType = violationType;
-      if (status) params.status = status;
-
-      const data = await api.getPrapatra3Preview(params);
+      const data = await api.getBookletPreview({
+        type: bookletType,
+        taluka,
+        village,
+        surveyNo,
+        gatNo,
+        tenure,
+      });
       setPreviewData(data.rows || []);
+      if (data.summary) {
+        setSummary(data.summary);
+      } else {
+        setSummary({
+          totalCount: data.rows ? data.rows.length : 0,
+          totalAreaHa: '0.0000',
+          breachesCount: 0,
+        });
+      }
     } catch (err) {
-      console.error('Failed to load Prapatra preview:', err);
+      console.error('Failed to load booklet preview:', err);
+      setErrorMessage(err.message || 'बुकलेट डेटा आणण्यात अडचण आली.');
     } finally {
       setLoading(false);
     }
-  };
+  }, [bookletType, taluka, village, surveyNo, gatNo, tenure]);
 
   useEffect(() => {
     fetchPreview();
-  }, [taluka, violationType, status]);
+  }, [fetchPreview]);
 
-  const handleDownload = () => {
-    window.location.href = api.getPrapatra3DownloadUrl(taluka, violationType);
+  const handleDownloadExcel = async () => {
+    setDownloadingExcel(true);
+    setErrorMessage('');
+    try {
+      await api.downloadBookletExcel({
+        type: bookletType,
+        taluka,
+        village,
+        surveyNo,
+        gatNo,
+        tenure,
+      });
+    } catch (err) {
+      console.error('Download Excel error:', err);
+      setErrorMessage(err.message || 'एक्सेल फाईल डाऊनलोड करण्यात त्रुटी आली.');
+    } finally {
+      setDownloadingExcel(false);
+    }
   };
+
+  const handleDownloadPdf = async () => {
+    setDownloadingPdf(true);
+    setErrorMessage('');
+    try {
+      await api.downloadBookletPdf({
+        type: bookletType,
+        taluka,
+        village,
+        surveyNo,
+        gatNo,
+        tenure,
+      });
+    } catch (err) {
+      console.error('Download PDF error:', err);
+      setErrorMessage(err.message || 'पीडीएफ फाईल डाऊनलोड करण्यात त्रुटी आली.');
+    } finally {
+      setDownloadingPdf(false);
+    }
+  };
+
+  const handleResetFilters = () => {
+    setTaluka('');
+    setVillage('');
+    setSurveyNo('');
+    setGatNo('');
+    setTenure('');
+  };
+
+  const activeBooklet = BOOKLET_TYPES.find((b) => b.id === bookletType) || BOOKLET_TYPES[0];
+
+  // Column header configurations
+  const getHeaders = () => {
+    const baseCols = ['अ.क्र.', 'सध्या कब्जेदार सदरी असलेले नाव', 'स.नं.', 'क्षेत्र (हे.)', 'धारणा प्रकार'];
+    if (bookletType === 'ceiling') {
+      return [
+        ...baseCols,
+        'मूळ खातेदाराचे नाव',
+        'जमिनीची सध्यस्थिती',
+        'वाटप फे.फा.',
+        'शर्तभंग झाला?',
+        'अनाधिकृत हस्तांतरण',
+        'वापरात बदल',
+        'वर्ग-२ चे वर्ग-१',
+        'शेरा',
+      ];
+    }
+    if (bookletType === 'bhudan') {
+      return [
+        ...baseCols,
+        'मूळ खातेदाराशी नाते',
+        'जमिनीची सध्यस्थिती',
+        'वाटप फे.फा.',
+        'शर्तभंग झाला?',
+        'अनाधिकृत हस्तांतरण',
+        'वापरात बदल',
+        'वर्ग-२ चे वर्ग-१',
+        'शेरा',
+      ];
+    }
+    if (bookletType === 'tribal') {
+      return [
+        'अ.क्र.',
+        'मूळ खातेदार / वारसदार',
+        'स.नं.',
+        'क्षेत्र (हे.)',
+        'धारणा प्रकार',
+        'सध्या कब्जेदार सदरी नाव',
+        'परवानगीने आला किंवा कसे',
+        'आदिवासी ते आदिवासी',
+        'आदिवासी ते गैरआदिवासी',
+        'अनाधिकृत हस्तांतरण',
+        'वापरात बदल',
+        'वर्ग-२ चे वर्ग-१',
+        'शेरा',
+      ];
+    }
+    if (bookletType === 'tenancy89a') {
+      return [
+        'अ.क्र.',
+        'कंपनीचे नाव (कलम ८९-अ)',
+        'स.नं. / गट क्र.',
+        'क्षेत्र (हे.)',
+        'धारणा प्रकार',
+        'खरेदी दिनांक',
+        'औद्योगिक प्रयोजन वापर?',
+        'जमिनीची सध्यस्थिती',
+        'शेरा',
+      ];
+    }
+    return [];
+  };
+
+  const headers = getHeaders();
 
   return (
     <div className="space-y-4 sm:space-y-6">
-      {/* Header */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-6 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-3 sm:gap-4">
+      {/* Header Banner */}
+      <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-6 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <div className="flex items-center gap-2">
-            <span className="text-xs bg-emerald-100 text-emerald-900 font-bold px-2 py-0.5 rounded">
-              वैधानिक अहवाल
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-xs bg-emerald-100 text-emerald-900 font-bold px-2.5 py-0.5 rounded-full border border-emerald-200">
+              वैधानिक अहवाल प्रणाली
             </span>
             <span className="text-xs text-slate-500 font-medium">
-              महसूल व वन विभाग, महाराष्ट्र शासन
+              महसूल व वन विभाग, महाराष्ट्र शासन (जिल्हा चंद्रपूर)
             </span>
           </div>
-          <h1 className="text-lg sm:text-2xl font-black text-slate-900 mt-1 leading-tight">
-            प्रपत्र-३ अहवाल निर्यात केंद्र
+          <h1 className="text-xl sm:text-2xl font-black text-slate-900 mt-1 leading-tight tracking-tight">
+            अहवाल व प्रपत्र जनरेशन (Booklet Generation)
           </h1>
-          <p className="text-xs text-slate-500 mt-0.5">
-            भोगवटादार वर्ग-२ व शासकीय जमीन शर्तभंग, आदिवासी जमीन हस्तांतरण (कलम ३६/३६अ) व अतिक्रमण अहवाल
+          <p className="text-xs text-slate-600 mt-1 font-medium">
+            मा. महसूल मंत्री महोदयांच्या निर्देशानूसार सिलिंग (प्रपत्र-१), भुदान (प्रपत्र-२), आदिवासी जमीन (प्रपत्र-३) व कुळवहिवाट कलम ८९-अ (प्रपत्र-४) चे अधिकृत बुकलेट
           </p>
         </div>
 
-        <button
-          onClick={handleDownload}
-          className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl text-xs shadow-md transition active:scale-95 flex-shrink-0"
-        >
-          <Download className="w-4 h-4" />
-          <span>अधिकृत प्रपत्र-३ एक्सेल डाऊनलोड करा</span>
-        </button>
+        {/* Action Export Buttons */}
+        <div className="flex flex-wrap sm:flex-nowrap gap-2 w-full sm:w-auto">
+          <button
+            onClick={handleDownloadPdf}
+            disabled={downloadingPdf || loading}
+            className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 bg-rose-700 hover:bg-rose-800 disabled:opacity-50 text-white font-semibold px-4 py-2.5 rounded-xl text-xs shadow-sm transition active:scale-95 cursor-pointer"
+            title="अधिकृत पीडीएफ बुकलेट डाऊनलोड करा"
+          >
+            {downloadingPdf ? (
+              <RefreshCw className="w-4 h-4 animate-spin" />
+            ) : (
+              <Download className="w-4 h-4" />
+            )}
+            <span>PDF बुकलेट</span>
+          </button>
+          <button
+            onClick={handleDownloadExcel}
+            disabled={downloadingExcel || loading}
+            className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 bg-emerald-700 hover:bg-emerald-800 disabled:opacity-50 text-white font-semibold px-4 py-2.5 rounded-xl text-xs shadow-sm transition active:scale-95 cursor-pointer"
+            title="अधिकृत एक्सेल स्प्रेडशीट डाऊनलोड करा"
+          >
+            {downloadingExcel ? (
+              <RefreshCw className="w-4 h-4 animate-spin" />
+            ) : (
+              <FileSpreadsheet className="w-4 h-4" />
+            )}
+            <span>Excel बुकलेट</span>
+          </button>
+        </div>
       </div>
 
-     
+      {/* Error notification if any */}
+      {errorMessage && (
+        <div className="bg-rose-50 border border-rose-200 rounded-xl p-3 flex items-center gap-3 text-rose-800 text-xs font-medium animate-fadeIn">
+          <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+          <span>{errorMessage}</span>
+        </div>
+      )}
 
-      {/* Filter Bar */}
-      <div className="bg-white border border-slate-200 rounded-xl p-3.5 sm:p-4 shadow-sm flex flex-col sm:flex-row gap-2.5 sm:gap-3 items-stretch sm:items-center justify-between">
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3 flex-1">
-          <select
-            value={taluka}
-            onChange={(e) => setTaluka(e.target.value)}
-            className="w-full border border-slate-300 rounded-lg px-2.5 py-2 text-xs bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="">सर्व तालुके</option>
-            {CHANDRAPUR_TALUKAS.map((t) => (
-              <option key={t.id} value={t.id}>
-                {t.nameMr}
-              </option>
-            ))}
-          </select>
+      {/* Booklet Type Selector Tabs */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
+        {BOOKLET_TYPES.map((b) => {
+          const isSelected = bookletType === b.id;
+          return (
+            <button
+              key={b.id}
+              onClick={() => setBookletType(b.id)}
+              className={`text-left p-3.5 rounded-xl border transition-all duration-150 flex flex-col justify-between ${
+                isSelected
+                  ? `${b.color} border-2 shadow-sm font-semibold scale-[1.01]`
+                  : 'bg-white border-slate-200 hover:border-slate-300 text-slate-700'
+              }`}
+            >
+              <div className="flex justify-between items-center w-full mb-1.5">
+                <span className={`text-[11px] font-bold px-2 py-0.5 rounded ${isSelected ? 'bg-white/80 shadow-xs' : 'bg-slate-100 text-slate-600'}`}>
+                  {b.prapatra}
+                </span>
+                {isSelected && <CheckCircle2 className="w-4 h-4 text-current" />}
+              </div>
+              <div>
+                <h3 className="text-xs sm:text-sm font-bold leading-snug">{b.nameMr}</h3>
+                <p className="text-[10px] text-slate-500 mt-0.5 line-clamp-1">{b.nameEn}</p>
+              </div>
+            </button>
+          );
+        })}
+      </div>
 
-          <select
-            value={violationType}
-            onChange={(e) => setViolationType(e.target.value)}
-            className="w-full border border-slate-300 rounded-lg px-2.5 py-2 text-xs bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="">सर्व उल्लंघन प्रकार</option>
-            {Object.entries(VIOLATION_TYPES).map(([k, v]) => (
-              <option key={k} value={k}>
-                {v.labelMr}
-              </option>
-            ))}
-          </select>
-
-          <select
-            value={status}
-            onChange={(e) => setStatus(e.target.value)}
-            className="w-full border border-slate-300 rounded-lg px-2.5 py-2 text-xs bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="">सर्व प्रकरण स्थिती</option>
-            {Object.entries(ENFORCEMENT_STATUSES).map(([k, v]) => (
-              <option key={k} value={k}>
-                {v.labelMr}
-              </option>
-            ))}
-          </select>
+      {/* Filter Toolbar */}
+      <div className="bg-white border border-slate-200 rounded-xl p-3.5 sm:p-4 shadow-sm space-y-3">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-slate-100 pb-2.5">
+          <div className="flex items-center gap-2">
+            <Filter className="w-4 h-4 text-slate-600" />
+            <span className="text-xs font-bold text-slate-800">
+              तपशीलवार फिल्टर निकष (Search & Filter Parameters):
+            </span>
+          </div>
+          {(taluka || village || surveyNo || gatNo || tenure) && (
+            <button
+              onClick={handleResetFilters}
+              className="text-[11px] text-blue-700 hover:text-blue-900 font-semibold underline cursor-pointer"
+            >
+              फिल्टर साफ करा (Reset)
+            </button>
+          )}
         </div>
 
-        <button
-          onClick={fetchPreview}
-          disabled={loading}
-          className="p-2 border border-slate-300 rounded-xl text-slate-600 hover:bg-slate-50 transition active:scale-95 self-end sm:self-auto"
-          aria-label="Refresh report preview"
-        >
-          <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-        </button>
+        <div className="grid grid-cols-1 sm:grid-cols-5 gap-2.5">
+          <div>
+            <label className="block text-[10px] font-bold text-slate-600 mb-1">तालुका (Taluka)</label>
+            <select
+              value={taluka}
+              onChange={(e) => setTaluka(e.target.value)}
+              className="w-full border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:outline-hidden font-medium"
+            >
+              <option value="">सर्व तालुके (All Talukas)</option>
+              {CHANDRAPUR_TALUKAS.map((t) => (
+                <option key={t.id} value={t.id}>
+                  {t.nameMr} ({t.nameEn})
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-[10px] font-bold text-slate-600 mb-1">गाव (Village Name)</label>
+            <input
+              type="text"
+              placeholder="उदा. माढेळी किंवा Madheli"
+              value={village}
+              onChange={(e) => setVillage(e.target.value)}
+              className="w-full border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:outline-hidden"
+            >
+            </input>
+          </div>
+
+          <div>
+            <label className="block text-[10px] font-bold text-slate-600 mb-1">स.नं. (Survey No.)</label>
+            <input
+              type="text"
+              placeholder="उदा. 14 किंवा 14/2"
+              value={surveyNo}
+              onChange={(e) => setSurveyNo(e.target.value)}
+              className="w-full border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:outline-hidden"
+            />
+          </div>
+
+          <div>
+            <label className="block text-[10px] font-bold text-slate-600 mb-1">गट क्र. (Gat No.)</label>
+            <input
+              type="text"
+              placeholder="उदा. 19 किंवा 105"
+              value={gatNo}
+              onChange={(e) => setGatNo(e.target.value)}
+              className="w-full border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:outline-hidden"
+            />
+          </div>
+
+          <div>
+            <label className="block text-[10px] font-bold text-slate-600 mb-1">धारणा प्रकार (Tenure)</label>
+            <select
+              value={tenure}
+              onChange={(e) => setTenure(e.target.value)}
+              className="w-full border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:outline-hidden font-medium"
+            >
+              <option value="">सर्व धारणा प्रकार</option>
+              {Object.entries(TENURE_CLASSES).map(([key, info]) => (
+                <option key={key} value={key}>
+                  {info.labelMr}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
       </div>
 
-      {/* Live Preview Table */}
+      {/* Stats Summary Strip */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
+        <div className="bg-white border border-slate-200 rounded-xl p-3 shadow-xs flex items-center gap-3">
+          <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-700 flex items-center justify-center shrink-0">
+            <FileText className="w-4 h-4" />
+          </div>
+          <div>
+            <span className="text-[10px] text-slate-500 font-bold block">एकूण नोंदी</span>
+            <span className="text-sm font-black text-slate-800">{previewData.length}</span>
+          </div>
+        </div>
+
+        <div className="bg-white border border-slate-200 rounded-xl p-3 shadow-xs flex items-center gap-3">
+          <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0">
+            <LandPlot className="w-4 h-4" />
+          </div>
+          <div>
+            <span className="text-[10px] text-slate-500 font-bold block">एकूण क्षेत्र</span>
+            <span className="text-sm font-black text-slate-800">{summary.totalAreaHa} हे.</span>
+          </div>
+        </div>
+
+        <div className="bg-white border border-slate-200 rounded-xl p-3 shadow-xs flex items-center gap-3">
+          <div className="w-8 h-8 rounded-lg bg-rose-50 text-rose-700 flex items-center justify-center shrink-0">
+            <AlertCircle className="w-4 h-4" />
+          </div>
+          <div>
+            <span className="text-[10px] text-slate-500 font-bold block">शर्तभंग संशयित</span>
+            <span className="text-sm font-black text-rose-700">{summary.breachesCount}</span>
+          </div>
+        </div>
+
+        <div className="bg-white border border-slate-200 rounded-xl p-3 shadow-xs flex items-center gap-3">
+          <div className="w-8 h-8 rounded-lg bg-purple-50 text-purple-700 flex items-center justify-center shrink-0">
+            <Building2 className="w-4 h-4" />
+          </div>
+          <div>
+            <span className="text-[10px] text-slate-500 font-bold block">निवडलेले प्रपत्र</span>
+            <span className="text-xs font-black text-purple-900">{activeBooklet.prapatra}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Live Preview Table Container */}
       <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
-        <div className="px-3.5 sm:px-5 py-3 border-b border-slate-200 bg-slate-50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1.5">
+        <div className="px-4 py-3 border-b border-slate-200 bg-slate-50/80 flex justify-between items-center">
           <div className="flex items-center gap-2">
             <span className="text-xs font-bold text-slate-800">
-              प्रपत्र-३ थेट पूर्वावलोकन:
+              थेट बुकलेट पूर्वावलोकन ({activeBooklet.nameMr}):
             </span>
-            <span className="text-xs font-bold bg-blue-100 text-blue-900 px-2 py-0.5 rounded">
-              {previewData.length} नोंदणीकृत
-            </span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-[11px] text-slate-500 hidden sm:inline">
-              डाऊनलोड होणाऱ्या एक्सेल पत्रकातील हुबेहूब रचना
-            </span>
-            <span className="text-[10px] text-amber-800 bg-amber-50 px-2 py-0.5 rounded border border-amber-200 sm:hidden">
-              तक्ता आडवा स्क्रोल करा
+            <span className="text-xs font-bold bg-blue-100 text-blue-900 px-2 py-0.5 rounded-full">
+              {previewData.length} नोंदी
             </span>
           </div>
+          <button
+            onClick={fetchPreview}
+            disabled={loading}
+            className="p-1.5 rounded-lg hover:bg-slate-200 text-slate-600 transition cursor-pointer"
+            title="माहिती रिफ्रेश करा"
+          >
+            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+          </button>
         </div>
 
-        <div className="overflow-x-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
-          <table className="w-full text-left text-[11px] whitespace-nowrap min-w-[960px]">
-            <thead className="bg-amber-100/70 text-slate-900 font-bold border-b border-amber-200">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-[11px] whitespace-nowrap min-w-[1024px]">
+            <thead className="bg-slate-100/90 text-slate-900 font-bold border-b border-slate-200">
               <tr>
-                <th className="py-3 px-3 text-center">१. अ.क्र.</th>
-                <th className="py-3 px-3">२. तालुका</th>
-                <th className="py-3 px-3">३. गाव</th>
-                <th className="py-3 px-3">४. स.नं./गट क्र.</th>
-                <th className="py-3 px-2 text-center">५. हिस्सा</th>
-                <th className="py-3 px-3">६. क्षेत्र</th>
-                <th className="py-3 px-3">७. मूळ खातेदार (सन १९५०)</th>
-                <th className="py-3 px-3">८. धारणा प्रकार</th>
-                <th className="py-3 px-3">९. सद्यस्थितीतील कब्जेदार</th>
-                <th className="py-3 px-3">१०. उल्लंघन प्रकार</th>
-                <th className="py-3 px-3">११. प्राधिकारी स्थिती</th>
-                <th className="py-3 px-3">१२. आदेश क्र.</th>
-                <th className="py-3 px-3 text-center">१३. DMS फायली</th>
+                {headers.map((h, i) => (
+                  <th
+                    key={i}
+                    className="py-3 px-3 text-center border-r border-slate-200 last:border-r-0 text-[11px]"
+                  >
+                    {h}
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {loading ? (
                 <tr>
-                  <td colSpan={13} className="py-16 text-center text-slate-500">
-                    <div className="w-6 h-6 border-2 border-blue-900 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
-                    पूर्वावलोकन लोड होत आहे...
+                  <td colSpan={headers.length} className="py-20 text-center text-slate-500">
+                    <div className="w-7 h-7 border-3 border-blue-900 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+                    <span className="text-xs font-semibold">अधिकृत बुकलेट डेटा तयार होत आहे...</span>
                   </td>
                 </tr>
               ) : previewData.length === 0 ? (
                 <tr>
-                  <td colSpan={13} className="py-16 text-center text-slate-500">
-                    या निकषांनुसार कोणतेही अहवाल डेटा उपलब्ध नाही.
+                  <td colSpan={headers.length} className="py-16 text-center text-slate-500">
+                    <div className="max-w-md mx-auto space-y-1">
+                      <p className="text-xs font-bold text-slate-700">
+                        निवडलेल्या निकषांनुसार ({activeBooklet.prapatra}) मध्ये कोणताही डेटा आढळला नाही.
+                      </p>
+                      <p className="text-[11px] text-slate-400">
+                        कृपया वर दिलेले तालुका, गाव किंवा गट क्र. चे फिल्टर बदलून पुन्हा प्रयत्न करा.
+                      </p>
+                    </div>
                   </td>
                 </tr>
               ) : (
-                previewData.map((row) => {
-                  const tenure = TENURE_CLASSES[row.tenureClass];
-                  const viol = VIOLATION_TYPES[row.violationType];
-                  const stat = ENFORCEMENT_STATUSES[row.status];
+                previewData.map((row, index) => {
+                  const hasBreach =
+                    row.breachCondition === 'होय' ||
+                    row.unauthorizedTransfer === 'होय' ||
+                    row.changeOfUse === 'होय' ||
+                    row.tribalToNonTribal === 'होय';
 
                   return (
-                    <tr key={row.srNo} className="hover:bg-slate-50 transition">
-                      <td className="py-3 px-3 text-center font-bold text-slate-500">{row.srNo}</td>
-                      <td className="py-3 px-3 font-semibold text-slate-900">{row.taluka}</td>
-                      <td className="py-3 px-3 font-medium text-slate-800">{row.village}</td>
-                      <td className="py-3 px-3 font-bold text-slate-900">{row.surveyGat}</td>
-                      <td className="py-3 px-2 text-center text-slate-600">{row.hissa}</td>
-                      <td className="py-3 px-3 font-mono font-bold text-slate-900">{row.area}</td>
-                      <td className="py-3 px-3 font-bold text-amber-900 bg-amber-50/40">
-                        {row.originalOwner1950}
-                      </td>
-                      <td className="py-3 px-3">
-                        <span className={`px-2 py-0.5 rounded font-bold border ${tenure?.badgeClass}`}>
-                          {tenure?.labelMr || row.tenureClass}
-                        </span>
-                      </td>
-                      <td className="py-3 px-3 font-bold text-slate-800">{row.occupant}</td>
-                      <td className="py-3 px-3">
-                        <span className={`px-2 py-0.5 rounded font-bold border ${viol?.badgeClass}`}>
-                          {viol?.labelMr || row.violationType}
-                        </span>
-                      </td>
-                      <td className="py-3 px-3">
-                        <span className={`px-2 py-0.5 rounded font-bold border ${stat?.color}`}>
-                          {stat?.labelMr || row.status}
-                        </span>
-                      </td>
-                      <td className="py-3 px-3 font-mono text-blue-900 font-bold">
-                        {row.caseNumber}
-                      </td>
-                      <td className="py-3 px-3 text-center">
-                        <span className="px-2 py-0.5 rounded font-bold bg-slate-100 text-slate-700">
-                          {row.documentsCount} फायली
-                        </span>
-                      </td>
+                    <tr
+                      key={index}
+                      className={`hover:bg-blue-50/40 transition duration-150 ${
+                        hasBreach ? 'bg-rose-50/20' : index % 2 === 1 ? 'bg-slate-50/40' : ''
+                      }`}
+                    >
+                      {Object.entries(row).map(([key, val], idx) => {
+                        const isBreachCell =
+                          val === 'होय' &&
+                          (key.includes('breach') ||
+                            key.includes('unauthorized') ||
+                            key.includes('changeOfUse') ||
+                            key.includes('tribalToNonTribal'));
+
+                        return (
+                          <td
+                            key={idx}
+                            className={`py-2.5 px-3 border-r border-slate-100 last:border-r-0 text-center font-medium ${
+                              isBreachCell
+                                ? 'text-rose-700 font-bold bg-rose-50/80'
+                                : 'text-slate-700'
+                            }`}
+                          >
+                            {val !== null && val !== undefined && val !== '' ? (
+                              isBreachCell ? (
+                                <span className="inline-block px-1.5 py-0.5 rounded bg-rose-100 text-rose-800 text-[10px]">
+                                  {val}
+                                </span>
+                              ) : (
+                                val
+                              )
+                            ) : (
+                              <span className="text-slate-300">-</span>
+                            )}
+                          </td>
+                        );
+                      })}
                     </tr>
                   );
                 })
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* Official Statutory Verification Footer Notice */}
+        <div className="p-3 bg-slate-50 border-t border-slate-200 text-[10px] text-slate-500 flex flex-col sm:flex-row justify-between items-center gap-2">
+          <span>
+            * हे बुकलेट महाराष्ट्र जमीन महसूल संहिता १९६६ आणि संबंधित विशेष अधिनियमांनुसार तयार केलेले शासकीय प्रपत्र आहे.
+          </span>
+          <span className="font-semibold text-slate-600">
+            मुद्रण व तपासणी: तलाठी / मंडळ अधिकारी / तहसीलदार
+          </span>
         </div>
       </div>
     </div>

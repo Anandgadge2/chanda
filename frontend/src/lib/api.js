@@ -277,5 +277,88 @@ export const api = {
     return `${BASE_URL}/api/reports/prapatra-3?${params.toString()}`;
   },
 
+  // Booklets (Prapatra 1-4)
+  getBookletPreview: async (params = {}) => {
+    const cleanParams = Object.fromEntries(
+      Object.entries(params).filter(([_, v]) => v !== '' && v !== null && v !== undefined)
+    );
+    const query = new URLSearchParams(cleanParams).toString();
+    const res = await dedupedFetch(`${BASE_URL}/api/booklets/preview?${query}`, {
+      headers: {
+        ...getAuthHeaders(),
+      },
+      cache: 'no-store',
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ error: 'बुकलेट पूर्वावलोकन लोड अयशस्वी झाले.' }));
+      throw new Error(err.error || 'Failed to fetch booklet preview');
+    }
+    return res.json();
+  },
+
+  downloadBookletExcel: async (params = {}) => {
+    const cleanParams = Object.fromEntries(
+      Object.entries(params).filter(([_, v]) => v !== '' && v !== null && v !== undefined)
+    );
+    const query = new URLSearchParams(cleanParams).toString();
+    const res = await fetch(`${BASE_URL}/api/booklets/export-excel?${query}`, {
+      headers: {
+        ...getAuthHeaders(),
+      },
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ error: 'एक्सेल डाऊनलोड अयशस्वी झाले.' }));
+      throw new Error(err.error || 'एक्सेल डाऊनलोड अयशस्वी झाले.');
+    }
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${params.type || 'Booklet'}_${new Date().toISOString().slice(0, 10)}.xlsx`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
+  },
+
+  downloadBookletPdf: async (params = {}) => {
+    const cleanParams = Object.fromEntries(
+      Object.entries(params).filter(([_, v]) => v !== '' && v !== null && v !== undefined)
+    );
+    const query = new URLSearchParams(cleanParams).toString();
+    const res = await fetch(`${BASE_URL}/api/booklets/export-pdf?${query}`, {
+      headers: {
+        ...getAuthHeaders(),
+      },
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ error: 'पीडीएफ डाऊनलोड अयशस्वी झाले.' }));
+      throw new Error(err.error || 'पीडीएफ डाऊनलोड अयशस्वी झाले.');
+    }
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${params.type || 'Booklet'}_${new Date().toISOString().slice(0, 10)}.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
+  },
+
+  saveBookletRecord: async (payload) => {
+    const res = await fetch(`${BASE_URL}/api/booklets/record`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...getAuthHeaders(),
+      },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'नोंद जतन करणे अयशस्वी झाले.');
+    return data;
+  },
+
   getSampleTemplateUrl: () => `${BASE_URL}/api/parcels/sample-template`,
 };

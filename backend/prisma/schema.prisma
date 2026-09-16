@@ -51,6 +51,7 @@ enum DMSDocType {
 }
 
 enum UserRole {
+  SUPERADMIN
   COLLECTOR          // जिल्हाधिकारी — Apex authority
   SDO                // उपविभागीय अधिकारी — Sub-Divisional Officer
   TEHSILDAR          // तहसीलदार
@@ -95,6 +96,10 @@ model LandParcel {
   backwardHistories BackwardHistory[]
   forwardCases      ForwardEnforcementCase[]
   documents         DmsDocument[]
+  ceilingRecords    CeilingRecord[]
+  bhudanRecords     BhudanRecord[]
+  tribalRecords     TribalRecord[]
+  tenancy89ARecords Tenancy89ARecord[]
 
   @@index([taluka, villageCode, gatNumber], name: "idx_parcel_hierarchy_lookup")
   @@index([tenureClass], name: "idx_parcel_tenure")
@@ -226,6 +231,96 @@ model DmsDocument {
   @@index([parcelId], name: "idx_dms_parcel")
   @@index([caseId], name: "idx_dms_case")
   @@map("dms_documents")
+}
+
+// -------------------------------------------------------------
+// BOOKLET RECORDS (Statutory Forms 1-4)
+// -------------------------------------------------------------
+
+model CeilingRecord {
+  id                   String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  parcelId             String     @map("parcel_id") @db.Uuid
+  
+  originalAllotteeName String     @map("original_allottee_name") @db.VarChar(255)
+  allotmentFerfar      String?    @map("allotment_ferfar") @db.VarChar(64)
+  currentLandStatus    String?    @default("कृषक") @map("current_land_status") @db.VarChar(128)
+  isBreachOfCondition  Boolean    @default(false) @map("is_breach_of_condition")
+  unauthorizedTransfer Boolean    @default(false) @map("unauthorized_transfer")
+  changeOfUse          Boolean    @default(false) @map("change_of_use")
+  class2ToClass1       Boolean    @default(false) @map("class2_to_class1")
+  remarks              String?    @db.Text
+
+  createdAt            DateTime   @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt            DateTime   @updatedAt @map("updated_at") @db.Timestamptz
+
+  parcel               LandParcel @relation(fields: [parcelId], references: [id], onDelete: Cascade)
+  
+  @@index([parcelId], name: "idx_ceiling_parcel")
+  @@map("ceiling_records")
+}
+
+model BhudanRecord {
+  id                               String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  parcelId                         String     @map("parcel_id") @db.Uuid
+  
+  relationshipWithOriginalAllottee String     @map("relationship_with_original_allottee") @db.VarChar(255)
+  allotmentFerfar                  String?    @map("allotment_ferfar") @db.VarChar(64)
+  currentLandStatus                String?    @default("कृषक") @map("current_land_status") @db.VarChar(128)
+  isBreachOfCondition              Boolean    @default(false) @map("is_breach_of_condition")
+  unauthorizedTransfer             Boolean    @default(false) @map("unauthorized_transfer")
+  changeOfUse                      Boolean    @default(false) @map("change_of_use")
+  class2ToClass1                   Boolean    @default(false) @map("class2_to_class1")
+  remarks                          String?    @db.Text
+
+  createdAt                        DateTime   @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt                        DateTime   @updatedAt @map("updated_at") @db.Timestamptz
+
+  parcel                           LandParcel @relation(fields: [parcelId], references: [id], onDelete: Cascade)
+
+  @@index([parcelId], name: "idx_bhudan_parcel")
+  @@map("bhudan_records")
+}
+
+model TribalRecord {
+  id                   String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  parcelId             String     @map("parcel_id") @db.Uuid
+  
+  originalHolderOrHeir String     @map("original_holder_or_heir") @db.VarChar(255)
+  currentOccupant      String     @map("current_occupant") @db.VarChar(255)
+  permissionStatus     String     @map("permission_status") @db.VarChar(255)
+  tribalToTribal       Boolean    @default(false) @map("tribal_to_tribal")
+  tribalToNonTribal    Boolean    @default(false) @map("tribal_to_non_tribal")
+  unauthorizedTransfer Boolean    @default(false) @map("unauthorized_transfer")
+  changeOfUse          Boolean    @default(false) @map("change_of_use")
+  class2ToClass1       Boolean    @default(false) @map("class2_to_class1")
+  remarks              String?    @db.Text
+
+  createdAt            DateTime   @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt            DateTime   @updatedAt @map("updated_at") @db.Timestamptz
+
+  parcel               LandParcel @relation(fields: [parcelId], references: [id], onDelete: Cascade)
+
+  @@index([parcelId], name: "idx_tribal_parcel")
+  @@map("tribal_records")
+}
+
+model Tenancy89ARecord {
+  id                     String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  parcelId               String     @map("parcel_id") @db.Uuid
+  
+  companyName            String     @map("company_name") @db.VarChar(255)
+  purchaseDate           DateTime?  @map("purchase_date") @db.Date
+  isGenuineIndustrialUse Boolean    @default(true) @map("is_genuine_industrial_use")
+  currentLandStatus      String     @map("current_land_status") @db.VarChar(128)
+  remarks                String?    @db.Text
+
+  createdAt              DateTime   @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt              DateTime   @updatedAt @map("updated_at") @db.Timestamptz
+
+  parcel                 LandParcel @relation(fields: [parcelId], references: [id], onDelete: Cascade)
+
+  @@index([parcelId], name: "idx_tenancy89a_parcel")
+  @@map("tenancy89a_records")
 }
 
 // -------------------------------------------------------------

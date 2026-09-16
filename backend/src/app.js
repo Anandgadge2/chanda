@@ -9,6 +9,7 @@ import reportRoutes from './routes/reportRoutes.js';
 import documentRoutes from './routes/documentRoutes.js';
 import caseRoutes from './routes/caseRoutes.js';
 import analyticsRoutes from './routes/analyticsRoutes.js';
+import bookletRoutes from './routes/bookletRoutes.js';
 
 // Polyfill BigInt serialization for Prisma fileSizeBytes
 BigInt.prototype.toJSON = function () {
@@ -62,6 +63,7 @@ const apiIndexHandler = (req, res) => {
       parcels: '/api/parcels',
       cases: '/api/cases',
       reports: '/api/reports',
+      booklets: '/api/booklets',
       documents: '/api/documents',
       analytics: '/api/analytics',
     },
@@ -93,6 +95,7 @@ app.get('/api/health', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/parcels', parcelRoutes);
 app.use('/api/reports', reportRoutes);
+app.use('/api/booklets', bookletRoutes);
 app.use('/api/documents', documentRoutes);
 app.use('/api/cases', caseRoutes);
 app.use('/api/analytics', analyticsRoutes);
