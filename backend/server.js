@@ -8,6 +8,8 @@ dotenv.config();
 const PORT = process.env.PORT || 5000;
 const ENV = process.env.NODE_ENV || 'development';
 
+let keepAliveInterval = null;
+
 const server = app.listen(PORT, async () => {
   logger.banner({
     name: 'Chandrapur Land Records & Governance Platform API',
@@ -29,10 +31,23 @@ const server = app.listen(PORT, async () => {
   } catch (err) {
     logger.error('PostgreSQL connection check failed', err, 'PRISMA');
   }
+
+  // Keep-Alive Ping for Neon Cloud in development mode (pings every 4 mins to prevent 5-min auto-suspend)
+  if (ENV === 'development') {
+    const FOUR_MINUTES = 4 * 60 * 1000;
+    keepAliveInterval = setInterval(async () => {
+      try {
+        await prisma.$queryRaw`SELECT 1`;
+      } catch (err) {
+        // Ignore background ping errors during brief network drops
+      }
+    }, FOUR_MINUTES);
+  }
 });
 
 // Graceful Shutdown
 const shutdown = async (signal) => {
+  if (keepAliveInterval) clearInterval(keepAliveInterval);
   logger.info(`Received ${signal}. Shutting down gracefully...`, 'SERVER');
   server.close(async () => {
     try {

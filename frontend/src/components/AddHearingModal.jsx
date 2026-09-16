@@ -1,13 +1,31 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { X, Calendar, Scale, CheckCircle2, AlertCircle } from 'lucide-react';
 import { api } from '../lib/api';
 import { useFocusTrap } from '../hooks/useFocusTrap';
 
 export default function AddHearingModal({ isOpen, onClose, caseItem, onHearingAdded }) {
   const trapRef = useFocusTrap(isOpen);
+  const [mounted, setMounted] = useState(false);
   const [hearingDate, setHearingDate] = useState(new Date().toISOString().slice(0, 10));
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
   const [authority, setAuthority] = useState('Sub-Divisional Officer (SDO) Warora');
   const [proceedingsLog, setProceedingsLog] = useState('');
   const [nextHearingDate, setNextHearingDate] = useState('');
@@ -25,7 +43,7 @@ export default function AddHearingModal({ isOpen, onClose, caseItem, onHearingAd
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onClose]);
 
-  if (!isOpen || !caseItem) return null;
+  if (!isOpen || !caseItem || !mounted) return null;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -52,9 +70,9 @@ export default function AddHearingModal({ isOpen, onClose, caseItem, onHearingAd
     }
   };
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center p-2.5 sm:p-4 bg-slate-950/75 backdrop-blur-sm animate-in fade-in duration-150 overflow-y-auto"
+      className="fixed inset-0 z-[100] flex items-center justify-center p-2.5 sm:p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-150 overflow-y-auto"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
@@ -189,6 +207,7 @@ export default function AddHearingModal({ isOpen, onClose, caseItem, onHearingAd
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

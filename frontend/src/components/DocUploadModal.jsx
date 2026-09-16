@@ -1,13 +1,32 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { X, Upload, FileText, CheckCircle2, AlertCircle } from 'lucide-react';
 import { api } from '../lib/api';
 import { useFocusTrap } from '../hooks/useFocusTrap';
 
 export default function DocUploadModal({ isOpen, onClose, parcelId, caseId, onUploadSuccess }) {
   const trapRef = useFocusTrap(isOpen);
+  const [mounted, setMounted] = useState(false);
   const [file, setFile] = useState(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
+
   const [title, setTitle] = useState('');
   const [docType, setDocType] = useState('SDO_ORDER');
   const [rackNo, setRackNo] = useState('');
@@ -27,7 +46,7 @@ export default function DocUploadModal({ isOpen, onClose, parcelId, caseId, onUp
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onClose]);
 
-  if (!isOpen) return null;
+  if (!isOpen || !mounted) return null;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -66,9 +85,9 @@ export default function DocUploadModal({ isOpen, onClose, parcelId, caseId, onUp
     }
   };
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/75 backdrop-blur-sm p-2.5 sm:p-4 animate-in fade-in duration-150 overflow-y-auto"
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-2.5 sm:p-4 animate-in fade-in duration-150 overflow-y-auto"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
@@ -250,6 +269,7 @@ export default function DocUploadModal({ isOpen, onClose, parcelId, caseId, onUp
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

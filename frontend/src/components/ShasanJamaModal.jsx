@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import {
   X,
   Scale,
@@ -18,6 +19,23 @@ import { useFocusTrap } from '../hooks/useFocusTrap';
 export default function ShasanJamaModal({ isOpen, onClose, caseItem, onSuccess = () => {} }) {
   const trapRef = useFocusTrap(isOpen);
   const { user } = useAuth();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
 
   const [orderNumber, setOrderNumber] = useState('');
   const [orderDate, setOrderDate] = useState(new Date().toISOString().split('T')[0]);
@@ -41,7 +59,7 @@ export default function ShasanJamaModal({ isOpen, onClose, caseItem, onSuccess =
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onClose]);
 
-  if (!isOpen || !caseItem) return null;
+  if (!isOpen || !caseItem || !mounted) return null;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -101,9 +119,9 @@ export default function ShasanJamaModal({ isOpen, onClose, caseItem, onSuccess =
     }
   };
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4 bg-slate-950/75 backdrop-blur-sm animate-in fade-in duration-150 overflow-y-auto"
+      className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-150 overflow-y-auto"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
@@ -311,6 +329,7 @@ export default function ShasanJamaModal({ isOpen, onClose, caseItem, onSuccess =
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

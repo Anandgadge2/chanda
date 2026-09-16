@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import {
   X,
   Search,
@@ -23,8 +24,25 @@ export default function RevenueShortcutGuideModal({
   initialCategory = 'ALL',
 }) {
   const trapRef = useFocusTrap(isOpen);
+  const [mounted, setMounted] = useState(false);
   const [searchQuery, setSearchQuery] = useState(initialQuery);
   const [selectedCategory, setSelectedCategory] = useState(initialCategory);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
 
   // Handle ESC key
   useEffect(() => {
@@ -58,9 +76,9 @@ export default function RevenueShortcutGuideModal({
     });
   }, [searchQuery, selectedCategory]);
 
-  if (!isOpen) return null;
+  if (!isOpen || !mounted) return null;
 
-  return (
+  return createPortal(
     <div
       className="fixed inset-0 z-[100] flex items-center justify-center p-2 sm:p-4 md:p-6 overflow-hidden"
       role="dialog"
@@ -274,6 +292,7 @@ export default function RevenueShortcutGuideModal({
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

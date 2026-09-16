@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import {
   ShieldCheck,
   Download,
@@ -18,6 +19,7 @@ import { useFocusTrap } from '../hooks/useFocusTrap';
 import { api } from '../lib/api';
 
 export default function DpdpaRightsModal({ isOpen, onClose, user }) {
+  const [mounted, setMounted] = useState(false);
   const [activeTab, setActiveTab] = useState('export'); // 'export' | 'erasure'
   const [exportLoading, setExportLoading] = useState(false);
   const [exportSuccess, setExportSuccess] = useState(false);
@@ -28,7 +30,23 @@ export default function DpdpaRightsModal({ isOpen, onClose, user }) {
 
   const trapRef = useFocusTrap(isOpen);
 
-  if (!isOpen) return null;
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
+
+  if (!isOpen || !mounted) return null;
 
   // Handle Export Data (Section 11)
   const handleExport = async () => {
@@ -68,9 +86,9 @@ export default function DpdpaRightsModal({ isOpen, onClose, user }) {
     }
   };
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4 bg-slate-950/75 backdrop-blur-sm animate-in fade-in duration-150"
+      className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-150"
       role="dialog"
       aria-modal="true"
       aria-labelledby="dpdpa-rights-title"
@@ -344,6 +362,7 @@ export default function DpdpaRightsModal({ isOpen, onClose, user }) {
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

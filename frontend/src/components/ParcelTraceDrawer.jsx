@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import {
   X,
   Clock,
@@ -35,20 +36,50 @@ import { useFocusTrap } from '../hooks/useFocusTrap';
 
 export default function ParcelTraceDrawer({ upi, onClose, onRefresh }) {
   const trapRef = useFocusTrap(Boolean(upi));
+  const [mounted, setMounted] = useState(false);
   const [data, setData] = useState(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Lock body scroll when drawer is open
+  useEffect(() => {
+    if (upi) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [upi]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('backward');
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
 
   // Split-view & Interactive Document Selection State
+  // Default to false ("केवळ माहिती" mode on by default as requested)
   const [selectedEpoch, setSelectedEpoch] = useState(null);
   const [selectedCase, setSelectedCase] = useState(null);
   const [selectedDoc, setSelectedDoc] = useState(null);
-  const [isSplitView, setIsSplitView] = useState(true);
+  const [isSplitView, setIsSplitView] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [glossaryModalOpen, setGlossaryModalOpen] = useState(false);
   const [glossaryInitialQuery, setGlossaryInitialQuery] = useState('');
+
+  // Open Document Handler: switches to Right-Side Split View ("बाजू-बाजूने दृश्य") and loads document
+  const handleOpenDocument = (epochOrItem, type = 'backward') => {
+    if (type === 'backward') {
+      setSelectedEpoch(epochOrItem);
+    } else if (type === 'forward') {
+      setSelectedCase(epochOrItem);
+    } else if (type === 'documents') {
+      setSelectedDoc(epochOrItem);
+    }
+    setIsSplitView(true);
+  };
 
   // Handle ESC key
   useEffect(() => {
@@ -85,7 +116,7 @@ export default function ParcelTraceDrawer({ upi, onClose, onRefresh }) {
       });
   }, [upi]);
 
-  if (!upi) return null;
+  if (!upi || !mounted) return null;
 
   const parcel = data?.parcel;
   const summary = data?.intelligenceSummary;
@@ -112,7 +143,7 @@ export default function ParcelTraceDrawer({ upi, onClose, onRefresh }) {
 
   const activeDocument = getActiveDocument();
 
-  return (
+  return createPortal(
     <div
       className="fixed inset-0 z-[100] flex items-center justify-center p-2 sm:p-3 md:p-4 overflow-hidden"
       role="dialog"
@@ -187,15 +218,15 @@ export default function ParcelTraceDrawer({ upi, onClose, onRefresh }) {
             <button
               type="button"
               onClick={() => setIsSplitView((prev) => !prev)}
-              className={`p-1.5 sm:px-2.5 sm:py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition border focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+              className={`p-1.5 sm:px-3 sm:py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition border focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                 isSplitView
-                  ? 'bg-blue-50 text-blue-800 border-blue-300'
-                  : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
+                  ? 'bg-blue-50 text-blue-900 border-blue-600 ring-1 ring-blue-600 shadow-2xs'
+                  : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
               } hidden md:flex`}
-              title="बाजू-बाजूने स्कॅन दृश्य टॉगल करा"
+              title={isSplitView ? 'केवळ माहिती दृश्य टॉगल करा' : 'बाजू-बाजूने स्कॅन दृश्य टॉगल करा'}
             >
               <Columns className="w-3.5 h-3.5 text-blue-700" />
-              <span className="hidden lg:inline">{isSplitView ? 'बाजू-बाजूने दृश्य' : 'केवळ माहिती'}</span>
+              <span>{isSplitView ? 'बाजू-बाजूने दृश्य' : 'केवळ माहिती'}</span>
             </button>
 
             {/* Fullscreen Modal Toggle */}
@@ -396,34 +427,57 @@ export default function ParcelTraceDrawer({ upi, onClose, onRefresh }) {
                         </span>
                       </div>
 
-                      {/* Animated Timeline Container */}
-                      <div className="relative pl-6 space-y-4 before:absolute before:left-2.5 before:top-3 before:bottom-3 before:w-0.5 before:bg-gradient-to-b before:from-amber-500 before:via-blue-600 before:to-slate-300">
-                        {parcel.backwardHistories?.map((epoch) => {
+                      {/* Enhanced Animated Timeline Container */}
+                      <div className="relative pl-7 space-y-4 before:absolute before:left-3 before:top-4 before:bottom-4 before:w-1 before:rounded-full before:bg-gradient-to-b before:from-amber-500 before:via-blue-600 before:to-emerald-500 before:shadow-xs">
+                        {parcel.backwardHistories?.map((epoch, index) => {
                           const isSelected = selectedEpoch?.id === epoch.id || (!selectedEpoch && epoch.epochYear === 1950);
                           const is1950 = epoch.epochYear === 1950;
 
                           return (
-                            <div key={epoch.id} className="relative group">
-                              {/* Timeline Glowing Node */}
-                              <div
-                                className={`absolute -left-6 top-3 w-4 h-4 rounded-full border-2 transition-all duration-200 ${
-                                  isSelected
-                                    ? is1950
-                                      ? 'border-amber-600 bg-amber-500 ring-4 ring-amber-200 scale-110'
-                                      : 'border-blue-700 bg-blue-600 ring-4 ring-blue-200 scale-110'
-                                    : is1950
-                                    ? 'border-amber-500 bg-amber-100'
-                                    : 'border-slate-400 bg-white hover:border-blue-600'
-                                }`}
-                              />
+                            <div
+                              key={epoch.id}
+                              className="relative group animate-in fade-in slide-in-from-left-4 duration-300 fill-mode-backwards"
+                              style={{ animationDelay: `${index * 120}ms` }}
+                            >
+                              {/* Glowing Interactive Milestone Node */}
+                              <div className="absolute -left-7 top-4 flex items-center justify-center">
+                                {isSelected && (
+                                  <span
+                                    className={`absolute w-7 h-7 rounded-full animate-ping opacity-60 ${
+                                      is1950 ? 'bg-amber-400' : 'bg-blue-400'
+                                    }`}
+                                  />
+                                )}
+                                <div
+                                  className={`relative w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all duration-300 ${
+                                    isSelected
+                                      ? is1950
+                                        ? 'border-amber-600 bg-amber-500 ring-4 ring-amber-300/60 scale-125 shadow-md'
+                                        : 'border-blue-700 bg-blue-600 ring-4 ring-blue-300/60 scale-125 shadow-md'
+                                      : is1950
+                                      ? 'border-amber-500 bg-amber-100 group-hover:scale-110 group-hover:border-amber-600 shadow-xs'
+                                      : 'border-slate-300 bg-white group-hover:border-blue-600 group-hover:scale-110 shadow-xs'
+                                  }`}
+                                >
+                                  <div
+                                    className={`w-1.5 h-1.5 rounded-full ${
+                                      isSelected
+                                        ? 'bg-white'
+                                        : is1950
+                                        ? 'bg-amber-600'
+                                        : 'bg-slate-400'
+                                    }`}
+                                  />
+                                </div>
+                              </div>
 
-                              {/* Interactive Epoch Card */}
+                              {/* Interactive Epoch Card with Smooth Hover & Focus States */}
                               <div
                                 onClick={() => setSelectedEpoch(epoch)}
-                                className={`p-3.5 sm:p-4 rounded-xl border transition-all duration-200 cursor-pointer text-xs space-y-2 relative ${
+                                className={`p-3.5 sm:p-4 rounded-xl border transition-all duration-300 cursor-pointer text-xs space-y-2.5 relative ${
                                   isSelected
-                                    ? 'bg-gradient-to-br from-blue-50/40 via-white to-amber-50/20 border-blue-600 shadow-md ring-2 ring-blue-500/30 -translate-y-0.5'
-                                    : 'bg-white border-slate-200 hover:border-slate-300 hover:shadow-xs hover:bg-slate-50/40'
+                                    ? 'bg-gradient-to-br from-blue-50/60 via-white to-amber-50/30 border-blue-600 shadow-md ring-2 ring-blue-500/30 -translate-y-0.5'
+                                    : 'bg-white border-slate-200 hover:border-slate-300 hover:shadow-md hover:bg-slate-50/50 hover:-translate-y-0.5'
                                 }`}
                               >
                                 {/* Card Top Row */}
@@ -431,9 +485,9 @@ export default function ParcelTraceDrawer({ upi, onClose, onRefresh }) {
                                   <div>
                                     <div className="flex items-center gap-1.5 flex-wrap">
                                       <span
-                                        className={`text-[10px] font-bold px-2 py-0.5 rounded shadow-2xs ${
+                                        className={`text-[10px] font-extrabold px-2.5 py-0.5 rounded shadow-2xs ${
                                           is1950
-                                            ? 'bg-amber-500 text-slate-950 font-extrabold border border-amber-600'
+                                            ? 'bg-amber-500 text-slate-950 border border-amber-600'
                                             : 'bg-slate-100 text-slate-800 border border-slate-300'
                                         }`}
                                       >
@@ -441,32 +495,32 @@ export default function ParcelTraceDrawer({ upi, onClose, onRefresh }) {
                                       </span>
 
                                       {isSelected && (
-                                        <span className="text-[9px] bg-blue-900 text-white font-bold px-1.5 py-0.2 rounded-full flex items-center gap-1">
-                                          <Check className="w-2.5 h-2.5" />
+                                        <span className="text-[9px] bg-blue-900 text-white font-bold px-2 py-0.5 rounded-full flex items-center gap-1 shadow-2xs">
+                                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                                           सध्या पाहत आहात
                                         </span>
                                       )}
                                     </div>
 
-                                    <h4 className="text-xs sm:text-sm font-bold text-slate-900 mt-1">
+                                    <h4 className="text-xs sm:text-sm font-extrabold text-slate-900 mt-1">
                                       {epoch.ownerName}
                                     </h4>
                                   </div>
 
                                   <div className="text-right shrink-0">
-                                    <span className="text-[10px] font-mono font-bold bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200 text-slate-700 block">
+                                    <span className="text-[10px] font-mono font-bold bg-slate-100 px-2 py-0.5 rounded border border-slate-200 text-slate-700 block shadow-2xs">
                                       फेरफार: {epoch.ferfarNumber || 'N/A'}
                                     </span>
                                   </div>
                                 </div>
 
                                 {/* Detailed Fields Grid */}
-                                <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-[11px] text-slate-600 bg-slate-50/80 p-2 rounded-lg border border-slate-100">
+                                <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-[11px] text-slate-600 bg-slate-50/90 p-2.5 rounded-lg border border-slate-100">
                                   <div>
                                     खाते क्र.: <strong className="text-slate-900">{epoch.khataNumber || '-'}</strong>
                                   </div>
                                   <div>
-                                    क्षेत्र: <strong className="text-slate-900">{Number(epoch.areaHa).toFixed(4)} हे.</strong>
+                                    क्षेत्र: <strong className="text-slate-900 font-mono">{Number(epoch.areaHa).toFixed(4)} हे.</strong>
                                   </div>
                                   <div className="truncate">
                                     हस्तांतरण: <strong className="text-slate-900">{epoch.mutationType || '-'}</strong>
@@ -478,7 +532,7 @@ export default function ParcelTraceDrawer({ upi, onClose, onRefresh }) {
 
                                 {/* Remarks / Statutory Restriction */}
                                 {epoch.remarks && (
-                                  <p className="text-[11px] text-amber-950 bg-amber-50/70 p-2 rounded-lg border border-amber-200/70 italic">
+                                  <p className="text-[11px] text-amber-950 bg-amber-50/80 p-2 rounded-lg border border-amber-200/80 italic">
                                     शेरा: {epoch.remarks}
                                   </p>
                                 )}
@@ -488,21 +542,20 @@ export default function ParcelTraceDrawer({ upi, onClose, onRefresh }) {
                                   <span className="text-slate-500 font-mono text-[10px]">
                                     {is1950 ? '🏛️ कपाट: R-01 | गठ्ठा: B-01' : epoch.epochYear === 1988 ? '🏛️ कपाट: R-02 | गठ्ठा: B-04' : '🏛️ कपाट: R-03 | गठ्ठा: B-09'}
                                   </span>
+
+                                  {/* Prominent View Document Action Button */}
                                   <button
                                     type="button"
                                     onClick={(e) => {
                                       e.stopPropagation();
-                                      setSelectedEpoch(epoch);
+                                      handleOpenDocument(epoch, 'backward');
                                     }}
-                                    className={`inline-flex items-center gap-1 font-bold px-2 py-0.5 rounded transition ${
-                                      isSelected
-                                        ? 'bg-blue-900 text-white'
-                                        : 'text-blue-700 hover:text-blue-900 hover:bg-blue-50'
-                                    }`}
+                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-extrabold bg-blue-900 hover:bg-blue-800 text-white shadow-xs transition-all active:scale-95 hover:shadow-md hover:ring-2 hover:ring-blue-400/40"
+                                    title="स्कॅन दस्तऐवज उघडा"
                                   >
-                                    <FileText className="w-3 h-3" />
+                                    <Eye className="w-3.5 h-3.5 text-amber-300 animate-pulse" />
                                     <span>स्कॅन दस्तऐवज पहा</span>
-                                    <ChevronRight className="w-3 h-3" />
+                                    <ExternalLink className="w-3 h-3 text-blue-200" />
                                   </button>
                                 </div>
                               </div>
@@ -620,11 +673,15 @@ export default function ParcelTraceDrawer({ upi, onClose, onRefresh }) {
                               <div className="pt-2 border-t border-slate-100 flex justify-end">
                                 <button
                                   type="button"
-                                  className="inline-flex items-center gap-1 text-[11px] text-blue-700 font-bold hover:text-blue-900"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleOpenDocument(item, 'forward');
+                                  }}
+                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-blue-50 text-blue-900 border border-blue-200 hover:bg-blue-100 transition active:scale-95 shadow-2xs"
                                 >
-                                  <FileText className="w-3 h-3" />
+                                  <Eye className="w-3.5 h-3.5 text-blue-700" />
                                   <span>नोटीस व आदेश दस्तऐवज उघडा</span>
-                                  <ChevronRight className="w-3 h-3" />
+                                  <ChevronRight className="w-3.5 h-3.5" />
                                 </button>
                               </div>
                             </div>
@@ -683,10 +740,18 @@ export default function ParcelTraceDrawer({ upi, onClose, onRefresh }) {
                                     {doc.title}
                                   </h4>
                                 </div>
-                                <span className="text-[10px] text-blue-700 font-bold inline-flex items-center gap-1">
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleOpenDocument(doc, 'documents');
+                                  }}
+                                  className="text-[10px] font-bold inline-flex items-center gap-1 bg-blue-50 hover:bg-blue-100 text-blue-900 border border-blue-200 px-2 py-1 rounded-lg transition"
+                                >
+                                  <Eye className="w-3 h-3 text-blue-700" />
                                   <span>पहा</span>
                                   <ChevronRight className="w-3 h-3" />
-                                </span>
+                                </button>
                               </div>
 
                               <div className="grid grid-cols-3 gap-2 bg-slate-50 p-2 rounded-lg border border-slate-100 text-[11px] text-slate-600 font-mono">
@@ -710,7 +775,7 @@ export default function ParcelTraceDrawer({ upi, onClose, onRefresh }) {
 
                 {/* RIGHT COLUMN: Interactive Scanned Document Viewer (Displayed right beside each data) */}
                 {isSplitView && (
-                  <div className="lg:col-span-6 xl:col-span-6 flex flex-col min-h-[460px] sticky top-0">
+                  <div className="lg:col-span-6 xl:col-span-6 flex flex-col min-h-[460px] sticky top-0 animate-in fade-in slide-in-from-right-4 duration-300">
                     <ArchivalDocumentViewer
                       document={activeDocument}
                       selectedEpoch={activeTab === 'backward' ? selectedEpoch : null}
@@ -778,6 +843,7 @@ export default function ParcelTraceDrawer({ upi, onClose, onRefresh }) {
         onClose={() => setGlossaryModalOpen(false)}
         initialQuery={glossaryInitialQuery}
       />
-    </div>
+    </div>,
+    document.body
   );
 }
