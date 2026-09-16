@@ -196,6 +196,37 @@ export default function ShartbhangAnalyticsChart({ violations = [], statuses = [
         </div>
       )}
 
+      {/* Screen Reader Accessible Data Table (WCAG 1.1.1) */}
+      <table className="sr-only">
+        <caption>शर्तभंग विश्लेषण व न्यायालयीन टप्पे सारणी</caption>
+        <thead>
+          <tr>
+            <th scope="col">प्रकार / टप्पा</th>
+            <th scope="col">प्रकरणे संख्या</th>
+            <th scope="col">टक्केवारी / माहिती</th>
+            <th scope="col">बाधित क्षेत्र (हे.)</th>
+          </tr>
+        </thead>
+        <tbody>
+          {categoryData.map((c) => (
+            <tr key={c.typeKey}>
+              <td>{c.labelMr} ({c.labelEn})</td>
+              <td>{c.count}</td>
+              <td>{c.pct}%</td>
+              <td>{c.areaHa}</td>
+            </tr>
+          ))}
+          {pipelineData.map((p) => (
+            <tr key={p.key}>
+              <td>{p.labelMr}</td>
+              <td>{p.count}</td>
+              <td>न्यायालयीन टप्पा</td>
+              <td>-</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
       {/* Footer Details */}
       <div className="flex items-center justify-between pt-2 border-t border-slate-100 text-xs">
         <div className="flex items-center gap-2 text-slate-500 font-medium text-[11px]">

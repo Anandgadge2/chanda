@@ -74,6 +74,9 @@ export const login = async (req, res) => {
       role: user.role,
       taluka: user.taluka,
       designation: user.designation,
+      consentGiven: user.consentGiven,
+      consentAt: user.consentAt,
+      consentVersion: user.consentVersion,
     };
 
     // Return instant success response to client immediately
@@ -198,12 +201,20 @@ export const logout = async (req, res) => {
  */
 export const register = async (req, res) => {
   try {
-    const { fullName, email, mobile, password, role = 'CITIZEN', taluka, designation } = req.body;
+    const { fullName, email, mobile, password, role = 'CITIZEN', taluka, designation, consentGiven } = req.body;
 
     if (!fullName || !email || !password) {
       return res.status(400).json({
         success: false,
         error: 'नाव, ईमेल आणि संकेतशब्द अनिवार्य आहेत. (Full name, email and password are required)',
+      });
+    }
+
+    // DPDPA 2023 Sec 6: Explicit consent validation
+    if (!consentGiven) {
+      return res.status(400).json({
+        success: false,
+        error: 'गोपनीयता धोरण व डेटा संरक्षण संमती आवश्यक आहे. (Consent to privacy policy is mandatory under DPDPA 2023)',
       });
     }
 
@@ -242,6 +253,9 @@ export const register = async (req, res) => {
         taluka: taluka || null,
         designation: designation || null,
         isActive: true,
+        consentGiven: true,
+        consentAt: new Date(),
+        consentVersion: '1.0',
       },
       select: {
         id: true,
@@ -251,6 +265,9 @@ export const register = async (req, res) => {
         role: true,
         taluka: true,
         designation: true,
+        consentGiven: true,
+        consentAt: true,
+        consentVersion: true,
         createdAt: true,
       },
     });
@@ -260,7 +277,7 @@ export const register = async (req, res) => {
       action: 'USER_REGISTER',
       entityType: 'User',
       entityId: newUser.id,
-      newData: { email: newUser.email, role: newUser.role },
+      newData: { email: newUser.email, role: newUser.role, consentVersion: '1.0' },
       req,
     });
 
@@ -276,3 +293,104 @@ export const register = async (req, res) => {
     });
   }
 };
+
+/**
+ * GET /api/auth/dpdpa/export
+ * DPDPA 2023 Sec 11 - Right to Information & Data Portability
+ */
+export const exportMyData = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        fullName: true,
+        email: true,
+        mobile: true,
+        role: true,
+        taluka: true,
+        designation: true,
+        consentGiven: true,
+        consentAt: true,
+        consentVersion: true,
+        createdAt: true,
+        updatedAt: true,
+        sessions: {
+          select: {
+            id: true,
+            ipAddress: true,
+            userAgent: true,
+            createdAt: true,
+            expiresAt: true,
+          },
+        },
+        auditLogs: {
+          select: {
+            id: true,
+            action: true,
+            entityType: true,
+            entityId: true,
+            createdAt: true,
+          },
+          take: 50,
+          orderBy: { createdAt: 'desc' },
+        },
+      },
+    });
+
+    await logAudit({
+      userId,
+      action: 'DPDPA_DATA_EXPORT',
+      entityType: 'User',
+      entityId: userId,
+      req,
+    });
+
+    return res.json({
+      success: true,
+      exportTimestamp: new Date().toISOString(),
+      regulations: 'Digital Personal Data Protection Act, 2023 (DPDPA)',
+      data: user,
+    });
+  } catch (error) {
+    console.error('Error in exportMyData:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'डेटा निर्यात करताना त्रुटी. (Failed to export personal data)',
+    });
+  }
+};
+
+/**
+ * POST /api/auth/dpdpa/erasure-request
+ * DPDPA 2023 Sec 12 - Right to Correction and Erasure
+ */
+export const requestErasure = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { reason } = req.body;
+
+    await logAudit({
+      userId,
+      action: 'DPDPA_ERASURE_REQUESTED',
+      entityType: 'User',
+      entityId: userId,
+      newData: { reason: reason || 'Data principal requested erasure under DPDPA Sec 12' },
+      req,
+    });
+
+    return res.json({
+      success: true,
+      message: 'आपली डेटा हटविण्याची विनंती नोंदवली गेली आहे. डेटा संरक्षण अधिकाऱ्याद्वारे (DPO) ७२ तासांच्या आत कार्यवाही केली जाईल. (Erasure request logged. Under DPDPA 2023, the Data Protection Officer will review within 72 hours.)',
+      requestId: `ER-${Date.now()}`,
+    });
+  } catch (error) {
+    console.error('Error in requestErasure:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'विनंती नोंदवताना त्रुटी. (Failed to register erasure request)',
+    });
+  }
+};
+

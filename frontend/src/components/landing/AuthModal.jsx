@@ -24,6 +24,7 @@ import { CHANDRAPUR_TALUKAS } from '../../lib/constants';
 import ChandrapurDistrictLogo from './ChandrapurDistrictLogo';
 import { useAuth } from '../AuthContext';
 import { api } from '../../lib/api';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
 
 const DEFAULT_OFFICERS = [
   {
@@ -52,6 +53,7 @@ const DEFAULT_OFFICERS = [
 export default function AuthModal({ isOpen, onClose, initialTab = 'login' }) {
   const router = useRouter();
   const { login } = useAuth();
+  const trapRef = useFocusTrap(isOpen);
 
   const [tab, setTab] = useState(initialTab);
   const [email, setEmail] = useState('collector.chandrapur@maharashtra.gov.in');
@@ -69,12 +71,14 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'login' }) {
   const [regPassword, setRegPassword] = useState('');
   const [regTaluka, setRegTaluka] = useState('Chandrapur');
   const [regRole, setRegRole] = useState('CITIZEN');
+  const [regConsent, setRegConsent] = useState(false);
   const [regSubmitted, setRegSubmitted] = useState(false);
 
   useEffect(() => {
     setTab(initialTab);
     setErrorMsg('');
     setSuccessMsg('');
+    setRegConsent(false);
     setRegSubmitted(false);
   }, [initialTab, isOpen]);
 
@@ -126,6 +130,10 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'login' }) {
 
   const handleRegisterSubmit = async (e) => {
     e.preventDefault();
+    if (!regConsent) {
+      setErrorMsg('कृपया गोपनीयता धोरण व डेटा संरक्षण संमती स्वीकारा. (Consent to privacy policy is mandatory under DPDPA 2023)');
+      return;
+    }
     setErrorMsg('');
     setLoading(true);
 
@@ -137,6 +145,7 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'login' }) {
         password: regPassword,
         role: regRole,
         taluka: regTaluka,
+        consentGiven: true,
       });
       setRegSubmitted(true);
     } catch (err) {
@@ -147,15 +156,26 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'login' }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-2.5 sm:p-4 bg-slate-950/70 backdrop-blur-md animate-in fade-in duration-200 overflow-y-auto">
-      <div className="relative w-full max-w-lg max-h-[94vh] flex flex-col bg-white rounded-2xl sm:rounded-3xl shadow-2xl border border-slate-200 overflow-hidden text-slate-800 my-auto">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-2.5 sm:p-4 bg-slate-950/70 backdrop-blur-md animate-in fade-in duration-200 overflow-y-auto"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      <div
+        ref={trapRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="auth-modal-title"
+        className="relative w-full max-w-lg max-h-[94vh] flex flex-col bg-white rounded-2xl sm:rounded-3xl shadow-2xl border border-slate-200 overflow-hidden text-slate-800 my-auto"
+      >
         {/* Modal Header */}
         <div className="px-4 sm:px-6 pt-3.5 sm:pt-4 pb-2.5 sm:pb-3 bg-white border-b border-slate-200 relative shrink-0">
           <button
             type="button"
             onClick={onClose}
-            className="absolute top-3 right-3 sm:top-3.5 sm:right-3.5 p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition"
-            aria-label="Close dialog"
+            className="absolute top-3 right-3 sm:top-3.5 sm:right-3.5 p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition focus:outline-none focus:ring-2 focus:ring-blue-500"
+            aria-label="संवाद बंद करा (Close dialog)"
           >
             <X className="w-4 h-4 sm:w-5 sm:h-5" />
           </button>
@@ -166,22 +186,27 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'login' }) {
               <p className="text-[10px] sm:text-[11px] text-amber-800 font-bold tracking-wide truncate">
                 महाराष्ट्र शासन | जिल्हाधिकारी कार्यालय, चंद्रपूर
               </p>
-              <h2 className="text-sm sm:text-base font-bold tracking-tight text-slate-900 mt-0.5 truncate">
+              <h2
+                id="auth-modal-title"
+                className="text-sm sm:text-base font-bold tracking-tight text-slate-900 mt-0.5 truncate"
+              >
                 {tab === 'login' ? 'महसूल अधिकारी पोर्टल लॉगिन' : 'नागरिक व अधिकारी नोंदणी'}
               </h2>
             </div>
           </div>
 
           {/* Tab Switcher */}
-          <div className="flex bg-slate-100 p-1 rounded-xl mt-2.5 sm:mt-3 text-xs font-semibold border border-slate-200/60">
+          <div className="flex bg-slate-100 p-1 rounded-xl mt-2.5 sm:mt-3 text-xs font-semibold border border-slate-200/60" role="tablist">
             <button
               type="button"
+              role="tab"
+              aria-selected={tab === 'login'}
               onClick={() => {
                 setTab('login');
                 setErrorMsg('');
                 setSuccessMsg('');
               }}
-              className={`flex-1 py-1.5 sm:py-2 rounded-lg flex items-center justify-center gap-1.5 sm:gap-2 transition text-[11px] sm:text-xs ${
+              className={`flex-1 py-1.5 sm:py-2 rounded-lg flex items-center justify-center gap-1.5 sm:gap-2 transition text-[11px] sm:text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                 tab === 'login'
                   ? 'bg-blue-900 text-white shadow-xs font-bold'
                   : 'text-slate-600 hover:text-slate-900'
@@ -192,12 +217,14 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'login' }) {
             </button>
             <button
               type="button"
+              role="tab"
+              aria-selected={tab === 'register'}
               onClick={() => {
                 setTab('register');
                 setErrorMsg('');
                 setRegSubmitted(false);
               }}
-              className={`flex-1 py-1.5 sm:py-2 rounded-lg flex items-center justify-center gap-1.5 sm:gap-2 transition text-[11px] sm:text-xs ${
+              className={`flex-1 py-1.5 sm:py-2 rounded-lg flex items-center justify-center gap-1.5 sm:gap-2 transition text-[11px] sm:text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                 tab === 'register'
                   ? 'bg-blue-900 text-white shadow-xs font-bold'
                   : 'text-slate-600 hover:text-slate-900'
@@ -226,7 +253,7 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'login' }) {
                       type="button"
                       onClick={() => handleQuickLogin(officer)}
                       disabled={loading}
-                      className="text-left p-2 rounded-xl bg-white border border-amber-300/80 hover:border-amber-500 hover:shadow-sm text-[11px] transition group flex flex-col justify-between active:scale-95"
+                      className="text-left p-2 rounded-xl bg-white border border-amber-300/80 hover:border-amber-500 hover:shadow-sm text-[11px] transition group flex flex-col justify-between active:scale-95 focus:outline-none focus:ring-2 focus:ring-amber-500"
                     >
                       <span className="font-bold text-slate-900 line-clamp-1 group-hover:text-blue-900">
                         {officer.badge}
@@ -238,15 +265,23 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'login' }) {
               </div>
 
               {errorMsg && (
-                <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-semibold flex items-center gap-2 animate-in fade-in">
-                  <AlertCircle className="w-4 h-4 text-rose-600 flex-shrink-0" />
+                <div
+                  role="alert"
+                  aria-live="assertive"
+                  className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-semibold flex items-center gap-2 animate-in fade-in"
+                >
+                  <AlertCircle className="w-4 h-4 text-rose-600 flex-shrink-0" aria-hidden="true" />
                   <span>{errorMsg}</span>
                 </div>
               )}
 
               {successMsg && (
-                <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold flex items-center gap-2 animate-in fade-in">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+                <div
+                  role="status"
+                  aria-live="polite"
+                  className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold flex items-center gap-2 animate-in fade-in"
+                >
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" aria-hidden="true" />
                   <span>{successMsg}</span>
                 </div>
               )}
@@ -254,12 +289,13 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'login' }) {
               {/* Login Form */}
               <form onSubmit={handleLoginSubmit} className="space-y-3.5">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                  <label htmlFor="login-email" className="block text-xs font-bold text-slate-700 mb-1">
                     शासकीय ईमेल
                   </label>
                   <div className="relative">
-                    <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                    <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-3 pointer-events-none" aria-hidden="true" />
                     <input
+                      id="login-email"
                       type="email"
                       required
                       value={email}
@@ -271,12 +307,13 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'login' }) {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                  <label htmlFor="login-password" className="block text-xs font-bold text-slate-700 mb-1">
                     संकेतशब्द
                   </label>
                   <div className="relative">
-                    <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-3 pointer-events-none" />
+                    <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-3 pointer-events-none" aria-hidden="true" />
                     <input
+                      id="login-password"
                       type={showPassword ? 'text' : 'password'}
                       required
                       value={password}
@@ -287,11 +324,11 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'login' }) {
                     <button
                       type="button"
                       onClick={() => setShowPassword((prev) => !prev)}
-                      className="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-700 p-0.5 rounded transition focus:outline-none"
+                      className="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-700 p-0.5 rounded transition focus:outline-none focus:ring-2 focus:ring-blue-500"
                       title={showPassword ? 'संकेतशब्द लपवा' : 'संकेतशब्द दाखवा'}
                       aria-label={showPassword ? 'संकेतशब्द लपवा' : 'संकेतशब्द दाखवा'}
                     >
-                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      {showPassword ? <EyeOff className="w-4 h-4" aria-hidden="true" /> : <Eye className="w-4 h-4" aria-hidden="true" />}
                     </button>
                   </div>
                 </div>
@@ -299,14 +336,14 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'login' }) {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full py-2.5 rounded-xl bg-gradient-to-r from-blue-900 to-indigo-900 hover:from-blue-800 hover:to-indigo-800 text-white font-bold text-xs shadow-md hover:shadow-lg transition flex items-center justify-center gap-2 active:scale-98 disabled:opacity-50"
+                  className="w-full py-2.5 rounded-xl bg-gradient-to-r from-blue-900 to-indigo-900 hover:from-blue-800 hover:to-indigo-800 text-white font-bold text-xs shadow-md hover:shadow-lg transition flex items-center justify-center gap-2 active:scale-98 disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                 >
                   {loading ? (
                     <span>प्रमाणीकरण चालू आहे...</span>
                   ) : (
                     <>
                       <span>सुरक्षित महसूल डॅशबोर्ड उघडा</span>
-                      <ArrowRight className="w-4 h-4 text-amber-400" />
+                      <ArrowRight className="w-4 h-4 text-amber-400" aria-hidden="true" />
                     </>
                   )}
                 </button>
@@ -318,7 +355,7 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'login' }) {
               {regSubmitted ? (
                 <div className="py-6 text-center space-y-3">
                   <div className="w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto">
-                    <CheckCircle2 className="w-7 h-7" />
+                    <CheckCircle2 className="w-7 h-7" aria-hidden="true" />
                   </div>
                   <h3 className="text-base font-bold text-slate-900">नोंदणी यशस्वी झाली!</h3>
                   <p className="text-xs text-slate-600 max-w-sm mx-auto leading-relaxed">
@@ -330,7 +367,7 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'login' }) {
                       setTab('login');
                       setRegSubmitted(false);
                     }}
-                    className="mt-3 px-5 py-2 rounded-xl bg-blue-900 text-white text-xs font-bold hover:bg-blue-800 transition"
+                    className="mt-3 px-5 py-2 rounded-xl bg-blue-900 text-white text-xs font-bold hover:bg-blue-800 transition focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     लॉगिन पृष्ठाकडे जा
                   </button>
@@ -338,19 +375,24 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'login' }) {
               ) : (
                 <form onSubmit={handleRegisterSubmit} className="space-y-3">
                   {errorMsg && (
-                    <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-semibold flex items-center gap-2 animate-in fade-in">
-                      <AlertCircle className="w-4 h-4 text-rose-600 flex-shrink-0" />
+                    <div
+                      role="alert"
+                      aria-live="assertive"
+                      className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-semibold flex items-center gap-2 animate-in fade-in"
+                    >
+                      <AlertCircle className="w-4 h-4 text-rose-600 flex-shrink-0" aria-hidden="true" />
                       <span>{errorMsg}</span>
                     </div>
                   )}
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">
+                    <label htmlFor="reg-name" className="block text-xs font-bold text-slate-700 mb-1">
                       पूर्ण नाव
                     </label>
                     <div className="relative">
-                      <User className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                      <User className="w-4 h-4 text-slate-400 absolute left-3 top-3 pointer-events-none" aria-hidden="true" />
                       <input
+                        id="reg-name"
                         type="text"
                         required
                         value={regName}
@@ -363,12 +405,13 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'login' }) {
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1">
+                      <label htmlFor="reg-email" className="block text-xs font-bold text-slate-700 mb-1">
                         ईमेल
                       </label>
                       <div className="relative">
-                        <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                        <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-3 pointer-events-none" aria-hidden="true" />
                         <input
+                          id="reg-email"
                           type="email"
                           required
                           value={regEmail}
@@ -380,12 +423,13 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'login' }) {
                     </div>
 
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1">
+                      <label htmlFor="reg-mobile" className="block text-xs font-bold text-slate-700 mb-1">
                         मोबाईल
                       </label>
                       <div className="relative">
-                        <Phone className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                        <Phone className="w-4 h-4 text-slate-400 absolute left-3 top-3 pointer-events-none" aria-hidden="true" />
                         <input
+                          id="reg-mobile"
                           type="tel"
                           value={regMobile}
                           onChange={(e) => setRegMobile(e.target.value)}
@@ -398,10 +442,11 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'login' }) {
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1">
+                      <label htmlFor="reg-taluka" className="block text-xs font-bold text-slate-700 mb-1">
                         तालुका
                       </label>
                       <select
+                        id="reg-taluka"
                         value={regTaluka}
                         onChange={(e) => setRegTaluka(e.target.value)}
                         className="w-full px-3 py-2 text-xs border border-slate-300 rounded-xl bg-slate-50 font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -415,11 +460,12 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'login' }) {
                     </div>
 
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1">
+                      <label htmlFor="reg-password" className="block text-xs font-bold text-slate-700 mb-1">
                         संकेतशब्द
                       </label>
                       <div className="relative">
                         <input
+                          id="reg-password"
                           type={showRegPassword ? 'text' : 'password'}
                           required
                           value={regPassword}
@@ -430,20 +476,37 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'login' }) {
                         <button
                           type="button"
                           onClick={() => setShowRegPassword((prev) => !prev)}
-                          className="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-700 p-0.5 rounded transition focus:outline-none"
+                          className="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-700 p-0.5 rounded transition focus:outline-none focus:ring-2 focus:ring-blue-500"
                           title={showRegPassword ? 'संकेतशब्द लपवा' : 'संकेतशब्द दाखवा'}
                           aria-label={showRegPassword ? 'संकेतशब्द लपवा' : 'संकेतशब्द दाखवा'}
                         >
-                          {showRegPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                          {showRegPassword ? <EyeOff className="w-4 h-4" aria-hidden="true" /> : <Eye className="w-4 h-4" aria-hidden="true" />}
                         </button>
                       </div>
                     </div>
                   </div>
 
+                  {/* DPDPA 2023 Consent Checkbox */}
+                  <div className="p-3 bg-blue-50/70 border border-blue-200/80 rounded-xl">
+                    <label htmlFor="reg-consent" className="flex items-start gap-2.5 text-xs text-slate-800 cursor-pointer select-none">
+                      <input
+                        type="checkbox"
+                        id="reg-consent"
+                        required
+                        checked={regConsent}
+                        onChange={(e) => setRegConsent(e.target.checked)}
+                        className="mt-0.5 w-4 h-4 rounded border-blue-300 text-blue-900 focus:ring-2 focus:ring-blue-500 shrink-0"
+                      />
+                      <span className="leading-relaxed text-[11px] sm:text-xs">
+                        मी <a href="/privacy-policy" target="_blank" rel="noopener noreferrer" className="underline font-bold text-blue-900 hover:text-blue-700 focus:outline-none focus:ring-1 focus:ring-blue-500 rounded">गोपनीयता धोरण</a> वाचले असून <strong>डिजिटल व्यक्तिगत डेटा संरक्षण कायदा (DPDPA २०२३)</strong> अंतर्गत माझ्या वैयक्तिक माहितीच्या प्रक्रियेस संमती देतो/देते.
+                      </span>
+                    </label>
+                  </div>
+
                   <button
                     type="submit"
                     disabled={loading}
-                    className="w-full mt-2 py-2.5 rounded-xl bg-blue-900 hover:bg-blue-800 text-white font-bold text-xs shadow-md transition flex items-center justify-center gap-2 disabled:opacity-50"
+                    className="w-full mt-2 py-2.5 rounded-xl bg-blue-900 hover:bg-blue-800 text-white font-bold text-xs shadow-md transition flex items-center justify-center gap-2 disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                   >
                     {loading ? <span>नोंदणी होत आहे...</span> : <span>नोंदणी पूर्ण करा</span>}
                   </button>

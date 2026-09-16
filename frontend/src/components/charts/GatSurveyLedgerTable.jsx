@@ -61,8 +61,12 @@ export default function GatSurveyLedgerTable({ parcels = [] }) {
         {/* Search & Tenure Filter */}
         <div className="flex items-center gap-2 flex-wrap">
           <div className="relative min-w-[160px] sm:min-w-[200px]">
-            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
+            <label htmlFor="gat-search-input" className="sr-only">
+              गट, स.नं., किंवा गाव शोधा
+            </label>
+            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" aria-hidden="true" />
             <input
+              id="gat-search-input"
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -71,7 +75,7 @@ export default function GatSurveyLedgerTable({ parcels = [] }) {
             />
           </div>
 
-          <div className="inline-flex p-0.5 bg-slate-100 rounded-lg border border-slate-200 text-[11px] font-bold">
+          <div className="inline-flex p-0.5 bg-slate-100 rounded-lg border border-slate-200 text-[11px] font-bold" role="group" aria-label="धारणाधिकार वर्ग फिल्टर">
             <button
               onClick={() => setSelectedTenure('ALL')}
               className={`px-2 py-0.5 rounded-md transition ${
@@ -109,15 +113,18 @@ export default function GatSurveyLedgerTable({ parcels = [] }) {
       {/* Modern High-Performance Analytical Table */}
       <div className="overflow-x-auto rounded-lg border border-slate-200/80">
         <table className="w-full text-left border-collapse">
+          <caption className="sr-only">
+            गट व सर्व्हे क्रमांक महसूल अभिलेख सारणी - नवा गट क्र., जुना स.नं., क्षेत्र, पोटखराबा व वैधानिक चौकशी सविस्तर विवरण
+          </caption>
           <thead>
             <tr className="bg-slate-50/80 border-b border-slate-200 text-[11px] font-bold text-slate-600 uppercase tracking-wider">
-              <th className="py-2 px-3">गट व स.नं.</th>
-              <th className="py-2 px-3">गाव व तालुका</th>
-              <th className="py-2 px-3">धारणाधिकार वर्ग</th>
-              <th className="py-2 px-3">एकूण क्षेत्र (Ha)</th>
-              <th className="py-2 px-3">लागवड वि. पोटखराबा</th>
-              <th className="py-2 px-3">वैधानिक स्थिती / उल्लंघन</th>
-              <th className="py-2 px-3 text-right">३६०° इतिहास</th>
+              <th scope="col" className="py-2 px-3">गट व स.नं.</th>
+              <th scope="col" className="py-2 px-3">गाव व तालुका</th>
+              <th scope="col" className="py-2 px-3">धारणाधिकार वर्ग</th>
+              <th scope="col" className="py-2 px-3">एकूण क्षेत्र (Ha)</th>
+              <th scope="col" className="py-2 px-3">लागवड वि. पोटखराबा</th>
+              <th scope="col" className="py-2 px-3">वैधानिक स्थिती / उल्लंघन</th>
+              <th scope="col" className="py-2 px-3 text-right">३६०° इतिहास</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100 text-xs text-slate-800 font-medium">

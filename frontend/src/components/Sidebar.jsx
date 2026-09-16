@@ -18,6 +18,7 @@ import {
   X,
 } from 'lucide-react';
 import clsx from 'clsx';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 
 const navItems = [
   {
@@ -66,11 +67,23 @@ export default function Sidebar({
   const pathname = usePathname();
   const [isHovered, setIsHovered] = useState(false);
   const hoverTimeoutRef = useRef(null);
+  const mobileTrapRef = useFocusTrap(mobileOpen);
 
   // Close hover state when navigating to a new page
   useEffect(() => {
     setIsHovered(false);
   }, [pathname]);
+
+  // Handle ESC key to close mobile drawer
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && mobileOpen) {
+        onCloseMobile();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [mobileOpen, onCloseMobile]);
 
   // Clean up hover debounce timer
   useEffect(() => {
@@ -162,6 +175,7 @@ export default function Sidebar({
                 <Link
                   key={item.href}
                   href={item.href}
+                  aria-current={isActive ? 'page' : undefined}
                   className={clsx(
                     'group relative flex items-center rounded-xl transition-colors duration-150 h-10',
                     effectiveCollapsed
@@ -235,12 +249,25 @@ export default function Sidebar({
       >
         {/* Backdrop */}
         <div
-          className="absolute inset-0 bg-slate-950/60 backdrop-blur-xs transition-opacity duration-300"
+          role="button"
+          tabIndex={0}
+          aria-label="मेनू बंद करा (Close menu)"
+          className="absolute inset-0 bg-slate-950/60 backdrop-blur-xs transition-opacity duration-300 focus:outline-none"
           onClick={onCloseMobile}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              onCloseMobile();
+            }
+          }}
         />
 
         {/* Drawer Panel */}
         <div
+          ref={mobileTrapRef}
+          role="dialog"
+          aria-modal="true"
+          aria-label="प्रशासकीय विभाग नेव्हिगेशन"
           className={clsx(
             'relative w-72 max-w-[80vw] bg-white h-full shadow-2xl flex flex-col p-4 space-y-4 border-r border-slate-200 overflow-y-auto transform transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]',
             mobileOpen ? 'translate-x-0' : '-translate-x-full'
@@ -251,9 +278,10 @@ export default function Sidebar({
               <span className="font-black text-slate-900 text-sm">प्रशासकीय विभाग</span>
             </div>
             <button
+              type="button"
               onClick={onCloseMobile}
-              className="p-1.5 rounded-lg text-slate-500 hover:bg-slate-100 transition cursor-pointer"
-              aria-label="Close menu"
+              className="p-1.5 rounded-lg text-slate-500 hover:bg-slate-100 transition cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500"
+              aria-label="मेनू बंद करा (Close menu)"
             >
               <X className="w-5 h-5" />
             </button>
@@ -268,6 +296,7 @@ export default function Sidebar({
                   key={item.href}
                   href={item.href}
                   onClick={onCloseMobile}
+                  aria-current={isActive ? 'page' : undefined}
                   className={clsx(
                     'flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all',
                     isActive

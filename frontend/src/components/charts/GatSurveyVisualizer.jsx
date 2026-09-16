@@ -142,6 +142,44 @@ export default function GatSurveyVisualizer({
         )}
       </div>
 
+      {/* Screen Reader Accessible Data Table (WCAG 1.1.1) */}
+      <table className="sr-only">
+        <caption>गट व सर्व्हे क्रमांक भूमी विश्लेषण सारणी</caption>
+        <thead>
+          <tr>
+            <th scope="col">गट क्र.</th>
+            <th scope="col">जुना स.नं.</th>
+            <th scope="col">गाव व तालुका</th>
+            <th scope="col">लागवड क्षेत्र (हे.)</th>
+            <th scope="col">पोटखराबा (हे.)</th>
+            <th scope="col">एकूण क्षेत्र (हे.)</th>
+            <th scope="col">स्थिती</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>सर्व भूखंड</td>
+            <td>-</td>
+            <td>चंद्रपूर जिल्हा</td>
+            <td>{cultivable.toFixed(2)} ({cultivablePct}%)</td>
+            <td>{potkharaba.toFixed(2)} ({potkharabaPct}%)</td>
+            <td>{totalUsableArea.toFixed(2)}</td>
+            <td>एकूण सारांश</td>
+          </tr>
+          {parcels.slice(0, 10).map((p) => (
+            <tr key={p.upi}>
+              <td>{p.gatNumber}</td>
+              <td>{p.oldSurveyNo || '-'}</td>
+              <td>{p.villageName}, {p.taluka}</td>
+              <td>{p.cultivableAreaHa || '0.00'}</td>
+              <td>{p.potkharabaAreaHa || '0.00'}</td>
+              <td>{p.totalAreaHa}</td>
+              <td>{p.hasActiveDispute || p.violationType ? 'सक्रीय चौकशी' : 'निर्दोष'}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
       {/* Footer info note */}
       <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500 font-medium">
         <span>भूखंडाचा ३६०° इतिहास पाहण्यासाठी भूखंड सूची पहा</span>

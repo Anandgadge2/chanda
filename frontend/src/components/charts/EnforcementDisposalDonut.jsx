@@ -192,6 +192,27 @@ export default function EnforcementDisposalDonut({ statuses = [], totalViolation
         </div>
       </div>
 
+      {/* Screen Reader Accessible Data Table (WCAG 1.1.1) */}
+      <table className="sr-only">
+        <caption>न्यायालयीन आदेश व प्रकरण निकाली आलेख सारणी</caption>
+        <thead>
+          <tr>
+            <th scope="col">न्यायालयीन टप्पा / स्थिती</th>
+            <th scope="col">प्रकरण संख्या</th>
+            <th scope="col">प्रमाण</th>
+          </tr>
+        </thead>
+        <tbody>
+          {chartData.map((item) => (
+            <tr key={item.status}>
+              <td>{item.nameMr}</td>
+              <td>{item.count}</td>
+              <td>{total > 0 ? ((item.count / total) * 100).toFixed(1) : 0}%</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
       {/* Footer Outlay */}
       <div className="flex items-center justify-between pt-2 border-t border-slate-100 text-xs text-slate-600">
         <span className="text-[11px] font-medium text-slate-500">

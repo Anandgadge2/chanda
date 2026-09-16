@@ -235,6 +235,35 @@ export default function TalukaMountainChart({ data = [], selectedTaluka = '' }) 
         )}
       </div>
 
+      {/* Screen Reader Accessible Data Table (WCAG 1.1.1) */}
+      <table className="sr-only">
+        <caption>तालुका पर्वत/स्तंभ आलेख तुलना सारणी</caption>
+        <thead>
+          <tr>
+            <th scope="col">तालुका</th>
+            <th scope="col">भूखंड</th>
+            <th scope="col">शर्तभंग</th>
+            <th scope="col">सक्रीय वाद</th>
+            <th scope="col">एकूण क्षेत्र (हे.)</th>
+            <th scope="col">लागवडीयोग्य क्षेत्र (हे.)</th>
+            <th scope="col">बाधित क्षेत्र (हे.)</th>
+          </tr>
+        </thead>
+        <tbody>
+          {chartData.map((row) => (
+            <tr key={row.taluka}>
+              <td>{row.nameMr} ({row.taluka})</td>
+              <td>{row.parcelCount}</td>
+              <td>{row.violationCount}</td>
+              <td>{row.disputeCount}</td>
+              <td>{row.totalAreaHa}</td>
+              <td>{row.cultivableAreaHa}</td>
+              <td>{row.disputedAreaHa}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
       {/* Footer Taluka Chips */}
       <div className="flex flex-wrap items-center gap-1.5 pt-2 border-t border-slate-100 text-xs text-slate-600">
         <span className="font-semibold text-slate-700 text-[11px]">नोंदणीकृत तालुके:</span>

@@ -196,6 +196,31 @@ export default function TalukaComparisonChart({ data = [], selectedTaluka = '' }
         )}
       </div>
 
+      {/* Screen Reader Accessible Data Table (WCAG 1.1.1) */}
+      <table className="sr-only">
+        <caption>तालुकानिहाय सनियंत्रण व तुलना डेटा सारणी</caption>
+        <thead>
+          <tr>
+            <th scope="col">तालुका</th>
+            <th scope="col">नोंदणीकृत भूखंड</th>
+            <th scope="col">शर्तभंग व चौकशी</th>
+            <th scope="col">सक्रीय वाद</th>
+            <th scope="col">एकूण क्षेत्र (हेक्टर)</th>
+          </tr>
+        </thead>
+        <tbody>
+          {chartData.map((row) => (
+            <tr key={row.taluka}>
+              <td>{row.nameMr} ({row.taluka})</td>
+              <td>{row.parcelCount}</td>
+              <td>{row.violationCount}</td>
+              <td>{row.disputeCount}</td>
+              <td>{row.totalAreaHa}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
       {/* Summary Chips Footer */}
       <div className="flex flex-wrap items-center gap-1.5 pt-2 border-t border-slate-100 text-xs text-slate-600">
         <span className="font-semibold text-slate-700 text-[11px]">नोंदणीकृत तालुके:</span>

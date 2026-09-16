@@ -241,6 +241,29 @@ export default function LandTypeDonutChart({ data = [] }) {
         </div>
       </div>
 
+      {/* Screen Reader Accessible Data Table (WCAG 1.1.1) */}
+      <table className="sr-only">
+        <caption>जमीन धारणा वर्गनिहाय क्षेत्रफळ व भूखंड सारणी</caption>
+        <thead>
+          <tr>
+            <th scope="col">धारणा प्रकार</th>
+            <th scope="col">इंग्रजी नाव</th>
+            <th scope="col">भूखंड संख्या</th>
+            <th scope="col">क्षेत्रफळ (हे.)</th>
+          </tr>
+        </thead>
+        <tbody>
+          {chartData.map((item) => (
+            <tr key={item.tenure}>
+              <td>{item.nameMr}</td>
+              <td>{item.nameEn}</td>
+              <td>{item.count}</td>
+              <td>{item.areaHa}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
       {/* Footer Outlay Tag (Matching Reference Image 2) */}
       <div className="flex items-center justify-between pt-2 border-t border-slate-100 text-xs text-slate-600">
         <span className="text-[11px] font-medium text-slate-500">

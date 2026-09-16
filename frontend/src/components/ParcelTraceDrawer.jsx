@@ -31,8 +31,10 @@ import { TENURE_CLASSES, VIOLATION_TYPES, ENFORCEMENT_STATUSES } from '../lib/co
 import DocUploadModal from './DocUploadModal';
 import ArchivalDocumentViewer from './ArchivalDocumentViewer';
 import RevenueShortcutGuideModal from './RevenueShortcutGuideModal';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 
 export default function ParcelTraceDrawer({ upi, onClose, onRefresh }) {
+  const trapRef = useFocusTrap(Boolean(upi));
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -47,6 +49,17 @@ export default function ParcelTraceDrawer({ upi, onClose, onRefresh }) {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [glossaryModalOpen, setGlossaryModalOpen] = useState(false);
   const [glossaryInitialQuery, setGlossaryInitialQuery] = useState('');
+
+  // Handle ESC key
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && upi) {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [upi, onClose]);
 
   useEffect(() => {
     if (!upi) return;
@@ -100,7 +113,12 @@ export default function ParcelTraceDrawer({ upi, onClose, onRefresh }) {
   const activeDocument = getActiveDocument();
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-3 md:p-4 overflow-hidden">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-3 md:p-4 overflow-hidden"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="parcel-drawer-title"
+    >
       {/* Backdrop */}
       <div
         className="fixed inset-0 bg-slate-950/70 backdrop-blur-md transition-opacity animate-in fade-in duration-300"
@@ -109,6 +127,7 @@ export default function ParcelTraceDrawer({ upi, onClose, onRefresh }) {
 
       {/* Enhanced Centered Modal Dialog */}
       <div
+        ref={trapRef}
         className={`relative z-10 w-full bg-white rounded-2xl shadow-2xl flex flex-col border border-slate-700/40 overflow-hidden animate-dialog-in duration-200 my-auto ${
           isFullscreen
             ? 'fixed inset-2 sm:inset-4 max-w-none max-h-none h-[calc(100vh-2rem)]'
@@ -119,7 +138,7 @@ export default function ParcelTraceDrawer({ upi, onClose, onRefresh }) {
         <div className="px-4 sm:px-6 py-2.5 sm:py-3 bg-white text-slate-900 flex justify-between items-center border-b border-slate-200 shrink-0 gap-3">
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
-              <h2 className="text-sm sm:text-base font-bold text-slate-900 truncate tracking-tight">
+              <h2 id="parcel-drawer-title" className="text-sm sm:text-base font-bold text-slate-900 truncate tracking-tight">
                 {parcel?.villageName} | गट क्र. {parcel?.gatNumber}
                 {parcel?.hissaNumber && parcel.hissaNumber !== '0' && ` (हिस्सा ${parcel.hissaNumber})`}
               </h2>
@@ -157,7 +176,7 @@ export default function ParcelTraceDrawer({ upi, onClose, onRefresh }) {
                 setGlossaryInitialQuery('');
                 setGlossaryModalOpen(true);
               }}
-              className="px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-lg text-xs font-semibold bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 transition flex items-center gap-1.5"
+              className="px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-lg text-xs font-semibold bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 transition flex items-center gap-1.5 focus:outline-none focus:ring-2 focus:ring-amber-500"
               title="७/१२ संक्षिप्त रूपे मार्गदर्शक (Glossary)"
             >
               <BookOpen className="w-3.5 h-3.5 text-amber-700" />
@@ -168,7 +187,7 @@ export default function ParcelTraceDrawer({ upi, onClose, onRefresh }) {
             <button
               type="button"
               onClick={() => setIsSplitView((prev) => !prev)}
-              className={`p-1.5 sm:px-2.5 sm:py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition border ${
+              className={`p-1.5 sm:px-2.5 sm:py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition border focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                 isSplitView
                   ? 'bg-blue-50 text-blue-800 border-blue-300'
                   : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
@@ -183,7 +202,7 @@ export default function ParcelTraceDrawer({ upi, onClose, onRefresh }) {
             <button
               type="button"
               onClick={() => setIsFullscreen((prev) => !prev)}
-              className="p-1.5 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition border border-slate-200 hidden sm:block"
+              className="p-1.5 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition border border-slate-200 hidden sm:block focus:outline-none focus:ring-2 focus:ring-slate-400"
               title={isFullscreen ? 'सामान्य आकार' : 'विस्तारित आकार'}
             >
               {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
@@ -193,8 +212,8 @@ export default function ParcelTraceDrawer({ upi, onClose, onRefresh }) {
             <button
               type="button"
               onClick={onClose}
-              className="text-slate-400 hover:text-slate-700 hover:bg-slate-100 p-1.5 rounded-lg transition"
-              aria-label="Close dialog"
+              className="text-slate-400 hover:text-slate-700 hover:bg-slate-100 p-1.5 rounded-lg transition focus:outline-none focus:ring-2 focus:ring-blue-500"
+              aria-label="संवाद बंद करा (Close dialog)"
             >
               <X className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>

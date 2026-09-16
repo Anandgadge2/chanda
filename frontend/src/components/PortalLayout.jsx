@@ -7,6 +7,7 @@ import Sidebar from './Sidebar';
 import RouteGuard from './RouteGuard';
 import AuthModal from './landing/AuthModal';
 import LandingFooter from './landing/LandingFooter';
+import CookieConsentBanner from './CookieConsentBanner';
 import { useAuth } from './AuthContext';
 
 const STANDALONE_PUBLIC_ROUTES = ['/', '/privacy-policy', '/terms', '/accessibility-statement'];
@@ -28,6 +29,7 @@ export default function PortalLayout({ children }) {
           {children}
         </main>
         <AuthModal isOpen={isLoginModalOpen} onClose={closeLoginModal} />
+        <CookieConsentBanner />
       </div>
     );
   }
@@ -60,6 +62,7 @@ export default function PortalLayout({ children }) {
         </div>
         <LandingFooter />
         <AuthModal isOpen={isLoginModalOpen} onClose={closeLoginModal} />
+        <CookieConsentBanner />
       </div>
     );
   }
@@ -79,6 +82,7 @@ export default function PortalLayout({ children }) {
           <RouteGuard>{children}</RouteGuard>
         </main>
         <AuthModal isOpen={isLoginModalOpen} onClose={closeLoginModal} />
+        <CookieConsentBanner />
       </div>
     );
   }
@@ -104,6 +108,7 @@ export default function PortalLayout({ children }) {
       </div>
 
       <AuthModal isOpen={isLoginModalOpen} onClose={closeLoginModal} />
+      <CookieConsentBanner />
     </div>
   );
 }

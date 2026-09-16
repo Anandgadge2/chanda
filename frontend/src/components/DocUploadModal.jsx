@@ -1,10 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { X, Upload, FileText, CheckCircle2, AlertCircle } from 'lucide-react';
 import { api } from '../lib/api';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 
 export default function DocUploadModal({ isOpen, onClose, parcelId, caseId, onUploadSuccess }) {
+  const trapRef = useFocusTrap(isOpen);
   const [file, setFile] = useState(null);
   const [title, setTitle] = useState('');
   const [docType, setDocType] = useState('SDO_ORDER');
@@ -13,6 +15,17 @@ export default function DocUploadModal({ isOpen, onClose, parcelId, caseId, onUp
   const [fileNo, setFileNo] = useState('');
   const [uploading, setUploading] = useState(false);
   const [statusMsg, setStatusMsg] = useState({ type: '', text: '' });
+
+  // Handle ESC key
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && isOpen) {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 
@@ -54,16 +67,27 @@ export default function DocUploadModal({ isOpen, onClose, parcelId, caseId, onUp
   };
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-2.5 sm:p-4 animate-in fade-in duration-200 overflow-y-auto">
-      <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 max-w-lg w-full max-h-[94vh] flex flex-col overflow-hidden my-auto">
+    <div
+      className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-2.5 sm:p-4 animate-in fade-in duration-200 overflow-y-auto"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      <div
+        ref={trapRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="upload-modal-title"
+        className="bg-white rounded-2xl shadow-2xl border border-slate-200 max-w-lg w-full max-h-[94vh] flex flex-col overflow-hidden my-auto"
+      >
         {/* Modal Header */}
         <div className="px-4 sm:px-6 py-3 sm:py-3.5 bg-white border-b border-slate-200 flex justify-between items-center shrink-0">
           <div className="flex items-center gap-2.5 min-w-0">
             <div className="w-8 h-8 rounded-lg bg-blue-50 border border-blue-200/80 flex items-center justify-center shrink-0 text-blue-700">
-              <Upload className="w-4 h-4" />
+              <Upload className="w-4 h-4" aria-hidden="true" />
             </div>
             <div className="min-w-0">
-              <h2 className="text-sm sm:text-base font-bold text-slate-900 leading-tight">
+              <h2 id="upload-modal-title" className="text-sm sm:text-base font-bold text-slate-900 leading-tight">
                 दस्तावेज अपलोड व अभिलेख नोंद
               </h2>
               <p className="text-[11px] text-slate-500 truncate mt-0.5">
@@ -72,9 +96,10 @@ export default function DocUploadModal({ isOpen, onClose, parcelId, caseId, onUp
             </div>
           </div>
           <button
+            type="button"
             onClick={onClose}
-            className="text-slate-400 hover:text-slate-700 hover:bg-slate-100 p-1.5 rounded-lg transition shrink-0"
-            aria-label="Close dialog"
+            className="text-slate-400 hover:text-slate-700 hover:bg-slate-100 p-1.5 rounded-lg transition shrink-0 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            aria-label="संवाद बंद करा (Close dialog)"
           >
             <X className="w-4 h-4 sm:w-5 sm:h-5" />
           </button>
@@ -84,6 +109,8 @@ export default function DocUploadModal({ isOpen, onClose, parcelId, caseId, onUp
         <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-3.5 sm:space-y-4 overflow-y-auto flex-1">
           {statusMsg.text && (
             <div
+              role={statusMsg.type === 'error' ? 'alert' : 'status'}
+              aria-live={statusMsg.type === 'error' ? 'assertive' : 'polite'}
               className={`p-3 rounded-lg text-xs flex items-center gap-2 ${
                 statusMsg.type === 'success'
                   ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
@@ -91,19 +118,20 @@ export default function DocUploadModal({ isOpen, onClose, parcelId, caseId, onUp
               }`}
             >
               {statusMsg.type === 'success' ? (
-                <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" aria-hidden="true" />
               ) : (
-                <AlertCircle className="w-4 h-4 text-rose-600 flex-shrink-0" />
+                <AlertCircle className="w-4 h-4 text-rose-600 flex-shrink-0" aria-hidden="true" />
               )}
               <span>{statusMsg.text}</span>
             </div>
           )}
 
           <div>
-            <label className="text-xs font-semibold text-slate-700 block">
+            <label htmlFor="doc-title" className="text-xs font-semibold text-slate-700 block">
               दस्तावेज शीर्षक <span className="text-rose-500">*</span>
             </label>
             <input
+              id="doc-title"
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
@@ -114,10 +142,11 @@ export default function DocUploadModal({ isOpen, onClose, parcelId, caseId, onUp
           </div>
 
           <div>
-            <label className="text-xs font-semibold text-slate-700 block">
+            <label htmlFor="doc-type" className="text-xs font-semibold text-slate-700 block">
               दस्तावेज प्रकार <span className="text-rose-500">*</span>
             </label>
             <select
+              id="doc-type"
               value={docType}
               onChange={(e) => setDocType(e.target.value)}
               className="w-full border border-slate-300 rounded-lg p-2.5 text-xs mt-1 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
@@ -138,8 +167,9 @@ export default function DocUploadModal({ isOpen, onClose, parcelId, caseId, onUp
             </p>
             <div className="grid grid-cols-3 gap-2">
               <div>
-                <label className="text-[11px] font-semibold text-slate-600 block">रॅक क्र.</label>
+                <label htmlFor="doc-rack-no" className="text-[11px] font-semibold text-slate-600 block">रॅक क्र.</label>
                 <input
+                  id="doc-rack-no"
                   placeholder="उदा. R-04"
                   value={rackNo}
                   onChange={(e) => setRackNo(e.target.value)}
@@ -147,8 +177,9 @@ export default function DocUploadModal({ isOpen, onClose, parcelId, caseId, onUp
                 />
               </div>
               <div>
-                <label className="text-[11px] font-semibold text-slate-600 block">गठ्ठा क्र.</label>
+                <label htmlFor="doc-bundle-no" className="text-[11px] font-semibold text-slate-600 block">गठ्ठा क्र.</label>
                 <input
+                  id="doc-bundle-no"
                   placeholder="उदा. B-12"
                   value={bundleNo}
                   onChange={(e) => setBundleNo(e.target.value)}
@@ -156,8 +187,9 @@ export default function DocUploadModal({ isOpen, onClose, parcelId, caseId, onUp
                 />
               </div>
               <div>
-                <label className="text-[11px] font-semibold text-slate-600 block">फाईल क्र.</label>
+                <label htmlFor="doc-file-no" className="text-[11px] font-semibold text-slate-600 block">फाईल क्र.</label>
                 <input
+                  id="doc-file-no"
                   placeholder="उदा. SDO/118"
                   value={fileNo}
                   onChange={(e) => setFileNo(e.target.value)}
@@ -169,13 +201,14 @@ export default function DocUploadModal({ isOpen, onClose, parcelId, caseId, onUp
 
           {/* File Upload Box */}
           <div>
-            <label className="text-xs font-semibold text-slate-700 block">
+            <label htmlFor="doc-file-input" className="text-xs font-semibold text-slate-700 block">
               फाईल निवडा (PDF किंवा इमेज) <span className="text-rose-500">*</span>
             </label>
             <input
+              id="doc-file-input"
               type="file"
               onChange={(e) => setFile(e.target.files[0])}
-              className="w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-blue-900 file:text-white hover:file:bg-blue-800 cursor-pointer mt-1"
+              className="w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-blue-900 file:text-white hover:file:bg-blue-800 cursor-pointer mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded"
               accept="application/pdf,image/*"
               required
             />
@@ -191,23 +224,23 @@ export default function DocUploadModal({ isOpen, onClose, parcelId, caseId, onUp
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 py-2.5 border border-slate-300 rounded-lg text-xs font-semibold text-slate-700 hover:bg-slate-100 transition"
+              className="flex-1 py-2.5 border border-slate-300 rounded-lg text-xs font-semibold text-slate-700 hover:bg-slate-100 transition focus:outline-none focus:ring-2 focus:ring-slate-400"
             >
               रद्द करा (Cancel)
             </button>
             <button
               type="submit"
               disabled={uploading}
-              className="flex-1 bg-blue-900 hover:bg-blue-800 text-white font-semibold py-2.5 rounded-lg text-xs shadow-sm transition disabled:opacity-50 flex items-center justify-center gap-2"
+              className="flex-1 bg-blue-900 hover:bg-blue-800 text-white font-semibold py-2.5 rounded-lg text-xs shadow-sm transition disabled:opacity-50 flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
             >
               {uploading ? (
                 <>
-                  <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" aria-hidden="true" />
                   <span>अपलोड होत आहे...</span>
                 </>
               ) : (
                 <>
-                  <Upload className="w-3.5 h-3.5" />
+                  <Upload className="w-3.5 h-3.5" aria-hidden="true" />
                   <span>Cloudinary वर सेव्ह करा</span>
                 </>
               )}

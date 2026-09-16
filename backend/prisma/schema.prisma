@@ -338,6 +338,9 @@ model User {
   designation    String?    @db.VarChar(128)       // Official title
   isActive       Boolean    @default(true) @map("is_active")
   lastLoginAt    DateTime?  @map("last_login_at") @db.Timestamptz
+  consentGiven   Boolean    @default(false) @map("consent_given")
+  consentAt      DateTime?  @map("consent_at") @db.Timestamptz
+  consentVersion String?    @map("consent_version") @db.VarChar(16)
   createdAt      DateTime   @default(now()) @map("created_at") @db.Timestamptz
   updatedAt      DateTime   @updatedAt @map("updated_at") @db.Timestamptz
 

@@ -118,6 +118,25 @@ export default function ComplianceSpeedometerGauge({
         </div>
       </div>
 
+      {/* Screen Reader Accessible Data Table (WCAG 1.1.1) */}
+      <table className="sr-only">
+        <caption>महसूल संरक्षण व अनुपालन निर्देशांक तपशील</caption>
+        <thead>
+          <tr>
+            <th scope="col">अनुपालन मेट्रिक</th>
+            <th scope="col">संख्या / प्रमाण</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>एकूण भूखंड संख्या</td><td>{totalParcels}</td></tr>
+          <tr><td>कायदेशीर सुरक्षित भूखंड</td><td>{safeParcels}</td></tr>
+          <tr><td>एकूण शर्तभंग व वाद संख्या</td><td>{totalViolations}</td></tr>
+          <tr><td>शासन जमा किंवा नियमित झालेले भूखंड</td><td>{repossessedCount}</td></tr>
+          <tr><td>प्रलंबित SDO / तहसीलदार सुनावण्या</td><td>{pendingHearings}</td></tr>
+          <tr><td>एकूण अनुपालन स्कोअर</td><td>{scorePct}%</td></tr>
+        </tbody>
+      </table>
+
       {/* Metric Breakdown Badges */}
       <div className="grid grid-cols-3 gap-1.5 pt-2 border-t border-slate-100 text-center">
         <div className="p-1.5 rounded-lg bg-emerald-50/70 border border-emerald-200/80">

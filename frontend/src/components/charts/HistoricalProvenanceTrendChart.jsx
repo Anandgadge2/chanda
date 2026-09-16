@@ -142,6 +142,27 @@ export default function HistoricalProvenanceTrendChart({ data = [] }) {
         )}
       </div>
 
+      {/* Screen Reader Accessible Data Table (WCAG 1.1.1) */}
+      <table className="sr-only">
+        <caption>१९५० ते २०२६ भूमी स्थित्यंतर व फेरफार प्रवृत्ती सारणी</caption>
+        <thead>
+          <tr>
+            <th scope="col">वर्ष / टप्पा</th>
+            <th scope="col">फेरफार नोंदी संख्या</th>
+            <th scope="col">क्षेत्रफळ (हे.)</th>
+          </tr>
+        </thead>
+        <tbody>
+          {chartData.map((item) => (
+            <tr key={item.year}>
+              <td>{item.epochLabel}</td>
+              <td>{item.count}</td>
+              <td>{item.areaHa}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
       {/* Epoch Pills Footer */}
       <div className="flex flex-wrap items-center gap-1.5 pt-2 border-t border-slate-100 text-xs">
         <span className="text-[11px] font-bold text-slate-600">स्थित्यंतर टप्पे:</span>

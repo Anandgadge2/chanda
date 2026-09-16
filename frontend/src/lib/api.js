@@ -121,6 +121,34 @@ export const api = {
     }
   },
 
+  // DPDPA 2023 Data Principal Rights
+  exportData: async () => {
+    const res = await dedupedFetch(`${BASE_URL}/api/auth/dpdpa/export`, {
+      headers: {
+        ...getAuthHeaders(),
+      },
+      cache: 'no-store',
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'डेटा निर्यात अयशस्वी झाला.');
+    return data;
+  },
+
+  requestErasure: async (reason = '') => {
+    const res = await fetch(`${BASE_URL}/api/auth/dpdpa/erasure-request`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...getAuthHeaders(),
+      },
+      body: JSON.stringify({ reason }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'डेटा हटविण्याची विनंती अयशस्वी झाली.');
+    return data;
+  },
+
+
   // Analytics
   getAnalyticsSummary: async (taluka = '', forceRefresh = false) => {
     const params = new URLSearchParams();
