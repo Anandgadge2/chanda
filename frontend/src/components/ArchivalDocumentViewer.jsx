@@ -59,8 +59,8 @@ export default function ArchivalDocumentViewer({
   return (
     <div
       ref={containerRef}
-      className={`flex flex-col bg-slate-900/5 rounded-2xl border border-slate-200/90 shadow-sm overflow-hidden transition-all duration-300 ${
-        isFullscreen ? 'fixed inset-3 z-[70] bg-slate-950/90 p-4 shadow-2xl backdrop-blur-md' : className
+      className={`flex flex-col bg-slate-900/5 border border-slate-200/90 shadow-sm overflow-hidden transition-all duration-200 ${
+        isFullscreen ? 'fixed inset-0 z-[120] bg-slate-950 w-screen h-screen p-3 sm:p-4 shadow-none rounded-none' : `rounded-2xl ${className}`
       }`}
     >
       {/* Viewer Header & Controls Bar */}

@@ -10,14 +10,12 @@ import {
   AlertTriangle,
   CheckCircle,
   CheckCircle2,
-  FileSpreadsheet,
   RefreshCw,
   BookOpen,
   Copy,
   Check,
   ChevronRight,
   ChevronDown,
-  Download,
   ArrowUpDown,
   ArrowUp,
   ArrowDown,
@@ -204,64 +202,7 @@ export default function ParcelsPage() {
   const activeFiltersCount =
     (search ? 1 : 0) + (taluka ? 1 : 0) + (tenureClass ? 1 : 0) + (hasActiveDispute !== '' ? 1 : 0);
 
-  // Export Table to CSV
-  const handleExportCSV = () => {
-    if (!parcels || parcels.length === 0) return;
 
-    const headers = [
-      'अ.क्र.',
-      'UPI / भूखंड ओळख',
-      'तालुका',
-      'गाव',
-      'गाव कोड',
-      'गट क्र.',
-      'जुना स.नं.',
-      'हिस्सा क्र.',
-      'एकूण क्षेत्र (हेक्टर)',
-      'अंदाजे क्षेत्र (एकर)',
-      'पोटखराबा क्षेत्र (हेक्टर)',
-      'धारणा प्रकार',
-      'वाद स्थिती',
-      'सक्रिय केस क्र.',
-    ];
-
-    const rows = sortedParcels.map((p, idx) => {
-      const tenure = TENURE_CLASSES[p.tenureClass]?.labelMr || p.tenureClass;
-      const dispute = p.hasActiveDispute ? 'सक्रिय वाद / शर्तभंग' : 'निर्वेध';
-      const caseNo = p.forwardCases?.[0]?.caseNumber || '-';
-      const areaHa = Number(p.totalAreaHa || 0).toFixed(4);
-      const areaAcre = (Number(p.totalAreaHa || 0) * 2.47105).toFixed(2);
-      const potkharaba = Number(p.potkharabaAreaHa || 0).toFixed(4);
-
-      return [
-        idx + 1,
-        `"${p.upi}"`,
-        `"${p.taluka}"`,
-        `"${p.villageName}"`,
-        `"${p.villageCode || ''}"`,
-        `"${p.gatNumber}"`,
-        `"${p.oldSurveyNo || ''}"`,
-        `"${p.hissaNumber || '०'}"`,
-        areaHa,
-        areaAcre,
-        potkharaba,
-        `"${tenure}"`,
-        `"${dispute}"`,
-        `"${caseNo}"`,
-      ].join(',');
-    });
-
-    const csvContent = '\uFEFF' + [headers.join(','), ...rows].join('\r\n');
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', `Chandrapur_Land_Parcels_${new Date().toISOString().slice(0, 10)}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-  };
 
   // Helper for tenure badge styling
   const getTenureDetails = (tenureKey) => {
@@ -346,15 +287,7 @@ export default function ParcelsPage() {
             <span>७/१२ संक्षिप्त रूपे मदत</span>
           </button>
 
-          <a
-            href={api.getSampleTemplateUrl()}
-            download
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 rounded-lg text-xs font-semibold transition active:scale-95 shadow-2xs"
-            title="एक्सेल टेम्पलेट"
-          >
-            <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600" />
-            <span>एक्सेल टेम्पलेट</span>
-          </a>
+
 
           <button
             onClick={() => fetchParcels(page, search)}
@@ -444,16 +377,7 @@ export default function ParcelsPage() {
           </button>
         )}
 
-        {/* Export CSV Button */}
-        <button
-          type="button"
-          onClick={handleExportCSV}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 rounded-lg text-xs font-bold transition shadow-2xs active:scale-95 shrink-0"
-          title="सध्याचा तक्ता CSV मध्ये डाउनलोड करा"
-        >
-          <Download className="w-3.5 h-3.5 text-blue-700" />
-          <span>तक्ता CSV</span>
-        </button>
+
       </div>
 
       {/* Enhanced Table Card (Precision table-fixed, 8 balanced columns, No DMS column) */}

@@ -85,12 +85,16 @@ export default function ParcelTraceDrawer({ upi, onClose, onRefresh }) {
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === 'Escape' && upi) {
-        onClose();
+        if (isFullscreen) {
+          setIsFullscreen(false);
+        } else {
+          onClose();
+        }
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [upi, onClose]);
+  }, [upi, isFullscreen, onClose]);
 
   useEffect(() => {
     if (!upi) return;
@@ -145,7 +149,9 @@ export default function ParcelTraceDrawer({ upi, onClose, onRefresh }) {
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center p-2 sm:p-3 md:p-4 overflow-hidden"
+      className={`fixed inset-0 z-[100] flex items-center justify-center overflow-hidden transition-all duration-150 ${
+        isFullscreen ? 'p-0' : 'p-2 sm:p-3 md:p-4'
+      }`}
       role="dialog"
       aria-modal="true"
       aria-labelledby="parcel-drawer-title"
@@ -156,13 +162,13 @@ export default function ParcelTraceDrawer({ upi, onClose, onRefresh }) {
         onClick={onClose}
       />
 
-      {/* Enhanced Centered Modal Dialog */}
+      {/* Enhanced Modal Dialog */}
       <div
         ref={trapRef}
-        className={`relative z-10 w-full bg-white rounded-2xl shadow-2xl flex flex-col border border-slate-700/40 overflow-hidden animate-dialog-in duration-200 my-auto ${
+        className={`relative z-10 w-full bg-white flex flex-col overflow-hidden animate-dialog-in duration-150 ${
           isFullscreen
-            ? 'fixed inset-2 sm:inset-4 max-w-none max-h-none h-[calc(100vh-2rem)]'
-            : 'max-w-7xl max-h-[95vh] h-[92vh]'
+            ? 'fixed inset-0 w-screen h-screen max-w-none max-h-none rounded-none border-0 shadow-none my-0'
+            : 'rounded-2xl shadow-2xl border border-slate-700/40 max-w-7xl max-h-[95vh] h-[92vh] my-auto'
         }`}
       >
         {/* Executive Government Header */}
@@ -233,10 +239,11 @@ export default function ParcelTraceDrawer({ upi, onClose, onRefresh }) {
             <button
               type="button"
               onClick={() => setIsFullscreen((prev) => !prev)}
-              className="p-1.5 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition border border-slate-200 hidden sm:block focus:outline-none focus:ring-2 focus:ring-slate-400"
-              title={isFullscreen ? 'सामान्य आकार' : 'विस्तारित आकार'}
+              className="p-1.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition border border-slate-300 flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-2xs"
+              title={isFullscreen ? 'पूर्ण स्क्रीन बंद करा (Exit Fullscreen)' : 'पूर्ण स्क्रीन करा (Fullscreen)'}
+              aria-label={isFullscreen ? 'पूर्ण स्क्रीन बंद करा' : 'पूर्ण स्क्रीन करा'}
             >
-              {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+              {isFullscreen ? <Minimize2 className="w-4 h-4 text-blue-900" /> : <Maximize2 className="w-4 h-4 text-slate-700" />}
             </button>
 
             {/* Close Button */}
