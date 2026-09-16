@@ -114,14 +114,14 @@ export default function ParcelTraceDrawer({ upi, onClose, onRefresh }) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-3 md:p-4 overflow-hidden"
+      className="fixed inset-0 z-[100] flex items-center justify-center p-2 sm:p-3 md:p-4 overflow-hidden"
       role="dialog"
       aria-modal="true"
       aria-labelledby="parcel-drawer-title"
     >
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-slate-950/70 backdrop-blur-md transition-opacity animate-in fade-in duration-300"
+        className="fixed inset-0 bg-slate-950/75 backdrop-blur-sm transition-opacity animate-in fade-in duration-150"
         onClick={onClose}
       />
 

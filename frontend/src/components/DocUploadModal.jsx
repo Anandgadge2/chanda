@@ -68,7 +68,7 @@ export default function DocUploadModal({ isOpen, onClose, parcelId, caseId, onUp
 
   return (
     <div
-      className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-2.5 sm:p-4 animate-in fade-in duration-200 overflow-y-auto"
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/75 backdrop-blur-sm p-2.5 sm:p-4 animate-in fade-in duration-150 overflow-y-auto"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
@@ -78,7 +78,7 @@ export default function DocUploadModal({ isOpen, onClose, parcelId, caseId, onUp
         role="dialog"
         aria-modal="true"
         aria-labelledby="upload-modal-title"
-        className="bg-white rounded-2xl shadow-2xl border border-slate-200 max-w-lg w-full max-h-[94vh] flex flex-col overflow-hidden my-auto"
+        className="bg-white rounded-2xl shadow-2xl border border-slate-200 max-w-lg w-full max-h-[90vh] flex flex-col overflow-hidden my-auto"
       >
         {/* Modal Header */}
         <div className="px-4 sm:px-6 py-3 sm:py-3.5 bg-white border-b border-slate-200 flex justify-between items-center shrink-0">
@@ -105,133 +105,135 @@ export default function DocUploadModal({ isOpen, onClose, parcelId, caseId, onUp
           </button>
         </div>
 
-        {/* Modal Body */}
-        <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-3.5 sm:space-y-4 overflow-y-auto flex-1">
-          {statusMsg.text && (
-            <div
-              role={statusMsg.type === 'error' ? 'alert' : 'status'}
-              aria-live={statusMsg.type === 'error' ? 'assertive' : 'polite'}
-              className={`p-3 rounded-lg text-xs flex items-center gap-2 ${
-                statusMsg.type === 'success'
-                  ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
-                  : 'bg-rose-50 text-rose-800 border border-rose-200'
-              }`}
-            >
-              {statusMsg.type === 'success' ? (
-                <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" aria-hidden="true" />
-              ) : (
-                <AlertCircle className="w-4 h-4 text-rose-600 flex-shrink-0" aria-hidden="true" />
-              )}
-              <span>{statusMsg.text}</span>
-            </div>
-          )}
-
-          <div>
-            <label htmlFor="doc-title" className="text-xs font-semibold text-slate-700 block">
-              दस्तावेज शीर्षक <span className="text-rose-500">*</span>
-            </label>
-            <input
-              id="doc-title"
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className="w-full border border-slate-300 rounded-lg p-2.5 text-xs mt-1 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-              placeholder="उदा. SDO आदेश क्र. १२/२०२४ किंवा स्थळ पंचनामा"
-              required
-            />
-          </div>
-
-          <div>
-            <label htmlFor="doc-type" className="text-xs font-semibold text-slate-700 block">
-              दस्तावेज प्रकार <span className="text-rose-500">*</span>
-            </label>
-            <select
-              id="doc-type"
-              value={docType}
-              onChange={(e) => setDocType(e.target.value)}
-              className="w-full border border-slate-300 rounded-lg p-2.5 text-xs mt-1 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
-            >
-              <option value="SDO_ORDER">उपविभागीय अधिकारी (SDO) आदेश</option>
-              <option value="COLLECTOR_ORDER">जिल्हाधिकारी आदेश (शासन जमा)</option>
-              <option value="FIELD_PANCHNAMA">स्थळ पंचनामा व छायाचित्रे</option>
-              <option value="OLD_7_12_ARCHIVE">सन १९५० जुना सातबारा</option>
-              <option value="FERFAR_REGISTER_COPY">गाव नमुना ६ फेरफार</option>
-              <option value="SHOW_CAUSE_NOTICE">कारणे दाखवा नोटीस</option>
-            </select>
-          </div>
-
-          {/* Physical Coordinate Fields */}
-          <div className="bg-slate-50 p-3 rounded-lg border border-slate-200">
-            <p className="text-[11px] font-bold text-slate-600 uppercase tracking-wide mb-2">
-              भौतिक अभिलेखागार स्थान
-            </p>
-            <div className="grid grid-cols-3 gap-2">
-              <div>
-                <label htmlFor="doc-rack-no" className="text-[11px] font-semibold text-slate-600 block">रॅक क्र.</label>
-                <input
-                  id="doc-rack-no"
-                  placeholder="उदा. R-04"
-                  value={rackNo}
-                  onChange={(e) => setRackNo(e.target.value)}
-                  className="border border-slate-300 rounded p-2 text-xs w-full mt-1 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
-                />
+        {/* Modal Form with Scrollable Body and Pinned Footer */}
+        <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-hidden min-h-0">
+          <div className="p-4 sm:p-6 space-y-3.5 sm:space-y-4 overflow-y-auto flex-1">
+            {statusMsg.text && (
+              <div
+                role={statusMsg.type === 'error' ? 'alert' : 'status'}
+                aria-live={statusMsg.type === 'error' ? 'assertive' : 'polite'}
+                className={`p-3 rounded-lg text-xs flex items-center gap-2 ${
+                  statusMsg.type === 'success'
+                    ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                    : 'bg-rose-50 text-rose-800 border border-rose-200'
+                }`}
+              >
+                {statusMsg.type === 'success' ? (
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" aria-hidden="true" />
+                ) : (
+                  <AlertCircle className="w-4 h-4 text-rose-600 flex-shrink-0" aria-hidden="true" />
+                )}
+                <span>{statusMsg.text}</span>
               </div>
-              <div>
-                <label htmlFor="doc-bundle-no" className="text-[11px] font-semibold text-slate-600 block">गठ्ठा क्र.</label>
-                <input
-                  id="doc-bundle-no"
-                  placeholder="उदा. B-12"
-                  value={bundleNo}
-                  onChange={(e) => setBundleNo(e.target.value)}
-                  className="border border-slate-300 rounded p-2 text-xs w-full mt-1 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label htmlFor="doc-file-no" className="text-[11px] font-semibold text-slate-600 block">फाईल क्र.</label>
-                <input
-                  id="doc-file-no"
-                  placeholder="उदा. SDO/118"
-                  value={fileNo}
-                  onChange={(e) => setFileNo(e.target.value)}
-                  className="border border-slate-300 rounded p-2 text-xs w-full mt-1 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* File Upload Box */}
-          <div>
-            <label htmlFor="doc-file-input" className="text-xs font-semibold text-slate-700 block">
-              फाईल निवडा (PDF किंवा इमेज) <span className="text-rose-500">*</span>
-            </label>
-            <input
-              id="doc-file-input"
-              type="file"
-              onChange={(e) => setFile(e.target.files[0])}
-              className="w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-blue-900 file:text-white hover:file:bg-blue-800 cursor-pointer mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded"
-              accept="application/pdf,image/*"
-              required
-            />
-            {file && (
-              <p className="text-[11px] text-slate-500 mt-1">
-                निवडलेली फाईल: <span className="font-semibold text-slate-700">{file.name}</span> ({(file.size / 1024 / 1024).toFixed(2)} MB)
-              </p>
             )}
+
+            <div>
+              <label htmlFor="doc-title" className="text-xs font-semibold text-slate-700 block">
+                दस्तावेज शीर्षक <span className="text-rose-500">*</span>
+              </label>
+              <input
+                id="doc-title"
+                type="text"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                className="w-full border border-slate-300 rounded-lg p-2.5 text-xs mt-1 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                placeholder="उदा. SDO आदेश क्र. १२/२०२४ किंवा स्थळ पंचनामा"
+                required
+              />
+            </div>
+
+            <div>
+              <label htmlFor="doc-type" className="text-xs font-semibold text-slate-700 block">
+                दस्तावेज प्रकार <span className="text-rose-500">*</span>
+              </label>
+              <select
+                id="doc-type"
+                value={docType}
+                onChange={(e) => setDocType(e.target.value)}
+                className="w-full border border-slate-300 rounded-lg p-2.5 text-xs mt-1 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              >
+                <option value="SDO_ORDER">उपविभागीय अधिकारी (SDO) आदेश</option>
+                <option value="COLLECTOR_ORDER">जिल्हाधिकारी आदेश (शासन जमा)</option>
+                <option value="FIELD_PANCHNAMA">स्थळ पंचनामा व छायाचित्रे</option>
+                <option value="OLD_7_12_ARCHIVE">सन १९५० जुना सातबारा</option>
+                <option value="FERFAR_REGISTER_COPY">गाव नमुना ६ फेरफार</option>
+                <option value="SHOW_CAUSE_NOTICE">कारणे दाखवा नोटीस</option>
+              </select>
+            </div>
+
+            {/* Physical Coordinate Fields */}
+            <div className="bg-slate-50 p-3 rounded-lg border border-slate-200">
+              <p className="text-[11px] font-bold text-slate-600 uppercase tracking-wide mb-2">
+                भौतिक अभिलेखागार स्थान
+              </p>
+              <div className="grid grid-cols-3 gap-2">
+                <div>
+                  <label htmlFor="doc-rack-no" className="text-[11px] font-semibold text-slate-600 block">रॅक क्र.</label>
+                  <input
+                    id="doc-rack-no"
+                    placeholder="उदा. R-04"
+                    value={rackNo}
+                    onChange={(e) => setRackNo(e.target.value)}
+                    className="border border-slate-300 rounded p-2 text-xs w-full mt-1 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="doc-bundle-no" className="text-[11px] font-semibold text-slate-600 block">गठ्ठा क्र.</label>
+                  <input
+                    id="doc-bundle-no"
+                    placeholder="उदा. B-12"
+                    value={bundleNo}
+                    onChange={(e) => setBundleNo(e.target.value)}
+                    className="border border-slate-300 rounded p-2 text-xs w-full mt-1 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="doc-file-no" className="text-[11px] font-semibold text-slate-600 block">फाईल क्र.</label>
+                  <input
+                    id="doc-file-no"
+                    placeholder="उदा. SDO/118"
+                    value={fileNo}
+                    onChange={(e) => setFileNo(e.target.value)}
+                    className="border border-slate-300 rounded p-2 text-xs w-full mt-1 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* File Upload Box */}
+            <div>
+              <label htmlFor="doc-file-input" className="text-xs font-semibold text-slate-700 block">
+                फाईल निवडा (PDF किंवा इमेज) <span className="text-rose-500">*</span>
+              </label>
+              <input
+                id="doc-file-input"
+                type="file"
+                onChange={(e) => setFile(e.target.files[0])}
+                className="w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-blue-900 file:text-white hover:file:bg-blue-800 cursor-pointer mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded"
+                accept="application/pdf,image/*"
+                required
+              />
+              {file && (
+                <p className="text-[11px] text-slate-500 mt-1">
+                  निवडलेली फाईल: <span className="font-semibold text-slate-700">{file.name}</span> ({(file.size / 1024 / 1024).toFixed(2)} MB)
+                </p>
+              )}
+            </div>
           </div>
 
-          {/* Submit */}
-          <div className="pt-2 flex gap-3">
+          {/* Pinned Action Buttons Footer */}
+          <div className="px-4 sm:px-6 py-3 bg-slate-50 border-t border-slate-200 flex items-center justify-end gap-3 shrink-0">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 py-2.5 border border-slate-300 rounded-lg text-xs font-semibold text-slate-700 hover:bg-slate-100 transition focus:outline-none focus:ring-2 focus:ring-slate-400"
+              className="px-4 py-2 border border-slate-300 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-100 transition focus:outline-none focus:ring-2 focus:ring-slate-400"
             >
               रद्द करा (Cancel)
             </button>
             <button
               type="submit"
               disabled={uploading}
-              className="flex-1 bg-blue-900 hover:bg-blue-800 text-white font-semibold py-2.5 rounded-lg text-xs shadow-sm transition disabled:opacity-50 flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              className="px-5 py-2 bg-blue-900 hover:bg-blue-800 text-white font-semibold rounded-xl text-xs shadow-sm transition disabled:opacity-50 flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
             >
               {uploading ? (
                 <>

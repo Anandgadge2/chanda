@@ -8,25 +8,50 @@ import { logAudit } from '../middleware/auditMiddleware.js';
  */
 export const getCases = async (req, res) => {
   try {
-    const { violationType, status, taluka, isRepossessedToGovt, page = 1, limit = 30 } = req.query;
+    const { search, violationType, status, taluka, isRepossessedToGovt, page = 1, limit = 30 } = req.query;
 
     const pageNum = Math.max(1, parseInt(page, 10));
     const take = Math.min(100, Math.max(1, parseInt(limit, 10)));
     const skip = (pageNum - 1) * take;
 
-    const where = {};
-    if (violationType) where.violationType = violationType;
-    if (status) where.status = status;
+    const andConditions = [];
+
+    if (violationType) andConditions.push({ violationType });
+    if (status) andConditions.push({ status });
     if (isRepossessedToGovt !== undefined && isRepossessedToGovt !== '') {
-      where.isRepossessedToGovt = isRepossessedToGovt === 'true';
+      andConditions.push({ isRepossessedToGovt: isRepossessedToGovt === 'true' });
     }
     if (taluka) {
-      where.parcel = {
-        taluka: { equals: taluka, mode: 'insensitive' },
-      };
+      andConditions.push({
+        parcel: {
+          taluka: { equals: taluka, mode: 'insensitive' },
+        },
+      });
+    }
+    if (search && search.trim()) {
+      const q = search.trim();
+      andConditions.push({
+        OR: [
+          { caseNumber: { contains: q, mode: 'insensitive' } },
+          { occupantName: { contains: q, mode: 'insensitive' } },
+          { finalOrderDetails: { contains: q, mode: 'insensitive' } },
+          { investigatingOfficer: { contains: q, mode: 'insensitive' } },
+          {
+            parcel: {
+              OR: [
+                { villageName: { contains: q, mode: 'insensitive' } },
+                { gatNumber: { contains: q, mode: 'insensitive' } },
+                { upi: { contains: q, mode: 'insensitive' } },
+              ],
+            },
+          },
+        ],
+      });
     }
 
-    const [cases, totalCount] = await Promise.all([
+    const where = andConditions.length > 0 ? { AND: andConditions } : {};
+
+    const [cases, totalCount, activeHearingsCount, noticeCount, shasanJamaCount, areaAgg] = await Promise.all([
       prisma.forwardEnforcementCase.findMany({
         where,
         skip,
@@ -41,6 +66,30 @@ export const getCases = async (req, res) => {
         },
       }),
       prisma.forwardEnforcementCase.count({ where }),
+      prisma.forwardEnforcementCase.count({
+        where: {
+          ...where,
+          status: 'HEARING_SCHEDULED',
+        },
+      }),
+      prisma.forwardEnforcementCase.count({
+        where: {
+          ...where,
+          status: 'NOTICE_ISSUED',
+        },
+      }),
+      prisma.forwardEnforcementCase.count({
+        where: {
+          ...where,
+          isRepossessedToGovt: true,
+        },
+      }),
+      prisma.forwardEnforcementCase.aggregate({
+        where,
+        _sum: {
+          encroachedAreaHa: true,
+        },
+      }),
     ]);
 
     res.json({
@@ -51,6 +100,13 @@ export const getCases = async (req, res) => {
         page: pageNum,
         limit: take,
         totalPages: Math.ceil(totalCount / take),
+      },
+      stats: {
+        totalCases: totalCount,
+        activeHearings: activeHearingsCount,
+        noticesIssued: noticeCount,
+        shasanJama: shasanJamaCount,
+        totalDisputedAreaHa: Number(areaAgg._sum?.encroachedAreaHa || 0),
       },
     });
   } catch (err) {
