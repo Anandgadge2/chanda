@@ -21,11 +21,8 @@ import {
   ArrowUpDown,
   ArrowUp,
   ArrowDown,
-  Landmark,
-  Trees,
-  Building,
-  Clock,
   Scale,
+  Clock,
   ExternalLink,
   X,
 } from 'lucide-react';
@@ -266,7 +263,7 @@ export default function ParcelsPage() {
     URL.revokeObjectURL(url);
   };
 
-  // Helper for tenure icon & details
+  // Helper for tenure badge styling
   const getTenureDetails = (tenureKey) => {
     const config = TENURE_CLASSES[tenureKey];
     switch (tenureKey) {
@@ -286,21 +283,21 @@ export default function ParcelsPage() {
         };
       case 'SARKAR_SHASAN':
         return {
-          icon: <Landmark className="w-3 h-3 text-blue-700 shrink-0" />,
+          icon: <span className="w-1.5 h-1.5 rounded-full bg-blue-700 inline-block shrink-0" />,
           label: config?.labelMr || 'शासकीय / शासन',
           hint: 'महाराष्ट्र शासनाकडे निहित',
           badgeClass: 'bg-blue-50 text-blue-800 border-blue-300',
         };
       case 'DEVASTHAN_INAM':
         return {
-          icon: <Building className="w-3 h-3 text-purple-700 shrink-0" />,
+          icon: <span className="w-1.5 h-1.5 rounded-full bg-purple-700 inline-block shrink-0" />,
           label: config?.labelMr || 'देवस्थान / इनाम',
           hint: 'धार्मिक न्यास / अहस्तांतरणीय',
           badgeClass: 'bg-purple-50 text-purple-800 border-purple-300',
         };
       case 'FOREST_JANGAL':
         return {
-          icon: <Trees className="w-3 h-3 text-green-800 shrink-0" />,
+          icon: <span className="w-1.5 h-1.5 rounded-full bg-green-800 inline-block shrink-0" />,
           label: config?.labelMr || 'वन जमीन',
           hint: 'राखीव / संरक्षित वनक्षेत्र',
           badgeClass: 'bg-green-50 text-green-900 border-green-300',
@@ -316,7 +313,7 @@ export default function ParcelsPage() {
   };
 
   return (
-    <div className="space-y-3.5 sm:space-y-4">
+    <div className="space-y-3">
       {/* Sleek Low-Profile Header */}
       <div className="bg-white border border-slate-200 rounded-xl px-4 py-3 shadow-2xs flex flex-col md:flex-row justify-between items-start md:items-center gap-2.5">
         <div className="flex items-center gap-3">
@@ -503,7 +500,7 @@ export default function ParcelsPage() {
               <span>
                 {expandedRowIds.size === sortedParcels.length && sortedParcels.length > 0
                   ? 'सर्व संक्षिप्त करा'
-                  : 'सर्व शेरे उघडा'}
+                  : 'सर्व तपशील उघडा'}
               </span>
             </button>
           </div>
@@ -843,150 +840,115 @@ export default function ParcelsPage() {
                         </td>
                       </tr>
 
-                      {/* Expandable Secondary Row (Accordion Details - colSpan 8) */}
+                      {/* Modern Sleek Telemetry Ribbon (Zero-Bloat, Clean, High-Tech) */}
                       {isExpanded && (
-                        <tr className="bg-slate-50/80 border-b border-blue-200">
-                          <td colSpan={8} className="p-0">
-                            <div className="px-5 py-4 border-l-4 border-l-blue-900 space-y-3.5">
-                              <div className="flex items-center justify-between border-b border-slate-200 pb-2">
-                                <div className="flex items-center gap-2">
-                                  <span className="font-mono text-xs font-black text-blue-950 bg-blue-100/80 px-2.5 py-0.5 rounded border border-blue-300">
-                                    {parcel.upi}
-                                  </span>
-                                  <span className="text-xs font-bold text-slate-700">
-                                    भूखंड सविस्तर पार्श्वभूमी व अभिलेख
-                                  </span>
+                        <tr className="bg-slate-50/70 border-b border-slate-200/90 animate-in fade-in duration-150">
+                          <td colSpan={8} className="py-2.5 px-4 bg-gradient-to-r from-blue-50/40 via-slate-50/60 to-white border-l-4 border-l-blue-900">
+                            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 text-xs">
+                              {/* 1. 1950 Provenance */}
+                              <div className="flex items-center gap-2.5 min-w-[200px]">
+                                <div className="w-7 h-7 rounded-lg bg-blue-100 text-blue-900 flex items-center justify-center shrink-0 shadow-2xs">
+                                  <Clock className="w-3.5 h-3.5" />
                                 </div>
-                                <div className="flex items-center gap-2">
-                                  <button
-                                    type="button"
-                                    onClick={() => setSelectedUpi(parcel.upi)}
-                                    className="inline-flex items-center gap-1 text-xs font-bold text-blue-900 hover:text-blue-700 bg-white border border-blue-200 hover:border-blue-400 px-3 py-1 rounded-lg transition shadow-2xs"
-                                  >
-                                    <Clock className="w-3.5 h-3.5 text-blue-700" />
-                                    <span>पूर्ण ३६०° साखळी उघडा</span>
-                                  </button>
-                                  <button
-                                    type="button"
-                                    onClick={() => setUploadModalParcelId(parcel.id)}
-                                    className="inline-flex items-center gap-1 text-xs font-bold text-slate-700 hover:text-slate-900 bg-white border border-slate-300 hover:border-slate-400 px-3 py-1 rounded-lg transition shadow-2xs"
-                                  >
-                                    <Upload className="w-3.5 h-3.5 text-blue-600" />
-                                    <span>कागदपत्रे व्यवस्थापन (DMS)</span>
-                                  </button>
+                                <div>
+                                  <div className="flex items-center gap-1.5">
+                                    <span className="font-bold text-slate-800">१९५० शीर्षक साखळी:</span>
+                                    <span className="font-bold text-blue-900 bg-blue-100/70 px-1.5 py-0.2 rounded border border-blue-200 text-[10px]">
+                                      {parcel._count?.backwardHistories || 0} ऐतिहासिक फेरफार नोंदी
+                                    </span>
+                                  </div>
+                                  <p className="text-[11px] text-slate-500 mt-0.5">
+                                    मूळ १९५० मालकी, फेरफार नोंदी व कायदेशीर पुरावे
+                                  </p>
                                 </div>
                               </div>
 
-                              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
-                                {/* Card 1: 1950 Title History */}
-                                <div className="bg-white border border-slate-200 rounded-xl p-3 shadow-2xs space-y-2">
-                                  <div className="flex items-center justify-between border-b border-slate-100 pb-1.5">
-                                    <div className="flex items-center gap-1.5 font-bold text-slate-900">
-                                      <Clock className="w-3.5 h-3.5 text-blue-700" />
-                                      <span>१९५० शीर्षक साखळी</span>
-                                    </div>
-                                    <span className="text-[10px] font-extrabold bg-blue-50 text-blue-900 px-2 py-0.5 rounded border border-blue-200">
-                                      {parcel._count?.backwardHistories || 0} ऐतिहासिक नोंदी
-                                    </span>
-                                  </div>
-                                  <p className="text-slate-600 text-[11px] leading-relaxed">
-                                    १९५० मूळ मालकी नोंदी, जुने ७/१२ अभिलेख व फेरफार साखळी तपासा.
-                                    मूळ शासकीय/खाजगी धारणा स्थिती सत्यापित करा.
-                                  </p>
-                                  <button
-                                    type="button"
-                                    onClick={() => setSelectedUpi(parcel.upi)}
-                                    className="inline-flex items-center gap-1 text-[11px] text-blue-900 hover:underline font-bold"
-                                  >
-                                    <span>३६०° कालरेषा व मूळ मालकी पहा</span>
-                                    <ChevronRight className="w-3 h-3" />
-                                  </button>
-                                </div>
+                              {/* Vertical Divider */}
+                              <div className="hidden lg:block w-px h-7 bg-slate-200/80 shrink-0" />
 
-                                {/* Card 2: Forward Enforcement Cases */}
-                                <div className="bg-white border border-slate-200 rounded-xl p-3 shadow-2xs space-y-2">
-                                  <div className="flex items-center justify-between border-b border-slate-100 pb-1.5">
-                                    <div className="flex items-center gap-1.5 font-bold text-slate-900">
-                                      <Scale className="w-3.5 h-3.5 text-rose-700" />
-                                      <span>सक्रिय कायदेशीर चौकशी</span>
-                                    </div>
-                                    {hasDispute ? (
-                                      <span className="text-[10px] font-extrabold bg-rose-50 text-rose-900 px-2 py-0.5 rounded border border-rose-200">
-                                        चौकशी चालू
+                              {/* 2. Legal / Dispute Status */}
+                              <div className="flex items-center gap-2.5 min-w-[240px]">
+                                <div
+                                  className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 shadow-2xs ${
+                                    hasDispute
+                                      ? 'bg-rose-100 text-rose-800'
+                                      : 'bg-emerald-100 text-emerald-800'
+                                  }`}
+                                >
+                                  <Scale className="w-3.5 h-3.5" />
+                                </div>
+                                <div>
+                                  <div className="flex items-center gap-1.5">
+                                    <span className="font-bold text-slate-800">कायदेशीर स्थिती:</span>
+                                    {hasDispute && activeCase ? (
+                                      <span className="font-mono font-bold text-rose-900 bg-rose-50 px-1.5 py-0.2 rounded border border-rose-200 text-[10px]">
+                                        {activeCase.caseNumber}
                                       </span>
+                                    ) : hasDispute ? (
+                                      <span className="text-rose-700 font-bold text-[11px]">शर्तभंग चौकशी चालू</span>
                                     ) : (
-                                      <span className="text-[10px] font-extrabold bg-emerald-50 text-emerald-900 px-2 py-0.5 rounded border border-emerald-200">
-                                        विवादरहित
+                                      <span className="text-emerald-700 font-bold text-[11px] flex items-center gap-1">
+                                        <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                                        <span>७/१२ निर्वेध (विवादरहित)</span>
                                       </span>
                                     )}
                                   </div>
-
-                                  {parcel.forwardCases && parcel.forwardCases.length > 0 ? (
-                                    <div className="space-y-1.5">
-                                      {parcel.forwardCases.map((fc) => (
-                                        <div
-                                          key={fc.id}
-                                          className="p-1.5 bg-rose-50/60 rounded border border-rose-200 text-[11px] flex items-center justify-between gap-1"
-                                        >
-                                          <div>
-                                            <span className="font-mono font-bold text-rose-950">
-                                              {fc.caseNumber}
-                                            </span>
-                                            <span className="text-[10px] text-rose-700 ml-1.5">
-                                              ({VIOLATION_TYPES[fc.violationType]?.labelMr || fc.violationType})
-                                            </span>
-                                          </div>
-                                          <Link
-                                            href={`/cases?search=${encodeURIComponent(fc.caseNumber)}`}
-                                            className="text-[10px] font-bold text-blue-900 hover:underline inline-flex items-center gap-0.5"
-                                          >
-                                            <span>तपशील</span>
-                                            <ExternalLink className="w-2.5 h-2.5" />
-                                          </Link>
-                                        </div>
-                                      ))}
-                                    </div>
-                                  ) : (
-                                    <p className="text-slate-500 text-[11px] leading-relaxed">
-                                      या भूखंडावर सध्या कोणतेही सक्रिय वाद किंवा शर्तभंग प्रकरण नोंदवलेले नाही.
-                                    </p>
-                                  )}
+                                  <p className="text-[11px] text-slate-500 mt-0.5">
+                                    {hasDispute && activeCase
+                                      ? `${VIOLATION_TYPES[activeCase.violationType]?.labelMr || activeCase.violationType} चौकशी`
+                                      : hasDispute
+                                      ? 'सक्रिय वाद नोंदवलेला आहे'
+                                      : 'कोणतीही शर्तभंग अथवा अतिक्रमण चौकशी नाही'}
+                                  </p>
                                 </div>
+                              </div>
 
-                                {/* Card 3: Administrative & Survey Specs */}
-                                <div className="bg-white border border-slate-200 rounded-xl p-3 shadow-2xs space-y-2">
-                                  <div className="flex items-center justify-between border-b border-slate-100 pb-1.5">
-                                    <div className="flex items-center gap-1.5 font-bold text-slate-900">
-                                      <MapPin className="w-3.5 h-3.5 text-emerald-700" />
-                                      <span>प्रशासकीय व महसूल मंडळ</span>
-                                    </div>
-                                    <span className="text-[10px] font-bold text-slate-500">
-                                      गाव कोड: {parcel.villageCode || 'N/A'}
+                              {/* Vertical Divider */}
+                              <div className="hidden lg:block w-px h-7 bg-slate-200/80 shrink-0" />
+
+                              {/* 3. Survey & Potkharaba Specs */}
+                              <div className="flex items-center gap-2.5 min-w-[190px]">
+                                <div className="w-7 h-7 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center shrink-0 shadow-2xs">
+                                  <MapPin className="w-3.5 h-3.5" />
+                                </div>
+                                <div>
+                                  <div className="flex items-center gap-1.5 text-[11px] text-slate-700">
+                                    <span className="font-bold">गाव कोड:</span>{' '}
+                                    <span className="font-mono font-semibold">{parcel.villageCode || 'N/A'}</span>
+                                    <span className="text-slate-300">•</span>
+                                    <span className="font-bold">पोटखराब:</span>{' '}
+                                    <span className="font-mono font-semibold">
+                                      {potkharabaHa > 0 ? `${potkharabaHa.toFixed(4)} हे.` : 'निरंक'}
                                     </span>
                                   </div>
-                                  <div className="grid grid-cols-2 gap-1.5 text-[11px]">
-                                    <div>
-                                      <span className="text-slate-400">जिल्हा:</span>{' '}
-                                      <span className="font-bold text-slate-700">{parcel.district || 'Chandrapur'}</span>
-                                    </div>
-                                    <div>
-                                      <span className="text-slate-400">तालुका:</span>{' '}
-                                      <span className="font-bold text-slate-700">{parcel.taluka}</span>
-                                    </div>
-                                    <div>
-                                      <span className="text-slate-400">एकूण क्षेत्र:</span>{' '}
-                                      <span className="font-mono font-bold text-slate-800">
-                                        {areaHa.toFixed(4)} हे.
-                                      </span>
-                                    </div>
-                                    <div>
-                                      <span className="text-slate-400">पोटखराब:</span>{' '}
-                                      <span className="font-mono font-bold text-slate-800">
-                                        {potkharabaHa.toFixed(4)} हे.
-                                      </span>
-                                    </div>
-                                  </div>
+                                  <p className="text-[11px] text-slate-500 mt-0.5">
+                                    {parcel.district || 'चंद्रपूर'} • {parcel.taluka}
+                                  </p>
                                 </div>
+                              </div>
+
+                              {/* Vertical Divider */}
+                              <div className="hidden lg:block w-px h-7 bg-slate-200/80 shrink-0" />
+
+                              {/* 4. Quick Action Buttons */}
+                              <div className="flex items-center gap-1.5 shrink-0 self-end lg:self-auto">
+                                <button
+                                  type="button"
+                                  onClick={() => setSelectedUpi(parcel.upi)}
+                                  className="inline-flex items-center gap-1 text-[11px] font-bold text-blue-900 bg-white hover:bg-blue-50 border border-blue-200 hover:border-blue-300 px-2.5 py-1.5 rounded-lg transition shadow-2xs active:scale-95"
+                                >
+                                  <Eye className="w-3 h-3 text-blue-700" />
+                                  <span>३६०° साखळी</span>
+                                </button>
+                                {hasDispute && activeCase && (
+                                  <Link
+                                    href={`/cases?search=${encodeURIComponent(activeCase.caseNumber)}`}
+                                    className="inline-flex items-center gap-1 text-[11px] font-bold text-rose-800 bg-white hover:bg-rose-50 border border-rose-200 hover:border-rose-300 px-2.5 py-1.5 rounded-lg transition shadow-2xs active:scale-95"
+                                  >
+                                    <span>केस तपशील</span>
+                                    <ExternalLink className="w-2.5 h-2.5" />
+                                  </Link>
+                                )}
                               </div>
                             </div>
                           </td>
