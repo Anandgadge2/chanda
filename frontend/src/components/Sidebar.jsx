@@ -109,7 +109,7 @@ export default function Sidebar({
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         className={clsx(
-          'flex-shrink-0 hidden lg:block transition-[width] duration-300 ease-out z-30',
+          'flex-shrink-0 hidden lg:block transition-[width] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] will-change-[width] z-30',
           effectiveCollapsed ? 'w-[72px]' : 'w-64'
         )}
       >
@@ -117,7 +117,7 @@ export default function Sidebar({
           {/* Header Row: Title & Collapse Toggle */}
           <div className="h-10 flex items-center mb-1">
             {effectiveCollapsed ? (
-              <div className="w-10 h-10 mx-auto flex items-center justify-center">
+              <div className="relative group w-10 h-10 mx-auto flex items-center justify-center">
                 <button
                   onClick={onToggleCollapse}
                   title="साइडबार कायम उघडा ठेवा (पिन करा)"
@@ -126,6 +126,12 @@ export default function Sidebar({
                 >
                   <PanelLeftClose className="w-4 h-4 rotate-180 text-blue-900 scale-110" />
                 </button>
+                {!isHovered && (
+                  <div className="absolute left-full ml-3 top-1/2 -translate-y-1/2 px-2.5 py-1.5 bg-slate-900 text-white rounded-lg shadow-xl opacity-0 pointer-events-none group-hover:opacity-100 transition-all duration-150 z-50 whitespace-nowrap text-xs font-medium border border-slate-800 -translate-x-1 group-hover:translate-x-0">
+                    <div className="absolute top-1/2 -translate-y-1/2 -left-1 w-2 h-2 bg-slate-900 border-l border-b border-slate-800 rotate-45" />
+                    <span>साइडबार उघडा</span>
+                  </div>
+                )}
               </div>
             ) : (
               <div className="w-full flex items-center justify-between px-2">
