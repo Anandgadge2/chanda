@@ -54,12 +54,13 @@ enum DMSDocType {
 enum UserRole {
   SUPERADMIN
   COLLECTOR          // जिल्हाधिकारी — Apex authority
-  SDO                // उपविभागीय अधिकारी — Sub-Divisional Officer
+  SUB_COLLECTOR      // उपजिल्हाधिकारी / अपर जिल्हाधिकारी
+  SDO                // उपविभागीय अधिकारी — Sub-Divisional Officer / प्रांत
   TEHSILDAR          // तहसीलदार
   NAIB_TEHSILDAR     // नायब तहसीलदार
-  TALATHI            // तलाठी — Village-level data entry
-  CIRCLE_OFFICER     // महसूल मंडळ अधिकारी
-  CITIZEN            // नागरिक — Public read-only
+  CIRCLE_OFFICER     // महसूल मंडळ अधिकारी (Circle Officer)
+  TALATHI            // तलाठी — Village-level revenue officer
+  CITIZEN            // नागरिक — Legacy (internal portal only)
 }
 
 // -------------------------------------------------------------
@@ -387,3 +388,52 @@ model AuditLog {
   @@index([createdAt(sort: Desc)], name: "idx_audit_created")
   @@map("audit_logs")
 }
+
+// -------------------------------------------------------------
+// STATUTORY PRAPATRA 1 TO 5 ROLLUPS (District & Taluka Summary)
+// -------------------------------------------------------------
+
+model PrapatraRollup {
+  id                     String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  district               String    @default("Chandrapur") @db.VarChar(64)
+  taluka                 String    @db.VarChar(64)
+  villageName            String?   @map("village_name") @db.VarChar(128)
+  
+  // Prapatra 1 (1950 Baseline & Illegal Deletions)
+  total712Count          Int       @default(0) @map("total_712_count")
+  inspected1950Count     Int       @default(0) @map("inspected_1950_count")
+  govtFound1950Count     Int       @default(0) @map("govt_found_1950_count")
+  illegalDeletionsCount  Int       @default(0) @map("illegal_deletions_count")
+  rectifiedCount         Int       @default(0) @map("rectified_count")
+  pendingRectifyCount    Int       @default(0) @map("pending_rectify_count")
+  
+  // Prapatra 2 (Pokalist Nondi)
+  pokalistCount          Int       @default(0) @map("pokalist_count")
+  pokalistRemovedCount   Int       @default(0) @map("pokalist_removed_count")
+  pokalistPendingCount   Int       @default(0) @map("pokalist_pending_count")
+  
+  // Prapatra 3 (Govt Depts & Corporations Allotments)
+  govtDeptsAllottedCount Int       @default(0) @map("govt_depts_allotted_count")
+  govtDeptsShartbhang    Int       @default(0) @map("govt_depts_shartbhang")
+  govtDeptsRestoredGovt  Int       @default(0) @map("govt_depts_restored_govt")
+  
+  // Prapatra 4 (Private Societies, Trusts, Individuals)
+  privateAllottedCount   Int       @default(0) @map("private_allotted_count")
+  privateShartbhang      Int       @default(0) @map("private_shartbhang")
+  privateRestoredGovt    Int       @default(0) @map("private_restored_govt")
+  
+  // Prapatra 5 (Comprehensive Govt Lands)
+  totalGovtLandCount     Int       @default(0) @map("total_govt_land_count")
+  govtAllottedCount      Int       @default(0) @map("govt_allotted_count")
+  govtShartbhangCount    Int       @default(0) @map("govt_shartbhang_count")
+  govtEncroachedCount    Int       @default(0) @map("govt_encroached_count")
+  govtMojaniDoneCount    Int       @default(0) @map("govt_mojani_done_count")
+  
+  remarks                String?   @db.Text
+  updatedAt              DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@unique([district, taluka, villageName], name: "idx_prapatra_rollup_unique")
+  @@index([taluka], name: "idx_prapatra_taluka")
+  @@map("prapatra_rollups")
+}
+

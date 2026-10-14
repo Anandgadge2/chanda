@@ -16,6 +16,75 @@ export const CHANDRAPUR_TALUKAS = [
   { id: 'Jivati', nameMr: 'जिवती', nameEn: 'Jivati' },
 ];
 
+/**
+ * Revenue Administration Hierarchy of Collectorate (Apex to Grassroots)
+ */
+export const REVENUE_OFFICER_ROLES = [
+  {
+    role: 'COLLECTOR',
+    rank: 1,
+    titleMr: 'जिल्हाधिकारी (Collector)',
+    titleEn: 'District Collector & District Magistrate',
+    jurisdiction: 'संपूर्ण चंद्रपूर जिल्हा (Apex Authority)',
+    badgeClass: 'bg-rose-50 text-rose-700 border-rose-300',
+    description: 'जिल्हा महसूल प्रमुख, अपीलीय अधिकारी, शासन जमा व अंतिम महसूल आदेश प्राधिकरण.',
+  },
+  {
+    role: 'SUB_COLLECTOR',
+    rank: 2,
+    titleMr: 'उपजिल्हाधिकारी / अपर जिल्हाधिकारी',
+    titleEn: 'Sub-Collector / Additional Collector',
+    jurisdiction: 'जिल्हा मुख्यालय (Collectorate HQ)',
+    badgeClass: 'bg-purple-50 text-purple-700 border-purple-300',
+    description: 'भूसंपादन, पुनर्वसन, अकृषिक (NA) संनियंत्रण व महसूल समन्वय.',
+  },
+  {
+    role: 'SDO',
+    rank: 3,
+    titleMr: 'उपविभागीय अधिकारी (SDO / प्रांत)',
+    titleEn: 'Sub-Divisional Officer (SDO / Prant)',
+    jurisdiction: 'उपविभाग (Sub-Division)',
+    badgeClass: 'bg-blue-50 text-blue-700 border-blue-300',
+    description: 'अर्ध-न्यायिक महसूल न्यायालय (MLRC कलम ३६, ३६अ, ४४, ४५ सुनावणी व आदेश).',
+  },
+  {
+    role: 'TEHSILDAR',
+    rank: 4,
+    titleMr: 'तहसीलदार (Tehsildar)',
+    titleEn: 'Tehsildar (Taluka Executive Magistrate)',
+    jurisdiction: 'तालुका (Taluka Scope)',
+    badgeClass: 'bg-emerald-50 text-emerald-700 border-emerald-300',
+    description: 'तालुका महसूल प्रशासन, अतिक्रमण निष्कासन, फेरफार अपील व वसुली.',
+  },
+  {
+    role: 'NAIB_TEHSILDAR',
+    rank: 5,
+    titleMr: 'नायब तहसीलदार (Naib Tehsildar)',
+    titleEn: 'Naib Tehsildar',
+    jurisdiction: 'तालुका / मंडळ प्रभार',
+    badgeClass: 'bg-amber-50 text-amber-700 border-amber-300',
+    description: 'फेरफार नोंदी प्रमाणीकरण (Certification of Mutations) व तपासणी.',
+  },
+  {
+    role: 'CIRCLE_OFFICER',
+    rank: 6,
+    titleMr: 'महसूल मंडळ अधिकारी (Circle Officer)',
+    titleEn: 'Revenue Circle Officer',
+    jurisdiction: 'महसूल मंडळ (Revenue Circle)',
+    badgeClass: 'bg-teal-50 text-teal-700 border-teal-300',
+    description: 'स्थळ पंचनामे, पीक पाहणी तपासणी व फेरफार चौकशी अहवाल.',
+  },
+  {
+    role: 'TALATHI',
+    rank: 7,
+    titleMr: 'तलाठी (Talathi / पटवारी)',
+    titleEn: 'Talathi (Village Revenue Officer)',
+    jurisdiction: 'सझा / गाव (Saja / Village)',
+    badgeClass: 'bg-indigo-50 text-indigo-700 border-indigo-300',
+    description: '७/१२, ८-अ, गाव नमुना ६ फेरफार नोंदवही व मूळ अभिलेख नोंदणी.',
+  },
+];
+
 export const TENURE_CLASSES = {
   BHOGVATDAR_CLASS_1: {
     labelMr: 'भोगवटादार वर्ग-१',

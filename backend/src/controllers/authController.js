@@ -230,15 +230,30 @@ export const register = async (req, res) => {
       });
     }
 
-    // Role restrictions: Only authenticated COLLECTOR can create officer roles
-    const officerRoles = ['COLLECTOR', 'SDO', 'TEHSILDAR', 'NAIB_TEHSILDAR', 'TALATHI', 'CIRCLE_OFFICER'];
-    if (officerRoles.includes(role)) {
-      if (!req.user || req.user.role !== 'COLLECTOR') {
-        return res.status(403).json({
-          success: false,
-          error: 'केवळ जिल्हाधिकारी नवीन महसूल अधिकाऱ्यांची नोंदणी करू शकतात. (Only Collector can register officers)',
-        });
-      }
+    // Internal portal: Open citizen registration is disabled.
+    // User accounts can only be provisioned internally by Collector or SuperAdmin.
+    if (!req.user || !['COLLECTOR', 'SUPERADMIN'].includes(req.user.role)) {
+      return res.status(403).json({
+        success: false,
+        error: 'हे पोर्टल केवळ जिल्हाधिकारी कार्यालय व महसूल विभागाच्या अंतर्गत वापरासाठी आहे. नवीन अधिकारी खाती केवळ जिल्हाधिकारी यांच्या मान्यतेने तयार केली जाऊ शकतात. (Internal portal: Open registration disabled. Only Collector can provision officer accounts)',
+      });
+    }
+
+    const validRoles = [
+      'SUPERADMIN',
+      'COLLECTOR',
+      'SUB_COLLECTOR',
+      'SDO',
+      'TEHSILDAR',
+      'NAIB_TEHSILDAR',
+      'CIRCLE_OFFICER',
+      'TALATHI',
+    ];
+    if (!validRoles.includes(role)) {
+      return res.status(400).json({
+        success: false,
+        error: 'अवैध पद/भूमिका. (Invalid officer role)',
+      });
     }
 
     const passwordHash = await bcrypt.hash(password, 12);

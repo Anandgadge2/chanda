@@ -349,6 +349,17 @@ export const api = {
     window.URL.revokeObjectURL(url);
   },
 
+  getBookletDownloadUrl: ({ type = 'ceiling', taluka = '', village = '', format = 'excel' } = {}) => {
+    const params = new URLSearchParams();
+    if (type) params.set('type', type);
+    if (taluka) params.set('taluka', taluka);
+    if (village) params.set('village', village);
+    const token = getAuthToken();
+    if (token) params.set('token', token);
+    const endpoint = format === 'pdf' ? 'export-pdf' : 'export-excel';
+    return `${BASE_URL}/api/booklets/${endpoint}?${params.toString()}`;
+  },
+
   downloadBookletPdf: async (params = {}) => {
     const cleanParams = Object.fromEntries(
       Object.entries(params).filter(([_, v]) => v !== '' && v !== null && v !== undefined)
@@ -452,5 +463,101 @@ export const api = {
     }
     return data;
   },
+
+  getPrapatraReport: async (id, query = {}) => {
+    const params = new URLSearchParams();
+    if (typeof query === 'string') {
+      params.append('taluka', query);
+    } else {
+      if (query.taluka) params.append('taluka', query.taluka);
+      if (query.village) params.append('village', query.village);
+      if (query.search) params.append('search', query.search);
+      if (query.filterType) params.append('filterType', query.filterType);
+    }
+    const res = await dedupedFetch(`${BASE_URL}/api/prapatra/${id}?${params.toString()}`);
+    if (!res.ok) {
+      throw new Error('प्रपत्र डेटा लोड करणे अयशस्वी झाले.');
+    }
+    return res.json();
+  },
+
+  getTalukaVillages: async (taluka = 'all') => {
+    const params = new URLSearchParams();
+    if (taluka) params.append('taluka', taluka);
+    const res = await dedupedFetch(`${BASE_URL}/api/prapatra/villages?${params.toString()}`);
+    if (!res.ok) {
+      throw new Error('गावांची यादी लोड करणे अयशस्वी झाले.');
+    }
+    return res.json();
+  },
+
+  updatePrapatraRollup: async (id, data) => {
+    const res = await fetch(`${BASE_URL}/api/prapatra/rollup/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        ...getAuthHeaders(),
+      },
+      body: JSON.stringify(data),
+    });
+    const resData = await res.json();
+    if (!res.ok) {
+      throw new Error(resData.error || 'अभिलेख अद्ययावत करणे अयशस्वी झाले.');
+    }
+    return resData;
+  },
+
+  uploadPrapatraExcel: async (formData) => {
+    const res = await fetch(`${BASE_URL}/api/prapatra/upload`, {
+      method: 'POST',
+      headers: {
+        // Do not set Content-Type header so browser sets multipart boundary automatically
+        Authorization: typeof window !== 'undefined' ? `Bearer ${localStorage.getItem('token') || ''}` : '',
+      },
+      body: formData,
+    });
+    const resData = await res.json();
+    if (!res.ok) {
+      throw new Error(resData.error || 'एक्सेल फाईल अपलोड करणे अयशस्वी झाले.');
+    }
+    return resData;
+  },
+
+  getPrapatraSummary: async () => {
+    const res = await dedupedFetch(`${BASE_URL}/api/prapatra/summary`);
+    if (!res.ok) {
+      throw new Error('जिल्हा सारांश लोड करणे अयशस्वी झाले.');
+    }
+    return res.json();
+  },
+
+  getPrapatraExcelUrl: (id, query = {}) => {
+    const params = new URLSearchParams();
+    params.append('format', 'excel');
+    if (typeof query === 'string') {
+      params.append('taluka', query);
+    } else {
+      if (query.taluka) params.append('taluka', query.taluka);
+      if (query.village) params.append('village', query.village);
+      if (query.search) params.append('search', query.search);
+      if (query.filterType) params.append('filterType', query.filterType);
+    }
+    return `${BASE_URL}/api/prapatra/${id}?${params.toString()}`;
+  },
+
+  getPrapatraPdfUrl: (id, query = {}) => {
+    const params = new URLSearchParams();
+    params.append('format', 'pdf');
+    if (typeof query === 'string') {
+      params.append('taluka', query);
+    } else {
+      if (query.taluka) params.append('taluka', query.taluka);
+      if (query.village) params.append('village', query.village);
+      if (query.search) params.append('search', query.search);
+      if (query.filterType) params.append('filterType', query.filterType);
+    }
+    return `${BASE_URL}/api/prapatra/${id}?${params.toString()}`;
+  },
 };
+
 

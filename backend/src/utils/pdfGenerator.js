@@ -146,3 +146,192 @@ function getWidthsForPdf(type) {
   }
   return [];
 }
+
+/**
+ * Generate Official Prapatra 1 to 5 PDF matching docs/1.pdf - docs/5.pdf
+ */
+export const generatePrapatraPdf = async (prapatraNum, records, scopeName, res) => {
+  let title = '';
+  let headers = [];
+  let widths = [];
+  let rowsMapper = null;
+
+  if (prapatraNum === 1) {
+    title = 'प्रपत्र क्र. १ - शासकीय जमिनींचे सन १९५० पासूनचे सर्व मूळ ७/१२ अभिलेखाची तपासणी करून त्यानुसार ७/१२ अभिलेख अद्यावत करण्याबाबत';
+    headers = [
+      'अ.क्र.', 'जिल्हा / तालुका / गाव', 'एकूण ७/१२ संख्या\n[२(अ)]', '१९५० पासून तपासणी\n[३(अ)]',
+      'सरकार नोंद\n७/१२ [४(अ)]', 'अवैधरीत्या सरकार\nनोंद कमी [५(अ)]', 'दुरुस्ती केलेले\n[६(अ)]', 'दुरुस्तीस शिल्लक\n[७(अ)]', 'शेरा'
+    ];
+    widths = [24, 180, 75, 75, 75, 75, 65, 65, 90];
+    rowsMapper = (r, i) => [
+      i + 1,
+      r.villageName && r.villageName !== 'संपूर्ण तालुका (All Villages)' ? r.villageName : (r.taluka || r.villageName || 'एकूण'),
+      r.total712Count || 0,
+      r.inspected1950Count || 0,
+      r.govtFound1950Count || 0,
+      r.illegalDeletionsCount || 0,
+      r.rectifiedCount || 0,
+      r.pendingRectifyCount || 0,
+      r.remarks || '-'
+    ];
+  } else if (prapatraNum === 2) {
+    title = 'प्रपत्र क्र. २ - पोकळीस्त नोंदींचा तपासणी अहवाल (Defunct/Hollow Entries Audit)';
+    headers = [
+      'अ.क्र.', 'जिल्हा / तालुका / गाव', 'एकूण ७/१२ संख्या', 'पोकळीस्त नोंद असलेले ७/१२',
+      'वगळण्यात आलेल्या नोंदी', 'वगळण्यास शिल्लक नोंदी', 'शेरा'
+    ];
+    widths = [30, 240, 95, 95, 95, 95, 100];
+    rowsMapper = (r, i) => [
+      i + 1,
+      r.villageName && r.villageName !== 'संपूर्ण तालुका (All Villages)' ? r.villageName : (r.taluka || r.villageName || 'एकूण'),
+      r.total712Count || 0,
+      r.pokalistCount || 0,
+      r.pokalistRemovedCount || 0,
+      r.pokalistPendingCount || 0,
+      r.remarks || '-'
+    ];
+  } else if (prapatraNum === 3) {
+    title = 'प्रपत्र क्र. ३ - शासकीय विभागांना विविध प्रयोजनार्थ वाटप केलेल्या जमिनींची तपासणी अहवाल';
+    headers = [
+      'अ.क्र.', 'जिल्हा / तालुका / गाव', 'शासकीय विभागांना वाटप जमीन', 'शर्तभंग झालेली जमीन',
+      'पुन्हा शासन जमा केलेली जमीन', 'शासन जमा प्रलंबित', 'शेरा'
+    ];
+    widths = [30, 240, 95, 95, 95, 95, 100];
+    rowsMapper = (r, i) => [
+      i + 1,
+      r.villageName && r.villageName !== 'संपूर्ण तालुका (All Villages)' ? r.villageName : (r.taluka || r.villageName || 'एकूण'),
+      r.govtDeptsAllottedCount || 0,
+      r.govtDeptsShartbhang || 0,
+      r.govtDeptsRestoredGovt || 0,
+      Math.max(0, (r.govtDeptsShartbhang || 0) - (r.govtDeptsRestoredGovt || 0)),
+      r.remarks || '-'
+    ];
+  } else if (prapatraNum === 4) {
+    title = 'प्रपत्र क्र. ४ - खाजगी व्यक्ती / संस्थांना वाटप केलेल्या शासकीय जमिनींची तपासणी अहवाल';
+    headers = [
+      'अ.क्र.', 'जिल्हा / तालुका / गाव', 'खाजगी व्यक्तींना वाटप जमीन', 'शर्तभंग झालेली जमीन',
+      'पुन्हा शासन जमा केलेली जमीन', 'शासन जमा प्रलंबित', 'शेरा'
+    ];
+    widths = [30, 240, 95, 95, 95, 95, 100];
+    rowsMapper = (r, i) => [
+      i + 1,
+      r.villageName && r.villageName !== 'संपूर्ण तालुका (All Villages)' ? r.villageName : (r.taluka || r.villageName || 'एकूण'),
+      r.privateAllottedCount || 0,
+      r.privateShartbhang || 0,
+      r.privateRestoredGovt || 0,
+      Math.max(0, (r.privateShartbhang || 0) - (r.privateRestoredGovt || 0)),
+      r.remarks || '-'
+    ];
+  } else {
+    title = 'प्रपत्र क्र. ५ - गायरान / शासकीय जमिनींवरील अतिक्रमणांची तपासणी अहवाल';
+    headers = [
+      'अ.क्र.', 'जिल्हा / तालुका / गाव', 'एकूण शासकीय / गायरान जमीन', 'अतिक्रमित जमीन',
+      'मोजणी झालेली जमीन', 'मोजणी शिल्लक जमीन', 'शेरा'
+    ];
+    widths = [30, 240, 95, 95, 95, 95, 100];
+    rowsMapper = (r, i) => [
+      i + 1,
+      r.villageName && r.villageName !== 'संपूर्ण तालुका (All Villages)' ? r.villageName : (r.taluka || r.villageName || 'एकूण'),
+      r.totalGovtLandCount || 0,
+      r.govtEncroachedCount || 0,
+      r.govtMojaniDoneCount || 0,
+      Math.max(0, (r.govtEncroachedCount || 0) - (r.govtMojaniDoneCount || 0)),
+      r.remarks || '-'
+    ];
+  }
+
+  const body = [];
+  body.push(headers.map(h => ({ text: h, style: 'tableHeader' })));
+
+  records.forEach((rec, idx) => {
+    const row = rowsMapper(rec, idx).map(v => ({
+      text: v !== null && v !== undefined ? v.toString() : '-',
+      style: 'tableCell'
+    }));
+    body.push(row);
+  });
+
+  const docDefinition = {
+    pageOrientation: 'landscape',
+    pageSize: 'A4',
+    pageMargins: [15, 15, 15, 15],
+    content: [
+      { text: 'महाराष्ट्र शासन - जिल्हाधिकारी कार्यालय, चंद्रपूर', style: 'mainHeader' },
+      { text: title, style: 'subHeader' },
+      {
+        columns: [
+          { text: `कार्यक्षेत्र: ${scopeName}`, style: 'metaText', bold: true },
+          { text: `दिनांक: ${new Date().toLocaleDateString('mr-IN')}`, style: 'metaText', alignment: 'right' }
+        ],
+        margin: [0, 0, 0, 8]
+      },
+      {
+        table: {
+          headerRows: 1,
+          widths,
+          body
+        },
+        layout: {
+          fillColor: function (rowIndex) {
+            return (rowIndex === 0) ? '#D9E1F2' : (rowIndex % 2 === 0 ? '#F9FAFB' : null);
+          },
+          hLineWidth: function () { return 0.5; },
+          vLineWidth: function () { return 0.5; },
+          hLineColor: function () { return '#BFBFBF'; },
+          vLineColor: function () { return '#BFBFBF'; },
+          paddingLeft: function () { return 3; },
+          paddingRight: function () { return 3; },
+          paddingTop: function () { return 3; },
+          paddingBottom: function () { return 3; }
+        }
+      },
+      {
+        margin: [0, 16, 0, 0],
+        columns: [
+          {
+            width: '*',
+            text: 'माहिती तयार करणाराचे नाव व पदनाम\n(तलाठी / महसूल सहाय्यक)\nदिनांक: ____________\nस्वाक्षरी: ____________',
+            style: 'sigText'
+          },
+          {
+            width: '*',
+            text: 'माहिती तपासणी करणाऱ्या अधिकाऱ्याचे नाव व पदनाम\n(मंडळ अधिकारी / नायब तहसीलदार)\nदिनांक: ____________\nस्वाक्षरी: ____________',
+            style: 'sigText',
+            alignment: 'center'
+          },
+          {
+            width: '*',
+            text: 'अंतिम मंजुरी / प्रमाणीकरण\n(उपविभागीय अधिकारी / तहसीलदार)\nदिनांक: ____________\nस्वाक्षरी: ____________',
+            style: 'sigText',
+            alignment: 'right'
+          }
+        ]
+      }
+    ],
+    styles: {
+      mainHeader: { fontSize: 13, bold: true, alignment: 'center', margin: [0, 0, 0, 2] },
+      subHeader: { fontSize: 10, bold: true, alignment: 'center', margin: [0, 0, 0, 4], color: '#1E3A8A' },
+      metaText: { fontSize: 8, color: '#374151' },
+      tableHeader: { bold: true, fontSize: 6.5, alignment: 'center', color: '#111827' },
+      tableCell: { fontSize: 6.5, alignment: 'center', color: '#1F2937' },
+      sigText: { fontSize: 8, bold: true, color: '#374151', lineHeight: 1.3 }
+    },
+    defaultStyle: {
+      font: 'Nirmala'
+    }
+  };
+
+  const pdf = pdfmake.createPdf(docDefinition);
+  const buffer = await pdf.getBuffer();
+
+  const timestamp = new Date().toISOString().slice(0, 10);
+  res.setHeader('Content-Type', 'application/pdf');
+  res.setHeader('Content-Disposition', `attachment; filename=Prapatra-${prapatraNum}_Chandrapur_${timestamp}.pdf`);
+
+  if (typeof res.send === 'function') {
+    res.send(buffer);
+  } else {
+    res.end(buffer);
+  }
+};
+

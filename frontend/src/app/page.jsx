@@ -13,10 +13,8 @@ import AuthModal from '../components/landing/AuthModal';
 
 export default function HomePage() {
   const [authModalOpen, setAuthModalOpen] = useState(false);
-  const [authModalTab, setAuthModalTab] = useState('login');
 
-  const handleOpenAuth = (tab = 'login') => {
-    setAuthModalTab(tab);
+  const handleOpenAuth = () => {
     setAuthModalOpen(true);
   };
 
@@ -50,11 +48,10 @@ export default function HomePage() {
       {/* Official Multi-Column Government Footer */}
       <LandingFooter />
 
-      {/* Officer Login & Citizen Register Modal */}
+      {/* Revenue Officer Internal Login Modal */}
       <AuthModal
         isOpen={authModalOpen}
         onClose={handleCloseAuth}
-        initialTab={authModalTab}
       />
     </div>
   );

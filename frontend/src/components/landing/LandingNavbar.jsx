@@ -83,23 +83,12 @@ export default function LandingNavbar({ onOpenAuth }) {
               <>
                 <button
                   type="button"
-                  onClick={() => onOpenAuth('register')}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-700 hover:text-blue-950 hover:bg-slate-100 border border-slate-300 transition shadow-2xs"
-                >
-                  <UserPlus className="w-3.5 h-3.5 text-blue-900" />
-                  <span>नागरिक नोंदणी</span>
-                </button>
-
-                <button
-                  type="button"
                   onClick={() => onOpenAuth('login')}
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-blue-950 bg-amber-400 hover:bg-amber-300 border border-amber-500/60 shadow-xs hover:shadow-md transition"
                 >
                   <Lock className="w-3.5 h-3.5 text-blue-950" />
                   <span>अधिकारी लॉगिन</span>
                 </button>
-
-               
               </>
             )}
             <Link
@@ -253,18 +242,9 @@ export default function LandingNavbar({ onOpenAuth }) {
                 <button
                   onClick={() => {
                     setMobileMenuOpen(false);
-                    onOpenAuth('register');
-                  }}
-                  className="w-full py-2.5 rounded-xl text-center font-semibold text-slate-700 bg-slate-100 border border-slate-300 text-xs"
-                >
-                  नागरिक नोंदणी
-                </button>
-                <button
-                  onClick={() => {
-                    setMobileMenuOpen(false);
                     onOpenAuth('login');
                   }}
-                  className="w-full py-2.5 rounded-xl text-center font-bold text-blue-950 bg-amber-400 text-xs"
+                  className="w-full py-2.5 rounded-xl text-center font-bold text-blue-950 bg-amber-400 text-xs shadow-xs"
                 >
                   अधिकारी लॉगिन
                 </button>

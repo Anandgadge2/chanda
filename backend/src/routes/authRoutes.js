@@ -15,9 +15,9 @@ const router = Router();
 
 // Public routes
 router.post('/login', login);
-router.post('/register', register);
 
 // Authenticated routes
+router.post('/register', authenticate, register);
 router.get('/me', authenticate, getMe);
 router.post('/logout', authenticate, logout);
 router.put('/profile', authenticate, updateProfile);

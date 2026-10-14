@@ -73,3 +73,14 @@ uploads/
 .postman/
 postman/
 
+# ==========================================
+# Raw Government Workbooks & Heavy Payloads
+# ==========================================
+data/all_talukas_raw/
+data/gondpipri_real_data/
+data/test_exports/
+data/test_samples/
+data/all_talukas_parcels.json
+data/gondpipri_cleaned_payload.json
+
+
