@@ -110,6 +110,10 @@ export const getPrapatraReport = async (req, res) => {
       village = 'all',
       search = '',
       filterType = 'all',
+      tenure = 'all',
+      violation = 'all',
+      landStatus = 'all',
+      areaRange = 'all',
       format = 'json',
       booklet = 'false'
     } = req.query;
@@ -204,19 +208,88 @@ export const getPrapatraReport = async (req, res) => {
       ];
     }
 
+    // Tenure Class Filter
+    if (tenure && tenure !== 'all') {
+      parcelWhere.tenureClass = tenure;
+    }
+
+    // Area Range Filter
+    if (areaRange && areaRange !== 'all') {
+      if (areaRange === 'under1') {
+        parcelWhere.totalAreaHa = { lte: 1.0 };
+      } else if (areaRange === '1to5') {
+        parcelWhere.totalAreaHa = { gt: 1.0, lte: 5.0 };
+      } else if (areaRange === '5to10') {
+        parcelWhere.totalAreaHa = { gt: 5.0, lte: 10.0 };
+      } else if (areaRange === 'above10') {
+        parcelWhere.totalAreaHa = { gt: 10.0 };
+      }
+    }
+
     if (search && search.trim()) {
       const s = search.trim();
       const searchConditions = [
         { villageName: { contains: s, mode: 'insensitive' } },
         { gatNumber: { contains: s, mode: 'insensitive' } },
         { oldSurveyNo: { contains: s, mode: 'insensitive' } },
-        { upi: { contains: s, mode: 'insensitive' } }
+        { upi: { contains: s, mode: 'insensitive' } },
+        { metadata: { path: ['ownerName'], string_contains: s } },
+        { metadata: { path: ['otherRights'], string_contains: s } }
       ];
       if (parcelWhere.OR) {
         parcelWhere.AND = [{ OR: parcelWhere.OR }, { OR: searchConditions }];
         delete parcelWhere.OR;
       } else {
         parcelWhere.OR = searchConditions;
+      }
+    }
+
+    // Violation Filter
+    if (violation && violation !== 'all') {
+      const vConditions = [];
+      if (violation === 'shartbhang') {
+        vConditions.push(
+          { metadata: { path: ['flags', 'isShartbhang'], equals: true } },
+          { forwardCases: { some: { violationType: 'SHARTBHANG' } } }
+        );
+      } else if (violation === 'illegalConversion') {
+        vConditions.push(
+          { metadata: { path: ['flags', 'isShartbhang'], equals: true } },
+          { forwardCases: { some: { violationType: 'UNAUTHORIZED_NA_CONVERSION' } } }
+        );
+      } else if (violation === 'illegalDeletion') {
+        vConditions.push(
+          { metadata: { path: ['flags', 'isIllegalDeletion'], equals: true } },
+          { forwardCases: { some: { violationType: 'GOVERNMENT_NAME_MISSING' } } }
+        );
+      } else if (violation === 'pokalist') {
+        vConditions.push(
+          { metadata: { path: ['flags', 'isPokalist'], equals: true } },
+          { forwardCases: { some: { violationType: 'POKALIST_NONDI' } } },
+          { metadata: { path: ['otherRights'], string_contains: 'बु.ग.दे' } }
+        );
+      } else if (violation === 'tribalViolation') {
+        vConditions.push(
+          { metadata: { path: ['flags', 'isTribal'], equals: true } },
+          { forwardCases: { some: { violationType: 'TRIBAL_LAND_VIOLATION' } } },
+          { metadata: { path: ['otherRights'], string_contains: 'आदिवासी' } }
+        );
+      } else if (violation === 'encroachment') {
+        vConditions.push(
+          { metadata: { path: ['flags', 'isEncroached'], equals: true } },
+          { forwardCases: { some: { violationType: 'ENCROACHMENT' } } }
+        );
+      }
+
+      if (vConditions.length > 0) {
+        if (parcelWhere.AND) {
+          parcelWhere.AND.push({ OR: vConditions });
+        } else if (parcelWhere.OR) {
+          parcelWhere.AND = [{ OR: parcelWhere.OR }, { OR: vConditions }];
+          delete parcelWhere.OR;
+        } else {
+          parcelWhere.OR = vConditions;
+        }
       }
     }
 
@@ -557,44 +630,64 @@ export const getTalukaVillages = async (req, res) => {
     const { taluka = 'all' } = req.query;
     const targetTaluka = TALUKA_ALIASES[taluka?.toLowerCase()] || taluka;
 
-    const where = {
+    const rollupWhere = {
       villageName: { not: 'संपूर्ण तालुका (All Villages)' }
     };
+    const parcelWhere = {};
 
     if (taluka && taluka !== 'all' && taluka !== 'सर्व तालुके') {
-      where.taluka = { equals: targetTaluka, mode: 'insensitive' };
+      rollupWhere.taluka = { equals: targetTaluka, mode: 'insensitive' };
+      parcelWhere.taluka = { equals: targetTaluka, mode: 'insensitive' };
     }
 
-    const records = await prisma.prapatraRollup.findMany({
-      where,
-      select: {
-        id: true,
-        taluka: true,
-        villageName: true,
-        total712Count: true,
-        govtFound1950Count: true,
-        illegalDeletionsCount: true,
-        pokalistCount: true,
-        govtEncroachedCount: true,
-        govtShartbhangCount: true
-      },
-      orderBy: [{ villageName: 'asc' }]
-    });
+    const [rollupRecords, parcelRecords] = await Promise.all([
+      prisma.prapatraRollup.findMany({
+        where: rollupWhere,
+        select: {
+          id: true,
+          taluka: true,
+          villageName: true,
+          total712Count: true,
+          govtFound1950Count: true,
+          illegalDeletionsCount: true,
+          pokalistCount: true,
+          govtEncroachedCount: true,
+          govtShartbhangCount: true
+        },
+        orderBy: [{ villageName: 'asc' }]
+      }),
+      prisma.landParcel.findMany({
+        where: parcelWhere,
+        select: {
+          taluka: true,
+          villageName: true
+        },
+        distinct: ['villageName']
+      })
+    ]);
 
     // Clean village names and deduplicate
     const seen = new Set();
     const cleanVillages = [];
-    for (const r of records) {
+
+    const allRecords = [...parcelRecords, ...rollupRecords];
+    for (const r of allRecords) {
+      if (!r.villageName || r.villageName === 'Unspecified') continue;
       const cName = cleanVillageName(r.villageName);
-      if (cName && !seen.has(`${r.taluka}-${cName}`)) {
-        seen.add(`${r.taluka}-${cName}`);
+      if (cName && cName !== 'अज्ञात गाव' && !seen.has(cName.toLowerCase())) {
+        seen.add(cName.toLowerCase());
         cleanVillages.push({
-          ...r,
+          id: r.id || `${r.taluka}-${cName}`,
+          taluka: r.taluka || targetTaluka,
+          villageName: cName,
           originalVillageName: r.villageName,
-          villageName: cName
+          total712Count: r.total712Count || 0
         });
       }
     }
+
+    // Sort Marathi village names alphabetically
+    cleanVillages.sort((a, b) => a.villageName.localeCompare(b.villageName, 'mr'));
 
     return res.status(200).json({
       success: true,

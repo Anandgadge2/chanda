@@ -15,10 +15,12 @@ import {
   X,
   ShieldCheck,
   Building2,
-  ChevronRight,
   Eye,
   SlidersHorizontal,
-  Info
+  Info,
+  Scale,
+  AlertTriangle,
+  Compass
 } from 'lucide-react';
 import { CHANDRAPUR_TALUKAS } from '../../lib/constants';
 import { api } from '../../lib/api';
@@ -28,10 +30,13 @@ function cleanVillageName(name) {
   if (!name) return 'अज्ञात गाव';
   if (name === 'संपूर्ण तालुका (All Villages)' || name === 'all' || name === 'सर्व गावे') return name;
   let raw = String(name);
-  raw = raw.replace(/1\s*[-तते]\s*4[56]/gi, '');
-  raw = raw.replace(/4[56]\s*[-तते]\s*1/gi, '');
-  raw = raw.replace(/1-46/gi, '');
-  raw = raw.replace(/4[56]\s*मद[दत]?/gi, '');
+  raw = raw.replace(/[1१]\s*[-तते]\s*[4४][56५६]/gi, '');
+  raw = raw.replace(/[4४][56५६]\s*[-तते]\s*[1१]/gi, '');
+  raw = raw.replace(/[1१]\s*[-तते]\s*[1-9१-९]+/gi, '');
+  raw = raw.replace(/[1-9१-९]+\s*[-तते]\s*[1-9१-९]+/gi, '');
+  raw = raw.replace(/1-46|१-४६|1-45|१-४५/gi, '');
+  raw = raw.replace(/१ त ४५|१ ते ४६|1 to 46|1 to 45/gi, '');
+  raw = raw.replace(/[4४][56५६]\s*मद[दत]?/gi, '');
   raw = raw.replace(/मद[दत]?\s+/gi, '');
   raw = raw.replace(/मदयच/gi, '');
   raw = raw.replace(/महसल\s*अधकर\s*अभलख/gi, '');
@@ -72,11 +77,16 @@ export default function ReportsPage() {
   const [activeTab, setActiveTab] = useState('checklist');
   const [selectedCatId, setSelectedCatId] = useState(1);
 
-  // Filters
+  // Administrative Filters
   const [taluka, setTaluka] = useState('all');
   const [village, setVillage] = useState('all');
   const [villageOptions, setVillageOptions] = useState([]);
   const [search, setSearch] = useState('');
+
+  // Additional Detailed Filters
+  const [tenureFilter, setTenureFilter] = useState('all');
+  const [violationFilter, setViolationFilter] = useState('all');
+  const [areaRangeFilter, setAreaRangeFilter] = useState('all');
 
   // View state: 'parcels' (Detailed Actual Records with Owner Names) vs 'summary' (Rollup Table)
   const [activeView, setActiveView] = useState('parcels');
@@ -114,6 +124,9 @@ export default function ReportsPage() {
         taluka,
         village,
         search,
+        tenure: tenureFilter,
+        violation: violationFilter,
+        areaRange: areaRangeFilter,
         booklet: activeTab === 'categories' ? 'true' : 'false'
       });
       setSummaryData(res.data || []);
@@ -125,7 +138,7 @@ export default function ReportsPage() {
     } finally {
       setLoading(false);
     }
-  }, [activeTab, selectedCatId, taluka, village, search]);
+  }, [activeTab, selectedCatId, taluka, village, search, tenureFilter, violationFilter, areaRangeFilter]);
 
   useEffect(() => {
     loadData();
@@ -148,7 +161,12 @@ export default function ReportsPage() {
       if (p.tenureClass === 'BHOGVATDAR_CLASS_2' || p.tenureDisplay?.includes('वर्ग-२')) {
         class2Count++;
       }
-      if (p.statusFinding?.includes('शर्तभंग') || p.statusFinding?.includes('अवैध') || p.points?.[37] === 'होय') {
+      if (
+        p.statusFinding?.includes('शर्तभंग') ||
+        p.statusFinding?.includes('अवैध') ||
+        p.points?.[37] === 'होय' ||
+        p.points?.[36]?.includes('होय')
+      ) {
         shartbhangCount++;
       }
     });
@@ -173,23 +191,46 @@ export default function ReportsPage() {
     taluka,
     village,
     search,
+    tenure: tenureFilter,
+    violation: violationFilter,
+    areaRange: areaRangeFilter,
     booklet: activeTab === 'categories' ? 'true' : 'false'
   });
   const pdfDownloadUrl = api.getPrapatraPdfUrl(currentReportId, {
     taluka,
     village,
     search,
+    tenure: tenureFilter,
+    violation: violationFilter,
+    areaRange: areaRangeFilter,
     booklet: activeTab === 'categories' ? 'true' : 'false'
   });
 
+  const hasActiveFilters =
+    taluka !== 'all' ||
+    village !== 'all' ||
+    search !== '' ||
+    tenureFilter !== 'all' ||
+    violationFilter !== 'all' ||
+    areaRangeFilter !== 'all';
+
+  const resetFilters = () => {
+    setTaluka('all');
+    setVillage('all');
+    setSearch('');
+    setTenureFilter('all');
+    setViolationFilter('all');
+    setAreaRangeFilter('all');
+  };
+
   return (
     <div className="min-h-screen bg-slate-50/70 p-4 sm:p-6 lg:p-8 font-sans text-slate-800">
-      <div className="max-w-7xl mx-auto space-y-5">
+      <div className="max-w-7xl mx-auto space-y-4">
         
         {/* =========================================================
             HEADER & ACTIONS
         ========================================================= */}
-        <header className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <header className="bg-white border border-slate-200/80 rounded-2xl p-4 sm:p-5 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div className="space-y-1">
             <div className="flex items-center gap-2.5">
               <span className="p-2 bg-blue-50 text-blue-800 rounded-xl border border-blue-100">
@@ -200,7 +241,7 @@ export default function ReportsPage() {
                   महसूल तपासणी अहवाल व प्रपत्रे
                 </h1>
                 <p className="text-xs text-slate-500 font-medium">
-                  Revenue Inspection & Statutory Audit Booklets | चंद्रपूर जिल्हा
+                  Revenue Inspection & Statutory Audit Booklets | जिल्हाधिकारी कार्यालय, चंद्रपूर
                 </p>
               </div>
             </div>
@@ -260,7 +301,7 @@ export default function ReportsPage() {
               <ShieldCheck className="w-4 h-4" />
               <span>१ ते ४६ मुद्द्यांची तपासणी सूची</span>
               <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 font-mono">
-                Master Booklet
+                Master Checklist
               </span>
             </button>
 
@@ -283,120 +324,192 @@ export default function ReportsPage() {
         </div>
 
         {/* =========================================================
-            CATEGORY SELECTOR (IF IN CATEGORIES TAB)
+            PROPER CATEGORY DROPDOWN SELECTOR (REPLACED BLOCKS)
         ========================================================= */}
         {activeTab === 'categories' && (
-          <div className="bg-white border border-slate-200/80 rounded-2xl p-4 shadow-xs">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-black bg-blue-100 text-blue-800 px-2 py-0.5 rounded-md">
-                  प्रपत्र क्र. {currentCategory.id}
-                </span>
-                <h3 className="text-sm font-bold text-slate-900">{currentCategory.nameMr}</h3>
-              </div>
-              <span className="text-xs text-slate-500 hidden sm:inline">{currentCategory.desc}</span>
+          <div className="bg-white border border-slate-200/80 rounded-2xl p-3.5 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
+            <div className="flex items-center gap-2.5 flex-1 w-full">
+              <label className="text-xs font-bold text-slate-700 shrink-0 flex items-center gap-1.5">
+                <Compass className="w-4 h-4 text-blue-600" />
+                <span>प्रपत्र / विषय निवडा:</span>
+              </label>
+              <select
+                value={selectedCatId}
+                onChange={e => setSelectedCatId(Number(e.target.value))}
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer shadow-2xs"
+              >
+                {STATUTORY_CATEGORIES.map(cat => (
+                  <option key={cat.id} value={cat.id}>
+                    प्रपत्र क्र. {cat.id}: {cat.nameMr} — {cat.desc}
+                  </option>
+                ))}
+              </select>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
-              {STATUTORY_CATEGORIES.map(cat => {
-                const isSelected = selectedCatId === cat.id;
-                return (
-                  <button
-                    key={cat.id}
-                    onClick={() => setSelectedCatId(cat.id)}
-                    className={`p-2 rounded-xl text-left text-xs font-semibold transition border cursor-pointer ${
-                      isSelected
-                        ? 'bg-blue-50 border-blue-500 text-blue-900 shadow-2xs font-bold'
-                        : 'bg-slate-50/60 border-slate-200/80 text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-mono text-slate-400">#{cat.id}</span>
-                      {isSelected && <span className="w-1.5 h-1.5 rounded-full bg-blue-600" />}
-                    </div>
-                    <div className="truncate mt-0.5" title={cat.nameMr}>
-                      {cat.nameMr}
-                    </div>
-                  </button>
-                );
-              })}
+            <div className="shrink-0 flex items-center gap-2">
+              <span className="text-xs font-bold bg-blue-100 text-blue-900 px-2.5 py-1 rounded-lg">
+                प्रपत्र क्र. {currentCategory.id}
+              </span>
+              <span className="text-xs text-slate-500 font-medium hidden lg:inline">
+                {currentCategory.desc}
+              </span>
             </div>
           </div>
         )}
 
         {/* =========================================================
-            MINIMALIST HORIZONTAL FILTER BAR
+            COMPREHENSIVE MULTI-FILTER SUITE
         ========================================================= */}
-        <div className="bg-white border border-slate-200/80 rounded-2xl p-3.5 shadow-xs flex flex-wrap items-center justify-between gap-3">
-          <div className="flex flex-wrap items-center gap-2.5 flex-1">
-            {/* Taluka Selector */}
-            <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5">
-              <Building2 className="w-3.5 h-3.5 text-slate-400" />
-              <select
-                value={taluka}
-                onChange={e => {
-                  setTaluka(e.target.value);
-                  setVillage('all');
-                }}
-                className="bg-transparent text-xs font-bold text-slate-800 outline-hidden cursor-pointer"
-              >
-                <option value="all">सर्व तालुके (All 15 Talukas)</option>
-                {CHANDRAPUR_TALUKAS.map(t => (
-                  <option key={t.id} value={t.name}>
-                    {t.nameMr} ({t.name})
-                  </option>
-                ))}
-              </select>
+        <div className="bg-white border border-slate-200/80 rounded-2xl p-4 shadow-xs space-y-3">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+            <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700">
+              <SlidersHorizontal className="w-3.5 h-3.5 text-blue-600" />
+              <span>तपासणी निकष व फिल्टर्स (Advanced Audit Filters)</span>
             </div>
 
-            {/* Village Selector */}
-            <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5">
-              <LandPlot className="w-3.5 h-3.5 text-slate-400" />
-              <select
-                value={village}
-                onChange={e => setVillage(e.target.value)}
-                className="bg-transparent text-xs font-bold text-slate-800 outline-hidden cursor-pointer max-w-[200px]"
+            {hasActiveFilters && (
+              <button
+                onClick={resetFilters}
+                className="text-xs text-rose-600 hover:text-rose-800 font-bold px-2 py-1 rounded-lg hover:bg-rose-50 transition cursor-pointer flex items-center gap-1"
               >
-                <option value="all">सर्व गावे (All Villages)</option>
-                {villageOptions.map((v, i) => (
-                  <option key={i} value={v}>
-                    {cleanVillageName(v)}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Search Input */}
-            <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 flex-1 min-w-[200px]">
-              <Search className="w-3.5 h-3.5 text-slate-400" />
-              <input
-                type="text"
-                placeholder="गट क्र. / स.नं. / खातेदाराचे नाव शोधा..."
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-                className="bg-transparent text-xs text-slate-800 outline-hidden w-full placeholder:text-slate-400 font-medium"
-              />
-              {search && (
-                <button onClick={() => setSearch('')} className="text-slate-400 hover:text-slate-600">
-                  <X className="w-3.5 h-3.5" />
-                </button>
-              )}
-            </div>
+                <X className="w-3.5 h-3.5" />
+                <span>सर्व फिल्टर्स रीसेट करा</span>
+              </button>
+            )}
           </div>
 
-          {/* Reset Filters */}
-          {(taluka !== 'all' || village !== 'all' || search) && (
-            <button
-              onClick={() => {
-                setTaluka('all');
-                setVillage('all');
-                setSearch('');
-              }}
-              className="text-xs text-slate-500 hover:text-slate-800 font-bold px-2.5 py-1.5 rounded-lg hover:bg-slate-100 transition cursor-pointer"
-            >
-              फिल्टर साफ करा
-            </button>
-          )}
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2.5">
+            {/* 1. Taluka Dropdown */}
+            <div className="space-y-1">
+              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">तालुका</label>
+              <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5">
+                <Building2 className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                <select
+                  value={taluka}
+                  onChange={e => {
+                    setTaluka(e.target.value);
+                    setVillage('all');
+                  }}
+                  className="bg-transparent text-xs font-bold text-slate-800 outline-none w-full cursor-pointer"
+                >
+                  <option value="all">सर्व तालुके (15 Talukas)</option>
+                  {CHANDRAPUR_TALUKAS.map(t => (
+                    <option key={t.id} value={t.id}>
+                      {t.nameMr} ({t.nameEn})
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* 2. Village Dropdown (Properly fixed, no [object Object]) */}
+            <div className="space-y-1">
+              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                गाव {villageOptions.length > 0 ? `(${villageOptions.length})` : ''}
+              </label>
+              <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5">
+                <LandPlot className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                <select
+                  value={village}
+                  onChange={e => setVillage(e.target.value)}
+                  className="bg-transparent text-xs font-bold text-slate-800 outline-none w-full cursor-pointer"
+                >
+                  <option value="all">सर्व गावे (All Villages)</option>
+                  {villageOptions.map((v, i) => {
+                    const vName = typeof v === 'object' ? (v.villageName || v.name) : v;
+                    const vVal = typeof v === 'object' ? (v.villageName || v.originalVillageName || v.name) : v;
+                    const cleanV = cleanVillageName(vName);
+                    if (!cleanV || cleanV === 'अज्ञात गाव') return null;
+                    return (
+                      <option key={i} value={vVal}>
+                        {cleanV} {v.total712Count ? `(${v.total712Count})` : ''}
+                      </option>
+                    );
+                  })}
+                </select>
+              </div>
+            </div>
+
+            {/* 3. Tenure Class Filter */}
+            <div className="space-y-1">
+              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">धारणा प्रकार</label>
+              <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5">
+                <Scale className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                <select
+                  value={tenureFilter}
+                  onChange={e => setTenureFilter(e.target.value)}
+                  className="bg-transparent text-xs font-bold text-slate-800 outline-none w-full cursor-pointer"
+                >
+                  <option value="all">सर्व धारणा प्रकार</option>
+                  <option value="BHOGVATDAR_CLASS_1">भोगवटादार वर्ग-१</option>
+                  <option value="BHOGVATDAR_CLASS_2">भोगवटादार वर्ग-२</option>
+                  <option value="SARKAR_SHASAN">शासकीय जमीन</option>
+                  <option value="DEVASTHAN_INAM">देवस्थान / इनाम</option>
+                  <option value="FOREST_JANGAL">वन जमीन</option>
+                </select>
+              </div>
+            </div>
+
+            {/* 4. Violation / Audit Finding Filter */}
+            <div className="space-y-1">
+              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">तपासणी निष्कर्ष</label>
+              <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5">
+                <AlertTriangle className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                <select
+                  value={violationFilter}
+                  onChange={e => setViolationFilter(e.target.value)}
+                  className="bg-transparent text-xs font-bold text-slate-800 outline-none w-full cursor-pointer"
+                >
+                  <option value="all">सर्व तपासणी निष्कर्ष</option>
+                  <option value="shartbhang">शर्तभंग (Breach)</option>
+                  <option value="illegalConversion">वर्ग-२ चे वर्ग-१ रूपांतरण</option>
+                  <option value="illegalDeletion">सरकार नोंद कमी केलेले</option>
+                  <option value="pokalist">पोकळीस्त नोंदी (बु.ग.दे.)</option>
+                  <option value="tribalViolation">आदिवासी जमीन हस्तांतरण</option>
+                  <option value="encroachment">शासकीय अतिक्रमण</option>
+                </select>
+              </div>
+            </div>
+
+            {/* 5. Area Range Filter */}
+            <div className="space-y-1">
+              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">क्षेत्र मर्यादा</label>
+              <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5">
+                <Filter className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                <select
+                  value={areaRangeFilter}
+                  onChange={e => setAreaRangeFilter(e.target.value)}
+                  className="bg-transparent text-xs font-bold text-slate-800 outline-none w-full cursor-pointer"
+                >
+                  <option value="all">सर्व क्षेत्र</option>
+                  <option value="under1">१ हेक्टर पेक्षा कमी</option>
+                  <option value="1to5">१ ते ५ हेक्टर</option>
+                  <option value="5to10">५ ते १० हेक्टर</option>
+                  <option value="above10">१० हेक्टर पेक्षा जास्त</option>
+                </select>
+              </div>
+            </div>
+
+            {/* 6. Multi-Field Search */}
+            <div className="space-y-1">
+              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">शोध</label>
+              <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5">
+                <Search className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                <input
+                  type="text"
+                  placeholder="गट क्र. / स.नं. / खातेदार..."
+                  value={search}
+                  onChange={e => setSearch(e.target.value)}
+                  className="bg-transparent text-xs text-slate-800 outline-none w-full placeholder:text-slate-400 font-medium"
+                />
+                {search && (
+                  <button onClick={() => setSearch('')} className="text-slate-400 hover:text-slate-600">
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* =========================================================
@@ -422,7 +535,7 @@ export default function ReportsPage() {
           </div>
 
           <div className="bg-white border border-slate-200/80 rounded-2xl p-3.5 shadow-xs">
-            <span className="text-[11px] font-bold text-slate-400">शर्तभंग / रूपांतरण संशयित</span>
+            <span className="text-[11px] font-bold text-slate-400">शर्तभंग / संशयित बाबी</span>
             <div className="text-xl font-black text-rose-600 mt-0.5">{stats.shartbhangCount}</div>
             <span className="text-[10px] text-slate-500 font-medium">विशेष चौकशी आवश्यक</span>
           </div>

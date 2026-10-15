@@ -469,10 +469,11 @@ export const api = {
     if (typeof query === 'string') {
       params.append('taluka', query);
     } else {
-      if (query.taluka) params.append('taluka', query.taluka);
-      if (query.village) params.append('village', query.village);
-      if (query.search) params.append('search', query.search);
-      if (query.filterType) params.append('filterType', query.filterType);
+      Object.entries(query).forEach(([k, v]) => {
+        if (v !== undefined && v !== null && v !== '' && v !== 'all') {
+          params.append(k, v);
+        }
+      });
     }
     const res = await dedupedFetch(`${BASE_URL}/api/prapatra/${id}?${params.toString()}`);
     if (!res.ok) {
@@ -483,7 +484,7 @@ export const api = {
 
   getTalukaVillages: async (taluka = 'all') => {
     const params = new URLSearchParams();
-    if (taluka) params.append('taluka', taluka);
+    if (taluka && taluka !== 'all') params.append('taluka', taluka);
     const res = await dedupedFetch(`${BASE_URL}/api/prapatra/villages?${params.toString()}`);
     if (!res.ok) {
       throw new Error('गावांची यादी लोड करणे अयशस्वी झाले.');
@@ -537,10 +538,11 @@ export const api = {
     if (typeof query === 'string') {
       params.append('taluka', query);
     } else {
-      if (query.taluka) params.append('taluka', query.taluka);
-      if (query.village) params.append('village', query.village);
-      if (query.search) params.append('search', query.search);
-      if (query.filterType) params.append('filterType', query.filterType);
+      Object.entries(query).forEach(([k, v]) => {
+        if (v !== undefined && v !== null && v !== '' && v !== 'all') {
+          params.append(k, v);
+        }
+      });
     }
     return `${BASE_URL}/api/prapatra/${id}?${params.toString()}`;
   },
@@ -551,10 +553,11 @@ export const api = {
     if (typeof query === 'string') {
       params.append('taluka', query);
     } else {
-      if (query.taluka) params.append('taluka', query.taluka);
-      if (query.village) params.append('village', query.village);
-      if (query.search) params.append('search', query.search);
-      if (query.filterType) params.append('filterType', query.filterType);
+      Object.entries(query).forEach(([k, v]) => {
+        if (v !== undefined && v !== null && v !== '' && v !== 'all') {
+          params.append(k, v);
+        }
+      });
     }
     return `${BASE_URL}/api/prapatra/${id}?${params.toString()}`;
   },

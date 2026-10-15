@@ -15,12 +15,15 @@ const thinBorder = {
 
 export function cleanVillageName(name) {
   if (!name) return 'अज्ञात गाव';
-  if (name === 'संपूर्ण तालुका (All Villages)') return name;
+  if (name === 'संपूर्ण तालुका (All Villages)' || name === 'all' || name === 'सर्व गावे') return name;
   let raw = String(name);
-  raw = raw.replace(/1\s*[-तते]\s*4[56]/gi, '');
-  raw = raw.replace(/4[56]\s*[-तते]\s*1/gi, '');
-  raw = raw.replace(/1-46/gi, '');
-  raw = raw.replace(/4[56]\s*मद[दत]?/gi, '');
+  raw = raw.replace(/[1१]\s*[-तते]\s*[4४][56५६]/gi, '');
+  raw = raw.replace(/[4४][56५६]\s*[-तते]\s*[1१]/gi, '');
+  raw = raw.replace(/[1१]\s*[-तते]\s*[1-9१-९]+/gi, '');
+  raw = raw.replace(/[1-9१-९]+\s*[-तते]\s*[1-9१-९]+/gi, '');
+  raw = raw.replace(/1-46|१-४६|1-45|१-४५/gi, '');
+  raw = raw.replace(/१ त ४५|१ ते ४६|1 to 46|1 to 45/gi, '');
+  raw = raw.replace(/[4४][56५६]\s*मद[दत]?/gi, '');
   raw = raw.replace(/मद[दत]?\s+/gi, '');
   raw = raw.replace(/मदयच/gi, '');
   raw = raw.replace(/महसल\s*अधकर\s*अभलख/gi, '');
