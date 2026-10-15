@@ -558,6 +558,13 @@ export const api = {
     }
     return `${BASE_URL}/api/prapatra/${id}?${params.toString()}`;
   },
+  getBookletCategories: async () => {
+    const res = await dedupedFetch(`${BASE_URL}/api/prapatra/categories`);
+    if (!res.ok) {
+      throw new Error('प्रपत्र श्रेणी लोड करणे अयशस्वी झाले.');
+    }
+    return res.json();
+  },
 };
 
 

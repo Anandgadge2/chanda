@@ -6,6 +6,7 @@ import {
   getPrapatraReport,
   getDistrictSummary,
   getTalukaVillages,
+  getBookletCategories,
   updatePrapatraRollup,
   uploadPrapatraExcel
 } from '../controllers/prapatraController.js';
@@ -51,9 +52,15 @@ router.post('/upload', upload.single('file'), uploadPrapatraExcel);
 router.put('/rollup/:id', updatePrapatraRollup);
 
 /**
+ * @route   GET /api/prapatra/categories
+ * @desc    Get the 17 official statutory booklet categories & 46 checklist points
+ */
+router.get('/categories', getBookletCategories);
+
+/**
  * @route   GET /api/prapatra/:id
- * @desc    Get Prapatra 1, 2, 3, 4, or 5 in JSON or Excel format
- * @query   taluka, village, search, filterType, format ('json' or 'excel')
+ * @desc    Get Prapatra 1-17 or Master Checklist in JSON, Excel, or PDF format
+ * @query   taluka, village, search, filterType, format ('json', 'excel', 'pdf')
  */
 router.get('/:id', getPrapatraReport);
 

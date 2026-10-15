@@ -782,7 +782,7 @@ export default function ParcelTraceDrawer({ upi, onClose, onRefresh }) {
 
                 {/* RIGHT COLUMN: Interactive Scanned Document Viewer (Displayed right beside each data) */}
                 {isSplitView && (
-                  <div className="lg:col-span-6 xl:col-span-6 flex flex-col min-h-[460px] sticky top-0 animate-in fade-in slide-in-from-right-4 duration-300">
+                  <div className="lg:col-span-6 xl:col-span-6 flex flex-col h-[calc(92vh-200px)] min-h-[580px] sticky top-0 animate-in fade-in slide-in-from-right-4 duration-300">
                     <ArchivalDocumentViewer
                       document={activeDocument}
                       selectedEpoch={activeTab === 'backward' ? selectedEpoch : null}

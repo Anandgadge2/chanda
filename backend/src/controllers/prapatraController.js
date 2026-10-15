@@ -12,6 +12,15 @@ import {
   cleanVillageName
 } from '../utils/prapatraGenerator.js';
 import { generatePrapatraPdf } from '../utils/pdfGenerator.js';
+import {
+  generateMasterChecklistExcel,
+  generateMasterChecklistPdf,
+  generateCategoryBookletExcel,
+  generateCategoryBookletPdf,
+  BOOKLET_CATEGORIES,
+  CHECKLIST_46_POINTS,
+  resolveParcel46Points
+} from '../utils/masterBookletGenerator.js';
 
 const execAsync = promisify(exec);
 
@@ -95,18 +104,21 @@ async function syncTalukaTotalRollup(talukaName) {
  */
 export const getPrapatraReport = async (req, res) => {
   try {
-    const { id } = req.params; // 1, 2, 3, 4, 5
+    const { id } = req.params; // 1-17, 'checklist', 'master', '46'
     const {
       taluka = 'all',
       village = 'all',
       search = '',
       filterType = 'all',
-      format = 'json'
+      format = 'json',
+      booklet = 'false'
     } = req.query;
 
-    const prapatraNum = parseInt(id, 10);
-    if (![1, 2, 3, 4, 5].includes(prapatraNum)) {
-      return res.status(400).json({ success: false, error: 'Invalid Prapatra number (1-5)' });
+    const isChecklist = id === 'checklist' || id === 'master' || id === '46';
+    const prapatraNum = isChecklist ? 0 : parseInt(id, 10);
+
+    if (!isChecklist && (isNaN(prapatraNum) || prapatraNum < 1 || prapatraNum > 17)) {
+      return res.status(400).json({ success: false, error: 'अवैध प्रपत्र क्रमांक (१ ते १७ किंवा checklist)' });
     }
 
     const targetTaluka = TALUKA_ALIASES[taluka?.toLowerCase()] || taluka;
@@ -208,47 +220,114 @@ export const getPrapatraReport = async (req, res) => {
       }
     }
 
-    // Prapatra specific criteria
+    // Prapatra / Category specific criteria
     let prapatraParcelConditions = null;
-    if (prapatraNum === 1) {
-      if (filterType === 'illegalDeletions') {
+    if (!isChecklist) {
+      if (prapatraNum === 1) {
+        if (filterType === 'illegalDeletions') {
+          prapatraParcelConditions = [
+            { metadata: { path: ['flags', 'isIllegalDeletion'], equals: true } },
+            { forwardCases: { some: { violationType: 'GOVERNMENT_NAME_MISSING' } } }
+          ];
+        } else {
+          prapatraParcelConditions = [
+            { tenureClass: 'SARKAR_SHASAN' },
+            { backwardHistories: { some: { wasGovtLand: true } } },
+            { forwardCases: { some: { violationType: 'GOVERNMENT_NAME_MISSING' } } },
+            { metadata: { path: ['flags', 'isGovt'], equals: true } }
+          ];
+        }
+      } else if (prapatraNum === 2) {
         prapatraParcelConditions = [
-          { metadata: { path: ['flags', 'isIllegalDeletion'], equals: true } },
-          { forwardCases: { some: { violationType: 'GOVERNMENT_NAME_MISSING' } } }
+          { metadata: { path: ['flags', 'isPokalist'], equals: true } },
+          { forwardCases: { some: { violationType: 'POKALIST_NONDI' } } },
+          { metadata: { path: ['otherRights'], string_contains: 'बु.ग.दे' } },
+          { metadata: { path: ['otherRights'], string_contains: 'ता.ग.दे' } },
+          { metadata: { path: ['otherRights'], string_contains: 'सं.कु.' } }
         ];
-      } else {
+      } else if (prapatraNum === 3) {
+        prapatraParcelConditions = [
+          { metadata: { path: ['flags', 'isCorpAllot'], equals: true } },
+          { forwardCases: { some: { prapatraCategory: { contains: '३' } } } }
+        ];
+      } else if (prapatraNum === 4) {
+        prapatraParcelConditions = [
+          { metadata: { path: ['flags', 'isPrivateAllot'], equals: true } },
+          { forwardCases: { some: { prapatraCategory: { contains: '४' } } } }
+        ];
+      } else if (prapatraNum === 5) {
         prapatraParcelConditions = [
           { tenureClass: 'SARKAR_SHASAN' },
-          { backwardHistories: { some: { wasGovtLand: true } } },
-          { forwardCases: { some: { violationType: 'GOVERNMENT_NAME_MISSING' } } },
-          { metadata: { path: ['flags', 'isGovt'], equals: true } }
+          { metadata: { path: ['flags', 'isGovt'], equals: true } },
+          { metadata: { path: ['flags', 'isEncroached'], equals: true } },
+          { forwardCases: { some: { violationType: 'ENCROACHMENT' } } }
+        ];
+      } else if (prapatraNum === 6) {
+        prapatraParcelConditions = [
+          { ceilingRecords: { some: {} } },
+          { metadata: { path: ['otherRights'], string_contains: 'कमाल' } },
+          { metadata: { path: ['otherRights'], string_contains: 'सिलिंग' } }
+        ];
+      } else if (prapatraNum === 7) {
+        prapatraParcelConditions = [
+          { metadata: { path: ['otherRights'], string_contains: 'गुरचरण' } },
+          { metadata: { path: ['otherRights'], string_contains: 'चराई' } },
+          { metadata: { path: ['otherRights'], string_contains: 'विकास' } }
+        ];
+      } else if (prapatraNum === 8) {
+        prapatraParcelConditions = [
+          { tenureClass: 'DEVASTHAN_INAM' },
+          { metadata: { path: ['otherRights'], string_contains: 'देवस्थान' } },
+          { metadata: { path: ['otherRights'], string_contains: 'इनाम' } }
+        ];
+      } else if (prapatraNum === 9) {
+        prapatraParcelConditions = [
+          { metadata: { path: ['flags', 'isTribal'], equals: true } },
+          { tribalRecords: { some: {} } },
+          { metadata: { path: ['otherRights'], string_contains: 'आदिवासी' } },
+          { forwardCases: { some: { violationType: 'TRIBAL_LAND_VIOLATION' } } }
+        ];
+      } else if (prapatraNum === 10) {
+        prapatraParcelConditions = [
+          { metadata: { path: ['otherRights'], string_contains: 'पुनर्वसन' } },
+          { metadata: { path: ['otherRights'], string_contains: 'प्रकल्पग्रस्त' } }
+        ];
+      } else if (prapatraNum === 11) {
+        prapatraParcelConditions = [
+          { metadata: { path: ['otherRights'], string_contains: 'भाडेपट्टा' } },
+          { metadata: { path: ['otherRights'], string_contains: 'लीज' } }
+        ];
+      } else if (prapatraNum === 12) {
+        prapatraParcelConditions = [
+          { bhudanRecords: { some: {} } },
+          { metadata: { path: ['otherRights'], string_contains: 'भूदान' } },
+          { metadata: { path: ['otherRights'], string_contains: 'ग्रामदान' } }
+        ];
+      } else if (prapatraNum === 13) {
+        prapatraParcelConditions = [
+          { tenureClass: 'FOREST_JANGAL' },
+          { metadata: { path: ['otherRights'], string_contains: 'खाजगी वन' } }
+        ];
+      } else if (prapatraNum === 14) {
+        prapatraParcelConditions = [
+          { metadata: { path: ['otherRights'], string_contains: 'भूमीधारी' } },
+          { tenureClass: 'BHOGVATDAR_CLASS_2' }
+        ];
+      } else if (prapatraNum === 15) {
+        prapatraParcelConditions = [
+          { metadata: { path: ['otherRights'], string_contains: 'सूट' } }
+        ];
+      } else if (prapatraNum === 16) {
+        prapatraParcelConditions = [
+          { metadata: { path: ['otherRights'], string_contains: 'वक्फ' } },
+          { metadata: { path: ['otherRights'], string_contains: 'कब्रस्तान' } }
+        ];
+      } else if (prapatraNum === 17) {
+        prapatraParcelConditions = [
+          { metadata: { path: ['otherRights'], string_contains: 'भूसंपादन' } },
+          { metadata: { path: ['otherRights'], string_contains: 'राखीव' } }
         ];
       }
-    } else if (prapatraNum === 2) {
-      prapatraParcelConditions = [
-        { metadata: { path: ['flags', 'isPokalist'], equals: true } },
-        { forwardCases: { some: { violationType: 'POKALIST_NONDI' } } },
-        { metadata: { path: ['otherRights'], string_contains: 'बु.ग.दे' } },
-        { metadata: { path: ['otherRights'], string_contains: 'ता.ग.दे' } },
-        { metadata: { path: ['otherRights'], string_contains: 'सं.कु.' } }
-      ];
-    } else if (prapatraNum === 3) {
-      prapatraParcelConditions = [
-        { metadata: { path: ['flags', 'isCorpAllot'], equals: true } },
-        { forwardCases: { some: { prapatraCategory: { contains: '३' } } } }
-      ];
-    } else if (prapatraNum === 4) {
-      prapatraParcelConditions = [
-        { metadata: { path: ['flags', 'isPrivateAllot'], equals: true } },
-        { forwardCases: { some: { prapatraCategory: { contains: '४' } } } }
-      ];
-    } else if (prapatraNum === 5) {
-      prapatraParcelConditions = [
-        { tenureClass: 'SARKAR_SHASAN' },
-        { metadata: { path: ['flags', 'isGovt'], equals: true } },
-        { metadata: { path: ['flags', 'isEncroached'], equals: true } },
-        { forwardCases: { some: { violationType: 'ENCROACHMENT' } } }
-      ];
     }
 
     if (prapatraParcelConditions) {
@@ -379,13 +458,15 @@ export const getPrapatraReport = async (req, res) => {
         gatNumber: p.gatNumber || '-',
         oldSurveyNo: p.oldSurveyNo || '-',
         totalAreaHa: Number(p.totalAreaHa || 0).toFixed(4),
+        potkharabaAreaHa: Number(p.potkharabaAreaHa || 0).toFixed(4),
         currentOwner,
         baselineOwner1950,
         tenureClass: p.tenureClass,
         tenureDisplay: tenureLabels[p.tenureClass] || p.tenureClass || '-',
         statusFinding,
         orderRef: c?.caseNumber || b1950?.ferfarNumber || '-',
-        remarks: (otherRights && otherRights !== '....' && otherRights !== '-') ? otherRights : (b1950?.mutationType || '-')
+        remarks: (otherRights && otherRights !== '....' && otherRights !== '-') ? otherRights : (b1950?.mutationType || '-'),
+        points: resolveParcel46Points(p)
       };
     });
 
@@ -394,8 +475,18 @@ export const getPrapatraReport = async (req, res) => {
       const timestamp = new Date().toISOString().slice(0, 10);
       const safeScope = targetTaluka.replace(/[^a-zA-Z0-9]/g, '_');
       res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-      res.setHeader('Content-Disposition', `attachment; filename=Prapatra-${prapatraNum}_Chandrapur_${safeScope}_${timestamp}.xlsx`);
 
+      if (isChecklist) {
+        res.setHeader('Content-Disposition', `attachment; filename=Checklist-46_Chandrapur_${safeScope}_${timestamp}.xlsx`);
+        return await generateMasterChecklistExcel(formattedParcels, scopeName, res);
+      }
+
+      if (prapatraNum > 5 || booklet === 'true') {
+        res.setHeader('Content-Disposition', `attachment; filename=Category-${prapatraNum}_Booklet_${safeScope}_${timestamp}.xlsx`);
+        return await generateCategoryBookletExcel(prapatraNum, records, formattedParcels, scopeName, res);
+      }
+
+      res.setHeader('Content-Disposition', `attachment; filename=Prapatra-${prapatraNum}_Chandrapur_${safeScope}_${timestamp}.xlsx`);
       if (prapatraNum === 1) return await generatePrapatra1Excel(records, formattedParcels, scopeName, res);
       if (prapatraNum === 2) return await generatePrapatra2Excel(records, formattedParcels, scopeName, res);
       if (prapatraNum === 3) return await generatePrapatra3Excel(records, formattedParcels, scopeName, res);
@@ -405,13 +496,31 @@ export const getPrapatraReport = async (req, res) => {
 
     // If PDF export requested
     if (format === 'pdf') {
+      const timestamp = new Date().toISOString().slice(0, 10);
+      const safeScope = targetTaluka.replace(/[^a-zA-Z0-9]/g, '_');
+      res.setHeader('Content-Type', 'application/pdf');
+
+      if (isChecklist) {
+        res.setHeader('Content-Disposition', `attachment; filename=Checklist-46_Chandrapur_${safeScope}_${timestamp}.pdf`);
+        return await generateMasterChecklistPdf(formattedParcels, scopeName, res);
+      }
+
+      if (prapatraNum > 5 || booklet === 'true') {
+        res.setHeader('Content-Disposition', `attachment; filename=Category-${prapatraNum}_Booklet_${safeScope}_${timestamp}.pdf`);
+        return await generateCategoryBookletPdf(prapatraNum, records, formattedParcels, scopeName, res);
+      }
+
+      res.setHeader('Content-Disposition', `attachment; filename=Prapatra-${prapatraNum}_Chandrapur_${safeScope}_${timestamp}.pdf`);
       return await generatePrapatraPdf(prapatraNum, records, formattedParcels, scopeName, res);
     }
 
     // Default JSON response
+    const catMeta = BOOKLET_CATEGORIES.find(c => c.id === prapatraNum);
     return res.status(200).json({
       success: true,
+      isChecklist,
       prapatra: prapatraNum,
+      category: catMeta || null,
       scope: scopeName,
       taluka: targetTaluka,
       village,
@@ -420,12 +529,24 @@ export const getPrapatraReport = async (req, res) => {
       count: records.length,
       data: records,
       parcels: formattedParcels,
-      totalParcelsCount: formattedParcels.length
+      totalParcelsCount: formattedParcels.length,
+      checklistPoints: isChecklist ? CHECKLIST_46_POINTS : undefined
     });
   } catch (err) {
     console.error('getPrapatraReport error:', err);
     return res.status(500).json({ success: false, error: err.message });
   }
+};
+
+/**
+ * Get the 17 official statutory categories and 46 checklist points
+ */
+export const getBookletCategories = async (req, res) => {
+  return res.json({
+    success: true,
+    categories: BOOKLET_CATEGORIES,
+    checklistPoints: CHECKLIST_46_POINTS
+  });
 };
 
 /**

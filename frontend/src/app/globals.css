@@ -433,4 +433,30 @@ body.high-contrast :focus-visible {
   border-width: 0;
 }
 
+/* Print Stylesheet for Archival Documents */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .archival-parchment,
+  .archival-parchment * {
+    visibility: visible;
+  }
+  .archival-parchment {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 24px !important;
+    box-shadow: none !important;
+    border: 1px solid #78350f !important;
+    background: #fff !important;
+    color: #000 !important;
+    page-break-inside: avoid;
+  }
+}
+
+
 
