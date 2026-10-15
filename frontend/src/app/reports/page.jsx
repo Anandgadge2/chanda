@@ -27,6 +27,29 @@ import {
 } from 'lucide-react';
 import { CHANDRAPUR_TALUKAS } from '../../lib/constants';
 import { api } from '../../lib/api';
+import Pagination from '../../components/Pagination';
+
+function cleanVillageName(name) {
+  if (!name) return 'अज्ञात गाव';
+  if (name === 'संपूर्ण तालुका (All Villages)' || name === 'all' || name === 'सर्व गावे') return name;
+  let raw = String(name);
+  raw = raw.replace(/1\s*[-तते]\s*4[56]/gi, '');
+  raw = raw.replace(/4[56]\s*[-तते]\s*1/gi, '');
+  raw = raw.replace(/1-46/gi, '');
+  raw = raw.replace(/4[56]\s*मद[दत]?/gi, '');
+  raw = raw.replace(/मद[दत]?\s+/gi, '');
+  raw = raw.replace(/मदयच/gi, '');
+  raw = raw.replace(/महसल\s*अधकर\s*अभलख/gi, '');
+  raw = raw.replace(/महिती|महत/gi, '');
+  raw = raw.replace(/तपसण[ी]?\s*सतर/gi, '');
+  raw = raw.replace(/तपसण[ी]?/gi, '');
+  raw = raw.replace(/Worksheet\s*\d*/gi, '');
+  raw = raw.replace(/सधरत/gi, '');
+  raw = raw.replace(/2026/g, '');
+  raw = raw.replace(/^मंडळ\s*/i, '');
+  raw = raw.trim().replace(/\s+/g, ' ');
+  return raw || name || 'अज्ञात गाव';
+}
 
 const APEX_PRAPATRA_LIST = [
   {
@@ -123,6 +146,10 @@ export default function ReportsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState('all');
   const [prapatraData, setPrapatraData] = useState([]);
+  const [prapatraParcels, setPrapatraParcels] = useState([]);
+  const [activeTableView, setActiveTableView] = useState('parcels'); // 'parcels' (actual data) | 'summary' (rollups)
+  const [parcelPage, setParcelPage] = useState(1);
+  const [parcelPageSize] = useState(25);
   const [prapatraLoading, setPrapatraLoading] = useState(false);
 
   // Admin / Collector editing mode
@@ -174,6 +201,8 @@ export default function ReportsPage() {
         filterType
       });
       setPrapatraData(res.data || []);
+      setPrapatraParcels(res.parcels || []);
+      setParcelPage(1);
     } catch (err) {
       console.error('Error loading Prapatra report:', err);
       setNotification({ type: 'error', message: err.message || 'प्रपत्र डेटा आणण्यात अडचण आली.' });
@@ -461,8 +490,8 @@ export default function ReportsPage() {
                   >
                     <option value="all">सर्व गावे ({villageOptions.length > 0 ? `${villageOptions.length} गावे` : 'सर्व'})</option>
                     {villageOptions.map((v) => (
-                      <option key={v.id || v.villageName} value={v.villageName}>
-                        {v.villageName} ({v.total712Count} ७/१२)
+                      <option key={v.id || v.villageName} value={v.originalVillageName || v.villageName}>
+                        {cleanVillageName(v.villageName)} ({v.total712Count} ७/१२)
                       </option>
                     ))}
                   </select>
@@ -557,38 +586,81 @@ export default function ReportsPage() {
             </div>
           </div>
 
-          {/* Prapatra Description Banner */}
-          <div className="bg-blue-900 text-white p-3 rounded-xl shadow-xs flex items-center justify-between gap-3">
+          {/* Prapatra Description Banner & View Switcher */}
+          <div className="bg-blue-900 text-white p-3 rounded-xl shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
             <div className="flex items-center gap-2">
               <span className="text-xs font-black bg-amber-400 text-slate-900 px-2 py-0.5 rounded">
                 {activeApex.tag}
               </span>
               <h2 className="text-xs sm:text-sm font-bold">{activeApex.desc}</h2>
             </div>
-            <span className="text-[11px] text-blue-200 font-mono bg-blue-950 px-2 py-0.5 rounded">
-              एकूण नोंदी: {prapatraData.length}
-            </span>
+
+            {/* View Mode Switcher: Actual Parcel Records vs Summary Rollup */}
+            <div className="flex items-center gap-1.5 bg-blue-950/80 p-1 rounded-lg border border-blue-800/60 shrink-0">
+              <button
+                type="button"
+                onClick={() => setActiveTableView('parcels')}
+                className={`px-3 py-1.5 rounded-md text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+                  activeTableView === 'parcels'
+                    ? 'bg-amber-400 text-slate-900 shadow-xs'
+                    : 'text-blue-200 hover:text-white hover:bg-blue-900/50'
+                }`}
+                title="प्रत्येक ७/१२ ची सविस्तर यादी, गाव, गट क्र., क्षेत्र व खातेदाराचे नाव पहा"
+              >
+                <TableProperties className="w-3.5 h-3.5" />
+                <span>सविस्तर ७/१२ यादी (खातेदारांसह)</span>
+                <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${
+                  activeTableView === 'parcels' ? 'bg-slate-900 text-amber-300' : 'bg-blue-900 text-blue-200'
+                }`}>
+                  {prapatraParcels.length}
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setActiveTableView('summary')}
+                className={`px-3 py-1.5 rounded-md text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+                  activeTableView === 'summary'
+                    ? 'bg-amber-400 text-slate-900 shadow-xs'
+                    : 'text-blue-200 hover:text-white hover:bg-blue-900/50'
+                }`}
+                title="तालुका व गाव निहाय अधिकृत गोषवारा आकडेवारी पहा"
+              >
+                <Layers className="w-3.5 h-3.5" />
+                <span>गोषवारा (Summary)</span>
+                <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${
+                  activeTableView === 'summary' ? 'bg-slate-900 text-amber-300' : 'bg-blue-900 text-blue-200'
+                }`}>
+                  {prapatraData.length}
+                </span>
+              </button>
+            </div>
           </div>
 
-          {/* Prapatra Data Table */}
-          <div className="bg-white border border-slate-200 rounded-xl shadow-2xs overflow-hidden">
-            <div className="overflow-x-auto max-h-[620px]">
-              <table className="w-full text-left border-collapse text-xs">
-                <thead>
-                  {/* PRAPATRA 1 HEADERS */}
-                  {selectedPrapatra === 1 && (
-                    <>
+          {/* VIEW 1: DETAILED ACTUAL 7/12 PARCELS TABLE (WITH OWNER NAMES) */}
+          {activeTableView === 'parcels' && (
+            <div className="space-y-3">
+              <div className="bg-white border border-slate-200 rounded-xl shadow-2xs overflow-hidden">
+                <div className="overflow-x-auto max-h-[640px]">
+                  <table className="w-full text-left border-collapse text-xs">
+                    <thead>
                       <tr className="bg-slate-100 text-slate-800 font-bold border-b border-slate-300 text-center">
                         <th className="py-2.5 px-3 border-r border-slate-200 w-12">अ.क्र.</th>
-                        <th className="py-2.5 px-3 border-r border-slate-200 text-left">जिल्हा / तालुका / गाव</th>
-                        <th className="py-2.5 px-3 border-r border-slate-200">एकूण ७/१२ ची संख्या<br/><span className="text-[10px] text-slate-500 font-normal">[२(अ)]</span></th>
-                        <th className="py-2.5 px-3 border-r border-slate-200">१९५० पासून तपासणी केलेले ७/१२<br/><span className="text-[10px] text-slate-500 font-normal">[३(अ)]</span></th>
-                        <th className="py-2.5 px-3 border-r border-slate-200 text-blue-800">सरकार/शासन नोंद असलेले ७/१२<br/><span className="text-[10px] text-blue-600 font-normal">[४(अ)]</span></th>
-                        <th className="py-2.5 px-3 border-r border-slate-200 text-rose-700">अवैधरीत्या सरकार नोंद कमी केलेले ७/१२<br/><span className="text-[10px] text-rose-500 font-normal">[५(अ)]</span></th>
-                        <th className="py-2.5 px-3 border-r border-slate-200 text-emerald-700">यापैकी दुरुस्ती केलेले ७/१२<br/><span className="text-[10px] text-emerald-500 font-normal">[६(अ)]</span></th>
-                        <th className="py-2.5 px-3 border-r border-slate-200 text-amber-700">दुरुस्ती करण्यास शिल्लक ७/१२<br/><span className="text-[10px] text-amber-500 font-normal">[७(अ)]</span></th>
-                        <th className="py-2.5 px-3 border-r border-slate-200">शेरा</th>
-                        {isAdminMode && <th className="py-2.5 px-3 text-center w-20">कृती</th>}
+                        <th className="py-2.5 px-3 border-r border-slate-200 text-left">तालुका / गाव</th>
+                        <th className="py-2.5 px-3 border-r border-slate-200 w-24">गट क्र.</th>
+                        <th className="py-2.5 px-3 border-r border-slate-200 w-24">जुना स.नं.</th>
+                        <th className="py-2.5 px-3 border-r border-slate-200 w-24 text-right">क्षेत्र (हे.)</th>
+                        <th className="py-2.5 px-3 border-r border-slate-200 text-left min-w-[200px] text-blue-950 bg-blue-50/50">
+                          सध्याचे खातेदार / भोगवटादार नाव
+                        </th>
+                        <th className="py-2.5 px-3 border-r border-slate-200 text-left min-w-[150px]">
+                          सन १९५० मूळ नोंद / मालक
+                        </th>
+                        <th className="py-2.5 px-3 border-r border-slate-200 w-28">धारणा प्रकार</th>
+                        <th className="py-2.5 px-3 border-r border-slate-200 text-left min-w-[180px]">
+                          तपासणी निष्कर्ष / सद्यस्थिती
+                        </th>
+                        <th className="py-2.5 px-3 text-left min-w-[160px]">शेरा व इतर हक्क</th>
                       </tr>
                       <tr className="bg-slate-50 text-[10px] text-slate-500 text-center border-b border-slate-200">
                         <th className="py-1 border-r border-slate-200">१</th>
@@ -600,215 +672,346 @@ export default function ReportsPage() {
                         <th className="py-1 border-r border-slate-200">७</th>
                         <th className="py-1 border-r border-slate-200">८</th>
                         <th className="py-1 border-r border-slate-200">९</th>
-                        {isAdminMode && <th className="py-1">१०</th>}
+                        <th className="py-1">१०</th>
                       </tr>
-                    </>
-                  )}
-
-                  {/* PRAPATRA 2 HEADERS */}
-                  {selectedPrapatra === 2 && (
-                    <>
-                      <tr className="bg-slate-100 text-slate-800 font-bold border-b border-slate-300 text-center">
-                        <th className="py-2.5 px-3 border-r border-slate-200 w-12">अ.क्र.</th>
-                        <th className="py-2.5 px-3 border-r border-slate-200 text-left">जिल्हा / तालुका / गाव</th>
-                        <th className="py-2.5 px-3 border-r border-slate-200 text-amber-800">पोकळीस्त नोंदी (बु.ग.दे./ता.ग.दे./सं.कु.) संख्या<br/><span className="text-[10px] text-slate-500 font-normal">[२(अ)]</span></th>
-                        <th className="py-2.5 px-3 border-r border-slate-200 text-emerald-700">कमी करण्यात आलेल्या नोंदींची संख्या<br/><span className="text-[10px] text-emerald-500 font-normal">[३(अ)]</span></th>
-                        <th className="py-2.5 px-3 border-r border-slate-200 text-rose-700">कमी करण्यास शिल्लक नोंदींची संख्या<br/><span className="text-[10px] text-rose-500 font-normal">[४(अ)]</span></th>
-                        <th className="py-2.5 px-3 border-r border-slate-200">शेरा</th>
-                        {isAdminMode && <th className="py-2.5 px-3 text-center w-20">कृती</th>}
-                      </tr>
-                      <tr className="bg-slate-50 text-[10px] text-slate-500 text-center border-b border-slate-200">
-                        <th className="py-1 border-r border-slate-200">१</th>
-                        <th className="py-1 border-r border-slate-200">२</th>
-                        <th className="py-1 border-r border-slate-200">३</th>
-                        <th className="py-1 border-r border-slate-200">४</th>
-                        <th className="py-1 border-r border-slate-200">५</th>
-                        <th className="py-1 border-r border-slate-200">६</th>
-                        {isAdminMode && <th className="py-1">७</th>}
-                      </tr>
-                    </>
-                  )}
-
-                  {/* PRAPATRA 3 HEADERS */}
-                  {selectedPrapatra === 3 && (
-                    <>
-                      <tr className="bg-slate-100 text-slate-800 font-bold border-b border-slate-300 text-center">
-                        <th className="py-2.5 px-3 border-r border-slate-200 w-12">अ.क्र.</th>
-                        <th className="py-2.5 px-3 border-r border-slate-200 text-left">जिल्हा / तालुका / गाव</th>
-                        <th className="py-2.5 px-3 border-r border-slate-200">शासकीय मंडळे/स्थानिक संस्थांना प्रदान ७/१२<br/><span className="text-[10px] text-slate-500 font-normal">[२(अ)]</span></th>
-                        <th className="py-2.5 px-3 border-r border-slate-200 text-rose-700">अनधिकृत हस्तांतरण / शर्तभंग ७/१२<br/><span className="text-[10px] text-rose-500 font-normal">[३(अ)]</span></th>
-                        <th className="py-2.5 px-3 border-r border-slate-200 text-emerald-700">मालकी पूर्ववत / शासन जमा केलेले<br/><span className="text-[10px] text-emerald-500 font-normal">[४(अ)]</span></th>
-                        <th className="py-2.5 px-3 border-r border-slate-200">शेरा</th>
-                        {isAdminMode && <th className="py-2.5 px-3 text-center w-20">कृती</th>}
-                      </tr>
-                      <tr className="bg-slate-50 text-[10px] text-slate-500 text-center border-b border-slate-200">
-                        <th className="py-1 border-r border-slate-200">१</th>
-                        <th className="py-1 border-r border-slate-200">२</th>
-                        <th className="py-1 border-r border-slate-200">३</th>
-                        <th className="py-1 border-r border-slate-200">४</th>
-                        <th className="py-1 border-r border-slate-200">५</th>
-                        <th className="py-1 border-r border-slate-200">६</th>
-                        {isAdminMode && <th className="py-1">७</th>}
-                      </tr>
-                    </>
-                  )}
-
-                  {/* PRAPATRA 4 HEADERS */}
-                  {selectedPrapatra === 4 && (
-                    <>
-                      <tr className="bg-slate-100 text-slate-800 font-bold border-b border-slate-300 text-center">
-                        <th className="py-2.5 px-3 border-r border-slate-200 w-12">अ.क्र.</th>
-                        <th className="py-2.5 px-3 border-r border-slate-200 text-left">जिल्हा / तालुका / गाव</th>
-                        <th className="py-2.5 px-3 border-r border-slate-200">शैक्षणिक/ट्रस्ट/सोसायट्यांना प्रदान ७/१२<br/><span className="text-[10px] text-slate-500 font-normal">[२(अ)]</span></th>
-                        <th className="py-2.5 px-3 border-r border-slate-200 text-rose-700">अनधिकृत हस्तांतरण / शर्तभंग ७/१२<br/><span className="text-[10px] text-rose-500 font-normal">[३(अ)]</span></th>
-                        <th className="py-2.5 px-3 border-r border-slate-200 text-emerald-700">मालकी पूर्ववत / शासन जमा केलेले<br/><span className="text-[10px] text-emerald-500 font-normal">[४(अ)]</span></th>
-                        <th className="py-2.5 px-3 border-r border-slate-200">शेरा</th>
-                        {isAdminMode && <th className="py-2.5 px-3 text-center w-20">कृती</th>}
-                      </tr>
-                      <tr className="bg-slate-50 text-[10px] text-slate-500 text-center border-b border-slate-200">
-                        <th className="py-1 border-r border-slate-200">१</th>
-                        <th className="py-1 border-r border-slate-200">२</th>
-                        <th className="py-1 border-r border-slate-200">३</th>
-                        <th className="py-1 border-r border-slate-200">४</th>
-                        <th className="py-1 border-r border-slate-200">५</th>
-                        <th className="py-1 border-r border-slate-200">६</th>
-                        {isAdminMode && <th className="py-1">७</th>}
-                      </tr>
-                    </>
-                  )}
-
-                  {/* PRAPATRA 5 HEADERS */}
-                  {selectedPrapatra === 5 && (
-                    <>
-                      <tr className="bg-slate-100 text-slate-800 font-bold border-b border-slate-300 text-center">
-                        <th className="py-2.5 px-3 border-r border-slate-200 w-12" rowSpan={2}>अ.क्र.</th>
-                        <th className="py-2.5 px-3 border-r border-slate-200 text-left" rowSpan={2}>जिल्हा / तालुका / गाव</th>
-                        <th className="py-2.5 px-3 border-r border-slate-200" rowSpan={2}>शासकीय जमिनी ७/१२ संख्या<br/><span className="text-[10px] text-slate-500 font-normal">[२(अ)]</span></th>
-                        <th className="py-2.5 px-3 border-r border-slate-200" rowSpan={2}>वाटप केलेल्या जमिनी संख्या<br/><span className="text-[10px] text-slate-500 font-normal">[३(अ)]</span></th>
-                        <th className="py-1.5 px-3 border-b border-slate-200 bg-slate-200" colSpan={3}>शासकीय जमिनींची सद्यस्थिती</th>
-                        <th className="py-2.5 px-3 border-r border-slate-200" rowSpan={2}>शेरा</th>
-                        {isAdminMode && <th className="py-2.5 px-3 text-center w-20" rowSpan={2}>कृती</th>}
-                      </tr>
-                      <tr className="bg-slate-100 text-slate-800 font-bold border-b border-slate-300 text-center">
-                        <th className="py-1.5 px-3 border-r border-slate-200 text-rose-700">शर्तभंग झालेल्या<br/><span className="text-[10px] font-normal">[४(अ)]</span></th>
-                        <th className="py-1.5 px-3 border-r border-slate-200 text-amber-700">अतिक्रमण असलेल्या<br/><span className="text-[10px] font-normal">[५(अ)]</span></th>
-                        <th className="py-1.5 px-3 border-r border-slate-200 text-emerald-700">मोजणी झालेल्या<br/><span className="text-[10px] font-normal">[६(अ)]</span></th>
-                      </tr>
-                      <tr className="bg-slate-50 text-[10px] text-slate-500 text-center border-b border-slate-200">
-                        <th className="py-1 border-r border-slate-200">१</th>
-                        <th className="py-1 border-r border-slate-200">२</th>
-                        <th className="py-1 border-r border-slate-200">३</th>
-                        <th className="py-1 border-r border-slate-200">४</th>
-                        <th className="py-1 border-r border-slate-200">५</th>
-                        <th className="py-1 border-r border-slate-200">६</th>
-                        <th className="py-1 border-r border-slate-200">७</th>
-                        <th className="py-1 border-r border-slate-200">८</th>
-                        {isAdminMode && <th className="py-1">९</th>}
-                      </tr>
-                    </>
-                  )}
-                </thead>
-                <tbody className="divide-y divide-slate-200">
-                  {prapatraLoading ? (
-                    <tr>
-                      <td colSpan={11} className="py-12 text-center text-slate-500">
-                        <RefreshCw className="w-6 h-6 animate-spin mx-auto text-blue-900 mb-2" />
-                        <span>प्रपत्र डेटा लोड होत आहे...</span>
-                      </td>
-                    </tr>
-                  ) : prapatraData.length === 0 ? (
-                    <tr>
-                      <td colSpan={11} className="py-8 text-center text-slate-400">
-                        कोणतीही नोंद उपलब्ध नाही. (निवडलेले फिल्टर तपासा किंवा रीसेट करा)
-                      </td>
-                    </tr>
-                  ) : (
-                    prapatraData.map((row, idx) => (
-                      <tr key={row.id || idx} className="hover:bg-blue-50/40 transition">
-                        <td className="py-2.5 px-3 text-center text-slate-400 border-r border-slate-100">{idx + 1}</td>
-                        <td className="py-2.5 px-3 font-semibold text-slate-900 border-r border-slate-100">
-                          {row.villageName === 'संपूर्ण तालुका (All Villages)' ? (
-                            <span className="font-extrabold text-blue-950 flex items-center gap-1.5">
-                              <Building2 className="w-3.5 h-3.5 text-blue-900" />
-                              तालुका: {row.taluka} (एकूण गोषवारा)
-                            </span>
-                          ) : (
-                            row.villageName || row.taluka
-                          )}
-                        </td>
-
-                        {/* Prapatra 1 Body */}
-                        {selectedPrapatra === 1 && (
-                          <>
-                            <td className="py-2.5 px-3 text-center border-r border-slate-100 font-mono">{row.total712Count?.toLocaleString('en-IN')}</td>
-                            <td className="py-2.5 px-3 text-center border-r border-slate-100 font-mono">{row.inspected1950Count?.toLocaleString('en-IN')}</td>
-                            <td className="py-2.5 px-3 text-center border-r border-slate-100 font-mono font-bold text-blue-900">{row.govtFound1950Count?.toLocaleString('en-IN')}</td>
-                            <td className="py-2.5 px-3 text-center border-r border-slate-100 font-mono font-bold text-rose-700">{row.illegalDeletionsCount}</td>
-                            <td className="py-2.5 px-3 text-center border-r border-slate-100 font-mono font-bold text-emerald-700">{row.rectifiedCount}</td>
-                            <td className="py-2.5 px-3 text-center border-r border-slate-100 font-mono font-bold text-amber-700">{row.pendingRectifyCount}</td>
-                          </>
-                        )}
-
-                        {/* Prapatra 2 Body */}
-                        {selectedPrapatra === 2 && (
-                          <>
-                            <td className="py-2.5 px-3 text-center border-r border-slate-100 font-mono font-bold text-amber-800">{row.pokalistCount}</td>
-                            <td className="py-2.5 px-3 text-center border-r border-slate-100 font-mono font-bold text-emerald-700">{row.pokalistRemovedCount}</td>
-                            <td className="py-2.5 px-3 text-center border-r border-slate-100 font-mono font-bold text-rose-700">{row.pokalistPendingCount}</td>
-                          </>
-                        )}
-
-                        {/* Prapatra 3 Body */}
-                        {selectedPrapatra === 3 && (
-                          <>
-                            <td className="py-2.5 px-3 text-center border-r border-slate-100 font-mono">{row.govtDeptsAllottedCount}</td>
-                            <td className="py-2.5 px-3 text-center border-r border-slate-100 font-mono font-bold text-rose-700">{row.govtDeptsShartbhang}</td>
-                            <td className="py-2.5 px-3 text-center border-r border-slate-100 font-mono font-bold text-emerald-700">{row.govtDeptsRestoredGovt}</td>
-                          </>
-                        )}
-
-                        {/* Prapatra 4 Body */}
-                        {selectedPrapatra === 4 && (
-                          <>
-                            <td className="py-2.5 px-3 text-center border-r border-slate-100 font-mono">{row.privateAllottedCount}</td>
-                            <td className="py-2.5 px-3 text-center border-r border-slate-100 font-mono font-bold text-rose-700">{row.privateShartbhang}</td>
-                            <td className="py-2.5 px-3 text-center border-r border-slate-100 font-mono font-bold text-emerald-700">{row.privateRestoredGovt}</td>
-                          </>
-                        )}
-
-                        {/* Prapatra 5 Body */}
-                        {selectedPrapatra === 5 && (
-                          <>
-                            <td className="py-2.5 px-3 text-center border-r border-slate-100 font-mono font-bold text-blue-900">{row.totalGovtLandCount?.toLocaleString('en-IN')}</td>
-                            <td className="py-2.5 px-3 text-center border-r border-slate-100 font-mono">{row.govtAllottedCount}</td>
-                            <td className="py-2.5 px-3 text-center border-r border-slate-100 font-mono font-bold text-rose-700">{row.govtShartbhangCount}</td>
-                            <td className="py-2.5 px-3 text-center border-r border-slate-100 font-mono font-bold text-amber-700">{row.govtEncroachedCount}</td>
-                            <td className="py-2.5 px-3 text-center border-r border-slate-100 font-mono font-bold text-emerald-700">{row.govtMojaniDoneCount}</td>
-                          </>
-                        )}
-
-                        <td className="py-2.5 px-3 text-slate-500 italic border-r border-slate-100">{row.remarks || '-'}</td>
-
-                        {/* Action Column for SuperAdmin / Collector */}
-                        {isAdminMode && (
-                          <td className="py-2.5 px-3 text-center">
-                            <button
-                              onClick={() => openEditModal(row)}
-                              className="inline-flex items-center gap-1 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 font-semibold px-2 py-1 rounded text-[11px] shadow-2xs transition cursor-pointer"
-                              title="या गावाचे अभिलेख आकडे दुरुस्त करा"
-                            >
-                              <Edit3 className="w-3 h-3 text-amber-700" />
-                              <span>संपादन</span>
-                            </button>
+                    </thead>
+                    <tbody className="divide-y divide-slate-200">
+                      {prapatraLoading ? (
+                        <tr>
+                          <td colSpan={10} className="py-12 text-center text-slate-500">
+                            <RefreshCw className="w-6 h-6 animate-spin mx-auto text-blue-900 mb-2" />
+                            <span>सविस्तर ७/१२ अभिलेख व खातेदार यादी लोड होत आहे...</span>
                           </td>
-                        )}
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
+                        </tr>
+                      ) : prapatraParcels.length === 0 ? (
+                        <tr>
+                          <td colSpan={10} className="py-10 text-center text-slate-500">
+                            <LandPlot className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+                            <p className="font-semibold text-slate-700">या फिल्टरनुसार कोणतेही सविस्तर ७/१२ अभिलेख सापडले नाहीत.</p>
+                            <p className="text-[11px] text-slate-400 mt-1">गाव किंवा फिल्टर बदलून पहा किंवा सर्व गावे निवडा.</p>
+                          </td>
+                        </tr>
+                      ) : (
+                        prapatraParcels
+                          .slice((parcelPage - 1) * parcelPageSize, parcelPage * parcelPageSize)
+                          .map((p, idx) => {
+                            const realIdx = (parcelPage - 1) * parcelPageSize + idx + 1;
+                            return (
+                              <tr key={p.id || p.upi || idx} className="hover:bg-blue-50/40 transition">
+                                <td className="py-2.5 px-3 text-center text-slate-400 border-r border-slate-100 font-mono">
+                                  {realIdx}
+                                </td>
+                                <td className="py-2.5 px-3 font-semibold text-slate-900 border-r border-slate-100">
+                                  <div>{p.taluka}</div>
+                                  <div className="text-[11px] text-blue-900 font-normal">{cleanVillageName(p.villageName)}</div>
+                                </td>
+                                <td className="py-2.5 px-3 text-center font-mono font-bold text-slate-800 border-r border-slate-100">
+                                  {p.gatNumber || '-'}
+                                </td>
+                                <td className="py-2.5 px-3 text-center text-slate-600 border-r border-slate-100">
+                                  {p.oldSurveyNo || '-'}
+                                </td>
+                                <td className="py-2.5 px-3 text-right font-mono font-semibold text-slate-900 border-r border-slate-100">
+                                  {p.totalAreaHa}
+                                </td>
+                                <td className="py-2.5 px-3 text-slate-900 font-bold border-r border-slate-100 bg-blue-50/30">
+                                  <div className="line-clamp-2" title={p.currentOwner}>
+                                    {p.currentOwner || 'नोंद उपलब्ध नाही'}
+                                  </div>
+                                </td>
+                                <td className="py-2.5 px-3 text-slate-700 border-r border-slate-100">
+                                  <div className="line-clamp-2" title={p.baselineOwner1950}>
+                                    {p.baselineOwner1950 || 'नोंद उपलब्ध नाही'}
+                                  </div>
+                                </td>
+                                <td className="py-2.5 px-3 text-center border-r border-slate-100">
+                                  <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                                    p.tenureClass === 'SARKAR_SHASAN'
+                                      ? 'bg-rose-100 text-rose-800 border border-rose-200'
+                                      : p.tenureClass === 'BHOGVATDAR_CLASS_2'
+                                      ? 'bg-amber-100 text-amber-900 border border-amber-200'
+                                      : 'bg-slate-100 text-slate-700'
+                                  }`}>
+                                    {p.tenureDisplay || p.tenureClass || '-'}
+                                  </span>
+                                </td>
+                                <td className="py-2.5 px-3 border-r border-slate-100">
+                                  <span className={`text-[11px] font-semibold ${
+                                    p.statusFinding?.includes('अवैध') || p.statusFinding?.includes('शर्तभंग') || p.statusFinding?.includes('अतिक्रमण')
+                                      ? 'text-rose-700 font-bold'
+                                      : 'text-slate-800'
+                                  }`}>
+                                    {p.statusFinding || '-'}
+                                  </span>
+                                </td>
+                                <td className="py-2.5 px-3 text-slate-500 italic">
+                                  <div className="line-clamp-2" title={p.remarks}>
+                                    {p.remarks || '-'}
+                                  </div>
+                                </td>
+                              </tr>
+                            );
+                          })
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* Pagination for Detailed Parcels */}
+              {prapatraParcels.length > parcelPageSize && (
+                <Pagination
+                  currentPage={parcelPage}
+                  totalPages={Math.ceil(prapatraParcels.length / parcelPageSize)}
+                  totalCount={prapatraParcels.length}
+                  limit={parcelPageSize}
+                  onPageChange={(newPage) => setParcelPage(newPage)}
+                />
+              )}
             </div>
-          </div>
+          )}
+
+          {/* VIEW 2: SUMMARY ROLLUP TABLE (गोषवारा) */}
+          {activeTableView === 'summary' && (
+            <div className="bg-white border border-slate-200 rounded-xl shadow-2xs overflow-hidden">
+              <div className="overflow-x-auto max-h-[620px]">
+                <table className="w-full text-left border-collapse text-xs">
+                  <thead>
+                    {/* PRAPATRA 1 HEADERS */}
+                    {selectedPrapatra === 1 && (
+                      <>
+                        <tr className="bg-slate-100 text-slate-800 font-bold border-b border-slate-300 text-center">
+                          <th className="py-2.5 px-3 border-r border-slate-200 w-12">अ.क्र.</th>
+                          <th className="py-2.5 px-3 border-r border-slate-200 text-left">जिल्हा / तालुका / गाव</th>
+                          <th className="py-2.5 px-3 border-r border-slate-200">एकूण ७/१२ ची संख्या<br/><span className="text-[10px] text-slate-500 font-normal">[२(अ)]</span></th>
+                          <th className="py-2.5 px-3 border-r border-slate-200">१९५० पासून तपासणी केलेले ७/१२<br/><span className="text-[10px] text-slate-500 font-normal">[३(अ)]</span></th>
+                          <th className="py-2.5 px-3 border-r border-slate-200 text-blue-800">सरकार/शासन नोंद असलेले ७/१२<br/><span className="text-[10px] text-blue-600 font-normal">[४(अ)]</span></th>
+                          <th className="py-2.5 px-3 border-r border-slate-200 text-rose-700">अवैधरीत्या सरकार नोंद कमी केलेले ७/१२<br/><span className="text-[10px] text-rose-500 font-normal">[५(अ)]</span></th>
+                          <th className="py-2.5 px-3 border-r border-slate-200 text-emerald-700">यापैकी दुरुस्ती केलेले ७/१२<br/><span className="text-[10px] text-emerald-500 font-normal">[६(अ)]</span></th>
+                          <th className="py-2.5 px-3 border-r border-slate-200 text-amber-700">दुरुस्ती करण्यास शिल्लक ७/१२<br/><span className="text-[10px] text-amber-500 font-normal">[७(अ)]</span></th>
+                          <th className="py-2.5 px-3 border-r border-slate-200">शेरा</th>
+                          {isAdminMode && <th className="py-2.5 px-3 text-center w-20">कृती</th>}
+                        </tr>
+                        <tr className="bg-slate-50 text-[10px] text-slate-500 text-center border-b border-slate-200">
+                          <th className="py-1 border-r border-slate-200">१</th>
+                          <th className="py-1 border-r border-slate-200">२</th>
+                          <th className="py-1 border-r border-slate-200">३</th>
+                          <th className="py-1 border-r border-slate-200">४</th>
+                          <th className="py-1 border-r border-slate-200">५</th>
+                          <th className="py-1 border-r border-slate-200">६</th>
+                          <th className="py-1 border-r border-slate-200">७</th>
+                          <th className="py-1 border-r border-slate-200">८</th>
+                          <th className="py-1 border-r border-slate-200">९</th>
+                          {isAdminMode && <th className="py-1">१०</th>}
+                        </tr>
+                      </>
+                    )}
+
+                    {/* PRAPATRA 2 HEADERS */}
+                    {selectedPrapatra === 2 && (
+                      <>
+                        <tr className="bg-slate-100 text-slate-800 font-bold border-b border-slate-300 text-center">
+                          <th className="py-2.5 px-3 border-r border-slate-200 w-12">अ.क्र.</th>
+                          <th className="py-2.5 px-3 border-r border-slate-200 text-left">जिल्हा / तालुका / गाव</th>
+                          <th className="py-2.5 px-3 border-r border-slate-200 text-amber-800">पोकळीस्त नोंदी (बु.ग.दे./ता.ग.दे./सं.कु.) संख्या<br/><span className="text-[10px] text-slate-500 font-normal">[२(अ)]</span></th>
+                          <th className="py-2.5 px-3 border-r border-slate-200 text-emerald-700">कमी करण्यात आलेल्या नोंदींची संख्या<br/><span className="text-[10px] text-emerald-500 font-normal">[३(अ)]</span></th>
+                          <th className="py-2.5 px-3 border-r border-slate-200 text-rose-700">कमी करण्यास शिल्लक नोंदींची संख्या<br/><span className="text-[10px] text-rose-500 font-normal">[४(अ)]</span></th>
+                          <th className="py-2.5 px-3 border-r border-slate-200">शेरा</th>
+                          {isAdminMode && <th className="py-2.5 px-3 text-center w-20">कृती</th>}
+                        </tr>
+                        <tr className="bg-slate-50 text-[10px] text-slate-500 text-center border-b border-slate-200">
+                          <th className="py-1 border-r border-slate-200">१</th>
+                          <th className="py-1 border-r border-slate-200">२</th>
+                          <th className="py-1 border-r border-slate-200">३</th>
+                          <th className="py-1 border-r border-slate-200">४</th>
+                          <th className="py-1 border-r border-slate-200">५</th>
+                          <th className="py-1 border-r border-slate-200">६</th>
+                          {isAdminMode && <th className="py-1">७</th>}
+                        </tr>
+                      </>
+                    )}
+
+                    {/* PRAPATRA 3 HEADERS */}
+                    {selectedPrapatra === 3 && (
+                      <>
+                        <tr className="bg-slate-100 text-slate-800 font-bold border-b border-slate-300 text-center">
+                          <th className="py-2.5 px-3 border-r border-slate-200 w-12">अ.क्र.</th>
+                          <th className="py-2.5 px-3 border-r border-slate-200 text-left">जिल्हा / तालुका / गाव</th>
+                          <th className="py-2.5 px-3 border-r border-slate-200">शासकीय मंडळे/स्थानिक संस्थांना प्रदान ७/१२<br/><span className="text-[10px] text-slate-500 font-normal">[२(अ)]</span></th>
+                          <th className="py-2.5 px-3 border-r border-slate-200 text-rose-700">अनधिकृत हस्तांतरण / शर्तभंग ७/१२<br/><span className="text-[10px] text-rose-500 font-normal">[३(अ)]</span></th>
+                          <th className="py-2.5 px-3 border-r border-slate-200 text-emerald-700">मालकी पूर्ववत / शासन जमा केलेले<br/><span className="text-[10px] text-emerald-500 font-normal">[४(अ)]</span></th>
+                          <th className="py-2.5 px-3 border-r border-slate-200">शेरा</th>
+                          {isAdminMode && <th className="py-2.5 px-3 text-center w-20">कृती</th>}
+                        </tr>
+                        <tr className="bg-slate-50 text-[10px] text-slate-500 text-center border-b border-slate-200">
+                          <th className="py-1 border-r border-slate-200">१</th>
+                          <th className="py-1 border-r border-slate-200">२</th>
+                          <th className="py-1 border-r border-slate-200">३</th>
+                          <th className="py-1 border-r border-slate-200">४</th>
+                          <th className="py-1 border-r border-slate-200">५</th>
+                          <th className="py-1 border-r border-slate-200">६</th>
+                          {isAdminMode && <th className="py-1">७</th>}
+                        </tr>
+                      </>
+                    )}
+
+                    {/* PRAPATRA 4 HEADERS */}
+                    {selectedPrapatra === 4 && (
+                      <>
+                        <tr className="bg-slate-100 text-slate-800 font-bold border-b border-slate-300 text-center">
+                          <th className="py-2.5 px-3 border-r border-slate-200 w-12">अ.क्र.</th>
+                          <th className="py-2.5 px-3 border-r border-slate-200 text-left">जिल्हा / तालुका / गाव</th>
+                          <th className="py-2.5 px-3 border-r border-slate-200">शैक्षणिक/ट्रस्ट/सोसायट्यांना प्रदान ७/१२<br/><span className="text-[10px] text-slate-500 font-normal">[२(अ)]</span></th>
+                          <th className="py-2.5 px-3 border-r border-slate-200 text-rose-700">अनधिकृत हस्तांतरण / शर्तभंग ७/१२<br/><span className="text-[10px] text-rose-500 font-normal">[३(अ)]</span></th>
+                          <th className="py-2.5 px-3 border-r border-slate-200 text-emerald-700">मालकी पूर्ववत / शासन जमा केलेले<br/><span className="text-[10px] text-emerald-500 font-normal">[४(अ)]</span></th>
+                          <th className="py-2.5 px-3 border-r border-slate-200">शेरा</th>
+                          {isAdminMode && <th className="py-2.5 px-3 text-center w-20">कृती</th>}
+                        </tr>
+                        <tr className="bg-slate-50 text-[10px] text-slate-500 text-center border-b border-slate-200">
+                          <th className="py-1 border-r border-slate-200">१</th>
+                          <th className="py-1 border-r border-slate-200">२</th>
+                          <th className="py-1 border-r border-slate-200">३</th>
+                          <th className="py-1 border-r border-slate-200">४</th>
+                          <th className="py-1 border-r border-slate-200">५</th>
+                          <th className="py-1 border-r border-slate-200">६</th>
+                          {isAdminMode && <th className="py-1">७</th>}
+                        </tr>
+                      </>
+                    )}
+
+                    {/* PRAPATRA 5 HEADERS */}
+                    {selectedPrapatra === 5 && (
+                      <>
+                        <tr className="bg-slate-100 text-slate-800 font-bold border-b border-slate-300 text-center">
+                          <th className="py-2.5 px-3 border-r border-slate-200 w-12" rowSpan={2}>अ.क्र.</th>
+                          <th className="py-2.5 px-3 border-r border-slate-200 text-left" rowSpan={2}>जिल्हा / तालुका / गाव</th>
+                          <th className="py-2.5 px-3 border-r border-slate-200" rowSpan={2}>शासकीय जमिनी ७/१२ संख्या<br/><span className="text-[10px] text-slate-500 font-normal">[२(अ)]</span></th>
+                          <th className="py-2.5 px-3 border-r border-slate-200" rowSpan={2}>वाटप केलेल्या जमिनी संख्या<br/><span className="text-[10px] text-slate-500 font-normal">[३(अ)]</span></th>
+                          <th className="py-1.5 px-3 border-b border-slate-200 bg-slate-200" colSpan={3}>शासकीय जमिनींची सद्यस्थिती</th>
+                          <th className="py-2.5 px-3 border-r border-slate-200" rowSpan={2}>शेरा</th>
+                          {isAdminMode && <th className="py-2.5 px-3 text-center w-20" rowSpan={2}>कृती</th>}
+                        </tr>
+                        <tr className="bg-slate-100 text-slate-800 font-bold border-b border-slate-300 text-center">
+                          <th className="py-1.5 px-3 border-r border-slate-200 text-rose-700">शर्तभंग झालेल्या<br/><span className="text-[10px] font-normal">[४(अ)]</span></th>
+                          <th className="py-1.5 px-3 border-r border-slate-200 text-amber-700">अतिक्रमण असलेल्या<br/><span className="text-[10px] font-normal">[५(अ)]</span></th>
+                          <th className="py-1.5 px-3 border-r border-slate-200 text-emerald-700">मोजणी झालेल्या<br/><span className="text-[10px] font-normal">[६(अ)]</span></th>
+                        </tr>
+                        <tr className="bg-slate-50 text-[10px] text-slate-500 text-center border-b border-slate-200">
+                          <th className="py-1 border-r border-slate-200">१</th>
+                          <th className="py-1 border-r border-slate-200">२</th>
+                          <th className="py-1 border-r border-slate-200">३</th>
+                          <th className="py-1 border-r border-slate-200">४</th>
+                          <th className="py-1 border-r border-slate-200">५</th>
+                          <th className="py-1 border-r border-slate-200">६</th>
+                          <th className="py-1 border-r border-slate-200">७</th>
+                          <th className="py-1 border-r border-slate-200">८</th>
+                          {isAdminMode && <th className="py-1">९</th>}
+                        </tr>
+                      </>
+                    )}
+                  </thead>
+                  <tbody className="divide-y divide-slate-200">
+                    {prapatraLoading ? (
+                      <tr>
+                        <td colSpan={11} className="py-12 text-center text-slate-500">
+                          <RefreshCw className="w-6 h-6 animate-spin mx-auto text-blue-900 mb-2" />
+                          <span>प्रपत्र डेटा लोड होत आहे...</span>
+                        </td>
+                      </tr>
+                    ) : prapatraData.length === 0 ? (
+                      <tr>
+                        <td colSpan={11} className="py-8 text-center text-slate-400">
+                          कोणतीही नोंद उपलब्ध नाही. (निवडलेले फिल्टर तपासा किंवा रीसेट करा)
+                        </td>
+                      </tr>
+                    ) : (
+                      prapatraData.map((row, idx) => (
+                        <tr key={row.id || idx} className="hover:bg-blue-50/40 transition">
+                          <td className="py-2.5 px-3 text-center text-slate-400 border-r border-slate-100">{idx + 1}</td>
+                          <td className="py-2.5 px-3 font-semibold text-slate-900 border-r border-slate-100">
+                            {row.villageName === 'संपूर्ण तालुका (All Villages)' ? (
+                              <span className="font-extrabold text-blue-950 flex items-center gap-1.5">
+                                <Building2 className="w-3.5 h-3.5 text-blue-900" />
+                                तालुका: {row.taluka} (एकूण गोषवारा)
+                              </span>
+                            ) : (
+                              cleanVillageName(row.villageName) || row.taluka
+                            )}
+                          </td>
+
+                          {/* Prapatra 1 Body */}
+                          {selectedPrapatra === 1 && (
+                            <>
+                              <td className="py-2.5 px-3 text-center border-r border-slate-100 font-mono">{row.total712Count?.toLocaleString('en-IN')}</td>
+                              <td className="py-2.5 px-3 text-center border-r border-slate-100 font-mono">{row.inspected1950Count?.toLocaleString('en-IN')}</td>
+                              <td className="py-2.5 px-3 text-center border-r border-slate-100 font-mono font-bold text-blue-900">{row.govtFound1950Count?.toLocaleString('en-IN')}</td>
+                              <td className="py-2.5 px-3 text-center border-r border-slate-100 font-mono font-bold text-rose-700">{row.illegalDeletionsCount}</td>
+                              <td className="py-2.5 px-3 text-center border-r border-slate-100 font-mono font-bold text-emerald-700">{row.rectifiedCount}</td>
+                              <td className="py-2.5 px-3 text-center border-r border-slate-100 font-mono font-bold text-amber-700">{row.pendingRectifyCount}</td>
+                            </>
+                          )}
+
+                          {/* Prapatra 2 Body */}
+                          {selectedPrapatra === 2 && (
+                            <>
+                              <td className="py-2.5 px-3 text-center border-r border-slate-100 font-mono font-bold text-amber-800">{row.pokalistCount}</td>
+                              <td className="py-2.5 px-3 text-center border-r border-slate-100 font-mono font-bold text-emerald-700">{row.pokalistRemovedCount}</td>
+                              <td className="py-2.5 px-3 text-center border-r border-slate-100 font-mono font-bold text-rose-700">{row.pokalistPendingCount}</td>
+                            </>
+                          )}
+
+                          {/* Prapatra 3 Body */}
+                          {selectedPrapatra === 3 && (
+                            <>
+                              <td className="py-2.5 px-3 text-center border-r border-slate-100 font-mono">{row.govtDeptsAllottedCount}</td>
+                              <td className="py-2.5 px-3 text-center border-r border-slate-100 font-mono font-bold text-rose-700">{row.govtDeptsShartbhang}</td>
+                              <td className="py-2.5 px-3 text-center border-r border-slate-100 font-mono font-bold text-emerald-700">{row.govtDeptsRestoredGovt}</td>
+                            </>
+                          )}
+
+                          {/* Prapatra 4 Body */}
+                          {selectedPrapatra === 4 && (
+                            <>
+                              <td className="py-2.5 px-3 text-center border-r border-slate-100 font-mono">{row.privateAllottedCount}</td>
+                              <td className="py-2.5 px-3 text-center border-r border-slate-100 font-mono font-bold text-rose-700">{row.privateShartbhang}</td>
+                              <td className="py-2.5 px-3 text-center border-r border-slate-100 font-mono font-bold text-emerald-700">{row.privateRestoredGovt}</td>
+                            </>
+                          )}
+
+                          {/* Prapatra 5 Body */}
+                          {selectedPrapatra === 5 && (
+                            <>
+                              <td className="py-2.5 px-3 text-center border-r border-slate-100 font-mono font-bold text-blue-900">{row.totalGovtLandCount?.toLocaleString('en-IN')}</td>
+                              <td className="py-2.5 px-3 text-center border-r border-slate-100 font-mono">{row.govtAllottedCount}</td>
+                              <td className="py-2.5 px-3 text-center border-r border-slate-100 font-mono font-bold text-rose-700">{row.govtShartbhangCount}</td>
+                              <td className="py-2.5 px-3 text-center border-r border-slate-100 font-mono font-bold text-amber-700">{row.govtEncroachedCount}</td>
+                              <td className="py-2.5 px-3 text-center border-r border-slate-100 font-mono font-bold text-emerald-700">{row.govtMojaniDoneCount}</td>
+                            </>
+                          )}
+
+                          <td className="py-2.5 px-3 text-slate-500 italic border-r border-slate-100">{row.remarks || '-'}</td>
+
+                          {/* Action Column for SuperAdmin / Collector */}
+                          {isAdminMode && (
+                            <td className="py-2.5 px-3 text-center">
+                              <button
+                                onClick={() => openEditModal(row)}
+                                className="inline-flex items-center gap-1 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 font-semibold px-2 py-1 rounded text-[11px] shadow-2xs transition cursor-pointer"
+                                title="या गावाचे अभिलेख आकडे दुरुस्त करा"
+                              >
+                                <Edit3 className="w-3 h-3 text-amber-700" />
+                                <span>संपादन</span>
+                              </button>
+                            </td>
+                          )}
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
         </div>
       )}
 

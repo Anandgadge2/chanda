@@ -8,7 +8,8 @@ import {
   generatePrapatra2Excel,
   generatePrapatra3Excel,
   generatePrapatra4Excel,
-  generatePrapatra5Excel
+  generatePrapatra5Excel,
+  cleanVillageName
 } from '../utils/prapatraGenerator.js';
 import { generatePrapatraPdf } from '../utils/pdfGenerator.js';
 
@@ -125,7 +126,7 @@ export const getPrapatraReport = async (req, res) => {
       } else {
         // District-wide specific village search
         where.villageName = { equals: village, mode: 'insensitive' };
-        scopeName = `चंद्रपूर जिल्हा | गाव: ${village}`;
+        scopeName = `चंद्रपूर जिल्हा | गाव: ${cleanVillageName(village)}`;
       }
     } else {
       where.taluka = { equals: targetTaluka, mode: 'insensitive' };
@@ -134,7 +135,7 @@ export const getPrapatraReport = async (req, res) => {
         scopeName = `तालुका: ${targetTaluka} (सर्व गावे)`;
       } else {
         where.villageName = { equals: village, mode: 'insensitive' };
-        scopeName = `तालुका: ${targetTaluka} | गाव: ${village}`;
+        scopeName = `तालुका: ${targetTaluka} | गाव: ${cleanVillageName(village)}`;
       }
     }
 
@@ -175,6 +176,219 @@ export const getPrapatraReport = async (req, res) => {
       });
     }
 
+    // -------------------------------------------------------------
+    // FETCH ACTUAL LAND PARCELS & OWNER DATA
+    // -------------------------------------------------------------
+    const parcelWhere = {};
+    if (!isAllTalukas) {
+      parcelWhere.taluka = { equals: targetTaluka, mode: 'insensitive' };
+    }
+    if (!isAllVillages) {
+      const cleanV = cleanVillageName(village);
+      parcelWhere.OR = [
+        { villageName: { contains: cleanV, mode: 'insensitive' } },
+        { villageName: { contains: village, mode: 'insensitive' } },
+        { revenueCircle: { contains: cleanV, mode: 'insensitive' } }
+      ];
+    }
+
+    if (search && search.trim()) {
+      const s = search.trim();
+      const searchConditions = [
+        { villageName: { contains: s, mode: 'insensitive' } },
+        { gatNumber: { contains: s, mode: 'insensitive' } },
+        { oldSurveyNo: { contains: s, mode: 'insensitive' } },
+        { upi: { contains: s, mode: 'insensitive' } }
+      ];
+      if (parcelWhere.OR) {
+        parcelWhere.AND = [{ OR: parcelWhere.OR }, { OR: searchConditions }];
+        delete parcelWhere.OR;
+      } else {
+        parcelWhere.OR = searchConditions;
+      }
+    }
+
+    // Prapatra specific criteria
+    let prapatraParcelConditions = null;
+    if (prapatraNum === 1) {
+      if (filterType === 'illegalDeletions') {
+        prapatraParcelConditions = [
+          { metadata: { path: ['flags', 'isIllegalDeletion'], equals: true } },
+          { forwardCases: { some: { violationType: 'GOVERNMENT_NAME_MISSING' } } }
+        ];
+      } else {
+        prapatraParcelConditions = [
+          { tenureClass: 'SARKAR_SHASAN' },
+          { backwardHistories: { some: { wasGovtLand: true } } },
+          { forwardCases: { some: { violationType: 'GOVERNMENT_NAME_MISSING' } } },
+          { metadata: { path: ['flags', 'isGovt'], equals: true } }
+        ];
+      }
+    } else if (prapatraNum === 2) {
+      prapatraParcelConditions = [
+        { metadata: { path: ['flags', 'isPokalist'], equals: true } },
+        { forwardCases: { some: { violationType: 'POKALIST_NONDI' } } },
+        { metadata: { path: ['otherRights'], string_contains: 'बु.ग.दे' } },
+        { metadata: { path: ['otherRights'], string_contains: 'ता.ग.दे' } },
+        { metadata: { path: ['otherRights'], string_contains: 'सं.कु.' } }
+      ];
+    } else if (prapatraNum === 3) {
+      prapatraParcelConditions = [
+        { metadata: { path: ['flags', 'isCorpAllot'], equals: true } },
+        { forwardCases: { some: { prapatraCategory: { contains: '३' } } } }
+      ];
+    } else if (prapatraNum === 4) {
+      prapatraParcelConditions = [
+        { metadata: { path: ['flags', 'isPrivateAllot'], equals: true } },
+        { forwardCases: { some: { prapatraCategory: { contains: '४' } } } }
+      ];
+    } else if (prapatraNum === 5) {
+      prapatraParcelConditions = [
+        { tenureClass: 'SARKAR_SHASAN' },
+        { metadata: { path: ['flags', 'isGovt'], equals: true } },
+        { metadata: { path: ['flags', 'isEncroached'], equals: true } },
+        { forwardCases: { some: { violationType: 'ENCROACHMENT' } } }
+      ];
+    }
+
+    if (prapatraParcelConditions) {
+      if (parcelWhere.AND) {
+        parcelWhere.AND.push({ OR: prapatraParcelConditions });
+      } else if (parcelWhere.OR) {
+        parcelWhere.AND = [{ OR: parcelWhere.OR }, { OR: prapatraParcelConditions }];
+        delete parcelWhere.OR;
+      } else {
+        parcelWhere.OR = prapatraParcelConditions;
+      }
+    }
+
+    const maxParcels = (format === 'excel' || format === 'xlsx') ? 5000 : (format === 'pdf' ? 500 : 200);
+
+    let rawParcels = await prisma.landParcel.findMany({
+      where: parcelWhere,
+      take: maxParcels,
+      include: {
+        backwardHistories: { where: { epochYear: { in: [1950, 1995] } }, orderBy: { epochYear: 'asc' } },
+        forwardCases: { take: 1, orderBy: { createdAt: 'desc' } }
+      },
+      orderBy: [{ taluka: 'asc' }, { villageName: 'asc' }, { gatNumber: 'asc' }]
+    });
+
+    // Graceful fallback for village scope if strict filters returned 0
+    if (rawParcels.length === 0 && !isAllVillages) {
+      const cleanV = cleanVillageName(village);
+      rawParcels = await prisma.landParcel.findMany({
+        where: {
+          taluka: !isAllTalukas ? { equals: targetTaluka, mode: 'insensitive' } : undefined,
+          OR: [
+            { villageName: { contains: cleanV, mode: 'insensitive' } },
+            { revenueCircle: { contains: cleanV, mode: 'insensitive' } }
+          ]
+        },
+        take: maxParcels,
+        include: {
+          backwardHistories: { where: { epochYear: { in: [1950, 1995] } }, orderBy: { epochYear: 'asc' } },
+          forwardCases: { take: 1, orderBy: { createdAt: 'desc' } }
+        },
+        orderBy: [{ taluka: 'asc' }, { villageName: 'asc' }, { gatNumber: 'asc' }]
+      });
+    }
+
+    const tenureLabels = {
+      BHOGVATDAR_CLASS_1: 'भोगवटादार वर्ग-१',
+      BHOGVATDAR_CLASS_2: 'भोगवटादार वर्ग-२',
+      SARKAR_SHASAN: 'शासकीय जमीन',
+      DEVASTHAN_INAM: 'देवस्थान / इनाम',
+      FOREST_JANGAL: 'वन जमीन'
+    };
+
+    const formattedParcels = rawParcels.map((p, idx) => {
+      const metaOwner = p.metadata?.ownerName;
+      const caseOccupant = p.forwardCases?.[0]?.occupantName;
+      const b1995 = p.backwardHistories?.find(b => b.epochYear >= 1990);
+      const b1950 = p.backwardHistories?.find(b => b.epochYear === 1950);
+      const otherRights = p.metadata?.otherRights;
+
+      // Extract current owner
+      let currentOwner = 'नोंद उपलब्ध नाही';
+      if (metaOwner && metaOwner !== 'नाही' && metaOwner !== '-' && metaOwner !== 'भो वर्ग 2') {
+        currentOwner = metaOwner;
+      } else if (otherRights && otherRights !== '-' && otherRights !== '....' && otherRights.length > 2 && !otherRights.includes('रूपांतर')) {
+        currentOwner = otherRights;
+      } else if (caseOccupant && caseOccupant !== 'नाही') {
+        currentOwner = caseOccupant;
+      } else if (b1995?.ownerName && b1995.ownerName !== 'नाही') {
+        currentOwner = b1995.ownerName;
+      } else if (metaOwner) {
+        currentOwner = metaOwner;
+      }
+
+      // Extract 1950 owner
+      let baselineOwner1950 = 'नोंद उपलब्ध नाही';
+      if (b1950?.ownerName && b1950.ownerName !== 'नाही' && b1950.ownerName !== '_') {
+        baselineOwner1950 = b1950.ownerName;
+      } else if (b1950?.wasGovtLand || p.tenureClass === 'SARKAR_SHASAN') {
+        baselineOwner1950 = 'शासकीय / सरकार नोंद';
+      }
+
+      // Status finding based on Prapatra
+      let statusFinding = 'तपासणी प्रमाणित';
+      const flags = p.metadata?.flags || {};
+      const c = p.forwardCases?.[0];
+
+      if (prapatraNum === 1) {
+        if (flags.isIllegalDeletion || c?.violationType === 'GOVERNMENT_NAME_MISSING') {
+          statusFinding = 'अवैधरीत्या सरकार नोंद कमी (दुरुस्ती आवश्यक)';
+        } else if (b1950?.wasGovtLand || p.tenureClass === 'SARKAR_SHASAN') {
+          statusFinding = '१९५० पासून सरकार नोंद कायम';
+        } else {
+          statusFinding = '१९५० अभिलेख तपासणी प्रमाणित';
+        }
+      } else if (prapatraNum === 2) {
+        if (flags.isPokalist || c?.violationType === 'POKALIST_NONDI') {
+          statusFinding = 'पोकळीस्त नोंद (बु.ग.दे./ता.ग.दे.) वगळण्यास शिल्लक';
+        } else {
+          statusFinding = 'पोकळीस्त नोंद आढळली नाही';
+        }
+      } else if (prapatraNum === 3) {
+        if (flags.isCorpAllot || flags.isShartbhang) {
+          statusFinding = c?.isRepossessedToGovt ? 'पुन्हा शासन जमा' : 'शर्तभंग / अनधिकृत हस्तांतरण';
+        } else {
+          statusFinding = 'मंडळ / महामंडळ वाटप';
+        }
+      } else if (prapatraNum === 4) {
+        if (flags.isPrivateAllot || flags.isShartbhang) {
+          statusFinding = c?.isRepossessedToGovt ? 'पुन्हा शासन जमा' : 'शर्तभंग / चौकशी सुरू';
+        } else {
+          statusFinding = 'खाजगी संस्था वाटप';
+        }
+      } else if (prapatraNum === 5) {
+        if (flags.isEncroached || c?.violationType === 'ENCROACHMENT') {
+          statusFinding = flags.isMojaniDone ? 'अतिक्रमण (मोजणी पूर्ण)' : 'अतिक्रमण (मोजणी शिल्लक)';
+        } else {
+          statusFinding = 'गायरान / शासकीय जमीन';
+        }
+      }
+
+      return {
+        id: p.id,
+        upi: p.upi,
+        srNo: idx + 1,
+        taluka: p.taluka,
+        villageName: cleanVillageName(p.villageName),
+        gatNumber: p.gatNumber || '-',
+        oldSurveyNo: p.oldSurveyNo || '-',
+        totalAreaHa: Number(p.totalAreaHa || 0).toFixed(4),
+        currentOwner,
+        baselineOwner1950,
+        tenureClass: p.tenureClass,
+        tenureDisplay: tenureLabels[p.tenureClass] || p.tenureClass || '-',
+        statusFinding,
+        orderRef: c?.caseNumber || b1950?.ferfarNumber || '-',
+        remarks: (otherRights && otherRights !== '....' && otherRights !== '-') ? otherRights : (b1950?.mutationType || '-')
+      };
+    });
+
     // If Excel export requested
     if (format === 'excel' || format === 'xlsx') {
       const timestamp = new Date().toISOString().slice(0, 10);
@@ -182,16 +396,16 @@ export const getPrapatraReport = async (req, res) => {
       res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
       res.setHeader('Content-Disposition', `attachment; filename=Prapatra-${prapatraNum}_Chandrapur_${safeScope}_${timestamp}.xlsx`);
 
-      if (prapatraNum === 1) return await generatePrapatra1Excel(records, scopeName, res);
-      if (prapatraNum === 2) return await generatePrapatra2Excel(records, scopeName, res);
-      if (prapatraNum === 3) return await generatePrapatra3Excel(records, scopeName, res);
-      if (prapatraNum === 4) return await generatePrapatra4Excel(records, scopeName, res);
-      if (prapatraNum === 5) return await generatePrapatra5Excel(records, scopeName, res);
+      if (prapatraNum === 1) return await generatePrapatra1Excel(records, formattedParcels, scopeName, res);
+      if (prapatraNum === 2) return await generatePrapatra2Excel(records, formattedParcels, scopeName, res);
+      if (prapatraNum === 3) return await generatePrapatra3Excel(records, formattedParcels, scopeName, res);
+      if (prapatraNum === 4) return await generatePrapatra4Excel(records, formattedParcels, scopeName, res);
+      if (prapatraNum === 5) return await generatePrapatra5Excel(records, formattedParcels, scopeName, res);
     }
 
     // If PDF export requested
     if (format === 'pdf') {
-      return await generatePrapatraPdf(prapatraNum, records, scopeName, res);
+      return await generatePrapatraPdf(prapatraNum, records, formattedParcels, scopeName, res);
     }
 
     // Default JSON response
@@ -204,7 +418,9 @@ export const getPrapatraReport = async (req, res) => {
       filterType,
       search,
       count: records.length,
-      data: records
+      data: records,
+      parcels: formattedParcels,
+      totalParcelsCount: formattedParcels.length
     });
   } catch (err) {
     console.error('getPrapatraReport error:', err);
@@ -244,11 +460,26 @@ export const getTalukaVillages = async (req, res) => {
       orderBy: [{ villageName: 'asc' }]
     });
 
+    // Clean village names and deduplicate
+    const seen = new Set();
+    const cleanVillages = [];
+    for (const r of records) {
+      const cName = cleanVillageName(r.villageName);
+      if (cName && !seen.has(`${r.taluka}-${cName}`)) {
+        seen.add(`${r.taluka}-${cName}`);
+        cleanVillages.push({
+          ...r,
+          originalVillageName: r.villageName,
+          villageName: cName
+        });
+      }
+    }
+
     return res.status(200).json({
       success: true,
       taluka: targetTaluka,
-      count: records.length,
-      villages: records
+      count: cleanVillages.length,
+      villages: cleanVillages
     });
   } catch (err) {
     console.error('getTalukaVillages error:', err);
