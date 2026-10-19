@@ -210,7 +210,7 @@ export default function Sidebar({
                         : 'max-w-[170px] opacity-100 ml-2.5'
                     )}
                   >
-                    <p className="leading-tight text-xs font-bold truncate">{item.labelMr}</p>
+                    <p className="leading-tight text-sm font-bold truncate">{item.labelMr}</p>
                   </div>
 
                   {/* Active Indicator Arrow */}
@@ -311,7 +311,7 @@ export default function Sidebar({
                       )}
                     />
                     <div>
-                      <p className="leading-tight text-xs font-bold">{item.labelMr}</p>
+                      <p className="leading-tight text-sm font-bold">{item.labelMr}</p>
                     </div>
                   </div>
                   <ChevronRight className="w-3.5 h-3.5 opacity-60" />

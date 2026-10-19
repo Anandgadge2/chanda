@@ -85,14 +85,14 @@ export default function Navbar({
               </div>
               <div className="min-w-0">
                 <div className="flex items-center gap-1.5 sm:gap-2">
-                  <span className="font-black text-slate-900 text-xs sm:text-base tracking-tight group-hover:text-blue-950 transition truncate">
+                  <span className="font-black text-slate-900 text-sm sm:text-lg tracking-tight group-hover:text-blue-950 transition truncate">
                     जिल्हाधिकारी कार्यालय, चंद्रपूर
                   </span>
-                  <span className="hidden sm:inline-block text-[10px] font-bold bg-amber-100 text-amber-900 px-1.5 py-0.5 rounded border border-amber-300 flex-shrink-0">
+                  <span className="hidden sm:inline-block text-xs font-bold bg-amber-100 text-amber-900 px-2 py-0.5 rounded border border-amber-300 flex-shrink-0">
                     MLRC 1966
                   </span>
                 </div>
-                <p className="text-[10px] sm:text-[11px] text-slate-500 font-medium hidden md:block truncate">
+                <p className="text-xs sm:text-sm text-slate-500 font-medium hidden md:block truncate">
                   जमीन महसूल व भूमी अभिलेख संनियंत्रण प्रणाली
                 </p>
               </div>
@@ -103,19 +103,19 @@ export default function Navbar({
           <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
             <Link
               href="/glossary"
-              className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 sm:px-3 py-1.5 rounded-lg border border-slate-200 text-slate-700 hover:text-blue-950 hover:bg-slate-50 transition shadow-2xs"
+              className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold px-3 py-1.5 rounded-lg border border-slate-200 text-slate-700 hover:text-blue-950 hover:bg-slate-50 transition shadow-2xs"
               title="जमीन महसूल शब्दावली व संक्षिप्त रूपे"
             >
-              <BookOpen className="w-3.5 h-3.5 text-amber-600" />
+              <BookOpen className="w-4 h-4 text-amber-600" />
               <span className="hidden md:inline">महसूल शब्दावली</span>
               <span className="md:hidden">शब्दावली</span>
             </Link>
 
             <Link
               href="/"
-              className="hidden sm:inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 sm:px-3 py-1.5 rounded-lg border border-slate-200 text-slate-700 hover:text-blue-950 hover:bg-slate-50 transition shadow-2xs"
+              className="hidden sm:inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold px-3 py-1.5 rounded-lg border border-slate-200 text-slate-700 hover:text-blue-950 hover:bg-slate-50 transition shadow-2xs"
             >
-              <ExternalLink className="w-3.5 h-3.5 text-slate-500" />
+              <ExternalLink className="w-4 h-4 text-slate-500" />
               <span className="hidden md:inline">सार्वजनिक पोर्टल</span>
               <span className="md:hidden">पोर्टल</span>
             </Link>

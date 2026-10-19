@@ -22,6 +22,7 @@ import TalukaMountainChart from '../../components/charts/TalukaMountainChart';
 import ComplianceSpeedometerGauge from '../../components/charts/ComplianceSpeedometerGauge';
 import GatSurveyVisualizer from '../../components/charts/GatSurveyVisualizer';
 import GatSurveyLedgerTable from '../../components/charts/GatSurveyLedgerTable';
+import ChandrapurGisMap from '../../components/ChandrapurGisMap';
 import { api } from '../../lib/api';
 import { CHANDRAPUR_TALUKAS, VIOLATION_TYPES } from '../../lib/constants';
 
@@ -68,27 +69,27 @@ export default function DashboardPage() {
   return (
     <div className="space-y-2.5 sm:space-y-3">
       {/* Streamlined Compact Executive Command & Filter Header */}
-      <div className="bg-white border border-slate-200/90 rounded-xl px-3 py-2 sm:px-3.5 sm:py-2 shadow-2xs flex flex-col sm:flex-row justify-between sm:items-center gap-2">
-        <div className="flex items-center gap-2 min-w-0">
-          <span className="text-[10px] font-bold bg-amber-100 text-amber-900 px-1.5 py-0.5 rounded border border-amber-300 shrink-0">
+      <div className="bg-white border border-slate-200/90 rounded-xl px-3.5 py-2.5 sm:px-4 sm:py-3 shadow-2xs flex flex-col sm:flex-row justify-between sm:items-center gap-2.5">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <span className="text-xs font-bold bg-amber-100 text-amber-900 px-2 py-0.5 rounded border border-amber-300 shrink-0">
             महसूल २०२६
           </span>
-          <h1 className="text-xs sm:text-sm font-black text-slate-900 leading-none truncate">
+          <h1 className="text-sm sm:text-base lg:text-lg font-black text-slate-900 leading-none truncate">
             जमीन अभिलेख व्यवस्थापन व महसूल चौकशी प्रणाली
           </h1>
-          <span className="text-[10px] text-slate-400 font-medium hidden xl:inline shrink-0">
+          <span className="text-xs text-slate-500 font-semibold hidden xl:inline shrink-0">
             • चंद्रपूर (MLRC १९६६)
           </span>
         </div>
 
         {/* Compact Integrated Actions & Filter */}
-        <div className="flex items-center gap-2 shrink-0">
-          <div className="flex items-center gap-1.5 min-w-[150px] sm:min-w-[180px]">
-            <Filter className="w-3.5 h-3.5 text-blue-900 shrink-0" />
+        <div className="flex items-center gap-2.5 shrink-0">
+          <div className="flex items-center gap-1.5 min-w-[160px] sm:min-w-[200px]">
+            <Filter className="w-4 h-4 text-blue-900 shrink-0" />
             <select
               value={taluka}
               onChange={(e) => setTaluka(e.target.value)}
-              className="w-full border border-slate-200 rounded-lg px-2 py-1 text-xs bg-slate-50 font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-500 transition cursor-pointer"
+              className="w-full border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs sm:text-sm bg-slate-50 font-bold text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-500 transition cursor-pointer"
             >
               <option value="">सर्व तालुके (All 15)</option>
               {CHANDRAPUR_TALUKAS.map((t) => (
@@ -102,19 +103,19 @@ export default function DashboardPage() {
           <button
             onClick={() => loadData(taluka, true)}
             disabled={loading}
-            className="inline-flex items-center gap-1 text-xs text-slate-600 hover:text-blue-950 font-bold px-2 py-1 rounded-lg border border-slate-200 hover:bg-slate-50 transition shadow-2xs cursor-pointer shrink-0"
+            className="inline-flex items-center gap-1.5 text-xs sm:text-sm text-slate-700 hover:text-blue-950 font-bold px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 transition shadow-2xs cursor-pointer shrink-0"
             title="माहिती रिफ्रेश करा"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-blue-900' : ''}`} />
+            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-blue-900' : ''}`} />
             <span className="hidden md:inline">रिफ्रेश</span>
           </button>
 
           <Link
             href="/bulk-upload"
-            className="inline-flex items-center justify-center gap-1 bg-blue-900 hover:bg-blue-800 text-white font-bold px-2.5 py-1 rounded-lg text-xs shadow-2xs transition active:scale-95 shrink-0"
+            className="inline-flex items-center justify-center gap-1.5 bg-blue-900 hover:bg-blue-800 text-white font-bold px-3 py-1.5 rounded-lg text-xs sm:text-sm shadow-2xs transition active:scale-95 shrink-0"
             title="गाव एक्सेल डेटा अपलोड"
           >
-            <UploadCloud className="w-3.5 h-3.5" />
+            <UploadCloud className="w-4 h-4" />
             <span>गाव डेटा अपलोड</span>
           </Link>
         </div>
@@ -162,6 +163,13 @@ export default function DashboardPage() {
           textColor="text-emerald-600"
         />
       </div>
+
+      {/* Official Chandrapur District Interactive Cadastral GIS Map */}
+      <ChandrapurGisMap
+        selectedTaluka={taluka}
+        onSelectTaluka={(newTaluka) => setTaluka(newTaluka)}
+        analyticsData={analytics.talukaDistribution}
+      />
 
       {/* Visual Analytics Row 1: Dual Donut Cards with Side Metrics (Image 2 Reference Style) */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-2.5 sm:gap-3">

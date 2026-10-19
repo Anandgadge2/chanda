@@ -34,7 +34,9 @@ export default function EnforcementDisposalDonut({ statuses = [], totalViolation
   }).filter((d) => d.count > 0);
 
   const total = chartData.reduce((acc, curr) => acc + curr.value, 0) || totalViolations;
-  const resolvedCount = chartData.find((d) => d.status === 'FINAL_ORDER_PASSED' || d.status === 'RECTIFIED_7_12')?.count || 0;
+  const resolvedCount = chartData
+    .filter((d) => d.status === 'FINAL_ORDER_PASSED' || d.status === 'RECTIFIED_7_12' || d.status === 'DISMISSED')
+    .reduce((sum, d) => sum + d.count, 0);
   const resolutionPct = total > 0 ? Math.round((resolvedCount / total) * 100) : 0;
 
   const activeItem = activeIndex !== null && chartData[activeIndex] ? chartData[activeIndex] : null;
@@ -135,19 +137,23 @@ export default function EnforcementDisposalDonut({ statuses = [], totalViolation
                       {activeItem.count} प्रकरणे
                     </span>
                     <span className="text-[9px] font-bold text-slate-500">
-                      {total > 0 ? ((activeItem.count / total) * 100).toFixed(0) : 0}% प्रमाण
+                      {total > 0
+                        ? ((activeItem.count / total) * 100 < 1 && activeItem.count > 0
+                            ? '<1'
+                            : ((activeItem.count / total) * 100).toFixed(0))
+                        : 0}% प्रमाण
                     </span>
                   </div>
                 ) : (
                   <div className="flex flex-col items-center justify-center text-center">
-                    <span className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight leading-none">
-                      {resolutionPct}%
+                    <span className="text-[9px] font-extrabold px-1.5 py-0.2 rounded-full border shadow-2xs mb-0.5 bg-blue-50 text-blue-700 border-blue-200">
+                      एकूण प्रकरणे
                     </span>
-                    <span className="text-[10px] uppercase tracking-wider font-bold text-emerald-700 mt-0.5">
-                      निर्गती दर
+                    <span className="text-base sm:text-lg font-black text-slate-900 tracking-tight leading-none my-0.5">
+                      {total} प्रकरणे
                     </span>
-                    <span className="text-[9px] text-slate-400 font-medium">
-                      {resolvedCount} / {total} आदेशित
+                    <span className="text-[9px] font-bold text-slate-500">
+                      {resolvedCount} / {total} आदेशित ({resolutionPct > 0 ? `${resolutionPct}%` : (resolvedCount > 0 ? '<1%' : '0%')})
                     </span>
                   </div>
                 )}
@@ -159,7 +165,11 @@ export default function EnforcementDisposalDonut({ statuses = [], totalViolation
         {/* Right: Stacked Status Items with Colored Bullets */}
         <div className="md:col-span-6 space-y-2">
           {chartData.map((item, index) => {
-            const pct = total > 0 ? ((item.count / total) * 100).toFixed(0) : 0;
+            const pct = total > 0
+              ? ((item.count / total) * 100 < 1 && item.count > 0
+                  ? '<1'
+                  : ((item.count / total) * 100).toFixed(0))
+              : 0;
             const isHighlighted = activeIndex === index;
 
             return (

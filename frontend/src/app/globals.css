@@ -27,8 +27,38 @@
 }
 
 html {
+  font-size: 17px;
   scroll-behavior: smooth;
   overflow-x: clip;
+}
+
+@media (min-width: 640px) {
+  html {
+    font-size: 17.5px;
+  }
+}
+
+@media (min-width: 1280px) {
+  html {
+    font-size: 18px;
+  }
+}
+
+/* Accessibility Typography Controls (synchronized with AccessibilityBar A- / A / A+) */
+html.font-sm {
+  font-size: 15.5px !important;
+}
+
+html.font-md {
+  font-size: 17.5px !important;
+}
+
+html.font-lg {
+  font-size: 19.5px !important;
+}
+
+html.font-xl {
+  font-size: 21.5px !important;
 }
 
 body {
@@ -37,6 +67,8 @@ body {
   color: #0f172a;
   min-height: 100vh;
   overflow-x: clip;
+  line-height: 1.55;
+  letter-spacing: 0.01em;
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -458,5 +490,20 @@ body.high-contrast :focus-visible {
   }
 }
 
+/* Custom GIS Cartography Utilities */
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
 
+.animate-spin-slow {
+  animation: spin-slow 24s linear infinite;
+}
 
+.taluka-polygon-group:hover path {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}

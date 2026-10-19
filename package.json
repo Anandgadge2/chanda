@@ -4,9 +4,9 @@
   "private": true,
   "description": "Chandrapur Land Records & Governance Platform",
   "scripts": {
-    "dev": "concurrently -k --names \"BACKEND,FRONTEND\" --prefix-colors \"magenta.bold,cyan.bold\" --prefix \"[{time}] [{name}]\" --timestamp-format \"HH:mm:ss\" \"npm run dev --prefix backend\" \"npm run dev --prefix frontend\"",
-    "dev:backend": "npm run dev --prefix backend",
-    "dev:frontend": "npm run dev --prefix frontend",
+    "dev": "concurrently -k --names \"BACKEND,FRONTEND\" --prefix-colors \"magenta.bold,cyan.bold\" --prefix \"[{time}] [{name}]\" --timestamp-format \"HH:mm:ss\" \"npm --prefix backend run dev\" \"npm --prefix frontend run dev\"",
+    "dev:backend": "npm --prefix backend run dev",
+    "dev:frontend": "npm --prefix frontend run dev",
     "build": "npm run db:generate --prefix backend && npm run build --prefix frontend",
     "vercel-build": "npm run db:generate --prefix backend && npm run build --prefix frontend",
     "postinstall": "npm run db:generate --prefix backend",
