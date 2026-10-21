@@ -13,6 +13,7 @@ import {
   Landmark,
   Calendar,
   Filter,
+  Layers,
 } from 'lucide-react';
 import MetricCard from '../../components/MetricCard';
 import LandTypeDonutChart from '../../components/charts/LandTypeDonutChart';
@@ -20,10 +21,10 @@ import EnforcementDisposalDonut from '../../components/charts/EnforcementDisposa
 import HistoricalProvenanceTrendChart from '../../components/charts/HistoricalProvenanceTrendChart';
 import TalukaMountainChart from '../../components/charts/TalukaMountainChart';
 import GatSurveyVisualizer from '../../components/charts/GatSurveyVisualizer';
-import GatSurveyLedgerTable from '../../components/charts/GatSurveyLedgerTable';
+import ShartbhangAnalyticsChart from '../../components/charts/ShartbhangAnalyticsChart';
 import ChandrapurGisMap from '../../components/ChandrapurGisMap';
 import { api } from '../../lib/api';
-import { CHANDRAPUR_TALUKAS, VIOLATION_TYPES } from '../../lib/constants';
+import { CHANDRAPUR_TALUKAS } from '../../lib/constants';
 
 export default function DashboardPage() {
   const [taluka, setTaluka] = useState('');
@@ -170,7 +171,7 @@ export default function DashboardPage() {
         analyticsData={analytics.talukaDistribution}
       />
 
-      {/* Visual Analytics Row 1: Dual Donut Cards with Side Metrics (Image 2 Reference Style) */}
+      {/* Visual Analytics Row 1: Dual Donut Cards with Side Metrics */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-2.5 sm:gap-3">
         <LandTypeDonutChart data={analytics.tenureDistribution} />
         <EnforcementDisposalDonut
@@ -180,7 +181,7 @@ export default function DashboardPage() {
         />
       </div>
 
-      {/* Visual Analytics Row 2: 1950 Provenance Trend & Taluka Mountain/Bar Spectrum (Image 2, 3 & 5 Style) */}
+      {/* Visual Analytics Row 2: 1950 Provenance Trend & Taluka Mountain/Bar Spectrum */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-2.5 sm:gap-3">
         <HistoricalProvenanceTrendChart data={analytics.historicalTimeline} />
         <TalukaMountainChart
@@ -189,15 +190,199 @@ export default function DashboardPage() {
         />
       </div>
 
-      {/* Visual Analytics Row 3: Gat Land Usability & Survey Breakdown */}
-      <GatSurveyVisualizer
-        parcels={analytics.topGatParcels}
-        totalPotkharabaHa={analytics.totalPotkharabaHa}
-        totalCultivableHa={analytics.totalCultivableHa}
-      />
+      {/* Visual Analytics Row 3: Land Usability & Quasi-Judicial Analytics (Strictly Visual Graphs & Charts) */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-2.5 sm:gap-3">
+        <GatSurveyVisualizer
+          parcels={analytics.topGatParcels}
+          totalPotkharabaHa={analytics.totalPotkharabaHa}
+          totalCultivableHa={analytics.totalCultivableHa}
+        />
+        <ShartbhangAnalyticsChart
+          violations={analytics.violationsByType}
+          statuses={analytics.statusDistribution}
+        />
+      </div>
 
-      {/* Visual Analytics Row 4: Comprehensive Survey & Gat Ledger Table */}
-      <GatSurveyLedgerTable parcels={analytics.topGatParcels} />
+      {/* Primary Revenue Modules Redirection Gateway (Replaces Data Table with Direct Portals) */}
+      <div className="space-y-2.5 pt-1">
+        <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-1 px-1">
+          <div>
+            <h2 className="text-xs sm:text-sm font-black text-slate-900 flex items-center gap-1.5">
+              <Layers className="w-4 h-4 text-blue-900" />
+              <span>महसूल मुख्य विभाग नेव्हिगेशन केंद्र (Primary Revenue Modules)</span>
+            </h2>
+            <p className="text-[11px] text-slate-500 font-medium">
+              डॅशबोर्डवर केवळ आलेख व नकाशा विश्लेषण उपलब्ध असून, सविस्तर नोंदवही, अभिलेख व प्रकरणांसाठी खालील मुख्य विभागांचा वापर करा:
+            </p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5 sm:gap-3">
+          {/* Card 1: Parcels Portal */}
+          <div className="bg-white border border-slate-200/90 hover:border-blue-400 rounded-xl p-3.5 shadow-2xs hover:shadow-sm transition-all duration-200 flex flex-col justify-between group">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <div className="w-8 h-8 rounded-lg bg-blue-50 border border-blue-200 text-blue-900 flex items-center justify-center shrink-0">
+                  <Landmark className="w-4 h-4" />
+                </div>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-50 text-blue-800 border border-blue-200">
+                  {analytics.totalParcels} भूखंड नोंद
+                </span>
+              </div>
+
+              <div>
+                <h3 className="text-sm font-bold text-slate-900 group-hover:text-blue-900 transition flex items-center gap-1">
+                  <span>गट व सर्व्हे क्रमांक नोंदवही (Parcels)</span>
+                </h3>
+                <p className="text-[11px] text-slate-500 leading-relaxed mt-1 font-medium">
+                  संपूर्ण गट व सर्व्हे क्रमांक महसूल अभिलेख सारणी, जुना-नवा स.नं. ताळमेळ, ७/१२ क्षेत्र, पोटखराबा व ३६०° फेरफार इतिहास.
+                </p>
+              </div>
+
+              <div className="flex flex-wrap gap-1.5 pt-1">
+                <Link
+                  href="/parcels?tenure=BHOGVATDAR_CLASS_2"
+                  className="text-[10px] px-2 py-0.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded font-semibold transition"
+                >
+                  वर्ग-२ भूखंड
+                </Link>
+                <Link
+                  href="/parcels?tenure=SARKAR_SHASAN"
+                  className="text-[10px] px-2 py-0.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded font-semibold transition"
+                >
+                  शासकीय जमीन
+                </Link>
+                <Link
+                  href="/parcels?hasActiveDispute=true"
+                  className="text-[10px] px-2 py-0.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded font-semibold transition"
+                >
+                  शर्तभंग नोंद
+                </Link>
+              </div>
+            </div>
+
+            <div className="pt-3 mt-3 border-t border-slate-100">
+              <Link
+                href="/parcels"
+                className="w-full inline-flex items-center justify-center gap-2 bg-blue-900 hover:bg-blue-800 text-white font-bold text-xs py-2 px-3 rounded-lg shadow-2xs transition active:scale-98"
+              >
+                <span>भूखंड नोंदवहीत जा (Go to Parcels)</span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </Link>
+            </div>
+          </div>
+
+          {/* Card 2: Cases Portal */}
+          <div className="bg-white border border-slate-200/90 hover:border-amber-400 rounded-xl p-3.5 shadow-2xs hover:shadow-sm transition-all duration-200 flex flex-col justify-between group">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <div className="w-8 h-8 rounded-lg bg-amber-50 border border-amber-200 text-amber-700 flex items-center justify-center shrink-0">
+                  <Scale className="w-4 h-4" />
+                </div>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200">
+                  {analytics.totalViolations} चौकशी
+                </span>
+              </div>
+
+              <div>
+                <h3 className="text-sm font-bold text-slate-900 group-hover:text-amber-800 transition flex items-center gap-1">
+                  <span>महसूल व अर्ध-न्यायिक प्रकरणे (Cases)</span>
+                </h3>
+                <p className="text-[11px] text-slate-500 leading-relaxed mt-1 font-medium">
+                  कलम ३६, ३६अ व ५०-५४ शर्तभंग चौकशी, SDO व तहसीलदार सुनावणी नोंदी, स्थळ पंचनामे, नोटीस व शासन जमा हुकूमनामे.
+                </p>
+              </div>
+
+              <div className="flex flex-wrap gap-1.5 pt-1">
+                <Link
+                  href="/cases"
+                  className="text-[10px] px-2 py-0.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded font-semibold transition"
+                >
+                  SDO सुनावण्या
+                </Link>
+                <Link
+                  href="/cases"
+                  className="text-[10px] px-2 py-0.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded font-semibold transition"
+                >
+                  तहसीलदार चौकशी
+                </Link>
+                <Link
+                  href="/cases"
+                  className="text-[10px] px-2 py-0.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 rounded font-semibold transition"
+                >
+                  शासन जमा आदेश
+                </Link>
+              </div>
+            </div>
+
+            <div className="pt-3 mt-3 border-t border-slate-100">
+              <Link
+                href="/cases"
+                className="w-full inline-flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs py-2 px-3 rounded-lg shadow-2xs transition active:scale-98"
+              >
+                <span>न्यायालयीन प्रकरणांत जा (Go to Cases)</span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </Link>
+            </div>
+          </div>
+
+          {/* Card 3: Reports Portal */}
+          <div className="bg-white border border-slate-200/90 hover:border-emerald-400 rounded-xl p-3.5 shadow-2xs hover:shadow-sm transition-all duration-200 flex flex-col justify-between group">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <div className="w-8 h-8 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700 flex items-center justify-center shrink-0">
+                  <FileSpreadsheet className="w-4 h-4" />
+                </div>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">
+                  प्रपत्र १ ते ६
+                </span>
+              </div>
+
+              <div>
+                <h3 className="text-sm font-bold text-slate-900 group-hover:text-emerald-800 transition flex items-center gap-1">
+                  <span>वैधानिक अहवाल व सांख्यिकी (Reports)</span>
+                </h3>
+                <p className="text-[11px] text-slate-500 leading-relaxed mt-1 font-medium">
+                  प्रपत्र १ ते ६ वैधानिक विवरणपत्रे, तालुकावार विल्हेवाट ताळेबंद, आदिवासी संरक्षण अहवाल व एक्सेल/पीडीएफ डाऊनलोड.
+                </p>
+              </div>
+
+              <div className="flex flex-wrap gap-1.5 pt-1">
+                <Link
+                  href="/reports"
+                  className="text-[10px] px-2 py-0.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded font-semibold transition"
+                >
+                  प्रपत्र १ (आदिवासी)
+                </Link>
+                <Link
+                  href="/reports"
+                  className="text-[10px] px-2 py-0.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded font-semibold transition"
+                >
+                  प्रपत्र २ (शर्तभंग)
+                </Link>
+                <button
+                  type="button"
+                  onClick={handleExport}
+                  className="text-[10px] px-2 py-0.5 bg-blue-50 hover:bg-blue-100 text-blue-900 border border-blue-200 rounded font-semibold transition cursor-pointer"
+                  title="प्रपत्र ३ एक्सेल डाऊनलोड करा"
+                >
+                  प्रपत्र ३ डाऊनलोड ⤓
+                </button>
+              </div>
+            </div>
+
+            <div className="pt-3 mt-3 border-t border-slate-100">
+              <Link
+                href="/reports"
+                className="w-full inline-flex items-center justify-center gap-2 bg-emerald-800 hover:bg-emerald-700 text-white font-bold text-xs py-2 px-3 rounded-lg shadow-2xs transition active:scale-98"
+              >
+                <span>अहवाल केंद्रात जा (Go to Reports)</span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* Statutory Guidance & Quick Links Grid */}
       <div className="grid grid-cols-1 gap-2.5 sm:gap-3">
