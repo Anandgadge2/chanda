@@ -14,6 +14,7 @@ import {
   Calendar,
   Filter,
   Layers,
+  MapPin,
 } from 'lucide-react';
 import MetricCard from '../../components/MetricCard';
 import LandTypeDonutChart from '../../components/charts/LandTypeDonutChart';
@@ -31,6 +32,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [analytics, setAnalytics] = useState({
     totalParcels: 0,
+    totalVillages: 0,
     totalViolations: 0,
     pendingHearings: 0,
     totalRepossessedHa: 0,
@@ -144,10 +146,14 @@ export default function DashboardPage() {
         />
 
         <MetricCard
-          titleMr="SDO सुनावणी प्रलंबित"
-          value={analytics.pendingHearings}
-          subtext="उपविभाग न्यायालय"
-          icon={Scale}
+          titleMr="समाविष्ट महसूल गावे"
+          value={analytics.totalVillages}
+          subtext={
+            taluka
+              ? `${CHANDRAPUR_TALUKAS.find((t) => t.id.toLowerCase() === taluka.toLowerCase())?.nameMr || taluka} तालुका`
+              : '१५ तालुके कार्यक्षेत्र'
+          }
+          icon={MapPin}
           badgeColor="bg-indigo-50 border-indigo-200"
           iconColor="text-indigo-600"
           textColor="text-indigo-600"
