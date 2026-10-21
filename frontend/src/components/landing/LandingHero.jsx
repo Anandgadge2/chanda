@@ -20,6 +20,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { CHANDRAPUR_TALUKAS } from '../../lib/constants';
+import { api } from '../../lib/api';
 
 const CHANDRAPUR_BANNERS = [
   {
@@ -79,9 +80,25 @@ export default function LandingHero({ onOpenAuth }) {
 
   const [searchTaluka, setSearchTaluka] = useState('');
   const [searchGat, setSearchGat] = useState('');
+  const [liveStats, setLiveStats] = useState({
+    talukas: 15,
+    villages: 663,
+    parcels: 42452,
+  });
 
   useEffect(() => {
     setIsMounted(true);
+    api.getAnalyticsSummary()
+      .then((data) => {
+        if (data) {
+          setLiveStats({
+            talukas: data.totalTalukas || 15,
+            villages: data.totalVillages || 663,
+            parcels: data.totalParcels || 42452,
+          });
+        }
+      })
+      .catch(() => {});
   }, []);
 
   const bannerSettings = {
@@ -180,7 +197,7 @@ export default function LandingHero({ onOpenAuth }) {
                   <div
                     className="banner-card block relative w-full h-[250px] sm:h-[320px] lg:h-[455px] rounded-2xl sm:rounded-3xl overflow-hidden border border-slate-700/60 shadow-lg group transition-all duration-500 bg-slate-950 select-none"
                   >
-                    {/* Image with 50% Reduced Scale on Hover */}
+                    {/* Image with Reduced Scale on Hover */}
                     <img
                       src={banner.image}
                       alt={banner.titleMr}
@@ -230,8 +247,6 @@ export default function LandingHero({ onOpenAuth }) {
       </div>
 
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 space-y-4">
-
-
         {/* Real-time District Revenue Indicators */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
           <div className="p-2.5 sm:p-3.5 rounded-xl bg-white border border-slate-200 shadow-2xs flex items-center gap-2.5 sm:gap-3">
@@ -239,7 +254,9 @@ export default function LandingHero({ onOpenAuth }) {
               <Landmark className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
             <div className="min-w-0">
-              <p className="text-lg sm:text-xl font-black text-slate-900 leading-none">१५</p>
+              <p className="text-lg sm:text-xl font-black text-slate-900 leading-none">
+                {liveStats.talukas.toLocaleString('mr-IN')}
+              </p>
               <p className="text-[11px] sm:text-xs font-bold text-slate-800 mt-1 truncate">प्रशासकीय तालुके</p>
               <p className="text-[9px] sm:text-[10px] text-slate-500 truncate">चंद्रपूर उपविभाग</p>
             </div>
@@ -250,9 +267,11 @@ export default function LandingHero({ onOpenAuth }) {
               <Compass className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
             <div className="min-w-0">
-              <p className="text-lg sm:text-xl font-black text-slate-900 leading-none">१,४८२</p>
+              <p className="text-lg sm:text-xl font-black text-slate-900 leading-none">
+                {liveStats.villages.toLocaleString('mr-IN')}
+              </p>
               <p className="text-[11px] sm:text-xs font-bold text-slate-800 mt-1 truncate">महसूल गावे</p>
-              <p className="text-[9px] sm:text-[10px] text-slate-500 truncate">डिजिटल अभिलेख</p>
+              <p className="text-[9px] sm:text-[10px] text-slate-500 truncate">तपासणी अभिलेख</p>
             </div>
           </div>
 
@@ -261,9 +280,11 @@ export default function LandingHero({ onOpenAuth }) {
               <ShieldCheck className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
             <div className="min-w-0">
-              <p className="text-lg sm:text-xl font-black text-slate-900 leading-none">१९५०</p>
-              <p className="text-[11px] sm:text-xs font-bold text-slate-800 mt-1 truncate">मूळ शीर्षक साखळी</p>
-              <p className="text-[9px] sm:text-[10px] text-slate-500 truncate">बु.ग.दे. पडताळणी</p>
+              <p className="text-lg sm:text-xl font-black text-slate-900 leading-none">
+                {liveStats.parcels.toLocaleString('mr-IN')}
+              </p>
+              <p className="text-[11px] sm:text-xs font-bold text-slate-800 mt-1 truncate">नोंदणीकृत भूखंड</p>
+              <p className="text-[9px] sm:text-[10px] text-slate-500 truncate">डिजिटल ७/१२ साठा</p>
             </div>
           </div>
 
@@ -274,7 +295,7 @@ export default function LandingHero({ onOpenAuth }) {
             <div className="min-w-0">
               <p className="text-lg sm:text-xl font-black text-slate-900 leading-none">MLRC १९६६</p>
               <p className="text-[11px] sm:text-xs font-bold text-slate-800 mt-1 truncate">वैधानिक संरक्षण</p>
-              <p className="text-[9px] sm:text-[10px] text-slate-500 truncate">आदिवासी व गायरान</p>
+              <p className="text-[9px] sm:text-[10px] text-slate-500 truncate">१९५० मूळ शीर्षक पडताळणी</p>
             </div>
           </div>
         </div>

@@ -513,7 +513,7 @@ export const api = {
       method: 'POST',
       headers: {
         // Do not set Content-Type header so browser sets multipart boundary automatically
-        Authorization: typeof window !== 'undefined' ? `Bearer ${localStorage.getItem('token') || ''}` : '',
+        ...getAuthHeaders(),
       },
       body: formData,
     });

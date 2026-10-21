@@ -25,6 +25,13 @@ const fetchSummaryFromDatabase = async (taluka) => {
       (SELECT COUNT(*)::int FROM land_parcels lp 
        WHERE (${talukaParam}::text IS NULL OR LOWER(lp.taluka) = LOWER(${talukaParam}))) as "totalParcels",
 
+      -- Total Distinct Villages
+      (SELECT COUNT(DISTINCT lp.village_name)::int FROM land_parcels lp 
+       WHERE (${talukaParam}::text IS NULL OR LOWER(lp.taluka) = LOWER(${talukaParam}))) as "totalVillages",
+
+      -- Total Distinct Talukas
+      (SELECT COUNT(DISTINCT lp.taluka)::int FROM land_parcels lp) as "totalTalukas",
+
       -- Total Violations
       (SELECT COUNT(*)::int FROM forward_enforcement_cases fec 
        LEFT JOIN land_parcels lp ON fec.parcel_id = lp.id 
@@ -78,11 +85,13 @@ const fetchSummaryFromDatabase = async (taluka) => {
          GROUP BY lp.tenure_class
        ) td) as "tenureDistribution",
 
-      -- Taluka-wise Distribution & Comparative Analysis
+      -- Taluka-wise Distribution & Comparative Analysis with Live Cultivable & Disputed Area
       (SELECT COALESCE(json_agg(json_build_object(
         'taluka', t.taluka,
         'parcelCount', t.parcel_cnt,
         'totalAreaHa', t.total_area_ha,
+        'cultivableAreaHa', t.cultivable_area_ha,
+        'disputedAreaHa', t.disputed_area_ha,
         'violationCount', t.violation_cnt,
         'disputeCount', t.dispute_cnt
       )), '[]'::json)
@@ -91,6 +100,8 @@ const fetchSummaryFromDatabase = async (taluka) => {
            lp.taluka,
            COUNT(DISTINCT lp.id)::int as parcel_cnt,
            COALESCE(SUM(lp.total_area_ha), 0)::float as total_area_ha,
+           COALESCE(SUM(lp.total_area_ha - lp.potkharaba_area_ha), 0)::float as cultivable_area_ha,
+           COALESCE(SUM(fec.encroached_area_ha), 0)::float as disputed_area_ha,
            COUNT(DISTINCT fec.id)::int as violation_cnt,
            COUNT(DISTINCT CASE WHEN lp.has_active_dispute THEN lp.id END)::int as dispute_cnt
          FROM land_parcels lp
@@ -202,13 +213,39 @@ const fetchSummaryFromDatabase = async (taluka) => {
          WHERE (${talukaParam}::text IS NULL OR LOWER(lp.taluka) = LOWER(${talukaParam}))
          ORDER BY ch.hearing_date DESC
          LIMIT 5
-       ) h) as "recentHearings"
+       ) h) as "recentHearings",
+
+      -- Featured Authentic Flagged Dispute Parcel
+      (SELECT row_to_json(fd) FROM (
+        SELECT 
+          lp.upi,
+          lp.village_name as "villageName",
+          lp.taluka,
+          lp.gat_number as "gatNumber",
+          lp.old_survey_no as "oldSurveyNo",
+          lp.total_area_ha::float as "totalAreaHa",
+          lp.tenure_class::text as "currentTenure",
+          COALESCE(lp.metadata->>'ownerName', 'विद्यमान खातेदार (चालू ७/१२)') as "currentOwner",
+          COALESCE(bh.owner_name, 'मूळ सनद नोंदणीकृत खातेदार') as "baselineOwner",
+          'वर्ग-२ (नवीन व अविभाज्य शर्त)' as "baselineTenure",
+          fec.case_number as "caseNumber",
+          fec.violation_type::text as "violationType",
+          fec.status::text as "status"
+        FROM forward_enforcement_cases fec
+        JOIN land_parcels lp ON fec.parcel_id = lp.id
+        LEFT JOIN backward_histories bh ON bh.parcel_id = lp.id AND bh.epoch_year = 1950
+        WHERE lp.has_active_dispute = true
+        ORDER BY fec.encroached_area_ha DESC
+        LIMIT 1
+      ) fd) as "featuredDispute"
   `;
 
   const row = rows[0] || {};
   return {
     success: true,
     totalParcels: Number(row.totalParcels || 0),
+    totalVillages: Number(row.totalVillages || 0),
+    totalTalukas: Number(row.totalTalukas || 0),
     totalViolations: Number(row.totalViolations || 0),
     pendingHearings: Number(row.pendingHearings || 0),
     totalRepossessedHa: Number(row.totalRepossessedHa || 0),
@@ -222,6 +259,7 @@ const fetchSummaryFromDatabase = async (taluka) => {
     topGatParcels: row.topGatParcels || [],
     historicalTimeline: row.historicalTimeline || [],
     recentHearings: row.recentHearings || [],
+    featuredDispute: row.featuredDispute || null,
   };
 };
 
@@ -266,4 +304,3 @@ export const getSummary = async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 };
-

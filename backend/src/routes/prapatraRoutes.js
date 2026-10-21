@@ -10,6 +10,7 @@ import {
   updatePrapatraRollup,
   uploadPrapatraExcel
 } from '../controllers/prapatraController.js';
+import { authenticate, authorize } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
@@ -41,9 +42,15 @@ router.get('/villages', getTalukaVillages);
 
 /**
  * @route   POST /api/prapatra/upload
- * @desc    Upload official 1-45 points Excel inspection workbook
+ * @desc    Upload official 1-45 points Excel inspection workbook(s)
  */
-router.post('/upload', upload.single('file'), uploadPrapatraExcel);
+router.post(
+  '/upload',
+  authenticate,
+  authorize('SUPERADMIN', 'COLLECTOR', 'SUB_COLLECTOR', 'SDO', 'TEHSILDAR', 'NAIB_TEHSILDAR', 'CIRCLE_OFFICER', 'TALATHI'),
+  upload.any(),
+  uploadPrapatraExcel
+);
 
 /**
  * @route   PUT /api/prapatra/rollup/:id

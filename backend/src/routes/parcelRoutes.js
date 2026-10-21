@@ -11,7 +11,13 @@ import { authenticate, authorize } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-router.post('/bulk-upload', authenticate, authorize('COLLECTOR', 'SDO', 'TEHSILDAR', 'NAIB_TEHSILDAR', 'TALATHI'), upload.single('file'), bulkUpload);
+router.post(
+  '/bulk-upload',
+  authenticate,
+  authorize('SUPERADMIN', 'COLLECTOR', 'SUB_COLLECTOR', 'SDO', 'TEHSILDAR', 'NAIB_TEHSILDAR', 'CIRCLE_OFFICER', 'TALATHI'),
+  upload.single('file'),
+  bulkUpload
+);
 router.get('/sample-template', getSampleTemplate); // Publicly accessible template
 router.get('/', authenticate, getParcels);
 router.post('/', authenticate, authorize('COLLECTOR', 'SDO', 'TEHSILDAR', 'NAIB_TEHSILDAR', 'TALATHI'), createParcel);

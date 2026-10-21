@@ -49,6 +49,8 @@ export default function ChandrapurGisMap({
   const [hoveredPoi, setHoveredPoi] = useState(null);
   const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 });
   const [viewMode, setViewMode] = useState('admin'); // 'admin' | 'risk' | 'sdo'
+  const [selectedSdo, setSelectedSdo] = useState('all'); // 'all' | 'chandrapur' | 'warora' | ...
+  const [selectedRiskLevel, setSelectedRiskLevel] = useState('all'); // 'all' | 'critical' | 'high' | 'medium' | 'low'
   const [zoomLevel, setZoomLevel] = useState(1);
   const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
@@ -74,6 +76,77 @@ export default function ChandrapurGisMap({
   const mapContainerRef = useRef(null);
   const canvasRef = useRef(null);
 
+  // Industry-Standard GIS Cartographic Risk Classification for Shartbhang
+  const getRiskCategory = (violations = 0) => {
+    const v = Number(violations) || 0;
+    if (v >= 250) {
+      return {
+        level: 'critical',
+        labelMr: 'अती-गंभीर जोखीम',
+        fullLabelMr: 'अती-गंभीर जोखीम (Critical Red Zone)',
+        tagMr: 'रेड झोन',
+        rangeMr: '२५०+ प्रकरणे',
+        fill: '#FECDD3', // Rose-200
+        fillHover: '#FDA4AF', // Rose-300
+        stroke: '#BE123C', // Rose-700
+        badgeBg: 'bg-rose-100',
+        badgeText: 'text-rose-900 border-rose-300',
+        icon: '🚨',
+        guidanceMr: 'तातडीने SDO / जिल्हाधिकारी स्तरावर सुनावणी व MLRC कलम ५९ अन्वये नोटीस आवश्यक.',
+      };
+    }
+    if (v >= 51) {
+      return {
+        level: 'high',
+        labelMr: 'उच्च जोखीम',
+        fullLabelMr: 'उच्च जोखीम (High Risk Orange)',
+        tagMr: 'ऑरेंज झोन',
+        rangeMr: '५१ - २५० प्रकरणे',
+        fill: '#FFEDD5', // Orange-100
+        fillHover: '#FED7AA', // Orange-200
+        stroke: '#C2410C', // Orange-700
+        badgeBg: 'bg-orange-100',
+        badgeText: 'text-orange-900 border-orange-300',
+        icon: '⚠️',
+        guidanceMr: 'तहसीलदार व मंडळ अधिकारी यांनी पंचनामे पूर्ण करून विल्हेवाट अहवाल सादर करावा.',
+      };
+    }
+    if (v >= 15) {
+      return {
+        level: 'medium',
+        labelMr: 'मध्यम जोखीम',
+        fullLabelMr: 'मध्यम जोखीम (Moderate Risk Yellow)',
+        tagMr: 'यलो झोन',
+        rangeMr: '१५ - ५० प्रकरणे',
+        fill: '#FEF9C3', // Yellow-100
+        fillHover: '#FEF08A', // Yellow-200
+        stroke: '#A16207', // Yellow-700
+        badgeBg: 'bg-amber-100',
+        badgeText: 'text-amber-900 border-amber-300',
+        icon: '⚡',
+        guidanceMr: 'तलाठी स्तरावर फेरफार नोंदी व अकृषिक परवानगीची नियमित तपासणी सुरू ठेवावी.',
+      };
+    }
+    return {
+      level: 'low',
+      labelMr: 'कमी जोखीम / सुरक्षित',
+      fullLabelMr: 'कमी जोखीम / सुरक्षित (Low Risk Green)',
+      tagMr: 'ग्रीन झोन',
+      rangeMr: '० - १४ प्रकरणे',
+      fill: '#DCFCE7', // Green-100
+      fillHover: '#BBF7D0', // Green-200
+      stroke: '#15803D', // Green-700
+      badgeBg: 'bg-emerald-100',
+      badgeText: 'text-emerald-900 border-emerald-300',
+      icon: '✅',
+      guidanceMr: 'नियंत्रित व सुरक्षित क्षेत्र. सामान्य महसूल फेरफार नियमांनुसार संनियंत्रण.',
+    };
+  };
+
+  const getSdoInfo = (sdoId) => {
+    return SUB_DIVISIONS.find((s) => s.id === sdoId) || null;
+  };
+
   // Merge dynamic backend analytics into taluka GIS items
   const talukaDataMap = useMemo(() => {
     const map = new Map();
@@ -83,62 +156,149 @@ export default function ChandrapurGisMap({
       );
       map.set(t.id.toLowerCase(), {
         ...t,
-        liveParcelCount: analyticMatch ? analyticMatch.parcelCount : t.total712,
-        liveViolationCount: analyticMatch ? analyticMatch.violationCount : t.shartbhang,
-        liveDisputeCount: analyticMatch ? analyticMatch.disputeCount : t.govtEncroached,
-        liveTotalAreaHa: analyticMatch ? analyticMatch.totalAreaHa : t.cultivableHa,
+        liveParcelCount: analyticMatch?.parcelCount !== undefined ? analyticMatch.parcelCount : t.total712,
+        liveViolationCount: analyticMatch?.violationCount !== undefined ? analyticMatch.violationCount : t.shartbhang,
+        liveDisputeCount: analyticMatch?.disputeCount !== undefined ? analyticMatch.disputeCount : t.govtEncroached,
+        liveTotalAreaHa: analyticMatch?.totalAreaHa !== undefined ? analyticMatch.totalAreaHa : t.cultivableHa,
+        liveCultivableAreaHa: analyticMatch?.cultivableAreaHa !== undefined ? analyticMatch.cultivableAreaHa : t.cultivableHa,
+        liveDisputedAreaHa: analyticMatch?.disputedAreaHa !== undefined ? analyticMatch.disputedAreaHa : (t.govtEncroached || 0),
       });
     });
     return map;
   }, [analyticsData]);
 
-  // Max violations for choropleth scale calculation
-  const maxViolations = useMemo(() => {
-    let max = 1;
+  // Aggregate District Risk Breakdown
+  const riskStats = useMemo(() => {
+    let critical = 0;
+    let high = 0;
+    let medium = 0;
+    let low = 0;
+    let totalViolations = 0;
+
     TALUKA_GIS_DATA.forEach((t) => {
       const item = talukaDataMap.get(t.id.toLowerCase());
-      if (item && item.liveViolationCount > max) {
-        max = item.liveViolationCount;
-      }
+      const v = item ? item.liveViolationCount : t.shartbhang;
+      totalViolations += v;
+      const r = getRiskCategory(v);
+      if (r.level === 'critical') critical++;
+      else if (r.level === 'high') high++;
+      else if (r.level === 'medium') medium++;
+      else low++;
     });
-    return max;
+
+    return { critical, high, medium, low, totalViolations };
   }, [talukaDataMap]);
 
-  // Determine Taluka Fill Color based on View Mode (Bright, Realistic Palette from Image 2)
+  // Aggregate SDO-Level Statistics
+  const sdoStats = useMemo(() => {
+    const map = new Map();
+    SUB_DIVISIONS.forEach((s) => {
+      let parcels = 0;
+      let violations = 0;
+      let area = 0;
+      let villages = 0;
+      s.talukas.forEach((tId) => {
+        const item = talukaDataMap.get(tId.toLowerCase());
+        if (item) {
+          parcels += item.liveParcelCount || 0;
+          violations += item.liveViolationCount || 0;
+          area += Number(item.liveTotalAreaHa || 0);
+          villages += item.villagesCount || 0;
+        }
+      });
+      map.set(s.id, { parcels, violations, area, villages });
+    });
+    return map;
+  }, [talukaDataMap]);
+
+  // Determine Taluka Fill Color based on View Mode and Selection
   const getTalukaFill = (taluka) => {
     const isSelected = selectedTaluka && selectedTaluka.toLowerCase() === taluka.id.toLowerCase();
     const isHovered = hoveredTaluka && hoveredTaluka.id.toLowerCase() === taluka.id.toLowerCase();
+    const item = talukaDataMap.get(taluka.id.toLowerCase());
+    const violations = item ? item.liveViolationCount : taluka.shartbhang;
+    const risk = getRiskCategory(violations);
+    const sdo = getSdoInfo(taluka.sdoId);
 
+    // 1. Shartbhang Heatmap Mode (Industry-Standard Choropleth)
     if (viewMode === 'risk') {
-      const item = talukaDataMap.get(taluka.id.toLowerCase());
-      const v = item ? item.liveViolationCount : taluka.shartbhang;
-      const ratio = Math.min(v / Math.max(maxViolations, 1), 1);
-      // Clean, bright choropleth scale
-      if (ratio < 0.1) return isHovered ? '#86EFAC' : '#DCFCE7';
-      if (ratio < 0.3) return isHovered ? '#FEF08A' : '#FEF9C3';
-      if (ratio < 0.6) return isHovered ? '#FED7AA' : '#FFEDD5';
-      return isHovered ? '#FCA5A5' : '#FEE2E2';
+      if (selectedRiskLevel !== 'all' && risk.level !== selectedRiskLevel) {
+        return '#F8FAFC';
+      }
+      if (isSelected) return '#F43F5E';
+      return isHovered ? risk.fillHover : risk.fill;
     }
 
+    // 2. Sub-Division (SDO) Mode (Qualitative Regional Palette)
     if (viewMode === 'sdo') {
-      const sdo = SUB_DIVISIONS.find((s) => s.id === taluka.sdoId);
-      return sdo ? (isHovered ? sdo.color + '55' : sdo.color + '33') : taluka.colorAdmin;
+      if (selectedSdo !== 'all' && taluka.sdoId !== selectedSdo) {
+        return '#F8FAFC';
+      }
+      if (isSelected) return '#93C5FD';
+      if (!sdo) return taluka.colorAdmin;
+      return isHovered ? sdo.fillHover : sdo.fill;
     }
 
-    // Official Administrative Map: Authentic Pastel Colors matching Image 2
+    // 3. Official Administrative Map Mode
     if (isSelected) return '#FEF08A';
-    return taluka.colorAdmin;
+    return isHovered ? taluka.colorAdmin : taluka.colorAdmin;
   };
 
   // Determine Taluka Stroke Color
   const getTalukaStroke = (taluka) => {
     const isSelected = selectedTaluka && selectedTaluka.toLowerCase() === taluka.id.toLowerCase();
     const isHovered = hoveredTaluka && hoveredTaluka.id.toLowerCase() === taluka.id.toLowerCase();
+    const item = talukaDataMap.get(taluka.id.toLowerCase());
+    const violations = item ? item.liveViolationCount : taluka.shartbhang;
+    const risk = getRiskCategory(violations);
+    const sdo = getSdoInfo(taluka.sdoId);
 
     if (isSelected) return '#1D4ED8'; // Bold royal blue outline
     if (isHovered) return '#D97706'; // Vibrant amber glow on hover
 
+    if (viewMode === 'risk') {
+      if (selectedRiskLevel !== 'all' && risk.level !== selectedRiskLevel) {
+        return '#E2E8F0';
+      }
+      return risk.stroke;
+    }
+
+    if (viewMode === 'sdo') {
+      if (selectedSdo !== 'all' && taluka.sdoId !== selectedSdo) {
+        return '#CBD5E1';
+      }
+      return sdo ? sdo.border : '#475569';
+    }
+
     return taluka.colorBorder || '#1E293B';
+  };
+
+  // Determine Taluka Opacity for Selective Filtering
+  const getTalukaOpacity = (taluka) => {
+    if (viewMode === 'risk' && selectedRiskLevel !== 'all') {
+      const item = talukaDataMap.get(taluka.id.toLowerCase());
+      const v = item ? item.liveViolationCount : 0;
+      const risk = getRiskCategory(v);
+      return risk.level === selectedRiskLevel ? 1 : 0.35;
+    }
+    if (viewMode === 'sdo' && selectedSdo !== 'all') {
+      return taluka.sdoId === selectedSdo ? 1 : 0.35;
+    }
+    return 1;
+  };
+
+  // Determine Taluka Stroke Width
+  const getTalukaStrokeWidth = (taluka) => {
+    const isSelected = selectedTaluka && selectedTaluka.toLowerCase() === taluka.id.toLowerCase();
+    const isHovered = hoveredTaluka && hoveredTaluka.id.toLowerCase() === taluka.id.toLowerCase();
+    if (isSelected) return 2.2;
+    if (isHovered) return 1.8;
+    if (viewMode === 'risk') return 1.35;
+    if (viewMode === 'sdo') {
+      if (selectedSdo !== 'all' && taluka.sdoId === selectedSdo) return 1.8;
+      return 1.25;
+    }
+    return 0.85;
   };
 
   // Handle Mouse Events for Hover Tooltip (Measured relative to Canvas viewport)
@@ -241,6 +401,11 @@ export default function ChandrapurGisMap({
     if (!selectedTaluka) return null;
     return talukaDataMap.get(selectedTaluka.toLowerCase()) || null;
   }, [selectedTaluka, talukaDataMap]);
+
+  const selectedSdoData = useMemo(() => {
+    if (selectedSdo === 'all') return null;
+    return SUB_DIVISIONS.find((s) => s.id === selectedSdo) || null;
+  }, [selectedSdo]);
 
   return (
     <div
@@ -359,6 +524,140 @@ export default function ChandrapurGisMap({
           </button>
         </div>
       </div>
+
+      {/* Dynamic Contextual Bar for SDO Mode */}
+      {viewMode === 'sdo' && (
+        <div className="relative z-10 bg-gradient-to-r from-indigo-50/95 via-white to-blue-50/85 border-b border-indigo-200/90 px-3 py-1.5 sm:px-4 flex items-center justify-between gap-2 overflow-x-auto text-xs scrollbar-none shadow-2xs">
+          <div className="flex items-center gap-1.5 shrink-0 text-indigo-950 font-bold">
+            <Landmark className="w-3.5 h-3.5 text-indigo-700" />
+            <span className="text-xs font-black">उपविभाग (SDO):</span>
+          </div>
+
+          <div className="flex items-center gap-1.5 shrink-0 flex-nowrap">
+            <button
+              onClick={() => setSelectedSdo('all')}
+              className={`px-2.5 py-1 rounded-md text-xs font-bold border transition cursor-pointer ${
+                selectedSdo === 'all'
+                  ? 'bg-indigo-900 text-white border-indigo-950 shadow-2xs'
+                  : 'bg-white text-slate-700 border-slate-200 hover:bg-indigo-50/60'
+              }`}
+            >
+              सर्व ६ उपविभाग
+            </button>
+
+            {SUB_DIVISIONS.map((sdo) => {
+              const isAct = selectedSdo === sdo.id;
+              return (
+                <button
+                  key={sdo.id}
+                  onClick={() => setSelectedSdo(isAct ? 'all' : sdo.id)}
+                  className={`px-2.5 py-1 rounded-md text-xs font-bold border transition cursor-pointer flex items-center gap-1.5 ${
+                    isAct
+                      ? 'text-white border-transparent shadow-xs'
+                      : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+                  }`}
+                  style={{
+                    backgroundColor: isAct ? sdo.border : undefined,
+                  }}
+                  title={`${sdo.nameMr} • ${sdo.sdoOfficer}`}
+                >
+                  <span
+                    className="w-2.5 h-2.5 rounded-full shrink-0"
+                    style={{ backgroundColor: isAct ? '#FFFFFF' : sdo.color }}
+                  />
+                  <span>{sdo.shortNameMr || sdo.nameMr}</span>
+                  <span
+                    className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${
+                      isAct ? 'bg-white/20 text-white font-black' : 'bg-slate-100 text-slate-600'
+                    }`}
+                  >
+                    {sdo.talukas.length} तालुके
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Dynamic Contextual Bar for Heatmap Mode */}
+      {viewMode === 'risk' && (
+        <div className="relative z-10 bg-gradient-to-r from-rose-50/95 via-white to-amber-50/85 border-b border-rose-200/90 px-3 py-1.5 sm:px-4 flex items-center justify-between gap-2 overflow-x-auto text-xs scrollbar-none shadow-2xs">
+          <div className="flex items-center gap-1.5 shrink-0 text-rose-950 font-bold">
+            <ShieldAlert className="w-3.5 h-3.5 text-rose-600" />
+            <span className="text-xs font-black">शर्तभंग जोखीम स्तर:</span>
+          </div>
+
+          <div className="flex items-center gap-1.5 shrink-0 flex-nowrap">
+            <button
+              onClick={() => setSelectedRiskLevel('all')}
+              className={`px-2.5 py-1 rounded-md text-xs font-bold border transition cursor-pointer ${
+                selectedRiskLevel === 'all'
+                  ? 'bg-rose-900 text-white border-rose-950 shadow-2xs'
+                  : 'bg-white text-slate-700 border-slate-200 hover:bg-rose-50/60'
+              }`}
+            >
+              सर्व तालुके ({riskStats.totalViolations.toLocaleString('mr-IN')} प्रकरणे)
+            </button>
+
+            <button
+              onClick={() => setSelectedRiskLevel(selectedRiskLevel === 'critical' ? 'all' : 'critical')}
+              className={`px-2.5 py-1 rounded-md text-xs font-bold border transition cursor-pointer flex items-center gap-1.5 ${
+                selectedRiskLevel === 'critical'
+                  ? 'bg-rose-700 text-white border-rose-800 shadow-xs'
+                  : 'bg-white text-rose-950 border-rose-300 hover:bg-rose-50'
+              }`}
+            >
+              <span>🔴 अती-गंभीर</span>
+              <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono font-black ${selectedRiskLevel === 'critical' ? 'bg-white/20 text-white' : 'bg-rose-100 text-rose-900'}`}>
+                {riskStats.critical} तालुके • २५०+
+              </span>
+            </button>
+
+            <button
+              onClick={() => setSelectedRiskLevel(selectedRiskLevel === 'high' ? 'all' : 'high')}
+              className={`px-2.5 py-1 rounded-md text-xs font-bold border transition cursor-pointer flex items-center gap-1.5 ${
+                selectedRiskLevel === 'high'
+                  ? 'bg-orange-600 text-white border-orange-700 shadow-xs'
+                  : 'bg-white text-orange-950 border-orange-300 hover:bg-orange-50'
+              }`}
+            >
+              <span>🟠 उच्च जोखीम</span>
+              <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono font-black ${selectedRiskLevel === 'high' ? 'bg-white/20 text-white' : 'bg-orange-100 text-orange-900'}`}>
+                {riskStats.high} तालुके • ५१-२५०
+              </span>
+            </button>
+
+            <button
+              onClick={() => setSelectedRiskLevel(selectedRiskLevel === 'medium' ? 'all' : 'medium')}
+              className={`px-2.5 py-1 rounded-md text-xs font-bold border transition cursor-pointer flex items-center gap-1.5 ${
+                selectedRiskLevel === 'medium'
+                  ? 'bg-amber-600 text-white border-amber-700 shadow-xs'
+                  : 'bg-white text-amber-950 border-amber-300 hover:bg-amber-50'
+              }`}
+            >
+              <span>🟡 मध्यम</span>
+              <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono font-black ${selectedRiskLevel === 'medium' ? 'bg-white/20 text-white' : 'bg-amber-100 text-amber-900'}`}>
+                {riskStats.medium} तालुके • १५-५०
+              </span>
+            </button>
+
+            <button
+              onClick={() => setSelectedRiskLevel(selectedRiskLevel === 'low' ? 'all' : 'low')}
+              className={`px-2.5 py-1 rounded-md text-xs font-bold border transition cursor-pointer flex items-center gap-1.5 ${
+                selectedRiskLevel === 'low'
+                  ? 'bg-emerald-600 text-white border-emerald-700 shadow-xs'
+                  : 'bg-white text-emerald-950 border-emerald-300 hover:bg-emerald-50'
+              }`}
+            >
+              <span>🟢 कमी / सुरक्षित</span>
+              <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono font-black ${selectedRiskLevel === 'low' ? 'bg-white/20 text-white' : 'bg-emerald-100 text-emerald-900'}`}>
+                {riskStats.low} तालुके • ०-१४
+              </span>
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Layer Visibility Toggles Bar (Clean Light Badges) */}
       <div className="relative z-10 bg-slate-50/80 border-b border-slate-200 px-3 py-1.5 sm:px-4 flex items-center justify-between gap-2 overflow-x-auto text-xs scrollbar-none">
@@ -558,9 +857,10 @@ export default function ChandrapurGisMap({
                     d={taluka.path}
                     fill={fillColor}
                     stroke={strokeColor}
-                    strokeWidth={isSelected ? 1.8 : isHovered ? 1.4 : 0.85}
+                    strokeWidth={getTalukaStrokeWidth(taluka)}
                     strokeLinejoin="round"
                     strokeLinecap="round"
+                    opacity={getTalukaOpacity(taluka)}
                     className="transition-colors duration-150"
                   />
 
@@ -572,6 +872,7 @@ export default function ChandrapurGisMap({
                     fill={isSelected ? '#1E3A8A' : isHovered ? '#D97706' : '#1E293B'}
                     stroke="#FFFFFF"
                     strokeWidth={0.6}
+                    opacity={getTalukaOpacity(taluka)}
                   />
 
                   {/* Special Ring for District Headquarter (Chandrapur) */}
@@ -584,41 +885,109 @@ export default function ChandrapurGisMap({
                       stroke="#B45309"
                       strokeWidth="0.9"
                       strokeDasharray="1.5,1.5"
+                      opacity={getTalukaOpacity(taluka)}
                     />
                   )}
 
-                  {/* Taluka Labels (Clean Dark Text with White Halo) */}
+                  {/* Taluka Labels (Clean, High-Contrast Text with Crisp White Halo) */}
                   {layers.labels && (
-                    <g pointerEvents="none">
+                    <g pointerEvents="none" opacity={getTalukaOpacity(taluka)}>
+                      {/* Primary Marathi Label */}
                       <text
                         x={taluka.center[0]}
-                        y={taluka.center[1] - 2.8}
+                        y={taluka.center[1] - (viewMode === 'risk' || viewMode === 'sdo' ? 4.8 : 2.8)}
                         textAnchor="middle"
                         fill="#0F172A"
-                        fontSize={isSelected ? '8.2' : isHovered ? '7.6' : '6.4'}
+                        fontSize={isSelected ? '8.4' : isHovered ? '8.0' : '7.0'}
                         fontWeight="900"
+                        stroke="#FFFFFF"
+                        strokeWidth="2.2"
+                        strokeLinejoin="round"
+                        paintOrder="stroke fill"
                         className="select-none tracking-tight font-black"
-                        style={{
-                          textShadow:
-                            '0 0 3px #FFFFFF, 0 0 5px #FFFFFF, 0 1px 2px #FFFFFF',
-                        }}
                       >
                         {taluka.nameMr}
                       </text>
+
+                      {/* Secondary English Label */}
                       <text
                         x={taluka.center[0]}
-                        y={taluka.center[1] + 5.2}
+                        y={taluka.center[1] + (viewMode === 'risk' || viewMode === 'sdo' ? 2.6 : 5.2)}
                         textAnchor="middle"
-                        fill="#1E293B"
+                        fill="#334155"
                         fontSize={isSelected ? '5.2' : isHovered ? '4.8' : '4.2'}
                         fontWeight="800"
+                        stroke="#FFFFFF"
+                        strokeWidth="1.4"
+                        strokeLinejoin="round"
+                        paintOrder="stroke fill"
                         className="select-none tracking-wider uppercase font-mono"
-                        style={{
-                          textShadow: '0 0 2.5px #FFFFFF, 0 0 4px #FFFFFF',
-                        }}
                       >
                         {taluka.nameEn}
                       </text>
+
+                      {/* Direct Violation Count Pill in Risk Heatmap Mode */}
+                      {viewMode === 'risk' && (() => {
+                        const vItem = talukaDataMap.get(taluka.id.toLowerCase());
+                        const vCount = vItem ? vItem.liveViolationCount : taluka.shartbhang;
+                        const vRisk = getRiskCategory(vCount);
+                        return (
+                          <g transform={`translate(${taluka.center[0]}, ${taluka.center[1] + 9.6})`}>
+                            <rect
+                              x="-14"
+                              y="-4.2"
+                              width="28"
+                              height="8.4"
+                              rx="4.2"
+                              fill={vRisk.stroke}
+                              stroke="#FFFFFF"
+                              strokeWidth="0.8"
+                            />
+                            <text
+                              x="0"
+                              y="1.8"
+                              textAnchor="middle"
+                              fill="#FFFFFF"
+                              fontSize="4.5"
+                              fontWeight="900"
+                              className="select-none font-sans"
+                            >
+                              {vCount.toLocaleString('mr-IN')}
+                            </text>
+                          </g>
+                        );
+                      })()}
+
+                      {/* Direct SDO Tag Pill in SDO Circle Mode */}
+                      {viewMode === 'sdo' && (() => {
+                        const sdo = getSdoInfo(taluka.sdoId);
+                        if (!sdo) return null;
+                        return (
+                          <g transform={`translate(${taluka.center[0]}, ${taluka.center[1] + 9.6})`}>
+                            <rect
+                              x="-17"
+                              y="-3.8"
+                              width="34"
+                              height="7.6"
+                              rx="3.8"
+                              fill="#FFFFFF"
+                              stroke={sdo.border}
+                              strokeWidth="0.8"
+                            />
+                            <text
+                              x="0"
+                              y="1.7"
+                              textAnchor="middle"
+                              fill={sdo.border}
+                              fontSize="3.8"
+                              fontWeight="900"
+                              className="select-none font-bold"
+                            >
+                              {sdo.shortNameMr || sdo.nameMr.replace(' उपविभाग', '')} प्रांत
+                            </text>
+                          </g>
+                        );
+                      })()}
                     </g>
                   )}
                 </g>
@@ -916,92 +1285,149 @@ export default function ChandrapurGisMap({
           )}
         </svg>
 
-        {/* Clean Hover HUD Tooltip (Bright Modern Card with 4-Quadrant Collision Avoidance) */}
-        {hoveredTaluka && !hoveredPoi && (
-          <div
-            className="absolute z-50 pointer-events-none transition-all duration-75 ease-out w-[310px] sm:w-[340px] max-w-[calc(100%-24px)]"
-            style={getSmartTooltipStyle(340, 310)}
-          >
-            <div className="bg-white/98 text-slate-900 p-3.5 rounded-xl border border-slate-200/90 shadow-2xl backdrop-blur-md max-h-[calc(100%-24px)] overflow-y-auto scrollbar-none ring-1 ring-slate-900/10">
-              {/* Header */}
-              <div className="flex items-center justify-between border-b border-slate-100 pb-2 mb-2">
-                <div className="flex items-center gap-2 min-w-0">
-                  <div className="w-7 h-7 rounded-lg bg-blue-900 flex items-center justify-center text-white shrink-0 shadow-xs">
-                    <MapPin className="w-4 h-4" />
+        {/* Clean Hover HUD Tooltip (Comprehensive, Fully Readable, Zero Truncation) */}
+        {hoveredTaluka && !hoveredPoi && (() => {
+          const item = talukaDataMap.get(hoveredTaluka.id.toLowerCase());
+          const liveViolations = item ? item.liveViolationCount : hoveredTaluka.shartbhang;
+          const liveParcels = item ? item.liveParcelCount : hoveredTaluka.total712;
+          const liveArea = item ? item.liveTotalAreaHa : hoveredTaluka.cultivableHa;
+          const liveGovtLand = hoveredTaluka.govtLand || hoveredTaluka.govtEncroached;
+          const risk = getRiskCategory(liveViolations);
+          const sdo = getSdoInfo(hoveredTaluka.sdoId);
+
+          return (
+            <div
+              className="absolute z-50 pointer-events-none transition-all duration-75 ease-out w-[360px] sm:w-[410px] max-w-[calc(100vw-32px)]"
+              style={getSmartTooltipStyle(410, 360)}
+            >
+              <div className="bg-white/98 text-slate-900 p-4 rounded-xl border border-slate-200/90 shadow-2xl backdrop-blur-md ring-1 ring-slate-900/10">
+                {/* Header: Taluka Name + SDO Sub-Division without truncation */}
+                <div className="border-b border-slate-100 pb-2.5 mb-2.5">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-start gap-2.5 min-w-0">
+                      <div className="w-8 h-8 rounded-lg bg-blue-900 flex items-center justify-center text-white shrink-0 shadow-xs mt-0.5 font-bold">
+                        <MapPin className="w-4 h-4" />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="flex items-baseline gap-1.5 flex-wrap">
+                          <h3 className="text-base sm:text-lg font-black text-slate-900 leading-snug">
+                            तालुका {hoveredTaluka.nameMr}
+                          </h3>
+                          <span className="text-xs font-semibold text-slate-500 font-mono">
+                            ({hoveredTaluka.nameEn})
+                          </span>
+                        </div>
+                        <div className="mt-1 flex items-center gap-1.5 flex-wrap">
+                          <span className="inline-flex items-center gap-1 text-xs font-bold text-indigo-800 bg-indigo-50 border border-indigo-200 px-2 py-0.5 rounded-md">
+                            <Landmark className="w-3 h-3 text-indigo-600" />
+                            <span>{hoveredTaluka.sdoSubdivision}</span>
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <span className="text-xs px-2.5 py-1 rounded-full bg-blue-50 text-blue-900 border border-blue-200 font-bold shrink-0 shadow-2xs whitespace-nowrap">
+                      {hoveredTaluka.villagesCount} महसूल गावे
+                    </span>
                   </div>
-                  <div className="min-w-0">
-                    <h3 className="text-base sm:text-lg font-black text-slate-900 leading-tight truncate">
-                      तालुका {hoveredTaluka.nameMr}
-                    </h3>
-                    <span className="text-xs text-blue-900 font-bold block truncate">
-                      {hoveredTaluka.nameEn} • {hoveredTaluka.sdoSubdivision}
+
+                  <div className="text-[11px] text-slate-500 font-medium mt-2 flex items-center gap-1.5 break-words">
+                    <span className="text-slate-400">🏛️</span>
+                    <span>{hoveredTaluka.tehsildarOffice}</span>
+                  </div>
+                </div>
+
+                {/* Mode-Specific Contextual Alert Banner */}
+                {viewMode === 'risk' && (
+                  <div className={`p-2.5 rounded-lg border mb-2.5 ${risk.badgeBg} ${risk.badgeText}`}>
+                    <div className="flex items-center justify-between gap-2 mb-1">
+                      <span className="font-black text-xs flex items-center gap-1.5">
+                        <span className="text-sm">{risk.icon}</span>
+                        <span>{risk.fullLabelMr}</span>
+                      </span>
+                      <span className="text-xs font-black font-mono">
+                        {liveViolations.toLocaleString('mr-IN')} प्रकरणे
+                      </span>
+                    </div>
+                    <p className="text-[11px] leading-relaxed break-words font-medium opacity-90">
+                      {risk.guidanceMr}
+                    </p>
+                  </div>
+                )}
+
+                {viewMode === 'sdo' && sdo && (
+                  <div className="p-2.5 rounded-lg border mb-2.5 bg-indigo-50/90 border-indigo-200 text-indigo-950">
+                    <div className="flex items-center justify-between gap-2 mb-1">
+                      <span className="font-black text-xs flex items-center gap-1.5">
+                        <Landmark className="w-3.5 h-3.5 text-indigo-700" />
+                        <span>{sdo.nameMr} (SDO Jurisdiction)</span>
+                      </span>
+                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-indigo-200/70 text-indigo-900">
+                        प्रांत कार्यालय
+                      </span>
+                    </div>
+                    <p className="text-[11px] leading-tight text-indigo-900/90 break-words font-medium">
+                      सक्षम अधिकारी: {sdo.sdoOfficer}
+                    </p>
+                    <p className="text-[10px] text-indigo-800/80 mt-1">
+                      या उपविभागातील तालुके: {sdo.talukas.join(', ')}
+                    </p>
+                  </div>
+                )}
+
+                {/* Live Revenue Statistics Grid */}
+                <div className="grid grid-cols-2 gap-2 text-xs mb-2.5">
+                  <div className="bg-blue-50/70 border border-blue-200/80 p-2 rounded-lg">
+                    <span className="text-blue-900/80 text-[11px] block font-semibold">नोंदणीकृत ७/१२ भूखंड:</span>
+                    <span className="font-black text-slate-900 text-sm sm:text-base">
+                      {Number(liveParcels).toLocaleString('mr-IN')}
+                    </span>
+                  </div>
+                  <div className={`p-2 rounded-lg border ${viewMode === 'risk' ? risk.badgeBg : 'bg-amber-50/90 border-amber-200'}`}>
+                    <span className="text-amber-900 text-[11px] block font-bold">शर्तभंग चौकशी:</span>
+                    <span className="font-black text-amber-900 text-sm sm:text-base">
+                      {Number(liveViolations).toLocaleString('mr-IN')} प्रकरणे
+                    </span>
+                  </div>
+                  <div className="bg-rose-50/90 border border-rose-200 p-2 rounded-lg">
+                    <span className="text-rose-900 text-[11px] block font-semibold">शासकीय जमीन:</span>
+                    <span className="font-black text-rose-800 text-sm sm:text-base">
+                      {Number(liveGovtLand).toLocaleString('mr-IN')} गट
+                    </span>
+                  </div>
+                  <div className="bg-emerald-50/90 border border-emerald-200 p-2 rounded-lg">
+                    <span className="text-emerald-900 text-[11px] block font-semibold">एकूण भौगोलिक क्षेत्र:</span>
+                    <span className="font-black text-emerald-800 text-sm sm:text-base">
+                      {Number(liveArea).toLocaleString('mr-IN')} Ha
                     </span>
                   </div>
                 </div>
-                <span className="text-xs px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-900 border border-blue-200 font-bold shrink-0 shadow-2xs">
-                  {hoveredTaluka.villagesCount} गावे
-                </span>
-              </div>
 
-              {/* Live Revenue Statistics Grid */}
-              <div className="grid grid-cols-2 gap-2 text-xs mb-2.5">
-                <div className="bg-blue-50/70 border border-blue-200/80 p-2 rounded-lg">
-                  <span className="text-blue-900/80 text-[11px] block font-semibold">नोंदणीकृत भूखंड:</span>
-                  <span className="font-black text-slate-900 text-sm sm:text-base">
-                    {(
-                      talukaDataMap.get(hoveredTaluka.id.toLowerCase())?.liveParcelCount ||
-                      hoveredTaluka.total712
-                    ).toLocaleString('mr-IN')}
-                  </span>
+                {/* Features (Full Text without Truncation) */}
+                <div className="bg-slate-50/90 rounded-lg p-2.5 border border-slate-200/70 mb-2">
+                  <p className="text-xs text-slate-700 leading-relaxed break-words">
+                    <span className="text-slate-900 font-bold">वैशिष्ट्ये: </span>
+                    {hoveredTaluka.keyHighlights}
+                  </p>
                 </div>
-                <div className="bg-amber-50/90 border border-amber-200 p-2 rounded-lg">
-                  <span className="text-amber-900 text-[11px] block font-bold">शर्तभंग चौकशी:</span>
-                  <span className="font-black text-amber-800 text-sm sm:text-base">
-                    {(
-                      talukaDataMap.get(hoveredTaluka.id.toLowerCase())?.liveViolationCount ||
-                      hoveredTaluka.shartbhang
-                    ).toLocaleString('mr-IN')}{' '}
-                    प्रकरणे
-                  </span>
-                </div>
-                <div className="bg-rose-50/90 border border-rose-200 p-2 rounded-lg">
-                  <span className="text-rose-900 text-[11px] block font-semibold">शासकीय जमीन:</span>
-                  <span className="font-black text-rose-800 text-sm sm:text-base">
-                    {hoveredTaluka.govtLand || hoveredTaluka.govtEncroached} गट
-                  </span>
-                </div>
-                <div className="bg-emerald-50/90 border border-emerald-200 p-2 rounded-lg">
-                  <span className="text-emerald-900 text-[11px] block font-semibold">एकूण क्षेत्र:</span>
-                  <span className="font-black text-emerald-800 text-sm sm:text-base">
-                    {Number(hoveredTaluka.cultivableHa).toLocaleString('mr-IN')} Ha
-                  </span>
-                </div>
-              </div>
 
-              {/* Economic & Cultural Highlight */}
-              <div className="bg-slate-50/90 rounded-lg p-2 border border-slate-200/70 mb-2">
-                <p className="text-xs text-slate-700 leading-snug">
-                  <span className="text-slate-900 font-bold">वैशिष्ट्ये: </span>
-                  {hoveredTaluka.keyHighlights}
-                </p>
-              </div>
+                {/* Rivers List */}
+                {hoveredTaluka.rivers?.length > 0 && (
+                  <div className="text-xs text-sky-900 font-semibold flex items-center gap-1.5 mb-2 px-1 break-words">
+                    <Waves className="w-3.5 h-3.5 shrink-0 text-sky-600" />
+                    <span className="text-slate-700 font-bold">प्रमुख नद्या:</span>
+                    <span className="text-sky-800">{hoveredTaluka.rivers.join(', ')}</span>
+                  </div>
+                )}
 
-              {/* Rivers */}
-              {hoveredTaluka.rivers?.length > 0 && (
-                <div className="text-xs text-sky-900 font-semibold flex items-center gap-1.5 mb-2 px-1">
-                  <Waves className="w-3.5 h-3.5 shrink-0 text-sky-600" />
-                  <span className="truncate">{hoveredTaluka.rivers.join(', ')}</span>
+                {/* Action Hint */}
+                <div className="text-xs text-slate-500 text-center pt-2 border-t border-slate-100 flex items-center justify-center gap-1.5 font-semibold">
+                  <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+                  <span>क्लिक करून डॅशबोर्ड डेटा फिल्टर करा</span>
                 </div>
-              )}
-
-              {/* Action Hint */}
-              <div className="text-xs text-slate-500 text-center pt-2 border-t border-slate-100 flex items-center justify-center gap-1.5 font-semibold">
-                <Sparkles className="w-3.5 h-3.5 text-amber-600" />
-                <span>क्लिक करून डॅशबोर्ड डेटा फिल्टर करा</span>
               </div>
             </div>
-          </div>
-        )}
+          );
+        })()}
 
         {/* Floating Tooltip for POIs with Smart Placement */}
         {hoveredPoi && (
@@ -1018,7 +1444,7 @@ export default function ChandrapurGisMap({
                 {hoveredPoi.badge} • {hoveredPoi.taluka}
               </div>
               {hoveredPoi.description && (
-                <p className="text-xs text-slate-600 leading-relaxed font-medium">
+                <p className="text-xs text-slate-600 leading-relaxed font-medium break-words">
                   {hoveredPoi.description}
                 </p>
               )}
@@ -1026,64 +1452,136 @@ export default function ChandrapurGisMap({
           </div>
         )}
 
-        {/* Clean Marathi Reference Legend (संदर्भ सूची) */}
+        {/* Dynamic Multi-Mode Reference Legend (संदर्भ सूची) */}
         {showLegend && (
-          <div className="absolute bottom-2 left-2 z-30 bg-white/95 backdrop-blur-md border border-slate-200 p-2.5 rounded-xl shadow-md max-w-[230px] hidden sm:block text-[10px] text-slate-800">
-            <div className="flex items-center justify-between border-b border-slate-200 pb-1 mb-1.5">
+          <div className="absolute bottom-2 left-2 z-30 bg-white/95 backdrop-blur-md border border-slate-200 p-2.5 rounded-xl shadow-md max-w-[260px] hidden sm:block text-[11px] text-slate-800">
+            <div className="flex items-center justify-between border-b border-slate-200 pb-1 mb-2">
               <span className="font-black text-blue-950 uppercase tracking-wider text-[10px]">
-                संदर्भ सूची (Map Legend)
+                {viewMode === 'risk'
+                  ? 'शर्तभंग जोखीम दर्शक (Risk Scale)'
+                  : viewMode === 'sdo'
+                  ? '६ उपविभाग संदर्भ (SDO Circles)'
+                  : 'संदर्भ सूची (Map Legend)'}
               </span>
               <button
                 onClick={() => setShowLegend(false)}
-                className="text-slate-400 hover:text-slate-700 text-xs px-1 cursor-pointer"
+                className="text-slate-400 hover:text-slate-700 text-xs px-1 cursor-pointer font-bold"
                 title="बंद करा"
               >
                 ✕
               </button>
             </div>
 
-            <div className="grid grid-cols-2 gap-x-2 gap-y-1.5 text-slate-700">
-              <div className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-blue-900 border border-white shadow-2xs"></span>
-                <span>जिल्हा मुख्यालय (HQ)</span>
+            {/* 1. Risk Mode Legend */}
+            {viewMode === 'risk' && (
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between gap-1.5 text-xs">
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-3 h-3 rounded bg-rose-200 border border-rose-700 shrink-0"></span>
+                    <span className="font-bold text-rose-950">अती-गंभीर (Critical)</span>
+                  </div>
+                  <span className="font-mono font-bold text-rose-800">२५०+</span>
+                </div>
+
+                <div className="flex items-center justify-between gap-1.5 text-xs">
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-3 h-3 rounded bg-orange-100 border border-orange-700 shrink-0"></span>
+                    <span className="font-bold text-orange-950">उच्च जोखीम (High)</span>
+                  </div>
+                  <span className="font-mono font-bold text-orange-800">५१-२५०</span>
+                </div>
+
+                <div className="flex items-center justify-between gap-1.5 text-xs">
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-3 h-3 rounded bg-yellow-100 border border-yellow-700 shrink-0"></span>
+                    <span className="font-bold text-amber-950">मध्यम जोखीम (Medium)</span>
+                  </div>
+                  <span className="font-mono font-bold text-amber-800">१५-५०</span>
+                </div>
+
+                <div className="flex items-center justify-between gap-1.5 text-xs">
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-3 h-3 rounded bg-emerald-100 border border-emerald-700 shrink-0"></span>
+                    <span className="font-bold text-emerald-950">कमी / सुरक्षित (Low)</span>
+                  </div>
+                  <span className="font-mono font-bold text-emerald-800">०-१४</span>
+                </div>
+
+                <div className="pt-1.5 border-t border-slate-100 text-[10px] text-slate-500 font-semibold flex items-center justify-between">
+                  <span>जिल्हा एकूण:</span>
+                  <span className="font-bold text-rose-700 font-mono">
+                    {riskStats.totalViolations.toLocaleString('mr-IN')} प्रकरणे
+                  </span>
+                </div>
               </div>
-              <div className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-slate-700"></span>
-                <span>तालुका केंद्र</span>
+            )}
+
+            {/* 2. SDO Mode Legend */}
+            {viewMode === 'sdo' && (
+              <div className="grid grid-cols-2 gap-x-2 gap-y-1.5 text-[11px]">
+                {SUB_DIVISIONS.map((sdo) => (
+                  <button
+                    key={sdo.id}
+                    onClick={() => setSelectedSdo(selectedSdo === sdo.id ? 'all' : sdo.id)}
+                    className="flex items-center gap-1.5 text-left hover:bg-slate-50 rounded p-0.5 cursor-pointer"
+                  >
+                    <span
+                      className="w-2.5 h-2.5 rounded-full shrink-0"
+                      style={{ backgroundColor: sdo.color }}
+                    />
+                    <span className={`font-bold ${selectedSdo === sdo.id ? 'text-indigo-950 underline' : 'text-slate-700'}`}>
+                      {sdo.shortNameMr}
+                    </span>
+                  </button>
+                ))}
               </div>
-              <div className="flex items-center gap-1.5">
-                <span className="w-3 h-0.5 bg-sky-600"></span>
-                <span>प्रमुख नद्या</span>
+            )}
+
+            {/* 3. Administrative Mode Legend */}
+            {viewMode === 'admin' && (
+              <div className="grid grid-cols-2 gap-x-2 gap-y-1.5 text-slate-700 text-[10px]">
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-full bg-blue-900 border border-white shadow-2xs"></span>
+                  <span>जिल्हा मुख्यालय (HQ)</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-slate-700"></span>
+                  <span>तालुका केंद्र</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="w-3 h-0.5 bg-sky-600"></span>
+                  <span>प्रमुख नद्या</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="w-3 h-0.5 border-b border-dashed border-slate-700"></span>
+                  <span>रेल्वे मार्ग</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[10px]">⛏</span>
+                  <span>कोळसा खाणी</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[10px]">🏭</span>
+                  <span>सिमेंट उद्योग</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[10px]">⚡</span>
+                  <span>CSTPS वीज केंद्र</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[10px]">🐅</span>
+                  <span>ताडोबा अभयारण्य</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[10px]">🏰</span>
+                  <span>ऐतिहासिक किल्ले</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[10px]">📄</span>
+                  <span>कागद उद्योग (BILT)</span>
+                </div>
               </div>
-              <div className="flex items-center gap-1.5">
-                <span className="w-3 h-0.5 border-b border-dashed border-slate-700"></span>
-                <span>रेल्वे मार्ग</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <span className="text-[10px]">⛏</span>
-                <span>कोळसा खाणी</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <span className="text-[10px]">🏭</span>
-                <span>सिमेंट उद्योग</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <span className="text-[10px]">⚡</span>
-                <span>CSTPS वीज केंद्र</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <span className="text-[10px]">🐅</span>
-                <span>ताडोबा अभयारण्य</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <span className="text-[10px]">🏰</span>
-                <span>ऐतिहासिक किल्ले</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <span className="text-[10px]">📄</span>
-                <span>कागद उद्योग (BILT)</span>
-              </div>
-            </div>
+            )}
           </div>
         )}
       </div>
@@ -1119,14 +1617,14 @@ export default function ChandrapurGisMap({
               <div className="bg-white border border-slate-200 px-3 py-1.5 rounded-lg text-center shadow-2xs">
                 <span className="text-[10px] text-slate-500 block font-medium">नोंदणीकृत ७/१२</span>
                 <span className="font-black text-slate-900 text-sm">
-                  {activeTalukaProfile.liveParcelCount?.toLocaleString('mr-IN')}
+                  {Number(activeTalukaProfile.liveParcelCount || activeTalukaProfile.total712).toLocaleString('mr-IN')}
                 </span>
               </div>
 
               <div className="bg-amber-50 border border-amber-200 px-3 py-1.5 rounded-lg text-center shadow-2xs">
                 <span className="text-[10px] text-amber-800 block font-bold">शर्तभंग चौकशी</span>
                 <span className="font-black text-amber-700 text-sm">
-                  {activeTalukaProfile.liveViolationCount?.toLocaleString('mr-IN')}
+                  {Number(activeTalukaProfile.liveViolationCount || activeTalukaProfile.shartbhang).toLocaleString('mr-IN')}
                 </span>
               </div>
 
@@ -1168,6 +1666,85 @@ export default function ChandrapurGisMap({
                 className="text-xs text-slate-500 hover:text-slate-800 underline px-1 transition cursor-pointer"
               >
                 सर्व तालुके दाखवा
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Selected SDO Jurisdiction Inspector Drawer (When SDO is selected and no single taluka selected) */}
+      {!activeTalukaProfile && selectedSdoData && (
+        <div className="relative z-20 bg-gradient-to-r from-indigo-50/95 via-white to-slate-50 border-t border-indigo-200 p-3 sm:p-4 text-slate-900">
+          <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-3">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-900 border border-indigo-300">
+                  निवडलेला उपविभाग (SDO Circle)
+                </span>
+                <h3 className="text-base sm:text-lg font-black text-slate-900 flex items-center gap-2">
+                  <span>{selectedSdoData.nameMr}</span>
+                  <span className="text-xs text-slate-500 font-normal">
+                    ({selectedSdoData.nameEn})
+                  </span>
+                </h3>
+              </div>
+              <p className="text-xs text-indigo-950 font-semibold leading-snug">
+                <span className="text-slate-600">सक्षम अधिकारी: </span>
+                {selectedSdoData.sdoOfficer}
+              </p>
+              <p className="text-xs text-slate-600">
+                <span className="font-bold text-slate-700">समाविष्ट तालुके: </span>
+                {selectedSdoData.talukas.join(', ')}
+              </p>
+            </div>
+
+            {/* Micro Stats for SDO */}
+            {(() => {
+              const stats = sdoStats.get(selectedSdoData.id) || {
+                parcels: 0,
+                violations: 0,
+                area: 0,
+                villages: 0,
+              };
+              return (
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs shrink-0 w-full lg:w-auto">
+                  <div className="bg-white border border-slate-200 px-3 py-1.5 rounded-lg text-center shadow-2xs">
+                    <span className="text-[10px] text-slate-500 block font-medium">महसूल गावे</span>
+                    <span className="font-black text-slate-900 text-sm">
+                      {stats.villages} गावे
+                    </span>
+                  </div>
+
+                  <div className="bg-blue-50 border border-blue-200 px-3 py-1.5 rounded-lg text-center shadow-2xs">
+                    <span className="text-[10px] text-blue-900 block font-medium">नोंदणीकृत ७/१२</span>
+                    <span className="font-black text-blue-950 text-sm">
+                      {stats.parcels.toLocaleString('mr-IN')}
+                    </span>
+                  </div>
+
+                  <div className="bg-amber-50 border border-amber-200 px-3 py-1.5 rounded-lg text-center shadow-2xs">
+                    <span className="text-[10px] text-amber-800 block font-bold">शर्तभंग प्रकरणे</span>
+                    <span className="font-black text-amber-700 text-sm">
+                      {stats.violations.toLocaleString('mr-IN')}
+                    </span>
+                  </div>
+
+                  <div className="bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-lg text-center shadow-2xs">
+                    <span className="text-[10px] text-emerald-800 block font-medium">एकूण क्षेत्र</span>
+                    <span className="font-black text-emerald-700 text-sm">
+                      {Math.round(stats.area).toLocaleString('mr-IN')} Ha
+                    </span>
+                  </div>
+                </div>
+              );
+            })()}
+
+            <div className="flex items-center gap-2 shrink-0 flex-wrap">
+              <button
+                onClick={() => setSelectedSdo('all')}
+                className="text-xs text-slate-500 hover:text-slate-800 underline px-1 transition cursor-pointer"
+              >
+                सर्व उपविभाग दाखवा
               </button>
             </div>
           </div>

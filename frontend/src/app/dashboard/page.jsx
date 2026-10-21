@@ -19,7 +19,6 @@ import LandTypeDonutChart from '../../components/charts/LandTypeDonutChart';
 import EnforcementDisposalDonut from '../../components/charts/EnforcementDisposalDonut';
 import HistoricalProvenanceTrendChart from '../../components/charts/HistoricalProvenanceTrendChart';
 import TalukaMountainChart from '../../components/charts/TalukaMountainChart';
-import ComplianceSpeedometerGauge from '../../components/charts/ComplianceSpeedometerGauge';
 import GatSurveyVisualizer from '../../components/charts/GatSurveyVisualizer';
 import GatSurveyLedgerTable from '../../components/charts/GatSurveyLedgerTable';
 import ChandrapurGisMap from '../../components/ChandrapurGisMap';
@@ -190,20 +189,12 @@ export default function DashboardPage() {
         />
       </div>
 
-      {/* Visual Analytics Row 3: Speedometer Compliance Gauge & Gat Land Usability (Image 4 Style) */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-2.5 sm:gap-3">
-        <ComplianceSpeedometerGauge
-          totalParcels={analytics.totalParcels}
-          totalViolations={analytics.totalViolations}
-          repossessedCount={analytics.totalRepossessedCases}
-          pendingHearings={analytics.pendingHearings}
-        />
-        <GatSurveyVisualizer
-          parcels={analytics.topGatParcels}
-          totalPotkharabaHa={analytics.totalPotkharabaHa}
-          totalCultivableHa={analytics.totalCultivableHa}
-        />
-      </div>
+      {/* Visual Analytics Row 3: Gat Land Usability & Survey Breakdown */}
+      <GatSurveyVisualizer
+        parcels={analytics.topGatParcels}
+        totalPotkharabaHa={analytics.totalPotkharabaHa}
+        totalCultivableHa={analytics.totalCultivableHa}
+      />
 
       {/* Visual Analytics Row 4: Comprehensive Survey & Gat Ledger Table */}
       <GatSurveyLedgerTable parcels={analytics.topGatParcels} />

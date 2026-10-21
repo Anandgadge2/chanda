@@ -2,6 +2,7 @@ import ExcelJS from 'exceljs';
 import prisma from '../config/prisma.js';
 import { generateSampleVillageTemplate } from '../utils/excelGenerator.js';
 import { invalidateAnalyticsCache } from './analyticsController.js';
+import { syncTalukaTotalRollup } from './prapatraController.js';
 import { logAudit } from '../middleware/auditMiddleware.js';
 
 /**
@@ -83,6 +84,70 @@ export const bulkUpload = async (req, res) => {
       data: records,
       skipDuplicates: true,
     });
+
+    // Synchronize village-level PrapatraRollups and Taluka summaries
+    try {
+      const villageGroups = new Map();
+      for (const r of records) {
+        const key = `${r.taluka.toLowerCase()}:::${r.villageName.toLowerCase()}`;
+        if (!villageGroups.has(key)) {
+          villageGroups.set(key, {
+            taluka: r.taluka,
+            villageName: r.villageName,
+            count: 0,
+            govtCount: 0,
+          });
+        }
+        const g = villageGroups.get(key);
+        g.count += 1;
+        if (r.tenureClass === 'SARKAR_SHASAN' || r.tenureClass === 'FOREST_JANGAL') {
+          g.govtCount += 1;
+        }
+      }
+
+      const affectedTalukas = new Set();
+      for (const g of villageGroups.values()) {
+        affectedTalukas.add(g.taluka);
+        const existingRollup = await prisma.prapatraRollup.findFirst({
+          where: {
+            district: 'Chandrapur',
+            taluka: { equals: g.taluka, mode: 'insensitive' },
+            villageName: { equals: g.villageName, mode: 'insensitive' }
+          }
+        });
+
+        if (existingRollup) {
+          await prisma.prapatraRollup.update({
+            where: { id: existingRollup.id },
+            data: {
+              total712Count: { increment: g.count },
+              inspected1950Count: { increment: g.count },
+              govtFound1950Count: { increment: g.govtCount },
+              totalGovtLandCount: { increment: g.govtCount }
+            }
+          });
+        } else {
+          await prisma.prapatraRollup.create({
+            data: {
+              district: 'Chandrapur',
+              taluka: g.taluka,
+              villageName: g.villageName,
+              total712Count: g.count,
+              inspected1950Count: g.count,
+              govtFound1950Count: g.govtCount,
+              totalGovtLandCount: g.govtCount,
+              remarks: 'गाव नमुना एक्सेल द्वारे आयात'
+            }
+          });
+        }
+      }
+
+      for (const t of affectedTalukas) {
+        await syncTalukaTotalRollup(t);
+      }
+    } catch (syncErr) {
+      console.error('Error synchronizing rollups in bulkUpload:', syncErr);
+    }
 
     await logAudit({
       userId: req.user?.id || null,

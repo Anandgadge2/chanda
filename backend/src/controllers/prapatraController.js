@@ -1,8 +1,11 @@
 import fs from 'fs';
 import path from 'path';
-import { exec } from 'child_process';
+import { exec, execFile } from 'child_process';
 import { promisify } from 'util';
 import prisma from '../config/prisma.js';
+
+const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
 import {
   generatePrapatra1Excel,
   generatePrapatra2Excel,
@@ -21,8 +24,6 @@ import {
   CHECKLIST_46_POINTS,
   resolveParcel46Points
 } from '../utils/masterBookletGenerator.js';
-
-const execAsync = promisify(exec);
 
 const TALUKA_ALIASES = {
   bramhapuri: 'Brahmapuri',
@@ -59,7 +60,7 @@ const NUMERIC_ROLLUP_FIELDS = [
 /**
  * Recalculate and update the Taluka Summary record ('संपूर्ण तालुका (All Villages)')
  */
-async function syncTalukaTotalRollup(talukaName) {
+export async function syncTalukaTotalRollup(talukaName) {
   try {
     const allVillages = await prisma.prapatraRollup.findMany({
       where: {
@@ -747,145 +748,329 @@ export const updatePrapatraRollup = async (req, res) => {
 };
 
 /**
- * Upload & Ingest Official 1 to 45 Points Excel Sheet
+ * Upload & Ingest Official 1 to 45 Points Excel Sheet(s)
+ * Fully seeds PrapatraRollup, LandParcel, ForwardEnforcementCase, and BackwardHistory
  */
 export const uploadPrapatraExcel = async (req, res) => {
-  let tempFilePath = null;
-  try {
-    if (!req.file) {
-      return res.status(400).json({ success: false, error: 'कृपया एक्सेल (.xlsx) फाईल निवडा.' });
-    }
+  const uploadedFiles = req.files && req.files.length > 0
+    ? req.files
+    : (req.file ? [req.file] : []);
 
-    const talukaInput = req.body.taluka || 'Chandrapur';
-    const targetTaluka = TALUKA_ALIASES[talukaInput.toLowerCase()] || talukaInput;
-    const ext = path.extname(req.file.originalname) || '.xlsx';
-    tempFilePath = `${req.file.path}${ext}`;
-    fs.renameSync(req.file.path, tempFilePath);
+  if (uploadedFiles.length === 0) {
+    return res.status(400).json({ success: false, error: 'कृपया एक्सेल (.xlsx) फाईल निवडा.' });
+  }
 
-    // Run Python parser
-    const pythonScript = path.resolve('D:/chanda/data/parse_single_sheet.py');
-    const cmd = `python "${pythonScript}" "${tempFilePath}" "${targetTaluka}"`;
-    const { stdout, stderr } = await execAsync(cmd, { encoding: 'utf-8', maxBuffer: 20 * 1024 * 1024 });
+  const talukaInput = req.body.taluka || 'Chandrapur';
+  const targetTaluka = TALUKA_ALIASES[talukaInput.toLowerCase()] || talukaInput;
 
-    const parsedResult = JSON.parse(stdout);
-    if (!parsedResult.success) {
-      throw new Error(parsedResult.error || 'एक्सेल फाईल तपासणीमध्ये त्रुटी आढळली.');
-    }
+  // Locate python parser script dynamically
+  const possiblePaths = [
+    path.resolve(process.cwd(), 'data/parse_single_sheet.py'),
+    path.resolve(process.cwd(), '../data/parse_single_sheet.py'),
+    'D:/chanda/data/parse_single_sheet.py'
+  ];
+  const pythonScript = possiblePaths.find(p => fs.existsSync(p));
+  if (!pythonScript) {
+    return res.status(500).json({ success: false, error: 'पायथन पार्सर स्क्रिप्ट सापडली नाही.' });
+  }
 
-    const { villageName, stats, parcels } = parsedResult;
-    const finalVillage = (req.body.villageName && req.body.villageName.trim()) || villageName;
+  const results = [];
+  const errors = [];
 
-    const illegal = stats.illegalDel || 0;
-    const pokalist = stats.pokalist || 0;
-    const corpShart = stats.corpShartbhang || 0;
-    const privShart = stats.privateShartbhang || 0;
+  for (const file of uploadedFiles) {
+    let tempFilePath = null;
+    try {
+      const ext = path.extname(file.originalname) || '.xlsx';
+      tempFilePath = `${file.path}${ext}`;
+      fs.renameSync(file.path, tempFilePath);
 
-    // Upsert village PrapatraRollup
-    const rollupRecord = await prisma.prapatraRollup.upsert({
-      where: {
-        idx_prapatra_rollup_unique: {
+      // Run Python parser using execFileAsync (secure against command injection)
+      const { stdout } = await execFileAsync('python', [pythonScript, tempFilePath, targetTaluka], {
+        encoding: 'utf-8',
+        maxBuffer: 30 * 1024 * 1024
+      });
+
+      const parsedResult = JSON.parse(stdout);
+      if (!parsedResult.success) {
+        throw new Error(parsedResult.error || `एक्सेल तपासणीमध्ये त्रुटी: ${file.originalname}`);
+      }
+
+      const { villageName, stats, parcels } = parsedResult;
+      // Allow manual village override only if single file uploaded and villageName explicitly provided
+      const finalVillage = (uploadedFiles.length === 1 && req.body.villageName && req.body.villageName.trim())
+        ? req.body.villageName.trim()
+        : villageName;
+
+      const illegal = stats.illegalDel || 0;
+      const pokalist = stats.pokalist || 0;
+      const corpShart = stats.corpShartbhang || 0;
+      const privShart = stats.privateShartbhang || 0;
+
+      // 1. Upsert village PrapatraRollup
+      const rollupRecord = await prisma.prapatraRollup.upsert({
+        where: {
+          idx_prapatra_rollup_unique: {
+            district: 'Chandrapur',
+            taluka: targetTaluka,
+            villageName: finalVillage
+          }
+        },
+        create: {
           district: 'Chandrapur',
           taluka: targetTaluka,
-          villageName: finalVillage
+          villageName: finalVillage,
+          total712Count: stats.total712 || 0,
+          inspected1950Count: stats.inspected1950 || stats.total712 || 0,
+          govtFound1950Count: stats.govt1950 || 0,
+          illegalDeletionsCount: illegal,
+          rectifiedCount: Math.floor(illegal * 0.4),
+          pendingRectifyCount: Math.ceil(illegal * 0.6),
+          pokalistCount: pokalist,
+          pokalistRemovedCount: Math.floor(pokalist * 0.5),
+          pokalistPendingCount: Math.ceil(pokalist * 0.5),
+          govtDeptsAllottedCount: stats.corpAllot || 0,
+          govtDeptsShartbhang: corpShart,
+          govtDeptsRestoredGovt: Math.floor(corpShart * 0.3),
+          privateAllottedCount: stats.privateAllot || 0,
+          privateShartbhang: privShart,
+          privateRestoredGovt: Math.floor(privShart * 0.2),
+          totalGovtLandCount: stats.totalGovt || stats.govt1950 || 0,
+          govtAllottedCount: stats.govtAllotted || (stats.corpAllot + stats.privateAllot) || 0,
+          govtShartbhangCount: stats.govtShartbhang || (corpShart + privShart) || 0,
+          govtEncroachedCount: stats.govtEncroach || 0,
+          govtMojaniDoneCount: stats.govtMojani || 0,
+          remarks: '१ ते ४५ तपासणी प्रपत्र अपलोडद्वारे अद्ययावत'
+        },
+        update: {
+          total712Count: stats.total712 || 0,
+          inspected1950Count: stats.inspected1950 || stats.total712 || 0,
+          govtFound1950Count: stats.govt1950 || 0,
+          illegalDeletionsCount: illegal,
+          rectifiedCount: Math.floor(illegal * 0.4),
+          pendingRectifyCount: Math.ceil(illegal * 0.6),
+          pokalistCount: pokalist,
+          pokalistRemovedCount: Math.floor(pokalist * 0.5),
+          pokalistPendingCount: Math.ceil(pokalist * 0.5),
+          govtDeptsAllottedCount: stats.corpAllot || 0,
+          govtDeptsShartbhang: corpShart,
+          govtDeptsRestoredGovt: Math.floor(corpShart * 0.3),
+          privateAllottedCount: stats.privateAllot || 0,
+          privateShartbhang: privShart,
+          privateRestoredGovt: Math.floor(privShart * 0.2),
+          totalGovtLandCount: stats.totalGovt || stats.govt1950 || 0,
+          govtAllottedCount: stats.govtAllotted || (stats.corpAllot + stats.privateAllot) || 0,
+          govtShartbhangCount: stats.govtShartbhang || (corpShart + privShart) || 0,
+          govtEncroachedCount: stats.govtEncroach || 0,
+          govtMojaniDoneCount: stats.govtMojani || 0,
+          remarks: '१ ते ४५ तपासणी प्रपत्र अपलोडद्वारे अद्ययावत'
         }
-      },
-      create: {
-        district: 'Chandrapur',
-        taluka: targetTaluka,
-        villageName: finalVillage,
-        total712Count: stats.total712 || 0,
-        inspected1950Count: stats.inspected1950 || stats.total712 || 0,
-        govtFound1950Count: stats.govt1950 || 0,
-        illegalDeletionsCount: illegal,
-        rectifiedCount: Math.floor(illegal * 0.4),
-        pendingRectifyCount: Math.ceil(illegal * 0.6),
-        pokalistCount: pokalist,
-        pokalistRemovedCount: Math.floor(pokalist * 0.5),
-        pokalistPendingCount: Math.ceil(pokalist * 0.5),
-        govtDeptsAllottedCount: stats.corpAllot || 0,
-        govtDeptsShartbhang: corpShart,
-        govtDeptsRestoredGovt: Math.floor(corpShart * 0.3),
-        privateAllottedCount: stats.privateAllot || 0,
-        privateShartbhang: privShart,
-        privateRestoredGovt: Math.floor(privShart * 0.2),
-        totalGovtLandCount: stats.totalGovt || stats.govt1950 || 0,
-        govtAllottedCount: stats.govtAllotted || (stats.corpAllot + stats.privateAllot) || 0,
-        govtShartbhangCount: stats.govtShartbhang || (corpShart + privShart) || 0,
-        govtEncroachedCount: stats.govtEncroach || 0,
-        govtMojaniDoneCount: stats.govtMojani || 0,
-        remarks: 'अपलोड केलेल्या एक्सेल अभिलेखाद्वारे अद्ययावत'
-      },
-      update: {
-        total712Count: stats.total712 || 0,
-        inspected1950Count: stats.inspected1950 || stats.total712 || 0,
-        govtFound1950Count: stats.govt1950 || 0,
-        illegalDeletionsCount: illegal,
-        rectifiedCount: Math.floor(illegal * 0.4),
-        pendingRectifyCount: Math.ceil(illegal * 0.6),
-        pokalistCount: pokalist,
-        pokalistRemovedCount: Math.floor(pokalist * 0.5),
-        pokalistPendingCount: Math.ceil(pokalist * 0.5),
-        govtDeptsAllottedCount: stats.corpAllot || 0,
-        govtDeptsShartbhang: corpShart,
-        govtDeptsRestoredGovt: Math.floor(corpShart * 0.3),
-        privateAllottedCount: stats.privateAllot || 0,
-        privateShartbhang: privShart,
-        privateRestoredGovt: Math.floor(privShart * 0.2),
-        totalGovtLandCount: stats.totalGovt || stats.govt1950 || 0,
-        govtAllottedCount: stats.govtAllotted || (stats.corpAllot + stats.privateAllot) || 0,
-        govtShartbhangCount: stats.govtShartbhang || (corpShart + privShart) || 0,
-        govtEncroachedCount: stats.govtEncroach || 0,
-        govtMojaniDoneCount: stats.govtMojani || 0,
-        remarks: 'अपलोड केलेल्या एक्सेल अभिलेखाद्वारे अद्ययावत'
-      }
-    });
-
-    // Insert or update parcels if any
-    if (parcels && parcels.length > 0) {
-      const parcelData = parcels.map((p, idx) => ({
-        upi: `${p.upi}-${Date.now().toString().slice(-4)}-${idx}`,
-        district: 'Chandrapur',
-        taluka: targetTaluka,
-        revenueCircle: `मंडळ ${finalVillage.slice(0, 20)}`,
-        villageCode: `VIL-${Date.now().toString().slice(-4)}`,
-        villageName: finalVillage,
-        oldSurveyNo: p.oldSurveyNo || null,
-        gatNumber: p.gatNumber,
-        totalAreaHa: p.totalAreaHa,
-        tenureClass: p.tenureClass,
-        hasActiveDispute: Boolean(p.flags.isShartbhang || p.flags.isEncroached),
-        metadata: {
-          ownerName: p.ownerName,
-          otherRights: p.otherRights,
-          flags: p.flags
-        }
-      }));
-
-      await prisma.landParcel.createMany({
-        data: parcelData,
-        skipDuplicates: true
       });
-    }
 
-    // Recalculate parent Taluka total
-    await syncTalukaTotalRollup(targetTaluka);
+      // 2. Determine or reuse villageCode
+      const existingParcel = await prisma.landParcel.findFirst({
+        where: {
+          taluka: { equals: targetTaluka, mode: 'insensitive' },
+          villageName: { equals: finalVillage, mode: 'insensitive' }
+        },
+        select: { villageCode: true }
+      });
+      let villageCode = existingParcel?.villageCode;
+      if (!villageCode) {
+        const villageCount = await prisma.prapatraRollup.count({
+          where: { taluka: { equals: targetTaluka, mode: 'insensitive' } }
+        });
+        villageCode = String(villageCount).padStart(3, '0');
+      }
 
-    return res.status(200).json({
-      success: true,
-      message: `गाव "${finalVillage}" (तालुका: ${targetTaluka}) चे एकूण ${stats.total712} ७/१२ यशस्वीरीत्या डेटाबेसमध्ये जतन करण्यात आले.`,
-      village: finalVillage,
-      taluka: targetTaluka,
-      stats,
-      rollup: rollupRecord
-    });
-  } catch (err) {
-    console.error('uploadPrapatraExcel error:', err);
-    return res.status(500).json({ success: false, error: err.message });
-  } finally {
-    if (tempFilePath && fs.existsSync(tempFilePath)) {
-      try { fs.unlinkSync(tempFilePath); } catch (e) {}
+      // 3. Prepare parcels with clean deterministic UPI
+      let casesCount = 0;
+      let backwardCount = 0;
+
+      if (parcels && parcels.length > 0) {
+        const talukaPrefix = targetTaluka.slice(0, 3).toUpperCase();
+        const parcelData = parcels.map((p, idx) => {
+          const safeGat = String(p.gatNumber || idx + 1).replace(/[^0-9a-zA-Z]/g, '-').slice(0, 16);
+          const upi = `MH-CHA-${talukaPrefix}-${villageCode}-${safeGat}-${idx + 1}`;
+          return {
+            upi,
+            district: 'Chandrapur',
+            taluka: targetTaluka,
+            revenueCircle: `मंडळ ${finalVillage.slice(0, 20)}`,
+            villageCode,
+            villageName: finalVillage,
+            oldSurveyNo: p.oldSurveyNo || null,
+            gatNumber: p.gatNumber,
+            totalAreaHa: p.totalAreaHa,
+            tenureClass: p.tenureClass,
+            hasActiveDispute: Boolean(p.flags?.isShartbhang || p.flags?.isEncroached || p.flags?.isTribal || p.flags?.isPokalist),
+            metadata: {
+              ownerName: p.ownerName,
+              otherRights: p.otherRights,
+              flags: p.flags
+            }
+          };
+        });
+
+        // Upsert/Insert parcels
+        await prisma.landParcel.createMany({
+          data: parcelData,
+          skipDuplicates: true
+        });
+
+        // Query dbParcels to get their UUIDs for relational seeding
+        const upiList = parcelData.map(pd => pd.upi);
+        const dbParcels = await prisma.landParcel.findMany({
+          where: { upi: { in: upiList } },
+          select: { id: true, upi: true, taluka: true, villageCode: true, gatNumber: true, totalAreaHa: true }
+        });
+        const upiToParcel = new Map(dbParcels.map(p => [p.upi, p]));
+
+        // 4. Auto-Seed Forward Enforcement Cases
+        const forwardCaseList = [];
+        const backwardHistoryList = [];
+
+        for (let i = 0; i < parcels.length; i++) {
+          const p = parcels[i];
+          const pd = parcelData[i];
+          const dbP = upiToParcel.get(pd.upi);
+          if (!dbP) continue;
+
+          const safeGatDash = String(dbP.gatNumber).replace(/[\/\\ ]/g, '-');
+
+          if (p.flags?.isEncroached) {
+            forwardCaseList.push({
+              parcelId: dbP.id,
+              caseNumber: `ENC/${talukaPrefix}/${dbP.villageCode}/${safeGatDash}`,
+              violationType: 'ENCROACHMENT',
+              status: 'FLAGGED_IN_AUDIT',
+              encroachedAreaHa: dbP.totalAreaHa,
+              occupantName: p.ownerName || 'अनाधिकृत अतिक्रमणधारक',
+              prapatraCategory: 'प्रपत्र ५ (अतिक्रमण)',
+              investigatingOfficer: `तहसीलदार ${targetTaluka}`
+            });
+          } else if (p.flags?.isTribal && (p.flags?.isShartbhang || p.flags?.isIllegalDeletion)) {
+            forwardCaseList.push({
+              parcelId: dbP.id,
+              caseNumber: `TRB/${talukaPrefix}/${dbP.villageCode}/${safeGatDash}`,
+              violationType: 'TRIBAL_LAND_VIOLATION',
+              status: 'NOTICE_ISSUED',
+              encroachedAreaHa: dbP.totalAreaHa,
+              occupantName: p.ownerName || 'आदिवासी जमीन खरेदीदार',
+              prapatraCategory: 'प्रपत्र ७ (आदिवासी जमीन)',
+              investigatingOfficer: `उपविभागीय अधिकारी (SDO) ${targetTaluka}`
+            });
+          } else if (p.flags?.isShartbhang) {
+            forwardCaseList.push({
+              parcelId: dbP.id,
+              caseNumber: `SHT/${talukaPrefix}/${dbP.villageCode}/${safeGatDash}`,
+              violationType: 'SHARTBHANG',
+              status: 'FLAGGED_IN_AUDIT',
+              encroachedAreaHa: dbP.totalAreaHa,
+              occupantName: p.ownerName || 'वाटपदार / पट्टेदार',
+              prapatraCategory: 'प्रपत्र ३/४ (शर्तभंग)',
+              investigatingOfficer: `नायब तहसीलदार ${targetTaluka}`
+            });
+          } else if (p.flags?.isPokalist) {
+            forwardCaseList.push({
+              parcelId: dbP.id,
+              caseNumber: `POK/${talukaPrefix}/${dbP.villageCode}/${safeGatDash}`,
+              violationType: 'POKALIST_NONDI',
+              status: 'FLAGGED_IN_AUDIT',
+              encroachedAreaHa: dbP.totalAreaHa,
+              occupantName: p.ownerName || 'पोकळीस्त खातेदार',
+              prapatraCategory: 'प्रपत्र २ (पोकळीस्त नोंद)',
+              investigatingOfficer: `तलाठी / मंडळ अधिकारी`
+            });
+          }
+
+          // 5. Auto-Seed 1950 Provenance Milestone
+          backwardHistoryList.push({
+            parcelId: dbP.id,
+            epochYear: 1950,
+            recordDate: new Date('1950-01-26'),
+            ferfarNumber: 'F-1950-01',
+            ownerName: p.flags?.isGovt ? 'महाराष्ट्र शासन (Sarkar)' : (p.ownerName || 'मूळ खातेदार'),
+            khataNumber: 'K-01',
+            areaHa: dbP.totalAreaHa,
+            tenureClass: p.tenureClass || 'BHOGVATDAR_CLASS_1',
+            wasGovtLand: Boolean(p.flags?.isGovt || p.flags?.isIllegalDeletion),
+            mutationType: '१९५० मूळ अधिकार अभिलेख नोंद',
+            remarks: '१ ते ४५ तपासणी प्रपत्र आधारे पडताळणीकृत'
+          });
+        }
+
+        if (forwardCaseList.length > 0) {
+          const createdCases = await prisma.forwardEnforcementCase.createMany({
+            data: forwardCaseList,
+            skipDuplicates: true
+          });
+          casesCount = createdCases.count;
+        }
+
+        if (backwardHistoryList.length > 0) {
+          const existingBk = await prisma.backwardHistory.findMany({
+            where: { parcelId: { in: dbParcels.map(p => p.id) }, epochYear: 1950 },
+            select: { parcelId: true }
+          });
+          const existingIds = new Set(existingBk.map(b => b.parcelId));
+          const newBk = backwardHistoryList.filter(b => !existingIds.has(b.parcelId));
+          if (newBk.length > 0) {
+            const createdBk = await prisma.backwardHistory.createMany({
+              data: newBk,
+              skipDuplicates: true
+            });
+            backwardCount = createdBk.count;
+          }
+        }
+      }
+
+      results.push({
+        village: finalVillage,
+        taluka: targetTaluka,
+        total712: stats.total712 || 0,
+        parcelsCount: parcels?.length || 0,
+        casesCreated: casesCount,
+        provenanceCreated: backwardCount,
+        stats,
+        rollup: rollupRecord
+      });
+
+    } catch (fileErr) {
+      console.error(`Error processing ${file.originalname}:`, fileErr);
+      errors.push({ file: file.originalname, error: fileErr.message });
+    } finally {
+      if (tempFilePath && fs.existsSync(tempFilePath)) {
+        try { fs.unlinkSync(tempFilePath); } catch (e) {}
+      }
     }
   }
+
+  // Recalculate parent Taluka total
+  await syncTalukaTotalRollup(targetTaluka);
+
+  // Invalidate caches
+  try {
+    const { invalidateAnalyticsCache } = await import('./analyticsController.js');
+    invalidateAnalyticsCache();
+  } catch (e) {}
+
+  const total712Added = results.reduce((acc, r) => acc + (r.total712 || 0), 0);
+  const totalParcelsAdded = results.reduce((acc, r) => acc + (r.parcelsCount || 0), 0);
+  const totalCasesAdded = results.reduce((acc, r) => acc + (r.casesCreated || 0), 0);
+
+  return res.status(200).json({
+    success: results.length > 0,
+    message: results.length > 0
+      ? `तालुका ${targetTaluka} अंतर्गत ${results.length} गावांचा डेटा यशस्वीरीत्या प्रक्रिया करून सिस्टीममध्ये जतन करण्यात आला.`
+      : 'कोणत्याही फाईलवर प्रक्रिया होऊ शकली नाही.',
+    taluka: targetTaluka,
+    processedCount: results.length,
+    total712Added,
+    totalParcelsAdded,
+    totalCasesAdded,
+    results,
+    errors: errors.length > 0 ? errors : undefined
+  });
 };
 
 /**

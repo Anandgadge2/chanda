@@ -20,6 +20,7 @@ import {
   Printer,
   Copy,
   Check,
+  AlertCircle,
 } from 'lucide-react';
 
 export default function ArchivalDocumentViewer({
@@ -61,23 +62,24 @@ export default function ArchivalDocumentViewer({
     (selectedEpoch
       ? selectedEpoch.epochYear === 1950
         ? 'सन १९५० हस्तलिखित सातबारा उतारा (1950 Baseline 7/12)'
-        : `सन ${selectedEpoch.epochYear} फेरफार नोंद क्र. ${selectedEpoch.ferfarNumber || 'N/A'}`
+        : `सन ${selectedEpoch.epochYear} फेरफार नोंद क्र. ${selectedEpoch.ferfarNumber || 'नोंद प्रलंबित'}`
       : selectedCase
-      ? `महसूल न्यायालय नोटीस व आदेश - केस क्र. ${selectedCase.caseNumber}`
+      ? `महसूल चौकशी नोटीस - केस क्र. ${selectedCase.caseNumber}`
       : 'अभिलेख दस्तऐवज');
 
-  const rackNo =
-    document?.recordRoomRackNo ||
-    (selectedEpoch?.epochYear === 1950 ? 'R-01' : selectedEpoch?.epochYear === 1988 ? 'R-02' : 'R-03');
-  const bundleNo =
-    document?.recordRoomBundleNo ||
-    (selectedEpoch?.epochYear === 1950 ? 'B-01' : selectedEpoch?.epochYear === 1988 ? 'B-04' : 'B-09');
+  const rackNo = document?.recordRoomRackNo || 'नोंद प्रलंबित';
+  const bundleNo = document?.recordRoomBundleNo || 'नोंद प्रलंबित';
   const fileNo =
     document?.fileNumber ||
-    (selectedEpoch?.epochYear === 1950
-      ? `ARCH/1950/RAJ/${parcel?.villageCode || parcel?.gatNumber || '078'}`
-      : `FER/${selectedEpoch?.epochYear || 'HIST'}/RAJ/${selectedEpoch?.ferfarNumber || '01'}`);
-  const hasRawFile = Boolean(document?.storageUrl);
+    (selectedEpoch
+      ? `ARCH/${selectedEpoch.epochYear || 'HIST'}/${parcel?.taluka?.slice(0, 3)?.toUpperCase() || 'CHA'}/${selectedEpoch.ferfarNumber || parcel?.gatNumber || 'REC'}`
+      : selectedCase
+      ? `CASE/${selectedCase.caseNumber}`
+      : parcel?.upi
+      ? `DOC/${parcel.upi}`
+      : 'नोंद प्रलंबित');
+
+  const hasRawFile = Boolean(document?.storageUrl && !document.storageUrl.includes('sample'));
 
   const handleCopy = (text, field) => {
     if (!text) return;
@@ -199,44 +201,45 @@ export default function ArchivalDocumentViewer({
           <button
             type="button"
             onClick={handlePrint}
-            className="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-lg transition border border-slate-700"
-            title="प्रत मुद्रित करा (Print Document)"
-            aria-label="Print Document"
+            className="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-lg border border-slate-700 transition"
+            title="प्रिंट करा (Print Record)"
+            aria-label="Print"
           >
             <Printer className="w-3.5 h-3.5" />
           </button>
 
-          {/* External Link */}
+          {/* Fullscreen Toggle */}
+          <button
+            type="button"
+            onClick={() => setIsFullscreen(!isFullscreen)}
+            className="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-lg border border-slate-700 transition"
+            title={isFullscreen ? 'पूर्ण पडदा बंद करा (Exit Fullscreen)' : 'पूर्ण पडदा (Fullscreen)'}
+            aria-label="Toggle Fullscreen"
+          >
+            {isFullscreen ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
+          </button>
+
+          {/* Raw File Direct Download/Link */}
           {hasRawFile && (
             <a
               href={document.storageUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-lg transition border border-slate-700"
-              title="मूळ दस्तऐवज उघडा"
-              aria-label="Open Document"
+              download
+              className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-lg text-xs transition shadow-xs"
+              title="मूळ PDF डाऊनलोड करा"
             >
-              <ExternalLink className="w-3.5 h-3.5" />
+              <Download className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">डाऊनलोड</span>
             </a>
           )}
-
-          {/* Fullscreen Toggle */}
-          <button
-            type="button"
-            onClick={() => setIsFullscreen((prev) => !prev)}
-            className="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-lg transition border border-slate-700"
-            title={isFullscreen ? 'सामान्य आकारात परत या (Exit Fullscreen)' : 'पूर्ण स्क्रीन करा (Fullscreen)'}
-            aria-label="Toggle Fullscreen"
-          >
-            {isFullscreen ? <Minimize2 className="w-3.5 h-3.5 text-amber-400" /> : <Maximize2 className="w-3.5 h-3.5" />}
-          </button>
         </div>
       </div>
 
-      {/* Collectorate Physical Record Coordinates Bar (Responsive & Never Truncated) */}
-      <div className="bg-slate-900/95 border-b border-slate-800 px-3 sm:px-4 py-2 flex flex-wrap items-center justify-between gap-x-3 gap-y-1.5 text-xs text-slate-200 shrink-0">
-        <div className="flex items-center gap-1.5 font-semibold text-amber-400">
-          <FolderArchive className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+      {/* Record Room Coordinates Bar */}
+      <div className="bg-slate-900/90 text-slate-300 px-3 sm:px-4 py-1.5 border-b border-slate-800/80 flex flex-wrap items-center justify-between gap-2 text-xs">
+        <div className="flex items-center gap-1.5 text-amber-400 font-semibold">
+          <FolderArchive className="w-3.5 h-3.5" />
           <span className="text-[11px] sm:text-xs">भौतिक अभिलेखागार संदर्भ (Record Room Coordinates):</span>
         </div>
 
@@ -273,7 +276,7 @@ export default function ArchivalDocumentViewer({
         </div>
       </div>
 
-      {/* Document View Area (Ample Bottom Clearance to Avoid Cutoff) */}
+      {/* Document View Area */}
       <div className="flex-1 min-h-[500px] overflow-y-auto overflow-x-auto p-3 sm:p-6 md:p-8 pb-20 sm:pb-28 bg-[#121620] flex items-start justify-center relative select-text">
         <div
           key={`${selectedEpoch?.id || selectedCase?.id || document?.id || 'default'}-${viewMode}`}
@@ -301,7 +304,7 @@ export default function ArchivalDocumentViewer({
                 गाव नमुना {selectedEpoch?.epochYear === 1950 ? '७/१२' : '६'} (अभिलेख प्रत)
               </div>
               <div className="absolute top-2.5 right-3 text-[9px] font-mono text-amber-950 font-semibold uppercase tracking-wider border border-amber-800/40 bg-amber-50/80 px-1.5 py-0.5 rounded shadow-2xs">
-                नोंद क्र. {selectedEpoch?.ferfarNumber || 'ARCH-1950'}
+                नोंद क्र. {selectedEpoch?.ferfarNumber || 'मूळ सनद'}
               </div>
 
               {/* Official Header */}
@@ -311,19 +314,19 @@ export default function ArchivalDocumentViewer({
                   <span>महाराष्ट्र शासन • महसूल व वन विभाग</span>
                 </div>
                 <h4 className="text-base sm:text-lg font-extrabold text-slate-900 tracking-tight">
-                  जिल्हाधिकारी कार्यालय चंद्रपूर | उपविभाग राजुरा
+                  जिल्हाधिकारी कार्यालय चंद्रपूर | {parcel?.taluka ? `तालुका ${parcel.taluka}` : 'चंद्रपूर जिल्हा'}
                 </h4>
                 <p className="text-xs sm:text-sm font-bold text-amber-900 mt-0.5">
                   {selectedEpoch?.epochYear === 1950
                     ? 'सन १९५० मूळ अधिकार अभिलेख पत्रक (गाव नमुना सात - सातबारा उतारा)'
                     : selectedEpoch
-                    ? `हक्क नोंदणी पत्रक (गाव नमुना सहा - फेरफार नोंद क्र. ${selectedEpoch.ferfarNumber})`
+                    ? `हक्क नोंदणी पत्रक (गाव नमुना सहा - फेरफार नोंद क्र. ${selectedEpoch.ferfarNumber || '—'})`
                     : selectedCase
-                    ? `महसूल न्यायालय सुनावणी व कारणे दाखवा नोटीस (केस क्र. ${selectedCase.caseNumber})`
+                    ? `महसूल न्यायालय चौकशी नोटीस (केस क्र. ${selectedCase.caseNumber})`
                     : 'प्रमाणित अभिलेख दस्तऐवज प्रत'}
                 </p>
                 <p className="text-[11px] text-slate-700 font-medium mt-0.5">
-                  सजा: चुरापूर | महसूल मंडळ: {parcel?.revenueCircle || 'चुरापूर'} | तालुका: {parcel?.taluka || 'राजुरा'} | जिल्हा: चंद्रपूर
+                  गाव: {parcel?.villageName || '—'} | महसूल मंडळ: {parcel?.revenueCircle || '—'} | तालुका: {parcel?.taluka || '—'} | जिल्हा: चंद्रपूर
                 </p>
               </div>
 
@@ -332,19 +335,19 @@ export default function ArchivalDocumentViewer({
                 <div className="p-1">
                   <span className="text-slate-600 text-[10px] block font-medium">गट क्रमांक:</span>
                   <span className="font-extrabold text-slate-900 text-xs sm:text-sm">
-                    {parcel?.gatNumber || '101/1'}{parcel?.hissaNumber && parcel.hissaNumber !== '0' ? ` (हिस्सा ${parcel.hissaNumber})` : ''}
+                    {parcel?.gatNumber || '—'}{parcel?.hissaNumber && parcel.hissaNumber !== '0' ? ` (हिस्सा ${parcel.hissaNumber})` : ''}
                   </span>
                 </div>
                 <div className="p-1">
                   <span className="text-slate-600 text-[10px] block font-medium">जुना स.नं.:</span>
                   <span className="font-extrabold text-slate-900 text-xs sm:text-sm">
-                    {parcel?.oldSurveyNo || '88'}
+                    {parcel?.oldSurveyNo || '—'}
                   </span>
                 </div>
                 <div className="p-1">
                   <span className="text-slate-600 text-[10px] block font-medium">एकूण क्षेत्र:</span>
                   <span className="font-extrabold text-slate-900 text-xs sm:text-sm">
-                    {selectedEpoch ? Number(selectedEpoch.areaHa).toFixed(4) : Number(parcel?.totalAreaHa || 0.81).toFixed(4)} हेक्टर
+                    {selectedEpoch ? Number(selectedEpoch.areaHa).toFixed(4) : (parcel?.totalAreaHa ? Number(parcel.totalAreaHa).toFixed(4) : '—')} हेक्टर
                   </span>
                 </div>
                 <div className="p-1">
@@ -352,6 +355,10 @@ export default function ArchivalDocumentViewer({
                   <span className="font-extrabold text-amber-950 text-xs sm:text-sm">
                     {selectedEpoch?.tenureClass === 'BHOGVATDAR_CLASS_2' || parcel?.tenureClass === 'BHOGVATDAR_CLASS_2'
                       ? 'भोगवटादार वर्ग-२'
+                      : selectedEpoch?.tenureClass === 'SARKAR_SHASAN' || parcel?.tenureClass === 'SARKAR_SHASAN'
+                      ? 'महाराष्ट्र शासन'
+                      : selectedEpoch?.tenureClass === 'FOREST_JANGAL' || parcel?.tenureClass === 'FOREST_JANGAL'
+                      ? 'वन जमीन'
                       : 'भोगवटादार वर्ग-१'}
                   </span>
                 </div>
@@ -365,13 +372,13 @@ export default function ArchivalDocumentViewer({
                       खातेदार / मालक नोंद (Titleholder):
                     </span>
                     <p className="font-extrabold text-xs sm:text-base text-slate-900 mt-0.5">
-                      {selectedEpoch?.ownerName || (selectedCase ? selectedCase.occupantName : parcel?.backwardHistories?.[0]?.ownerName || 'गणपती कृष्णा कावळे')}
+                      {selectedEpoch?.ownerName || (selectedCase ? selectedCase.occupantName : parcel?.backwardHistories?.[0]?.ownerName || parcel?.metadata?.ownerName || 'नोंदणीकृत खातेदार')}
                     </p>
                   </div>
                   <div className="text-right shrink-0">
                     <span className="text-[10px] text-slate-600 block font-medium">खाते क्रमांक:</span>
                     <span className="font-mono font-bold text-xs sm:text-sm text-slate-800 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
-                      {selectedEpoch?.khataNumber || 'K-45/1/ब/1,45/1/ब/2'}
+                      {selectedEpoch?.khataNumber || '—'}
                     </span>
                   </div>
                 </div>
@@ -380,7 +387,7 @@ export default function ArchivalDocumentViewer({
                   <div>
                     <span className="text-slate-600 block text-[10px] font-medium">हस्तांतरण / नोंद प्रकार:</span>
                     <span className="font-semibold text-slate-900">
-                      {selectedEpoch?.mutationType || (selectedCase ? 'शर्तभंग चौकशी' : 'मूळ वर्ग-२ वाटप')}
+                      {selectedEpoch?.mutationType || (selectedCase ? 'शर्तभंग चौकशी' : 'अधिकार अभिलेख नोंद')}
                     </span>
                   </div>
                   <div>
@@ -388,21 +395,19 @@ export default function ArchivalDocumentViewer({
                     <span className="font-semibold text-slate-900">
                       {selectedEpoch?.recordDate
                         ? new Date(selectedEpoch.recordDate).toLocaleDateString('mr-IN', { year: 'numeric', month: 'long', day: 'numeric' })
-                        : selectedEpoch?.epochYear === 1950
-                        ? '१५ जून, १९५०'
-                        : selectedEpoch?.epochYear === 1988
-                        ? '१४ मार्च १९८८'
-                        : '०५ सप्टेंबर २०१२'}
+                        : selectedEpoch?.epochYear
+                        ? `वर्ष ${selectedEpoch.epochYear}`
+                        : '—'}
                     </span>
                   </div>
                 </div>
 
                 {/* Legal Restrictions / Remarks */}
-                {(selectedEpoch?.remarks || selectedCase?.finalOrderDetails || true) && (
+                {(selectedEpoch?.remarks || selectedCase?.finalOrderDetails) && (
                   <div className="mt-2.5 p-2.5 bg-amber-100/70 border-l-4 border-amber-700 rounded-r text-[11px] text-amber-950">
                     <span className="font-bold">वैधानिक शेरा (Statutory Notation): </span>
                     <span className="italic font-medium">
-                      {selectedEpoch?.remarks || selectedCase?.finalOrderDetails || 'नवीन अविभाज्य शर्तींवर प्रदान (Class-2 Allotment)'}
+                      {selectedEpoch?.remarks || selectedCase?.finalOrderDetails}
                     </span>
                   </div>
                 )}
@@ -414,11 +419,13 @@ export default function ArchivalDocumentViewer({
                   <div className="flex justify-between items-center font-bold">
                     <span>नोटीस संदर्भ: {selectedCase.caseNumber}</span>
                     <span className="text-[10px] bg-rose-200 text-rose-900 px-2 py-0.5 rounded font-mono">
-                      कारणे दाखवा नोटीस
+                      महसूल चौकशी
                     </span>
                   </div>
-                  <p>तपास अधिकारी: {selectedCase.investigatingOfficer}</p>
-                  <p>नोटीस बजावणी दिनांक: {selectedCase.showCauseNoticeDate ? new Date(selectedCase.showCauseNoticeDate).toLocaleDateString('mr-IN') : '-'}</p>
+                  {selectedCase.investigatingOfficer && <p>तपास अधिकारी: {selectedCase.investigatingOfficer}</p>}
+                  {selectedCase.showCauseNoticeDate && (
+                    <p>नोटीस बजावणी दिनांक: {new Date(selectedCase.showCauseNoticeDate).toLocaleDateString('mr-IN')}</p>
+                  )}
                 </div>
               )}
 
@@ -428,15 +435,17 @@ export default function ArchivalDocumentViewer({
                 <div className="relative flex items-center gap-2.5">
                   <div className="w-16 h-16 rounded-full border-2 border-rose-800 p-0.5 flex flex-col items-center justify-center text-[7.5px] font-extrabold text-rose-800 uppercase text-center rotate-[-10deg] bg-rose-50/40 shadow-xs">
                     <div className="border border-rose-700/70 rounded-full w-full h-full flex flex-col items-center justify-center p-0.5 leading-tight">
-                      <span>उपविभाग</span>
-                      <span className="font-black">राजुरा</span>
+                      <span>तालुका</span>
+                      <span className="font-black">{parcel?.taluka || 'चंद्रपूर'}</span>
                       <Award className="w-2.5 h-2.5 text-rose-800 my-0.5" />
                       <span>सत्य प्रत</span>
                     </div>
                   </div>
                   <div className="text-[10px] text-slate-600">
                     <p className="font-bold text-slate-800">अभिलेख कक्ष शिक्का</p>
-                    <p className="font-mono text-[9px] text-slate-500">प्रमाणित प्रत क्र: CH-RAJ/{parcel?.gatNumber || '101/1'}</p>
+                    <p className="font-mono text-[9px] text-slate-500">
+                      प्रमाणित प्रत क्र: CH-{parcel?.taluka?.slice(0, 3)?.toUpperCase() || 'CHA'}/{parcel?.gatNumber || '—'}
+                    </p>
                   </div>
                 </div>
 
@@ -445,10 +454,10 @@ export default function ArchivalDocumentViewer({
                   <div className="text-right">
                     <p className="text-[10px] sm:text-xs font-bold text-slate-900">तलाठी / मंडळ अधिकारी</p>
                     <p className="text-[8px] sm:text-[9px] font-mono text-slate-500">
-                      SHA256: {parcel?.upi ? parcel.upi.substring(0, 16) : 'MH-CHA-RAJ-008-1'}...
+                      अभिलेख कोड: {parcel?.upi ? parcel.upi.substring(0, 18) : 'MH-CHA-REC'}
                     </p>
                     <span className="inline-block text-[8px] text-emerald-800 bg-emerald-100 border border-emerald-300 px-1.5 py-0.2 rounded font-bold mt-0.5">
-                      ✓ ई-अभिलेख डिजिटल स्वाक्षरीत
+                      ✓ ई-अभिलेख प्रमाणित
                     </span>
                   </div>
                   <div className="w-11 h-11 bg-white border border-slate-400 rounded-lg p-0.5 flex items-center justify-center shadow-xs">
@@ -459,7 +468,7 @@ export default function ArchivalDocumentViewer({
 
               {/* Official Archival Disclaimer Note */}
               <div className="text-[9px] sm:text-[10px] text-center text-slate-500 pt-2 border-t border-amber-800/15 font-medium leading-relaxed">
-                सदर दस्तऐवज जिल्हाधिकारी कार्यालय चंद्रपूर च्या अधिकृत ई-अभिलेख प्रणालीतून डाऊनलोड केलेला आहे. कायदेशीर पुराव्यासाठी मूळ अभिलेखाशी पडताळणी करावी.
+                सदर दस्तऐवज जिल्हाधिकारी कार्यालय चंद्रपूर च्या अधिकृत ई-अभिलेख प्रणालीतून संकलित केला आहे.
               </div>
             </div>
           )}
@@ -471,7 +480,7 @@ export default function ArchivalDocumentViewer({
         <span className="flex items-center gap-1.5">
           <Eye className="w-3.5 h-3.5 text-amber-400 shrink-0" />
           <span className="text-slate-300 font-medium">
-            स्कॅन दस्तऐवज अचूकतेने दर्शविला आहे (Resolution: 300 DPI Archival Scan)
+            डिजिटल अभिलेख कक्ष (Resolution: 300 DPI Archival Quality)
           </span>
         </span>
         <div className="flex items-center gap-2 font-mono text-[10px]">

@@ -38,9 +38,8 @@ export default function TalukaMountainChart({ data = [], selectedTaluka = '' }) 
       violationCount: violations,
       disputeCount: disputes,
       totalAreaHa: totalArea,
-      // Approx cultivable vs safe area ratio
-      cultivableAreaHa: Number((totalArea * 0.9).toFixed(2)),
-      disputedAreaHa: Number((violations * 1.5).toFixed(2)),
+      cultivableAreaHa: Number(Number(item.cultivableAreaHa || totalArea).toFixed(2)),
+      disputedAreaHa: Number(Number(item.disputedAreaHa || 0).toFixed(2)),
     };
   });
 
@@ -139,7 +138,7 @@ export default function TalukaMountainChart({ data = [], selectedTaluka = '' }) 
             <p className="text-xs font-semibold">नोंदी उपलब्ध नाहीत.</p>
           </div>
         ) : chartType === 'bars' ? (
-          // Multi-Series Grouped Bar Chart (Image 2 Chart 2 Style)
+          // Multi-Series Grouped Bar Chart
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={chartData} margin={{ top: 12, right: 12, left: -18, bottom: 2 }} barGap={3}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
@@ -167,7 +166,7 @@ export default function TalukaMountainChart({ data = [], selectedTaluka = '' }) 
             </BarChart>
           </ResponsiveContainer>
         ) : (
-          // Multi-layer Mountain Wave Chart (Image 3 & 5 LATINE Style)
+          // Multi-layer Mountain Wave Chart
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={chartData} margin={{ top: 16, right: 16, left: -18, bottom: 2 }}>
               <defs>
