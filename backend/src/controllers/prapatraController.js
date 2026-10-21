@@ -202,11 +202,16 @@ export const getPrapatraReport = async (req, res) => {
     }
     if (!isAllVillages) {
       const cleanV = cleanVillageName(village);
-      parcelWhere.OR = [
+      const orConditions = [
         { villageName: { contains: cleanV, mode: 'insensitive' } },
         { villageName: { contains: village, mode: 'insensitive' } },
         { revenueCircle: { contains: cleanV, mode: 'insensitive' } }
       ];
+      if (village.includes('पिपरदंड') || village.includes('पिंपरदंड') || village.includes('पपरदड')) {
+        orConditions.push({ villageName: { contains: 'पिपरदंड', mode: 'insensitive' } });
+        orConditions.push({ villageName: { contains: 'पिंपरदंड', mode: 'insensitive' } });
+      }
+      parcelWhere.OR = orConditions;
     }
 
     // Tenure Class Filter

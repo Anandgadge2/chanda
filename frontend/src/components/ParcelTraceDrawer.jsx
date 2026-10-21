@@ -26,6 +26,7 @@ import {
   Check,
   BookOpen,
   Info,
+  Printer,
 } from 'lucide-react';
 import { api } from '../lib/api';
 import { TENURE_CLASSES, VIOLATION_TYPES, ENFORCEMENT_STATUSES } from '../lib/constants';
@@ -218,6 +219,17 @@ export default function ParcelTraceDrawer({ upi, onClose, onRefresh }) {
             >
               <BookOpen className="w-3.5 h-3.5 text-amber-700" />
               <span className="hidden sm:inline">संक्षिप्त रूपे मदत</span>
+            </button>
+
+            {/* Print / Export 360 Provenance Dossier */}
+            <button
+              type="button"
+              onClick={() => window.print()}
+              className="px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-lg text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 transition flex items-center gap-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-2xs cursor-pointer"
+              title="३६०° शीर्षक साखळी अहवाल प्रिंट / सेव्ह करा (Print / Save PDF)"
+            >
+              <Printer className="w-3.5 h-3.5 text-slate-700" />
+              <span className="hidden sm:inline">अहवाल प्रिंट</span>
             </button>
 
             {/* Split View Toggle */}

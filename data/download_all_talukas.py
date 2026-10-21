@@ -43,7 +43,8 @@ for mr_name, en_name in TALUKA_NAME_MAP.items():
             continue
         sheet_id = it['id']
         title = it['title'].replace(" Microsoft Excel", "").replace(".xlsx", "").strip()
-        safe_title = "".join(c for c in title if c.isalnum() or c in (' ', '-', '_', '.')).rstrip()
+        # Preserve full Marathi Unicode script (including matras, velantis, and anusvaras)
+        safe_title = re.sub(r'[\\/*?:"<>|]', '', title).strip()
         filename = f"{idx:02d}_{safe_title}.xlsx"
         filepath = os.path.join(t_dir, filename)
         tasks.append({
