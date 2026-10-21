@@ -76,7 +76,7 @@ export default function DashboardPage() {
           <span className="text-xs font-bold bg-amber-100 text-amber-900 px-2 py-0.5 rounded border border-amber-300 shrink-0">
             महसूल २०२६
           </span>
-          <h1 className="text-sm sm:text-base lg:text-lg font-black text-slate-900 leading-none truncate">
+          <h1 className="text-sm sm:text-base lg:text-lg font-black text-slate-900 leading-none">
             जमीन अभिलेख व्यवस्थापन व महसूल चौकशी प्रणाली
           </h1>
           <span className="text-xs text-slate-500 font-semibold hidden xl:inline shrink-0">
@@ -181,6 +181,7 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-2.5 sm:gap-3">
         <LandTypeDonutChart data={analytics.tenureDistribution} />
         <EnforcementDisposalDonut
+          violations={analytics.violationsByType}
           statuses={analytics.statusDistribution}
           totalViolations={analytics.totalViolations}
           repossessedArea={analytics.totalRepossessedHa}

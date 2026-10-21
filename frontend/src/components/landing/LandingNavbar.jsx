@@ -91,13 +91,7 @@ export default function LandingNavbar({ onOpenAuth }) {
                 </button>
               </>
             )}
-            <Link
-              href="/glossary"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-700 hover:text-blue-950 hover:bg-slate-100 border border-slate-300 transition shadow-2xs"
-            >
-              <BookOpen className="w-3.5 h-3.5 text-amber-600" />
-              <span>महसूल शब्दावली</span>
-            </Link>
+           
           </div>
 
           {/* Mobile Menu Hamburger */}

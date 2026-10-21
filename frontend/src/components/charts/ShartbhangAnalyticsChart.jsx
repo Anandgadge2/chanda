@@ -15,7 +15,7 @@ const VIOLATION_PALETTE = {
 };
 
 export default function ShartbhangAnalyticsChart({ violations = [], statuses = [] }) {
-  const [activeTab, setActiveTab] = useState('categories'); // 'categories' | 'pipeline'
+  const [activeTab, setActiveTab] = useState('pipeline'); // 'categories' | 'pipeline'
 
   const totalViolations = (violations || []).reduce((acc, curr) => acc + (curr.count || 0), 0);
   const totalEncroachedArea = (violations || []).reduce((acc, curr) => acc + (curr.encroachedAreaHa || 0), 0);

@@ -101,15 +101,7 @@ export default function Navbar({
 
           {/* Right: Public Link & Profile Tray */}
           <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
-            <Link
-              href="/glossary"
-              className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold px-3 py-1.5 rounded-lg border border-slate-200 text-slate-700 hover:text-blue-950 hover:bg-slate-50 transition shadow-2xs"
-              title="जमीन महसूल शब्दावली व संक्षिप्त रूपे"
-            >
-              <BookOpen className="w-4 h-4 text-amber-600" />
-              <span className="hidden md:inline">महसूल शब्दावली</span>
-              <span className="md:hidden">शब्दावली</span>
-            </Link>
+            
 
             <Link
               href="/"
