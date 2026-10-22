@@ -256,7 +256,8 @@ export default function ReportsPage() {
     tenure: tenureFilter,
     violation: violationFilter,
     areaRange: areaRangeFilter,
-    booklet: activeTab === 'categories' ? 'true' : 'false'
+    booklet: activeTab === 'categories' ? 'true' : 'false',
+    view: activeTab === 'checklist' ? activeView : undefined
   });
   const pdfDownloadUrl = api.getPrapatraPdfUrl(currentReportId, {
     taluka,
@@ -265,7 +266,8 @@ export default function ReportsPage() {
     tenure: tenureFilter,
     violation: violationFilter,
     areaRange: areaRangeFilter,
-    booklet: activeTab === 'categories' ? 'true' : 'false'
+    booklet: activeTab === 'categories' ? 'true' : 'false',
+    view: activeTab === 'checklist' ? activeView : undefined
   });
 
   const hasActiveFilters =
@@ -310,7 +312,7 @@ export default function ReportsPage() {
           </div>
 
           {/* Action Export Buttons */}
-          <div className="flex items-center gap-2.5 w-full md:w-auto shrink-0">
+          <div className="flex items-center gap-2.5 w-full md:w-auto shrink-0 flex-wrap">
             <a
               href={excelDownloadUrl}
               download
@@ -318,22 +320,45 @@ export default function ReportsPage() {
               title="अधिकृत शासकीय एक्सेल बुकलेट डाऊनलोड करा (खातेदारांच्या संपूर्ण यादीसह)"
             >
               <FileSpreadsheet className="w-4 h-4" />
-              <span>एक्सेल (.xlsx)</span>
+              <span>
+                {activeTab === 'checklist' && activeView === 'summary'
+                  ? 'गोषवारा एक्सेल (.xlsx)'
+                  : activeTab === 'checklist' && activeView === 'timeline'
+                  ? '४६ सूची एक्सेल (.xlsx)'
+                  : 'एक्सेल (.xlsx)'}
+              </span>
               <span className="bg-emerald-700/80 text-[10px] px-1.5 py-0.5 rounded-full font-mono">
-                {parcels.length}
+                {activeTab === 'checklist' && activeView === 'summary' ? summaryData.length : parcels.length}
               </span>
             </a>
 
-            <a
-              href={pdfDownloadUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex-1 md:flex-none inline-flex items-center justify-center gap-2 px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold shadow-xs transition cursor-pointer"
-              title="स्वाक्षरी व प्रमाणपत्रासह अधिकृत पीडीएफ प्रत डाऊनलोड करा"
-            >
-              <Download className="w-4 h-4" />
-              <span>पीडीएफ (.pdf)</span>
-            </a>
+            {/* If on 46-Point Timeline, hide PDF button and show informative badge */}
+            {activeTab === 'checklist' && activeView === 'timeline' ? (
+              <div
+                className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 border border-amber-200/90 text-amber-900 rounded-xl text-[11px] font-medium"
+                title="४६ मुद्द्यांचे ५३ स्तंभ केवळ एक्सेलमध्ये उपलब्ध आहेत. पीडीएफकरिता 'संक्षिप्त ७/१२ यादी' किंवा 'गोषवारा' निवडा."
+              >
+                <Info className="w-3.5 h-3.5 text-amber-700 shrink-0" />
+                <span>५३ स्तंभ केवळ एक्सेलमध्ये उपलब्ध</span>
+              </div>
+            ) : (
+              <a
+                href={pdfDownloadUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1 md:flex-none inline-flex items-center justify-center gap-2 px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold shadow-xs transition cursor-pointer"
+                title="स्वाक्षरी व प्रमाणपत्रासह अधिकृत पीडीएफ प्रत डाऊनलोड करा"
+              >
+                <Download className="w-4 h-4" />
+                <span>
+                  {activeTab === 'checklist' && activeView === 'summary'
+                    ? 'गोषवारा (.pdf)'
+                    : activeTab === 'checklist' && activeView === 'parcels'
+                    ? 'संक्षिप्त ७/१२ (.pdf)'
+                    : 'पीडीएफ (.pdf)'}
+                </span>
+              </a>
+            )}
 
             <button
               onClick={loadData}
@@ -695,6 +720,10 @@ export default function ReportsPage() {
                     <span className="w-2.5 h-2.5 rounded-full bg-blue-600 inline-block"></span>
                     <span className="font-semibold text-blue-950">रकाने २० ते ४६: वैधानिक कायदे व पडताळणी रकाने</span>
                   </span>
+                </div>
+                <div className="mt-2.5 inline-flex items-center gap-1.5 px-3 py-1 bg-amber-100/70 border border-amber-300/80 rounded-full text-[11px] font-semibold text-amber-950">
+                  <Info className="w-3.5 h-3.5 text-amber-800 shrink-0" />
+                  <span>४६ मुद्द्यांचे ५३ स्तंभ विस्तृत असल्याने संपूर्ण विश्लेषणाकरिता वरील '४६ सूची एक्सेल (.xlsx)' वापरावे. स्वाक्षरीयुक्त पीडीएफ प्रतीकरिता 'संक्षिप्त ७/१२ यादी' किंवा 'गोषवारा' टॅब निवडावा.</span>
                 </div>
               </div>
 

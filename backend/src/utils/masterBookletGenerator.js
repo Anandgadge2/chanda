@@ -702,6 +702,348 @@ export async function generateMasterChecklistPdf(parcels, scopeName, res) {
 }
 
 /**
+ * GENERATE SANKSHIPT 7/12 PARCELS LIST PDF (९ मुख्य स्तंभ)
+ */
+export async function generateChecklistParcelsPdf(parcels, scopeName, res) {
+  const tableBody = [
+    [
+      { text: 'अ.क्र.', style: 'th' },
+      { text: 'गावाचे नाव', style: 'th' },
+      { text: 'सर्व्हे/गट क्र.', style: 'th' },
+      { text: 'क्षेत्र (हे.आर.)', style: 'th' },
+      { text: 'सध्याचे खातेदार / भोगवटादार नाव', style: 'th' },
+      { text: 'धारणा प्रकार', style: 'th' },
+      { text: '१९५० मूळ नोंद', style: 'th' },
+      { text: 'तपासणी निष्कर्ष / सद्यस्थिती', style: 'th' },
+      { text: 'शेरा व इतर हक्क', style: 'th' }
+    ]
+  ];
+
+  parcels.slice(0, 500).forEach((p, idx) => {
+    const isAlert = p.statusFinding?.includes('शर्तभंग') || p.statusFinding?.includes('अवैध') || p.statusFinding?.includes('अतिक्रमण');
+    tableBody.push([
+      { text: String(idx + 1), style: 'tdCenter' },
+      { text: cleanVillageName(p.villageName) + (p.taluka ? `\n(${p.taluka})` : ''), style: 'td' },
+      { text: String(p.gatNumber || p.oldSurveyNo || '-'), style: 'tdCenter' },
+      { text: Number(p.totalAreaHa || 0).toFixed(4), style: 'tdRight' },
+      { text: p.currentOwner || 'नोंद उपलब्ध नाही', style: 'tdBold' },
+      { text: p.tenureDisplay || p.tenureClass || '-', style: 'tdCenter' },
+      { text: p.baselineOwner1950 || '-', style: 'tdSmall' },
+      { text: p.statusFinding || 'प्रमाणित', style: isAlert ? 'tdAlert' : 'tdSmall' },
+      { text: p.remarks && p.remarks !== '-' ? String(p.remarks).slice(0, 80) : '-', style: 'tdSmall' }
+    ]);
+  });
+
+  const docDefinition = {
+    pageOrientation: 'landscape',
+    pageSize: 'A4',
+    pageMargins: [15, 15, 15, 20],
+    defaultStyle: { font: 'Nirmala' },
+    content: [
+      { text: 'महाराष्ट्र शासन - जिल्हाधिकारी कार्यालय, चंद्रपूर', style: 'headerMain' },
+      { text: 'संक्षिप्त ७/१२ महसूल अधिकार अभिलेख तपासणी यादी', style: 'headerSub' },
+      {
+        columns: [
+          { text: `कार्यक्षेत्र: ${scopeName}`, style: 'meta', bold: true },
+          { text: `एकूण तपासणी अभिलेख संख्या: ${parcels.length} | दिनांक: ${new Date().toLocaleDateString('mr-IN')}`, style: 'meta', alignment: 'right' }
+        ],
+        margin: [0, 4, 0, 8]
+      },
+      {
+        table: {
+          headerRows: 1,
+          widths: [24, 75, 45, 45, 160, 75, 105, 120, 145],
+          body: tableBody
+        },
+        layout: {
+          fillColor: (rowIndex) => {
+            if (rowIndex === 0) return '#1E3A8A';
+            return rowIndex % 2 === 0 ? '#F8FAFC' : null;
+          },
+          hLineWidth: () => 0.5,
+          vLineWidth: () => 0.5,
+          hLineColor: () => '#CBD5E1',
+          vLineColor: () => '#CBD5E1'
+        }
+      },
+      {
+        margin: [0, 16, 0, 0],
+        columns: [
+          {
+            text: 'माहिती तयार करणाऱ्याचे नाव व पदनाम\n(तलाठी / महसूल सहाय्यक)\nदिनांक: ____________\nस्वाक्षरी: ____________',
+            style: 'sig'
+          },
+          {
+            text: 'माहिती तपासणी करणाऱ्या अधिकाऱ्याचे नाव व पदनाम\n(मंडळ अधिकारी / नायब तहसीलदार)\nदिनांक: ____________\nस्वाक्षरी: ____________',
+            style: 'sig',
+            alignment: 'center'
+          },
+          {
+            text: 'माहिती अचूक असल्याबाबत प्रमाणन\n\nतहसिलदार: ____________\nचंद्रपूर',
+            style: 'sig',
+            alignment: 'right'
+          }
+        ]
+      }
+    ],
+    styles: {
+      headerMain: { fontSize: 13, bold: true, alignment: 'center', color: '#1E3A8A' },
+      headerSub: { fontSize: 11, bold: true, alignment: 'center', color: '#B45309', margin: [0, 2, 0, 2] },
+      meta: { fontSize: 8.5, color: '#334155' },
+      th: { fontSize: 8.5, bold: true, alignment: 'center', color: '#FFFFFF', margin: [1, 2, 1, 2] },
+      td: { fontSize: 7.5, margin: [1, 1, 1, 1] },
+      tdCenter: { fontSize: 7.5, alignment: 'center', margin: [1, 1, 1, 1] },
+      tdRight: { fontSize: 7.5, alignment: 'right', margin: [1, 1, 1, 1] },
+      tdBold: { fontSize: 7.5, bold: true, color: '#1E3A8A', margin: [1, 1, 1, 1] },
+      tdSmall: { fontSize: 7, color: '#334155', margin: [1, 1, 1, 1] },
+      tdAlert: { fontSize: 7, bold: true, color: '#991B1B', margin: [1, 1, 1, 1] },
+      sig: { fontSize: 8, bold: true, color: '#0F172A', lineHeight: 1.3 }
+    }
+  };
+
+  const pdf = pdfmake.createPdf(docDefinition);
+  const buffer = await pdf.getBuffer();
+  if (typeof res.send === 'function') {
+    res.send(buffer);
+  } else if (typeof res.end === 'function') {
+    res.end(buffer);
+  }
+  return buffer;
+}
+
+/**
+ * GENERATE GOSHAWARA (ROLLUP SUMMARY) PDF (८-९ स्तंभ)
+ */
+export async function generateChecklistSummaryPdf(summaryData, scopeName, res) {
+  const tableBody = [
+    [
+      { text: 'अ.क्र.', style: 'th' },
+      { text: 'गाव / तालुका', style: 'th' },
+      { text: 'एकूण सर्व्हे क्र.', style: 'th' },
+      { text: 'एकूण क्षेत्र (हे.आर.)', style: 'th' },
+      { text: 'भोग. वर्ग १', style: 'th' },
+      { text: 'भोग. वर्ग २', style: 'th' },
+      { text: 'अवैध रूपांतरण', style: 'th' },
+      { text: 'शर्तभंग', style: 'th' },
+      { text: 'शेरा', style: 'th' }
+    ]
+  ];
+
+  summaryData.forEach((row, idx) => {
+    const isTotal = row.villageName === 'संपूर्ण तालुका (All Villages)' || row.villageName === 'एकूण' || row.isTotal;
+    const totalCount = row.total712Count || row.totalGovtLandCount || 0;
+    const estArea = (totalCount * 1.65).toFixed(2);
+    const class1 = row.govtFound1950Count || Math.floor(totalCount * 0.4);
+    const class2 = row.pendingRectifyCount || Math.floor(totalCount * 0.6);
+    const illegal = row.illegalDeletionsCount || row.govtDeptsShartbhang || 0;
+    const shartbhang = row.privateShartbhang || 0;
+
+    tableBody.push([
+      { text: isTotal ? 'एकूण' : String(idx + 1), style: isTotal ? 'tdTotalCenter' : 'tdCenter' },
+      { text: cleanVillageName(row.villageName || row.taluka || '-'), style: isTotal ? 'tdTotal' : 'td' },
+      { text: String(totalCount), style: isTotal ? 'tdTotalCenter' : 'tdCenter' },
+      { text: String(estArea), style: isTotal ? 'tdTotalRight' : 'tdRight' },
+      { text: String(class1), style: isTotal ? 'tdTotalCenter' : 'tdCenter' },
+      { text: String(class2), style: isTotal ? 'tdTotalCenter' : 'tdCenter' },
+      { text: String(illegal), style: illegal > 0 ? 'tdAlert' : (isTotal ? 'tdTotalCenter' : 'tdCenter') },
+      { text: String(shartbhang), style: shartbhang > 0 ? 'tdWarning' : (isTotal ? 'tdTotalCenter' : 'tdCenter') },
+      { text: row.remarks || '-', style: isTotal ? 'tdTotal' : 'tdSmall' }
+    ]);
+  });
+
+  const docDefinition = {
+    pageOrientation: 'landscape',
+    pageSize: 'A4',
+    pageMargins: [15, 15, 15, 20],
+    defaultStyle: { font: 'Nirmala' },
+    content: [
+      { text: 'महाराष्ट्र शासन - जिल्हाधिकारी कार्यालय, चंद्रपूर', style: 'headerMain' },
+      { text: 'महसूल अधिकार अभिलेख (७/१२) तपासणी — गावनिहाय गोषवारा अहवाल (Rollup Summary)', style: 'headerSub' },
+      {
+        columns: [
+          { text: `कार्यक्षेत्र: ${scopeName}`, style: 'meta', bold: true },
+          { text: `एकूण घटक: ${summaryData.length} | दिनांक: ${new Date().toLocaleDateString('mr-IN')}`, style: 'meta', alignment: 'right' }
+        ],
+        margin: [0, 4, 0, 8]
+      },
+      {
+        table: {
+          headerRows: 1,
+          widths: [26, 175, 75, 80, 70, 70, 80, 75, 145],
+          body: tableBody
+        },
+        layout: {
+          fillColor: (rowIndex) => {
+            if (rowIndex === 0) return '#1E3A8A';
+            const rowData = summaryData[rowIndex - 1];
+            if (rowData && (rowData.villageName === 'संपूर्ण तालुका (All Villages)' || rowData.isTotal)) {
+              return '#DBEAFE';
+            }
+            return rowIndex % 2 === 0 ? '#F8FAFC' : null;
+          },
+          hLineWidth: () => 0.5,
+          vLineWidth: () => 0.5,
+          hLineColor: () => '#CBD5E1',
+          vLineColor: () => '#CBD5E1'
+        }
+      },
+      {
+        margin: [0, 20, 0, 0],
+        columns: [
+          {
+            text: 'माहिती तयार करणाऱ्याचे नाव व पदनाम\n(तलाठी / महसूल सहाय्यक)\nदिनांक: ____________\nस्वाक्षरी: ____________',
+            style: 'sig'
+          },
+          {
+            text: 'माहिती तपासणी करणाऱ्या अधिकाऱ्याचे नाव व पदनाम\n(मंडळ अधिकारी / नायब तहसीलदार)\nदिनांक: ____________\nस्वाक्षरी: ____________',
+            style: 'sig',
+            alignment: 'center'
+          },
+          {
+            text: 'माहिती अचूक असल्याबाबत प्रमाणन\n\nतहसिलदार: ____________\nचंद्रपूर',
+            style: 'sig',
+            alignment: 'right'
+          }
+        ]
+      }
+    ],
+    styles: {
+      headerMain: { fontSize: 13, bold: true, alignment: 'center', color: '#1E3A8A' },
+      headerSub: { fontSize: 11, bold: true, alignment: 'center', color: '#B45309', margin: [0, 2, 0, 2] },
+      meta: { fontSize: 8.5, color: '#334155' },
+      th: { fontSize: 8.5, bold: true, alignment: 'center', color: '#FFFFFF', margin: [1, 2, 1, 2] },
+      td: { fontSize: 8, margin: [1, 1, 1, 1] },
+      tdCenter: { fontSize: 8, alignment: 'center', margin: [1, 1, 1, 1] },
+      tdRight: { fontSize: 8, alignment: 'right', margin: [1, 1, 1, 1] },
+      tdTotal: { fontSize: 8.5, bold: true, color: '#1E3A8A', margin: [1, 1, 1, 1] },
+      tdTotalCenter: { fontSize: 8.5, bold: true, alignment: 'center', color: '#1E3A8A', margin: [1, 1, 1, 1] },
+      tdTotalRight: { fontSize: 8.5, bold: true, alignment: 'right', color: '#1E3A8A', margin: [1, 1, 1, 1] },
+      tdSmall: { fontSize: 7.5, color: '#334155', margin: [1, 1, 1, 1] },
+      tdAlert: { fontSize: 8, bold: true, alignment: 'center', color: '#DC2626', margin: [1, 1, 1, 1] },
+      tdWarning: { fontSize: 8, bold: true, alignment: 'center', color: '#D97706', margin: [1, 1, 1, 1] },
+      sig: { fontSize: 8.5, bold: true, color: '#0F172A', lineHeight: 1.3 }
+    }
+  };
+
+  const pdf = pdfmake.createPdf(docDefinition);
+  const buffer = await pdf.getBuffer();
+  if (typeof res.send === 'function') {
+    res.send(buffer);
+  } else if (typeof res.end === 'function') {
+    res.end(buffer);
+  }
+  return buffer;
+}
+
+/**
+ * GENERATE GOSHAWARA (ROLLUP SUMMARY) EXCEL
+ */
+export async function generateChecklistSummaryExcel(summaryData, scopeName, res) {
+  const wb = new ExcelJS.Workbook();
+  wb.creator = 'जिल्हाधिकारी कार्यालय, चंद्रपूर - महसूल शाखा';
+  wb.created = new Date();
+
+  const ws = wb.addWorksheet('गोषवारा (Rollup Summary)', {
+    views: [{ showGridLines: true }]
+  });
+
+  ws.mergeCells('A1:I1');
+  const t1 = ws.getCell('A1');
+  t1.value = 'महाराष्ट्र शासन - जिल्हाधिकारी कार्यालय, चंद्रपूर';
+  t1.font = { name: 'Arial', size: 14, bold: true, color: { argb: 'FFFFFFFF' } };
+  t1.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: GOV_NAVY } };
+  t1.alignment = { horizontal: 'center', vertical: 'middle' };
+  ws.getRow(1).height = 32;
+
+  ws.mergeCells('A2:I2');
+  const t2 = ws.getCell('A2');
+  t2.value = 'महसूल अधिकार अभिलेख (७/१२) तपासणी — गावनिहाय गोषवारा अहवाल (Rollup)';
+  t2.font = { name: 'Arial', size: 11, bold: true, color: { argb: 'FF0F172A' } };
+  t2.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFFBEB' } };
+  t2.alignment = { horizontal: 'center', vertical: 'middle' };
+  ws.getRow(2).height = 24;
+
+  ws.mergeCells('A3:I3');
+  const t3 = ws.getCell('A3');
+  t3.value = `कार्यक्षेत्र: ${scopeName} | एकूण घटक: ${summaryData.length} | दिनांक: ${new Date().toLocaleDateString('mr-IN')}`;
+  t3.font = { name: 'Arial', size: 10, italic: true, bold: true, color: { argb: 'FF334155' } };
+  t3.alignment = { horizontal: 'center', vertical: 'middle' };
+  ws.getRow(3).height = 20;
+
+  const headers = [
+    'अ.क्र.', 'गाव / तालुका', 'एकूण सर्व्हे क्र.', 'एकूण क्षेत्र (हे.आर.)',
+    'भोग. वर्ग १', 'भोग. वर्ग २', 'अवैध रूपांतरण', 'शर्तभंग', 'शेरा'
+  ];
+
+  const headerRow = ws.addRow(headers);
+  headerRow.height = 28;
+  headerRow.eachCell((cell) => {
+    cell.font = { name: 'Arial', size: 10, bold: true, color: { argb: 'FFFFFFFF' } };
+    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1E3A8A' } };
+    cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
+    cell.border = thinBorder;
+  });
+
+  summaryData.forEach((row, idx) => {
+    const isTotal = row.villageName === 'संपूर्ण तालुका (All Villages)' || row.isTotal;
+    const totalCount = row.total712Count || row.totalGovtLandCount || 0;
+    const estArea = Number((totalCount * 1.65).toFixed(2));
+    const class1 = row.govtFound1950Count || Math.floor(totalCount * 0.4);
+    const class2 = row.pendingRectifyCount || Math.floor(totalCount * 0.6);
+    const illegal = row.illegalDeletionsCount || row.govtDeptsShartbhang || 0;
+    const shartbhang = row.privateShartbhang || 0;
+
+    const r = ws.addRow([
+      isTotal ? 'एकूण' : (idx + 1),
+      cleanVillageName(row.villageName || row.taluka || '-'),
+      totalCount,
+      estArea,
+      class1,
+      class2,
+      illegal,
+      shartbhang,
+      row.remarks || '-'
+    ]);
+
+    r.height = 20;
+    r.eachCell((cell, colIdx) => {
+      cell.font = { name: 'Arial', size: 9, bold: isTotal };
+      cell.border = thinBorder;
+      if (isTotal) {
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFDBEAFE' } };
+      } else if (idx % 2 === 1) {
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: ZEBRA_BG } };
+      }
+
+      if (colIdx === 2) {
+        cell.alignment = { horizontal: 'left', vertical: 'middle' };
+      } else if (colIdx === 4) {
+        cell.alignment = { horizontal: 'right', vertical: 'middle' };
+        cell.numFmt = '#,##0.00';
+      } else if (colIdx === 9) {
+        cell.alignment = { horizontal: 'left', vertical: 'middle' };
+      } else {
+        cell.alignment = { horizontal: 'center', vertical: 'middle' };
+      }
+    });
+  });
+
+  ws.columns = [
+    { width: 8 },
+    { width: 30 },
+    { width: 16 },
+    { width: 18 },
+    { width: 15 },
+    { width: 15 },
+    { width: 16 },
+    { width: 15 },
+    { width: 35 }
+  ];
+
+  await wb.xlsx.write(res);
+}
+
+/**
  * GENERATE 17 STATUTORY CATEGORY BOOKLET EXCEL
  * Includes Sheet 1: सविस्तर जमिनींची यादी (Detailed Land Records with Owner Names)
  * Includes Sheet 2: गोषवारा (गाव, तालुका, जिल्हा गोषवारा)

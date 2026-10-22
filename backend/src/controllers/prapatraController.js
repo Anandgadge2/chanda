@@ -18,6 +18,9 @@ import { generatePrapatraPdf } from '../utils/pdfGenerator.js';
 import {
   generateMasterChecklistExcel,
   generateMasterChecklistPdf,
+  generateChecklistParcelsPdf,
+  generateChecklistSummaryPdf,
+  generateChecklistSummaryExcel,
   generateCategoryBookletExcel,
   generateCategoryBookletPdf,
   BOOKLET_CATEGORIES,
@@ -116,7 +119,8 @@ export const getPrapatraReport = async (req, res) => {
       landStatus = 'all',
       areaRange = 'all',
       format = 'json',
-      booklet = 'false'
+      booklet = 'false',
+      view = 'timeline'
     } = req.query;
 
     const isChecklist = id === 'checklist' || id === 'master' || id === '46';
@@ -556,6 +560,10 @@ export const getPrapatraReport = async (req, res) => {
       res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
 
       if (isChecklist) {
+        if (view === 'summary') {
+          res.setHeader('Content-Disposition', `attachment; filename=Checklist_Goshwara_Rollup_${safeScope}_${timestamp}.xlsx`);
+          return await generateChecklistSummaryExcel(records, scopeName, res);
+        }
         res.setHeader('Content-Disposition', `attachment; filename=Checklist-46_Chandrapur_${safeScope}_${timestamp}.xlsx`);
         return await generateMasterChecklistExcel(formattedParcels, scopeName, res);
       }
@@ -580,8 +588,17 @@ export const getPrapatraReport = async (req, res) => {
       res.setHeader('Content-Type', 'application/pdf');
 
       if (isChecklist) {
+        if (view === 'summary') {
+          res.setHeader('Content-Disposition', `attachment; filename=Checklist_Goshwara_Rollup_${safeScope}_${timestamp}.pdf`);
+          return await generateChecklistSummaryPdf(records, scopeName, res);
+        }
+        if (view === 'parcels') {
+          res.setHeader('Content-Disposition', `attachment; filename=Sankshipt_7-12_List_${safeScope}_${timestamp}.pdf`);
+          return await generateChecklistParcelsPdf(formattedParcels, scopeName, res);
+        }
+        // Fallback for timeline or legacy calls
         res.setHeader('Content-Disposition', `attachment; filename=Checklist-46_Chandrapur_${safeScope}_${timestamp}.pdf`);
-        return await generateMasterChecklistPdf(formattedParcels, scopeName, res);
+        return await generateChecklistParcelsPdf(formattedParcels, scopeName, res);
       }
 
       if (prapatraNum > 5 || booklet === 'true') {
