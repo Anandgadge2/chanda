@@ -569,10 +569,6 @@ export async function generateMasterChecklistExcel(parcels, scopeName, res) {
     // Points 20-46 (AA to BA) - वैधानिक कायदे व पडताळणी
     ...Array(27).fill({ width: 20 })
   ];
-    { width: 22 }, { width: 20 }, { width: 16 }, { width: 12 }, { width: 14 }, { width: 14 }, { width: 14 }, { width: 14 }, { width: 18 }, { width: 18 },
-    // Points 20-45
-    ...Array(26).fill({ width: 18 })
-  ];
 
   await wb.xlsx.write(res);
 }
