@@ -24,6 +24,7 @@ import {
   ChevronRight,
   FolderArchive,
   ArrowRight,
+  FileText,
 } from 'lucide-react';
 import { api } from '../../lib/api';
 import {
@@ -165,10 +166,14 @@ export default function CasesPage() {
   };
 
   const toggleAllRows = () => {
-    if (expandedRowIds.size === cases.length && cases.length > 0) {
+    if (expandedRowIds.size > 0) {
       setExpandedRowIds(new Set());
     } else {
-      setExpandedRowIds(new Set(cases.map((c) => c.id)));
+      // Intelligently expand rows that have active hearings, orders, or documents
+      const activeCaseIds = cases
+        .filter((c) => (c.hearings && c.hearings.length > 0) || c.finalOrderDetails || (c.documents && c.documents.length > 0))
+        .map((c) => c.id);
+      setExpandedRowIds(new Set(activeCaseIds.length > 0 ? activeCaseIds : cases.map((c) => c.id)));
     }
   };
 
@@ -265,7 +270,7 @@ export default function CasesPage() {
         </div>
       </div>
 
-      {/* 5 Dedicated Executive KPI Cards */}
+      {/* 5 Dedicated Executive KPI Cards with Modern Accents */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5 sm:gap-3">
         {/* Metric 1: Total Cases */}
         <button
@@ -274,20 +279,22 @@ export default function CasesPage() {
             setStatus('');
             setIsRepossessedToGovt('');
           }}
-          className={`p-3 rounded-xl border text-left transition active:scale-98 ${
+          className={`p-3.5 rounded-xl border text-left transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xs active:scale-98 ${
             status === '' && isRepossessedToGovt === ''
-              ? 'bg-blue-50/70 border-blue-600 shadow-2xs'
-              : 'bg-white border-slate-200/80 hover:border-slate-300 shadow-2xs'
+              ? 'bg-blue-50/80 border-blue-500 shadow-xs border-t-3 border-t-blue-600'
+              : 'bg-white border-slate-200/90 hover:border-slate-300 shadow-2xs border-t-3 border-t-blue-600'
           }`}
         >
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-500">एकूण प्रकरणे</span>
-            <Scale className="w-4 h-4 text-blue-900" />
+            <span className="text-xs font-bold text-slate-600">एकूण प्रकरणे</span>
+            <div className="w-7 h-7 rounded-lg bg-blue-100/80 border border-blue-200 flex items-center justify-center text-blue-900">
+              <Scale className="w-3.5 h-3.5" />
+            </div>
           </div>
-          <p className="text-lg sm:text-xl font-bold text-slate-900 mt-1">
+          <p className="text-xl sm:text-2xl font-black text-slate-900 mt-2 tracking-tight">
             {stats.totalCases}
           </p>
-          <p className="text-[10px] text-slate-400 mt-0.5 font-medium">नोंदवलेली सर्व प्रकरणे</p>
+          <p className="text-[11px] text-slate-400 mt-0.5 font-medium">नोंदवलेली सर्व प्रकरणे</p>
         </button>
 
         {/* Metric 2: Active Hearings */}
@@ -297,20 +304,22 @@ export default function CasesPage() {
             setStatus('HEARING_SCHEDULED');
             setIsRepossessedToGovt('');
           }}
-          className={`p-3 rounded-xl border text-left transition active:scale-98 ${
+          className={`p-3.5 rounded-xl border text-left transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xs active:scale-98 ${
             status === 'HEARING_SCHEDULED'
-              ? 'bg-indigo-50/70 border-indigo-600 shadow-2xs'
-              : 'bg-white border-slate-200/80 hover:border-slate-300 shadow-2xs'
+              ? 'bg-indigo-50/80 border-indigo-500 shadow-xs border-t-3 border-t-indigo-600'
+              : 'bg-white border-slate-200/90 hover:border-slate-300 shadow-2xs border-t-3 border-t-indigo-600'
           }`}
         >
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-500">सक्रिय सुनावण्या</span>
-            <Calendar className="w-4 h-4 text-indigo-700" />
+            <span className="text-xs font-bold text-indigo-900">सक्रिय सुनावण्या</span>
+            <div className="w-7 h-7 rounded-lg bg-indigo-100/80 border border-indigo-200 flex items-center justify-center text-indigo-700">
+              <Calendar className="w-3.5 h-3.5" />
+            </div>
           </div>
-          <p className="text-lg sm:text-xl font-bold text-indigo-950 mt-1">
+          <p className="text-xl sm:text-2xl font-black text-indigo-950 mt-2 tracking-tight">
             {stats.activeHearings}
           </p>
-          <p className="text-[10px] text-indigo-600/80 mt-0.5 font-medium">बोर्डावरील सुनावण्या</p>
+          <p className="text-[11px] text-indigo-600/80 mt-0.5 font-medium">बोर्डावरील सुनावण्या</p>
         </button>
 
         {/* Metric 3: Show Cause Notices */}
@@ -320,20 +329,22 @@ export default function CasesPage() {
             setStatus('NOTICE_ISSUED');
             setIsRepossessedToGovt('');
           }}
-          className={`p-3 rounded-xl border text-left transition active:scale-98 ${
+          className={`p-3.5 rounded-xl border text-left transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xs active:scale-98 ${
             status === 'NOTICE_ISSUED'
-              ? 'bg-amber-50/70 border-amber-600 shadow-2xs'
-              : 'bg-white border-slate-200/80 hover:border-slate-300 shadow-2xs'
+              ? 'bg-amber-50/80 border-amber-500 shadow-xs border-t-3 border-t-amber-500'
+              : 'bg-white border-slate-200/90 hover:border-slate-300 shadow-2xs border-t-3 border-t-amber-500'
           }`}
         >
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-500">कारणे दाखवा नोटीस</span>
-            <AlertTriangle className="w-4 h-4 text-amber-600" />
+            <span className="text-xs font-bold text-amber-900">कारणे दाखवा नोटीस</span>
+            <div className="w-7 h-7 rounded-lg bg-amber-100/80 border border-amber-200 flex items-center justify-center text-amber-700">
+              <AlertTriangle className="w-3.5 h-3.5" />
+            </div>
           </div>
-          <p className="text-lg sm:text-xl font-bold text-amber-950 mt-1">
+          <p className="text-xl sm:text-2xl font-black text-amber-950 mt-2 tracking-tight">
             {stats.noticesIssued}
           </p>
-          <p className="text-[10px] text-amber-700/80 mt-0.5 font-medium">जबाब / खुलासा प्रलंबित</p>
+          <p className="text-[11px] text-amber-700/80 mt-0.5 font-medium">जबाब / खुलासा प्रलंबित</p>
         </button>
 
         {/* Metric 4: Shasan Jama */}
@@ -343,33 +354,37 @@ export default function CasesPage() {
             setStatus('');
             setIsRepossessedToGovt('true');
           }}
-          className={`p-3 rounded-xl border text-left transition active:scale-98 ${
+          className={`p-3.5 rounded-xl border text-left transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xs active:scale-98 ${
             isRepossessedToGovt === 'true'
-              ? 'bg-emerald-50/70 border-emerald-600 shadow-2xs'
-              : 'bg-white border-slate-200/80 hover:border-slate-300 shadow-2xs'
+              ? 'bg-emerald-50/80 border-emerald-500 shadow-xs border-t-3 border-t-emerald-600'
+              : 'bg-white border-slate-200/90 hover:border-slate-300 shadow-2xs border-t-3 border-t-emerald-600'
           }`}
         >
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-500">शासन जमा आदेश</span>
-            <ShieldCheck className="w-4 h-4 text-emerald-700" />
+            <span className="text-xs font-bold text-emerald-900">शासन जमा आदेश</span>
+            <div className="w-7 h-7 rounded-lg bg-emerald-100/80 border border-emerald-200 flex items-center justify-center text-emerald-700">
+              <ShieldCheck className="w-3.5 h-3.5" />
+            </div>
           </div>
-          <p className="text-lg sm:text-xl font-bold text-emerald-950 mt-1">
+          <p className="text-xl sm:text-2xl font-black text-emerald-950 mt-2 tracking-tight">
             {stats.shasanJama}
           </p>
-          <p className="text-[10px] text-emerald-700/80 mt-0.5 font-medium">शासकीय सदरी दाखल</p>
+          <p className="text-[11px] text-emerald-700/80 mt-0.5 font-medium">शासकीय सदरी दाखल</p>
         </button>
 
         {/* Metric 5: Total Disputed Area */}
-        <div className="p-3 rounded-xl border border-slate-200/80 bg-white shadow-2xs col-span-2 sm:col-span-1">
+        <div className="p-3.5 rounded-xl border border-slate-200/90 bg-white shadow-2xs col-span-2 sm:col-span-1 border-t-3 border-t-rose-500 hover:shadow-xs transition-all duration-200">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-500">एकूण शर्तभंग क्षेत्र</span>
-            <Landmark className="w-4 h-4 text-rose-700" />
+            <span className="text-xs font-bold text-rose-900">एकूण शर्तभंग क्षेत्र</span>
+            <div className="w-7 h-7 rounded-lg bg-rose-100/80 border border-rose-200 flex items-center justify-center text-rose-700">
+              <Landmark className="w-3.5 h-3.5" />
+            </div>
           </div>
-          <p className="text-lg sm:text-xl font-bold text-slate-900 mt-1">
+          <p className="text-xl sm:text-2xl font-black text-slate-900 mt-2 tracking-tight">
             {Number(stats.totalDisputedAreaHa || 0).toFixed(2)}{' '}
-            <span className="text-xs font-semibold text-slate-500">हेक्टर</span>
+            <span className="text-xs font-bold text-slate-500">हेक्टर</span>
           </p>
-          <p className="text-[10px] text-slate-400 mt-0.5 font-medium">अतिक्रमित / वादग्रस्त क्षेत्र</p>
+          <p className="text-[11px] text-slate-400 mt-0.5 font-medium">अतिक्रमित / वादग्रस्त क्षेत्र</p>
         </div>
       </div>
 
@@ -486,13 +501,13 @@ export default function CasesPage() {
           >
             <ChevronDown
               className={`w-3.5 h-3.5 transition-transform duration-200 ${
-                expandedRowIds.size === cases.length && cases.length > 0 ? 'rotate-180 text-blue-900' : 'text-slate-500'
+                expandedRowIds.size > 0 ? 'rotate-180 text-blue-900' : 'text-slate-500'
               }`}
             />
             <span>
-              {expandedRowIds.size === cases.length && cases.length > 0
+              {expandedRowIds.size > 0
                 ? 'सर्व संक्षिप्त करा'
-                : 'सर्व शेरे उघडा'}
+                : 'तपशीलवार शेरे उघडा'}
             </span>
           </button>
         </div>
@@ -745,108 +760,147 @@ export default function CasesPage() {
                         </td>
                       </tr>
 
-                      {/* Expandable Dossier Sub-Row */}
+                      {/* Modern Executive Dossier - Zero Boilerplate, Zero Duplication */}
                       {isExpanded && (
-                        <tr className="bg-slate-50/90 border-b border-slate-200">
-                          <td colSpan={6} className="px-6 py-4">
-                            <div className="bg-white border border-slate-200/90 rounded-xl p-4 shadow-2xs space-y-3">
-                              <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                        <tr className="bg-slate-50/60 border-b border-slate-200">
+                          <td colSpan={6} className="px-3 sm:px-6 py-2.5">
+                            {/* Check if case has real hearings, orders, or documents */}
+                            {(c.hearings?.length > 0 || c.finalOrderDetails || c.documents?.length > 0) ? (
+                              <div className="bg-white border border-slate-200/90 rounded-xl p-3.5 shadow-2xs space-y-3">
+                                {/* Dossier Header Strip */}
+                                <div className="flex flex-wrap items-center justify-between gap-2 pb-2.5 border-b border-slate-100">
+                                  <div className="flex items-center gap-2 flex-wrap">
+                                    <span className="text-xs font-black text-slate-800 flex items-center gap-1.5">
+                                      <FolderArchive className="w-3.5 h-3.5 text-blue-700" />
+                                      <span>न्यायालयीन रोजनामा व आदेश तपशील</span>
+                                    </span>
+                                    {c.parcel?.upi && (
+                                      <span className="text-[11px] font-mono text-slate-500 bg-slate-50 border border-slate-200 px-2 py-0.5 rounded-md">
+                                        UPI: {c.parcel.upi}
+                                      </span>
+                                    )}
+                                  </div>
+                                  <div className="text-[11px] text-slate-500 flex items-center gap-2">
+                                    <span>तपास: <strong className="text-slate-800">{c.investigatingOfficer || 'नायब तहसीलदार'}</strong></span>
+                                    <span>•</span>
+                                    <span>प्रवर्ग: <strong className="text-slate-800">{c.prapatraCategory || 'प्रपत्र ३/४'}</strong></span>
+                                  </div>
+                                </div>
+
+                                {/* Active Hearings / Final Orders Grid */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                                  {/* Hearings Section */}
+                                  {c.hearings?.length > 0 && (
+                                    <div className="p-3 bg-blue-50/30 border border-blue-100 rounded-xl">
+                                      <div className="flex items-center justify-between pb-2 mb-2 border-b border-blue-200/50">
+                                        <span className="font-bold text-slate-900 flex items-center gap-1.5">
+                                          <Scale className="w-3.5 h-3.5 text-blue-700" />
+                                          <span>सुनावणी रोजनामा ({c.hearings.length})</span>
+                                        </span>
+                                      </div>
+                                      <div className="space-y-2 max-h-40 overflow-y-auto pr-1">
+                                        {c.hearings.map((h, hIdx) => (
+                                          <div key={h.id || hIdx} className="p-2 bg-white rounded-lg border border-slate-200 text-xs space-y-1">
+                                            <div className="flex items-center justify-between text-[11px]">
+                                              <span className="font-bold text-slate-800">{h.authority}</span>
+                                              <span className="font-mono text-slate-500">
+                                                दि.: {new Date(h.hearingDate).toLocaleDateString('mr-IN')}
+                                              </span>
+                                            </div>
+                                            <p className="text-slate-700 text-[11px]">{h.proceedingsLog}</p>
+                                            {h.nextHearingDate && (
+                                              <span className="text-[10px] text-indigo-700 font-semibold inline-block">
+                                                पुढील सुनावणी: {new Date(h.nextHearingDate).toLocaleDateString('mr-IN')}
+                                              </span>
+                                            )}
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  )}
+
+                                  {/* Final Order Section */}
+                                  {c.finalOrderDetails && (
+                                    <div className="p-3 bg-amber-50/30 border border-amber-200/70 rounded-xl">
+                                      <div className="flex items-center justify-between pb-2 mb-2 border-b border-amber-200/50">
+                                        <span className="font-bold text-slate-900 flex items-center gap-1.5">
+                                          <ShieldAlert className="w-3.5 h-3.5 text-amber-700" />
+                                          <span>न्यायालयीन अंतिम आदेश व निर्णय</span>
+                                        </span>
+                                        {c.orderDate && (
+                                          <span className="text-[10px] font-mono font-bold bg-amber-100 text-amber-900 px-2 py-0.5 rounded border border-amber-300">
+                                            दि.: {new Date(c.orderDate).toLocaleDateString('mr-IN')}
+                                          </span>
+                                        )}
+                                      </div>
+                                      <p className="font-medium text-slate-800 text-[11px] leading-relaxed">
+                                        {c.finalOrderDetails}
+                                      </p>
+                                      {c.isRepossessedToGovt && (
+                                        <span className="inline-flex items-center gap-1 text-emerald-800 font-bold bg-emerald-50 px-2 py-0.5 rounded text-[10px] mt-2 border border-emerald-200">
+                                          <CheckCircle className="w-3 h-3 text-emerald-600" />
+                                          जमीन शासकीय कब्जात प्रत्यार्पित (शासन जमा)
+                                        </span>
+                                      )}
+                                    </div>
+                                  )}
+                                </div>
+
+                                {/* Attached Evidence & Documents */}
+                                {c.documents?.length > 0 && (
+                                  <div className="flex items-center gap-2 text-[11px] pt-2 border-t border-slate-100 flex-wrap">
+                                    <span className="font-bold text-slate-600">संलग्न पुरावे व दस्तऐवज:</span>
+                                    <div className="flex items-center gap-1.5 flex-wrap">
+                                      {c.documents.map((d, dIdx) => (
+                                        <a
+                                          key={d.id || dIdx}
+                                          href={d.fileUrl}
+                                          target="_blank"
+                                          rel="noreferrer"
+                                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-blue-50 text-blue-900 border border-blue-200 hover:bg-blue-100 font-medium text-[11px] transition"
+                                        >
+                                          <FileText className="w-3 h-3 text-blue-700" />
+                                          <span className="truncate max-w-[140px]">{d.title}</span>
+                                        </a>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            ) : (
+                              /* Clean Single-Row Inquiry Dossier: ZERO DUPLICATION, ZERO BOILERPLATE */
+                              <div className="bg-white border border-slate-200/90 rounded-xl px-4 py-2.5 shadow-2xs flex flex-wrap items-center justify-between gap-3 text-xs">
+                                <div className="flex items-center gap-3 flex-wrap">
+                                  <div className="flex items-center gap-1.5">
+                                    <span className="w-2 h-2 rounded-full bg-amber-400"></span>
+                                    <span className="font-bold text-slate-700">चौकशी स्थिती:</span>
+                                    <span className="text-amber-800 font-medium bg-amber-50 border border-amber-200 px-2 py-0.5 rounded text-[11px]">
+                                      प्राथमिक चौकशी सुरू (सुनावणी इतिवृत्त प्रलंबित)
+                                    </span>
+                                  </div>
+                                  <span className="text-slate-300 hidden sm:inline">•</span>
+                                  <div className="flex items-center gap-1 text-slate-600">
+                                    <span>तपास अधिकारी:</span>
+                                    <strong className="text-slate-900 font-semibold">{c.investigatingOfficer || 'नायब तहसीलदार'}</strong>
+                                  </div>
+                                  <span className="text-slate-300 hidden sm:inline">•</span>
+                                  <div className="flex items-center gap-1 text-slate-600">
+                                    <span>वैधानिक तरतूद:</span>
+                                    <span className="text-slate-800 font-medium bg-slate-100 px-2 py-0.5 rounded text-[11px]">
+                                      {c.prapatraCategory || 'प्रपत्र ३/४'} • MLRC १९६६
+                                    </span>
+                                  </div>
+                                </div>
+
                                 <div className="flex items-center gap-2">
-                                  <FolderArchive className="w-4 h-4 text-blue-900" />
-                                  <span className="font-extrabold text-xs text-slate-900">
-                                    प्रकरण संचिका व न्यायालयीन इतिवृत्त: {c.caseNumber}
-                                  </span>
-                                </div>
-                                <span className="text-[11px] font-mono text-slate-500">
-                                  UPI: {c.parcel?.upi || 'N/A'}
-                                </span>
-                              </div>
-
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
-                                {/* Left: Hearing Log */}
-                                <div className="p-3 bg-indigo-50/60 border border-indigo-100 rounded-xl space-y-1.5">
-                                  <div className="flex items-center justify-between gap-2">
-                                    <span className="font-bold text-indigo-950 flex items-center gap-1.5">
-                                      <Scale className="w-3.5 h-3.5 text-indigo-700" />
-                                      <span>
-                                        सुनावणी प्राधिकारी:{' '}
-                                        {latestHearing?.authority || 'SDO / तहसीलदार न्यायालय'}
-                                      </span>
-                                    </span>
-                                    {latestHearing && (
-                                      <span className="text-[10px] font-bold bg-indigo-100 text-indigo-900 px-2 py-0.5 rounded">
-                                        दि.: {new Date(latestHearing.hearingDate).toLocaleDateString('mr-IN')}
-                                      </span>
-                                    )}
-                                  </div>
-                                  <p className="text-xs text-indigo-950 leading-relaxed">
-                                    <strong className="text-indigo-900">रोजनामा / इतिवृत्त: </strong>
-                                    {latestHearing?.proceedingsLog || 'अद्याप सुनावणी इतिवृत्त नोंदवलेली नाही.'}
-                                  </p>
-                                </div>
-
-                                {/* Right: Final Order or Status Remark */}
-                                <div className="p-3 bg-amber-50/70 border border-amber-200 rounded-xl space-y-1.5">
-                                  <div className="flex items-center justify-between gap-2">
-                                    <span className="font-bold text-amber-950 flex items-center gap-1.5">
-                                      <ShieldAlert className="w-3.5 h-3.5 text-amber-700" />
-                                      <span>सक्षम प्राधिकारी अंतिम आदेश व शेरा:</span>
-                                    </span>
-                                    {c.orderDate && (
-                                      <span className="text-[10px] font-mono font-bold bg-amber-100 text-amber-900 px-2 py-0.5 rounded border border-amber-300">
-                                        दि.: {new Date(c.orderDate).toLocaleDateString('mr-IN')}
-                                      </span>
-                                    )}
-                                  </div>
-                                  <p className="text-xs text-amber-950 leading-relaxed">
-                                    {c.finalOrderDetails || 'अंतिम आदेश अद्याप पारित झालेला नाही (प्रकरण सुनावणी / चौकशी टप्प्यावर आहे).'}
-                                  </p>
-                                </div>
-                              </div>
-
-                              {/* Footer Metadata & Quick Action Shortcuts */}
-                              <div className="flex items-center justify-between text-[11px] text-slate-500 pt-2 border-t border-slate-100 flex-wrap gap-2">
-                                <div className="flex items-center gap-4 flex-wrap">
-                                  <span>
-                                    तपास अधिकारी:{' '}
-                                    <strong className="text-slate-800">
-                                      {c.investigatingOfficer || 'नायब तहसीलदार (महसूल)'}
-                                    </strong>
-                                  </span>
-                                  {c.showCauseNoticeDate && (
-                                    <span>
-                                      नोटीस दिनांक:{' '}
-                                      <strong className="text-slate-800">
-                                        {new Date(c.showCauseNoticeDate).toLocaleDateString('mr-IN')}
-                                      </strong>
+                                  {c.parcel?.upi && (
+                                    <span className="text-[11px] font-mono text-slate-500 bg-slate-50 border border-slate-200 px-2 py-0.5 rounded">
+                                      UPI: {c.parcel.upi}
                                     </span>
                                   )}
-                                  <span>
-                                    प्रवर्ग:{' '}
-                                    <strong className="text-slate-800">
-                                      {c.prapatraCategory || 'प्रपत्र-३'}
-                                    </strong>
-                                  </span>
-                                </div>
-
-                                <div className="flex items-center gap-2">
-                                  <button
-                                    type="button"
-                                    onClick={() => setSelectedCaseForHearing(c)}
-                                    className="px-2.5 py-1 text-[11px] font-bold bg-blue-900 hover:bg-blue-800 text-white rounded-lg transition"
-                                  >
-                                    + नवीन सुनावणी नोंदवा
-                                  </button>
-                                  <button
-                                    type="button"
-                                    onClick={() => setUploadDocCaseId(c.id)}
-                                    className="px-2.5 py-1 text-[11px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-lg border border-slate-300 transition"
-                                  >
-                                    + पुरावा जोडा
-                                  </button>
                                 </div>
                               </div>
-                            </div>
+                            )}
                           </td>
                         </tr>
                       )}

@@ -132,7 +132,7 @@ export default function DashboardPage() {
       {/* Compact Analytical Metric Cards (2-col mobile, 4-col desktop) */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-2.5">
         <MetricCard
-          titleMr="नोंदणीकृत भूखंड"
+          titleMr="नोंदणीकृत भूखंड (गट क्र.)"
           value={analytics.totalParcels}
           subtext="चंद्रपूर महसूल अभिलेख"
           icon={Landmark}
