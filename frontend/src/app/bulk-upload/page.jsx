@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { api } from '../../lib/api';
 import { CHANDRAPUR_TALUKAS } from '../../lib/constants';
+import SearchableSelect from '../../components/SearchableSelect';
 
 export default function BulkUploadPage() {
   const [activeTab, setActiveTab] = useState('prapatra'); // 'prapatra' | 'parcel'
@@ -214,19 +215,17 @@ export default function BulkUploadPage() {
                 <label className="block text-xs font-bold text-slate-700 mb-1.5">
                   तालुका निवडा <span className="text-rose-500">*</span>
                 </label>
-                <div className="relative">
-                  <select
-                    value={selectedTaluka}
-                    onChange={(e) => setSelectedTaluka(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                  >
-                    {CHANDRAPUR_TALUKAS.map((t) => (
-                      <option key={t.id} value={t.id}>
-                        {t.nameMr} ({t.nameEn})
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                <SearchableSelect
+                  options={CHANDRAPUR_TALUKAS.map((t) => ({
+                    value: t.id,
+                    label: `${t.nameMr} (${t.nameEn})`
+                  }))}
+                  value={selectedTaluka}
+                  onChange={(val) => setSelectedTaluka(val)}
+                  placeholder="तालुका निवडा..."
+                  searchPlaceholder="तालुका शोधा..."
+                  icon={Building2}
+                />
               </div>
 
               <div>
@@ -301,11 +300,12 @@ export default function BulkUploadPage() {
                       {result.total712Added}
                     </span>
                   </div>
-                  <div className="p-2 sm:p-2.5 bg-white rounded-lg border border-emerald-100">
-                    <span className="text-[10px] text-slate-500 block">भूखंड नोंदणीकृत</span>
+                  <div className="p-2 sm:p-2.5 bg-white rounded-lg border border-emerald-100" title="नोंदणीकृत स्वतंत्र गट / सर्व्हे क्रमांक">
+                    <span className="text-[10px] text-slate-500 block font-bold">भूखंड नोंदणीकृत (गट/स.नं.)</span>
                     <span className="text-sm sm:text-base font-black text-emerald-700">
                       {result.totalParcelsAdded}
                     </span>
+                    <span className="text-[9px] text-emerald-600 block font-medium">स्वतंत्र गट क्र.</span>
                   </div>
                   <div className="p-2 sm:p-2.5 bg-white rounded-lg border border-emerald-100">
                     <span className="text-[10px] text-slate-500 block">दाखल प्रकरणे</span>
@@ -328,22 +328,47 @@ export default function BulkUploadPage() {
                       <span>प्रक्रिया केलेली गावे व आकडेवारी:</span>
                       <span className="text-slate-500 font-normal">तालुका: {result.taluka}</span>
                     </div>
-                    <div className="divide-y divide-emerald-100 max-h-48 overflow-y-auto text-[11px]">
+                    <div className="divide-y divide-emerald-100 max-h-56 overflow-y-auto text-[11px]">
                       {result.results.map((r, idx) => (
-                        <div key={idx} className="p-2.5 flex justify-between items-center hover:bg-slate-50">
-                          <div>
-                            <span className="font-bold text-slate-900">गाव: {r.village}</span>
-                            <div className="text-[10px] text-slate-500 mt-0.5 flex gap-2">
-                              <span>७/१२: {r.total712}</span>
-                              <span>•</span>
-                              <span>भूखंड: {r.parcelsCount}</span>
-                              <span>•</span>
-                              <span>प्रकरणे: {r.casesCreated}</span>
+                        <div key={idx} className="p-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 hover:bg-slate-50">
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2">
+                              <span className="font-black text-slate-900 text-xs sm:text-sm">गाव: {r.village}</span>
+                              <span className="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-bold">
+                                सिडिंग पूर्ण
+                              </span>
                             </div>
+                            <div className="text-[11px] text-slate-600 flex flex-wrap items-center gap-2">
+                              <span>एकूण ७/१२: <strong className="text-blue-900">{r.total712}</strong></span>
+                              <span>•</span>
+                              <span>भूखंड नोंदणीकृत (गट/स.नं.): <strong className="text-emerald-700">{r.parcelsCount}</strong></span>
+                              {r.uniqueGatCount !== undefined && r.uniqueGatCount !== r.parcelsCount && (
+                                <>
+                                  <span>•</span>
+                                  <span>स्वतंत्र गट: <strong className="text-indigo-700">{r.uniqueGatCount}</strong></span>
+                                </>
+                              )}
+                              <span>•</span>
+                              <span>दाखल प्रकरणे: <strong className="text-amber-700">{r.casesCreated || 0}</strong></span>
+                            </div>
+                            {r.gatNumbersSample && r.gatNumbersSample.length > 0 && (
+                              <div className="mt-1 pt-1 border-t border-slate-100 flex items-center gap-1.5 flex-wrap">
+                                <span className="text-[10px] font-bold text-slate-500">नोंदणीकृत गट/स.नं. उदा.:</span>
+                                <div className="flex flex-wrap gap-1">
+                                  {r.gatNumbersSample.map((g, gi) => (
+                                    <span key={gi} className="px-1.5 py-0.5 bg-emerald-50 text-emerald-800 text-[10px] rounded font-mono font-bold border border-emerald-200">
+                                      गट {g}
+                                    </span>
+                                  ))}
+                                  {r.uniqueGatCount > r.gatNumbersSample.length && (
+                                    <span className="text-[10px] text-slate-500 font-medium px-1">
+                                      +{r.uniqueGatCount - r.gatNumbersSample.length} इतर
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            )}
                           </div>
-                          <span className="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-bold">
-                            अपडेटेड
-                          </span>
                         </div>
                       ))}
                     </div>

@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom';
 import { X, Upload, FileText, CheckCircle2, AlertCircle } from 'lucide-react';
 import { api } from '../lib/api';
 import { useFocusTrap } from '../hooks/useFocusTrap';
+import SearchableSelect from './SearchableSelect';
 
 export default function DocUploadModal({ isOpen, onClose, parcelId, caseId, onUploadSuccess }) {
   const trapRef = useFocusTrap(isOpen);
@@ -162,22 +163,24 @@ export default function DocUploadModal({ isOpen, onClose, parcelId, caseId, onUp
             </div>
 
             <div>
-              <label htmlFor="doc-type" className="text-xs font-semibold text-slate-700 block">
+              <label className="text-xs font-semibold text-slate-700 block mb-1">
                 दस्तावेज प्रकार <span className="text-rose-500">*</span>
               </label>
-              <select
-                id="doc-type"
+              <SearchableSelect
+                options={[
+                  { value: 'SDO_ORDER', label: 'उपविभागीय अधिकारी (SDO) आदेश' },
+                  { value: 'COLLECTOR_ORDER', label: 'जिल्हाधिकारी आदेश (शासन जमा)' },
+                  { value: 'FIELD_PANCHNAMA', label: 'स्थळ पंचनामा व छायाचित्रे' },
+                  { value: 'OLD_7_12_ARCHIVE', label: 'सन १९५० जुना सातबारा' },
+                  { value: 'FERFAR_REGISTER_COPY', label: 'गाव नमुना ६ फेरफार' },
+                  { value: 'SHOW_CAUSE_NOTICE', label: 'कारणे दाखवा नोटीस' }
+                ]}
                 value={docType}
-                onChange={(e) => setDocType(e.target.value)}
-                className="w-full border border-slate-300 rounded-lg p-2.5 text-xs mt-1 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
-              >
-                <option value="SDO_ORDER">उपविभागीय अधिकारी (SDO) आदेश</option>
-                <option value="COLLECTOR_ORDER">जिल्हाधिकारी आदेश (शासन जमा)</option>
-                <option value="FIELD_PANCHNAMA">स्थळ पंचनामा व छायाचित्रे</option>
-                <option value="OLD_7_12_ARCHIVE">सन १९५० जुना सातबारा</option>
-                <option value="FERFAR_REGISTER_COPY">गाव नमुना ६ फेरफार</option>
-                <option value="SHOW_CAUSE_NOTICE">कारणे दाखवा नोटीस</option>
-              </select>
+                onChange={(val) => setDocType(val)}
+                placeholder="दस्तावेज प्रकार निवडा..."
+                searchPlaceholder="दस्तऐवज प्रकार शोधा..."
+                showCount={false}
+              />
             </div>
 
             {/* Physical Coordinate Fields */}

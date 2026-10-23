@@ -806,8 +806,8 @@ export const uploadPrapatraExcel = async (req, res) => {
       tempFilePath = `${file.path}${ext}`;
       fs.renameSync(file.path, tempFilePath);
 
-      // Run Python parser using execFileAsync (secure against command injection)
-      const { stdout } = await execFileAsync('python', [pythonScript, tempFilePath, targetTaluka], {
+      // Run Python parser using execFileAsync with original filename passed for clean village identification
+      const { stdout } = await execFileAsync('python', [pythonScript, tempFilePath, targetTaluka, file.originalname], {
         encoding: 'utf-8',
         maxBuffer: 30 * 1024 * 1024
       });
@@ -817,11 +817,19 @@ export const uploadPrapatraExcel = async (req, res) => {
         throw new Error(parsedResult.error || `एक्सेल तपासणीमध्ये त्रुटी: ${file.originalname}`);
       }
 
-      const { villageName, stats, parcels } = parsedResult;
+      const { villageName, stats, parcels, uniqueGatNumbers } = parsedResult;
+
+      // Sanitize village name: protect against hex/hash or temporary upload names
+      const isHash = (val) => !val || /^[0-9a-f]{16,}$/i.test(val.trim());
+      let derivedVillage = villageName;
+      if (isHash(derivedVillage)) {
+        derivedVillage = file.originalname ? file.originalname.replace(/\.[^/.]+$/, '').trim() : 'गाव';
+      }
+
       // Allow manual village override only if single file uploaded and villageName explicitly provided
       const finalVillage = (uploadedFiles.length === 1 && req.body.villageName && req.body.villageName.trim())
         ? req.body.villageName.trim()
-        : villageName;
+        : derivedVillage;
 
       const illegal = stats.illegalDel || 0;
       const pokalist = stats.pokalist || 0;
@@ -1046,11 +1054,16 @@ export const uploadPrapatraExcel = async (req, res) => {
         }
       }
 
+      // Collect all distinct Gat / Survey numbers to show the user explicitly
+      const distinctGats = uniqueGatNumbers || (parcels ? Array.from(new Set(parcels.map(p => p.gatNumber).filter(Boolean))) : []);
+
       results.push({
         village: finalVillage,
         taluka: targetTaluka,
         total712: stats.total712 || 0,
         parcelsCount: parcels?.length || 0,
+        uniqueGatCount: distinctGats.length,
+        gatNumbersSample: distinctGats.slice(0, 20),
         casesCreated: casesCount,
         provenanceCreated: backwardCount,
         stats,

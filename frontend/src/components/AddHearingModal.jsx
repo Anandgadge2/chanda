@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom';
 import { X, Calendar, Scale, CheckCircle2, AlertCircle } from 'lucide-react';
 import { api } from '../lib/api';
 import { useFocusTrap } from '../hooks/useFocusTrap';
+import SearchableSelect from './SearchableSelect';
 
 export default function AddHearingModal({ isOpen, onClose, caseItem, onHearingAdded }) {
   const trapRef = useFocusTrap(isOpen);
@@ -156,20 +157,23 @@ export default function AddHearingModal({ isOpen, onClose, caseItem, onHearingAd
             </div>
 
             <div>
-              <label htmlFor="hearing-authority" className="text-xs font-semibold text-slate-700 block">सुनावणी प्राधिकारी</label>
-              <select
-                id="hearing-authority"
+              <label className="text-xs font-semibold text-slate-700 block mb-1">सुनावणी प्राधिकारी</label>
+              <SearchableSelect
+                options={[
+                  { value: 'Sub-Divisional Officer (SDO) Warora', label: 'उपविभागीय अधिकारी (SDO) वरोरा' },
+                  { value: 'Sub-Divisional Officer (SDO) Rajura', label: 'उपविभागीय अधिकारी (SDO) राजुरा' },
+                  { value: 'Sub-Divisional Officer (SDO) Chandrapur', label: 'उपविभागीय अधिकारी (SDO) चंद्रपूर' },
+                  { value: 'Tehsildar Mul', label: 'तहसीलदार मूल' },
+                  { value: 'District Collector Chandrapur', label: 'जिल्हाधिकारी चंद्रपूर' },
+                  { value: 'Resident Deputy Collector (RDC)', label: 'निवासी उपजिल्हाधिकारी (RDC)' }
+                ]}
                 value={authority}
-                onChange={(e) => setAuthority(e.target.value)}
-                className="w-full border border-slate-300 rounded-lg p-2 text-xs mt-1 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
-              >
-                <option value="Sub-Divisional Officer (SDO) Warora">उपविभागीय अधिकारी (SDO) वरोरा</option>
-                <option value="Sub-Divisional Officer (SDO) Rajura">उपविभागीय अधिकारी (SDO) राजुरा</option>
-                <option value="Sub-Divisional Officer (SDO) Chandrapur">उपविभागीय अधिकारी (SDO) चंद्रपूर</option>
-                <option value="Tehsildar Mul">तहसीलदार मूल</option>
-                <option value="District Collector Chandrapur">जिल्हाधिकारी चंद्रपूर</option>
-                <option value="Resident Deputy Collector (RDC)">निवासी उपजिल्हाधिकारी (RDC)</option>
-              </select>
+                onChange={(val) => setAuthority(val)}
+                placeholder="सुनावणी प्राधिकारी निवडा..."
+                searchPlaceholder="प्राधिकारी शोधा..."
+                icon={Scale}
+                showCount={false}
+              />
             </div>
 
             <div>

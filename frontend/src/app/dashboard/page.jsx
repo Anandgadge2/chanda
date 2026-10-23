@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import {
   FileSpreadsheet,
@@ -26,6 +26,7 @@ import ShartbhangAnalyticsChart from '../../components/charts/ShartbhangAnalytic
 import ChandrapurGisMap from '../../components/ChandrapurGisMap';
 import { api } from '../../lib/api';
 import { CHANDRAPUR_TALUKAS } from '../../lib/constants';
+import SearchableSelect from '../../components/SearchableSelect';
 
 export default function DashboardPage() {
   const [taluka, setTaluka] = useState('');
@@ -64,6 +65,14 @@ export default function DashboardPage() {
     loadData(taluka);
   }, [taluka]);
 
+  const talukaSelectOptions = useMemo(() => [
+    { value: '', label: 'सर्व तालुके (All 15)' },
+    ...CHANDRAPUR_TALUKAS.map((t) => ({
+      value: t.id,
+      label: `${t.nameMr} (${t.nameEn})`
+    }))
+  ], []);
+
   const handleExport = () => {
     window.location.href = api.getPrapatra3DownloadUrl(taluka);
   };
@@ -86,20 +95,17 @@ export default function DashboardPage() {
 
         {/* Compact Integrated Actions & Filter */}
         <div className="flex items-center gap-2.5 shrink-0">
-          <div className="flex items-center gap-1.5 min-w-[160px] sm:min-w-[200px]">
-            <Filter className="w-4 h-4 text-blue-900 shrink-0" />
-            <select
+          <div className="w-[180px] sm:w-[210px]">
+            <SearchableSelect
+              options={talukaSelectOptions}
               value={taluka}
-              onChange={(e) => setTaluka(e.target.value)}
-              className="w-full border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs sm:text-sm bg-slate-50 font-bold text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-500 transition cursor-pointer"
-            >
-              <option value="">सर्व तालुके (All 15)</option>
-              {CHANDRAPUR_TALUKAS.map((t) => (
-                <option key={t.id} value={t.id}>
-                  {t.nameMr}
-                </option>
-              ))}
-            </select>
+              onChange={(val) => setTaluka(val)}
+              placeholder="सर्व तालुके"
+              searchPlaceholder="तालुका शोधा..."
+              icon={Filter}
+              showCount={false}
+              align="right"
+            />
           </div>
 
           <button

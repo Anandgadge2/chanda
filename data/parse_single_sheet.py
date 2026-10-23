@@ -12,6 +12,7 @@ if len(sys.argv) < 2:
 
 fpath = sys.argv[1]
 taluka_override = sys.argv[2] if len(sys.argv) > 2 else ""
+original_fname = sys.argv[3] if len(sys.argv) > 3 else os.path.basename(fpath)
 
 if not os.path.exists(fpath):
     print(json.dumps({"error": f"File not found: {fpath}"}))
@@ -105,8 +106,13 @@ try:
             if any(r[:6]):
                 rows_data.append(r)
 
-    fname = os.path.basename(fpath)
+    # Prefer original_fname over temp upload path
+    fname = original_fname or os.path.basename(fpath)
     v_name = clean_village_name(fname, sample_village)
+    # Double safeguard: if v_name is still a hex hash or empty, fallback
+    if not v_name or re.match(r'^[0-9a-f]{16,}$', v_name, re.I):
+        fallback = os.path.splitext(original_fname)[0] if original_fname else 'गाव'
+        v_name = clean_village_name(fallback, None)
     
     v_stats = {
         "total712": 0,
@@ -183,7 +189,8 @@ try:
         if is_govt and is_encroach: v_stats["govtEncroach"] += 1
         if is_govt and is_mojani: v_stats["govtMojani"] += 1
 
-        if is_govt or is_illegal_del or is_pokalist or is_encroach or is_shartbhang or is_tribal or len(parcels) < 30:
+        # Ingest every valid parcel entry from the 7/12 records
+        if survey_clean or owner_clean or is_govt or is_illegal_del or is_pokalist or is_encroach or is_shartbhang or is_tribal:
             safe_survey = re.sub(r'[^0-9]', '', survey_clean) or f"{r_idx}"
             taluka_prefix = (taluka_override or "DIS")[:3].upper()
             upi = f"MH-CHA-{taluka_prefix}-UPL-{int(safe_survey[:4]) if safe_survey.isdigit() else 1:04d}-{r_idx:02d}"
@@ -208,12 +215,15 @@ try:
                 }
             })
 
+    unique_gats = list(dict.fromkeys([p['gatNumber'] for p in parcels if p.get('gatNumber')]))
+
     output = {
         "success": True,
         "villageName": v_name,
         "taluka": taluka_override,
         "stats": v_stats,
-        "parcels": parcels
+        "parcels": parcels,
+        "uniqueGatNumbers": unique_gats
     }
     print(json.dumps(output, ensure_ascii=False))
 

@@ -18,6 +18,7 @@ import { api } from '../../lib/api';
 import { DMS_DOC_TYPES } from '../../lib/constants';
 import DocUploadModal from '../../components/DocUploadModal';
 import Pagination from '../../components/Pagination';
+import SearchableSelect from '../../components/SearchableSelect';
 
 export default function DocumentsPage() {
   const [documents, setDocuments] = useState([]);
@@ -123,18 +124,23 @@ export default function DocumentsPage() {
           />
         </form>
 
-        <select
-          value={docType}
-          onChange={(e) => setDocType(e.target.value)}
-          className="w-full sm:w-auto border border-slate-300 rounded-lg px-2.5 py-2 text-xs bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          <option value="">सर्व दस्तऐवज प्रकार</option>
-          {Object.entries(DMS_DOC_TYPES).map(([k, v]) => (
-            <option key={k} value={k}>
-              {v.labelMr}
-            </option>
-          ))}
-        </select>
+        <div className="w-full sm:w-64">
+          <SearchableSelect
+            options={[
+              { value: '', label: 'सर्व दस्तऐवज प्रकार' },
+              ...Object.entries(DMS_DOC_TYPES).map(([k, v]) => ({
+                value: k,
+                label: v.labelMr
+              }))
+            ]}
+            value={docType}
+            onChange={(val) => setDocType(val)}
+            placeholder="सर्व दस्तऐवज प्रकार"
+            searchPlaceholder="दस्तऐवज प्रकार शोधा..."
+            icon={Filter}
+            showCount={false}
+          />
+        </div>
       </div>
 
       {/* Documents Table */}
