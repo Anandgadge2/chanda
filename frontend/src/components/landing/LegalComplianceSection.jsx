@@ -123,16 +123,16 @@ export default function LegalComplianceSection() {
         </div>
 
         {/* Glossary Reference Banner */}
-        <div className="mt-4 sm:mt-6 p-4 rounded-2xl bg-gradient-to-r from-blue-950 via-slate-900 to-indigo-950 text-white flex flex-col sm:flex-row items-center justify-between gap-3 shadow-md border border-slate-800">
+        <div className="mt-4 sm:mt-6 p-4 rounded-2xl bg-gradient-to-r from-blue-50/90 via-indigo-50/60 to-amber-50/50 text-slate-900 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-xs border border-blue-200/80">
           <div className="flex items-center gap-3 text-center sm:text-left">
-            <div className="p-2 rounded-xl bg-amber-400/20 text-amber-400 border border-amber-400/30 shrink-0">
-              <BookOpen className="w-5 h-5" />
+            <div className="p-2.5 rounded-xl bg-blue-100 text-blue-900 border border-blue-200 shrink-0">
+              <BookOpen className="w-5 h-5 text-blue-900" />
             </div>
             <div>
-              <h3 className="text-xs sm:text-sm font-bold text-white">
+              <h3 className="text-xs sm:text-sm font-bold text-slate-900">
                 ७/१२ उताऱ्यावरील इतर हक्क व संक्षिप्त शब्दांचा अर्थ जाणून घ्यायचा आहे का?
               </h3>
-              <p className="text-[11px] text-slate-300 mt-0.5">
+              <p className="text-[11px] text-slate-600 mt-0.5">
                 अ.कृ., विनापरवानगी अ.कृ. वापर, भोगवटादार वर्ग १/२, ख.ख., ह.सो.प., बो., फे.नं. इत्यादींचा संपूर्ण शब्दकोश.
               </p>
             </div>
@@ -140,7 +140,7 @@ export default function LegalComplianceSection() {
 
           <Link
             href="/glossary"
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-blue-950 font-black text-xs transition shrink-0 shadow-xs hover:shadow-md"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-blue-900 hover:bg-blue-800 text-white font-bold text-xs transition shrink-0 shadow-xs hover:shadow-md cursor-pointer"
           >
             <span>महसूल शब्दावली मार्गदर्शक पहा</span>
             <ArrowRight className="w-3.5 h-3.5" />

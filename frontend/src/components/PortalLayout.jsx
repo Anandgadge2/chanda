@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import Navbar from './Navbar';
 import Sidebar from './Sidebar';
@@ -15,8 +15,28 @@ const STANDALONE_PUBLIC_ROUTES = ['/', '/privacy-policy', '/terms', '/accessibil
 export default function PortalLayout({ children }) {
   const pathname = usePathname();
   const { user, loading, isLoginModalOpen, closeLoginModal } = useAuth();
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+
+  // Restore saved sidebar collapsed state on client mount
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('chanda_sidebar_collapsed');
+      if (saved !== null) {
+        setSidebarCollapsed(saved === 'true');
+      }
+    } catch {}
+  }, []);
+
+  const handleToggleSidebar = () => {
+    setSidebarCollapsed((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem('chanda_sidebar_collapsed', String(next));
+      } catch {}
+      return next;
+    });
+  };
 
   const isStandalone = STANDALONE_PUBLIC_ROUTES.includes(pathname);
   const isGlossary = pathname === '/glossary';
@@ -24,7 +44,7 @@ export default function PortalLayout({ children }) {
   // Public Landing / Legal Pages (No internal layout)
   if (isStandalone) {
     return (
-      <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900">
+      <div className="min-h-screen flex flex-col text-slate-900 selection:bg-amber-400 selection:text-slate-950">
         <main id="main-content" className="flex-1 flex flex-col">
           {children}
         </main>
@@ -37,7 +57,7 @@ export default function PortalLayout({ children }) {
   // Loading Session Check State (No sidebar flicker)
   if (loading && !isGlossary) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 text-slate-900 font-sans">
+      <div className="min-h-screen flex flex-col items-center justify-center text-slate-900 font-sans">
         <div className="w-10 h-10 rounded-full border-3 border-blue-900 border-t-transparent animate-spin mb-3" />
         <p className="text-xs font-bold text-slate-700">सत्र पडताळणी सुरू आहे...</p>
       </div>
@@ -48,7 +68,7 @@ export default function PortalLayout({ children }) {
   // Render Official Navbar + Full Width Workspace + Footer!
   if (!user && isGlossary) {
     return (
-      <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 font-sans">
+      <div className="min-h-screen flex flex-col text-slate-900 font-sans">
         <Navbar
           sidebarCollapsed={true}
           onToggleSidebar={() => {}}
@@ -71,7 +91,7 @@ export default function PortalLayout({ children }) {
   // Show clean gateway WITHOUT internal officer sidebar!
   if (!user) {
     return (
-      <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 font-sans">
+      <div className="min-h-screen flex flex-col text-slate-900 font-sans">
         <Navbar
           sidebarCollapsed={true}
           onToggleSidebar={() => {}}
@@ -89,18 +109,18 @@ export default function PortalLayout({ children }) {
 
   // Authenticated Officer Layout: Full Workspace with Sidebar
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 font-sans">
+    <div className="min-h-screen flex flex-col text-slate-900 font-sans">
       <Navbar
         sidebarCollapsed={sidebarCollapsed}
-        onToggleSidebar={() => setSidebarCollapsed((prev) => !prev)}
+        onToggleSidebar={handleToggleSidebar}
         onToggleMobileSidebar={() => setMobileSidebarOpen((prev) => !prev)}
       />
-      <div className="w-full px-3 sm:px-5 lg:px-6 flex-1 py-2.5 sm:py-3.5 flex gap-3 sm:gap-4">
+      <div className="w-full px-3 sm:px-5 lg:px-6 flex-1 py-3 sm:py-4 flex gap-3 sm:gap-4">
         <Sidebar
           collapsed={sidebarCollapsed}
           mobileOpen={mobileSidebarOpen}
           onCloseMobile={() => setMobileSidebarOpen(false)}
-          onToggleCollapse={() => setSidebarCollapsed((prev) => !prev)}
+          onToggleCollapse={handleToggleSidebar}
         />
         <main id="main-content" className="flex-1 min-w-0">
           <RouteGuard>{children}</RouteGuard>

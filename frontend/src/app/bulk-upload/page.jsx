@@ -118,34 +118,37 @@ export default function BulkUploadPage() {
   };
 
   return (
-    <div className="space-y-4 sm:space-y-6">
-      {/* Sleek Header */}
-      <div className="bg-white border border-slate-200 rounded-xl px-4 py-3 shadow-2xs flex flex-col md:flex-row justify-between items-start md:items-center gap-2.5">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center shrink-0 text-emerald-800">
-            <FileSpreadsheet className="w-5 h-5" />
+    <div className="space-y-2.5 sm:space-y-3">
+      {/* Executive Command Hero Header - Pro Compact */}
+      <div className="bg-gradient-to-r from-emerald-50/80 via-teal-50/40 to-white text-slate-900 rounded-xl px-3.5 py-2 sm:py-2.5 shadow-2xs border border-emerald-200/80 flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div className="w-8 h-8 rounded-lg bg-emerald-600 flex items-center justify-center shrink-0 text-white shadow-2xs">
+            <FileSpreadsheet className="w-4 h-4" />
           </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-base sm:text-lg font-black text-slate-900 leading-tight">
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h1 className="text-sm sm:text-base font-extrabold text-slate-900 tracking-tight leading-tight truncate">
                 महसूल अभिलेख व गाव नमुना डेटा आयात
               </h1>
-              <span className="text-[10px] font-bold bg-emerald-100 text-emerald-900 px-2 py-0.5 rounded border border-emerald-300">
-                स्वयंचलित सिडिंग (Full Seeding)
+              <span className="text-[10px] font-extrabold uppercase tracking-wider bg-emerald-100 text-emerald-900 px-2 py-0.5 rounded-full border border-emerald-300">
+                स्वयंचलित सिडिंग
+              </span>
+              <span className="hidden md:inline text-[11px] text-slate-500 font-medium">
+                • १ ते ४५ तपासणी प्रपत्रे किंवा कच्च्या भूखंड यादीचे थेट रूपांतर
               </span>
             </div>
-            <p className="text-xs text-slate-500 mt-0.5">
-              १ ते ४५ तपासणी प्रपत्रे किंवा कच्च्या भूखंड यादीचे थेट भूखंड नोंदवहीत रूपांतर व स्वयंचलित कायदेशीर प्रकरणे निर्मिती
+            <p className="text-[11px] text-slate-500 md:hidden truncate font-medium">
+              १ ते ४५ तपासणी प्रपत्रे किंवा कच्च्या भूखंड यादीचे थेट रूपांतर
             </p>
           </div>
         </div>
 
         {activeTab === 'parcel' && (
-          <div className="flex items-center gap-2 shrink-0 self-end md:self-auto">
+          <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto">
             <a
               href={api.getSampleTemplateUrl()}
               download="गाव_नमुना_नोंदणी.xlsx"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg text-xs font-bold transition shadow-2xs active:scale-95"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold transition shadow-2xs active:scale-95 cursor-pointer"
               title="नमुना एक्सेल डाऊनलोड"
             >
               <Download className="w-3.5 h-3.5" />
@@ -155,23 +158,23 @@ export default function BulkUploadPage() {
         )}
       </div>
 
-      {/* Tabs Selector */}
-      <div className="flex border-b border-slate-200 gap-2">
+      {/* Modern Segmented Tabs Selector */}
+      <div className="inline-flex p-1 rounded-2xl bg-slate-200/60 backdrop-blur-md border border-slate-300/60 gap-1.5 shadow-2xs">
         <button
           onClick={() => {
             setActiveTab('prapatra');
             clearForm();
           }}
-          className={`pb-2.5 px-3.5 text-xs sm:text-sm font-bold flex items-center gap-2 border-b-2 transition ${
+          className={`py-2 px-4 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition-all cursor-pointer ${
             activeTab === 'prapatra'
-              ? 'border-emerald-600 text-emerald-800'
-              : 'border-transparent text-slate-500 hover:text-slate-800'
+              ? 'bg-white text-emerald-950 shadow-sm'
+              : 'text-slate-600 hover:text-slate-900 hover:bg-white/40'
           }`}
         >
-          <FolderArchive className="w-4 h-4" />
+          <FolderArchive className="w-4 h-4 text-emerald-700" />
           <span>१ ते ४५ तपासणी प्रपत्र (Official Revenue Booklet)</span>
-          <span className="text-[10px] bg-emerald-100 text-emerald-800 px-1.5 py-0.2 rounded font-semibold">
-            शिफारस केलेले
+          <span className="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-extrabold">
+            शिफारस
           </span>
         </button>
 
@@ -180,13 +183,13 @@ export default function BulkUploadPage() {
             setActiveTab('parcel');
             clearForm();
           }}
-          className={`pb-2.5 px-3.5 text-xs sm:text-sm font-bold flex items-center gap-2 border-b-2 transition ${
+          className={`py-2 px-4 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition-all cursor-pointer ${
             activeTab === 'parcel'
-              ? 'border-blue-600 text-blue-800'
-              : 'border-transparent text-slate-500 hover:text-slate-800'
+              ? 'bg-white text-blue-950 shadow-sm'
+              : 'text-slate-600 hover:text-slate-900 hover:bg-white/40'
           }`}
         >
-          <Layers className="w-4 h-4" />
+          <Layers className="w-4 h-4 text-blue-700" />
           <span>गाव भूखंड यादी नमुना (8-Column Parcel List)</span>
         </button>
       </div>

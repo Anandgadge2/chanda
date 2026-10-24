@@ -166,23 +166,38 @@ const fetchSummaryFromDatabase = async (taluka) => {
          LIMIT 25
        ) g) as "topGatParcels",
 
-      -- Historical Timeline Progression (Epochs from 1950 baseline)
+      -- Historical Timeline Progression (Epochs from 1950 baseline to 2026 current status)
       (SELECT COALESCE(json_agg(json_build_object(
-        'epochYear', bh.epoch_year,
-        'recordsCount', bh.cnt,
-        'totalAreaHa', bh.total_area_ha::float
+        'epochYear', t.epoch_year,
+        'recordsCount', t.cnt,
+        'totalAreaHa', t.total_area_ha::float,
+        'label', t.label
       )), '[]'::json)
        FROM (
+         -- 1950 (or historical epochs from backward_histories)
          SELECT 
            b.epoch_year, 
            COUNT(*)::int as cnt, 
-           COALESCE(SUM(b.area_ha), 0)::float as total_area_ha
+           COALESCE(SUM(b.area_ha), 0)::float as total_area_ha,
+           '१९५० (मूळ सनद/बंदोबस्त)' as label
          FROM backward_histories b
          LEFT JOIN land_parcels lp ON b.parcel_id = lp.id
          WHERE (${talukaParam}::text IS NULL OR LOWER(lp.taluka) = LOWER(${talukaParam}))
          GROUP BY b.epoch_year
-         ORDER BY b.epoch_year ASC
-       ) bh) as "historicalTimeline",
+
+         UNION ALL
+
+         -- 2026 (Current 7/12 Ground Audit Status)
+         SELECT 
+           2026 as epoch_year,
+           COUNT(*)::int as cnt,
+           COALESCE(SUM(lp.total_area_ha), 0)::float as total_area_ha,
+           '२०२६ (विद्यमान चालू ७/१२)' as label
+         FROM land_parcels lp
+         WHERE (${talukaParam}::text IS NULL OR LOWER(lp.taluka) = LOWER(${talukaParam}))
+
+         ORDER BY epoch_year ASC
+       ) t) as "historicalTimeline",
 
       -- Latest 5 Quasi-Judicial Hearings with Parcel and Case Context
       (SELECT COALESCE(json_agg(h), '[]'::json)

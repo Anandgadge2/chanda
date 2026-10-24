@@ -87,34 +87,37 @@ export default function RevenueShortcutGuideModal({
     >
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-slate-950/75 backdrop-blur-sm transition-opacity animate-in fade-in duration-150"
+        className="fixed inset-0 bg-slate-950/70 backdrop-blur-md transition-opacity animate-in fade-in duration-200"
         onClick={onClose}
       />
 
       {/* Modal Dialog */}
       <div
         ref={trapRef}
-        className="relative z-10 w-full max-w-4xl max-h-[90vh] bg-white rounded-2xl shadow-2xl flex flex-col border border-slate-200 overflow-hidden animate-in fade-in zoom-in-95 duration-150 my-auto"
+        className="relative z-10 w-full max-w-4xl max-h-[90vh] bg-white rounded-3xl shadow-[0_25px_60px_-15px_rgba(15,23,42,0.3)] flex flex-col border border-slate-100 overflow-hidden animate-in zoom-in-95 duration-150 my-auto"
       >
+        {/* Top Gradient Accent Strip */}
+        <div className="h-1.5 bg-gradient-to-r from-amber-500 via-blue-600 to-indigo-600 shrink-0" />
+
         {/* Header */}
-        <div className="px-4 sm:px-6 py-2.5 sm:py-3 bg-white border-b border-slate-200 flex justify-between items-center shrink-0 gap-3">
-          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
-            <div className="w-8 h-8 rounded-lg bg-blue-50 border border-blue-200/80 text-blue-900 flex items-center justify-center shrink-0">
-              <BookOpen className="w-4 h-4" />
+        <div className="px-5 sm:px-6 py-3.5 bg-white border-b border-slate-100 flex justify-between items-center shrink-0 gap-3">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-10 h-10 rounded-2xl bg-amber-50 border border-amber-200/80 text-amber-700 flex items-center justify-center shrink-0 shadow-2xs">
+              <BookOpen className="w-5 h-5" />
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
                 <h2
                   id="glossary-modal-title"
-                  className="text-sm sm:text-base font-bold text-slate-900 leading-tight"
+                  className="text-sm sm:text-base font-black text-slate-900 leading-tight"
                 >
                   जमीन महसूल शब्दावली व संक्षिप्त रूपे
                 </h2>
-                <span className="text-[10px] font-semibold bg-blue-50 text-blue-800 px-1.5 py-0.5 rounded border border-blue-200">
-                  Glossary
+                <span className="text-[10px] font-bold bg-amber-100 text-amber-900 px-2 py-0.5 rounded-full border border-amber-200">
+                  MLRC १९६६ Glossary
                 </span>
               </div>
-              <p className="text-[11px] text-slate-500 truncate mt-0.5 hidden sm:block">
+              <p className="text-[11px] text-slate-500 truncate mt-0.5 hidden sm:block font-medium">
                 ७/१२ उतारा, फेरफार नोंदवही (गाव नमुना ६) व महसूल आदेशांमधील संक्षिप्त संज्ञा
               </p>
             </div>
@@ -123,10 +126,10 @@ export default function RevenueShortcutGuideModal({
           <button
             type="button"
             onClick={onClose}
-            className="text-slate-400 hover:text-slate-700 hover:bg-slate-100 p-1.5 rounded-lg transition shrink-0 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 transition active:scale-90 flex items-center justify-center shrink-0 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
             aria-label="संवाद बंद करा (Close glossary modal)"
           >
-            <X className="w-4 h-4 sm:w-5 sm:h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 

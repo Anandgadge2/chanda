@@ -184,92 +184,95 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="space-y-3 max-w-6xl mx-auto pb-10">
-      {/* Compact Officer Profile Header Bar */}
-      <div className="bg-white border border-slate-200/90 rounded-xl px-3.5 py-2.5 sm:px-4 sm:py-3 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
-        <div className="flex items-center gap-3 min-w-0">
-          <div className="relative shrink-0">
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-blue-950 to-indigo-900 text-white font-black text-xs sm:text-sm flex items-center justify-center shadow-xs">
-              {user.fullName ? user.fullName.charAt(0) : 'अ'}
+    <div className="space-y-2.5 sm:space-y-3 max-w-6xl mx-auto pb-8">
+      {/* Executive Command Hero Header - Pro Compact */}
+      <div className="bg-gradient-to-r from-indigo-50/80 via-blue-50/40 to-white text-slate-900 rounded-xl px-3.5 py-2 sm:py-2.5 shadow-2xs border border-indigo-200/80">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="relative shrink-0">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-400 to-amber-600 text-slate-950 font-black text-sm flex items-center justify-center shadow-2xs">
+                {user.fullName ? user.fullName.charAt(0) : 'अ'}
+              </div>
+              <span
+                className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 border border-white rounded-full"
+                title="सत्र सक्रिय"
+              />
             </div>
-            <span
-              className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 border-2 border-white rounded-full"
-              title="सत्र सक्रिय"
-            />
+
+            <div className="min-w-0">
+              <div className="flex items-center gap-2 flex-wrap leading-tight">
+                <h1 className="text-sm sm:text-base font-extrabold text-slate-900 truncate">
+                  {user.fullName || 'महसूल अधिकारी'}
+                </h1>
+                <span className="px-2 py-0.5 text-[10px] font-extrabold uppercase rounded-full bg-blue-100 text-blue-900 border border-blue-200">
+                  {user.role}
+                </span>
+                <span className="px-2 py-0.5 text-[10px] font-extrabold rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200 flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  सक्रिय सत्र
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-500 font-medium mt-0.5 flex items-center gap-1.5 truncate">
+                <span>{user.designation || 'प्रशासकीय पद'}</span>
+                {user.taluka && (
+                  <>
+                    <span>•</span>
+                    <span>ता. {user.taluka}</span>
+                  </>
+                )}
+                <span>•</span>
+                <span>जिल्हाधिकारी कार्यालय चंद्रपूर</span>
+              </p>
+            </div>
           </div>
 
-          <div className="min-w-0">
-            <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap leading-tight">
-              <h1 className="text-xs sm:text-sm font-black text-slate-900 truncate">
-                {user.fullName || 'महसूल अधिकारी'}
-              </h1>
-              <span className="px-1.5 py-0.5 text-[9px] font-bold uppercase rounded bg-blue-100 text-blue-950 border border-blue-200">
-                {user.role}
-              </span>
-              <span className="px-1.5 py-0.5 text-[9px] font-bold rounded bg-emerald-100 text-emerald-950 border border-emerald-300">
-                सक्रिय
-              </span>
-            </div>
-            <p className="text-[11px] text-slate-500 font-medium mt-0.5 flex items-center gap-1.5 truncate">
-              <span>{user.designation || 'प्रशासकीय पद'}</span>
-              {user.taluka && (
-                <>
-                  <span>•</span>
-                  <span>ता. {user.taluka}</span>
-                </>
-              )}
-              <span>•</span>
-              <span>चंद्रपूर</span>
-            </p>
+          <div className="flex items-center gap-2 self-start sm:self-center shrink-0">
+            <span className="text-[11px] font-bold bg-white text-slate-700 px-2.5 py-1 rounded-lg border border-slate-200 shadow-2xs">
+              DPDPA संमती: v{user.consentVersion || '1.0-2026'}
+            </span>
           </div>
-        </div>
-
-        <div className="flex items-center gap-2 self-start sm:self-center shrink-0">
-          <span className="text-[10px] font-semibold bg-slate-100 text-slate-600 px-2.5 py-1 rounded-lg border border-slate-200">
-            DPDPA संमती: {user.consentVersion || '1.0-2026'}
-          </span>
         </div>
       </div>
 
-      {/* Settings Navigation Tabs */}
-      <div className="flex items-center gap-2 border-b border-slate-200 overflow-x-auto pb-px">
+      {/* Modern Segmented Settings Navigation Tabs */}
+      <div className="inline-flex p-1 rounded-2xl bg-slate-200/60 backdrop-blur-md border border-slate-300/60 gap-1.5 shadow-2xs overflow-x-auto max-w-full">
         <button
           type="button"
           onClick={() => setActiveTab('profile')}
-          className={`flex items-center gap-2 px-4 py-2.5 text-xs sm:text-sm font-bold border-b-2 transition-all whitespace-nowrap cursor-pointer ${
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all whitespace-nowrap cursor-pointer ${
             activeTab === 'profile'
-              ? 'border-blue-900 text-blue-950 bg-white rounded-t-xl shadow-2xs'
-              : 'border-transparent text-slate-600 hover:text-slate-900'
+              ? 'bg-white text-blue-950 shadow-sm'
+              : 'text-slate-600 hover:text-slate-900 hover:bg-white/40'
           }`}
         >
           <User className="w-4 h-4 text-blue-700" />
-          <span>१. संपर्क व वैयक्तिक तपशील (Profile)</span>
+          <span>१. संपर्क व वैयक्तिक तपशील</span>
         </button>
 
         <button
           type="button"
           onClick={() => setActiveTab('security')}
-          className={`flex items-center gap-2 px-4 py-2.5 text-xs sm:text-sm font-bold border-b-2 transition-all whitespace-nowrap cursor-pointer ${
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all whitespace-nowrap cursor-pointer ${
             activeTab === 'security'
-              ? 'border-blue-900 text-blue-950 bg-white rounded-t-xl shadow-2xs'
-              : 'border-transparent text-slate-600 hover:text-slate-900'
+              ? 'bg-white text-blue-950 shadow-sm'
+              : 'text-slate-600 hover:text-slate-900 hover:bg-white/40'
           }`}
         >
           <KeyRound className="w-4 h-4 text-amber-600" />
-          <span>२. सुरक्षितता व संकेतशब्द (Security)</span>
+          <span>२. सुरक्षितता व संकेतशब्द</span>
         </button>
 
         <button
           type="button"
           onClick={() => setActiveTab('dpdpa')}
-          className={`flex items-center gap-2 px-4 py-2.5 text-xs sm:text-sm font-bold border-b-2 transition-all whitespace-nowrap cursor-pointer ${
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all whitespace-nowrap cursor-pointer ${
             activeTab === 'dpdpa'
-              ? 'border-emerald-600 text-emerald-950 bg-white rounded-t-xl shadow-2xs'
-              : 'border-transparent text-slate-600 hover:text-slate-900'
+              ? 'bg-white text-emerald-950 shadow-sm'
+              : 'text-slate-600 hover:text-slate-900 hover:bg-white/40'
           }`}
         >
           <ShieldCheck className="w-4 h-4 text-emerald-700" />
-          <span>३. DPDPA २०२३ डेटा अधिकार (Privacy & Rights)</span>
+          <span>३. DPDPA २०२३ डेटा अधिकार</span>
         </button>
       </div>
 

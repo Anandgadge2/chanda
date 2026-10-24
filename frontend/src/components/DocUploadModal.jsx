@@ -88,7 +88,7 @@ export default function DocUploadModal({ isOpen, onClose, parcelId, caseId, onUp
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-2.5 sm:p-4 animate-in fade-in duration-150 overflow-y-auto"
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/70 backdrop-blur-md p-3 sm:p-4 animate-in fade-in duration-200 overflow-y-auto"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
@@ -98,30 +98,33 @@ export default function DocUploadModal({ isOpen, onClose, parcelId, caseId, onUp
         role="dialog"
         aria-modal="true"
         aria-labelledby="upload-modal-title"
-        className="bg-white rounded-2xl shadow-2xl border border-slate-200 max-w-lg w-full max-h-[90vh] flex flex-col overflow-hidden my-auto"
+        className="bg-white rounded-3xl shadow-[0_25px_60px_-15px_rgba(15,23,42,0.3)] border border-slate-100 max-w-lg w-full max-h-[90vh] flex flex-col overflow-hidden my-auto relative animate-in zoom-in-95 duration-150"
       >
+        {/* Top Gradient Accent Strip */}
+        <div className="h-1.5 bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 shrink-0" />
+
         {/* Modal Header */}
-        <div className="px-4 sm:px-6 py-3 sm:py-3.5 bg-white border-b border-slate-200 flex justify-between items-center shrink-0">
-          <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-8 h-8 rounded-lg bg-blue-50 border border-blue-200/80 flex items-center justify-center shrink-0 text-blue-700">
-              <Upload className="w-4 h-4" aria-hidden="true" />
+        <div className="px-5 sm:px-6 py-4 bg-white border-b border-slate-100 flex justify-between items-center shrink-0">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-10 h-10 rounded-2xl bg-purple-50 border border-purple-200/80 flex items-center justify-center shrink-0 text-purple-700 shadow-2xs">
+              <Upload className="w-5 h-5" aria-hidden="true" />
             </div>
             <div className="min-w-0">
-              <h2 id="upload-modal-title" className="text-sm sm:text-base font-bold text-slate-900 leading-tight">
+              <h2 id="upload-modal-title" className="text-sm sm:text-base font-black text-slate-900 leading-tight">
                 दस्तावेज अपलोड व अभिलेख नोंद
               </h2>
-              <p className="text-[11px] text-slate-500 truncate mt-0.5">
-                डिजिटल व भौतिक अभिलेखागार संकलन
+              <p className="text-[11px] text-slate-500 truncate mt-0.5 font-medium">
+                डिजिटल व भौतिक अभिलेखागार संकलन (DMS)
               </p>
             </div>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="text-slate-400 hover:text-slate-700 hover:bg-slate-100 p-1.5 rounded-lg transition shrink-0 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 transition active:scale-90 flex items-center justify-center shrink-0 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
             aria-label="संवाद बंद करा (Close dialog)"
           >
-            <X className="w-4 h-4 sm:w-5 sm:h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 
@@ -244,18 +247,18 @@ export default function DocUploadModal({ isOpen, onClose, parcelId, caseId, onUp
           </div>
 
           {/* Pinned Action Buttons Footer */}
-          <div className="px-4 sm:px-6 py-3 bg-slate-50 border-t border-slate-200 flex items-center justify-end gap-3 shrink-0">
+          <div className="px-5 sm:px-6 py-4 bg-slate-50/80 backdrop-blur-sm border-t border-slate-100 flex items-center justify-end gap-2.5 shrink-0">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 border border-slate-300 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-100 transition focus:outline-none focus:ring-2 focus:ring-slate-400"
+              className="px-4 py-2.5 border border-slate-200 hover:bg-slate-100 text-slate-700 font-bold rounded-xl text-xs transition active:scale-95 cursor-pointer focus:outline-none"
             >
-              रद्द करा (Cancel)
+              रद्द करा
             </button>
             <button
               type="submit"
               disabled={uploading}
-              className="px-5 py-2 bg-blue-900 hover:bg-blue-800 text-white font-semibold rounded-xl text-xs shadow-sm transition disabled:opacity-50 flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              className="px-5 py-2.5 bg-blue-950 hover:bg-blue-900 text-white font-bold rounded-xl text-xs shadow-sm hover:shadow transition disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer active:scale-95 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
             >
               {uploading ? (
                 <>

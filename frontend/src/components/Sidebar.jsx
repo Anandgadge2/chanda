@@ -1,20 +1,19 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
-  Home,
   LayoutDashboard,
   MapPin,
   Scale,
   FolderArchive,
   UploadCloud,
   FileSpreadsheet,
-  Layers,
   BookOpen,
   ChevronRight,
   PanelLeftClose,
+  PanelLeftOpen,
   X,
   Settings,
 } from 'lucide-react';
@@ -65,20 +64,13 @@ const navItems = [
 ];
 
 export default function Sidebar({
-  collapsed = true,
+  collapsed = false,
   mobileOpen = false,
   onCloseMobile = () => {},
   onToggleCollapse = () => {},
 }) {
   const pathname = usePathname();
-  const [isHovered, setIsHovered] = useState(false);
-  const hoverTimeoutRef = useRef(null);
   const mobileTrapRef = useFocusTrap(mobileOpen);
-
-  // Close hover state when navigating to a new page
-  useEffect(() => {
-    setIsHovered(false);
-  }, [pathname]);
 
   // Handle ESC key to close mobile drawer
   useEffect(() => {
@@ -91,66 +83,36 @@ export default function Sidebar({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [mobileOpen, onCloseMobile]);
 
-  // Clean up hover debounce timer
-  useEffect(() => {
-    return () => {
-      if (hoverTimeoutRef.current) {
-        clearTimeout(hoverTimeoutRef.current);
-      }
-    };
-  }, []);
-
-  const handleMouseEnter = () => {
-    if (hoverTimeoutRef.current) {
-      clearTimeout(hoverTimeoutRef.current);
-      hoverTimeoutRef.current = null;
-    }
-    setIsHovered(true);
-  };
-
-  const handleMouseLeave = () => {
-    if (hoverTimeoutRef.current) {
-      clearTimeout(hoverTimeoutRef.current);
-    }
-    hoverTimeoutRef.current = setTimeout(() => {
-      setIsHovered(false);
-    }, 180);
-  };
-
-  // When collapsed is true (auto-close mode), hover opens the sidebar
-  // When collapsed is false (pinned open mode), it stays open
-  const effectiveCollapsed = collapsed ? !isHovered : false;
-
   return (
     <>
       {/* Desktop Sidebar (Smooth fluid width with zero layout jitter) */}
       <aside
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
         className={clsx(
           'flex-shrink-0 hidden lg:block transition-[width] duration-300 ease-[cubic-bezier(0.2,0,0,1)] will-change-[width] z-30 select-none',
-          effectiveCollapsed ? 'w-[72px]' : 'w-64'
+          collapsed ? 'w-[72px]' : 'w-64'
         )}
       >
-        <div className="sticky top-20 bg-white border border-slate-200 rounded-2xl shadow-2xs space-y-2 p-2">
-          {/* Header Row: Title & Collapse Toggle */}
+        <div className="sticky top-20 bg-white/95 backdrop-blur-xl border border-slate-200/90 rounded-2xl shadow-[0_4px_24px_-4px_rgba(15,23,42,0.06)] space-y-2 p-2.5">
+          {/* Header Row: Title & Collapse Toggle Button */}
           <div className="h-10 flex items-center mb-1">
-            {effectiveCollapsed ? (
+            {collapsed ? (
               <div className="relative group w-10 h-10 mx-auto flex items-center justify-center">
                 <button
-                  onClick={onToggleCollapse}
-                  title="साइडबार कायम उघडा ठेवा (पिन करा)"
-                  className="w-10 h-10 rounded-xl text-slate-500 hover:text-blue-950 hover:bg-slate-100 transition-colors flex items-center justify-center cursor-pointer"
-                  aria-label="Toggle Sidebar Width"
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onToggleCollapse();
+                  }}
+                  title="साइडबार विस्तृत करा (Expand Sidebar)"
+                  className="w-10 h-10 rounded-xl text-slate-600 hover:text-blue-950 hover:bg-slate-100 active:scale-95 transition-all flex items-center justify-center cursor-pointer border border-transparent hover:border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  aria-label="Expand Sidebar"
                 >
-                  <PanelLeftClose className="w-4 h-4 rotate-180 text-blue-900 scale-110" />
+                  <PanelLeftOpen className="w-4 h-4 text-blue-900" />
                 </button>
-                {!isHovered && (
-                  <div className="absolute left-full ml-3 top-1/2 -translate-y-1/2 px-2.5 py-1.5 bg-slate-900 text-white rounded-lg shadow-xl opacity-0 pointer-events-none group-hover:opacity-100 transition-all duration-150 z-50 whitespace-nowrap text-xs font-medium border border-slate-800 -translate-x-1 group-hover:translate-x-0">
-                    <div className="absolute top-1/2 -translate-y-1/2 -left-1 w-2 h-2 bg-slate-900 border-l border-b border-slate-800 rotate-45" />
-                    <span>साइडबार उघडा</span>
-                  </div>
-                )}
+                <div className="absolute left-full ml-3 top-1/2 -translate-y-1/2 px-2.5 py-1.5 bg-slate-900 text-white rounded-lg shadow-xl opacity-0 pointer-events-none group-hover:opacity-100 transition-all duration-150 z-50 whitespace-nowrap text-xs font-medium border border-slate-800 -translate-x-1 group-hover:translate-x-0">
+                  <div className="absolute top-1/2 -translate-y-1/2 -left-1 w-2 h-2 bg-slate-900 border-l border-b border-slate-800 rotate-45" />
+                  <span>साइडबार विस्तृत करा</span>
+                </div>
               </div>
             ) : (
               <div className="w-full flex items-center justify-between px-2">
@@ -158,12 +120,16 @@ export default function Sidebar({
                   मुख्य विभाग
                 </span>
                 <button
-                  onClick={onToggleCollapse}
-                  title="ऑटो-क्लोज सक्षम करा"
-                  className="w-8 h-8 rounded-lg text-slate-400 hover:text-blue-950 hover:bg-slate-100 transition-colors flex items-center justify-center cursor-pointer"
-                  aria-label="Toggle Sidebar Width"
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onToggleCollapse();
+                  }}
+                  title="साइडबार संकुचित करा (Collapse Sidebar)"
+                  className="w-8 h-8 rounded-lg text-slate-500 hover:text-blue-950 hover:bg-slate-100 active:scale-95 transition-all flex items-center justify-center cursor-pointer border border-transparent hover:border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  aria-label="Collapse Sidebar"
                 >
-                  <PanelLeftClose className="w-4 h-4 text-slate-500" />
+                  <PanelLeftClose className="w-4 h-4 text-slate-600" />
                 </button>
               </div>
             )}
@@ -185,8 +151,8 @@ export default function Sidebar({
                   className={clsx(
                     'group relative flex items-center rounded-xl h-10 w-full px-2 transition-all duration-200',
                     isActive
-                      ? 'bg-blue-900 text-white shadow-xs font-bold'
-                      : 'text-slate-700 hover:bg-slate-100/90 hover:text-blue-950'
+                      ? 'bg-gradient-to-r from-blue-900 to-indigo-900 text-white shadow-sm font-bold ring-1 ring-blue-700/40'
+                      : 'text-slate-600 hover:bg-slate-100/80 hover:text-slate-950 font-semibold'
                   )}
                 >
                   {/* Stable fixed icon box - identical position in both collapsed and expanded states */}
@@ -205,7 +171,7 @@ export default function Sidebar({
                   <div
                     className={clsx(
                       'overflow-hidden whitespace-nowrap text-left transition-all duration-300 ease-out flex-1 min-w-0',
-                      effectiveCollapsed
+                      collapsed
                         ? 'max-w-0 opacity-0 pointer-events-none'
                         : 'max-w-[170px] opacity-100 ml-2.5'
                     )}
@@ -217,7 +183,7 @@ export default function Sidebar({
                   <ChevronRight
                     className={clsx(
                       'w-3.5 h-3.5 transition-all duration-200 shrink-0',
-                      effectiveCollapsed
+                      collapsed
                         ? 'opacity-0 max-w-0 pointer-events-none'
                         : isActive
                         ? 'opacity-100 text-amber-400'
@@ -226,7 +192,7 @@ export default function Sidebar({
                   />
 
                   {/* Floating Tooltip for Collapsed State */}
-                  {effectiveCollapsed && !isHovered && (
+                  {collapsed && (
                     <div className="absolute left-full ml-3 top-1/2 -translate-y-1/2 px-2.5 py-1.5 bg-slate-900 text-white rounded-xl shadow-xl opacity-0 pointer-events-none group-hover:opacity-100 transition-all duration-150 z-50 whitespace-nowrap border border-slate-800 -translate-x-1 group-hover:translate-x-0">
                       <div className="absolute top-1/2 -translate-y-1/2 -left-1 w-2 h-2 bg-slate-900 border-l border-b border-slate-800 rotate-45" />
                       <p className="text-xs font-bold text-white relative z-10 leading-tight">{item.labelMr}</p>

@@ -121,7 +121,7 @@ export default function ShasanJamaModal({ isOpen, onClose, caseItem, onSuccess =
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-150 overflow-y-auto"
+      className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4 bg-slate-950/70 backdrop-blur-md animate-in fade-in duration-200 overflow-y-auto"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
@@ -131,30 +131,38 @@ export default function ShasanJamaModal({ isOpen, onClose, caseItem, onSuccess =
         role="dialog"
         aria-modal="true"
         aria-labelledby="shasan-modal-title"
-        className="relative w-full max-w-xl bg-white rounded-2xl sm:rounded-3xl shadow-2xl border border-slate-200 overflow-hidden text-slate-800 my-auto max-h-[90vh] flex flex-col"
+        className="relative w-full max-w-xl bg-white rounded-3xl shadow-[0_25px_60px_-15px_rgba(15,23,42,0.3)] border border-slate-100 overflow-hidden text-slate-800 my-auto max-h-[90vh] flex flex-col animate-in zoom-in-95 duration-150"
       >
+        {/* Top Gradient Accent Strip */}
+        <div className="h-1.5 bg-gradient-to-r from-rose-600 via-amber-500 to-rose-700 shrink-0" />
+
         {/* Modal Header */}
-        <div className="px-4 sm:px-6 py-3 sm:py-3.5 bg-white border-b border-slate-200 flex items-center justify-between shrink-0">
-          <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-8 h-8 rounded-lg bg-rose-50 border border-rose-200/80 text-rose-700 flex items-center justify-center shrink-0">
-              <Scale className="w-4 h-4" aria-hidden="true" />
+        <div className="px-5 sm:px-6 py-4 bg-white border-b border-slate-100 flex items-center justify-between shrink-0">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-10 h-10 rounded-2xl bg-rose-50 border border-rose-200/80 text-rose-700 flex items-center justify-center shrink-0 shadow-2xs">
+              <Scale className="w-5 h-5" aria-hidden="true" />
             </div>
             <div className="min-w-0">
-              <h2 id="shasan-modal-title" className="text-sm sm:text-base font-bold text-slate-900 leading-tight">
-                शासन जमा अंतिम आदेश पारित करा
-              </h2>
-              <p className="text-[11px] text-slate-500 truncate mt-0.5">
-                प्रकरण क्र. <span className="font-semibold text-rose-700">{caseItem.caseNumber}</span> | MLRC १९६६ कलम ५०/५४/३६अ
+              <div className="flex items-center gap-2 flex-wrap">
+                <h2 id="shasan-modal-title" className="text-sm sm:text-base font-black text-slate-900 leading-tight">
+                  शासन जमा अंतिम आदेश पारित करा
+                </h2>
+                <span className="font-mono text-[10px] font-bold bg-rose-50 text-rose-800 px-2 py-0.5 rounded-full border border-rose-200">
+                  {caseItem.caseNumber}
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-500 truncate mt-0.5 font-medium">
+                MLRC १९६६ कलम ५० / ५४ / ३६अ शासकीय प्रत्यार्पण
               </p>
             </div>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="text-slate-400 hover:text-slate-700 hover:bg-slate-100 p-1.5 rounded-lg transition shrink-0 focus:outline-none focus:ring-2 focus:ring-rose-500"
+            className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 transition active:scale-90 flex items-center justify-center shrink-0 focus:outline-none focus:ring-2 focus:ring-rose-500 cursor-pointer"
             aria-label="संवाद बंद करा (Close dialog)"
           >
-            <X className="w-4 h-4 sm:w-5 sm:h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 
@@ -303,22 +311,25 @@ export default function ShasanJamaModal({ isOpen, onClose, caseItem, onSuccess =
             </div>
           </div>
 
-          {/* Pinned Action Buttons Footer (Never clipped on small screens) */}
-          <div className="px-4 sm:px-6 py-3 bg-slate-50 border-t border-slate-200 flex items-center justify-end gap-3 shrink-0">
+          {/* Pinned Action Buttons Footer */}
+          <div className="px-5 sm:px-6 py-4 bg-slate-50/80 backdrop-blur-sm border-t border-slate-100 flex items-center justify-end gap-2.5 shrink-0">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-xl border border-slate-300 text-xs font-bold text-slate-700 hover:bg-slate-100 transition focus:outline-none focus:ring-2 focus:ring-slate-400"
+              className="px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-100 transition active:scale-95 cursor-pointer focus:outline-none"
             >
               रद्द करा
             </button>
             <button
               type="submit"
               disabled={loading || !confirmed}
-              className="px-5 py-2 rounded-xl bg-rose-700 hover:bg-rose-800 text-white text-xs font-bold shadow-md hover:shadow-lg transition active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2"
+              className="px-5 py-2.5 rounded-xl bg-rose-700 hover:bg-rose-800 text-white text-xs font-bold shadow-sm hover:shadow transition active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 cursor-pointer focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2"
             >
               {loading ? (
-                <span>आदेश नोंदवत आहे...</span>
+                <>
+                  <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <span>आदेश नोंदवत आहे...</span>
+                </>
               ) : (
                 <>
                   <CheckCircle2 className="w-4 h-4" aria-hidden="true" />

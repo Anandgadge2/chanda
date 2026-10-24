@@ -56,19 +56,19 @@ export default function ChandrapurGisMap({
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [showLegend, setShowLegend] = useState(true);
+  const [showLegend, setShowLegend] = useState(false); // Clean and uncrowded by default
 
-  // Active Map Layer Toggles
+  // Active Map Layer Toggles - Default clean administrative cartography
   const [layers, setLayers] = useState({
     talukas: true,
-    rivers: true,
-    reservoirs: true,
-    tadoba: true,
-    industries: true,
-    mines: true,
-    forts: true,
-    heritage: true,
-    railways: true,
+    rivers: false,
+    reservoirs: false,
+    tadoba: false,
+    industries: false,
+    mines: false,
+    forts: false,
+    heritage: false,
+    railways: false,
     neighbors: true,
     labels: true,
   });
@@ -328,14 +328,14 @@ export default function ChandrapurGisMap({
   // Executive Corner Docked HUD Style:
   // If hovering on RIGHT side -> open in LEFT corner (so right map stays 100% visible)
   // If hovering on LEFT side -> open in RIGHT corner (so left map stays 100% visible)
-  const getCornerDockStyle = (cardWidth = 380) => {
+  const getCornerDockStyle = (cardWidth = 320) => {
     const isRight = isHoverOnRightSide;
     return {
-      top: '14px',
+      top: '10px',
       ...(isRight
-        ? { left: '14px', right: 'auto' }
-        : { right: '14px', left: 'auto' }),
-      maxHeight: isRight && showLegend ? 'calc(100% - 150px)' : 'calc(100% - 28px)',
+        ? { left: '10px', right: 'auto' }
+        : { right: '10px', left: 'auto' }),
+      maxHeight: 'calc(100% - 20px)',
     };
   };
 
@@ -649,14 +649,14 @@ export default function ChandrapurGisMap({
         </div>
       )}
 
-      {/* Layer Visibility Toggles Bar (Clean Light Badges) */}
-      <div className="relative z-10 bg-slate-50/80 border-b border-slate-200 px-3 py-1.5 sm:px-4 flex items-center justify-between gap-2 overflow-x-auto text-xs scrollbar-none">
-        <div className="flex items-center gap-1.5 shrink-0 text-slate-700">
+      {/* Layer Visibility Toggles Bar (Clean Light Badges - Compact) */}
+      <div className="relative z-10 bg-slate-50/90 border-b border-slate-200/80 px-3 py-1 sm:px-4 flex items-center justify-between gap-1.5 overflow-x-auto text-xs scrollbar-none">
+        <div className="flex items-center gap-1.5 shrink-0 text-slate-600">
           <Layers className="w-3.5 h-3.5 text-blue-700" />
-          <span className="font-bold text-slate-800 text-xs">नकाशा स्तर:</span>
+          <span className="font-bold text-slate-700 text-[11px]">नकाशा स्तर:</span>
         </div>
 
-        <div className="flex items-center gap-1.5 shrink-0 flex-nowrap">
+        <div className="flex items-center gap-1 shrink-0 flex-nowrap">
           <button
             onClick={() =>
               setLayers((p) => {
@@ -664,10 +664,10 @@ export default function ChandrapurGisMap({
                 return { ...p, rivers: nextVal, reservoirs: nextVal };
               })
             }
-            className={`px-2.5 py-1 rounded-md border transition cursor-pointer flex items-center gap-1.5 ${
+            className={`px-2 py-0.5 rounded text-[11px] border transition cursor-pointer flex items-center gap-1 ${
               layers.rivers || layers.reservoirs
-                ? 'bg-sky-50 border-sky-300 text-sky-900 font-bold shadow-2xs'
-                : 'bg-white border-slate-200 text-slate-400'
+                ? 'bg-sky-100 border-sky-300 text-sky-900 font-bold shadow-2xs'
+                : 'bg-white border-slate-200 text-slate-500 hover:text-slate-800'
             }`}
           >
             <Waves className="w-3 h-3 text-sky-600" />
@@ -676,10 +676,10 @@ export default function ChandrapurGisMap({
 
           <button
             onClick={() => setLayers((p) => ({ ...p, tadoba: !p.tadoba }))}
-            className={`px-2.5 py-1 rounded-md border transition cursor-pointer flex items-center gap-1.5 ${
+            className={`px-2 py-0.5 rounded text-[11px] border transition cursor-pointer flex items-center gap-1 ${
               layers.tadoba
-                ? 'bg-emerald-50 border-emerald-300 text-emerald-900 font-bold shadow-2xs'
-                : 'bg-white border-slate-200 text-slate-400'
+                ? 'bg-emerald-100 border-emerald-300 text-emerald-900 font-bold shadow-2xs'
+                : 'bg-white border-slate-200 text-slate-500 hover:text-slate-800'
             }`}
           >
             <TreePine className="w-3 h-3 text-emerald-600" />
@@ -688,10 +688,10 @@ export default function ChandrapurGisMap({
 
           <button
             onClick={() => setLayers((p) => ({ ...p, industries: !p.industries }))}
-            className={`px-2.5 py-1 rounded-md border transition cursor-pointer flex items-center gap-1.5 ${
+            className={`px-2 py-0.5 rounded text-[11px] border transition cursor-pointer flex items-center gap-1 ${
               layers.industries
-                ? 'bg-amber-50 border-amber-300 text-amber-900 font-bold shadow-2xs'
-                : 'bg-white border-slate-200 text-slate-400'
+                ? 'bg-amber-100 border-amber-300 text-amber-900 font-bold shadow-2xs'
+                : 'bg-white border-slate-200 text-slate-500 hover:text-slate-800'
             }`}
           >
             <Factory className="w-3 h-3 text-amber-600" />
@@ -700,10 +700,10 @@ export default function ChandrapurGisMap({
 
           <button
             onClick={() => setLayers((p) => ({ ...p, mines: !p.mines }))}
-            className={`px-2.5 py-1 rounded-md border transition cursor-pointer flex items-center gap-1.5 ${
+            className={`px-2 py-0.5 rounded text-[11px] border transition cursor-pointer flex items-center gap-1 ${
               layers.mines
-                ? 'bg-stone-100 border-stone-300 text-stone-900 font-bold shadow-2xs'
-                : 'bg-white border-slate-200 text-slate-400'
+                ? 'bg-stone-200 border-stone-400 text-stone-900 font-bold shadow-2xs'
+                : 'bg-white border-slate-200 text-slate-500 hover:text-slate-800'
             }`}
           >
             <Pickaxe className="w-3 h-3 text-stone-600" />
@@ -712,10 +712,10 @@ export default function ChandrapurGisMap({
 
           <button
             onClick={() => setLayers((p) => ({ ...p, forts: !p.forts }))}
-            className={`px-2.5 py-1 rounded-md border transition cursor-pointer flex items-center gap-1.5 ${
+            className={`px-2 py-0.5 rounded text-[11px] border transition cursor-pointer flex items-center gap-1 ${
               layers.forts
-                ? 'bg-rose-50 border-rose-300 text-rose-900 font-bold shadow-2xs'
-                : 'bg-white border-slate-200 text-slate-400'
+                ? 'bg-rose-100 border-rose-300 text-rose-900 font-bold shadow-2xs'
+                : 'bg-white border-slate-200 text-slate-500 hover:text-slate-800'
             }`}
           >
             <Castle className="w-3 h-3 text-rose-600" />
@@ -724,10 +724,10 @@ export default function ChandrapurGisMap({
 
           <button
             onClick={() => setLayers((p) => ({ ...p, railways: !p.railways }))}
-            className={`px-2.5 py-1 rounded-md border transition cursor-pointer flex items-center gap-1.5 ${
+            className={`px-2 py-0.5 rounded text-[11px] border transition cursor-pointer flex items-center gap-1 ${
               layers.railways
-                ? 'bg-indigo-50 border-indigo-300 text-indigo-900 font-bold shadow-2xs'
-                : 'bg-white border-slate-200 text-slate-400'
+                ? 'bg-indigo-100 border-indigo-300 text-indigo-900 font-bold shadow-2xs'
+                : 'bg-white border-slate-200 text-slate-500 hover:text-slate-800'
             }`}
           >
             <Train className="w-3 h-3 text-indigo-600" />
@@ -736,10 +736,10 @@ export default function ChandrapurGisMap({
 
           <button
             onClick={() => setShowLegend((p) => !p)}
-            className={`px-2.5 py-1 rounded-md border transition cursor-pointer flex items-center gap-1.5 ${
+            className={`px-2 py-0.5 rounded text-[11px] border transition cursor-pointer flex items-center gap-1 ${
               showLegend
-                ? 'bg-blue-50 border-blue-300 text-blue-900 font-bold shadow-2xs'
-                : 'bg-white border-slate-200 text-slate-400'
+                ? 'bg-blue-100 border-blue-300 text-blue-900 font-bold shadow-2xs'
+                : 'bg-white border-slate-200 text-slate-500 hover:text-slate-800'
             }`}
           >
             <Info className="w-3 h-3 text-blue-700" />
@@ -748,12 +748,12 @@ export default function ChandrapurGisMap({
         </div>
       </div>
 
-      {/* Main Map SVG Canvas (Bright, Crisp White Background) */}
+      {/* Main Map SVG Canvas (Compact, Clean Cartography) */}
       <div
         ref={canvasRef}
         className={`relative w-full flex items-center justify-center select-none overflow-hidden cursor-${
           isDragging ? 'grabbing' : 'grab'
-        } ${isFullscreen ? 'h-[calc(100vh-100px)]' : 'h-[520px] sm:h-[600px] lg:h-[660px]'}`}
+        } ${isFullscreen ? 'h-[calc(100vh-90px)]' : 'h-[320px] sm:h-[350px] lg:h-[380px]'}`}
         style={{
           backgroundColor: '#FFFFFF',
         }}
@@ -769,7 +769,7 @@ export default function ChandrapurGisMap({
         }}
       >
         {/* Subtle, Crisp Geographic Grid */}
-        <div className="absolute inset-0 pointer-events-none opacity-40 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:24px_24px]" />
+        <div className="absolute inset-0 pointer-events-none opacity-25 bg-[radial-gradient(#94a3b8_1px,transparent_1px)] [background-size:24px_24px]" />
 
         {/* SVG Drawing Canvas */}
         <svg
@@ -859,12 +859,12 @@ export default function ChandrapurGisMap({
                     className="transition-colors duration-150"
                   />
 
-                  {/* Headquarters Marker */}
+                  {/* Headquarters Marker - Positioned cleanly ABOVE the label */}
                   <circle
                     cx={taluka.center[0]}
-                    cy={taluka.center[1]}
-                    r={isSelected ? 3.0 : isHovered ? 2.4 : 1.6}
-                    fill={isSelected ? '#1E3A8A' : isHovered ? '#D97706' : '#1E293B'}
+                    cy={taluka.center[1] - 3.2}
+                    r={isSelected ? 2.6 : isHovered ? 2.1 : 1.5}
+                    fill={isSelected ? '#1E3A8A' : isHovered ? '#D97706' : '#334155'}
                     stroke="#FFFFFF"
                     strokeWidth={0.6}
                     opacity={getTalukaOpacity(taluka)}
@@ -874,12 +874,12 @@ export default function ChandrapurGisMap({
                   {taluka.id === 'Chandrapur' && (
                     <circle
                       cx={taluka.center[0]}
-                      cy={taluka.center[1]}
-                      r={4.2}
+                      cy={taluka.center[1] - 3.2}
+                      r={3.6}
                       fill="none"
                       stroke="#B45309"
-                      strokeWidth="0.9"
-                      strokeDasharray="1.5,1.5"
+                      strokeWidth="0.8"
+                      strokeDasharray="1.2,1.2"
                       opacity={getTalukaOpacity(taluka)}
                     />
                   )}
@@ -890,16 +890,16 @@ export default function ChandrapurGisMap({
                       {/* Primary Marathi Label */}
                       <text
                         x={taluka.center[0]}
-                        y={taluka.center[1] + (viewMode === 'risk' || viewMode === 'sdo' ? -1.8 : 2.0)}
+                        y={taluka.center[1] + (viewMode === 'risk' || viewMode === 'sdo' ? 4.2 : 4.8)}
                         textAnchor="middle"
                         fill="#0F172A"
-                        fontSize={isSelected ? '8.8' : isHovered ? '8.4' : '7.4'}
-                        fontWeight="900"
+                        fontSize={isSelected ? '7.6' : isHovered ? '7.2' : '6.5'}
+                        fontWeight="800"
                         stroke="#FFFFFF"
-                        strokeWidth="2.4"
+                        strokeWidth="1.8"
                         strokeLinejoin="round"
                         paintOrder="stroke fill"
-                        className="select-none tracking-tight font-black"
+                        className="select-none font-sans"
                       >
                         {taluka.nameMr}
                       </text>
@@ -910,25 +910,25 @@ export default function ChandrapurGisMap({
                         const vCount = vItem ? vItem.liveViolationCount : taluka.shartbhang;
                         const vRisk = getRiskCategory(vCount);
                         return (
-                          <g transform={`translate(${taluka.center[0]}, ${taluka.center[1] + 9.6})`}>
+                          <g transform={`translate(${taluka.center[0]}, ${taluka.center[1] + 10.4})`}>
                             <rect
-                              x="-14"
-                              y="-4.2"
-                              width="28"
-                              height="8.4"
-                              rx="4.2"
+                              x="-11"
+                              y="-3.2"
+                              width="22"
+                              height="6.4"
+                              rx="3.2"
                               fill={vRisk.stroke}
                               stroke="#FFFFFF"
-                              strokeWidth="0.8"
+                              strokeWidth="0.6"
                             />
                             <text
                               x="0"
-                              y="1.8"
+                              y="1.5"
                               textAnchor="middle"
                               fill="#FFFFFF"
-                              fontSize="4.5"
-                              fontWeight="900"
-                              className="select-none font-sans"
+                              fontSize="3.8"
+                              fontWeight="800"
+                              className="select-none font-mono"
                             >
                               {vCount.toLocaleString('mr-IN')}
                             </text>
@@ -941,27 +941,27 @@ export default function ChandrapurGisMap({
                         const sdo = getSdoInfo(taluka.sdoId);
                         if (!sdo) return null;
                         return (
-                          <g transform={`translate(${taluka.center[0]}, ${taluka.center[1] + 9.6})`}>
+                          <g transform={`translate(${taluka.center[0]}, ${taluka.center[1] + 10.4})`}>
                             <rect
-                              x="-17"
-                              y="-3.8"
-                              width="34"
-                              height="7.6"
-                              rx="3.8"
+                              x="-14"
+                              y="-3.0"
+                              width="28"
+                              height="6.0"
+                              rx="3.0"
                               fill="#FFFFFF"
                               stroke={sdo.border}
-                              strokeWidth="0.8"
+                              strokeWidth="0.6"
                             />
                             <text
                               x="0"
-                              y="1.7"
+                              y="1.4"
                               textAnchor="middle"
                               fill={sdo.border}
-                              fontSize="3.8"
-                              fontWeight="900"
+                              fontSize="3.3"
+                              fontWeight="800"
                               className="select-none font-bold"
                             >
-                              {sdo.shortNameMr || sdo.nameMr.replace(' उपविभाग', '')} प्रांत
+                              {sdo.shortNameMr || sdo.nameMr.replace(' उपविभाग', '')}
                             </text>
                           </g>
                         );
@@ -1031,34 +1031,30 @@ export default function ChandrapurGisMap({
             >
               <path
                 d={TADOBA_RESERVE.path}
-                fill="url(#tadoba-pattern-bright)"
-                stroke="#15803D"
-                strokeWidth="0.8"
+                fill="#22C55E"
+                fillOpacity="0.14"
+                stroke="#16A34A"
+                strokeWidth="0.7"
                 strokeDasharray="2,1.5"
               />
-              <g transform={`translate(${TADOBA_RESERVE.center[0] - 5}, ${TADOBA_RESERVE.center[1] - 5})`}>
-                <rect width="10" height="10" rx="5" fill="#15803D" stroke="#FFFFFF" strokeWidth="0.6" />
-                <text x="5" y="7" textAnchor="middle" fontSize="6">
-                  🐅
-                </text>
-              </g>
               <text
                 x={TADOBA_RESERVE.center[0]}
-                y={TADOBA_RESERVE.center[1] + 10}
+                y={TADOBA_RESERVE.center[1] + 2}
                 textAnchor="middle"
                 fill="#166534"
-                fontSize="5.2"
-                fontWeight="900"
-                style={{
-                  textShadow: '0 0 3px #FFFFFF, 0 0 5px #FFFFFF',
-                }}
+                fontSize="4.5"
+                fontWeight="800"
+                stroke="#FFFFFF"
+                strokeWidth="1.5"
+                paintOrder="stroke fill"
+                className="select-none font-sans"
               >
-                ताडोबा व्याघ्र प्रकल्प
+                🌲 ताडोबा अभयारण्य
               </text>
             </g>
           )}
 
-          {/* Layer: Major Rivers & Water Reservoirs (High-Contrast, Prominent Labels with Halos) */}
+          {/* Layer: Major Rivers & Water Reservoirs */}
           {(layers.rivers || layers.reservoirs) && (
             <g id="rivers-layer">
               {/* Rivers Layer */}
@@ -1080,25 +1076,17 @@ export default function ChandrapurGisMap({
                     }
                     onMouseLeave={() => setHoveredPoi(null)}
                   >
-                    {/* River Ambient Cyan Glow */}
-                    <path
-                      d={river.path}
-                      fill="none"
-                      stroke="#38BDF8"
-                      strokeWidth={(river.width || 1.2) + 1.8}
-                      opacity="0.5"
-                      strokeLinecap="round"
-                    />
-                    {/* Main River Stream */}
+                    {/* Main River Stream - sleek, subtle, clean cartographic line */}
                     <path
                       d={river.path}
                       fill="none"
                       stroke={river.color || '#0284C7'}
-                      strokeWidth={river.width || 1.4}
+                      strokeWidth={river.width ? Math.min(river.width, 1.0) : 0.85}
+                      strokeOpacity="0.75"
                       strokeLinecap="round"
                       strokeLinejoin="round"
                     />
-                    {/* Prominent River Labels with Crisp White Halo */}
+                    {/* River Labels - subtle, non-intrusive */}
                     {(river.labels || []).map((lbl, lidx) => (
                       <text
                         key={lidx}
@@ -1106,14 +1094,14 @@ export default function ChandrapurGisMap({
                         y={lbl.pos[1]}
                         textAnchor={lbl.anchor || 'middle'}
                         fill="#0284C7"
-                        fontSize="5.6"
-                        fontWeight="900"
+                        fontSize="4.2"
+                        fontWeight="700"
                         fontStyle="italic"
                         stroke="#FFFFFF"
-                        strokeWidth="2.4"
+                        strokeWidth="1.5"
                         strokeLinejoin="round"
                         paintOrder="stroke fill"
-                        className="select-none tracking-tight font-black"
+                        className="select-none tracking-tight pointer-events-none"
                       >
                         {lbl.text}
                       </text>
@@ -1140,50 +1128,30 @@ export default function ChandrapurGisMap({
                     }
                     onMouseLeave={() => setHoveredPoi(null)}
                   >
-                    {/* Reservoir Ambient Glow */}
-                    <ellipse
-                      cx={res.pos[0]}
-                      cy={res.pos[1]}
-                      rx={res.rx + 1.4}
-                      ry={res.ry + 1.2}
-                      fill="#38BDF8"
-                      fillOpacity="0.4"
-                    />
                     {/* Reservoir Water Body */}
                     <ellipse
                       cx={res.pos[0]}
                       cy={res.pos[1]}
-                      rx={res.rx}
-                      ry={res.ry}
-                      fill="#0284C7"
-                      fillOpacity="0.85"
-                      stroke="#FFFFFF"
-                      strokeWidth="0.8"
-                    />
-                    {/* Water Ripple Ring */}
-                    <ellipse
-                      cx={res.pos[0]}
-                      cy={res.pos[1]}
-                      rx={res.rx * 0.55}
-                      ry={res.ry * 0.55}
-                      fill="none"
-                      stroke="#BAE6FD"
+                      rx={res.rx * 0.65}
+                      ry={res.ry * 0.65}
+                      fill="#38BDF8"
+                      fillOpacity="0.7"
+                      stroke="#0284C7"
                       strokeWidth="0.5"
-                      strokeDasharray="1.5,1.5"
                     />
-                    {/* Reservoir Label (Bold, High-Contrast White Halo) */}
+                    {/* Reservoir Label */}
                     <text
                       x={res.pos[0] + (res.labelOffset?.x || 0)}
-                      y={res.pos[1] + (res.labelOffset?.y || (res.ry + 4.5))}
+                      y={res.pos[1] + (res.labelOffset?.y ? (res.labelOffset.y * 0.65) : (res.ry * 0.65 + 3.2))}
                       textAnchor={res.labelOffset?.anchor || 'middle'}
                       fill="#0369A1"
-                      fontSize="5.4"
-                      fontWeight="900"
+                      fontSize="3.6"
+                      fontWeight="700"
                       stroke="#FFFFFF"
-                      strokeWidth="2.4"
+                      strokeWidth="1.4"
                       strokeLinejoin="round"
                       paintOrder="stroke fill"
-                      className="select-none tracking-tight font-black"
+                      className="select-none tracking-tight pointer-events-none"
                     >
                       {res.nameMr}
                     </text>
@@ -1198,20 +1166,20 @@ export default function ChandrapurGisMap({
               <path
                 d={RAILWAY_ROUTE.path}
                 fill="none"
-                stroke="#334155"
-                strokeWidth="1.2"
+                stroke="#64748B"
+                strokeWidth="0.8"
                 strokeLinecap="round"
               />
               <path
                 d={RAILWAY_ROUTE.path}
                 fill="none"
                 stroke="#FFFFFF"
-                strokeWidth="0.8"
+                strokeWidth="0.5"
                 strokeDasharray="2,2"
               />
               {(RAILWAY_ROUTE.stations || []).map((st, sidx) => (
                 <g key={sidx} transform={`translate(${st.pos[0]}, ${st.pos[1]})`}>
-                  <circle r="1.4" fill="#EF4444" stroke="#FFFFFF" strokeWidth="0.4" />
+                  <circle r="1.1" fill="#EF4444" stroke="#FFFFFF" strokeWidth="0.3" />
                 </g>
               ))}
             </g>
@@ -1238,11 +1206,11 @@ export default function ChandrapurGisMap({
                   onMouseLeave={() => setHoveredPoi(null)}
                 >
                   {isPoiHovered && (
-                    <circle r="6" fill="none" stroke="#D97706" strokeWidth="0.8" opacity="0.8" />
+                    <circle r="4.2" fill="none" stroke="#D97706" strokeWidth="0.6" opacity="0.8" />
                   )}
 
                   <circle
-                    r={isPoiHovered ? 4.5 : 3.2}
+                    r={isPoiHovered ? 3.2 : 2.4}
                     fill={
                       poi.type === 'power'
                         ? '#D97706'
@@ -1257,15 +1225,15 @@ export default function ChandrapurGisMap({
                         : '#7C3AED'
                     }
                     stroke="#FFFFFF"
-                    strokeWidth="0.6"
-                    className="drop-shadow-sm"
+                    strokeWidth="0.5"
+                    className="drop-shadow-2xs"
                   />
 
                   <text
-                    y="1.2"
+                    y="0.8"
                     textAnchor="middle"
                     fill="#FFFFFF"
-                    fontSize={poi.type === 'power' ? '3.6' : '3.2'}
+                    fontSize={poi.type === 'power' ? '2.8' : '2.4'}
                     fontWeight="bold"
                     className="select-none"
                   >
@@ -1286,7 +1254,7 @@ export default function ChandrapurGisMap({
             })}
           </g>
 
-          {/* Layer: Neighboring Region & State Labels (Foreground - Always visible on top of map) */}
+          {/* Layer: Neighboring Region & State Labels */}
           {layers.neighbors && (
             <g className="neighboring-labels pointer-events-none select-none">
               {(NEIGHBORING_REGIONS || []).map((region, idx) => (
@@ -1295,14 +1263,14 @@ export default function ChandrapurGisMap({
                     x={region.pos[0]}
                     y={region.pos[1]}
                     textAnchor={region.anchor || 'middle'}
-                    fill="#334155"
-                    fontSize="6.2"
-                    fontWeight="900"
-                    letterSpacing="0.6"
-                    className="select-none uppercase font-black"
+                    fill="#64748B"
+                    fontSize="5.2"
+                    fontWeight="800"
+                    letterSpacing="0.4"
+                    className="select-none uppercase font-sans"
                     style={{
                       textShadow:
-                        '0 0 3px #FFFFFF, 0 0 6px #FFFFFF, 0 1px 2px #FFFFFF',
+                        '0 0 3px #FFFFFF, 0 0 5px #FFFFFF',
                     }}
                   >
                     {region.nameMr}
@@ -1310,13 +1278,13 @@ export default function ChandrapurGisMap({
                   {region.subText && (
                     <text
                       x={region.pos[0]}
-                      y={region.pos[1] + 5.5}
+                      y={region.pos[1] + 4.5}
                       textAnchor={region.anchor || 'middle'}
-                      fill="#64748B"
-                      fontSize="4.2"
-                      fontWeight="700"
+                      fill="#94A3B8"
+                      fontSize="3.6"
+                      fontWeight="600"
                       style={{
-                        textShadow: '0 0 3px #FFFFFF, 0 0 5px #FFFFFF',
+                        textShadow: '0 0 3px #FFFFFF',
                       }}
                     >
                       {region.subText}
@@ -1328,7 +1296,7 @@ export default function ChandrapurGisMap({
           )}
         </svg>
 
-        {/* Clean Hover HUD Tooltip (Comprehensive, Fully Readable, Zero Truncation) */}
+        {/* Clean Hover HUD Tooltip (Compact, Non-Intrusive, Fully Readable) */}
         {hoveredTaluka && !hoveredPoi && (() => {
           const item = talukaDataMap.get(hoveredTaluka.id.toLowerCase());
           const liveViolations = Number(item ? item.liveViolationCount : (hoveredTaluka.shartbhang || 0));
@@ -1341,160 +1309,160 @@ export default function ChandrapurGisMap({
 
           return (
             <div
-              className={`absolute z-40 pointer-events-none transition-all duration-200 ease-out w-[340px] sm:w-[395px] max-w-[calc(100%-28px)] ${
+              className={`absolute z-40 pointer-events-none transition-all duration-200 ease-out w-[280px] sm:w-[320px] max-w-[calc(100%-20px)] ${
                 isRight ? 'slide-in-from-left-3' : 'slide-in-from-right-3'
               }`}
-              style={getCornerDockStyle(395)}
+              style={getCornerDockStyle(320)}
             >
-              {/* Ultra-luxurious Frosted Glassmorphism Container with map shine-through */}
-              <div className="bg-white/70 backdrop-blur-2xl text-slate-900 p-3.5 sm:p-4 rounded-2xl border border-white/80 shadow-[0_20px_60px_-15px_rgba(15,23,42,0.3)] ring-1 ring-slate-900/10 overflow-y-auto max-h-[inherit]">
-                {/* Header: Taluka Name + SDO Sub-Division with Translucent Glass Sheen */}
-                <div className="bg-gradient-to-r from-blue-500/15 via-indigo-500/10 to-sky-500/15 -mx-3.5 -mt-3.5 sm:-mx-4 sm:-mt-4 p-3.5 sm:p-4 rounded-t-2xl border-b border-white/60 backdrop-blur-md mb-3">
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex items-start gap-2.5 min-w-0">
-                      <div className="w-8 h-8 rounded-lg bg-blue-900/90 text-white flex items-center justify-center shrink-0 shadow-xs mt-0.5 font-bold">
-                        <MapPin className="w-4 h-4" />
+              {/* Frosted Glassmorphism Container */}
+              <div className="bg-white/90 backdrop-blur-xl text-slate-900 p-2.5 sm:p-3 rounded-xl border border-white/90 shadow-[0_12px_36px_-10px_rgba(15,23,42,0.25)] ring-1 ring-slate-900/10 overflow-y-auto max-h-[inherit]">
+                {/* Header: Taluka Name + SDO */}
+                <div className="bg-gradient-to-r from-blue-500/15 via-indigo-500/10 to-sky-500/15 -mx-2.5 -mt-2.5 sm:-mx-3 sm:-mt-3 p-2.5 sm:p-3 rounded-t-xl border-b border-white/60 backdrop-blur-md mb-2">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <div className="w-6 h-6 rounded-md bg-blue-900 text-white flex items-center justify-center shrink-0 shadow-xs font-bold text-xs">
+                        <MapPin className="w-3.5 h-3.5" />
                       </div>
                       <div className="min-w-0">
-                        <div className="flex items-baseline gap-1.5 flex-wrap">
-                          <h3 className="text-base sm:text-lg font-black text-slate-900 leading-snug">
-                            तालुका {hoveredTaluka.nameMr}
-                          </h3>
-                        </div>
-                        <div className="mt-1 flex items-center gap-1.5 flex-wrap">
-                          <span className="inline-flex items-center gap-1 text-xs font-bold text-indigo-900 bg-white/75 backdrop-blur-sm border border-indigo-200/80 px-2 py-0.5 rounded-md shadow-2xs">
-                            <Landmark className="w-3 h-3 text-indigo-700" />
-                            <span>{hoveredTaluka.sdoSubdivision}</span>
-                          </span>
-                        </div>
+                        <h3 className="text-sm sm:text-base font-black text-slate-900 leading-tight">
+                          तालुका {hoveredTaluka.nameMr}
+                        </h3>
+                        <span className="text-[10px] font-bold text-indigo-900">
+                          {hoveredTaluka.sdoSubdivision}
+                        </span>
                       </div>
                     </div>
-                    <span className="text-xs px-2.5 py-1 rounded-full bg-blue-50/80 backdrop-blur-sm text-blue-950 border border-blue-200/80 font-bold shrink-0 shadow-2xs whitespace-nowrap">
-                      {hoveredTaluka.villagesCount} महसूल गावे
+                    <span className="text-[11px] px-2 py-0.5 rounded-full bg-blue-50 text-blue-950 border border-blue-200 font-bold shrink-0">
+                      {hoveredTaluka.villagesCount} गावे
                     </span>
-                  </div>
-
-                  <div className="text-[11px] text-slate-600 font-semibold mt-2 flex items-center gap-1.5 break-words">
-                    <span className="text-slate-500">🏛️</span>
-                    <span>{hoveredTaluka.tehsildarOffice}</span>
                   </div>
                 </div>
 
                 {/* Mode-Specific Contextual Alert Banner */}
                 {viewMode === 'risk' && (
-                  <div className={`p-2.5 rounded-xl border mb-2.5 backdrop-blur-sm ${risk.badgeBg} ${risk.badgeText}`}>
-                    <div className="flex items-center justify-between gap-2 mb-1">
-                      <span className="font-black text-xs flex items-center gap-1.5">
-                        <span className="text-sm">{risk.icon}</span>
-                        <span>{risk.fullLabelMr}</span>
+                  <div className={`p-2 rounded-lg border mb-2 backdrop-blur-sm ${risk.badgeBg} ${risk.badgeText}`}>
+                    <div className="flex items-center justify-between gap-1 mb-0.5">
+                      <span className="font-bold text-[11px] flex items-center gap-1">
+                        <span>{risk.icon}</span>
+                        <span>{risk.labelMr}</span>
                       </span>
-                      <span className="text-xs font-black font-mono">
-                        {liveViolations.toLocaleString('mr-IN')} प्रकरणे
+                      <span className="text-[11px] font-black font-mono">
+                        {liveViolations.toLocaleString('mr-IN')}
                       </span>
                     </div>
-                    <p className="text-[11px] leading-relaxed break-words font-medium opacity-90">
+                    <p className="text-[10px] leading-tight font-medium opacity-90">
                       {risk.guidanceMr}
                     </p>
                   </div>
                 )}
 
                 {viewMode === 'sdo' && sdo && (
-                  <div className="p-2.5 rounded-xl border mb-2.5 bg-indigo-50/80 backdrop-blur-sm border-indigo-200 text-indigo-950">
-                    <div className="flex items-center justify-between gap-2 mb-1">
-                      <span className="font-black text-xs flex items-center gap-1.5">
-                        <Landmark className="w-3.5 h-3.5 text-indigo-700" />
-                        <span>{sdo.nameMr} (SDO Jurisdiction)</span>
+                  <div className="p-2 rounded-lg border mb-2 bg-indigo-50/80 border-indigo-200 text-indigo-950">
+                    <div className="flex items-center justify-between gap-1">
+                      <span className="font-bold text-[11px] flex items-center gap-1">
+                        <Landmark className="w-3 h-3 text-indigo-700" />
+                        <span>{sdo.nameMr}</span>
                       </span>
-                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-white/70 text-indigo-900 border border-indigo-200">
+                      <span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-white text-indigo-900 border border-indigo-200">
                         प्रांत कार्यालय
                       </span>
                     </div>
-                    <p className="text-[11px] leading-tight text-indigo-900/90 break-words font-medium">
-                      सक्षम अधिकारी: {sdo.sdoOfficer}
-                    </p>
-                    <p className="text-[10px] text-indigo-800/80 mt-1">
-                      या उपविभागातील तालुके: {sdo.talukas.join(', ')}
+                    <p className="text-[10px] text-indigo-900/90 mt-0.5 font-medium">
+                      {sdo.sdoOfficer}
                     </p>
                   </div>
                 )}
 
-                {/* Live Revenue Statistics Grid with Frosted Glass Tiles */}
-                <div className="grid grid-cols-2 gap-2 text-xs mb-2.5">
-                  <div className="bg-blue-50/70 backdrop-blur-sm border border-blue-200/80 p-2 rounded-xl shadow-2xs">
-                    <span className="text-blue-900/80 text-[11px] block font-semibold">नोंदणीकृत ७/१२ भूखंड:</span>
-                    <span className="font-black text-slate-900 text-sm sm:text-base">
+                {/* Live Revenue Statistics Grid */}
+                <div className="grid grid-cols-2 gap-1.5 text-xs mb-2">
+                  <div className="bg-blue-50/70 border border-blue-200/80 p-1.5 rounded-lg">
+                    <span className="text-blue-900 text-[10px] block font-semibold">७/१२ भूखंड:</span>
+                    <span className="font-black text-slate-900 text-xs sm:text-sm">
                       {liveParcels.toLocaleString('mr-IN')}
                     </span>
                   </div>
-                  <div className={`p-2 rounded-xl border backdrop-blur-sm shadow-2xs ${viewMode === 'risk' ? risk.badgeBg : 'bg-amber-50/70 border-amber-200/80'}`}>
-                    <span className="text-amber-900 text-[11px] block font-bold">शर्तभंग चौकशी:</span>
-                    <span className="font-black text-amber-900 text-sm sm:text-base">
-                      {liveViolations.toLocaleString('mr-IN')} प्रकरणे
+                  <div className={`p-1.5 rounded-lg border ${viewMode === 'risk' ? risk.badgeBg : 'bg-amber-50/70 border-amber-200/80'}`}>
+                    <span className="text-amber-900 text-[10px] block font-bold">शर्तभंग:</span>
+                    <span className="font-black text-amber-900 text-xs sm:text-sm">
+                      {liveViolations.toLocaleString('mr-IN')}
                     </span>
                   </div>
-                  <div className="bg-rose-50/70 backdrop-blur-sm border border-rose-200/80 p-2 rounded-xl shadow-2xs">
-                    <span className="text-rose-900 text-[11px] block font-semibold">शासकीय जमीन / वाद:</span>
-                    <span className="font-black text-rose-800 text-sm sm:text-base">
+                  <div className="bg-rose-50/70 border border-rose-200/80 p-1.5 rounded-lg">
+                    <span className="text-rose-900 text-[10px] block font-semibold">शासकीय जमीन:</span>
+                    <span className="font-black text-rose-800 text-xs sm:text-sm">
                       {liveGovtLand.toLocaleString('mr-IN')} गट
                     </span>
                   </div>
-                  <div className="bg-emerald-50/70 backdrop-blur-sm border border-emerald-200/80 p-2 rounded-xl shadow-2xs">
-                    <span className="text-emerald-900 text-[11px] block font-semibold">एकूण भौगोलिक क्षेत्र:</span>
-                    <span className="font-black text-emerald-800 text-sm sm:text-base">
-                      {liveArea.toLocaleString('mr-IN', { maximumFractionDigits: 1 })} Ha
+                  <div className="bg-emerald-50/70 border border-emerald-200/80 p-1.5 rounded-lg">
+                    <span className="text-emerald-900 text-[10px] block font-semibold">एकूण क्षेत्र:</span>
+                    <span className="font-black text-emerald-800 text-xs sm:text-sm">
+                      {Math.round(liveArea).toLocaleString('mr-IN')} Ha
                     </span>
                   </div>
                 </div>
 
-                {/* Features (Full Text without Truncation) */}
-                <div className="bg-white/60 backdrop-blur-sm rounded-xl p-2.5 border border-white/80 mb-2 shadow-2xs">
-                  <p className="text-xs text-slate-700 leading-relaxed break-words">
+                {/* Features */}
+                <div className="bg-slate-50/70 rounded-lg p-1.5 border border-slate-200/60 mb-1.5">
+                  <p className="text-[10px] text-slate-700 leading-snug">
                     <span className="text-slate-900 font-bold">वैशिष्ट्ये: </span>
                     {hoveredTaluka.keyHighlights}
                   </p>
                 </div>
 
-                {/* Rivers List */}
-                {hoveredTaluka.rivers?.length > 0 && (
-                  <div className="text-xs text-sky-900 font-semibold flex items-center gap-1.5 mb-2 px-1 break-words">
-                    <Waves className="w-3.5 h-3.5 shrink-0 text-sky-600" />
-                    <span className="text-slate-700 font-bold">प्रमुख नद्या:</span>
-                    <span className="text-sky-800">{hoveredTaluka.rivers.join(', ')}</span>
-                  </div>
-                )}
-
                 {/* Action Hint */}
-                <div className="text-xs text-slate-500 text-center pt-2 border-t border-slate-200/60 flex items-center justify-center gap-1.5 font-semibold">
-                  <Sparkles className="w-3.5 h-3.5 text-amber-600" />
-                  <span>क्लिक करून डॅशबोर्ड डेटा फिल्टर करा</span>
+                <div className="text-[10px] text-slate-500 text-center pt-1 border-t border-slate-200/60 flex items-center justify-center gap-1 font-semibold">
+                  <Sparkles className="w-3 h-3 text-amber-600" />
+                  <span>क्लिक करून डेटा फिल्टर करा</span>
                 </div>
               </div>
             </div>
           );
         })()}
 
-        {/* Floating Tooltip for POIs with Smart Placement and Glass Effect */}
+        {/* Floating Tooltip for POIs with Smart Placement */}
         {hoveredPoi && (
           <div
-            className={`absolute z-40 pointer-events-none transition-all duration-200 ease-out w-[270px] sm:w-[320px] max-w-[calc(100%-24px)] ${
+            className={`absolute z-40 pointer-events-none transition-all duration-200 ease-out w-[250px] sm:w-[280px] max-w-[calc(100%-20px)] ${
               isHoverOnRightSide ? 'slide-in-from-left-3' : 'slide-in-from-right-3'
             }`}
-            style={getCornerDockStyle(320)}
+            style={getCornerDockStyle(280)}
           >
-            <div className="bg-white/75 backdrop-blur-2xl text-slate-900 p-3 sm:p-4 rounded-2xl border border-white/80 shadow-[0_20px_60px_-15px_rgba(15,23,42,0.3)] ring-1 ring-slate-900/10">
-              <div className="flex items-center gap-2 mb-1.5 font-bold">
-                <span className="text-blue-600 text-base">📍</span>
-                <span className="text-slate-900 text-sm sm:text-base font-black">{hoveredPoi.nameMr}</span>
+            <div className="bg-white/90 backdrop-blur-xl text-slate-900 p-2.5 sm:p-3 rounded-xl border border-white/90 shadow-[0_12px_36px_-10px_rgba(15,23,42,0.25)] ring-1 ring-slate-900/10">
+              <div className="flex items-center gap-1.5 mb-1 font-bold">
+                <span className="text-blue-600 text-sm">📍</span>
+                <span className="text-slate-900 text-xs sm:text-sm font-black">{hoveredPoi.nameMr}</span>
               </div>
-              <div className="text-xs text-blue-900 font-bold mb-1.5 bg-blue-50/70 border border-blue-200/70 px-2 py-0.5 rounded-md inline-block shadow-2xs">
+              <div className="text-[10px] text-blue-900 font-bold mb-1 bg-blue-50 border border-blue-200 px-1.5 py-0.2 rounded inline-block">
                 {hoveredPoi.badge} {hoveredPoi.taluka ? `• ${hoveredPoi.taluka}` : ''}
               </div>
               {hoveredPoi.description && (
-                <p className="text-xs text-slate-700 leading-relaxed font-medium break-words mt-1">
+                <p className="text-[10px] text-slate-700 leading-relaxed font-medium mt-0.5">
                   {hoveredPoi.description}
                 </p>
               )}
             </div>
+          </div>
+        )}
+
+        {/* Dynamic Mini Risk Bar in Heatmap Mode */}
+        {viewMode === 'risk' && !showLegend && (
+          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-20 bg-white/90 backdrop-blur-md border border-slate-200/90 px-3 py-1 rounded-full shadow-xs flex items-center gap-2.5 text-[11px] font-bold pointer-events-none select-none">
+            <span className="flex items-center gap-1 text-rose-900">
+              <span className="w-2 h-2 rounded-full bg-rose-200 border border-rose-600 inline-block" />
+              <span>अती-गंभीर (२५०+)</span>
+            </span>
+            <span className="flex items-center gap-1 text-orange-900">
+              <span className="w-2 h-2 rounded-full bg-orange-100 border border-orange-600 inline-block" />
+              <span>उच्च (५१-२५०)</span>
+            </span>
+            <span className="flex items-center gap-1 text-amber-900">
+              <span className="w-2 h-2 rounded-full bg-yellow-100 border border-yellow-600 inline-block" />
+              <span>मध्यम (१५-५०)</span>
+            </span>
+            <span className="flex items-center gap-1 text-emerald-900">
+              <span className="w-2 h-2 rounded-full bg-emerald-100 border border-emerald-600 inline-block" />
+              <span>कमी (०-१४)</span>
+            </span>
           </div>
         )}
 

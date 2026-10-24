@@ -53,44 +53,47 @@ export default function RevenueGlossaryPage() {
   }, [searchQuery, selectedCategory]);
 
   return (
-    <div className="w-full space-y-3.5 sm:space-y-4">
-      {/* Sleek, Low-Profile Compact Header */}
-      <div className="bg-white border border-slate-200 rounded-xl px-4 py-3 shadow-2xs flex flex-col md:flex-row justify-between items-start md:items-center gap-2.5">
-        <div className="flex items-center gap-3">
-          <div className="p-1 rounded-xl bg-white border border-slate-200 shadow-2xs shrink-0">
-            <ChandrapurDistrictLogo className="w-8 h-8" />
+    <div className="w-full space-y-2.5 sm:space-y-3">
+      {/* Executive Command Hero Header - Pro Compact */}
+      <div className="bg-gradient-to-r from-sky-50/80 via-blue-50/40 to-white text-slate-900 rounded-xl px-3.5 py-2 sm:py-2.5 shadow-2xs border border-sky-200/80 flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div className="p-1 rounded-lg bg-white border border-slate-200 shadow-2xs shrink-0">
+            <ChandrapurDistrictLogo className="w-7 h-7" />
           </div>
-          <div>
+          <div className="min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="text-base sm:text-lg font-black text-slate-900 leading-tight tracking-tight">
+              <h1 className="text-sm sm:text-base font-extrabold text-slate-900 tracking-tight leading-tight truncate">
                 जमीन महसूल शब्दावली व संक्षिप्त रूपे (Glossary)
               </h1>
-              <span className="text-[10px] font-bold bg-amber-100 text-amber-950 px-2 py-0.5 rounded border border-amber-300">
+              <span className="text-[10px] font-extrabold uppercase tracking-wider bg-amber-500 text-slate-950 px-2 py-0.5 rounded-full shadow-2xs">
                 MLRC १९६६
               </span>
+              <span className="hidden md:inline text-[11px] text-slate-500 font-medium">
+                • ७/१२ उतारा, फेरफार नोंदवही (नमुना ६) संक्षिप्त शब्द व कलमे
+              </span>
             </div>
-            <p className="text-xs text-slate-500 mt-0.5 max-w-2xl">
-              गाव नमुना ७/१२ उतारा, फेरफार नोंदवही (गाव नमुना ६) व मिळकत पत्रिकेतील संक्षिप्त शब्द व कायदेशीर कलमे
+            <p className="text-[11px] text-slate-500 md:hidden truncate font-medium">
+              ७/१२ उतारा, फेरफार नोंदवही (नमुना ६) संक्षिप्त शब्द व कलमे
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2 shrink-0 self-end md:self-auto flex-wrap">
+        <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto flex-wrap">
           <button
             type="button"
             onClick={() => window.print()}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-slate-300 rounded-lg text-xs font-bold text-slate-700 bg-white hover:bg-slate-50 shadow-2xs transition active:scale-95"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-slate-50 border border-slate-300 rounded-lg text-xs font-bold text-slate-700 hover:text-slate-950 shadow-2xs transition active:scale-95 cursor-pointer"
             title="शब्दावली अहवाल मुद्रित करा"
           >
-            <Printer className="w-3.5 h-3.5 text-slate-500" />
+            <Printer className="w-3.5 h-3.5 text-slate-700" />
             <span className="hidden sm:inline">प्रत मुद्रित करा</span>
             <span className="sm:hidden">Print</span>
           </button>
           <Link
             href={user ? '/dashboard' : '/'}
-            className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-950 hover:text-blue-800 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-lg transition shadow-2xs active:scale-95"
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-950 bg-amber-400 hover:bg-amber-300 px-3 py-1.5 rounded-lg transition shadow-2xs active:scale-95 cursor-pointer"
           >
-            <ArrowLeft className="w-3.5 h-3.5" />
+            <ArrowLeft className="w-3.5 h-3.5 text-slate-950 stroke-[2.5]" />
             <span>{user ? 'महसूल डॅशबोर्ड' : 'मुख्य पृष्ठ'}</span>
           </Link>
         </div>
@@ -163,44 +166,48 @@ export default function RevenueGlossaryPage() {
         </div>
       </div>
 
-      {/* Quick Statistics Bar - Stretches Full Width */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-3">
-        <div className="bg-white border border-slate-200 rounded-xl p-3.5 shadow-2xs text-center">
-          <span className="text-xl sm:text-2xl font-black text-amber-600 font-mono">
+      {/* Quick Statistics Bar - Modern Metric Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+        <div className="bg-white/95 backdrop-blur-md border border-slate-200/80 rounded-2xl p-4 shadow-sm text-center relative overflow-hidden transition-all hover:-translate-y-1 hover:shadow-md group">
+          <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-amber-400 to-amber-600" />
+          <span className="text-xl sm:text-2xl font-black text-amber-600 font-mono tracking-tight block">
             {REVENUE_SHORTCUTS.length}
           </span>
-          <p className="text-[11px] text-slate-500 font-bold mt-0.5">
+          <p className="text-[11px] text-slate-600 font-bold mt-1">
             एकूण संक्षिप्त रूपे (Shortcuts)
           </p>
         </div>
-        <div className="bg-white border border-slate-200 rounded-xl p-3.5 shadow-2xs text-center">
-          <span className="text-xl sm:text-2xl font-black text-blue-900 font-mono">
+        <div className="bg-white/95 backdrop-blur-md border border-slate-200/80 rounded-2xl p-4 shadow-sm text-center relative overflow-hidden transition-all hover:-translate-y-1 hover:shadow-md group">
+          <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-blue-500 to-indigo-600" />
+          <span className="text-xl sm:text-2xl font-black text-blue-900 font-mono tracking-tight block">
             {REVENUE_GLOSSARY_CATEGORIES.length - 1}
           </span>
-          <p className="text-[11px] text-slate-500 font-bold mt-0.5">
+          <p className="text-[11px] text-slate-600 font-bold mt-1">
             विषय वर्गवारी (Categories)
           </p>
         </div>
-        <div className="bg-white border border-slate-200 rounded-xl p-3.5 shadow-2xs text-center">
-          <span className="text-base sm:text-lg font-black text-emerald-700">
+        <div className="bg-white/95 backdrop-blur-md border border-slate-200/80 rounded-2xl p-4 shadow-sm text-center relative overflow-hidden transition-all hover:-translate-y-1 hover:shadow-md group">
+          <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-600" />
+          <span className="text-base sm:text-lg font-black text-emerald-700 tracking-tight block">
             MLRC 1966
           </span>
-          <p className="text-[11px] text-slate-500 font-bold mt-0.5">
+          <p className="text-[11px] text-slate-600 font-bold mt-1">
             वैधानिक संहिता व कलमे
           </p>
         </div>
-        <div className="bg-white border border-slate-200 rounded-xl p-3.5 shadow-2xs text-center">
-          <span className="text-base sm:text-lg font-black text-purple-800">
+        <div className="bg-white/95 backdrop-blur-md border border-slate-200/80 rounded-2xl p-4 shadow-sm text-center relative overflow-hidden transition-all hover:-translate-y-1 hover:shadow-md group">
+          <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-purple-500 to-fuchsia-600" />
+          <span className="text-base sm:text-lg font-black text-purple-900 tracking-tight block">
             १५ तालुके
           </span>
-          <p className="text-[11px] text-slate-500 font-bold mt-0.5">
+          <p className="text-[11px] text-slate-600 font-bold mt-1">
             चंद्रपूर जिल्हा कार्यक्षेत्र
           </p>
         </div>
       </div>
 
-      {/* Filter & Live Search Bar */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-5 shadow-xs space-y-3">
+      {/* Filter & Live Search Command Bar */}
+      <div className="bg-white/90 backdrop-blur-md border border-slate-200/80 rounded-2xl p-4 sm:p-5 shadow-sm space-y-3.5">
         <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
           <div className="relative flex-1">
             <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
@@ -209,7 +216,7 @@ export default function RevenueGlossaryPage() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="संक्षिप्त रूप, पूर्ण रूप, इंग्रजी शब्द किंवा कलम शोधा... (उदा. अ.कृ., विनापरवानगी, ख.ख., भो.व., बो., फे.नं., NA)"
-              className="w-full pl-10 pr-10 py-2.5 text-xs sm:text-sm bg-slate-50/70 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-900/30 focus:border-blue-900 shadow-2xs font-medium"
+              className="w-full pl-10 pr-10 py-2.5 text-xs sm:text-sm bg-slate-50/70 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-all font-medium"
             />
             {searchQuery && (
               <button

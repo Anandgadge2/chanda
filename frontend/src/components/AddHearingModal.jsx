@@ -73,7 +73,7 @@ export default function AddHearingModal({ isOpen, onClose, caseItem, onHearingAd
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center p-2.5 sm:p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-150 overflow-y-auto"
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/70 backdrop-blur-md p-3 sm:p-4 animate-in fade-in duration-200 overflow-y-auto"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
@@ -83,44 +83,52 @@ export default function AddHearingModal({ isOpen, onClose, caseItem, onHearingAd
         role="dialog"
         aria-modal="true"
         aria-labelledby="hearing-modal-title"
-        className="bg-white rounded-2xl shadow-2xl border border-slate-200 max-w-lg w-full max-h-[90vh] flex flex-col overflow-hidden my-auto"
+        className="bg-white rounded-3xl shadow-[0_25px_60px_-15px_rgba(15,23,42,0.3)] border border-slate-100 max-w-lg w-full max-h-[90vh] flex flex-col overflow-hidden my-auto relative animate-in zoom-in-95 duration-150"
       >
+        {/* Top Gradient Accent Strip */}
+        <div className="h-1.5 bg-gradient-to-r from-amber-500 via-blue-600 to-indigo-600 shrink-0" />
+
         {/* Modal Header */}
-        <div className="px-4 sm:px-6 py-3 sm:py-3.5 bg-white border-b border-slate-200 flex justify-between items-center shrink-0">
-          <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-8 h-8 rounded-lg bg-amber-50 border border-amber-200/80 flex items-center justify-center shrink-0 text-amber-700">
-              <Scale className="w-4 h-4" aria-hidden="true" />
+        <div className="px-5 sm:px-6 py-4 bg-white border-b border-slate-100 flex justify-between items-center shrink-0">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-10 h-10 rounded-2xl bg-amber-50 border border-amber-200/80 flex items-center justify-center shrink-0 text-amber-700 shadow-2xs">
+              <Scale className="w-5 h-5" aria-hidden="true" />
             </div>
             <div className="min-w-0">
-              <h2 id="hearing-modal-title" className="text-sm sm:text-base font-bold text-slate-900 leading-tight">
-                सुनावणी इतिवृत्त नोंद
-              </h2>
-              <p className="text-[11px] text-slate-500 truncate mt-0.5">
-                केस क्र.: <span className="font-semibold text-slate-700">{caseItem.caseNumber}</span> {caseItem.parcel?.villageName ? `(${caseItem.parcel.villageName})` : ''}
+              <div className="flex items-center gap-2 flex-wrap">
+                <h2 id="hearing-modal-title" className="text-sm sm:text-base font-black text-slate-900 leading-tight">
+                  सुनावणी इतिवृत्त नोंद
+                </h2>
+                <span className="font-mono text-[10px] font-bold bg-slate-100 text-slate-800 px-2 py-0.5 rounded-full border border-slate-200">
+                  {caseItem.caseNumber}
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-500 truncate mt-0.5 font-medium">
+                {caseItem.parcel?.villageName ? `गाव: ${caseItem.parcel.villageName} • ` : ''}MLRC १९६६ अर्ध-न्यायिक सुनावणी
               </p>
             </div>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="text-slate-400 hover:text-slate-700 hover:bg-slate-100 p-1.5 rounded-lg transition shrink-0 focus:outline-none focus:ring-2 focus:ring-amber-500"
+            className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 transition active:scale-90 flex items-center justify-center shrink-0 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
             aria-label="संवाद बंद करा (Close dialog)"
           >
-            <X className="w-4 h-4 sm:w-5 sm:h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Form with Scrollable Body and Pinned Footer */}
         <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-hidden min-h-0">
-          <div className="p-4 sm:p-6 space-y-3.5 sm:space-y-4 overflow-y-auto flex-1">
+          <div className="p-5 sm:p-6 space-y-4 overflow-y-auto flex-1">
             {statusMsg.text && (
               <div
                 role={statusMsg.type === 'error' ? 'alert' : 'status'}
                 aria-live={statusMsg.type === 'error' ? 'assertive' : 'polite'}
-                className={`p-3 rounded-lg text-xs flex items-center gap-2 ${
+                className={`p-3.5 rounded-2xl text-xs flex items-center gap-2.5 font-medium ${
                   statusMsg.type === 'success'
-                    ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
-                    : 'bg-rose-50 text-rose-800 border border-rose-200'
+                    ? 'bg-emerald-50 text-emerald-900 border border-emerald-200'
+                    : 'bg-rose-50 text-rose-900 border border-rose-200'
                 }`}
               >
                 {statusMsg.type === 'success' ? (
@@ -132,32 +140,38 @@ export default function AddHearingModal({ isOpen, onClose, caseItem, onHearingAd
               </div>
             )}
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
               <div>
-                <label htmlFor="hearing-date" className="text-xs font-semibold text-slate-700 block">सुनावणी दिनांक</label>
+                <label htmlFor="hearing-date" className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1">
+                  सुनावणी दिनांक <span className="text-rose-500">*</span>
+                </label>
                 <input
                   id="hearing-date"
                   type="date"
                   value={hearingDate}
                   onChange={(e) => setHearingDate(e.target.value)}
-                  className="w-full border border-slate-300 rounded-lg p-2 text-xs mt-1 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                  className="w-full border border-slate-200 rounded-xl p-2.5 text-xs bg-slate-50/60 hover:bg-white focus:bg-white focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-all font-medium focus:outline-none"
                   required
                 />
               </div>
               <div>
-                <label htmlFor="hearing-next-date" className="text-xs font-semibold text-slate-700 block">पुढील सुनावणी दिनांक (ऐच्छिक)</label>
+                <label htmlFor="hearing-next-date" className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1">
+                  पुढील तारीख (ऐच्छिक)
+                </label>
                 <input
                   id="hearing-next-date"
                   type="date"
                   value={nextHearingDate}
                   onChange={(e) => setNextHearingDate(e.target.value)}
-                  className="w-full border border-slate-300 rounded-lg p-2 text-xs mt-1 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                  className="w-full border border-slate-200 rounded-xl p-2.5 text-xs bg-slate-50/60 hover:bg-white focus:bg-white focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-all font-medium focus:outline-none"
                 />
               </div>
             </div>
 
             <div>
-              <label className="text-xs font-semibold text-slate-700 block mb-1">सुनावणी प्राधिकारी</label>
+              <label className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1">
+                सुनावणी सक्षम प्राधिकारी <span className="text-rose-500">*</span>
+              </label>
               <SearchableSelect
                 options={[
                   { value: 'Sub-Divisional Officer (SDO) Warora', label: 'उपविभागीय अधिकारी (SDO) वरोरा' },
@@ -177,7 +191,7 @@ export default function AddHearingModal({ isOpen, onClose, caseItem, onHearingAd
             </div>
 
             <div>
-              <label htmlFor="hearing-proceedings" className="text-xs font-semibold text-slate-700 block">
+              <label htmlFor="hearing-proceedings" className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1">
                 सुनावणी इतिवृत्त व आदेश शेरा <span className="text-rose-500">*</span>
               </label>
               <textarea
@@ -185,7 +199,7 @@ export default function AddHearingModal({ isOpen, onClose, caseItem, onHearingAd
                 rows={4}
                 value={proceedingsLog}
                 onChange={(e) => setProceedingsLog(e.target.value)}
-                className="w-full border border-slate-300 rounded-lg p-2.5 text-xs mt-1 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                className="w-full border border-slate-200 rounded-xl p-3 text-xs bg-slate-50/60 hover:bg-white focus:bg-white focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-all font-medium focus:outline-none leading-relaxed"
                 placeholder="उदा. उभय पक्षांचा युक्तिवाद ऐकला. संबंधित तलाठी यांनी मूळ सनद फेरफार प्रत सादर करण्याचे निर्देश दिले."
                 required
               />
@@ -193,20 +207,27 @@ export default function AddHearingModal({ isOpen, onClose, caseItem, onHearingAd
           </div>
 
           {/* Pinned Action Buttons Footer */}
-          <div className="px-4 sm:px-6 py-3 bg-slate-50 border-t border-slate-200 flex items-center justify-end gap-3 shrink-0">
+          <div className="px-5 sm:px-6 py-4 bg-slate-50/80 backdrop-blur-sm border-t border-slate-100 flex items-center justify-end gap-2.5 shrink-0">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 border border-slate-300 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-100 transition focus:outline-none focus:ring-2 focus:ring-slate-400"
+              className="px-4 py-2.5 border border-slate-200 hover:bg-slate-100 text-slate-700 font-bold rounded-xl text-xs transition active:scale-95 cursor-pointer focus:outline-none"
             >
               रद्द करा
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="px-5 py-2 bg-blue-900 hover:bg-blue-800 text-white font-semibold rounded-xl text-xs shadow-sm transition disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              className="px-5 py-2.5 bg-blue-950 hover:bg-blue-900 text-white font-bold rounded-xl text-xs shadow-sm hover:shadow transition disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer active:scale-95 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
             >
-              {loading ? 'नोंद होत आहे...' : 'इतिवृत्त सेव्ह करा'}
+              {loading ? (
+                <>
+                  <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <span>नोंद होत आहे...</span>
+                </>
+              ) : (
+                <span>इतिवृत्त सेव्ह करा</span>
+              )}
             </button>
           </div>
         </form>

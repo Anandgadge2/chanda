@@ -126,7 +126,7 @@ export default function SearchableSelect({
   return (
     <div
       ref={containerRef}
-      className={`relative inline-block w-full ${className}`}
+      className={`relative inline-block w-full ${className} ${isOpen ? 'z-50' : ''}`}
       onKeyDown={handleKeyDown}
     >
       {/* Trigger Button */}
@@ -161,8 +161,8 @@ export default function SearchableSelect({
       {/* Floating Dropdown Popover */}
       {isOpen && (
         <div
-          className={`absolute ${dropdownAlign === 'right' ? 'right-0' : 'left-0'} mt-1.5 w-full min-w-[220px] max-w-[340px] bg-white border border-slate-200 rounded-xl shadow-xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-100 ${dropdownClassName}`}
-          style={{ maxHeight: '340px' }}
+          className={`absolute ${dropdownAlign === 'right' ? 'right-0' : 'left-0'} mt-1.5 w-full min-w-[230px] sm:min-w-[260px] max-w-[340px] bg-white border border-slate-200/90 rounded-xl shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-100 ${dropdownClassName}`}
+          style={{ maxHeight: '360px' }}
         >
           {/* Sticky Search Input Box */}
           <div className="p-2 border-b border-slate-100 bg-slate-50/90 sticky top-0 z-10 backdrop-blur-xs">

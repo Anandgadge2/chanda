@@ -64,6 +64,11 @@ html.font-xl {
 body {
   font-family: 'Nirmala UI', 'Noto Sans Devanagari', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   background-color: #f8fafc;
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(224, 231, 255, 0.4) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(254, 243, 199, 0.3) 0px, transparent 45%),
+    radial-gradient(at 50% 100%, rgba(241, 245, 249, 0.6) 0px, transparent 55%);
+  background-attachment: fixed;
   color: #0f172a;
   min-height: 100vh;
   overflow-x: clip;
@@ -83,7 +88,7 @@ body {
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #f1f5f9;
+  background: transparent;
 }
 ::-webkit-scrollbar-thumb {
   background: #cbd5e1;
@@ -93,20 +98,32 @@ body {
   background: #94a3b8;
 }
 
-/* Glassmorphism Cards */
+/* Modern Glass & Surface Utilities */
 .glass-panel {
-  background: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(12px);
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(16px);
   border: 1px solid rgba(226, 232, 240, 0.8);
-  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05);
+  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.04);
 }
 
 .glass-card-hover {
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .glass-card-hover:hover {
   transform: translateY(-2px);
-  box-shadow: 0 10px 25px -3px rgba(15, 23, 42, 0.08), 0 4px 6px -4px rgba(15, 23, 42, 0.04);
+  box-shadow: 0 12px 30px -4px rgba(15, 23, 42, 0.08), 0 4px 8px -2px rgba(15, 23, 42, 0.03);
+}
+
+.modern-card-shadow {
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 4px 16px -2px rgba(15, 23, 42, 0.04);
+}
+
+.modern-card-hover {
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.modern-card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px -4px rgba(15, 23, 42, 0.08);
 }
 
 /* Slick Carousel Enhancements for Taluka Slider */
@@ -183,106 +200,22 @@ body {
   border-radius: 9999px !important;
 }
 
-/* Center Mode Banner Carousel (No outer frame, clean slide scaling) */
-.banner-center-slider {
-  position: relative;
+/* Modern Government Flagship Banner Styles */
+@keyframes heroSlideProgress {
+  0% {
+    width: 0%;
+  }
+  100% {
+    width: 100%;
+  }
 }
 
-.banner-center-slider .slick-list {
-  padding-top: 4px !important;
-  padding-bottom: 16px !important;
+.animate-hero-progress {
+  animation: heroSlideProgress 6s linear infinite;
 }
 
-.banner-center-slider .slick-track {
-  display: flex !important;
-  align-items: center !important;
-}
-
-.banner-center-slider .slick-slide {
-  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-  padding: 0 3px;
-  opacity: 0.6;
-  transform: scaleY(0.94) scaleX(0.985);
-  filter: brightness(0.8);
-  cursor: pointer;
-}
-
-.banner-center-slider .slick-slide:not(.slick-center):hover {
-  opacity: 0.85;
-  filter: brightness(0.95);
-  transform: scaleY(0.96) scaleX(0.99);
-}
-
-.banner-center-slider .slick-slide.slick-center {
-  opacity: 1 !important;
-  transform: scale(1) !important;
-  filter: brightness(1) !important;
-  z-index: 20 !important;
-  cursor: default;
-}
-
-.banner-center-slider .slick-slide.slick-center .banner-card {
-  border-color: rgba(251, 191, 36, 0.85) !important;
-  box-shadow: 0 20px 45px -10px rgba(15, 23, 42, 0.4), 0 0 25px rgba(251, 191, 36, 0.2) !important;
-}
-
-/* Bottom Pagination Dots for Banner (Clean transparent without background) */
-.banner-center-slider .slick-dots {
-  position: absolute !important;
-  bottom: 12px !important;
-  left: 50% !important;
-  transform: translateX(-50%) !important;
-  margin: 0 !important;
-  display: flex !important;
-  justify-content: center;
-  align-items: center;
-  gap: 8px;
-  list-style: none;
-  padding: 0 !important;
-  background: transparent !important;
-  backdrop-filter: none !important;
-  border: none !important;
-  box-shadow: none !important;
-  z-index: 30;
-}
-
-.banner-center-slider .slick-dots li {
-  width: auto !important;
-  height: auto !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  display: inline-flex;
-}
-
-.banner-center-slider .slick-dots li button {
-  width: 9px !important;
-  height: 9px !important;
-  padding: 0 !important;
-  border-radius: 9999px !important;
-  background-color: rgba(255, 255, 255, 0.5) !important;
-  border: none !important;
-  outline: none !important;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.6) !important;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-  font-size: 0 !important;
-  line-height: 0 !important;
-  cursor: pointer;
-}
-
-.banner-center-slider .slick-dots li button:hover {
-  background-color: rgba(255, 255, 255, 0.95) !important;
-}
-
-.banner-center-slider .slick-dots li button:before {
-  display: none !important;
-  content: '' !important;
-}
-
-.banner-center-slider .slick-dots li.slick-active button {
-  width: 30px !important;
-  background-color: #fbbf24 !important;
-  border-radius: 9999px !important;
-  box-shadow: 0 2px 10px rgba(251, 191, 36, 0.7) !important;
+.animate-hero-progress-paused {
+  animation-play-state: paused !important;
 }
 
 /* ==========================================================================

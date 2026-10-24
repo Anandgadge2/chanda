@@ -79,23 +79,33 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-2.5 sm:space-y-3">
-      {/* Streamlined Compact Executive Command & Filter Header */}
-      <div className="bg-white border border-slate-200/90 rounded-xl px-3.5 py-2.5 sm:px-4 sm:py-3 shadow-2xs flex flex-col sm:flex-row justify-between sm:items-center gap-2.5">
-        <div className="flex items-center gap-2.5 min-w-0">
-          <span className="text-xs font-bold bg-amber-100 text-amber-900 px-2 py-0.5 rounded border border-amber-300 shrink-0">
-            महसूल २०२६
-          </span>
-          <h1 className="text-sm sm:text-base lg:text-lg font-black text-slate-900 leading-none">
-            जमीन अभिलेख व्यवस्थापन व महसूल चौकशी प्रणाली
-          </h1>
-          <span className="text-xs text-slate-500 font-semibold hidden xl:inline shrink-0">
-            • चंद्रपूर (MLRC १९६६)
-          </span>
+      {/* Modern Executive Command Header - Pro Compact */}
+      <div className="bg-gradient-to-r from-blue-50/80 via-indigo-50/40 to-white text-slate-900 rounded-xl px-3.5 py-2 sm:py-2.5 shadow-2xs border border-blue-200/80 relative z-30 flex flex-col md:flex-row justify-between sm:items-center gap-2">
+        <div className="flex items-center gap-2.5 relative z-10 min-w-0">
+          <div className="w-8 h-8 rounded-lg bg-blue-700 text-white flex items-center justify-center shrink-0 shadow-2xs">
+            <Landmark className="w-4 h-4" />
+          </div>
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-[10px] font-bold bg-amber-500 text-slate-950 px-2 py-0.5 rounded-full shadow-2xs">
+                महसूल २०२६
+              </span>
+              <h1 className="text-sm sm:text-base font-extrabold text-slate-900 tracking-tight leading-tight truncate">
+                जमीन अभिलेख व्यवस्थापन व महसूल चौकशी प्रणाली
+              </h1>
+              <span className="hidden lg:inline text-[11px] text-slate-500 font-medium">
+                • चंद्रपूर जिल्हा • १५ तालुके संनियंत्रण
+              </span>
+            </div>
+            <p className="text-[11px] text-slate-500 lg:hidden truncate font-medium">
+              चंद्रपूर जिल्हा • MLRC १९६६ अंतर्गत १५ तालुक्यांचे संनियंत्रण
+            </p>
+          </div>
         </div>
 
-        {/* Compact Integrated Actions & Filter */}
-        <div className="flex items-center gap-2.5 shrink-0">
-          <div className="w-[180px] sm:w-[210px]">
+        {/* Integrated Actions & Filter */}
+        <div className="flex items-center gap-2 shrink-0 relative z-30 flex-wrap">
+          <div className="w-[170px] sm:w-[190px]">
             <SearchableSelect
               options={talukaSelectOptions}
               value={taluka}
@@ -111,19 +121,20 @@ export default function DashboardPage() {
           <button
             onClick={() => loadData(taluka, true)}
             disabled={loading}
-            className="inline-flex items-center gap-1.5 text-xs sm:text-sm text-slate-700 hover:text-blue-950 font-bold px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 transition shadow-2xs cursor-pointer shrink-0"
+            className="p-1.5 sm:px-2.5 sm:py-1.5 rounded-lg bg-white hover:bg-blue-50 text-slate-800 hover:text-blue-900 border border-slate-300 text-xs font-bold transition-all active:scale-95 shadow-2xs cursor-pointer flex items-center gap-1"
             title="माहिती रिफ्रेश करा"
+            aria-label="माहिती रिफ्रेश करा"
           >
-            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-blue-900' : ''}`} />
-            <span className="hidden md:inline">रिफ्रेश</span>
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-blue-600' : 'text-slate-700'}`} />
+            <span className="hidden sm:inline">रिफ्रेश</span>
           </button>
 
           <Link
             href="/bulk-upload"
-            className="inline-flex items-center justify-center gap-1.5 bg-blue-900 hover:bg-blue-800 text-white font-bold px-3 py-1.5 rounded-lg text-xs sm:text-sm shadow-2xs transition active:scale-95 shrink-0"
+            className="inline-flex items-center justify-center gap-1.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black px-3 py-1.5 rounded-lg text-xs shadow-xs transition-all active:scale-95 shrink-0"
             title="गाव एक्सेल डेटा अपलोड"
           >
-            <UploadCloud className="w-4 h-4" />
+            <UploadCloud className="w-3.5 h-3.5 text-slate-950" />
             <span>गाव डेटा अपलोड</span>
           </Link>
         </div>
