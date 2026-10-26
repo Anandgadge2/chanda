@@ -385,7 +385,7 @@ export default function CasesPage() {
       </div>
 
       {/* Modern Filter & Search Command Toolbar */}
-      <div className="bg-white/90 backdrop-blur-xl border border-slate-200/90 rounded-xl p-2.5 shadow-xs flex items-center gap-2.5 flex-wrap lg:flex-nowrap">
+      <div className="relative z-30 bg-white/95 backdrop-blur-xl border border-slate-200/90 rounded-2xl p-2.5 shadow-xs flex items-center gap-2.5 flex-wrap lg:flex-nowrap">
         {/* Live Search Input */}
         <div className="relative flex-1 min-w-[220px]">
           <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
@@ -409,7 +409,7 @@ export default function CasesPage() {
         </div>
 
         {/* Taluka Dropdown */}
-        <div className="w-full sm:w-auto min-w-[155px] max-w-[195px]">
+        <div className="w-full sm:w-auto min-w-[160px] max-w-[215px]">
           <SearchableSelect
             options={talukaSelectOptions}
             value={taluka}
@@ -421,7 +421,7 @@ export default function CasesPage() {
         </div>
 
         {/* Violation Type Dropdown */}
-        <div className="w-full sm:w-auto min-w-[165px] max-w-[205px]">
+        <div className="w-full sm:w-auto min-w-[170px] max-w-[225px]">
           <SearchableSelect
             options={violationSelectOptions}
             value={violationType}
@@ -433,7 +433,7 @@ export default function CasesPage() {
         </div>
 
         {/* Status Dropdown */}
-        <div className="w-full sm:w-auto min-w-[145px] max-w-[185px]">
+        <div className="w-full sm:w-auto min-w-[150px] max-w-[195px]">
           <SearchableSelect
             options={statusSelectOptions}
             value={status}
@@ -445,7 +445,7 @@ export default function CasesPage() {
         </div>
 
         {/* Shasan Jama Dropdown */}
-        <div className="w-full sm:w-auto min-w-[145px] max-w-[175px]">
+        <div className="w-full sm:w-auto min-w-[145px] max-w-[185px]">
           <SearchableSelect
             options={shasanJamaSelectOptions}
             value={isRepossessedToGovt}
