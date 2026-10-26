@@ -214,6 +214,7 @@ export const getParcels = async (req, res) => {
       taluka,
       villageCode,
       villageName,
+      village,
       tenureClass,
       hasActiveDispute,
       search,
@@ -227,9 +228,15 @@ export const getParcels = async (req, res) => {
 
     const where = {};
 
-    if (taluka) where.taluka = { equals: taluka, mode: 'insensitive' };
+    if (taluka && taluka !== 'all' && taluka !== 'सर्व तालुके') {
+      where.taluka = { equals: taluka, mode: 'insensitive' };
+    }
     if (villageCode) where.villageCode = villageCode;
-    if (villageName) where.villageName = { contains: villageName, mode: 'insensitive' };
+
+    const targetVillage = village || villageName;
+    if (targetVillage && targetVillage !== 'all' && targetVillage !== 'सर्व गावे') {
+      where.villageName = { equals: targetVillage.trim(), mode: 'insensitive' };
+    }
     if (tenureClass) where.tenureClass = tenureClass;
     if (hasActiveDispute !== undefined && hasActiveDispute !== '') {
       where.hasActiveDispute = hasActiveDispute === 'true';
@@ -244,7 +251,7 @@ export const getParcels = async (req, res) => {
       ];
     }
 
-    const cacheKey = JSON.stringify({ taluka, villageCode, villageName, tenureClass, hasActiveDispute, search, pageNum, take });
+    const cacheKey = JSON.stringify({ taluka, villageCode, villageName: targetVillage, tenureClass, hasActiveDispute, search, pageNum, take });
     let pending = inFlightParcelLists.get(cacheKey);
 
     if (!pending) {

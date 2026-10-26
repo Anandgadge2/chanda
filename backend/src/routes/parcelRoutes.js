@@ -6,6 +6,7 @@ import {
   getParcelTrace,
   createParcel,
 } from '../controllers/parcelController.js';
+import { getTalukaVillages } from '../controllers/prapatraController.js';
 import { upload } from '../middleware/uploadMiddleware.js';
 import { authenticate, authorize } from '../middleware/authMiddleware.js';
 
@@ -19,6 +20,7 @@ router.post(
   bulkUpload
 );
 router.get('/sample-template', getSampleTemplate); // Publicly accessible template
+router.get('/villages', getTalukaVillages);
 router.get('/', authenticate, getParcels);
 router.post('/', authenticate, authorize('COLLECTOR', 'SDO', 'TEHSILDAR', 'NAIB_TEHSILDAR', 'TALATHI'), createParcel);
 router.get('/:upi/trace', authenticate, getParcelTrace);

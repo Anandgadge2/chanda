@@ -40,7 +40,7 @@ module.exports = {
         }
       },
       fontFamily: {
-        sans: ['"Nirmala UI"', 'Inter', '"Noto Sans Devanagari"', 'system-ui', '-apple-system', 'sans-serif'],
+        sans: ['"Noto Sans Devanagari"', '"Nirmala UI"', 'Inter', 'system-ui', '-apple-system', 'sans-serif'],
       },
     },
   },

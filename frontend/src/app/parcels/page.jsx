@@ -7,6 +7,7 @@ import {
   Upload,
   Layers,
   MapPin,
+  LandPlot,
   AlertTriangle,
   CheckCircle,
   CheckCircle2,
@@ -38,6 +39,9 @@ export default function ParcelsPage() {
 
   // Filters
   const [taluka, setTaluka] = useState('');
+  const [village, setVillage] = useState('');
+  const [villageOptions, setVillageOptions] = useState([]);
+  const [loadingVillages, setLoadingVillages] = useState(false);
   const [tenureClass, setTenureClass] = useState('');
   const [hasActiveDispute, setHasActiveDispute] = useState('');
   const [search, setSearch] = useState('');
@@ -57,11 +61,50 @@ export default function ParcelsPage() {
   const [uploadModalParcelId, setUploadModalParcelId] = useState(null);
   const [glossaryModalOpen, setGlossaryModalOpen] = useState(false);
 
+  // Read query params from URL on mount if navigated with ?taluka=...&village=...
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const qTaluka = urlParams.get('taluka');
+      const qVillage = urlParams.get('village');
+      if (qTaluka) setTaluka(qTaluka);
+      if (qVillage) setVillage(qVillage);
+    }
+  }, []);
+
+  // Dynamically load villages for selected taluka
+  useEffect(() => {
+    let isMounted = true;
+    async function loadVillages() {
+      setLoadingVillages(true);
+      try {
+        const res = await api.getTalukaVillages(taluka || 'all');
+        if (isMounted) {
+          setVillageOptions(res.villages || []);
+        }
+      } catch (err) {
+        console.error('Failed to load villages list:', err);
+        if (isMounted) {
+          setVillageOptions([]);
+        }
+      } finally {
+        if (isMounted) {
+          setLoadingVillages(false);
+        }
+      }
+    }
+    loadVillages();
+    return () => {
+      isMounted = false;
+    };
+  }, [taluka]);
+
   const fetchParcels = async (targetPage = page, customSearch = search) => {
     setLoading(true);
     try {
       const params = { page: targetPage, limit };
       if (taluka) params.taluka = taluka;
+      if (village && village !== 'all') params.village = village;
       if (tenureClass) params.tenureClass = tenureClass;
       if (hasActiveDispute !== '') params.hasActiveDispute = hasActiveDispute;
       if (customSearch && customSearch.trim()) params.search = customSearch.trim();
@@ -81,7 +124,7 @@ export default function ParcelsPage() {
   useEffect(() => {
     setPage(1);
     fetchParcels(1, search);
-  }, [taluka, tenureClass, hasActiveDispute]);
+  }, [taluka, village, tenureClass, hasActiveDispute]);
 
   // Live search debounced
   const handleSearchChange = (e) => {
@@ -105,6 +148,7 @@ export default function ParcelsPage() {
   const handleResetFilters = () => {
     setSearch('');
     setTaluka('');
+    setVillage('');
     setTenureClass('');
     setHasActiveDispute('');
     setPage(1);
@@ -171,7 +215,7 @@ export default function ParcelsPage() {
   }, [parcels]);
 
   const activeFiltersCount =
-    (search ? 1 : 0) + (taluka ? 1 : 0) + (tenureClass ? 1 : 0) + (hasActiveDispute !== '' ? 1 : 0);
+    (search ? 1 : 0) + (taluka ? 1 : 0) + (village ? 1 : 0) + (tenureClass ? 1 : 0) + (hasActiveDispute !== '' ? 1 : 0);
 
   const talukaSelectOptions = useMemo(() => [
     { value: '', label: `सर्व तालुके (${CHANDRAPUR_TALUKAS.length})` },
@@ -180,6 +224,24 @@ export default function ParcelsPage() {
       label: `${t.nameMr} (${t.nameEn})`
     }))
   ], []);
+
+  const villageSelectOptions = useMemo(() => [
+    {
+      value: '',
+      label: villageOptions.length > 0
+        ? (taluka ? `सर्व गावे (${villageOptions.length})` : `सर्व गावे (${villageOptions.length})`)
+        : 'सर्व गावे (All Villages)'
+    },
+    ...villageOptions.map((v) => {
+      const vName = typeof v === 'object' ? (v.villageName || v.name) : v;
+      const count = typeof v === 'object' && v.total712Count ? `${v.total712Count}` : undefined;
+      return {
+        value: vName,
+        label: vName,
+        count
+      };
+    })
+  ], [villageOptions, taluka]);
 
   const tenureSelectOptions = useMemo(() => [
     { value: '', label: 'सर्व धारणा प्रकार' },
@@ -324,11 +386,27 @@ export default function ParcelsPage() {
           <SearchableSelect
             options={talukaSelectOptions}
             value={taluka}
-            onChange={(val) => setTaluka(val)}
+            onChange={(val) => {
+              setTaluka(val);
+              setVillage('');
+            }}
             placeholder="सर्व तालुके"
             searchPlaceholder="तालुका शोधा..."
             icon={MapPin}
             showCount={false}
+          />
+        </div>
+
+        {/* Village Dropdown */}
+        <div className="w-full sm:w-auto min-w-[155px] max-w-[210px]">
+          <SearchableSelect
+            options={villageSelectOptions}
+            value={village}
+            onChange={(val) => setVillage(val)}
+            placeholder={loadingVillages ? 'लोड होत आहे...' : 'सर्व गावे'}
+            searchPlaceholder="गाव शोधा (Search village)..."
+            icon={LandPlot}
+            showCount={true}
           />
         </div>
 
@@ -386,6 +464,15 @@ export default function ParcelsPage() {
               <span className="text-xs font-semibold text-slate-600">
                 {totalCount} नोंदणीकृत भूखंड (गट क्र.)
               </span>
+              {village && (
+                <>
+                  <span className="text-slate-300">•</span>
+                  <span className="inline-flex items-center gap-1 text-[11px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200/80 px-2 py-0.5 rounded-full">
+                    <LandPlot className="w-3 h-3 text-emerald-600" />
+                    गाव: {village}
+                  </span>
+                </>
+              )}
               {stats.class2Count > 0 && (
                 <>
                   <span className="text-slate-300">•</span>
