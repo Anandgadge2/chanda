@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import {
   UploadCloud,
@@ -25,6 +25,28 @@ export default function BulkUploadPage() {
   const [activeTab, setActiveTab] = useState('prapatra'); // 'prapatra' | 'parcel'
   const [selectedTaluka, setSelectedTaluka] = useState('Warora');
   const [villageName, setVillageName] = useState('');
+  const [villagesList, setVillagesList] = useState([]);
+  const [loadingVillages, setLoadingVillages] = useState(false);
+
+  useEffect(() => {
+    let isMounted = true;
+    async function fetchVillages() {
+      if (!selectedTaluka) return;
+      setLoadingVillages(true);
+      try {
+        const res = await api.getTalukaVillages(selectedTaluka);
+        if (isMounted && res.success && Array.isArray(res.villages)) {
+          setVillagesList(res.villages);
+        }
+      } catch (err) {
+        console.warn('Could not load villages for', selectedTaluka, err);
+      } finally {
+        if (isMounted) setLoadingVillages(false);
+      }
+    }
+    fetchVillages();
+    return () => { isMounted = false; };
+  }, [selectedTaluka]);
   
   // Prapatra state
   const [prapatraFiles, setPrapatraFiles] = useState([]);
@@ -237,12 +259,18 @@ export default function BulkUploadPage() {
                 </label>
                 <input
                   type="text"
+                  list="village-datalist"
                   value={villageName}
                   onChange={(e) => setVillageName(e.target.value)}
-                  placeholder="उदा. कोसरसार (रिकामे ठेवल्यास एक्सेल फाईलमधून स्वयंचलित ओळखले जाईल)"
+                  placeholder={loadingVillages ? "गावांची यादी लोड होत आहे..." : "उदा. कोसरसार (यादीतून निवडा किंवा टाईप करा)"}
                   disabled={prapatraFiles.length > 1}
                   className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 disabled:opacity-50"
                 />
+                <datalist id="village-datalist">
+                  {villagesList.map((v, idx) => (
+                    <option key={idx} value={v} />
+                  ))}
+                </datalist>
               </div>
             </div>
 
@@ -335,11 +363,16 @@ export default function BulkUploadPage() {
                       {result.results.map((r, idx) => (
                         <div key={idx} className="p-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 hover:bg-slate-50">
                           <div className="space-y-1">
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2 flex-wrap">
                               <span className="font-black text-slate-900 text-xs sm:text-sm">गाव: {r.village}</span>
                               <span className="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-bold">
                                 सिडिंग पूर्ण
                               </span>
+                              {r.auditArchive && (
+                                <span className="text-[10px] bg-teal-50 text-teal-800 border border-teal-200 px-2 py-0.5 rounded font-mono font-medium flex items-center gap-1" title={r.auditArchive}>
+                                  ☁️ GCP क्लाऊड आर्काइव्ह: {r.gcsPath ? r.gcsPath.split('/').pop() : 'जतन केले'}
+                                </span>
+                              )}
                             </div>
                             <div className="text-[11px] text-slate-600 flex flex-wrap items-center gap-2">
                               <span>एकूण ७/१२: <strong className="text-blue-900">{r.total712}</strong></span>

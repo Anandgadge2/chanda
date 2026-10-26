@@ -85,28 +85,33 @@ const fetchSummaryFromDatabase = async (taluka) => {
          GROUP BY lp.tenure_class
        ) td) as "tenureDistribution",
 
-      -- Taluka-wise Distribution & Comparative Analysis with Live Cultivable & Disputed Area
+      -- Taluka-wise Distribution & Comparative Analysis with Live Cultivable & Disputed Area (District-wide comparative rollup)
       (SELECT COALESCE(json_agg(json_build_object(
         'taluka', t.taluka,
+        'villageCount', t.village_cnt,
         'parcelCount', t.parcel_cnt,
         'totalAreaHa', t.total_area_ha,
         'cultivableAreaHa', t.cultivable_area_ha,
         'disputedAreaHa', t.disputed_area_ha,
         'violationCount', t.violation_cnt,
-        'disputeCount', t.dispute_cnt
+        'disputeCount', t.dispute_cnt,
+        'repossessedCount', t.repossessed_cnt,
+        'repossessedAreaHa', t.repossessed_area_ha
       )), '[]'::json)
        FROM (
          SELECT 
            lp.taluka,
+           COUNT(DISTINCT lp.village_name)::int as village_cnt,
            COUNT(DISTINCT lp.id)::int as parcel_cnt,
            COALESCE(SUM(lp.total_area_ha), 0)::float as total_area_ha,
            COALESCE(SUM(lp.total_area_ha - lp.potkharaba_area_ha), 0)::float as cultivable_area_ha,
            COALESCE(SUM(fec.encroached_area_ha), 0)::float as disputed_area_ha,
            COUNT(DISTINCT fec.id)::int as violation_cnt,
-           COUNT(DISTINCT CASE WHEN lp.has_active_dispute THEN lp.id END)::int as dispute_cnt
+           COUNT(DISTINCT CASE WHEN lp.has_active_dispute THEN lp.id END)::int as dispute_cnt,
+           COUNT(DISTINCT CASE WHEN fec.is_repossessed_to_govt = true THEN fec.id END)::int as repossessed_cnt,
+           COALESCE(SUM(CASE WHEN fec.is_repossessed_to_govt = true THEN fec.encroached_area_ha ELSE 0 END), 0)::float as repossessed_area_ha
          FROM land_parcels lp
          LEFT JOIN forward_enforcement_cases fec ON fec.parcel_id = lp.id
-         WHERE (${talukaParam}::text IS NULL OR LOWER(lp.taluka) = LOWER(${talukaParam}))
          GROUP BY lp.taluka
          ORDER BY parcel_cnt DESC, total_area_ha DESC
        ) t) as "talukaDistribution",

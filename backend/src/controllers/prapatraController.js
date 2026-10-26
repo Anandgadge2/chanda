@@ -3,6 +3,7 @@ import path from 'path';
 import { exec, execFile } from 'child_process';
 import { promisify } from 'util';
 import prisma from '../config/prisma.js';
+import { archiveExcelToGCS } from '../config/gcs.js';
 
 const execAsync = promisify(exec);
 const execFileAsync = promisify(execFile);
@@ -785,11 +786,14 @@ export const uploadPrapatraExcel = async (req, res) => {
   const talukaInput = req.body.taluka || 'Chandrapur';
   const targetTaluka = TALUKA_ALIASES[talukaInput.toLowerCase()] || talukaInput;
 
-  // Locate python parser script dynamically
+  // Locate python parser script dynamically inside backend codebase
+  const currentDir = path.dirname(new URL(import.meta.url).pathname.replace(/^\/([a-zA-Z]:)/, '$1'));
   const possiblePaths = [
-    path.resolve(process.cwd(), 'data/parse_single_sheet.py'),
-    path.resolve(process.cwd(), '../data/parse_single_sheet.py'),
-    'D:/chanda/data/parse_single_sheet.py'
+    path.resolve(currentDir, '../parsers/prapatraParser.py'),
+    path.resolve(process.cwd(), 'src/parsers/prapatraParser.py'),
+    path.resolve(process.cwd(), 'backend/src/parsers/prapatraParser.py'),
+    'D:/chanda/backend/src/parsers/prapatraParser.py',
+    path.resolve(process.cwd(), 'data/parse_single_sheet.py')
   ];
   const pythonScript = possiblePaths.find(p => fs.existsSync(p));
   if (!pythonScript) {
@@ -806,10 +810,13 @@ export const uploadPrapatraExcel = async (req, res) => {
       tempFilePath = `${file.path}${ext}`;
       fs.renameSync(file.path, tempFilePath);
 
+      // Read file buffer for immutable cloud archiving
+      const fileBuffer = fs.readFileSync(tempFilePath);
+
       // Run Python parser using execFileAsync with original filename passed for clean village identification
       const { stdout } = await execFileAsync('python', [pythonScript, tempFilePath, targetTaluka, file.originalname], {
         encoding: 'utf-8',
-        maxBuffer: 30 * 1024 * 1024
+        maxBuffer: 50 * 1024 * 1024
       });
 
       const parsedResult = JSON.parse(stdout);
@@ -830,6 +837,14 @@ export const uploadPrapatraExcel = async (req, res) => {
       const finalVillage = (uploadedFiles.length === 1 && req.body.villageName && req.body.villageName.trim())
         ? req.body.villageName.trim()
         : derivedVillage;
+
+      // Archive raw Excel copy to GCS audit store (immutable legal backup)
+      let auditArchive = null;
+      try {
+        auditArchive = await archiveExcelToGCS(fileBuffer, targetTaluka, finalVillage, file.originalname);
+      } catch (gcsErr) {
+        console.warn(`[GCS Archive Warning] ${file.originalname}:`, gcsErr.message);
+      }
 
       const illegal = stats.illegalDel || 0;
       const pokalist = stats.pokalist || 0;
@@ -941,11 +956,15 @@ export const uploadPrapatraExcel = async (req, res) => {
           };
         });
 
-        // Upsert/Insert parcels
-        await prisma.landParcel.createMany({
-          data: parcelData,
-          skipDuplicates: true
-        });
+        // Upsert/Insert parcels in memory-safe chunks of 500 rows to prevent DB timeouts
+        const CHUNK_SIZE = 500;
+        for (let c = 0; c < parcelData.length; c += CHUNK_SIZE) {
+          const chunk = parcelData.slice(c, c + CHUNK_SIZE);
+          await prisma.landParcel.createMany({
+            data: chunk,
+            skipDuplicates: true
+          });
+        }
 
         // Query dbParcels to get their UUIDs for relational seeding
         const upiList = parcelData.map(pd => pd.upi);
@@ -1030,11 +1049,14 @@ export const uploadPrapatraExcel = async (req, res) => {
         }
 
         if (forwardCaseList.length > 0) {
-          const createdCases = await prisma.forwardEnforcementCase.createMany({
-            data: forwardCaseList,
-            skipDuplicates: true
-          });
-          casesCount = createdCases.count;
+          for (let c = 0; c < forwardCaseList.length; c += CHUNK_SIZE) {
+            const chunk = forwardCaseList.slice(c, c + CHUNK_SIZE);
+            const createdCases = await prisma.forwardEnforcementCase.createMany({
+              data: chunk,
+              skipDuplicates: true
+            });
+            casesCount += createdCases.count;
+          }
         }
 
         if (backwardHistoryList.length > 0) {
@@ -1045,11 +1067,14 @@ export const uploadPrapatraExcel = async (req, res) => {
           const existingIds = new Set(existingBk.map(b => b.parcelId));
           const newBk = backwardHistoryList.filter(b => !existingIds.has(b.parcelId));
           if (newBk.length > 0) {
-            const createdBk = await prisma.backwardHistory.createMany({
-              data: newBk,
-              skipDuplicates: true
-            });
-            backwardCount = createdBk.count;
+            for (let c = 0; c < newBk.length; c += CHUNK_SIZE) {
+              const chunk = newBk.slice(c, c + CHUNK_SIZE);
+              const createdBk = await prisma.backwardHistory.createMany({
+                data: chunk,
+                skipDuplicates: true
+              });
+              backwardCount += createdBk.count;
+            }
           }
         }
       }
@@ -1066,6 +1091,8 @@ export const uploadPrapatraExcel = async (req, res) => {
         gatNumbersSample: distinctGats.slice(0, 20),
         casesCreated: casesCount,
         provenanceCreated: backwardCount,
+        auditArchive: auditArchive ? auditArchive.storageUrl : null,
+        gcsPath: auditArchive ? auditArchive.gcsPath : null,
         stats,
         rollup: rollupRecord
       });
@@ -1076,6 +1103,9 @@ export const uploadPrapatraExcel = async (req, res) => {
     } finally {
       if (tempFilePath && fs.existsSync(tempFilePath)) {
         try { fs.unlinkSync(tempFilePath); } catch (e) {}
+      }
+      if (file.path && fs.existsSync(file.path)) {
+        try { fs.unlinkSync(file.path); } catch (e) {}
       }
     }
   }

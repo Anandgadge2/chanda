@@ -1,5 +1,5 @@
 import express from 'express';
-import { uploadDocument, getDocuments } from '../controllers/documentController.js';
+import { uploadDocument, getDocuments, getDocumentSignedUrl } from '../controllers/documentController.js';
 import { upload } from '../middleware/uploadMiddleware.js';
 import { authenticate, authorize } from '../middleware/authMiddleware.js';
 
@@ -13,5 +13,6 @@ router.post(
   uploadDocument
 );
 router.get('/', authenticate, getDocuments);
+router.get('/:id/signed-url', authenticate, getDocumentSignedUrl);
 
 export default router;

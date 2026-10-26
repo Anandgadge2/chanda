@@ -156,12 +156,15 @@ export default function ChandrapurGisMap({
       );
       map.set(t.id.toLowerCase(), {
         ...t,
+        liveVillageCount: analyticMatch?.villageCount !== undefined ? analyticMatch.villageCount : (t.villagesCount || 0),
         liveParcelCount: analyticMatch?.parcelCount !== undefined ? analyticMatch.parcelCount : (t.total712 || 0),
         liveViolationCount: analyticMatch?.violationCount !== undefined ? analyticMatch.violationCount : (t.shartbhang || 0),
-        liveDisputeCount: analyticMatch?.disputeCount !== undefined ? analyticMatch.disputeCount : (t.govtLand || t.govtEncroached || 0),
+        liveDisputeCount: analyticMatch?.disputeCount !== undefined ? analyticMatch.disputeCount : 0,
+        liveRepossessedCount: analyticMatch?.repossessedCount !== undefined ? analyticMatch.repossessedCount : 0,
+        liveRepossessedAreaHa: analyticMatch?.repossessedAreaHa !== undefined ? analyticMatch.repossessedAreaHa : 0,
         liveTotalAreaHa: analyticMatch?.totalAreaHa !== undefined ? analyticMatch.totalAreaHa : (t.cultivableHa || 0),
         liveCultivableAreaHa: analyticMatch?.cultivableAreaHa !== undefined ? analyticMatch.cultivableAreaHa : (t.cultivableHa || 0),
-        liveDisputedAreaHa: analyticMatch?.disputedAreaHa !== undefined ? analyticMatch.disputedAreaHa : (t.govtEncroached || 0),
+        liveDisputedAreaHa: analyticMatch?.disputedAreaHa !== undefined ? analyticMatch.disputedAreaHa : 0,
       });
     });
     return map;
@@ -177,7 +180,7 @@ export default function ChandrapurGisMap({
 
     TALUKA_GIS_DATA.forEach((t) => {
       const item = talukaDataMap.get(t.id.toLowerCase());
-      const v = item ? item.liveViolationCount : t.shartbhang;
+      const v = item ? item.liveViolationCount : (t.shartbhang || 0);
       totalViolations += v;
       const r = getRiskCategory(v);
       if (r.level === 'critical') critical++;
@@ -203,7 +206,7 @@ export default function ChandrapurGisMap({
           parcels += item.liveParcelCount || 0;
           violations += item.liveViolationCount || 0;
           area += Number(item.liveTotalAreaHa || 0);
-          villages += item.villagesCount || 0;
+          villages += item.liveVillageCount || item.villagesCount || 0;
         }
       });
       map.set(s.id, { parcels, violations, area, villages });
@@ -420,11 +423,11 @@ export default function ChandrapurGisMap({
                 अधिकृत GIS नकाशा
               </span>
               <h2 className="text-sm sm:text-base font-black text-slate-900 tracking-wide">
-                चंद्रपूर जिल्हा प्रशासकीय व कॅडस्ट्रल नकाशा
+                चंद्रपूर जिल्हा प्रशासकीय व महसूल जोखीम GIS नकाशा
               </h2>
             </div>
             <p className="text-xs text-slate-500 font-medium hidden sm:block">
-              १५ तालुके • ६ उपविभाग (SDO) • महसूल व शर्तभंग संनियंत्रण
+              १५ तालुके • ६ उपविभाग (SDO) • थेट डेटाबेस संनियंत्रण (Live Database Sync)
             </p>
           </div>
         </div>
@@ -1301,8 +1304,11 @@ export default function ChandrapurGisMap({
           const item = talukaDataMap.get(hoveredTaluka.id.toLowerCase());
           const liveViolations = Number(item ? item.liveViolationCount : (hoveredTaluka.shartbhang || 0));
           const liveParcels = Number(item ? item.liveParcelCount : (hoveredTaluka.total712 || 0));
+          const liveVillages = Number(item?.liveVillageCount !== undefined ? item.liveVillageCount : (hoveredTaluka.villagesCount || 0));
           const liveArea = Number(item ? item.liveTotalAreaHa : (hoveredTaluka.cultivableHa || 0));
-          const liveGovtLand = Number(item ? item.liveDisputeCount : (hoveredTaluka.govtLand || hoveredTaluka.govtEncroached || 0));
+          const liveDisputes = Number(item ? item.liveDisputeCount : 0);
+          const liveRepossessed = Number(item ? item.liveRepossessedCount : 0);
+          const liveRepossessedArea = Number(item ? item.liveRepossessedAreaHa : 0);
           const risk = getRiskCategory(liveViolations);
           const sdo = getSdoInfo(hoveredTaluka.sdoId);
           const isRight = isHoverOnRightSide;
@@ -1333,7 +1339,7 @@ export default function ChandrapurGisMap({
                       </div>
                     </div>
                     <span className="text-[11px] px-2 py-0.5 rounded-full bg-blue-50 text-blue-950 border border-blue-200 font-bold shrink-0">
-                      {hoveredTaluka.villagesCount} गावे
+                      {liveVillages} गावे
                     </span>
                   </div>
                 </div>
@@ -1388,9 +1394,9 @@ export default function ChandrapurGisMap({
                     </span>
                   </div>
                   <div className="bg-rose-50/70 border border-rose-200/80 p-1.5 rounded-lg">
-                    <span className="text-rose-900 text-[10px] block font-semibold">शासकीय जमीन:</span>
+                    <span className="text-rose-900 text-[10px] block font-semibold">चौकशी/वाद:</span>
                     <span className="font-black text-rose-800 text-xs sm:text-sm">
-                      {liveGovtLand.toLocaleString('mr-IN')} गट
+                      {liveDisputes.toLocaleString('mr-IN')} गट
                     </span>
                   </div>
                   <div className="bg-emerald-50/70 border border-emerald-200/80 p-1.5 rounded-lg">
@@ -1399,6 +1405,14 @@ export default function ChandrapurGisMap({
                       {Math.round(liveArea).toLocaleString('mr-IN')} Ha
                     </span>
                   </div>
+                  {liveRepossessed > 0 && (
+                    <div className="bg-teal-50/70 border border-teal-200/80 p-1.5 rounded-lg col-span-2">
+                      <span className="text-teal-900 text-[10px] block font-semibold">शासन जमा (जप्त):</span>
+                      <span className="font-black text-teal-800 text-xs">
+                        {liveRepossessed.toLocaleString('mr-IN')} प्रकरणे ({liveRepossessedArea.toFixed(2)} Ha)
+                      </span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Features */}
@@ -1630,6 +1644,9 @@ export default function ChandrapurGisMap({
                 <span className="font-black text-slate-900 text-sm">
                   {Number(activeTalukaProfile.liveParcelCount || activeTalukaProfile.total712).toLocaleString('mr-IN')}
                 </span>
+                <span className="text-[10px] text-blue-700 block font-semibold">
+                  {Number(activeTalukaProfile.liveVillageCount || activeTalukaProfile.villagesCount || 0)} गावे
+                </span>
               </div>
 
               <div className="bg-amber-50 border border-amber-200 px-3 py-1.5 rounded-lg text-center shadow-2xs">
@@ -1637,19 +1654,28 @@ export default function ChandrapurGisMap({
                 <span className="font-black text-amber-700 text-sm">
                   {Number(activeTalukaProfile.liveViolationCount || activeTalukaProfile.shartbhang).toLocaleString('mr-IN')}
                 </span>
+                <span className="text-[10px] text-amber-900 block font-medium">
+                  प्रकरणे
+                </span>
               </div>
 
               <div className="bg-rose-50 border border-rose-200 px-3 py-1.5 rounded-lg text-center shadow-2xs">
-                <span className="text-[10px] text-rose-800 block font-medium">शासकीय जमीन</span>
+                <span className="text-[10px] text-rose-800 block font-medium">चौकशी/वाद गट</span>
                 <span className="font-black text-rose-700 text-sm">
-                  {activeTalukaProfile.govtLand} गट
+                  {Number(activeTalukaProfile.liveDisputeCount || 0).toLocaleString('mr-IN')} गट
+                </span>
+                <span className="text-[10px] text-rose-900 block font-medium">
+                  {activeTalukaProfile.liveRepossessedCount > 0 ? `${activeTalukaProfile.liveRepossessedCount} शासन जमा` : 'सक्रिय वाद'}
                 </span>
               </div>
 
               <div className="bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-lg text-center shadow-2xs">
                 <span className="text-[10px] text-emerald-800 block font-medium">एकूण क्षेत्र</span>
                 <span className="font-black text-emerald-700 text-sm">
-                  {Number(activeTalukaProfile.liveTotalAreaHa).toFixed(0)} Ha
+                  {Math.round(activeTalukaProfile.liveTotalAreaHa).toLocaleString('mr-IN')} Ha
+                </span>
+                <span className="text-[10px] text-emerald-900 block font-medium">
+                  {Math.round(activeTalukaProfile.liveCultivableAreaHa).toLocaleString('mr-IN')} Ha लागवडीयोग्य
                 </span>
               </div>
             </div>

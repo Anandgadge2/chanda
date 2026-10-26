@@ -1,0 +1,22 @@
+import prisma from '../config/prisma.js';
+
+async function main() {
+  const rollups = await prisma.prapatraRollup.findMany({
+    where: { taluka: 'Pombhurna', villageName: { not: 'संपूर्ण तालुका (All Villages)' } },
+    select: { id: true, villageName: true, total712Count: true }
+  });
+
+  const parcels = await prisma.landParcel.groupBy({
+    by: ['villageName', 'villageCode'],
+    where: { taluka: 'Pombhurna' },
+    _count: { id: true }
+  });
+
+  console.log('Pombhurna rollups:');
+  console.table(rollups);
+
+  console.log('Pombhurna parcels:');
+  console.table(parcels);
+}
+
+main().finally(() => prisma.$disconnect());

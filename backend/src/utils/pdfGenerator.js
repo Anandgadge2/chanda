@@ -398,15 +398,18 @@ export const generatePrapatraPdf = async (prapatraNum, summaryRecords = [], parc
   const pdf = pdfmake.createPdf(docDefinition);
   const buffer = await pdf.getBuffer();
 
-  const timestamp = new Date().toISOString().slice(0, 10);
-  res.setHeader('Content-Type', 'application/pdf');
-  res.setHeader('Content-Disposition', `attachment; filename=Prapatra-${prapatraNum}_Chandrapur_${timestamp}.pdf`);
+  if (typeof res.setHeader === 'function' && !res.headersSent) {
+    const timestamp = new Date().toISOString().slice(0, 10);
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename=Prapatra-${prapatraNum}_Chandrapur_${timestamp}.pdf`);
+  }
 
   if (typeof res.send === 'function') {
     res.send(buffer);
-  } else {
+  } else if (typeof res.end === 'function') {
     res.end(buffer);
   }
+  return buffer;
 };
 
 
