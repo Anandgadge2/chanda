@@ -2,7 +2,7 @@ import ExcelJS from 'exceljs';
 import prisma from '../config/prisma.js';
 import { generateSampleVillageTemplate } from '../utils/excelGenerator.js';
 import { invalidateAnalyticsCache } from './analyticsController.js';
-import { syncTalukaTotalRollup, recalculateVillageRollup } from './prapatraController.js';
+import { syncTalukaTotalRollup, recalculateVillageRollup, uploadPrapatraExcel } from './prapatraController.js';
 import { logAudit } from '../middleware/auditMiddleware.js';
 
 /**
@@ -21,6 +21,21 @@ export const bulkUpload = async (req, res) => {
 
     if (!worksheet) {
       return res.status(400).json({ success: false, error: 'Worksheet is empty' });
+    }
+
+    // Auto-detect: If user uploaded an official 1 to 45 Prapatra inspection booklet on this tab,
+    // seamlessly route it to the Prapatra ingestion pipeline instead of failing with column overflow!
+    let isPrapatraBooklet = false;
+    for (let r = 1; r <= Math.min(8, worksheet.rowCount); r++) {
+      const rowStr = (worksheet.getRow(r).values || []).join(' ');
+      if (['तपासणी', '1 ते 45', '1 to 45', 'इतर अधिकारातील नोंद', 'रिनंबरींग'].some(k => rowStr.includes(k))) {
+        isPrapatraBooklet = true;
+        break;
+      }
+    }
+
+    if (isPrapatraBooklet) {
+      return uploadPrapatraExcel(req, res);
     }
 
     const records = [];
@@ -43,12 +58,12 @@ export const bulkUpload = async (req, res) => {
 
       const values = row.values;
       // Depending on 1-based indexing in exceljs: values[1] is col A
-      const taluka = values[1] ? String(values[1]).trim() : 'Chandrapur';
-      const villageCode = values[2] ? String(values[2]).trim() : '001';
-      const villageName = values[3] ? String(values[3]).trim() : 'Unspecified';
-      const oldSurveyNo = values[4] ? String(values[4]).trim() : null;
-      const gatNumber = values[5] ? String(values[5]).trim() : null;
-      const hissaNumber = values[6] ? String(values[6]).trim() : '0';
+      const taluka = values[1] ? String(values[1]).trim().slice(0, 64) : 'Chandrapur';
+      const villageCode = values[2] ? String(values[2]).trim().slice(0, 32) : '001';
+      const villageName = values[3] ? String(values[3]).trim().slice(0, 128) : 'Unspecified';
+      const oldSurveyNo = values[4] ? String(values[4]).trim().slice(0, 32) : null;
+      const gatNumber = values[5] ? String(values[5]).trim().slice(0, 32) : null;
+      const hissaNumber = values[6] ? String(values[6]).trim().slice(0, 16) : '0';
       const totalAreaHa = parseFloat(values[7]) || 0.0;
       const tenureClass = normalizeTenure(values[8]);
 
@@ -58,7 +73,9 @@ export const bulkUpload = async (req, res) => {
       }
 
       const talukaCode = taluka.substring(0, 3).toUpperCase();
-      const upi = `MH-CHA-${talukaCode}-${villageCode}-${gatNumber}-${hissaNumber}`.replace(/\s+/g, '');
+      const safeGat = gatNumber.replace(/[^0-9a-zA-Z]/g, '-').slice(0, 16);
+      const safeHissa = hissaNumber.replace(/[^0-9a-zA-Z]/g, '-').slice(0, 8);
+      const upi = `MH-CHA-${talukaCode}-${villageCode.slice(0, 8)}-${safeGat}-${safeHissa}`.slice(0, 64);
 
       records.push({
         upi,

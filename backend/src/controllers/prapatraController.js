@@ -4,6 +4,7 @@ import { exec, execFile } from 'child_process';
 import { promisify } from 'util';
 import prisma from '../config/prisma.js';
 import { archiveExcelToGCS } from '../config/gcs.js';
+import { parsePrapatraBuffer } from '../parsers/prapatraParserJs.js';
 
 const execAsync = promisify(exec);
 const execFileAsync = promisify(execFile);
@@ -1061,15 +1062,29 @@ export const uploadPrapatraExcel = async (req, res) => {
       // Read file buffer for immutable cloud archiving
       const fileBuffer = fs.readFileSync(tempFilePath);
 
-      // Run Python parser using execFileAsync with original filename passed for clean village identification
-      const { stdout } = await execFileAsync('python', [pythonScript, tempFilePath, targetTaluka, file.originalname], {
-        encoding: 'utf-8',
-        maxBuffer: 50 * 1024 * 1024
-      });
+      // Run Native Pure JavaScript parser (100% serverless compatible on Vercel without Python)
+      let parsedResult;
+      try {
+        parsedResult = await parsePrapatraBuffer(fileBuffer, targetTaluka, file.originalname);
+      } catch (jsErr) {
+        // Fallback to python if available
+        if (pythonScript) {
+          try {
+            const { stdout } = await execFileAsync('python', [pythonScript, tempFilePath, targetTaluka, file.originalname], {
+              encoding: 'utf-8',
+              maxBuffer: 50 * 1024 * 1024
+            });
+            parsedResult = JSON.parse(stdout);
+          } catch (pyErr) {
+            throw new Error(`एक्सेल तपासणीमध्ये त्रुटी (${file.originalname}): ${jsErr.message}`);
+          }
+        } else {
+          throw new Error(`एक्सेल तपासणीमध्ये त्रुटी (${file.originalname}): ${jsErr.message}`);
+        }
+      }
 
-      const parsedResult = JSON.parse(stdout);
-      if (!parsedResult.success) {
-        throw new Error(parsedResult.error || `एक्सेल तपासणीमध्ये त्रुटी: ${file.originalname}`);
+      if (!parsedResult || !parsedResult.success) {
+        throw new Error(parsedResult?.error || `एक्सेल तपासणीमध्ये त्रुटी: ${file.originalname}`);
       }
 
       const { villageName, stats, parcels, uniqueGatNumbers } = parsedResult;
