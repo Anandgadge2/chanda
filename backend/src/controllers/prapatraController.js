@@ -1086,6 +1086,14 @@ export const uploadPrapatraExcel = async (req, res) => {
         ? req.body.villageName.trim()
         : derivedVillage;
 
+      if (!parcels || parcels.length === 0) {
+        errors.push({
+          file: file.originalname,
+          error: `सदर एक्सेल फाईल '${file.originalname}' मध्ये कोणताही भूखंड / ७/१२ नोंद आढळली नाही. ही केवळ कोरी नमुना (Blank Template) फाईल असल्याचे दिसते. कृपया प्रत्यक्ष डेटा भरलेली गाव प्रपत्र फाईल अपलोड करा.`
+        });
+        continue;
+      }
+
       // Archive raw Excel copy to GCS audit store (immutable legal backup)
       let auditArchive = null;
       try {
@@ -1180,6 +1188,14 @@ export const uploadPrapatraExcel = async (req, res) => {
       let backwardCount = 0;
 
       if (parcels && parcels.length > 0) {
+        // Clear prior raw parcels for this village if re-uploading, to guarantee 100% synchronization with the updated sheet
+        await prisma.landParcel.deleteMany({
+          where: {
+            taluka: { equals: targetTaluka, mode: 'insensitive' },
+            villageName: { equals: finalVillage, mode: 'insensitive' }
+          }
+        });
+
         const talukaPrefix = targetTaluka.slice(0, 3).toUpperCase();
         const parcelData = parcels.map((p, idx) => {
           const safeGat = String(p.gatNumber || idx + 1).replace(/[^0-9a-zA-Z]/g, '-').slice(0, 16);

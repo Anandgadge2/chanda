@@ -245,7 +245,7 @@ export default function CasesPage() {
     },
     ...CHANDRAPUR_TALUKAS.map((t) => ({
       value: t.id,
-      label: isMarathi ? `तालुका ${t.nameMr}` : `${t.nameEn} Taluka`,
+      label: isMarathi ? t.nameMr : t.nameEn,
     })),
   ], [isMarathi]);
 

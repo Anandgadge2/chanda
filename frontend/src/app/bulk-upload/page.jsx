@@ -301,7 +301,7 @@ export default function BulkUploadPage() {
                 <SearchableSelect
                   options={CHANDRAPUR_TALUKAS.map((t) => ({
                     value: t.id,
-                    label: isMarathi ? `तालुका ${t.nameMr}` : `${t.nameEn} Taluka`
+                    label: isMarathi ? t.nameMr : t.nameEn
                   }))}
                   value={selectedTaluka}
                   onChange={(val) => {
@@ -401,11 +401,31 @@ export default function BulkUploadPage() {
             )}
 
             {result && result.mode === 'prapatra' && (
-              <div className="p-4 sm:p-5 rounded-2xl bg-emerald-50 border border-emerald-300 text-xs text-emerald-950 space-y-3">
-                <div className="flex items-center gap-2 font-bold text-sm text-emerald-900">
-                  <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+              <div className={`p-4 sm:p-5 rounded-2xl ${result.success ? 'bg-emerald-50 border-emerald-300 text-emerald-950' : 'bg-rose-50 border-rose-300 text-rose-950'} border text-xs space-y-3`}>
+                <div className="flex items-center gap-2 font-bold text-sm">
+                  {result.success ? (
+                    <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+                  ) : (
+                    <AlertCircle className="w-5 h-5 text-rose-600" />
+                  )}
                   <span>{result.message}</span>
                 </div>
+
+                {result.errors && result.errors.length > 0 && (
+                  <div className="p-3 bg-rose-100/80 border border-rose-300 rounded-xl space-y-1.5 text-rose-900">
+                    <div className="font-bold text-xs flex items-center gap-1.5">
+                      <AlertCircle className="w-4 h-4 text-rose-700 shrink-0" />
+                      <span>{isMarathi ? 'खालील फाईल्समध्ये त्रुटी आढळली:' : 'Errors occurred in the following file(s):'}</span>
+                    </div>
+                    <ul className="list-disc list-inside space-y-1 text-[11px] pl-1 font-medium">
+                      {result.errors.map((errItem, eIdx) => (
+                        <li key={eIdx}>
+                          <strong className="font-mono text-rose-950">{errItem.file}</strong>: {errItem.error}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
 
                 <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 sm:gap-3 pt-2 border-t border-emerald-200 text-center">
                   <div className="p-2 sm:p-2.5 bg-white rounded-lg border border-emerald-100">

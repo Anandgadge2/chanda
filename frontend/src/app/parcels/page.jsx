@@ -228,7 +228,7 @@ export default function ParcelsPage() {
     { value: '', label: isMarathi ? `सर्व तालुके (${CHANDRAPUR_TALUKAS.length})` : `All Talukas (${CHANDRAPUR_TALUKAS.length})` },
     ...CHANDRAPUR_TALUKAS.map((t) => ({
       value: t.id,
-      label: isMarathi ? `तालुका ${t.nameMr}` : `${t.nameEn} Taluka`
+      label: isMarathi ? t.nameMr : t.nameEn
     }))
   ], [isMarathi]);
 

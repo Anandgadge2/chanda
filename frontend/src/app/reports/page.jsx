@@ -467,7 +467,7 @@ export default function ReportsPage() {
     { value: 'all', label: isMarathi ? 'सर्व तालुके (१५)' : 'All Talukas (15)' },
     ...CHANDRAPUR_TALUKAS.map(t => ({
       value: t.id,
-      label: isMarathi ? `तालुका ${t.nameMr}` : `${t.nameEn} Taluka`
+      label: isMarathi ? t.nameMr : t.nameEn
     }))
   ], [isMarathi]);
 
