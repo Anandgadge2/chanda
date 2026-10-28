@@ -1068,9 +1068,11 @@ export default function ReportsPage() {
           </div>
 
           {/* =========================================================
-              VIEW 0: FULL 46-CHECKPOINTS & BACKWARD TIMELINE TABLE
+              VIEW CONTENT WRAPPER WITH PROPER VIEWPORT-CENTERED LOADER
           ========================================================= */}
-          {activeView === 'timeline' ? (
+          <div className="relative min-h-[460px]">
+            {/* VIEW 0: FULL 46-CHECKPOINTS & BACKWARD TIMELINE TABLE */}
+            {activeView === 'timeline' ? (
             <div>
               {/* Official Government Table Title Header Banner */}
               <div className="p-4 bg-gradient-to-r from-amber-50 via-blue-50/50 to-indigo-50 border-b border-slate-200 flex flex-col items-center text-center">
@@ -1380,7 +1382,7 @@ export default function ReportsPage() {
 
               {/* Pagination */}
               {parcels.length > 0 && (
-                <div className="p-3.5 border-t border-slate-200 bg-slate-50/60">
+                <div className={`p-3.5 border-t border-slate-200 bg-slate-50/60 ${loading ? 'opacity-50 pointer-events-none' : ''}`}>
                   <Pagination
                     currentPage={page}
                     totalCount={parcels.length}
@@ -1432,13 +1434,42 @@ export default function ReportsPage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
-                    {loading ? (
-                      <tr>
-                        <td colSpan={10} className="py-16 text-center text-slate-400">
-                          <RefreshCw className="w-6 h-6 animate-spin mx-auto text-blue-600 mb-2" />
-                          <span>{isMarathi ? 'माहिती लोड होत आहे, कृपया प्रतीक्षा करा...' : 'Loading data, please wait...'}</span>
-                        </td>
-                      </tr>
+                    {loading && paginatedParcels.length === 0 ? (
+                      Array.from({ length: 8 }).map((_, sIdx) => (
+                        <tr key={`skel-parcels-${sIdx}`} className="animate-pulse border-b border-slate-100">
+                          <td className="py-2.5 px-3 text-center border-r border-slate-100">
+                            <div className="h-4 w-6 bg-slate-200 rounded mx-auto" />
+                          </td>
+                          <td className="py-2.5 px-3 border-r border-slate-100">
+                            <div className="h-4 w-28 bg-slate-200 rounded mb-1" />
+                            <div className="h-2.5 w-16 bg-slate-100 rounded" />
+                          </td>
+                          <td className="py-2.5 px-3 text-center border-r border-slate-100">
+                            <div className="h-4 w-12 bg-slate-200 rounded mx-auto" />
+                          </td>
+                          <td className="py-2.5 px-3 text-right border-r border-slate-100">
+                            <div className="h-4 w-10 bg-slate-200 rounded ml-auto" />
+                          </td>
+                          <td className="py-2.5 px-3 border-r border-slate-100">
+                            <div className="h-4 w-32 bg-slate-200 rounded" />
+                          </td>
+                          <td className="py-2.5 px-3 text-center border-r border-slate-100">
+                            <div className="h-5 w-20 bg-slate-200 rounded-md mx-auto" />
+                          </td>
+                          <td className="py-2.5 px-3 border-r border-slate-100">
+                            <div className="h-4 w-24 bg-slate-200 rounded" />
+                          </td>
+                          <td className="py-2.5 px-3 border-r border-slate-100">
+                            <div className="h-5 w-16 bg-slate-200 rounded-md" />
+                          </td>
+                          <td className="py-2.5 px-3 border-r border-slate-100">
+                            <div className="h-4 w-20 bg-slate-100 rounded" />
+                          </td>
+                          <td className="py-2.5 px-3 text-center">
+                            <div className="h-6 w-12 bg-slate-200 rounded-lg mx-auto" />
+                          </td>
+                        </tr>
+                      ))
                     ) : paginatedParcels.length === 0 ? (
                       <tr>
                         <td colSpan={10} className="py-16 text-center text-slate-400">
@@ -1518,7 +1549,7 @@ export default function ReportsPage() {
 
               {/* Pagination */}
               {parcels.length > 0 && (
-                <div className="p-3.5 border-t border-slate-200 bg-slate-50/60">
+                <div className={`p-3.5 border-t border-slate-200 bg-slate-50/60 ${loading ? 'opacity-50 pointer-events-none' : ''}`}>
                   <Pagination
                     currentPage={page}
                     totalCount={parcels.length}
@@ -1712,6 +1743,33 @@ export default function ReportsPage() {
                         }
                       }
 
+                      if (loading && displayRows.length === 0) {
+                        return Array.from({ length: 8 }).map((_, sIdx) => (
+                          <tr key={`skel-goshwara-${sIdx}`} className="animate-pulse border-b border-slate-100">
+                            <td className="py-2.5 px-2.5 text-center border-r border-slate-100">
+                              <div className="h-4 w-6 bg-slate-200 rounded mx-auto" />
+                            </td>
+                            <td className="py-2.5 px-3 border-r border-slate-100">
+                              <div className="h-4 w-32 bg-slate-200 rounded" />
+                            </td>
+                            <td className="py-2.5 px-2.5 text-center border-r border-slate-100">
+                              <div className="h-4 w-10 bg-slate-200 rounded mx-auto" />
+                            </td>
+                            <td className="py-2.5 px-2.5 text-right border-r border-slate-100">
+                              <div className="h-4 w-12 bg-slate-200 rounded ml-auto" />
+                            </td>
+                            {Array.from({ length: 10 }).map((__, cIdx) => (
+                              <td key={cIdx} className="py-2.5 px-1.5 text-center border-r border-slate-100">
+                                <div className="h-4 w-8 bg-slate-100 rounded mx-auto" />
+                              </td>
+                            ))}
+                            <td className="py-2.5 px-3">
+                              <div className="h-4 w-20 bg-slate-100 rounded" />
+                            </td>
+                          </tr>
+                        ));
+                      }
+
                       if (displayRows.length === 0) {
                         return (
                           <tr>
@@ -1840,6 +1898,55 @@ export default function ReportsPage() {
               </div>
             </div>
           )}
+
+          {/* Proper Loader Overlay (Guaranteed Centered in User Viewport Regardless of 6000px Table Width) */}
+          {loading && (
+            <div className="absolute inset-0 z-40 bg-white/85 backdrop-blur-[2px] flex flex-col items-center justify-center p-4 sm:p-6 text-center select-none transition-all duration-200">
+              <div className="bg-white/95 border border-slate-200/90 shadow-2xl rounded-3xl p-6 sm:p-8 max-w-md w-full mx-auto flex flex-col items-center">
+                {/* National Tricolor micro bar */}
+                <div className="h-1 w-24 bg-gradient-to-r from-amber-500 via-blue-600 to-emerald-600 rounded-full mb-5" />
+
+                {/* Dual-ring Official Spinner */}
+                <div className="relative w-16 h-16 sm:w-20 sm:h-20 mb-4 flex items-center justify-center">
+                  <div className="absolute inset-0 rounded-full border-4 border-slate-100" />
+                  <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-amber-500 border-r-emerald-600 animate-spin" style={{ animationDuration: '1.2s' }} />
+                  <div className="absolute inset-2 rounded-full border-3 border-transparent border-b-blue-900 border-l-blue-600 animate-spin" style={{ animationDirection: 'reverse', animationDuration: '0.9s' }} />
+                  <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center shadow-xs">
+                    <FileSpreadsheet className="w-5 h-5 text-blue-900 animate-pulse" />
+                  </div>
+                </div>
+
+                {/* Headline */}
+                <h3 className="text-base sm:text-lg font-black text-slate-900 tracking-tight">
+                  {isMarathi ? 'अधिकार अभिलेख व तपासणी सूची लोड होत आहे...' : 'Loading Record of Rights & Audit Matrix...'}
+                </h3>
+
+                {/* Subtitle */}
+                <p className="text-xs text-slate-500 mt-2 max-w-xs leading-relaxed">
+                  {isMarathi
+                    ? 'कृपया थोडा वेळ प्रतीक्षा करा. चंद्रपूर जिल्ह्यातील १५ तालुक्यांमधील मूळ ७/१२ व ४६ वैधानिक मुद्द्यांची माहिती संकलित होत आहे.'
+                    : 'Please wait while 46 statutory checkpoints, title chains, and baseline land records are fetched.'}
+                </p>
+
+                {/* Jurisdiction Badge */}
+                <div className="mt-4 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 text-slate-800 border border-slate-200 text-[11px] font-semibold">
+                  <MapPin className="w-3.5 h-3.5 text-blue-700 shrink-0" />
+                  <span>
+                    {taluka === 'all'
+                      ? (isMarathi ? 'संपूर्ण चंद्रपूर जिल्हा (१५ तालुके)' : 'Whole Chandrapur District')
+                      : (isMarathi ? `तालुका: ${taluka}` : `Taluka: ${taluka}`)}
+                    {village !== 'all' && ` • ${cleanVillageName(village)}`}
+                  </span>
+                </div>
+
+                {/* Indeterminate Progress Shimmer */}
+                <div className="w-56 h-1.5 bg-slate-100 rounded-full overflow-hidden mt-4 relative">
+                  <div className="absolute inset-0 bg-gradient-to-r from-amber-500 via-blue-600 to-emerald-600 rounded-full animate-pulse" />
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
 
           {/* =========================================================
               OFFICIAL 3-TIER SIGNATURE BLOCK
