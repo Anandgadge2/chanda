@@ -352,9 +352,9 @@ export default function EditParcelModal({ isOpen, onClose, parcel, onUpdateSucce
     <div
       role="dialog"
       aria-modal="true"
-      className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 md:p-6 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200 overflow-y-auto"
+      className="fixed inset-0 z-[60] flex items-center justify-center p-2 sm:p-4 md:p-6 bg-slate-950/65 backdrop-blur-xs animate-in fade-in duration-200 overflow-y-auto"
     >
-      <div className="bg-white rounded-2xl sm:rounded-3xl shadow-2xl border border-slate-200/90 w-full max-w-4xl overflow-hidden flex flex-col max-h-[94vh] sm:max-h-[90vh] my-auto">
+      <div className="bg-white rounded-2xl sm:rounded-3xl shadow-2xl border border-slate-200/90 w-full max-w-4xl h-[90vh] max-h-[820px] overflow-hidden flex flex-col animate-in zoom-in-95 duration-150 my-auto">
         {/* National Tricolor Micro Accent Line (Portal Theme) */}
         <div className="h-1 sm:h-1.5 w-full bg-gradient-to-r from-amber-500 via-white to-emerald-600 shrink-0" />
 
@@ -391,7 +391,7 @@ export default function EditParcelModal({ isOpen, onClose, parcel, onUpdateSucce
           <button
             type="button"
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 transition flex items-center justify-center cursor-pointer shrink-0"
+            className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 transition flex items-center justify-center cursor-pointer shrink-0"
             title={isMarathi ? 'बंद करा' : 'Close'}
           >
             <X className="w-4 h-4" />
@@ -443,534 +443,537 @@ export default function EditParcelModal({ isOpen, onClose, parcel, onUpdateSucce
           </button>
         </div>
 
-        {/* Form Body (Scrollable) */}
-        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 sm:py-5 space-y-4 sm:space-y-5">
-          {error && (
-            <div className="p-3.5 bg-rose-50 border border-rose-200 rounded-xl text-xs sm:text-sm text-rose-800 flex items-start gap-2.5 shadow-2xs">
-              <AlertCircle className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
-              <div>
-                <span className="font-bold">{isMarathi ? 'त्रुटी:' : 'Error:'}</span> {error}
-              </div>
-            </div>
-          )}
-
-          {successMsg && (
-            <div className="p-3.5 bg-emerald-50 border border-emerald-200 rounded-xl text-xs sm:text-sm text-emerald-800 flex items-center gap-2.5 shadow-2xs">
-              <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
-              <span className="font-semibold">{successMsg}</span>
-            </div>
-          )}
-
-          {/* TAB 1: CURRENT 7/12 (Dual Area Support) */}
-          {activeTab === 'current' && (
-            <div className="space-y-4">
-              <div>
-                <label className="block text-xs font-bold text-slate-800 mb-1.5">
-                  <User className="w-3.5 h-3.5 inline mr-1 text-slate-500" />
-                  {isMarathi ? 'भोगवटदाराचे नाव (सद्यस्थितीतील ७/१२ प्रमाणे)' : 'Current 7/12 Landholder / Occupant Name'} <span className="text-rose-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={ownerName}
-                  onChange={(e) => setOwnerName(e.target.value)}
-                  className="w-full text-xs sm:text-sm px-3.5 py-2.5 bg-white text-slate-900 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 font-medium transition placeholder:text-slate-400"
-                  placeholder={isMarathi ? 'उदा. प्रशांत बाबा लिहितकर व इतर' : 'e.g. Prashant Baba Lihitkar and others'}
-                />
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {/* Form with flex-1 and min-h-0 so it doesn't push the footer off screen */}
+        <form onSubmit={handleSubmit} className="flex-1 min-h-0 flex flex-col overflow-hidden">
+          {/* Scrollable Form Body */}
+          <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 sm:py-5 space-y-4 sm:space-y-5 bg-white">
+            {error && (
+              <div className="p-3.5 bg-rose-50 border border-rose-200 rounded-xl text-xs sm:text-sm text-rose-800 flex items-start gap-2.5 shadow-2xs">
+                <AlertCircle className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
                 <div>
-                  <label className="block text-xs font-bold text-slate-800 mb-1.5">
-                    <ShieldAlert className="w-3.5 h-3.5 inline mr-1 text-slate-500" />
-                    {isMarathi ? 'भोगवटदार वर्ग (भूधारणा नुसार)' : 'Tenure Class'} <span className="text-rose-500">*</span>
-                  </label>
-                  <select
-                    value={tenureClass}
-                    onChange={(e) => setTenureClass(e.target.value)}
-                    className="w-full text-xs sm:text-sm px-3.5 py-2.5 bg-white text-slate-900 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 font-medium cursor-pointer"
-                  >
-                    {TENURE_OPTIONS.map((opt) => (
-                      <option key={opt.value} value={opt.value}>
-                        {isMarathi ? opt.labelMr : `${opt.labelEn} — ${opt.labelMr}`}
-                      </option>
-                    ))}
-                  </select>
-                  <p className="mt-1 text-[11px] text-slate-500 leading-normal">
-                    {isMarathi ? selectedTenureConfig.descriptionMr : selectedTenureConfig.descriptionEn}
-                  </p>
+                  <span className="font-bold">{isMarathi ? 'त्रुटी:' : 'Error:'}</span> {error}
                 </div>
+              </div>
+            )}
 
+            {successMsg && (
+              <div className="p-3.5 bg-emerald-50 border border-emerald-200 rounded-xl text-xs sm:text-sm text-emerald-800 flex items-center gap-2.5 shadow-2xs">
+                <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+                <span className="font-semibold">{successMsg}</span>
+              </div>
+            )}
+
+            {/* TAB 1: CURRENT 7/12 (Dual Area Support) */}
+            {activeTab === 'current' && (
+              <div className="space-y-4">
                 <div>
                   <label className="block text-xs font-bold text-slate-800 mb-1.5">
-                    {isMarathi ? 'जुना सर्व्हे क्रमांक (Old Survey No)' : 'Old Survey Number'}
+                    <User className="w-3.5 h-3.5 inline mr-1 text-slate-500" />
+                    {isMarathi ? 'भोगवटदाराचे नाव (सद्यस्थितीतील ७/१२ प्रमाणे)' : 'Current 7/12 Landholder / Occupant Name'} <span className="text-rose-500">*</span>
                   </label>
                   <input
                     type="text"
-                    value={oldSurveyNo}
-                    onChange={(e) => setOldSurveyNo(e.target.value)}
-                    className="w-full text-xs sm:text-sm px-3.5 py-2.5 bg-white text-slate-900 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 font-mono transition placeholder:text-slate-400"
-                    placeholder={isMarathi ? 'उदा. 12/1 किंवा 45' : 'e.g. 12/1 or 45'}
+                    required
+                    value={ownerName}
+                    onChange={(e) => setOwnerName(e.target.value)}
+                    className="w-full text-xs sm:text-sm px-3.5 py-2.5 bg-white text-slate-900 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 font-medium transition placeholder:text-slate-400"
+                    placeholder={isMarathi ? 'उदा. प्रशांत बाबा लिहितकर व इतर' : 'e.g. Prashant Baba Lihitkar and others'}
                   />
                 </div>
-              </div>
 
-              {/* DUAL AREA INPUTS (कृषक हे.आर. + अकृषक आर चौ.मी.) */}
-              <div className="p-3.5 sm:p-4 bg-slate-50/80 border border-slate-200 rounded-xl space-y-3">
-                <div className="text-xs font-bold text-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-                  <span className="flex items-center gap-1.5">
-                    <LandPlot className="w-4 h-4 text-blue-600 shrink-0" />
-                    {isMarathi ? 'जमिनीचे क्षेत्र विभाजन (कृषक व अकृषक)' : 'Land Area Breakdown (Agricultural & Non-Agricultural)'}
-                  </span>
-                  <span className="text-[11px] text-slate-500 font-mono">
-                    {isMarathi ? 'एकूण क्षेत्र स्वयंचलित' : 'Total Area Auto-calculated'}
-                  </span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-800 mb-1.5">
+                      <ShieldAlert className="w-3.5 h-3.5 inline mr-1 text-slate-500" />
+                      {isMarathi ? 'भोगवटदार वर्ग (भूधारणा नुसार)' : 'Tenure Class'} <span className="text-rose-500">*</span>
+                    </label>
+                    <select
+                      value={tenureClass}
+                      onChange={(e) => setTenureClass(e.target.value)}
+                      className="w-full text-xs sm:text-sm px-3.5 py-2.5 bg-white text-slate-900 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 font-medium cursor-pointer"
+                    >
+                      {TENURE_OPTIONS.map((opt) => (
+                        <option key={opt.value} value={opt.value}>
+                          {isMarathi ? opt.labelMr : `${opt.labelEn} — ${opt.labelMr}`}
+                        </option>
+                      ))}
+                    </select>
+                    <p className="mt-1 text-[11px] text-slate-500 leading-normal">
+                      {isMarathi ? selectedTenureConfig.descriptionMr : selectedTenureConfig.descriptionEn}
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-800 mb-1.5">
+                      {isMarathi ? 'जुना सर्व्हे क्रमांक (Old Survey No)' : 'Old Survey Number'}
+                    </label>
+                    <input
+                      type="text"
+                      value={oldSurveyNo}
+                      onChange={(e) => setOldSurveyNo(e.target.value)}
+                      className="w-full text-xs sm:text-sm px-3.5 py-2.5 bg-white text-slate-900 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 font-mono transition placeholder:text-slate-400"
+                      placeholder={isMarathi ? 'उदा. 12/1 किंवा 45' : 'e.g. 12/1 or 45'}
+                    />
+                  </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {/* DUAL AREA INPUTS (कृषक हे.आर. + अकृषक आर चौ.मी.) */}
+                <div className="p-3.5 sm:p-4 bg-slate-50/80 border border-slate-200 rounded-xl space-y-3">
+                  <div className="text-xs font-bold text-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                    <span className="flex items-center gap-1.5">
+                      <LandPlot className="w-4 h-4 text-blue-600 shrink-0" />
+                      {isMarathi ? 'जमिनीचे क्षेत्र विभाजन (कृषक व अकृषक)' : 'Land Area Breakdown (Agricultural & Non-Agricultural)'}
+                    </span>
+                    <span className="text-[11px] text-slate-500 font-mono">
+                      {isMarathi ? 'एकूण क्षेत्र स्वयंचलित' : 'Total Area Auto-calculated'}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                        {isMarathi ? 'कृषक क्षेत्र (हेक्टर.आर)' : 'Agricultural Area (Ha.Are)'} <span className="text-rose-500">*</span>
+                      </label>
+                      <input
+                        type="number"
+                        step="0.0001"
+                        min="0"
+                        required
+                        value={agriAreaHa}
+                        onChange={(e) => handleAgriChange(e.target.value)}
+                        className="w-full text-xs sm:text-sm px-3 py-2 bg-white text-slate-900 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 font-mono"
+                        placeholder="0.0000"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                        {isMarathi ? 'अकृषक क्षेत्र (आर चौ.मी)' : 'Non-Agricultural Area (R.Sq.M)'}
+                      </label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        value={naAreaSqM}
+                        onChange={(e) => handleNaChange(e.target.value)}
+                        className="w-full text-xs sm:text-sm px-3 py-2 bg-white text-slate-900 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 font-mono"
+                        placeholder="0.00"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-bold text-blue-900 mb-1">
+                        {isMarathi ? 'एकूण क्षेत्र (हेक्टर मध्ये)' : 'Total Computed Area (Ha)'}
+                      </label>
+                      <input
+                        type="text"
+                        readOnly
+                        value={`${totalAreaHa} Ha`}
+                        className="w-full text-xs sm:text-sm px-3 py-2 bg-blue-50 text-blue-900 border border-blue-200 rounded-lg font-mono font-bold"
+                      />
+                    </div>
+                  </div>
+
                   <div>
                     <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                      {isMarathi ? 'कृषक क्षेत्र (हेक्टर.आर)' : 'Agricultural Area (Ha.Are)'} <span className="text-rose-500">*</span>
+                      {isMarathi ? 'पोटखराबा क्षेत्र (हेक्टर मध्ये)' : 'Potkharaba Area (Ha)'}
                     </label>
                     <input
                       type="number"
                       step="0.0001"
                       min="0"
-                      required
-                      value={agriAreaHa}
-                      onChange={(e) => handleAgriChange(e.target.value)}
+                      value={potkharabaAreaHa}
+                      onChange={(e) => setPotkharabaAreaHa(e.target.value)}
                       className="w-full text-xs sm:text-sm px-3 py-2 bg-white text-slate-900 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 font-mono"
                       placeholder="0.0000"
                     />
                   </div>
-
-                  <div>
-                    <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                      {isMarathi ? 'अकृषक क्षेत्र (आर चौ.मी)' : 'Non-Agricultural Area (R.Sq.M)'}
-                    </label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      value={naAreaSqM}
-                      onChange={(e) => handleNaChange(e.target.value)}
-                      className="w-full text-xs sm:text-sm px-3 py-2 bg-white text-slate-900 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 font-mono"
-                      placeholder="0.00"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-[11px] font-bold text-blue-900 mb-1">
-                      {isMarathi ? 'एकूण क्षेत्र (हेक्टर मध्ये)' : 'Total Computed Area (Ha)'}
-                    </label>
-                    <input
-                      type="text"
-                      readOnly
-                      value={`${totalAreaHa} Ha`}
-                      className="w-full text-xs sm:text-sm px-3 py-2 bg-blue-50 text-blue-900 border border-blue-200 rounded-lg font-mono font-bold"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                    {isMarathi ? 'पोटखराबा क्षेत्र (हेक्टर मध्ये)' : 'Potkharaba Area (Ha)'}
-                  </label>
-                  <input
-                    type="number"
-                    step="0.0001"
-                    min="0"
-                    value={potkharabaAreaHa}
-                    onChange={(e) => setPotkharabaAreaHa(e.target.value)}
-                    className="w-full text-xs sm:text-sm px-3 py-2 bg-white text-slate-900 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 font-mono"
-                    placeholder="0.0000"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-800 mb-1.5">
-                  {isMarathi ? 'इतर अधिकारातील नोंद (कुळ, आदिवासी, बोजा, लीज इ.)' : 'Other Rights Entry (Tenancy, Tribal, Charges, Lease)'}
-                </label>
-                <textarea
-                  rows={2}
-                  value={otherRights}
-                  onChange={(e) => setOtherRights(e.target.value)}
-                  className="w-full text-xs sm:text-sm px-3.5 py-2.5 bg-white text-slate-900 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 transition placeholder:text-slate-400"
-                  placeholder={isMarathi ? 'उदा. सक्षम प्राधिकाऱ्यांच्या पूर्व परवानगी शिवाय हस्तांतरास बंदी...' : 'e.g. Alienation barred without sanction of SDO...'}
-                />
-              </div>
-
-              <label className="flex items-center gap-3 p-3.5 bg-amber-50/70 border border-amber-200/90 rounded-xl cursor-pointer hover:bg-amber-100/50 transition select-none">
-                <input
-                  type="checkbox"
-                  id="hasActiveDispute"
-                  checked={hasActiveDispute}
-                  onChange={(e) => setHasActiveDispute(e.target.checked)}
-                  className="rounded text-blue-600 focus:ring-blue-500 w-4 h-4 cursor-pointer shrink-0"
-                />
-                <span className="text-xs font-semibold text-amber-950 leading-snug">
-                  {isMarathi
-                    ? 'सदर जमिनीवर सक्रिय महसूल वाद / न्यायालयीन प्रकरण प्रलंबित आहे (Active Dispute Flag)'
-                    : 'Active revenue dispute or court litigation pending for this parcel'}
-                </span>
-              </label>
-            </div>
-          )}
-
-          {/* TAB 2: AUDIT CHECKPOINTS & 16 STATUTORY SUB-TYPES */}
-          {activeTab === 'audit' && (
-            <div className="space-y-4">
-              {/* Statutory Sub-Type Dropdown per Client's Sheet 2 & 4 */}
-              <div className="p-3.5 sm:p-4 bg-indigo-50/70 border border-indigo-200/90 rounded-xl space-y-2">
-                <label className="block text-xs font-bold text-indigo-950">
-                  <Scale className="w-4 h-4 inline mr-1 text-indigo-600" />
-                  {isMarathi ? 'जमिनीचा वैधानिक उपप्रकार (Dropdown Sheet प्रमाणे १६ उपप्रकार)' : 'Statutory Sub-Type Category (Per Dropdown Master)'}
-                </label>
-                <select
-                  value={subTypeCategory}
-                  onChange={(e) => setSubTypeCategory(e.target.value)}
-                  className="w-full text-xs sm:text-sm px-3.5 py-2.5 bg-white text-slate-900 border border-indigo-300 rounded-xl focus:ring-2 focus:ring-indigo-500/20 font-medium cursor-pointer"
-                >
-                  {STATUTORY_SUB_TYPES.map((sub) => (
-                    <option key={sub.id} value={sub.nameMr}>
-                      {sub.nameMr}
-                    </option>
-                  ))}
-                </select>
-                <p className="text-[11px] text-indigo-800 leading-normal">
-                  {isMarathi
-                    ? 'हा उपप्रकार निवडल्यास हा सर्व्हे नंबर आपोआप संबंधित वैधानिक पुस्तकात (Booklet 1-17) आणि प्रपत्रात वर्गीकृत होईल.'
-                    : 'Selecting this sub-type categorizes this parcel into the appropriate statutory booklet and Prapatra report.'}
-                </p>
-              </div>
-
-              {/* Breach of Condition (शर्तभंग) */}
-              <div className="p-3.5 sm:p-4 bg-rose-50/50 border border-rose-200/80 rounded-xl space-y-3">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
-                  <span className="text-xs font-bold text-rose-950 flex items-center gap-1.5">
-                    <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" />
-                    <span>{isMarathi ? 'मुद्दा ३७: मौका चौकशीअंती शर्तभंग झालेला आहे काय?' : 'Point 37: Has Condition Breach Occurred?'}</span>
-                  </span>
-                  <div className="flex items-center gap-2 shrink-0">
-                    <label className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-bold cursor-pointer transition select-none ${
-                      isShartbhang ? 'bg-rose-100 border-rose-300 text-rose-900 shadow-2xs' : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
-                    }`}>
-                      <input
-                        type="radio"
-                        name="isShartbhang"
-                        checked={isShartbhang}
-                        onChange={() => setIsShartbhang(true)}
-                        className="text-rose-600 focus:ring-rose-500 w-3.5 h-3.5"
-                      />
-                      <span>{isMarathi ? 'होय (Yes)' : 'Yes'}</span>
-                    </label>
-                    <label className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-bold cursor-pointer transition select-none ${
-                      !isShartbhang ? 'bg-slate-100 border-slate-300 text-slate-800 shadow-2xs' : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
-                    }`}>
-                      <input
-                        type="radio"
-                        name="isShartbhang"
-                        checked={!isShartbhang}
-                        onChange={() => setIsShartbhang(false)}
-                        className="text-slate-600 focus:ring-slate-500 w-3.5 h-3.5"
-                      />
-                      <span>{isMarathi ? 'नाही (No)' : 'No'}</span>
-                    </label>
-                  </div>
-                </div>
-
-                {isShartbhang && (
-                  <div>
-                    <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                      {isMarathi ? 'शर्तभंगाचा तपशील (वापरात बदल / अनधिकृत हस्तांतरण / गैरकृषक वापर)' : 'Breach Specifics (Change of Use / Unauthorized Transfer / Illegal NA)'}
-                    </label>
-                    <input
-                      type="text"
-                      value={shartbhangDetail}
-                      onChange={(e) => setShartbhangDetail(e.target.value)}
-                      className="w-full text-xs px-3 py-2 bg-white text-slate-900 border border-rose-300 rounded-lg focus:ring-2 focus:ring-rose-500/20"
-                      placeholder={isMarathi ? 'उदा. विनापरवानगी व्यापारी वापर सुरू केला' : 'e.g. Commercial usage without authorization'}
-                    />
-                  </div>
-                )}
-              </div>
-
-              {/* Unauthorized Class-2 to Class-1 Conversion (वर्ग-२ चे वर्ग-१ रूपांतरण) */}
-              <div className="p-3.5 sm:p-4 bg-amber-50/50 border border-amber-200/80 rounded-xl space-y-3">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
-                  <span className="text-xs font-bold text-amber-950 flex items-center gap-1.5">
-                    <ShieldAlert className="w-4 h-4 text-amber-600 shrink-0" />
-                    <span>{isMarathi ? 'मुद्दा ३६: परवानगीशिवाय वर्ग-२ मधून वर्ग-१ मध्ये रूपांतरित झालेली आहे काय?' : 'Point 36: Converted from Class-2 to Class-1 without sanction?'}</span>
-                  </span>
-                  <div className="flex items-center gap-2 shrink-0">
-                    <label className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-bold cursor-pointer transition select-none ${
-                      isClass2To1 ? 'bg-amber-100 border-amber-300 text-amber-900 shadow-2xs' : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
-                    }`}>
-                      <input
-                        type="radio"
-                        name="isClass2To1"
-                        checked={isClass2To1}
-                        onChange={() => setIsClass2To1(true)}
-                        className="text-amber-600 focus:ring-amber-500 w-3.5 h-3.5"
-                      />
-                      <span>{isMarathi ? 'होय (Yes)' : 'Yes'}</span>
-                    </label>
-                    <label className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-bold cursor-pointer transition select-none ${
-                      !isClass2To1 ? 'bg-slate-100 border-slate-300 text-slate-800 shadow-2xs' : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
-                    }`}>
-                      <input
-                        type="radio"
-                        name="isClass2To1"
-                        checked={!isClass2To1}
-                        onChange={() => setIsClass2To1(false)}
-                        className="text-slate-600 focus:ring-slate-500 w-3.5 h-3.5"
-                      />
-                      <span>{isMarathi ? 'नाही (No)' : 'No'}</span>
-                    </label>
-                  </div>
-                </div>
-
-                {isClass2To1 && (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-                    <div>
-                      <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                        {isMarathi ? 'सक्षम प्राधिकाऱ्यांचे पदनाम (Collector / SDO)' : 'Sanctioning Authority Designation'}
-                      </label>
-                      <input
-                        type="text"
-                        value={sanctionAuthority}
-                        onChange={(e) => setSanctionAuthority(e.target.value)}
-                        className="w-full text-xs px-3 py-2 bg-white text-slate-900 border border-amber-300 rounded-lg"
-                        placeholder={isMarathi ? 'उदा. उपविभागीय अधिकारी (SDO)' : 'e.g. SDO Warora'}
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                        {isMarathi ? 'आदेश क्रमांक व दिनांक' : 'Order Number & Date'}
-                      </label>
-                      <input
-                        type="text"
-                        value={sanctionOrderNo}
-                        onChange={(e) => setSanctionOrderNo(e.target.value)}
-                        className="w-full text-xs px-3 py-2 bg-white text-slate-900 border border-amber-300 rounded-lg"
-                        placeholder={isMarathi ? 'उदा. महसूल/कावि-४२/२०२१' : 'e.g. REV/ORD/2021/89'}
-                      />
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Other Critical Statutory Checkpoints Toggle Grid - Interactive Labels */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <label className={`p-3 rounded-xl border flex items-center justify-between gap-3 cursor-pointer transition select-none ${
-                  isIllegalDeletion ? 'bg-blue-50/70 border-blue-300 shadow-2xs' : 'bg-slate-50/80 border-slate-200 hover:bg-slate-100/70'
-                }`}>
-                  <span className="text-xs font-medium text-slate-800 leading-snug">
-                    {isMarathi ? 'मुद्दा १८: अवैधरीत्या सरकार नोंद कमी केली आहे काय?' : 'Pt 18: Govt name illegally removed?'}
-                  </span>
-                  <input
-                    type="checkbox"
-                    checked={isIllegalDeletion}
-                    onChange={(e) => setIsIllegalDeletion(e.target.checked)}
-                    className="w-4 h-4 text-blue-600 rounded cursor-pointer shrink-0"
-                  />
-                </label>
-
-                <label className={`p-3 rounded-xl border flex items-center justify-between gap-3 cursor-pointer transition select-none ${
-                  isPokalist ? 'bg-blue-50/70 border-blue-300 shadow-2xs' : 'bg-slate-50/80 border-slate-200 hover:bg-slate-100/70'
-                }`}>
-                  <span className="text-xs font-medium text-slate-800 leading-snug">
-                    {isMarathi ? 'मुद्दा १९: पोकळीस्त नोंदी (बु.ग.दे./ता.ग.दे.) आहेत काय?' : 'Pt 19: Hollow non-statutory entries?'}
-                  </span>
-                  <input
-                    type="checkbox"
-                    checked={isPokalist}
-                    onChange={(e) => setIsPokalist(e.target.checked)}
-                    className="w-4 h-4 text-blue-600 rounded cursor-pointer shrink-0"
-                  />
-                </label>
-
-                <label className={`p-3 rounded-xl border flex items-center justify-between gap-3 cursor-pointer transition select-none ${
-                  isEncroached ? 'bg-blue-50/70 border-blue-300 shadow-2xs' : 'bg-slate-50/80 border-slate-200 hover:bg-slate-100/70'
-                }`}>
-                  <span className="text-xs font-medium text-slate-800 leading-snug">
-                    {isMarathi ? 'मुद्दा १५: जमिनीवर अतिक्रमण आहे काय?' : 'Pt 15: Encroachment present?'}
-                  </span>
-                  <input
-                    type="checkbox"
-                    checked={isEncroached}
-                    onChange={(e) => setIsEncroached(e.target.checked)}
-                    className="w-4 h-4 text-blue-600 rounded cursor-pointer shrink-0"
-                  />
-                </label>
-
-                <label className={`p-3 rounded-xl border flex items-center justify-between gap-3 cursor-pointer transition select-none ${
-                  isMojaniDone ? 'bg-blue-50/70 border-blue-300 shadow-2xs' : 'bg-slate-50/80 border-slate-200 hover:bg-slate-100/70'
-                }`}>
-                  <span className="text-xs font-medium text-slate-800 leading-snug">
-                    {isMarathi ? 'मुद्दा १६: सदर गटाचे KML तयार केले आहे काय?' : 'Pt 16: KML prepared?'}
-                  </span>
-                  <input
-                    type="checkbox"
-                    checked={isMojaniDone}
-                    onChange={(e) => setIsMojaniDone(e.target.checked)}
-                    className="w-4 h-4 text-blue-600 rounded cursor-pointer shrink-0"
-                  />
-                </label>
-
-                <label className={`p-3 rounded-xl border flex items-center justify-between gap-3 sm:col-span-2 cursor-pointer transition select-none ${
-                  isForm1KUpdated ? 'bg-blue-50/70 border-blue-300 shadow-2xs' : 'bg-slate-50/80 border-slate-200 hover:bg-slate-100/70'
-                }`}>
-                  <span className="text-xs font-medium text-slate-800 leading-snug">
-                    {isMarathi ? 'मुद्दा ४६: गाव नमुना १-क अद्यावत आहे काय?' : 'Pt 46: Village Form 1-K updated per statutory rules?'}
-                  </span>
-                  <input
-                    type="checkbox"
-                    checked={isForm1KUpdated}
-                    onChange={(e) => setIsForm1KUpdated(e.target.checked)}
-                    className="w-4 h-4 text-blue-600 rounded cursor-pointer shrink-0"
-                  />
-                </label>
-              </div>
-            </div>
-          )}
-
-          {/* TAB 3: HISTORICAL TIMELINE EPOCHS (1950, 1972, 1995) */}
-          {activeTab === 'timeline' && (
-            <div className="space-y-4">
-              <div className="p-3.5 bg-blue-50/70 border border-blue-200/80 rounded-xl text-xs text-blue-900 flex items-start gap-2.5">
-                <Info className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
-                <div className="leading-relaxed">
-                  {isMarathi
-                    ? 'येथून तुम्ही १९५० मूळ बंदोबस्त नोंद, एकत्रिकरण नोंद (~१९७२), किंवा पुनर्मोजणी नोंद (~१९९५) मधील खातेदार, भूधारणा वर्ग, फेरफार व क्षेत्र थेट दुरुस्त करू शकता.'
-                    : 'Inspect and rectify historical landholder, tenure classification, mutation number, and recorded area across 1950, ~1972, and ~1995 records.'}
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-800 mb-2">
-                  {isMarathi ? 'दुरुस्ती करावयाचा कालक्रम टप्पा निवडा' : 'Select Timeline Epoch to Rectify'} <span className="text-rose-500">*</span>
-                </label>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-2.5">
-                  {EPOCH_OPTIONS.map((ep) => {
-                    const isSelected = selectedEpochYear === ep.yr;
-                    return (
-                      <button
-                        key={ep.yr}
-                        type="button"
-                        onClick={() => handleEpochSelect(ep.yr)}
-                        className={`p-3 rounded-xl border text-left transition cursor-pointer flex flex-col justify-between gap-1.5 ${
-                          isSelected
-                            ? 'bg-blue-600 text-white border-blue-600 shadow-xs ring-2 ring-blue-500/20'
-                            : 'bg-white text-slate-800 border-slate-200 hover:bg-slate-50 hover:border-slate-300'
-                        }`}
-                      >
-                        <span className={`text-xs font-bold ${isSelected ? 'text-white' : 'text-slate-900'}`}>
-                          {isMarathi ? ep.titleMr : ep.titleEn}
-                        </span>
-                        <span className={`text-[11px] ${isSelected ? 'text-blue-100' : 'text-slate-500'}`}>
-                          {isMarathi ? ep.subtitleMr : ep.subtitleEn}
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
-                <div>
-                  <label className="block text-xs font-bold text-slate-800 mb-1.5">
-                    {isMarathi ? 'नोंदणीकृत खातेदाराचे नाव' : 'Recorded Owner Name'} <span className="text-rose-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={epochOwner}
-                    onChange={(e) => setEpochOwner(e.target.value)}
-                    className="w-full text-xs sm:text-sm px-3.5 py-2.5 bg-white text-slate-900 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500/20 font-medium"
-                    placeholder="उदा. मारोती संबा"
-                  />
                 </div>
 
                 <div>
                   <label className="block text-xs font-bold text-slate-800 mb-1.5">
-                    {isMarathi ? 'भूधारणा वर्ग (Tenure per Epoch)' : 'Tenure Class'}
+                    {isMarathi ? 'इतर अधिकारातील नोंद (कुळ, आदिवासी, बोजा, लीज इ.)' : 'Other Rights Entry (Tenancy, Tribal, Charges, Lease)'}
+                  </label>
+                  <textarea
+                    rows={2}
+                    value={otherRights}
+                    onChange={(e) => setOtherRights(e.target.value)}
+                    className="w-full text-xs sm:text-sm px-3.5 py-2.5 bg-white text-slate-900 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 transition placeholder:text-slate-400"
+                    placeholder={isMarathi ? 'उदा. सक्षम प्राधिकाऱ्यांच्या पूर्व परवानगी शिवाय हस्तांतरास बंदी...' : 'e.g. Alienation barred without sanction of SDO...'}
+                  />
+                </div>
+
+                <label className="flex items-center gap-3 p-3.5 bg-amber-50/70 border border-amber-200/90 rounded-xl cursor-pointer hover:bg-amber-100/50 transition select-none">
+                  <input
+                    type="checkbox"
+                    id="hasActiveDispute"
+                    checked={hasActiveDispute}
+                    onChange={(e) => setHasActiveDispute(e.target.checked)}
+                    className="rounded text-blue-600 focus:ring-blue-500 w-4 h-4 cursor-pointer shrink-0"
+                  />
+                  <span className="text-xs font-semibold text-amber-950 leading-snug">
+                    {isMarathi
+                      ? 'सदर जमिनीवर सक्रिय महसूल वाद / न्यायालयीन प्रकरण प्रलंबित आहे (Active Dispute Flag)'
+                      : 'Active revenue dispute or court litigation pending for this parcel'}
+                  </span>
+                </label>
+              </div>
+            )}
+
+            {/* TAB 2: AUDIT CHECKPOINTS & 16 STATUTORY SUB-TYPES */}
+            {activeTab === 'audit' && (
+              <div className="space-y-4">
+                {/* Statutory Sub-Type Dropdown per Client's Sheet 2 & 4 */}
+                <div className="p-3.5 sm:p-4 bg-indigo-50/70 border border-indigo-200/90 rounded-xl space-y-2">
+                  <label className="block text-xs font-bold text-indigo-950">
+                    <Scale className="w-4 h-4 inline mr-1 text-indigo-600" />
+                    {isMarathi ? 'जमिनीचा वैधानिक उपप्रकार (Dropdown Sheet प्रमाणे १६ उपप्रकार)' : 'Statutory Sub-Type Category (Per Dropdown Master)'}
                   </label>
                   <select
-                    value={epochTenure}
-                    onChange={(e) => setEpochTenure(e.target.value)}
-                    className="w-full text-xs sm:text-sm px-3.5 py-2.5 bg-white text-slate-900 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500/20 font-medium cursor-pointer"
+                    value={subTypeCategory}
+                    onChange={(e) => setSubTypeCategory(e.target.value)}
+                    className="w-full text-xs sm:text-sm px-3.5 py-2.5 bg-white text-slate-900 border border-indigo-300 rounded-xl focus:ring-2 focus:ring-indigo-500/20 font-medium cursor-pointer"
                   >
-                    {TENURE_OPTIONS.map((opt) => (
-                      <option key={opt.value} value={opt.value}>
-                        {isMarathi ? opt.labelMr : opt.labelEn}
+                    {STATUTORY_SUB_TYPES.map((sub) => (
+                      <option key={sub.id} value={sub.nameMr}>
+                        {sub.nameMr}
                       </option>
                     ))}
                   </select>
+                  <p className="text-[11px] text-indigo-800 leading-normal">
+                    {isMarathi
+                      ? 'हा उपप्रकार निवडल्यास हा सर्व्हे नंबर आपोआप संबंधित वैधानिक पुस्तकात (Booklet 1-17) आणि प्रपत्रात वर्गीकृत होईल.'
+                      : 'Selecting this sub-type categorizes this parcel into the appropriate statutory booklet and Prapatra report.'}
+                  </p>
+                </div>
+
+                {/* Breach of Condition (शर्तभंग) */}
+                <div className="p-3.5 sm:p-4 bg-rose-50/50 border border-rose-200/80 rounded-xl space-y-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                    <span className="text-xs font-bold text-rose-950 flex items-center gap-1.5">
+                      <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" />
+                      <span>{isMarathi ? 'मुद्दा ३७: मौका चौकशीअंती शर्तभंग झालेला आहे काय?' : 'Point 37: Has Condition Breach Occurred?'}</span>
+                    </span>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <label className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-bold cursor-pointer transition select-none ${
+                        isShartbhang ? 'bg-rose-100 border-rose-300 text-rose-900 shadow-2xs' : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
+                      }`}>
+                        <input
+                          type="radio"
+                          name="isShartbhang"
+                          checked={isShartbhang}
+                          onChange={() => setIsShartbhang(true)}
+                          className="text-rose-600 focus:ring-rose-500 w-3.5 h-3.5"
+                        />
+                        <span>{isMarathi ? 'होय (Yes)' : 'Yes'}</span>
+                      </label>
+                      <label className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-bold cursor-pointer transition select-none ${
+                        !isShartbhang ? 'bg-slate-100 border-slate-300 text-slate-800 shadow-2xs' : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
+                      }`}>
+                        <input
+                          type="radio"
+                          name="isShartbhang"
+                          checked={!isShartbhang}
+                          onChange={() => setIsShartbhang(false)}
+                          className="text-slate-600 focus:ring-slate-500 w-3.5 h-3.5"
+                        />
+                        <span>{isMarathi ? 'नाही (No)' : 'No'}</span>
+                      </label>
+                    </div>
+                  </div>
+
+                  {isShartbhang && (
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                        {isMarathi ? 'शर्तभंगाचा तपशील (वापरात बदल / अनधिकृत हस्तांतरण / गैरकृषक वापर)' : 'Breach Specifics (Change of Use / Unauthorized Transfer / Illegal NA)'}
+                      </label>
+                      <input
+                        type="text"
+                        value={shartbhangDetail}
+                        onChange={(e) => setShartbhangDetail(e.target.value)}
+                        className="w-full text-xs px-3 py-2 bg-white text-slate-900 border border-rose-300 rounded-lg focus:ring-2 focus:ring-rose-500/20"
+                        placeholder={isMarathi ? 'उदा. विनापरवानगी व्यापारी वापर सुरू केला' : 'e.g. Commercial usage without authorization'}
+                      />
+                    </div>
+                  )}
+                </div>
+
+                {/* Unauthorized Class-2 to Class-1 Conversion (वर्ग-२ चे वर्ग-१ रूपांतरण) */}
+                <div className="p-3.5 sm:p-4 bg-amber-50/50 border border-amber-200/80 rounded-xl space-y-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                    <span className="text-xs font-bold text-amber-950 flex items-center gap-1.5">
+                      <ShieldAlert className="w-4 h-4 text-amber-600 shrink-0" />
+                      <span>{isMarathi ? 'मुद्दा ३६: परवानगीशिवाय वर्ग-२ मधून वर्ग-१ मध्ये रूपांतरित झालेली आहे काय?' : 'Point 36: Converted from Class-2 to Class-1 without sanction?'}</span>
+                    </span>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <label className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-bold cursor-pointer transition select-none ${
+                        isClass2To1 ? 'bg-amber-100 border-amber-300 text-amber-900 shadow-2xs' : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
+                      }`}>
+                        <input
+                          type="radio"
+                          name="isClass2To1"
+                          checked={isClass2To1}
+                          onChange={() => setIsClass2To1(true)}
+                          className="text-amber-600 focus:ring-amber-500 w-3.5 h-3.5"
+                        />
+                        <span>{isMarathi ? 'होय (Yes)' : 'Yes'}</span>
+                      </label>
+                      <label className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-bold cursor-pointer transition select-none ${
+                        !isClass2To1 ? 'bg-slate-100 border-slate-300 text-slate-800 shadow-2xs' : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
+                      }`}>
+                        <input
+                          type="radio"
+                          name="isClass2To1"
+                          checked={!isClass2To1}
+                          onChange={() => setIsClass2To1(false)}
+                          className="text-slate-600 focus:ring-slate-500 w-3.5 h-3.5"
+                        />
+                        <span>{isMarathi ? 'नाही (No)' : 'No'}</span>
+                      </label>
+                    </div>
+                  </div>
+
+                  {isClass2To1 && (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                      <div>
+                        <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                          {isMarathi ? 'सक्षम प्राधिकाऱ्यांचे पदनाम (Collector / SDO)' : 'Sanctioning Authority Designation'}
+                        </label>
+                        <input
+                          type="text"
+                          value={sanctionAuthority}
+                          onChange={(e) => setSanctionAuthority(e.target.value)}
+                          className="w-full text-xs px-3 py-2 bg-white text-slate-900 border border-amber-300 rounded-lg"
+                          placeholder={isMarathi ? 'उदा. उपविभागीय अधिकारी (SDO)' : 'e.g. SDO Warora'}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                          {isMarathi ? 'आदेश क्रमांक व दिनांक' : 'Order Number & Date'}
+                        </label>
+                        <input
+                          type="text"
+                          value={sanctionOrderNo}
+                          onChange={(e) => setSanctionOrderNo(e.target.value)}
+                          className="w-full text-xs px-3 py-2 bg-white text-slate-900 border border-amber-300 rounded-lg"
+                          placeholder={isMarathi ? 'उदा. महसूल/कावि-४२/२०२१' : 'e.g. REV/ORD/2021/89'}
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Other Critical Statutory Checkpoints Toggle Grid - Interactive Labels */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <label className={`p-3 rounded-xl border flex items-center justify-between gap-3 cursor-pointer transition select-none ${
+                    isIllegalDeletion ? 'bg-blue-50/70 border-blue-300 shadow-2xs' : 'bg-slate-50/80 border-slate-200 hover:bg-slate-100/70'
+                  }`}>
+                    <span className="text-xs font-medium text-slate-800 leading-snug">
+                      {isMarathi ? 'मुद्दा १८: अवैधरीत्या सरकार नोंद कमी केली आहे काय?' : 'Pt 18: Govt name illegally removed?'}
+                    </span>
+                    <input
+                      type="checkbox"
+                      checked={isIllegalDeletion}
+                      onChange={(e) => setIsIllegalDeletion(e.target.checked)}
+                      className="w-4 h-4 text-blue-600 rounded cursor-pointer shrink-0"
+                    />
+                  </label>
+
+                  <label className={`p-3 rounded-xl border flex items-center justify-between gap-3 cursor-pointer transition select-none ${
+                    isPokalist ? 'bg-blue-50/70 border-blue-300 shadow-2xs' : 'bg-slate-50/80 border-slate-200 hover:bg-slate-100/70'
+                  }`}>
+                    <span className="text-xs font-medium text-slate-800 leading-snug">
+                      {isMarathi ? 'मुद्दा १९: पोकळीस्त नोंदी (बु.ग.दे./ता.ग.दे.) आहेत काय?' : 'Pt 19: Hollow non-statutory entries?'}
+                    </span>
+                    <input
+                      type="checkbox"
+                      checked={isPokalist}
+                      onChange={(e) => setIsPokalist(e.target.checked)}
+                      className="w-4 h-4 text-blue-600 rounded cursor-pointer shrink-0"
+                    />
+                  </label>
+
+                  <label className={`p-3 rounded-xl border flex items-center justify-between gap-3 cursor-pointer transition select-none ${
+                    isEncroached ? 'bg-blue-50/70 border-blue-300 shadow-2xs' : 'bg-slate-50/80 border-slate-200 hover:bg-slate-100/70'
+                  }`}>
+                    <span className="text-xs font-medium text-slate-800 leading-snug">
+                      {isMarathi ? 'मुद्दा १५: जमिनीवर अतिक्रमण आहे काय?' : 'Pt 15: Encroachment present?'}
+                    </span>
+                    <input
+                      type="checkbox"
+                      checked={isEncroached}
+                      onChange={(e) => setIsEncroached(e.target.checked)}
+                      className="w-4 h-4 text-blue-600 rounded cursor-pointer shrink-0"
+                    />
+                  </label>
+
+                  <label className={`p-3 rounded-xl border flex items-center justify-between gap-3 cursor-pointer transition select-none ${
+                    isMojaniDone ? 'bg-blue-50/70 border-blue-300 shadow-2xs' : 'bg-slate-50/80 border-slate-200 hover:bg-slate-100/70'
+                  }`}>
+                    <span className="text-xs font-medium text-slate-800 leading-snug">
+                      {isMarathi ? 'मुद्दा १६: सदर गटाचे KML तयार केले आहे काय?' : 'Pt 16: KML prepared?'}
+                    </span>
+                    <input
+                      type="checkbox"
+                      checked={isMojaniDone}
+                      onChange={(e) => setIsMojaniDone(e.target.checked)}
+                      className="w-4 h-4 text-blue-600 rounded cursor-pointer shrink-0"
+                    />
+                  </label>
+
+                  <label className={`p-3 rounded-xl border flex items-center justify-between gap-3 sm:col-span-2 cursor-pointer transition select-none ${
+                    isForm1KUpdated ? 'bg-blue-50/70 border-blue-300 shadow-2xs' : 'bg-slate-50/80 border-slate-200 hover:bg-slate-100/70'
+                  }`}>
+                    <span className="text-xs font-medium text-slate-800 leading-snug">
+                      {isMarathi ? 'मुद्दा ४६: गाव नमुना १-क अद्यावत आहे काय?' : 'Pt 46: Village Form 1-K updated per statutory rules?'}
+                    </span>
+                    <input
+                      type="checkbox"
+                      checked={isForm1KUpdated}
+                      onChange={(e) => setIsForm1KUpdated(e.target.checked)}
+                      className="w-4 h-4 text-blue-600 rounded cursor-pointer shrink-0"
+                    />
+                  </label>
                 </div>
               </div>
+            )}
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {/* TAB 3: HISTORICAL TIMELINE EPOCHS (1950, 1972, 1995) */}
+            {activeTab === 'timeline' && (
+              <div className="space-y-4">
+                <div className="p-3.5 bg-blue-50/70 border border-blue-200/80 rounded-xl text-xs text-blue-900 flex items-start gap-2.5">
+                  <Info className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
+                  <div className="leading-relaxed">
+                    {isMarathi
+                      ? 'येथून तुम्ही १९५० मूळ बंदोबस्त नोंद, एकत्रिकरण नोंद (~१९७२), किंवा पुनर्मोजणी नोंद (~१९९५) मधील खातेदार, भूधारणा वर्ग, फेरफार व क्षेत्र थेट दुरुस्त करू शकता.'
+                      : 'Inspect and rectify historical landholder, tenure classification, mutation number, and recorded area across 1950, ~1972, and ~1995 records.'}
+                  </div>
+                </div>
+
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                    {isMarathi ? 'फेरफार क्रमांक' : 'Ferfar No.'}
+                  <label className="block text-xs font-bold text-slate-800 mb-2">
+                    {isMarathi ? 'दुरुस्ती करावयाचा कालक्रम टप्पा निवडा' : 'Select Timeline Epoch to Rectify'} <span className="text-rose-500">*</span>
+                  </label>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-2.5">
+                    {EPOCH_OPTIONS.map((ep) => {
+                      const isSelected = selectedEpochYear === ep.yr;
+                      return (
+                        <button
+                          key={ep.yr}
+                          type="button"
+                          onClick={() => handleEpochSelect(ep.yr)}
+                          className={`p-3 rounded-xl border text-left transition cursor-pointer flex flex-col justify-between gap-1.5 ${
+                            isSelected
+                              ? 'bg-blue-600 text-white border-blue-600 shadow-xs ring-2 ring-blue-500/20'
+                              : 'bg-white text-slate-800 border-slate-200 hover:bg-slate-50 hover:border-slate-300'
+                          }`}
+                        >
+                          <span className={`text-xs font-bold ${isSelected ? 'text-white' : 'text-slate-900'}`}>
+                            {isMarathi ? ep.titleMr : ep.titleEn}
+                          </span>
+                          <span className={`text-[11px] ${isSelected ? 'text-blue-100' : 'text-slate-500'}`}>
+                            {isMarathi ? ep.subtitleMr : ep.subtitleEn}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-800 mb-1.5">
+                      {isMarathi ? 'नोंदणीकृत खातेदाराचे नाव' : 'Recorded Owner Name'} <span className="text-rose-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={epochOwner}
+                      onChange={(e) => setEpochOwner(e.target.value)}
+                      className="w-full text-xs sm:text-sm px-3.5 py-2.5 bg-white text-slate-900 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500/20 font-medium"
+                      placeholder="उदा. मारोती संबा"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-800 mb-1.5">
+                      {isMarathi ? 'भूधारणा वर्ग (Tenure per Epoch)' : 'Tenure Class'}
+                    </label>
+                    <select
+                      value={epochTenure}
+                      onChange={(e) => setEpochTenure(e.target.value)}
+                      className="w-full text-xs sm:text-sm px-3.5 py-2.5 bg-white text-slate-900 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500/20 font-medium cursor-pointer"
+                    >
+                      {TENURE_OPTIONS.map((opt) => (
+                        <option key={opt.value} value={opt.value}>
+                          {isMarathi ? opt.labelMr : opt.labelEn}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                      {isMarathi ? 'फेरफार क्रमांक' : 'Ferfar No.'}
+                    </label>
+                    <input
+                      type="text"
+                      value={epochFerfar}
+                      onChange={(e) => setEpochFerfar(e.target.value)}
+                      className="w-full text-xs px-3 py-2 bg-white text-slate-900 border border-slate-300 rounded-lg font-mono"
+                      placeholder="F-1"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                      {isMarathi ? 'खाता क्रमांक' : 'Khata No.'}
+                    </label>
+                    <input
+                      type="text"
+                      value={epochKhata}
+                      onChange={(e) => setEpochKhata(e.target.value)}
+                      className="w-full text-xs px-3 py-2 bg-white text-slate-900 border border-slate-300 rounded-lg font-mono"
+                      placeholder="K-1"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                      {isMarathi ? 'नोंदणीकृत क्षेत्र (हेक्टर)' : 'Recorded Area (Ha)'}
+                    </label>
+                    <input
+                      type="number"
+                      step="0.0001"
+                      min="0"
+                      value={epochAreaHa}
+                      onChange={(e) => setEpochAreaHa(e.target.value)}
+                      className="w-full text-xs px-3 py-2 bg-white text-slate-900 border border-slate-300 rounded-lg font-mono"
+                      placeholder="0.0000"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-800 mb-1.5">
+                    {isMarathi ? 'फेरफार प्रकार / टिप्पणी' : 'Mutation Type / Remarks'}
                   </label>
                   <input
                     type="text"
-                    value={epochFerfar}
-                    onChange={(e) => setEpochFerfar(e.target.value)}
-                    className="w-full text-xs px-3 py-2 bg-white text-slate-900 border border-slate-300 rounded-lg font-mono"
-                    placeholder="F-1"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                    {isMarathi ? 'खाता क्रमांक' : 'Khata No.'}
-                  </label>
-                  <input
-                    type="text"
-                    value={epochKhata}
-                    onChange={(e) => setEpochKhata(e.target.value)}
-                    className="w-full text-xs px-3 py-2 bg-white text-slate-900 border border-slate-300 rounded-lg font-mono"
-                    placeholder="K-1"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                    {isMarathi ? 'नोंदणीकृत क्षेत्र (हेक्टर)' : 'Recorded Area (Ha)'}
-                  </label>
-                  <input
-                    type="number"
-                    step="0.0001"
-                    min="0"
-                    value={epochAreaHa}
-                    onChange={(e) => setEpochAreaHa(e.target.value)}
-                    className="w-full text-xs px-3 py-2 bg-white text-slate-900 border border-slate-300 rounded-lg font-mono"
-                    placeholder="0.0000"
+                    value={epochRemarks}
+                    onChange={(e) => setEpochRemarks(e.target.value)}
+                    className="w-full text-xs sm:text-sm px-3.5 py-2.5 bg-white text-slate-900 border border-slate-300 rounded-xl"
+                    placeholder={isMarathi ? 'उदा. मूळ बंदोबस्त अधिकार नोंद' : 'e.g. Baseline Settlement entry'}
                   />
                 </div>
               </div>
+            )}
+          </div>
 
-              <div>
-                <label className="block text-xs font-bold text-slate-800 mb-1.5">
-                  {isMarathi ? 'फेरफार प्रकार / टिप्पणी' : 'Mutation Type / Remarks'}
-                </label>
-                <input
-                  type="text"
-                  value={epochRemarks}
-                  onChange={(e) => setEpochRemarks(e.target.value)}
-                  className="w-full text-xs sm:text-sm px-3.5 py-2.5 bg-white text-slate-900 border border-slate-300 rounded-xl"
-                  placeholder={isMarathi ? 'उदा. मूळ बंदोबस्त अधिकार नोंद' : 'e.g. Baseline Settlement entry'}
-                />
-              </div>
-            </div>
-          )}
-
-          {/* Sticky Form Actions Footer */}
-          <div className="pt-3.5 sm:pt-4 border-t border-slate-200/80 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white shrink-0">
-            <div className="flex items-center gap-1.5 text-[11px] text-slate-500">
+          {/* PINNED Sticky Form Actions Footer - ALWAYS VISIBLE */}
+          <div className="px-4 sm:px-6 py-3 sm:py-3.5 border-t border-slate-200/90 bg-slate-50/80 shrink-0 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-3">
+            <div className="flex items-center gap-1.5 text-[11px] sm:text-xs text-slate-500">
               <ShieldAlert className="w-3.5 h-3.5 text-blue-600 shrink-0" />
               <span>{isMarathi ? 'बदल सेव्ह होताच गाव व तालुक्याचा गोषवारा तात्काळ फेरगणती होईल.' : 'Village & taluka rollups auto-recalculated on save.'}</span>
             </div>
@@ -980,14 +983,14 @@ export default function EditParcelModal({ isOpen, onClose, parcel, onUpdateSucce
                 type="button"
                 onClick={onClose}
                 disabled={loading}
-                className="flex-1 sm:flex-none px-4 py-2.5 border border-slate-200 text-slate-700 rounded-xl text-xs sm:text-sm font-semibold hover:bg-slate-50 transition cursor-pointer"
+                className="flex-1 sm:flex-none px-4 py-2 border border-slate-200 text-slate-700 rounded-xl text-xs sm:text-sm font-semibold hover:bg-white transition cursor-pointer"
               >
                 {isMarathi ? 'रद्द करा (Cancel)' : 'Cancel'}
               </button>
               <button
                 type="submit"
                 disabled={loading}
-                className="flex-1 sm:flex-none px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 shadow-xs transition cursor-pointer disabled:opacity-50"
+                className="flex-1 sm:flex-none px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 shadow-xs transition cursor-pointer disabled:opacity-50 active:scale-95"
               >
                 {loading ? (
                   <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />

@@ -1794,77 +1794,82 @@ export default function ReportsPage() {
         ========================================================= */}
         {inspectedParcel && (
           <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4 md:p-6 overflow-y-auto animate-in fade-in duration-150">
-            <div className="bg-white rounded-2xl sm:rounded-3xl max-w-5xl w-full max-h-[94vh] sm:max-h-[90vh] shadow-2xl border border-slate-200/90 flex flex-col overflow-hidden animate-in zoom-in-95 duration-150 my-auto">
+            <div className="bg-white rounded-2xl sm:rounded-3xl max-w-5xl w-full h-[90vh] max-h-[850px] shadow-2xl border border-slate-200/90 flex flex-col overflow-hidden animate-in zoom-in-95 duration-150 my-auto">
               
               {/* National Tricolor Micro Accent Line (Portal Theme) */}
               <div className="h-1 sm:h-1.5 w-full bg-gradient-to-r from-amber-500 via-white to-emerald-600 shrink-0" />
 
-              {/* Modal Header - Official Light Portal Theme */}
-              <div className="px-4 sm:px-6 py-3.5 sm:py-4 border-b border-slate-200/90 bg-white flex flex-col sm:flex-row sm:items-center justify-between gap-3 shrink-0">
-                <div className="min-w-0 flex-1">
-                  <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-900 text-[10px] sm:text-xs font-bold mb-1.5 border border-amber-200/80">
-                    <History className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-amber-600 shrink-0" />
+              {/* Modal Header - Official Light Portal Theme (Zero Collision) */}
+              <div className="px-4 sm:px-6 py-3.5 sm:py-4 border-b border-slate-200/90 bg-white shrink-0">
+                {/* Top Row: Category Chip on Left + Actions on Right */}
+                <div className="flex items-center justify-between gap-3 mb-2">
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 text-[10px] sm:text-xs font-semibold border border-slate-200/80">
+                    <History className="w-3.5 h-3.5 text-blue-600 shrink-0" />
                     <span>{isMarathi ? 'ऐतिहासिक महसूल कालक्रम व अधिकार अभिलेख पडताळणी' : 'Historical Revenue Timeline & Record of Rights Verification'}</span>
                   </div>
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <h3 className="text-base sm:text-lg font-black tracking-tight text-slate-900 flex items-center gap-2">
-                      <span>{isMarathi ? 'गट / सर्व्हे क्र.' : 'Gat / Survey No.'} {inspectedParcel.gatNumber || inspectedParcel.oldSurveyNo}</span>
-                    </h3>
-                    <span className="text-xs px-2.5 py-0.5 rounded-md bg-blue-50 text-blue-800 border border-blue-200 font-semibold flex items-center gap-1">
-                      <MapPin className="w-3 h-3 text-blue-600 shrink-0" />
-                      {formatVillageName(inspectedParcel.villageName, isMarathi)}, {isMarathi ? 'ता.' : 'Tal.'} {inspectedParcel.taluka}
-                    </span>
-                    {inspectedParcel.upi && (
-                      <span className="font-mono text-[11px] bg-slate-100 text-slate-600 border border-slate-200/80 px-2 py-0.5 rounded font-medium">
-                        {inspectedParcel.upi}
-                      </span>
-                    )}
-                  </div>
-                  <div className="text-xs text-slate-600 mt-1.5 flex items-center gap-x-3 gap-y-1 flex-wrap font-medium">
-                    <span className="flex items-center gap-1">
-                      <span className="text-slate-500">{isMarathi ? 'सध्याचे खातेदार:' : 'Current Khatedar:'}</span>
-                      <strong className="text-slate-900 font-bold">{inspectedParcel.currentOwner}</strong>
-                    </span>
-                    <span className="text-slate-300 hidden sm:inline">•</span>
-                    <span className="flex items-center gap-1">
-                      <span className="text-slate-500">{isMarathi ? 'क्षेत्र:' : 'Area:'}</span>
-                      <strong className="text-slate-900 font-bold font-mono">{inspectedParcel.totalAreaHa} {isMarathi ? 'हे.आर.' : 'Ha.R'}</strong>
-                    </span>
-                    <span className="text-slate-300 hidden sm:inline">•</span>
-                    <span className="flex items-center gap-1">
-                      <span className="text-slate-500">{isMarathi ? 'धारणा प्रकार:' : 'Tenure Class:'}</span>
-                      <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-amber-50 text-amber-800 border border-amber-200">
-                        {inspectedParcel.tenureDisplay || inspectedParcel.tenureClass}
-                      </span>
-                    </span>
+
+                  <div className="flex items-center gap-2 shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => setIsEditModalOpen(true)}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold transition shadow-2xs cursor-pointer active:scale-95"
+                      title={isMarathi ? 'माहिती संपादित करा' : 'Edit Parcel Data'}
+                    >
+                      <Edit3 className="w-3.5 h-3.5 text-blue-200" />
+                      <span>{isMarathi ? 'माहिती संपादित करा' : 'Edit Data'}</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setInspectedParcel(null)}
+                      className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 transition flex items-center justify-center cursor-pointer shrink-0"
+                      aria-label="Close modal"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 self-start sm:self-center shrink-0 w-full sm:w-auto justify-between sm:justify-end pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-100">
-                  {/* Edit Record Button */}
-                  <button
-                    type="button"
-                    onClick={() => setIsEditModalOpen(true)}
-                    className="inline-flex items-center justify-center gap-1.5 px-3.5 py-1.5 sm:py-2 bg-amber-500 hover:bg-amber-600 text-slate-950 rounded-xl text-xs font-bold transition shadow-xs cursor-pointer active:scale-95"
-                    title={isMarathi ? 'माहिती संपादित करा' : 'Edit Parcel Data'}
-                  >
-                    <Edit3 className="w-3.5 h-3.5 stroke-[2.2]" />
-                    <span>{isMarathi ? 'माहिती संपादित करा' : 'Edit Data'}</span>
-                  </button>
+                {/* Main Identity Row: Gat No & Location Badges */}
+                <div className="flex items-center gap-2 sm:gap-2.5 flex-wrap">
+                  <h3 className="text-lg sm:text-xl font-bold tracking-tight text-slate-900">
+                    {isMarathi ? 'गट / सर्व्हे क्र.' : 'Gat / Survey No.'}{' '}
+                    <span className="font-black text-blue-700">{inspectedParcel.gatNumber || inspectedParcel.oldSurveyNo}</span>
+                  </h3>
+                  <span className="inline-flex items-center gap-1 text-xs px-2.5 py-0.5 rounded-md bg-slate-100 text-slate-700 border border-slate-200/80 font-medium">
+                    <MapPin className="w-3 h-3 text-slate-500 shrink-0" />
+                    {formatVillageName(inspectedParcel.villageName, isMarathi)}, {isMarathi ? 'ता.' : 'Tal.'} {inspectedParcel.taluka}
+                  </span>
+                  {inspectedParcel.upi && (
+                    <span className="font-mono text-[11px] bg-slate-50 text-slate-500 border border-slate-200 px-2 py-0.5 rounded font-medium">
+                      {inspectedParcel.upi}
+                    </span>
+                  )}
+                </div>
 
-                  <button
-                    type="button"
-                    onClick={() => setInspectedParcel(null)}
-                    className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 transition flex items-center justify-center cursor-pointer shrink-0"
-                    aria-label="Close modal"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
+                {/* Metadata Row: Clean Structured Divider */}
+                <div className="mt-2.5 pt-2 border-t border-slate-100 flex items-center gap-x-4 sm:gap-x-5 gap-y-1.5 flex-wrap text-xs text-slate-600 font-medium">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-slate-400 font-normal">{isMarathi ? 'सध्याचे खातेदार:' : 'Current Khatedar:'}</span>
+                    <strong className="text-slate-900 font-bold">{inspectedParcel.currentOwner}</strong>
+                  </div>
+                  <span className="text-slate-300 hidden sm:inline">•</span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-slate-400 font-normal">{isMarathi ? 'क्षेत्र:' : 'Area:'}</span>
+                    <strong className="text-slate-900 font-bold font-mono">{inspectedParcel.totalAreaHa} {isMarathi ? 'हे.आर.' : 'Ha.R'}</strong>
+                  </div>
+                  <span className="text-slate-300 hidden sm:inline">•</span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-slate-400 font-normal">{isMarathi ? 'धारणा प्रकार:' : 'Tenure Class:'}</span>
+                    <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-amber-50 text-amber-800 border border-amber-200">
+                      {inspectedParcel.tenureDisplay || inspectedParcel.tenureClass}
+                    </span>
+                  </div>
                 </div>
               </div>
 
               {/* Modal Body */}
-              <div className="p-3 sm:p-5 md:p-6 overflow-y-auto space-y-4 sm:space-y-5 bg-slate-50/70">
+              <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 sm:py-5 space-y-4 sm:space-y-5 bg-slate-50/70">
                 
                 {/* 1. VISUAL 4-PHASE BACKWARD HISTORY TIMELINE */}
                 <div className="bg-white p-3.5 sm:p-5 rounded-2xl border border-slate-200/80 shadow-xs">
