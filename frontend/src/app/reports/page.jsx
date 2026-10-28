@@ -1232,13 +1232,41 @@ export default function ReportsPage() {
                   </thead>
 
                   <tbody className="divide-y divide-slate-100 font-sans">
-                    {loading ? (
-                      <tr>
-                        <td colSpan={54} className="py-20 text-center text-slate-400">
-                          <RefreshCw className="w-8 h-8 animate-spin mx-auto text-blue-600 mb-2" />
-                          <span className="text-sm font-semibold">{isMarathi ? 'अधिकार अभिलेख व कालक्रम तपासणी सूची लोड होत आहे...' : 'Loading record of rights & audit checklist...'}</span>
-                        </td>
-                      </tr>
+                    {loading && paginatedParcels.length === 0 ? (
+                      Array.from({ length: 8 }).map((_, sIdx) => (
+                        <tr key={`skel-timeline-${sIdx}`} className="animate-pulse border-b border-slate-100">
+                          <td className="py-2.5 px-2 text-center border-r border-slate-100">
+                            <div className="h-4 w-6 bg-slate-200 rounded mx-auto" />
+                          </td>
+                          <td className="py-2.5 px-3 border-r border-slate-100">
+                            <div className="h-4 w-24 bg-slate-200 rounded mb-1" />
+                            <div className="h-2.5 w-14 bg-slate-100 rounded" />
+                          </td>
+                          <td className="py-2.5 px-2 text-center border-r border-slate-100">
+                            <div className="h-4 w-12 bg-slate-200 rounded mx-auto" />
+                          </td>
+                          <td className="py-2.5 px-2 text-right border-r border-slate-100">
+                            <div className="h-4 w-10 bg-slate-200 rounded ml-auto" />
+                          </td>
+                          <td className="py-2.5 px-2 text-center border-r border-slate-100">
+                            <div className="h-5 w-16 bg-slate-200 rounded-md mx-auto" />
+                          </td>
+                          <td className="py-2.5 px-3 border-r border-slate-100">
+                            <div className="h-4 w-28 bg-slate-200 rounded" />
+                          </td>
+                          <td className="py-2.5 px-3 border-r border-slate-100">
+                            <div className="h-4 w-20 bg-slate-100 rounded" />
+                          </td>
+                          {CHECKLIST_46_COLUMNS.map(col => (
+                            <td key={`skel-col-${col.num}`} className="py-2.5 px-2 text-center border-r border-slate-100">
+                              <div className="h-3 w-8 bg-slate-100 rounded mx-auto" />
+                            </td>
+                          ))}
+                          <td className="py-2.5 px-2 text-center">
+                            <div className="h-4 w-8 bg-slate-200 rounded mx-auto" />
+                          </td>
+                        </tr>
+                      ))
                     ) : paginatedParcels.length === 0 ? (
                       <tr>
                         <td colSpan={54} className="py-20 text-center text-slate-400">
