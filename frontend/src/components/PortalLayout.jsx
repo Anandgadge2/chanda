@@ -127,7 +127,7 @@ export default function PortalLayout({ children }) {
           onOpenMobile={() => setMobileSidebarOpen(true)}
           onToggleCollapse={handleToggleSidebar}
         />
-        <main id="main-content" className="flex-1 min-w-0 w-full max-w-full overflow-x-hidden relative z-10 pb-16 lg:pb-0">
+        <main id="main-content" className="flex-1 min-w-0 w-full max-w-full overflow-x-hidden relative pb-16 lg:pb-0">
           <RouteGuard>{children}</RouteGuard>
         </main>
       </div>

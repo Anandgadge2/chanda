@@ -163,7 +163,7 @@ export default function ParcelTraceDrawer({ upi, onClose, onRefresh }) {
     >
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs transition-opacity animate-in fade-in duration-150"
+        className="fixed inset-0 bg-slate-950/70 backdrop-blur-md transition-opacity animate-in fade-in duration-150"
         onClick={onClose}
       />
 

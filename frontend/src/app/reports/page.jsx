@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import {
   FileSpreadsheet,
   Download,
@@ -168,6 +169,28 @@ export default function ReportsPage() {
   // Modal inspection for 46 points
   const [inspectedParcel, setInspectedParcel] = useState(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Lock body scroll when modal is open and handle Escape key
+  useEffect(() => {
+    if (inspectedParcel) {
+      document.body.style.overflow = 'hidden';
+      const handleKeyDown = (e) => {
+        if (e.key === 'Escape') setInspectedParcel(null);
+      };
+      window.addEventListener('keydown', handleKeyDown);
+      return () => {
+        document.body.style.overflow = '';
+        window.removeEventListener('keydown', handleKeyDown);
+      };
+    } else {
+      document.body.style.overflow = '';
+    }
+  }, [inspectedParcel]);
 
   // Dynamically load villages for selected taluka
   useEffect(() => {
@@ -1792,9 +1815,19 @@ export default function ReportsPage() {
         {/* =========================================================
             HISTORICAL BACKWARD TIMELINE & 46-POINTS AUDIT MODAL
         ========================================================= */}
-        {inspectedParcel && (
-          <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4 md:p-6 overflow-y-auto animate-in fade-in duration-150">
-            <div className="bg-white rounded-2xl sm:rounded-3xl max-w-5xl w-full h-[90vh] max-h-[850px] shadow-2xl border border-slate-200/90 flex flex-col overflow-hidden animate-in zoom-in-95 duration-150 my-auto">
+        {inspectedParcel && mounted && createPortal(
+          <div
+            className="fixed inset-0 z-[100] bg-slate-950/70 backdrop-blur-md flex items-center justify-center p-2.5 sm:p-4 md:p-6 overflow-y-auto animate-in fade-in duration-200"
+            onClick={(e) => {
+              if (e.target === e.currentTarget) setInspectedParcel(null);
+            }}
+          >
+            <div
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="audit-modal-title"
+              className="bg-white rounded-2xl sm:rounded-3xl max-w-5xl w-full max-h-[88vh] shadow-2xl shadow-slate-950/30 border border-slate-200/90 flex flex-col overflow-hidden animate-in zoom-in-95 duration-150 my-auto"
+            >
               
               {/* National Tricolor Micro Accent Line (Portal Theme) */}
               <div className="h-1 sm:h-1.5 w-full bg-gradient-to-r from-amber-500 via-white to-emerald-600 shrink-0" />
@@ -1802,8 +1835,8 @@ export default function ReportsPage() {
               {/* Modal Header - Official Light Portal Theme (Zero Collision) */}
               <div className="px-4 sm:px-6 py-3.5 sm:py-4 border-b border-slate-200/90 bg-white shrink-0">
                 {/* Top Row: Category Chip on Left + Actions on Right */}
-                <div className="flex items-center justify-between gap-3 mb-2">
-                  <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 text-[10px] sm:text-xs font-semibold border border-slate-200/80">
+                <div className="flex items-center justify-between gap-3 mb-2.5">
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 text-blue-800 text-[11px] sm:text-xs font-bold border border-blue-200/80 shadow-2xs">
                     <History className="w-3.5 h-3.5 text-blue-600 shrink-0" />
                     <span>{isMarathi ? 'ऐतिहासिक महसूल कालक्रम व अधिकार अभिलेख पडताळणी' : 'Historical Revenue Timeline & Record of Rights Verification'}</span>
                   </div>
@@ -1812,17 +1845,17 @@ export default function ReportsPage() {
                     <button
                       type="button"
                       onClick={() => setIsEditModalOpen(true)}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold transition shadow-2xs cursor-pointer active:scale-95"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200/80 rounded-xl text-xs font-bold transition shadow-2xs cursor-pointer active:scale-95"
                       title={isMarathi ? 'माहिती संपादित करा' : 'Edit Parcel Data'}
                     >
-                      <Edit3 className="w-3.5 h-3.5 text-blue-200" />
+                      <Edit3 className="w-3.5 h-3.5 text-blue-600" />
                       <span>{isMarathi ? 'माहिती संपादित करा' : 'Edit Data'}</span>
                     </button>
 
                     <button
                       type="button"
                       onClick={() => setInspectedParcel(null)}
-                      className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 transition flex items-center justify-center cursor-pointer shrink-0"
+                      className="w-8 h-8 rounded-xl bg-slate-100/80 hover:bg-slate-200 text-slate-500 hover:text-slate-900 transition flex items-center justify-center cursor-pointer shrink-0 border border-slate-200/60"
                       aria-label="Close modal"
                     >
                       <X className="w-4 h-4" />
@@ -1832,7 +1865,7 @@ export default function ReportsPage() {
 
                 {/* Main Identity Row: Gat No & Location Badges */}
                 <div className="flex items-center gap-2 sm:gap-2.5 flex-wrap">
-                  <h3 className="text-lg sm:text-xl font-bold tracking-tight text-slate-900">
+                  <h3 id="audit-modal-title" className="text-lg sm:text-xl font-bold tracking-tight text-slate-900">
                     {isMarathi ? 'गट / सर्व्हे क्र.' : 'Gat / Survey No.'}{' '}
                     <span className="font-black text-blue-700">{inspectedParcel.gatNumber || inspectedParcel.oldSurveyNo}</span>
                   </h3>
@@ -1861,7 +1894,13 @@ export default function ReportsPage() {
                   <span className="text-slate-300 hidden sm:inline">•</span>
                   <div className="flex items-center gap-1.5">
                     <span className="text-slate-400 font-normal">{isMarathi ? 'धारणा प्रकार:' : 'Tenure Class:'}</span>
-                    <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-amber-50 text-amber-800 border border-amber-200">
+                    <span className={`px-2.5 py-0.5 rounded-md text-[11px] font-bold border ${
+                      inspectedParcel.tenureClass?.includes('1')
+                        ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                        : inspectedParcel.tenureClass?.includes('SARKAR')
+                        ? 'bg-blue-50 text-blue-800 border-blue-200'
+                        : 'bg-amber-50 text-amber-800 border-amber-200'
+                    }`}>
                       {inspectedParcel.tenureDisplay || inspectedParcel.tenureClass}
                     </span>
                   </div>
@@ -2136,24 +2175,25 @@ export default function ReportsPage() {
               </div>
 
               {/* Modal Footer */}
-              <div className="p-3.5 sm:p-4 border-t border-slate-200/80 bg-white flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-3 shrink-0">
-                <span className="text-xs text-slate-500 font-medium hidden sm:inline">
-                  {isMarathi ? 'सदर माहिती महसूल अधिकार अभिलेख तपासणी कार्यप्रणाली अंतर्गत संकलित केलेली आहे.' : 'This data is compiled under the Revenue Record-of-Rights Verification System.'}
-                </span>
+              <div className="px-4 sm:px-6 py-3.5 sm:py-4 border-t border-slate-200/90 bg-white flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 shrink-0">
+                <div className="flex items-center gap-2 text-xs text-slate-500 font-medium">
+                  <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <span>{isMarathi ? 'सदर माहिती महसूल अधिकार अभिलेख तपासणी कार्यप्रणाली अंतर्गत संकलित केलेली आहे.' : 'This data is compiled under the Revenue Record-of-Rights Verification System.'}</span>
+                </div>
                 <div className="flex items-center gap-2.5 w-full sm:w-auto justify-end ml-auto">
                   <button
                     type="button"
                     onClick={() => setIsEditModalOpen(true)}
-                    className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition shadow-xs cursor-pointer active:scale-95"
+                    className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs sm:text-sm font-bold transition shadow-xs cursor-pointer active:scale-95"
                   >
-                    <Edit3 className="w-3.5 h-3.5 text-amber-300" />
+                    <Edit3 className="w-4 h-4 text-amber-300" />
                     <span>{isMarathi ? 'माहिती संपादित करा' : 'Edit Parcel Record'}</span>
                   </button>
 
                   <button
                     type="button"
                     onClick={() => setInspectedParcel(null)}
-                    className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition cursor-pointer"
+                    className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs sm:text-sm font-semibold transition cursor-pointer border border-slate-200/60"
                   >
                     {isMarathi ? 'बंद करा' : 'Close'}
                   </button>
@@ -2161,7 +2201,8 @@ export default function ReportsPage() {
               </div>
 
             </div>
-          </div>
+          </div>,
+          document.body
         )}
 
         {/* Edit Parcel Modal Integration */}

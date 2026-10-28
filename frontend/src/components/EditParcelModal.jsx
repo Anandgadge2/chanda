@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import {
   X,
   Save,
@@ -20,9 +21,12 @@ import {
   Scale,
   AlertTriangle,
   Building2,
+  Check,
+  ShieldCheck,
 } from 'lucide-react';
 import { api } from '../lib/api';
 import { useTranslation } from './LanguageContext';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 import { formatVillageName } from '../lib/villageUtils';
 
 export const TENURE_OPTIONS = [
@@ -123,10 +127,33 @@ const EPOCH_OPTIONS = [
 
 export default function EditParcelModal({ isOpen, onClose, parcel, onUpdateSuccess }) {
   const { isMarathi } = useTranslation();
+  const [mounted, setMounted] = useState(false);
+  const trapRef = useFocusTrap(isOpen);
   const [activeTab, setActiveTab] = useState('current'); // 'current' | 'timeline' | 'audit'
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [successMsg, setSuccessMsg] = useState(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Lock body scroll when modal is open and handle Escape key
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+      const handleKeyDown = (e) => {
+        if (e.key === 'Escape') onClose();
+      };
+      window.addEventListener('keydown', handleKeyDown);
+      return () => {
+        document.body.style.overflow = '';
+        window.removeEventListener('keydown', handleKeyDown);
+      };
+    } else {
+      document.body.style.overflow = '';
+    }
+  }, [isOpen, onClose]);
 
   // Form State for Current 7/12
   const [ownerName, setOwnerName] = useState('');
@@ -348,39 +375,48 @@ export default function EditParcelModal({ isOpen, onClose, parcel, onUpdateSucce
     }
   };
 
-  return (
+  if (!mounted || !isOpen || !parcel) return null;
+
+  return createPortal(
     <div
-      role="dialog"
-      aria-modal="true"
-      className="fixed inset-0 z-[60] flex items-center justify-center p-2 sm:p-4 md:p-6 bg-slate-950/65 backdrop-blur-xs animate-in fade-in duration-200 overflow-y-auto"
+      className="fixed inset-0 z-[110] flex items-center justify-center p-2.5 sm:p-4 md:p-6 bg-slate-950/70 backdrop-blur-md animate-in fade-in duration-200 overflow-y-auto"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
     >
-      <div className="bg-white rounded-2xl sm:rounded-3xl shadow-2xl border border-slate-200/90 w-full max-w-4xl h-[90vh] max-h-[820px] overflow-hidden flex flex-col animate-in zoom-in-95 duration-150 my-auto">
+      <div
+        ref={trapRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="edit-parcel-modal-title"
+        className="bg-white rounded-2xl sm:rounded-3xl shadow-2xl shadow-slate-950/30 border border-slate-200/90 w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col animate-in zoom-in-95 duration-150 my-auto"
+      >
         {/* National Tricolor Micro Accent Line (Portal Theme) */}
         <div className="h-1 sm:h-1.5 w-full bg-gradient-to-r from-amber-500 via-white to-emerald-600 shrink-0" />
 
         {/* Header - Portal Theme */}
         <div className="px-4 sm:px-6 py-3.5 sm:py-4 border-b border-slate-200/90 flex items-center justify-between bg-white shrink-0 gap-3">
-          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-blue-50 border border-blue-200/80 text-blue-600 flex items-center justify-center shrink-0 shadow-2xs">
-              <Edit3 className="w-4 h-4 sm:w-5 sm:h-5" />
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200/80 text-blue-700 flex items-center justify-center shrink-0 shadow-2xs">
+              <Edit3 className="w-5 h-5" />
             </div>
             <div className="min-w-0">
-              <h3 className="text-sm sm:text-base font-bold text-slate-900 truncate">
+              <h3 id="edit-parcel-modal-title" className="text-sm sm:text-base font-bold text-slate-900 tracking-tight truncate">
                 {isMarathi ? 'अभिलेख, तपासणी मुद्दे व कालक्रम दुरुस्ती' : 'Edit Parcel, 46-Point Audit & Timeline'}
               </h3>
               <div className="flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs text-slate-600 mt-0.5 font-medium flex-wrap">
-                <span className="flex items-center gap-1 text-slate-700">
-                  <MapPin className="w-3 h-3 text-blue-600 shrink-0" />
+                <span className="inline-flex items-center gap-1 text-slate-700 font-semibold">
+                  <MapPin className="w-3.5 h-3.5 text-blue-600 shrink-0" />
                   {formatVillageName(parcel.villageName, isMarathi)}
                 </span>
                 <span className="text-slate-300">•</span>
-                <span className="font-semibold text-slate-800">
+                <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-800 border border-slate-200/70 font-bold text-[11px]">
                   {isMarathi ? 'गट क्र.' : 'Gat No.'} {parcel.gatNumber}
                 </span>
                 {parcel.upi && (
                   <>
                     <span className="text-slate-300">•</span>
-                    <span className="font-mono text-[10px] sm:text-[11px] bg-slate-100 text-slate-600 border border-slate-200/80 px-1.5 py-0.5 rounded">
+                    <span className="font-mono text-[10px] sm:text-[11px] bg-slate-50 text-slate-600 border border-slate-200 px-2 py-0.5 rounded font-medium">
                       {parcel.upi}
                     </span>
                   </>
@@ -391,7 +427,7 @@ export default function EditParcelModal({ isOpen, onClose, parcel, onUpdateSucce
           <button
             type="button"
             onClick={onClose}
-            className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 transition flex items-center justify-center cursor-pointer shrink-0"
+            className="w-9 h-9 rounded-xl bg-slate-100/80 hover:bg-slate-200 text-slate-500 hover:text-slate-900 transition flex items-center justify-center cursor-pointer shrink-0 border border-slate-200/60"
             title={isMarathi ? 'बंद करा' : 'Close'}
           >
             <X className="w-4 h-4" />
@@ -399,32 +435,32 @@ export default function EditParcelModal({ isOpen, onClose, parcel, onUpdateSucce
         </div>
 
         {/* 3-Tab Switcher - Responsive & Touch-friendly */}
-        <div className="flex border-b border-slate-200 px-3 sm:px-6 bg-slate-50/50 gap-2 sm:gap-6 pt-2 overflow-x-auto no-scrollbar shrink-0">
+        <div className="flex border-b border-slate-200/90 px-3 sm:px-6 bg-slate-50/70 gap-1.5 sm:gap-3 pt-2 overflow-x-auto no-scrollbar shrink-0">
           <button
             type="button"
             onClick={() => setActiveTab('current')}
-            className={`pb-2.5 px-1 sm:px-0 text-xs sm:text-sm font-bold border-b-2 flex items-center gap-1.5 sm:gap-2 transition cursor-pointer whitespace-nowrap shrink-0 ${
+            className={`pb-2.5 pt-1.5 px-3 text-xs sm:text-sm font-bold border-b-2 flex items-center gap-2 transition cursor-pointer whitespace-nowrap shrink-0 rounded-t-lg ${
               activeTab === 'current'
-                ? 'border-blue-600 text-blue-700'
-                : 'border-transparent text-slate-500 hover:text-slate-800'
+                ? 'border-blue-600 text-blue-700 bg-white shadow-2xs'
+                : 'border-transparent text-slate-500 hover:text-slate-800 hover:bg-slate-100/60'
             }`}
           >
-            <LandPlot className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
+            <LandPlot className="w-4 h-4 shrink-0" />
             <span>{isMarathi ? '१. सद्यस्थितीतील ७/१२' : '1. Current 7/12'}</span>
           </button>
 
           <button
             type="button"
             onClick={() => setActiveTab('audit')}
-            className={`pb-2.5 px-1 sm:px-0 text-xs sm:text-sm font-bold border-b-2 flex items-center gap-1.5 sm:gap-2 transition cursor-pointer whitespace-nowrap shrink-0 ${
+            className={`pb-2.5 pt-1.5 px-3 text-xs sm:text-sm font-bold border-b-2 flex items-center gap-2 transition cursor-pointer whitespace-nowrap shrink-0 rounded-t-lg ${
               activeTab === 'audit'
-                ? 'border-blue-600 text-blue-700'
-                : 'border-transparent text-slate-500 hover:text-slate-800'
+                ? 'border-blue-600 text-blue-700 bg-white shadow-2xs'
+                : 'border-transparent text-slate-500 hover:text-slate-800 hover:bg-slate-100/60'
             }`}
           >
-            <Scale className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
+            <Scale className="w-4 h-4 shrink-0" />
             <span>{isMarathi ? '२. तपासणी मुद्दे व वैधानिक उपप्रकार' : '2. 46 Audit Checkpoints & Category'}</span>
-            <span className="text-[10px] bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded font-mono font-bold shrink-0">
+            <span className="text-[10px] bg-amber-100 text-amber-900 border border-amber-200/80 px-2 py-0.5 rounded-full font-mono font-bold shrink-0">
               १६ उपप्रकार
             </span>
           </button>
@@ -432,13 +468,13 @@ export default function EditParcelModal({ isOpen, onClose, parcel, onUpdateSucce
           <button
             type="button"
             onClick={() => setActiveTab('timeline')}
-            className={`pb-2.5 px-1 sm:px-0 text-xs sm:text-sm font-bold border-b-2 flex items-center gap-1.5 sm:gap-2 transition cursor-pointer whitespace-nowrap shrink-0 ${
+            className={`pb-2.5 pt-1.5 px-3 text-xs sm:text-sm font-bold border-b-2 flex items-center gap-2 transition cursor-pointer whitespace-nowrap shrink-0 rounded-t-lg ${
               activeTab === 'timeline'
-                ? 'border-blue-600 text-blue-700'
-                : 'border-transparent text-slate-500 hover:text-slate-800'
+                ? 'border-blue-600 text-blue-700 bg-white shadow-2xs'
+                : 'border-transparent text-slate-500 hover:text-slate-800 hover:bg-slate-100/60'
             }`}
           >
-            <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
+            <Clock className="w-4 h-4 shrink-0" />
             <span>{isMarathi ? '३. ऐतिहासिक कालक्रम (1950-1995)' : '3. Historical Timeline'}</span>
           </button>
         </div>
@@ -498,9 +534,10 @@ export default function EditParcelModal({ isOpen, onClose, parcel, onUpdateSucce
                         </option>
                       ))}
                     </select>
-                    <p className="mt-1 text-[11px] text-slate-500 leading-normal">
-                      {isMarathi ? selectedTenureConfig.descriptionMr : selectedTenureConfig.descriptionEn}
-                    </p>
+                    <div className="mt-2 px-3 py-2 rounded-xl bg-slate-50 border border-slate-200/80 text-[11px] text-slate-600 flex items-start gap-1.5 leading-relaxed">
+                      <Info className="w-3.5 h-3.5 text-blue-600 shrink-0 mt-0.5" />
+                      <span>{isMarathi ? selectedTenureConfig.descriptionMr : selectedTenureConfig.descriptionEn}</span>
+                    </div>
                   </div>
 
                   <div>
@@ -524,7 +561,7 @@ export default function EditParcelModal({ isOpen, onClose, parcel, onUpdateSucce
                       <LandPlot className="w-4 h-4 text-blue-600 shrink-0" />
                       {isMarathi ? 'जमिनीचे क्षेत्र विभाजन (कृषक व अकृषक)' : 'Land Area Breakdown (Agricultural & Non-Agricultural)'}
                     </span>
-                    <span className="text-[11px] text-slate-500 font-mono">
+                    <span className="text-[11px] text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200/60 font-mono font-medium">
                       {isMarathi ? 'एकूण क्षेत्र स्वयंचलित' : 'Total Area Auto-calculated'}
                     </span>
                   </div>
@@ -565,12 +602,10 @@ export default function EditParcelModal({ isOpen, onClose, parcel, onUpdateSucce
                       <label className="block text-[11px] font-bold text-blue-900 mb-1">
                         {isMarathi ? 'एकूण क्षेत्र (हेक्टर मध्ये)' : 'Total Computed Area (Ha)'}
                       </label>
-                      <input
-                        type="text"
-                        readOnly
-                        value={`${totalAreaHa} Ha`}
-                        className="w-full text-xs sm:text-sm px-3 py-2 bg-blue-50 text-blue-900 border border-blue-200 rounded-lg font-mono font-bold"
-                      />
+                      <div className="w-full h-[38px] px-3 bg-blue-50/80 border border-blue-200/90 rounded-lg flex items-center justify-between font-mono">
+                        <span className="text-xs sm:text-sm font-bold text-blue-950">{totalAreaHa}</span>
+                        <span className="text-[10px] font-bold text-blue-700 bg-blue-100 px-1.5 py-0.5 rounded">Ha</span>
+                      </div>
                     </div>
                   </div>
 
@@ -972,9 +1007,9 @@ export default function EditParcelModal({ isOpen, onClose, parcel, onUpdateSucce
           </div>
 
           {/* PINNED Sticky Form Actions Footer - ALWAYS VISIBLE */}
-          <div className="px-4 sm:px-6 py-3 sm:py-3.5 border-t border-slate-200/90 bg-slate-50/80 shrink-0 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-3">
-            <div className="flex items-center gap-1.5 text-[11px] sm:text-xs text-slate-500">
-              <ShieldAlert className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+          <div className="px-4 sm:px-6 py-3.5 sm:py-4 border-t border-slate-200/90 bg-slate-50/90 backdrop-blur-md shrink-0 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-2 text-xs text-slate-500">
+              <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
               <span>{isMarathi ? 'बदल सेव्ह होताच गाव व तालुक्याचा गोषवारा तात्काळ फेरगणती होईल.' : 'Village & taluka rollups auto-recalculated on save.'}</span>
             </div>
 
@@ -983,14 +1018,14 @@ export default function EditParcelModal({ isOpen, onClose, parcel, onUpdateSucce
                 type="button"
                 onClick={onClose}
                 disabled={loading}
-                className="flex-1 sm:flex-none px-4 py-2 border border-slate-200 text-slate-700 rounded-xl text-xs sm:text-sm font-semibold hover:bg-white transition cursor-pointer"
+                className="flex-1 sm:flex-none px-4 py-2.5 border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 rounded-xl text-xs sm:text-sm font-semibold transition cursor-pointer shadow-2xs"
               >
                 {isMarathi ? 'रद्द करा (Cancel)' : 'Cancel'}
               </button>
               <button
                 type="submit"
                 disabled={loading}
-                className="flex-1 sm:flex-none px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 shadow-xs transition cursor-pointer disabled:opacity-50 active:scale-95"
+                className="flex-1 sm:flex-none px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 shadow-xs transition cursor-pointer disabled:opacity-50 active:scale-95"
               >
                 {loading ? (
                   <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -1003,6 +1038,7 @@ export default function EditParcelModal({ isOpen, onClose, parcel, onUpdateSucce
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
