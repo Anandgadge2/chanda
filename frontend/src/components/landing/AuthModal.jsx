@@ -26,6 +26,7 @@ import {
 import ChandrapurDistrictLogo from './ChandrapurDistrictLogo';
 import { useAuth } from '../AuthContext';
 import { useFocusTrap } from '../../hooks/useFocusTrap';
+import { useTranslation } from '../LanguageContext';
 
 /**
  * Official Hierarchy of Revenue Administration (Apex to Grassroots)
@@ -33,93 +34,129 @@ import { useFocusTrap } from '../../hooks/useFocusTrap';
 const HIERARCHY_OFFICERS = [
   {
     role: 'COLLECTOR',
-    rank: '१',
-    title: 'जिल्हाधिकारी, चंद्रपूर',
+    rankMr: '१',
+    rankEn: '1',
+    titleMr: 'जिल्हाधिकारी, चंद्रपूर',
+    titleEn: 'District Collector & Magistrate, Chandrapur',
     roleTag: 'Apex Authority',
-    badge: 'जिल्हाधिकारी (Collector)',
-    jurisdiction: 'संपूर्ण चंद्रपूर जिल्हा (District-wide)',
+    badgeMr: 'जिल्हाधिकारी (Collector)',
+    badgeEn: 'Collector & DM',
+    jurisdictionMr: 'संपूर्ण चंद्रपूर जिल्हा (District-wide)',
+    jurisdictionEn: 'Entire District Jurisdiction',
     icon: Crown,
     email: 'collector.chandrapur@maharashtra.gov.in',
     password: '111111',
-    description: 'जिल्हा महसूल प्रमुख, अपीलीय अधिकारी व शासन जमा अंतिम आदेश',
+    descriptionMr: 'जिल्हा महसूल प्रमुख, अपीलीय अधिकारी व शासन जमा अंतिम आदेश',
+    descriptionEn: 'Head of District Administration, Appellate Authority & Final Decrees',
   },
   {
     role: 'SUB_COLLECTOR',
-    rank: '२',
-    title: 'उपजिल्हाधिकारी (भूसंपादन / महसूल)',
+    rankMr: '२',
+    rankEn: '2',
+    titleMr: 'उपजिल्हाधिकारी (भूसंपादन / महसूल)',
+    titleEn: 'Sub-Collector / Additional Collector (HQ)',
     roleTag: 'Headquarters',
-    badge: 'उपजिल्हाधिकारी (Sub-Collector)',
-    jurisdiction: 'जिल्हा मुख्यालय (Collectorate HQ)',
+    badgeMr: 'उपजिल्हाधिकारी (Sub-Collector)',
+    badgeEn: 'Sub-Collector / Addl Collector',
+    jurisdictionMr: 'जिल्हा मुख्यालय (Collectorate HQ)',
+    jurisdictionEn: 'Collectorate Headquarters',
     icon: Building2,
     email: 'subcollector.chandrapur@maharashtra.gov.in',
     password: '111111',
-    description: 'भूसंपादन, पुनर्वसन, अकृषिक (NA) संनियंत्रण व समन्वय',
+    descriptionMr: 'भूसंपादन, पुनर्वसन, अकृषिक (NA) संनियंत्रण व समन्वय',
+    descriptionEn: 'Land Acquisition, Rehabilitation & Non-Agricultural Sanctions',
   },
   {
     role: 'SDO',
-    rank: '३',
-    title: 'उपविभागीय अधिकारी (SDO), वरोरा',
+    rankMr: '३',
+    rankEn: '3',
+    titleMr: 'उपविभागीय अधिकारी (SDO), वरोरा',
+    titleEn: 'Sub-Divisional Officer (SDO), Warora',
     roleTag: 'Sub-Division',
-    badge: 'उपविभागीय अधिकारी (SDO / प्रांत)',
-    jurisdiction: 'वरोरा उपविभाग (Warora Sub-Division)',
+    badgeMr: 'उपविभागीय अधिकारी (SDO / प्रांत)',
+    badgeEn: 'Sub-Divisional Officer (SDO)',
+    jurisdictionMr: 'वरोरा उपविभाग (Warora Sub-Division)',
+    jurisdictionEn: 'Warora Revenue Sub-Division',
     icon: Scale,
     email: 'sdo.warora@maharashtra.gov.in',
     password: '111111',
-    description: 'अर्ध-न्यायिक न्यायालय (MLRC कलम ३६, ३६अ, ४४, ४५ सुनावणी)',
+    descriptionMr: 'अर्ध-न्यायिक न्यायालय (MLRC कलम ३६, ३६अ, ४४, ४५ सुनावणी)',
+    descriptionEn: 'Quasi-Judicial Revenue Court (MLRC Sec 36, 36A, 44, 45 Proceedings)',
   },
   {
     role: 'TEHSILDAR',
-    rank: '४',
-    title: 'तहसीलदार, चंद्रपूर',
+    rankMr: '४',
+    rankEn: '4',
+    titleMr: 'तहसीलदार, चंद्रपूर',
+    titleEn: 'Tahsildar & Executive Magistrate, Chandrapur',
     roleTag: 'Taluka Scope',
-    badge: 'तहसीलदार (Tehsildar)',
-    jurisdiction: 'चंद्रपूर तालुका (Taluka Executive)',
+    badgeMr: 'तहसीलदार (Tehsildar)',
+    badgeEn: 'Tahsildar & Executive Magistrate',
+    jurisdictionMr: 'चंद्रपूर तालुका (Taluka Executive)',
+    jurisdictionEn: 'Chandrapur Taluka Executive Scope',
     icon: Briefcase,
     email: 'teh.chandrapur@maharashtra.gov.in',
     password: '111111',
-    description: 'तालुका महसूल प्रशासन, अतिक्रमण निष्कासन व वसुली',
+    descriptionMr: 'तालुका महसूल प्रशासन, अतिक्रमण निष्कासन व वसुली',
+    descriptionEn: 'Taluka Revenue Administration, Encroachment Removal & Recovery',
   },
   {
     role: 'NAIB_TEHSILDAR',
-    rank: '५',
-    title: 'नायब तहसीलदार, चंद्रपूर',
+    rankMr: '५',
+    rankEn: '5',
+    titleMr: 'नायब तहसीलदार, चंद्रपूर',
+    titleEn: 'Naib Tahsildar, Chandrapur',
     roleTag: 'Circle / Taluka',
-    badge: 'नायब तहसीलदार (Naib Tehsildar)',
-    jurisdiction: 'तहसील / मंडळ प्रभार',
+    badgeMr: 'नायब तहसीलदार (Naib Tehsildar)',
+    badgeEn: 'Naib Tahsildar',
+    jurisdictionMr: 'तहसील / मंडळ प्रभार',
+    jurisdictionEn: 'Tehsil & Circle Charge',
     icon: FileCheck2,
     email: 'naib.chandrapur@maharashtra.gov.in',
     password: '111111',
-    description: 'फेरफार नोंदी प्रमाणीकरण (Mutation Certification)',
+    descriptionMr: 'फेरफार नोंदी प्रमाणीकरण (Mutation Certification)',
+    descriptionEn: 'Mutation Entry Certification & Revenue Dispute Inquiries',
   },
   {
     role: 'CIRCLE_OFFICER',
-    rank: '६',
-    title: 'मंडळ अधिकारी (Circle Officer), माढेळी',
+    rankMr: '६',
+    rankEn: '6',
+    titleMr: 'मंडळ अधिकारी (Circle Officer), माढेळी',
+    titleEn: 'Circle Officer, Madheli Circle',
     roleTag: 'Revenue Circle',
-    badge: 'मंडळ अधिकारी (Circle Officer)',
-    jurisdiction: 'माढेळी मंडळ (Madheli Circle)',
+    badgeMr: 'मंडळ अधिकारी (Circle Officer)',
+    badgeEn: 'Circle Officer',
+    jurisdictionMr: 'माढेळी मंडळ (Madheli Circle)',
+    jurisdictionEn: 'Madheli Revenue Circle',
     icon: Compass,
     email: 'co.madheli@maharashtra.gov.in',
     password: '111111',
-    description: 'स्थळ पंचनामे, पीक पाहणी व फेरफार चौकशी अहवाल',
+    descriptionMr: 'स्थळ पंचनामे, पीक पाहणी व फेरफार चौकशी अहवाल',
+    descriptionEn: 'Spot Panchnama, Crop Inspection (Pik Pahani) & Verification Reports',
   },
   {
     role: 'TALATHI',
-    rank: '७',
-    title: 'तलाठी (सझा माढेळी), वरोरा',
+    rankMr: '७',
+    rankEn: '7',
+    titleMr: 'तलाठी (सझा माढेळी), वरोरा',
+    titleEn: 'Talathi / Village Revenue Officer, Madheli',
     roleTag: 'Saja / Village',
-    badge: 'तलाठी (Talathi / पटवारी)',
-    jurisdiction: 'सझा माढेळी (Village Records)',
+    badgeMr: 'तलाठी (Talathi / पटवारी)',
+    badgeEn: 'Talathi (Patwari)',
+    jurisdictionMr: 'सझा माढेळी (Village Records)',
+    jurisdictionEn: 'Saja Madheli Grassroots Registry',
     icon: FileCheck2,
     email: 'talathi.madheli@maharashtra.gov.in',
     password: '111111',
-    description: 'गाव नमुना ७/१२, ८-अ, फेरफार नोंदवही व्यवस्थापन',
+    descriptionMr: 'गाव नमुना ७/१२, ८-अ, फेरफार नोंदवही व्यवस्थापन',
+    descriptionEn: 'Village Form 7/12, 8A, & Mutation Register Custody',
   },
 ];
 
 export default function AuthModal({ isOpen, onClose }) {
   const router = useRouter();
   const { login } = useAuth();
+  const { isMarathi } = useTranslation();
   const trapRef = useFocusTrap(isOpen);
   const [mounted, setMounted] = useState(false);
 
@@ -183,7 +220,7 @@ export default function AuthModal({ isOpen, onClose }) {
       onClose();
       router.push('/dashboard');
     } catch (err) {
-      setErrorMsg(err.message || 'अवैध शासकीय ईमेल किंवा संकेतशब्द. कृपया पुन्हा प्रयत्न करा.');
+      setErrorMsg(err.message || (isMarathi ? 'अवैध शासकीय ईमेल किंवा संकेतशब्द. कृपया पुन्हा प्रयत्न करा.' : 'Invalid official email or password. Please try again.'));
     } finally {
       setLoading(false);
     }
@@ -210,14 +247,14 @@ export default function AuthModal({ isOpen, onClose }) {
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-[11px] font-medium text-slate-500 tracking-wide">
-                  महाराष्ट्र शासन • जिल्हाधिकारी कार्यालय, चंद्रपूर
+                  {isMarathi ? 'महाराष्ट्र शासन • जिल्हाधिकारी कार्यालय, चंद्रपूर' : 'Govt of Maharashtra • Collectorate Chandrapur'}
                 </span>
                 <span className="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-medium hidden sm:inline-block">
-                  अंतर्गत पोर्टल
+                  {isMarathi ? 'अंतर्गत पोर्टल' : 'Official Portal'}
                 </span>
               </div>
               <h2 id="auth-modal-title" className="text-sm sm:text-base font-bold text-slate-900 tracking-tight">
-                भूमी अभिलेख व महसूल अधिकारी अधिकृत प्रणाली
+                {isMarathi ? 'भूमी अभिलेख व महसूल अधिकारी अधिकृत प्रणाली' : 'Land Governance & Revenue Officer Portal'}
               </h2>
             </div>
           </div>
@@ -226,7 +263,7 @@ export default function AuthModal({ isOpen, onClose }) {
             type="button"
             onClick={onClose}
             className="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition focus:outline-none focus:ring-2 focus:ring-blue-500"
-            aria-label="संवाद बंद करा (Close dialog)"
+            aria-label={isMarathi ? 'संवाद बंद करा (Close dialog)' : 'Close dialog'}
           >
             <X className="w-4 h-4" />
           </button>
@@ -240,9 +277,11 @@ export default function AuthModal({ isOpen, onClose }) {
               <div className="flex items-center justify-between px-1 mb-2.5">
                 <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
                   <Users2 className="w-3.5 h-3.5 text-slate-400" />
-                  <span>पदानुक्रम (Hierarchy)</span>
+                  <span>{isMarathi ? 'पदानुक्रम (Hierarchy)' : 'Officer Hierarchy'}</span>
                 </span>
-                <span className="text-[10px] text-slate-400 font-medium">१ ते ७ पदे</span>
+                <span className="text-[10px] text-slate-400 font-medium">
+                  {isMarathi ? '१ ते ७ पदे' : '7 Official Roles'}
+                </span>
               </div>
 
               {/* Hierarchy List: Responsive Horizontal scroll on mobile, sleek vertical list on desktop */}
@@ -269,10 +308,12 @@ export default function AuthModal({ isOpen, onClose }) {
                               : 'bg-slate-200/80 text-slate-600'
                           }`}
                         >
-                          {officer.rank}
+                          {isMarathi ? officer.rankMr : officer.rankEn}
                         </span>
                         <div className="min-w-0 whitespace-nowrap md:whitespace-normal">
-                          <div className="truncate leading-tight font-medium">{officer.badge}</div>
+                          <div className="truncate leading-tight font-medium">
+                            {isMarathi ? officer.badgeMr : officer.badgeEn}
+                          </div>
                           <div
                             className={`text-[10px] truncate hidden md:block ${
                               isSelected ? 'text-blue-100' : 'text-slate-400'
@@ -290,7 +331,10 @@ export default function AuthModal({ isOpen, onClose }) {
 
             {/* Quick Context Footnote */}
             <div className="mt-4 pt-3 border-t border-slate-200/60 text-[11px] text-slate-400 leading-relaxed hidden md:block px-1">
-              <span className="font-medium text-slate-600">टीप:</span> पदानुक्रमानुसार सुनावणी व फेरफार मंजुरीचे अधिकार निश्चित केले आहेत.
+              <span className="font-medium text-slate-600">{isMarathi ? 'टीप:' : 'Note:'}</span>{' '}
+              {isMarathi
+                ? 'पदानुक्रमानुसार सुनावणी व फेरफार मंजुरीचे अधिकार निश्चित केले आहेत.'
+                : 'Jurisdiction & quasi-judicial hearing powers are determined by statutory hierarchy.'}
             </div>
           </div>
 
@@ -302,17 +346,17 @@ export default function AuthModal({ isOpen, onClose }) {
                 <div className="min-w-0 space-y-0.5">
                   <div className="flex items-center gap-1.5 flex-wrap">
                     <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700">
-                      पद #{currentOfficer.rank} • {currentOfficer.roleTag}
+                      {isMarathi ? 'पद' : 'Role'} #{isMarathi ? currentOfficer.rankMr : currentOfficer.rankEn} • {currentOfficer.roleTag}
                     </span>
                     <span className="text-[11px] text-slate-400 truncate">
-                      {currentOfficer.jurisdiction}
+                      {isMarathi ? currentOfficer.jurisdictionMr : currentOfficer.jurisdictionEn}
                     </span>
                   </div>
                   <h3 className="text-sm sm:text-base font-bold text-slate-900 truncate pt-0.5">
-                    {currentOfficer.title}
+                    {isMarathi ? currentOfficer.titleMr : currentOfficer.titleEn}
                   </h3>
                   <p className="text-[11px] text-slate-500 line-clamp-1">
-                    {currentOfficer.description}
+                    {isMarathi ? currentOfficer.descriptionMr : currentOfficer.descriptionEn}
                   </p>
                 </div>
 
@@ -321,10 +365,10 @@ export default function AuthModal({ isOpen, onClose }) {
                   onClick={(e) => handleExecuteLogin(e, currentOfficer.email, currentOfficer.password)}
                   disabled={loading}
                   className="shrink-0 px-2.5 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 font-semibold text-xs transition-colors flex items-center gap-1 active:scale-95 disabled:opacity-50"
-                  title="या खात्यावर थेट चाचणी लॉगिन करा"
+                  title={isMarathi ? 'या खात्यावर थेट चाचणी लॉगिन करा' : 'Direct Demo Login'}
                 >
                   <Sparkles className="w-3.5 h-3.5 text-blue-600" />
-                  <span>थेट प्रवेश</span>
+                  <span>{isMarathi ? 'थेट प्रवेश' : 'Quick Login'}</span>
                 </button>
               </div>
 
@@ -353,7 +397,7 @@ export default function AuthModal({ isOpen, onClose }) {
               <form onSubmit={handleExecuteLogin} className="space-y-3.5">
                 <div>
                   <label htmlFor="login-email" className="block text-xs font-medium text-slate-700 mb-1.5">
-                    शासकीय ईमेल (Official ID / NIC)
+                    {isMarathi ? 'शासकीय ईमेल (Official ID / NIC)' : 'Official Email (NIC / MahaGov ID)'}
                   </label>
                   <div className="relative">
                     <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-3 pointer-events-none" />
@@ -363,7 +407,7 @@ export default function AuthModal({ isOpen, onClose }) {
                       required
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      placeholder="उदा. collector.chandrapur@maharashtra.gov.in"
+                      placeholder="e.g. collector.chandrapur@maharashtra.gov.in"
                       className="w-full pl-9 pr-3 py-2 text-xs border border-slate-200 rounded-xl bg-slate-50/50 hover:bg-white focus:bg-white font-medium text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition"
                     />
                   </div>
@@ -372,9 +416,11 @@ export default function AuthModal({ isOpen, onClose }) {
                 <div>
                   <div className="flex items-center justify-between mb-1.5">
                     <label htmlFor="login-password" className="block text-xs font-medium text-slate-700">
-                      संकेतशब्द (Password)
+                      {isMarathi ? 'संकेतशब्द (Password)' : 'Password'}
                     </label>
-                    <span className="text-[10px] text-slate-400 font-mono">चाचणी संकेतशब्द: 111111</span>
+                    <span className="text-[10px] text-slate-400 font-mono">
+                      {isMarathi ? 'चाचणी संकेतशब्द: 111111' : 'Demo Pass: 111111'}
+                    </span>
                   </div>
                   <div className="relative">
                     <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-3 pointer-events-none" />
@@ -391,8 +437,8 @@ export default function AuthModal({ isOpen, onClose }) {
                       type="button"
                       onClick={() => setShowPassword((prev) => !prev)}
                       className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600 p-0.5 rounded transition"
-                      title={showPassword ? 'संकेतशब्द लपवा' : 'संकेतशब्द दाखवा'}
-                      aria-label={showPassword ? 'संकेतशब्द लपवा' : 'संकेतशब्द दाखवा'}
+                      title={showPassword ? (isMarathi ? 'संकेतशब्द लपवा' : 'Hide password') : (isMarathi ? 'संकेतशब्द दाखवा' : 'Show password')}
+                      aria-label={showPassword ? 'Hide password' : 'Show password'}
                     >
                       {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
@@ -405,11 +451,11 @@ export default function AuthModal({ isOpen, onClose }) {
                   className="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs shadow-sm hover:shadow-md transition flex items-center justify-center gap-2 active:scale-[0.99] disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
                 >
                   {loading ? (
-                    <span>प्रमाणीकरण चालू आहे...</span>
+                    <span>{isMarathi ? 'प्रमाणीकरण चालू आहे...' : 'Authenticating...'}</span>
                   ) : (
                     <>
                       <ShieldCheck className="w-4 h-4 text-white" />
-                      <span>डॅशबोर्डमध्ये प्रवेश करा</span>
+                      <span>{isMarathi ? 'डॅशबोर्डमध्ये प्रवेश करा' : 'Sign In to Revenue Dashboard'}</span>
                       <ArrowRight className="w-4 h-4 text-white" />
                     </>
                   )}
@@ -421,7 +467,11 @@ export default function AuthModal({ isOpen, onClose }) {
             <div className="pt-2">
               <p className="text-[11px] text-slate-400 text-center flex items-center justify-center gap-1.5">
                 <Building2 className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                <span>केवळ अधिकृत महसूल अधिकारी व कर्मचाऱ्यांसाठी मर्यादित.</span>
+                <span>
+                  {isMarathi
+                    ? 'केवळ अधिकृत महसूल अधिकारी व कर्मचाऱ्यांसाठी मर्यादित.'
+                    : 'Restricted for authorized revenue officers and revenue staff.'}
+                </span>
               </p>
             </div>
           </div>

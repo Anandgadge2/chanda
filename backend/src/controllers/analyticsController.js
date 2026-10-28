@@ -43,7 +43,7 @@ const fetchSummaryFromDatabase = async (taluka) => {
        WHERE fec.status = 'HEARING_SCHEDULED' AND (${talukaParam}::text IS NULL OR LOWER(lp.taluka) = LOWER(${talukaParam}))) as "pendingHearings",
 
       -- Repossessed Government Land (Area in Ha)
-      (SELECT COALESCE(SUM(fec.encroached_area_ha), 0)::float FROM forward_enforcement_cases fec 
+      (SELECT COALESCE(SUM(COALESCE(NULLIF(fec.encroached_area_ha, 0), lp.total_area_ha, 0)), 0)::float FROM forward_enforcement_cases fec 
        LEFT JOIN land_parcels lp ON fec.parcel_id = lp.id 
        WHERE fec.is_repossessed_to_govt = true AND (${talukaParam}::text IS NULL OR LOWER(lp.taluka) = LOWER(${talukaParam}))) as "totalRepossessedHa",
 
@@ -51,6 +51,20 @@ const fetchSummaryFromDatabase = async (taluka) => {
       (SELECT COUNT(*)::int FROM forward_enforcement_cases fec 
        LEFT JOIN land_parcels lp ON fec.parcel_id = lp.id 
        WHERE fec.is_repossessed_to_govt = true AND (${talukaParam}::text IS NULL OR LOWER(lp.taluka) = LOWER(${talukaParam}))) as "totalRepossessedCases",
+
+      -- In-Progress Enforcement Cases Under Inquiry
+      (SELECT COUNT(*)::int FROM forward_enforcement_cases fec 
+       LEFT JOIN land_parcels lp ON fec.parcel_id = lp.id 
+       WHERE (fec.is_repossessed_to_govt = false OR fec.is_repossessed_to_govt IS NULL)
+         AND fec.status NOT IN ('FINAL_ORDER_PASSED', 'RECTIFIED_7_12', 'DISMISSED')
+         AND (${talukaParam}::text IS NULL OR LOWER(lp.taluka) = LOWER(${talukaParam}))) as "inProgressCases",
+
+      -- In-Progress Enforcement Area (Ha) Under Inquiry
+      (SELECT COALESCE(SUM(COALESCE(NULLIF(fec.encroached_area_ha, 0), lp.total_area_ha, 0)), 0)::float FROM forward_enforcement_cases fec 
+       LEFT JOIN land_parcels lp ON fec.parcel_id = lp.id 
+       WHERE (fec.is_repossessed_to_govt = false OR fec.is_repossessed_to_govt IS NULL)
+         AND fec.status NOT IN ('FINAL_ORDER_PASSED', 'RECTIFIED_7_12', 'DISMISSED')
+         AND (${talukaParam}::text IS NULL OR LOWER(lp.taluka) = LOWER(${talukaParam}))) as "inProgressAreaHa",
 
       -- Violations Grouped by Statutory Category
       (SELECT COALESCE(json_agg(json_build_object(
@@ -109,7 +123,7 @@ const fetchSummaryFromDatabase = async (taluka) => {
            COUNT(DISTINCT fec.id)::int as violation_cnt,
            COUNT(DISTINCT CASE WHEN lp.has_active_dispute THEN lp.id END)::int as dispute_cnt,
            COUNT(DISTINCT CASE WHEN fec.is_repossessed_to_govt = true THEN fec.id END)::int as repossessed_cnt,
-           COALESCE(SUM(CASE WHEN fec.is_repossessed_to_govt = true THEN fec.encroached_area_ha ELSE 0 END), 0)::float as repossessed_area_ha
+           COALESCE(SUM(CASE WHEN fec.is_repossessed_to_govt = true THEN COALESCE(NULLIF(fec.encroached_area_ha, 0), lp.total_area_ha, 0) ELSE 0 END), 0)::float as repossessed_area_ha
          FROM land_parcels lp
          LEFT JOIN forward_enforcement_cases fec ON fec.parcel_id = lp.id
          GROUP BY lp.taluka
@@ -270,6 +284,8 @@ const fetchSummaryFromDatabase = async (taluka) => {
     pendingHearings: Number(row.pendingHearings || 0),
     totalRepossessedHa: Number(row.totalRepossessedHa || 0),
     totalRepossessedCases: Number(row.totalRepossessedCases || 0),
+    inProgressCases: Number(row.inProgressCases ?? (row.totalViolations - (row.totalRepossessedCases || 0))),
+    inProgressAreaHa: Number(row.inProgressAreaHa || 0),
     violationsByType: row.violationsByType || [],
     tenureDistribution: row.tenureDistribution || [],
     talukaDistribution: row.talukaDistribution || [],

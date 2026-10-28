@@ -3,12 +3,14 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ShieldCheck, Cookie, X, ArrowRight } from 'lucide-react';
+import { useTranslation } from './LanguageContext';
 
 /**
  * Cookie & Privacy Consent Banner
  * Compliant with Digital Personal Data Protection Act, 2023 (DPDPA) & WCAG 2.1 AA
  */
 export default function CookieConsentBanner() {
+  const { isMarathi } = useTranslation();
   const [show, setShow] = useState(false);
 
   useEffect(() => {
@@ -44,7 +46,7 @@ export default function CookieConsentBanner() {
   return (
     <aside
       role="region"
-      aria-label="कुकी आणि डेटा गोपनीयता संमती सूचना (Cookie & Data Privacy Notice)"
+      aria-label={isMarathi ? 'कुकी आणि डेटा गोपनीयता संमती सूचना (Cookie & Data Privacy Notice)' : 'Cookie & Data Privacy Notice'}
       className="fixed bottom-3 sm:bottom-6 inset-x-3 sm:inset-x-6 max-w-5xl mx-auto z-50 transition-all duration-300 animate-in fade-in slide-in-from-bottom-5"
     >
       <div className="bg-white/95 backdrop-blur-xl border border-slate-200/90 shadow-[0_20px_60px_-15px_rgba(15,23,42,0.2)] rounded-2xl sm:rounded-3xl overflow-hidden">
@@ -54,7 +56,7 @@ export default function CookieConsentBanner() {
             type="button"
             onClick={() => handleAccept('essential')}
             className="absolute top-2.5 right-2.5 sm:top-3.5 sm:right-3.5 text-slate-400 hover:text-slate-700 p-1.5 rounded-lg hover:bg-slate-100 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400"
-            aria-label="संमती सूचना बंद करा (Close notice)"
+            aria-label={isMarathi ? 'संमती सूचना बंद करा (Close notice)' : 'Close cookie notice'}
           >
             <X className="w-4 h-4" aria-hidden="true" />
           </button>
@@ -68,17 +70,18 @@ export default function CookieConsentBanner() {
             <div className="text-xs sm:text-sm text-slate-700 leading-relaxed">
               <div className="flex flex-wrap items-center gap-2 mb-1">
                 <span className="text-sm sm:text-base font-black text-slate-900 tracking-tight">
-                  डेटा गोपनीयता व कुकीज संमती (DPDPA 2023)
+                  {isMarathi ? 'डेटा गोपनीयता व कुकीज संमती (DPDPA 2023)' : 'Data Privacy & Cookies Consent (DPDPA 2023)'}
                 </span>
                 <span className="px-2.5 py-0.5 text-[10px] font-extrabold tracking-wider uppercase rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200/80 inline-flex items-center gap-1">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse" />
-                  शासकीय पोर्टल
+                  {isMarathi ? 'शासकीय पोर्टल' : 'Official Portal'}
                 </span>
               </div>
 
               <p className="text-xs sm:text-[13px] text-slate-600 leading-relaxed font-normal">
-                चंद्रपूर जिल्हा महसूल पोर्टल सुरक्षित लॉगिन आणि सत्र व्यवस्थापनासाठी केवळ आवश्यक कुकीज वापरते. 
-                डिजिटल व्यक्तिगत डेटा संरक्षण कायदा (DPDPA २०२३) व GIGW ३.० मानकांनुसार आपला वैयक्तिक डेटा पूर्णतः सुरक्षित राखला जातो.
+                {isMarathi
+                  ? 'चंद्रपूर जिल्हा महसूल पोर्टल सुरक्षित लॉगिन आणि सत्र व्यवस्थापनासाठी केवळ आवश्यक कुकीज वापरते. डिजिटल व्यक्तिगत डेटा संरक्षण कायदा (DPDPA २०२३) व GIGW ३.० मानकांनुसार आपला वैयक्तिक डेटा पूर्णतः सुरक्षित राखला जातो.'
+                  : 'District Collectorate Chandrapur uses strictly essential cookies for secure officer authentication and session security in compliance with DPDPA 2023 and GIGW 3.0 standards.'}
               </p>
 
               <div className="mt-2 flex flex-wrap items-center gap-3 text-xs">
@@ -86,7 +89,7 @@ export default function CookieConsentBanner() {
                   href="/privacy-policy"
                   className="text-blue-700 hover:text-blue-900 font-bold inline-flex items-center gap-1 hover:gap-1.5 transition-all underline decoration-blue-300 hover:decoration-blue-700 underline-offset-2"
                 >
-                  <span>गोपनीयता धोरण वाचा (Privacy Policy)</span>
+                  <span>{isMarathi ? 'गोपनीयता धोरण वाचा (Privacy Policy)' : 'Read Privacy Policy'}</span>
                   <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
                 </Link>
                 <span className="text-slate-300" aria-hidden="true">•</span>
@@ -94,7 +97,7 @@ export default function CookieConsentBanner() {
                   href="/accessibility-statement"
                   className="text-slate-500 hover:text-slate-800 font-medium inline-flex items-center gap-1 transition-colors"
                 >
-                  <span>सुलभता विधान (Accessibility)</span>
+                  <span>{isMarathi ? 'सुलभता विधान (Accessibility)' : 'Accessibility Statement'}</span>
                 </Link>
               </div>
             </div>
@@ -107,14 +110,14 @@ export default function CookieConsentBanner() {
               onClick={() => handleAccept('essential')}
               className="flex-1 md:flex-initial px-3.5 py-2 text-xs sm:text-sm font-bold text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200/80 active:bg-slate-300 border border-slate-200/90 rounded-xl transition-all shadow-2xs focus:outline-none focus:ring-2 focus:ring-slate-400"
             >
-              केवळ आवश्यक (Essential)
+              {isMarathi ? 'केवळ आवश्यक (Essential)' : 'Essential Only'}
             </button>
             <button
               type="button"
               onClick={() => handleAccept('all')}
               className="flex-1 md:flex-initial px-5 py-2 text-xs sm:text-sm font-bold text-white bg-gradient-to-r from-blue-700 via-blue-800 to-indigo-900 hover:from-blue-800 hover:to-indigo-950 active:scale-[0.98] rounded-xl shadow-md shadow-blue-900/25 hover:shadow-lg transition-all focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
             >
-              स्वीकारा व पुढे चला (Accept)
+              {isMarathi ? 'स्वीकारा व पुढे चला (Accept)' : 'Accept & Proceed'}
             </button>
           </div>
         </div>

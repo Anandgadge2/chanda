@@ -15,10 +15,13 @@ import {
 import { api } from '../lib/api';
 import { useAuth } from './AuthContext';
 import { useFocusTrap } from '../hooks/useFocusTrap';
+import { useTranslation } from './LanguageContext';
+import { formatVillageName } from '../lib/villageUtils';
 
 export default function ShasanJamaModal({ isOpen, onClose, caseItem, onSuccess = () => {} }) {
   const trapRef = useFocusTrap(isOpen);
   const { user } = useAuth();
+  const { isMarathi } = useTranslation();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -40,7 +43,7 @@ export default function ShasanJamaModal({ isOpen, onClose, caseItem, onSuccess =
   const [orderNumber, setOrderNumber] = useState('');
   const [orderDate, setOrderDate] = useState(new Date().toISOString().split('T')[0]);
   const [authority, setAuthority] = useState(
-    user?.designation || (user?.role === 'COLLECTOR' ? 'जिल्हाधिकारी, चंद्रपूर' : 'उपविभागीय अधिकारी (SDO)')
+    user?.designation || (user?.role === 'COLLECTOR' ? (isMarathi ? 'जिल्हाधिकारी, चंद्रपूर' : 'District Collector, Chandrapur') : (isMarathi ? 'उपविभागीय अधिकारी (SDO)' : 'Sub-Divisional Officer (SDO)'))
   );
   const [orderSummary, setOrderSummary] = useState('');
   const [file, setFile] = useState(null);
@@ -66,15 +69,23 @@ export default function ShasanJamaModal({ isOpen, onClose, caseItem, onSuccess =
     setErrorMsg('');
 
     if (!orderNumber.trim()) {
-      setErrorMsg('कृपया अधिकृत आदेश क्रमांक प्रविष्ट करा.');
+      setErrorMsg(isMarathi ? 'कृपया अधिकृत आदेश क्रमांक प्रविष्ट करा.' : 'Please enter the official order number.');
       return;
     }
     if (!orderSummary.trim() || orderSummary.trim().length < 20) {
-      setErrorMsg('आदेशाचा संक्षिप्त तपशील किमान २० अक्षरांचा असावा.');
+      setErrorMsg(
+        isMarathi
+          ? 'आदेशाचा संक्षिप्त तपशील किमान २० अक्षरांचा असावा.'
+          : 'Order legal summary must be at least 20 characters long.'
+      );
       return;
     }
     if (!confirmed) {
-      setErrorMsg('कृपया वैधानिक शपथपूर्वक प्रमाणीकरणास संमती द्या.');
+      setErrorMsg(
+        isMarathi
+          ? 'कृपया वैधानिक शपथपूर्वक प्रमाणीकरणास संमती द्या.'
+          : 'Please acknowledge the statutory affirmation checkbox.'
+      );
       return;
     }
 
@@ -87,7 +98,7 @@ export default function ShasanJamaModal({ isOpen, onClose, caseItem, onSuccess =
       if (file) {
         const formData = new FormData();
         formData.append('document', file);
-        formData.append('title', `शासन जमा अंतिम आदेश - ${orderNumber}`);
+        formData.append('title', isMarathi ? `शासन जमा अंतिम आदेश - ${orderNumber}` : `Govt Vesting Final Decree - ${orderNumber}`);
         formData.append('docType', user?.role === 'COLLECTOR' ? 'COLLECTOR_ORDER' : 'SDO_ORDER');
         formData.append('caseId', caseItem.id);
         if (caseItem.parcelId) formData.append('parcelId', caseItem.parcelId);
@@ -100,7 +111,7 @@ export default function ShasanJamaModal({ isOpen, onClose, caseItem, onSuccess =
       }
 
       // 2. Update case enforcement status to RECTIFIED_7_12 with Shasan Jama flag
-      const finalDetailsText = `[आदेश क्र. ${orderNumber} दि. ${orderDate} | सक्षम प्राधिकारी: ${authority}] ${orderSummary.trim()}`;
+      const finalDetailsText = `[${isMarathi ? 'आदेश क्र.' : 'Order No.'} ${orderNumber} ${isMarathi ? 'दि.' : 'Dt.'} ${orderDate} | ${isMarathi ? 'सक्षम प्राधिकारी:' : 'Authority:'} ${authority}] ${orderSummary.trim()}`;
 
       await api.updateCaseStatus(caseItem.id, {
         status: 'RECTIFIED_7_12',
@@ -113,7 +124,9 @@ export default function ShasanJamaModal({ isOpen, onClose, caseItem, onSuccess =
       onClose();
     } catch (err) {
       console.error('Shasan Jama execution error:', err);
-      setErrorMsg(err.message || 'शासन जमा आदेश नोंदवताना त्रुटी आली.');
+      setErrorMsg(
+        err.message || (isMarathi ? 'शासन जमा आदेश नोंदवताना त्रुटी आली.' : 'Error recording repossession decree.')
+      );
     } finally {
       setLoading(false);
     }
@@ -145,14 +158,16 @@ export default function ShasanJamaModal({ isOpen, onClose, caseItem, onSuccess =
             <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
                 <h2 id="shasan-modal-title" className="text-sm sm:text-base font-black text-slate-900 leading-tight">
-                  शासन जमा अंतिम आदेश पारित करा
+                  {isMarathi ? 'शासन जमा अंतिम आदेश पारित करा' : 'Execute Govt Repossession Decree (Shasan Jama)'}
                 </h2>
                 <span className="font-mono text-[10px] font-bold bg-rose-50 text-rose-800 px-2 py-0.5 rounded-full border border-rose-200">
                   {caseItem.caseNumber}
                 </span>
               </div>
               <p className="text-[11px] text-slate-500 truncate mt-0.5 font-medium">
-                MLRC १९६६ कलम ५० / ५४ / ३६अ शासकीय प्रत्यार्पण
+                {isMarathi
+                  ? (isMarathi ? 'MLRC १९६६ कलम ५० / ५४ / ३६अ शासकीय प्रत्यार्पण' : 'MLRC 1966 Section 50 / 54 / 36A Govt Vesting Enforcement')
+                  : 'MLRC 1966 Section 50 / 54 / 36A State Repossession'}
               </p>
             </div>
           </div>
@@ -160,7 +175,7 @@ export default function ShasanJamaModal({ isOpen, onClose, caseItem, onSuccess =
             type="button"
             onClick={onClose}
             className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 transition active:scale-90 flex items-center justify-center shrink-0 focus:outline-none focus:ring-2 focus:ring-rose-500 cursor-pointer"
-            aria-label="संवाद बंद करा (Close dialog)"
+            aria-label={isMarathi ? 'संवाद बंद करा (Close dialog)' : 'Close dialog'}
           >
             <X className="w-4 h-4" />
           </button>
@@ -172,19 +187,19 @@ export default function ShasanJamaModal({ isOpen, onClose, caseItem, onSuccess =
             {/* Target Parcel Summary */}
             <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs space-y-1">
               <div className="flex justify-between text-slate-600">
-                <span>भूखंड (UPI):</span>
+                <span>{isMarathi ? 'भूखंड (UPI):' : 'Parcel (UPI):'}</span>
                 <span className="font-bold text-slate-900">{caseItem.parcel?.upi || 'N/A'}</span>
               </div>
               <div className="flex justify-between text-slate-600">
-                <span>स्थान:</span>
+                <span>{isMarathi ? 'स्थान:' : 'Location:'}</span>
                 <span className="font-medium text-slate-800">
-                  {caseItem.parcel?.villageName}, तालुका {caseItem.parcel?.taluka} (गट क्र.{' '}
+                  {formatVillageName(caseItem.parcel?.villageName, isMarathi)}, {isMarathi ? 'तालुका' : 'Taluka'} {caseItem.parcel?.taluka} ({isMarathi ? 'गट क्र.' : 'Gat No.'}{' '}
                   {caseItem.parcel?.gatNumber})
                 </span>
               </div>
               <div className="flex justify-between text-slate-600">
-                <span>अतिक्रमित / शर्तभंग क्षेत्र:</span>
-                <span className="font-bold text-rose-700">{caseItem.encroachedAreaHa} हेक्टर</span>
+                <span>{isMarathi ? 'अतिक्रमित / शर्तभंग क्षेत्र:' : 'Encroached / Breach Area:'}</span>
+                <span className="font-bold text-rose-700">{caseItem.encroachedAreaHa} {isMarathi ? 'हेक्टर' : 'Ha'}</span>
               </div>
             </div>
 
@@ -202,7 +217,7 @@ export default function ShasanJamaModal({ isOpen, onClose, caseItem, onSuccess =
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label htmlFor="shasan-order-no" className="block text-xs font-bold text-slate-700 mb-1">
-                  अधिकृत आदेश क्रमांक *
+                  {isMarathi ? 'अधिकृत आदेश क्रमांक *' : 'Official Order Number *'}
                 </label>
                 <input
                   id="shasan-order-no"
@@ -210,14 +225,14 @@ export default function ShasanJamaModal({ isOpen, onClose, caseItem, onSuccess =
                   required
                   value={orderNumber}
                   onChange={(e) => setOrderNumber(e.target.value)}
-                  placeholder="उदा. SDO/WAR/REV/2026/042-SJ"
+                  placeholder="e.g. SDO/WAR/REV/2026/042-SJ"
                   className="w-full px-3 py-2 text-xs border border-slate-300 rounded-xl bg-slate-50 font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 
               <div>
                 <label htmlFor="shasan-order-date" className="block text-xs font-bold text-slate-700 mb-1">
-                  आदेश दिनांक *
+                  {isMarathi ? 'आदेश दिनांक *' : 'Order Date *'}
                 </label>
                 <input
                   id="shasan-order-date"
@@ -232,7 +247,7 @@ export default function ShasanJamaModal({ isOpen, onClose, caseItem, onSuccess =
 
             <div>
               <label htmlFor="shasan-authority" className="block text-xs font-bold text-slate-700 mb-1">
-                आदेश पारित करणारे सक्षम प्राधिकारी *
+                {isMarathi ? 'आदेश पारित करणारे सक्षम प्राधिकारी *' : 'Competent Sanctioning Authority *'}
               </label>
               <input
                 id="shasan-authority"
@@ -246,7 +261,7 @@ export default function ShasanJamaModal({ isOpen, onClose, caseItem, onSuccess =
 
             <div>
               <label htmlFor="shasan-summary" className="block text-xs font-bold text-slate-700 mb-1">
-                आदेशाचा संक्षिप्त कायदेशीर तपशील *
+                {isMarathi ? 'आदेशाचा संक्षिप्त कायदेशीर तपशील *' : 'Brief Legal Rationale & Decrees *'}
               </label>
               <textarea
                 id="shasan-summary"
@@ -254,7 +269,11 @@ export default function ShasanJamaModal({ isOpen, onClose, caseItem, onSuccess =
                 rows={3}
                 value={orderSummary}
                 onChange={(e) => setOrderSummary(e.target.value)}
-                placeholder="उदा. प्रतिवादीने विहित मुदतीत वैध कारण सादर न केल्यामुळे जमीन महसूल संहिता १९६६ चे कलम ५०/५४ अन्वये सदर गट शासनाधीन (शासन जमा) करण्याचे अंतिम आदेश पारित करण्यात येत आहेत."
+                placeholder={
+                  isMarathi
+                    ? (isMarathi ? 'उदा. प्रतिवादीने विहित मुदतीत वैध कारण सादर न केल्यामुळे जमीन महसूल संहिता १९६६ चे कलम ५०/५४ अन्वये सदर गट शासनाधीन (शासन जमा) करण्याचे अंतिम आदेश पारित करण्यात येत आहेत.' : 'e.g. As respondent failed to submit cause within period, final order of resuming land into Government vesting under MLRC 1966 Section 50/54 is passed.')
+                    : 'e.g., Respondent failed to produce valid NA sanction. Final order passed repossessing subject land to Maharashtra Government under MLRC 1966 Section 50/54.'
+                }
                 className="w-full p-3 text-xs border border-slate-300 rounded-xl bg-slate-50 font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 leading-relaxed"
               />
             </div>
@@ -262,7 +281,7 @@ export default function ShasanJamaModal({ isOpen, onClose, caseItem, onSuccess =
             {/* Signed PDF File Upload */}
             <div>
               <label htmlFor="shasan-file-upload" className="block text-xs font-bold text-slate-700 mb-1">
-                स्वाक्षरी केलेली आदेश प्रत
+                {isMarathi ? 'स्वाक्षरी केलेली आदेश प्रत' : 'Signed Decree PDF'}
               </label>
               <div className="flex items-center gap-3">
                 <label
@@ -270,7 +289,11 @@ export default function ShasanJamaModal({ isOpen, onClose, caseItem, onSuccess =
                   className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-dashed border-blue-400 bg-blue-50/60 hover:bg-blue-100/70 text-xs font-bold text-blue-900 transition focus-within:ring-2 focus-within:ring-blue-500"
                 >
                   <Upload className="w-3.5 h-3.5 text-blue-700" aria-hidden="true" />
-                  <span>{file ? 'फाइल बदला' : 'PDF फाइल जोडा'}</span>
+                  <span>
+                    {file
+                      ? (isMarathi ? 'फाइल बदला' : 'Change PDF')
+                      : (isMarathi ? 'PDF फाइल जोडा' : 'Attach PDF')}
+                  </span>
                   <input
                     id="shasan-file-upload"
                     type="file"
@@ -287,7 +310,9 @@ export default function ShasanJamaModal({ isOpen, onClose, caseItem, onSuccess =
                 )}
               </div>
               <p className="text-[10px] text-slate-500 mt-1">
-                * सक्षम प्राधिकाऱ्याची स्वाक्षरी व शिक्का असलेली अधिकृत प्रत जोडावी.
+                {isMarathi
+                  ? (isMarathi ? '* सक्षम प्राधिकाऱ्याची स्वाक्षरी व शिक्का असलेली अधिकृत प्रत जोडावी.' : '* Duly signed and stamped copy by competent authority should be attached.')
+                  : '* Attach official scan bearing seal and signature of competent authority.'}
               </p>
             </div>
 
@@ -303,9 +328,10 @@ export default function ShasanJamaModal({ isOpen, onClose, caseItem, onSuccess =
                   className="mt-0.5 rounded border-rose-300 text-rose-700 focus:ring-2 focus:ring-rose-500"
                 />
                 <span className="leading-relaxed">
-                  <strong>शपथपूर्वक प्रमाणीकरण:</strong> मी याद्वारे प्रमाणित करतो/करते की वरील आदेश
-                  महाराष्ट्र जमीन महसूल संहिता १९६६ अंतर्गत सक्षम महसूल प्राधिकाऱ्याने रीतसर
-                  पारित केला असून तो अंतिम स्वरूपाचा आहे.
+                  <strong>{isMarathi ? 'शपथपूर्वक प्रमाणीकरण:' : 'Statutory Affirmation:'}</strong>{' '}
+                  {isMarathi
+                    ? (isMarathi ? 'मी याद्वारे प्रमाणित करतो/करते की वरील आदेश महाराष्ट्र जमीन महसूल संहिता १९६६ अंतर्गत सक्षम महसूल प्राधिकाऱ्याने रीतसर पारित केला असून तो अंतिम स्वरूपाचा आहे.' : 'I hereby solemnly affirm that the above decree was duly passed by the competent revenue authority under MLRC 1966 and is of final nature.')
+                    : 'I hereby certify that the above repossession decree has been duly passed by the competent revenue authority under MLRC 1966 and constitutes a final enforceable order.'}
                 </span>
               </label>
             </div>
@@ -318,7 +344,7 @@ export default function ShasanJamaModal({ isOpen, onClose, caseItem, onSuccess =
               onClick={onClose}
               className="px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-100 transition active:scale-95 cursor-pointer focus:outline-none"
             >
-              रद्द करा
+              {isMarathi ? 'रद्द करा' : 'Cancel'}
             </button>
             <button
               type="submit"
@@ -328,12 +354,12 @@ export default function ShasanJamaModal({ isOpen, onClose, caseItem, onSuccess =
               {loading ? (
                 <>
                   <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  <span>आदेश नोंदवत आहे...</span>
+                  <span>{isMarathi ? 'आदेश नोंदवत आहे...' : 'Executing decree...'}</span>
                 </>
               ) : (
                 <>
                   <CheckCircle2 className="w-4 h-4" aria-hidden="true" />
-                  <span>शासन जमा आदेश पारित करा</span>
+                  <span>{isMarathi ? 'शासन जमा आदेश पारित करा' : 'Execute Repossession Decree'}</span>
                 </>
               )}
             </button>

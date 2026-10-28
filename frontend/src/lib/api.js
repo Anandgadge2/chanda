@@ -178,6 +178,20 @@ export const api = {
     return res.json();
   },
 
+  updateParcel: async (upi, payload) => {
+    const res = await fetch(`${BASE_URL}/api/parcels/${encodeURIComponent(upi)}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        ...getAuthHeaders(),
+      },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to update parcel');
+    return data;
+  },
+
   getParcelTrace: async (upi) => {
     const res = await dedupedFetch(`${BASE_URL}/api/parcels/${encodeURIComponent(upi)}/trace`, {
       headers: {

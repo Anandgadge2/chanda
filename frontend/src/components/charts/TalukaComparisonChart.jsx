@@ -13,8 +13,10 @@ import {
 } from 'recharts';
 import { MapPin, BarChart3 } from 'lucide-react';
 import { CHANDRAPUR_TALUKAS } from '../../lib/constants';
+import { useTranslation } from '../LanguageContext';
 
 export default function TalukaComparisonChart({ data = [], selectedTaluka = '' }) {
+  const { isMarathi } = useTranslation();
   const [viewMode, setViewMode] = useState('counts'); // 'counts' | 'area'
 
   // Map Marathi names
@@ -42,25 +44,27 @@ export default function TalukaComparisonChart({ data = [], selectedTaluka = '' }
         <div className="bg-white p-2.5 rounded-xl border border-slate-200 shadow-xl text-xs max-w-xs z-50 pointer-events-none">
           <div className="flex items-center gap-1.5 mb-1.5 border-b border-slate-100 pb-1">
             <MapPin className="w-3.5 h-3.5 text-blue-800 shrink-0" />
-            <span className="font-black text-slate-900 text-xs">तालुका {item.nameMr}</span>
-            <span className="text-[10px] text-slate-500 font-medium">({item.taluka})</span>
+            <span className="font-black text-slate-900 text-xs">
+              {isMarathi ? `तालुका ${item.nameMr}` : `${item.taluka} Taluka`}
+            </span>
+            
           </div>
 
           <div className="space-y-1 mt-1">
             <div className="flex justify-between items-center text-slate-700">
-              <span className="text-[10px] font-medium">नोंदणीकृत भूखंड:</span>
+              <span className="text-[10px] font-medium">{isMarathi ? 'नोंदणीकृत भूखंड:' : 'Registered Parcels:'}</span>
               <span className="font-bold text-slate-900">{item.parcelCount}</span>
             </div>
             <div className="flex justify-between items-center text-amber-700">
-              <span className="text-[10px] font-medium">शर्तभंग व चौकशी:</span>
+              <span className="text-[10px] font-medium">{isMarathi ? 'शर्तभंग व चौकशी:' : 'Breach Inquiries:'}</span>
               <span className="font-bold text-amber-800">{item.violationCount}</span>
             </div>
             <div className="flex justify-between items-center text-rose-700">
-              <span className="text-[10px] font-medium">सक्रीय वाद (Disputes):</span>
+              <span className="text-[10px] font-medium">{isMarathi ? 'सक्रीय वाद:' : 'Active Disputes:'}</span>
               <span className="font-bold text-rose-800">{item.disputeCount}</span>
             </div>
             <div className="flex justify-between items-center text-blue-900 pt-1 border-t border-slate-100">
-              <span className="text-[10px] font-semibold">एकूण क्षेत्रफळ:</span>
+              <span className="text-[10px] font-semibold">{isMarathi ? 'एकूण क्षेत्रफळ:' : 'Total Area:'}</span>
               <span className="font-black">{item.totalAreaHa.toFixed(2)} Ha</span>
             </div>
           </div>
@@ -80,13 +84,15 @@ export default function TalukaComparisonChart({ data = [], selectedTaluka = '' }
           </div>
           <div>
             <h3 className="text-xs sm:text-sm font-bold text-slate-900 flex items-center gap-1.5">
-              <span>तालुकानिहाय सनियंत्रण व तुलना</span>
+              <span>{isMarathi ? 'तालुकानिहाय सनियंत्रण व तुलना' : 'Taluka-wise Monitoring & Comparison'}</span>
               <span className="text-[10px] px-1.5 py-0.2 rounded bg-blue-100 text-blue-800 font-semibold">
-                १५ तालुके
+                {isMarathi ? '१५ तालुके' : '15 Talukas'}
               </span>
             </h3>
             <p className="text-[11px] text-slate-500 font-medium">
-              भूखंड, शर्तभंग प्रकरणे व महसूल क्षेत्राचे तुलनात्मक विवरण
+              {isMarathi
+                ? 'भूखंड, शर्तभंग प्रकरणे व महसूल क्षेत्राचे तुलनात्मक विवरण'
+                : 'Comparative summary of parcels, breaches & revenue area'}
             </p>
           </div>
         </div>
@@ -103,7 +109,7 @@ export default function TalukaComparisonChart({ data = [], selectedTaluka = '' }
             }`}
             aria-pressed={viewMode === 'counts'}
           >
-            प्रकरणे व भूखंड
+            {isMarathi ? 'प्रकरणे व भूखंड' : 'Cases & Parcels'}
           </button>
           <button
             type="button"
@@ -115,7 +121,7 @@ export default function TalukaComparisonChart({ data = [], selectedTaluka = '' }
             }`}
             aria-pressed={viewMode === 'area'}
           >
-            क्षेत्रफळ (Ha)
+            {isMarathi ? 'क्षेत्रफळ (Ha)' : 'Area (Ha)'}
           </button>
         </div>
       </div>
@@ -125,7 +131,7 @@ export default function TalukaComparisonChart({ data = [], selectedTaluka = '' }
         {chartData.length === 0 ? (
           <div className="flex flex-col items-center justify-center text-slate-400 py-8">
             <BarChart3 className="w-8 h-8 stroke-[1.5] mb-2 opacity-40" />
-            <p className="text-xs font-semibold">या निवडीसाठी तालुका नोंदी उपलब्ध नाहीत.</p>
+            <p className="text-xs font-semibold">{isMarathi ? 'या निवडीसाठी तालुका नोंदी उपलब्ध नाहीत.' : 'No taluka records found for this selection.'}</p>
           </div>
         ) : (
           <ResponsiveContainer width="100%" height="100%">
@@ -136,7 +142,7 @@ export default function TalukaComparisonChart({ data = [], selectedTaluka = '' }
             >
               <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
               <XAxis
-                dataKey="nameMr"
+                dataKey={isMarathi ? 'nameMr' : 'taluka'}
                 tick={{ fontSize: 11, fill: '#475569', fontWeight: 600 }}
                 axisLine={{ stroke: '#e2e8f0' }}
                 tickLine={false}
@@ -151,10 +157,10 @@ export default function TalukaComparisonChart({ data = [], selectedTaluka = '' }
               <Legend
                 wrapperStyle={{ paddingTop: '8px', fontSize: '11px', fontWeight: 600 }}
                 formatter={(value) => {
-                  if (value === 'parcelCount') return 'नोंदणीकृत भूखंड';
-                  if (value === 'violationCount') return 'शर्तभंग चौकशी';
-                  if (value === 'disputeCount') return 'सक्रीय वाद';
-                  if (value === 'totalAreaHa') return 'एकूण क्षेत्र (Ha)';
+                  if (value === 'parcelCount') return isMarathi ? 'नोंदणीकृत भूखंड' : 'Registered Parcels';
+                  if (value === 'violationCount') return isMarathi ? 'शर्तभंग चौकशी' : 'Breach Inquiries';
+                  if (value === 'disputeCount') return isMarathi ? 'सक्रीय वाद' : 'Active Disputes';
+                  if (value === 'totalAreaHa') return isMarathi ? 'एकूण क्षेत्र (Ha)' : 'Total Area (Ha)';
                   return value;
                 }}
               />
@@ -198,20 +204,20 @@ export default function TalukaComparisonChart({ data = [], selectedTaluka = '' }
 
       {/* Screen Reader Accessible Data Table (WCAG 1.1.1) */}
       <table className="sr-only">
-        <caption>तालुकानिहाय सनियंत्रण व तुलना डेटा सारणी</caption>
+        <caption>{isMarathi ? 'तालुकानिहाय सनियंत्रण व तुलना डेटा सारणी' : 'Taluka-wise Monitoring & Comparison Data Table'}</caption>
         <thead>
           <tr>
-            <th scope="col">तालुका</th>
-            <th scope="col">नोंदणीकृत भूखंड</th>
-            <th scope="col">शर्तभंग व चौकशी</th>
-            <th scope="col">सक्रीय वाद</th>
-            <th scope="col">एकूण क्षेत्र (हेक्टर)</th>
+            <th scope="col">{isMarathi ? 'तालुका' : 'Taluka'}</th>
+            <th scope="col">{isMarathi ? 'नोंदणीकृत भूखंड' : 'Registered Parcels'}</th>
+            <th scope="col">{isMarathi ? 'शर्तभंग व चौकशी' : 'Breach & Inquiry'}</th>
+            <th scope="col">{isMarathi ? 'सक्रीय वाद' : 'Active Disputes'}</th>
+            <th scope="col">{isMarathi ? 'एकूण क्षेत्र (हेक्टर)' : 'Total Area (Ha)'}</th>
           </tr>
         </thead>
         <tbody>
           {chartData.map((row) => (
             <tr key={row.taluka}>
-              <td>{row.nameMr} ({row.taluka})</td>
+              <td>{isMarathi ? row.nameMr : row.taluka}</td>
               <td>{row.parcelCount}</td>
               <td>{row.violationCount}</td>
               <td>{row.disputeCount}</td>
@@ -223,7 +229,7 @@ export default function TalukaComparisonChart({ data = [], selectedTaluka = '' }
 
       {/* Summary Chips Footer */}
       <div className="flex flex-wrap items-center gap-1.5 pt-2 border-t border-slate-100 text-xs text-slate-600">
-        <span className="font-semibold text-slate-700 text-[11px]">नोंदणीकृत तालुके:</span>
+        <span className="font-semibold text-slate-700 text-[11px]">{isMarathi ? 'नोंदणीकृत तालुके:' : 'Registered Talukas:'}</span>
         {chartData.map((t) => (
           <span
             key={t.taluka}
@@ -233,7 +239,7 @@ export default function TalukaComparisonChart({ data = [], selectedTaluka = '' }
                 : 'bg-slate-50 text-slate-700 border-slate-200'
             }`}
           >
-            <span>{t.nameMr}:</span>
+            <span>{isMarathi ? t.nameMr : t.taluka}:</span>
             <span className="text-slate-900 font-extrabold">{t.parcelCount}</span>
           </span>
         ))}

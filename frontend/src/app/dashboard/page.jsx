@@ -11,7 +11,6 @@ import {
   ChevronRight,
   RefreshCw,
   Landmark,
-  Calendar,
   Filter,
   Layers,
   MapPin,
@@ -27,8 +26,10 @@ import ChandrapurGisMap from '../../components/ChandrapurGisMap';
 import { api } from '../../lib/api';
 import { CHANDRAPUR_TALUKAS } from '../../lib/constants';
 import SearchableSelect from '../../components/SearchableSelect';
+import { useTranslation } from '../../components/LanguageContext';
 
 export default function DashboardPage() {
+  const { isMarathi } = useTranslation();
   const [taluka, setTaluka] = useState('');
   const [loading, setLoading] = useState(true);
   const [analytics, setAnalytics] = useState({
@@ -38,6 +39,8 @@ export default function DashboardPage() {
     pendingHearings: 0,
     totalRepossessedHa: 0,
     totalRepossessedCases: 0,
+    inProgressCases: 0,
+    inProgressAreaHa: 0,
     violationsByType: [],
     tenureDistribution: [],
     talukaDistribution: [],
@@ -66,19 +69,19 @@ export default function DashboardPage() {
   }, [taluka]);
 
   const talukaSelectOptions = useMemo(() => [
-    { value: '', label: 'सर्व तालुके (All 15)' },
+    { value: '', label: isMarathi ? 'सर्व तालुके (१५)' : 'All Talukas (15)' },
     ...CHANDRAPUR_TALUKAS.map((t) => ({
       value: t.id,
-      label: `${t.nameMr} (${t.nameEn})`
+      label: isMarathi ? `तालुका ${t.nameMr}` : `${t.nameEn} Taluka`
     }))
-  ], []);
+  ], [isMarathi]);
 
   const handleExport = () => {
     window.location.href = api.getPrapatra3DownloadUrl(taluka);
   };
 
   return (
-    <div className="space-y-2.5 sm:space-y-3">
+    <div className="space-y-2.5 sm:space-y-3 w-full max-w-full min-w-0">
       {/* Modern Executive Command Header - Pro Compact */}
       <div className="bg-gradient-to-r from-blue-50/80 via-indigo-50/40 to-white text-slate-900 rounded-xl px-3.5 py-2 sm:py-2.5 shadow-2xs border border-blue-200/80 relative z-30 flex flex-col md:flex-row justify-between sm:items-center gap-2">
         <div className="flex items-center gap-2.5 relative z-10 min-w-0">
@@ -88,30 +91,30 @@ export default function DashboardPage() {
           <div className="min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
               <span className="text-[10px] font-bold bg-amber-500 text-slate-950 px-2 py-0.5 rounded-full shadow-2xs">
-                महसूल २०२६
+                {isMarathi ? "महसूल २०२६" : "Revenue 2026"}
               </span>
               <h1 className="text-sm sm:text-base font-extrabold text-slate-900 tracking-tight leading-tight truncate">
-                जमीन अभिलेख व्यवस्थापन व महसूल चौकशी प्रणाली
+                {isMarathi ? "जमीन अभिलेख व्यवस्थापन व महसूल चौकशी प्रणाली" : "Land Governance & Revenue Inquiries Command Center"}
               </h1>
               <span className="hidden lg:inline text-[11px] text-slate-500 font-medium">
-                • चंद्रपूर जिल्हा • १५ तालुके संनियंत्रण
+                {isMarathi ? "• चंद्रपूर जिल्हा • १५ तालुके संनियंत्रण" : "• Chandrapur District • 15 Talukas Monitoring"}
               </span>
             </div>
             <p className="text-[11px] text-slate-500 lg:hidden truncate font-medium">
-              चंद्रपूर जिल्हा • MLRC १९६६ अंतर्गत १५ तालुक्यांचे संनियंत्रण
+              {isMarathi ? "चंद्रपूर जिल्हा • MLRC १९६६ अंतर्गत १५ तालुक्यांचे संनियंत्रण" : "Chandrapur District • 15 Talukas under MLRC 1966"}
             </p>
           </div>
         </div>
 
-        {/* Integrated Actions & Filter */}
-        <div className="flex items-center gap-2 shrink-0 relative z-30 flex-wrap">
-          <div className="w-[170px] sm:w-[190px]">
+        {/* Integrated Actions & Filter - Single Unified Row on Mobile */}
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 relative z-30 w-full md:w-auto">
+          <div className="flex-1 min-w-0 sm:w-[185px] sm:flex-initial">
             <SearchableSelect
               options={talukaSelectOptions}
               value={taluka}
               onChange={(val) => setTaluka(val)}
-              placeholder="सर्व तालुके"
-              searchPlaceholder="तालुका शोधा..."
+              placeholder={isMarathi ? 'सर्व तालुके' : 'All Talukas'}
+              searchPlaceholder={isMarathi ? 'तालुका शोधा...' : 'Search taluka...'}
               icon={Filter}
               showCount={false}
               align="right"
@@ -121,31 +124,34 @@ export default function DashboardPage() {
           <button
             onClick={() => loadData(taluka, true)}
             disabled={loading}
-            className="p-1.5 sm:px-2.5 sm:py-1.5 rounded-lg bg-white hover:bg-blue-50 text-slate-800 hover:text-blue-900 border border-slate-300 text-xs font-bold transition-all active:scale-95 shadow-2xs cursor-pointer flex items-center gap-1"
-            title="माहिती रिफ्रेश करा"
-            aria-label="माहिती रिफ्रेश करा"
+            className="p-2 sm:px-2.5 sm:py-2 rounded-xl bg-white hover:bg-blue-50 text-slate-800 hover:text-blue-900 border border-slate-300 text-xs font-bold transition-all active:scale-95 shadow-2xs cursor-pointer flex items-center gap-1.5 shrink-0"
+            title={isMarathi ? 'माहिती रिफ्रेश करा' : 'Refresh Data'}
+            aria-label={isMarathi ? 'माहिती रिफ्रेश करा' : 'Refresh Data'}
           >
             <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-blue-600' : 'text-slate-700'}`} />
-            <span className="hidden sm:inline">रिफ्रेश</span>
+            <span className="hidden sm:inline">{isMarathi ? 'रिफ्रेश' : 'Refresh'}</span>
           </button>
 
           <Link
             href="/bulk-upload"
-            className="inline-flex items-center justify-center gap-1.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black px-3 py-1.5 rounded-lg text-xs shadow-xs transition-all active:scale-95 shrink-0"
-            title="गाव एक्सेल डेटा अपलोड"
+            className="px-2.5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black text-xs shadow-2xs transition-all active:scale-95 flex items-center gap-1.5 shrink-0 border border-amber-400"
+            title={isMarathi ? 'गाव डेटा अपलोड' : 'Upload Village Data'}
           >
-            <UploadCloud className="w-3.5 h-3.5 text-slate-950" />
-            <span>गाव डेटा अपलोड</span>
+            <UploadCloud className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">{isMarathi ? 'गाव डेटा अपलोड' : 'Upload Village Data'}</span>
+            <span className="sm:hidden">{isMarathi ? 'अपलोड' : 'Upload'}</span>
           </Link>
         </div>
       </div>
 
       {/* Compact Analytical Metric Cards (2-col mobile, 4-col desktop) */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-2.5">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-2.5 w-full max-w-full min-w-0">
         <MetricCard
-          titleMr="नोंदणीकृत भूखंड (गट क्र.)"
+          titleMr="नोंदणीकृत भूखंड"
+          titleEn="Registered Land"
           value={analytics.totalParcels}
-          subtext="चंद्रपूर महसूल अभिलेख"
+          subtext="गट क्र. • चंद्रपूर"
+          subtextEn="Gat No. • Chandrapur"
           icon={Landmark}
           badgeColor="bg-blue-50 border-blue-200"
           iconColor="text-blue-700"
@@ -154,8 +160,10 @@ export default function DashboardPage() {
 
         <MetricCard
           titleMr="शर्तभंग व चौकशी"
+          titleEn="Breaches & Inquiries"
           value={analytics.totalViolations}
-          subtext="कलम ३६, ३६अ व ५०-५४"
+          subtext="कलम ३६, ५०-५४"
+          subtextEn="Sec 36, 50-54"
           icon={AlertTriangle}
           badgeColor="bg-amber-50 border-amber-200"
           iconColor="text-amber-600"
@@ -164,11 +172,17 @@ export default function DashboardPage() {
 
         <MetricCard
           titleMr="समाविष्ट महसूल गावे"
+          titleEn="Covered Villages"
           value={analytics.totalVillages}
           subtext={
             taluka
               ? `${CHANDRAPUR_TALUKAS.find((t) => t.id.toLowerCase() === taluka.toLowerCase())?.nameMr || taluka} तालुका`
-              : '१५ तालुके कार्यक्षेत्र'
+              : '१५ तालुके'
+          }
+          subtextEn={
+            taluka
+              ? `${CHANDRAPUR_TALUKAS.find((t) => t.id.toLowerCase() === taluka.toLowerCase())?.nameEn || taluka} Taluka`
+              : '15 Talukas'
           }
           icon={MapPin}
           badgeColor="bg-indigo-50 border-indigo-200"
@@ -177,9 +191,11 @@ export default function DashboardPage() {
         />
 
         <MetricCard
-          titleMr="शासन जमा क्षेत्र"
-          value={`${Number(analytics.totalRepossessedHa).toFixed(2)} Ha`}
-          subtext={`${analytics.totalRepossessedCases || 1} प्रकरणे नियमित/जप्त`}
+          titleMr="शासन जमा कार्यवाही (प्रक्रियेत)"
+          titleEn="Govt Vesting in Progress"
+          value={(analytics.inProgressCases ?? (analytics.totalViolations - (analytics.totalRepossessedCases || 0)) ?? 0).toLocaleString(isMarathi ? 'mr-IN' : 'en-IN')}
+          subtext={`${Number(analytics.totalRepossessedCases || 0).toLocaleString('mr-IN')} पूर्ण (${Number(analytics.totalRepossessedHa || 0).toFixed(2)} Ha शासन जमा)`}
+          subtextEn={`${Number(analytics.totalRepossessedCases || 0)} Completed (${Number(analytics.totalRepossessedHa || 0).toFixed(2)} Ha Vested)`}
           icon={ShieldCheck}
           badgeColor="bg-emerald-50 border-emerald-200"
           iconColor="text-emerald-600"
@@ -227,276 +243,227 @@ export default function DashboardPage() {
         />
       </div>
 
-      {/* Primary Revenue Modules Redirection Gateway (Replaces Data Table with Direct Portals) */}
-      <div className="space-y-2.5 pt-1">
-        <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-1 px-1">
+      {/* Primary Revenue Modules */}
+      <div className="space-y-3 pt-1">
+        <div className="flex items-center justify-between px-0.5">
           <div>
-            <h2 className="text-xs sm:text-sm font-black text-slate-900 flex items-center gap-1.5">
+            <h2 className="text-xs sm:text-sm font-bold text-slate-900 tracking-tight flex items-center gap-1.5">
               <Layers className="w-4 h-4 text-blue-900" />
-              <span>महसूल मुख्य विभाग नेव्हिगेशन केंद्र (Primary Revenue Modules)</span>
+              <span>{isMarathi ? "महसूल मुख्य विभाग" : "Primary Revenue Modules"}</span>
             </h2>
-            <p className="text-[11px] text-slate-500 font-medium">
-              डॅशबोर्डवर केवळ आलेख व नकाशा विश्लेषण उपलब्ध असून, सविस्तर नोंदवही, अभिलेख व प्रकरणांसाठी खालील मुख्य विभागांचा वापर करा:
+            <p className="text-[11px] text-slate-500 font-medium mt-0.5">
+              {isMarathi ? "नोंदवही, प्रपत्रे व प्रकरणांचे थेट विभाग" : "Direct access to land ledgers, cases & statutory records"}
             </p>
           </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5 sm:gap-3">
           {/* Card 1: Parcels Portal */}
-          <div className="bg-white border border-slate-200/90 hover:border-blue-400 rounded-xl p-3.5 shadow-2xs hover:shadow-sm transition-all duration-200 flex flex-col justify-between group">
-            <div className="space-y-2">
+          <div className="bg-white border border-slate-200/80 hover:border-blue-500/40 rounded-2xl p-4 shadow-xs hover:shadow-md transition-all duration-200 flex flex-col justify-between group">
+            <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <div className="w-8 h-8 rounded-lg bg-blue-50 border border-blue-200 text-blue-900 flex items-center justify-center shrink-0">
+                <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-900 flex items-center justify-center shrink-0 border border-blue-100">
                   <Landmark className="w-4 h-4" />
                 </div>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-50 text-blue-800 border border-blue-200">
-                  {analytics.totalParcels} भूखंड नोंद
+                <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-900 border border-blue-200/70 font-mono">
+                  {analytics.totalParcels?.toLocaleString('en-IN') || 0} {isMarathi ? "भूखंड" : "Parcels"}
                 </span>
               </div>
 
               <div>
-                <h3 className="text-sm font-bold text-slate-900 group-hover:text-blue-900 transition flex items-center gap-1">
-                  <span>गट व सर्व्हे क्रमांक नोंदवही (Parcels)</span>
+                <h3 className="text-sm font-bold text-slate-900 group-hover:text-blue-900 transition flex items-center gap-1.5">
+                  <span>{isMarathi ? "गट व सर्व्हे क्रमांक नोंदवही" : "Gat & Survey Parcels Ledger"}</span>
                 </h3>
-                <p className="text-[11px] text-slate-500 leading-relaxed mt-1 font-medium">
-                  संपूर्ण गट व सर्व्हे क्रमांक महसूल अभिलेख सारणी, जुना-नवा स.नं. ताळमेळ, ७/१२ क्षेत्र, पोटखराबा व ३६०° फेरफार इतिहास.
+                <p className="text-xs text-slate-500 leading-relaxed mt-1">
+                  {isMarathi
+                    ? "७/१२ क्षेत्र, जुना-नवा स.नं. ताळमेळ व फेरफार इतिहास."
+                    : "7/12 area, old vs new survey reconciliation & mutation history."}
                 </p>
               </div>
 
-              <div className="flex flex-wrap gap-1.5 pt-1">
+              <div className="flex flex-wrap gap-1.5 pt-0.5">
                 <Link
                   href="/parcels?tenure=BHOGVATDAR_CLASS_2"
-                  className="text-[10px] px-2 py-0.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded font-semibold transition"
+                  className="text-[10px] px-2 py-0.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-md font-semibold transition"
                 >
-                  वर्ग-२ भूखंड
+                  {isMarathi ? "वर्ग-२ भूखंड" : "Class-2"}
                 </Link>
                 <Link
                   href="/parcels?tenure=SARKAR_SHASAN"
-                  className="text-[10px] px-2 py-0.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded font-semibold transition"
+                  className="text-[10px] px-2 py-0.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-md font-semibold transition"
                 >
-                  शासकीय जमीन
+                  {isMarathi ? "शासकीय जमीन" : "Govt Land"}
                 </Link>
                 <Link
                   href="/parcels?hasActiveDispute=true"
-                  className="text-[10px] px-2 py-0.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded font-semibold transition"
+                  className="text-[10px] px-2 py-0.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200/80 rounded-md font-semibold transition"
                 >
-                  शर्तभंग नोंद
+                  {isMarathi ? "शर्तभंग नोंद" : "Breach"}
                 </Link>
               </div>
             </div>
 
-            <div className="pt-3 mt-3 border-t border-slate-100">
+            <div className="pt-3.5 mt-3 border-t border-slate-100">
               <Link
                 href="/parcels"
-                className="w-full inline-flex items-center justify-center gap-2 bg-blue-900 hover:bg-blue-800 text-white font-bold text-xs py-2 px-3 rounded-lg shadow-2xs transition active:scale-98"
+                className="w-full inline-flex items-center justify-center gap-1.5 bg-[#242b6b] hover:bg-[#1a2055] text-white font-bold text-xs py-2 px-3 rounded-xl shadow-xs transition active:scale-98"
               >
-                <span>भूखंड नोंदवहीत जा (Go to Parcels)</span>
-                <ChevronRight className="w-3.5 h-3.5" />
+                <span>{isMarathi ? "भूखंड नोंदवहीत जा" : "Go to Parcels Ledger"}</span>
+                <ChevronRight className="w-3.5 h-3.5 text-amber-400" />
               </Link>
             </div>
           </div>
 
           {/* Card 2: Cases Portal */}
-          <div className="bg-white border border-slate-200/90 hover:border-amber-400 rounded-xl p-3.5 shadow-2xs hover:shadow-sm transition-all duration-200 flex flex-col justify-between group">
-            <div className="space-y-2">
+          <div className="bg-white border border-slate-200/80 hover:border-amber-500/40 rounded-2xl p-4 shadow-xs hover:shadow-md transition-all duration-200 flex flex-col justify-between group">
+            <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <div className="w-8 h-8 rounded-lg bg-amber-50 border border-amber-200 text-amber-700 flex items-center justify-center shrink-0">
+                <div className="w-8 h-8 rounded-xl bg-amber-50 text-amber-800 flex items-center justify-center shrink-0 border border-amber-100">
                   <Scale className="w-4 h-4" />
                 </div>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200">
-                  {analytics.totalViolations} चौकशी
+                <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-900 border border-amber-200/70 font-mono">
+                  {analytics.totalViolations?.toLocaleString('en-IN') || 0} {isMarathi ? "चौकशी" : "Inquiries"}
                 </span>
               </div>
 
               <div>
-                <h3 className="text-sm font-bold text-slate-900 group-hover:text-amber-800 transition flex items-center gap-1">
-                  <span>महसूल व अर्ध-न्यायिक प्रकरणे (Cases)</span>
+                <h3 className="text-sm font-bold text-slate-900 group-hover:text-amber-800 transition flex items-center gap-1.5">
+                  <span>{isMarathi ? "महसूल व अर्ध-न्यायिक प्रकरणे" : "Revenue & Judicial Cases"}</span>
                 </h3>
-                <p className="text-[11px] text-slate-500 leading-relaxed mt-1 font-medium">
-                  कलम ३६, ३६अ व ५०-५४ शर्तभंग चौकशी, SDO व तहसीलदार सुनावणी नोंदी, स्थळ पंचनामे, नोटीस व शासन जमा हुकूमनामे.
+                <p className="text-xs text-slate-500 leading-relaxed mt-1">
+                  {isMarathi
+                    ? "कलम ३६, ३६अ, ५०-५४ शर्तभंग चौकशी व सुनावणी नोंदी."
+                    : "MLRC Sec 36, 36A, 50-54 breach inquiries & hearing decrees."}
                 </p>
               </div>
 
-              <div className="flex flex-wrap gap-1.5 pt-1">
+              <div className="flex flex-wrap gap-1.5 pt-0.5">
                 <Link
                   href="/cases"
-                  className="text-[10px] px-2 py-0.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded font-semibold transition"
+                  className="text-[10px] px-2 py-0.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-md font-semibold transition"
                 >
-                  SDO सुनावण्या
+                  {isMarathi ? "SDO सुनावण्या" : "SDO"}
                 </Link>
                 <Link
                   href="/cases"
-                  className="text-[10px] px-2 py-0.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded font-semibold transition"
+                  className="text-[10px] px-2 py-0.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-md font-semibold transition"
                 >
-                  तहसीलदार चौकशी
+                  {isMarathi ? "तहसीलदार चौकशी" : "Tahsildar"}
                 </Link>
                 <Link
                   href="/cases"
-                  className="text-[10px] px-2 py-0.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 rounded font-semibold transition"
+                  className="text-[10px] px-2 py-0.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200/80 rounded-md font-semibold transition"
                 >
-                  शासन जमा आदेश
+                  {isMarathi ? "शासन जमा आदेश" : "Govt Orders"}
                 </Link>
               </div>
             </div>
 
-            <div className="pt-3 mt-3 border-t border-slate-100">
+            <div className="pt-3.5 mt-3 border-t border-slate-100">
               <Link
                 href="/cases"
-                className="w-full inline-flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs py-2 px-3 rounded-lg shadow-2xs transition active:scale-98"
+                className="w-full inline-flex items-center justify-center gap-1.5 bg-[#242b6b] hover:bg-[#1a2055] text-white font-bold text-xs py-2 px-3 rounded-xl shadow-xs transition active:scale-98"
               >
-                <span>न्यायालयीन प्रकरणांत जा (Go to Cases)</span>
-                <ChevronRight className="w-3.5 h-3.5" />
+                <span>{isMarathi ? "न्यायालयीन प्रकरणांत जा" : "Go to Judicial Chamber"}</span>
+                <ChevronRight className="w-3.5 h-3.5 text-amber-400" />
               </Link>
             </div>
           </div>
 
           {/* Card 3: Reports Portal */}
-          <div className="bg-white border border-slate-200/90 hover:border-emerald-400 rounded-xl p-3.5 shadow-2xs hover:shadow-sm transition-all duration-200 flex flex-col justify-between group">
-            <div className="space-y-2">
+          <div className="bg-white border border-slate-200/80 hover:border-emerald-500/40 rounded-2xl p-4 shadow-xs hover:shadow-md transition-all duration-200 flex flex-col justify-between group">
+            <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <div className="w-8 h-8 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700 flex items-center justify-center shrink-0">
+                <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-800 flex items-center justify-center shrink-0 border border-emerald-100">
                   <FileSpreadsheet className="w-4 h-4" />
                 </div>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">
-                  प्रपत्र १ ते ६
+                <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-900 border border-emerald-200/70 font-mono">
+                  {isMarathi ? "प्रपत्र १ ते ६" : "Prapatra 1-6"}
                 </span>
               </div>
 
               <div>
-                <h3 className="text-sm font-bold text-slate-900 group-hover:text-emerald-800 transition flex items-center gap-1">
-                  <span>वैधानिक अहवाल व सांख्यिकी (Reports)</span>
+                <h3 className="text-sm font-bold text-slate-900 group-hover:text-emerald-800 transition flex items-center gap-1.5">
+                  <span>{isMarathi ? "वैधानिक अहवाल व सांख्यिकी" : "Statutory Reports & Prapatra"}</span>
                 </h3>
-                <p className="text-[11px] text-slate-500 leading-relaxed mt-1 font-medium">
-                  प्रपत्र १ ते ६ वैधानिक विवरणपत्रे, तालुकावार विल्हेवाट ताळेबंद, आदिवासी संरक्षण अहवाल व एक्सेल/पीडीएफ डाऊनलोड.
+                <p className="text-xs text-slate-500 leading-relaxed mt-1">
+                  {isMarathi
+                    ? "प्रपत्र १ ते ६ विवरणपत्रे, ताळेबंद व एक्सेल/PDF डाऊनलोड."
+                    : "Prapatra 1 to 6 statutory returns, balance sheets & exports."}
                 </p>
               </div>
 
-              <div className="flex flex-wrap gap-1.5 pt-1">
+              <div className="flex flex-wrap gap-1.5 pt-0.5">
                 <Link
                   href="/reports"
-                  className="text-[10px] px-2 py-0.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded font-semibold transition"
+                  className="text-[10px] px-2 py-0.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-md font-semibold transition"
                 >
-                  प्रपत्र १ (आदिवासी)
+                  {isMarathi ? "प्रपत्र १ (आदिवासी)" : "Prapatra 1"}
                 </Link>
                 <Link
                   href="/reports"
-                  className="text-[10px] px-2 py-0.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded font-semibold transition"
+                  className="text-[10px] px-2 py-0.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-md font-semibold transition"
                 >
-                  प्रपत्र २ (शर्तभंग)
+                  {isMarathi ? "प्रपत्र २ (शर्तभंग)" : "Prapatra 2"}
                 </Link>
                 <button
                   type="button"
                   onClick={handleExport}
-                  className="text-[10px] px-2 py-0.5 bg-blue-50 hover:bg-blue-100 text-blue-900 border border-blue-200 rounded font-semibold transition cursor-pointer"
-                  title="प्रपत्र ३ एक्सेल डाऊनलोड करा"
+                  className="text-[10px] px-2 py-0.5 bg-blue-50 hover:bg-blue-100 text-blue-900 border border-blue-200/80 rounded-md font-semibold transition cursor-pointer"
+                  title={isMarathi ? "प्रपत्र ३ एक्सेल डाऊनलोड करा" : "Download Prapatra 3 Excel"}
                 >
-                  प्रपत्र ३ डाऊनलोड ⤓
+                  {isMarathi ? "प्रपत्र ३ डाऊनलोड ⤓" : "Prapatra 3 ⤓"}
                 </button>
               </div>
             </div>
 
-            <div className="pt-3 mt-3 border-t border-slate-100">
+            <div className="pt-3.5 mt-3 border-t border-slate-100">
               <Link
                 href="/reports"
-                className="w-full inline-flex items-center justify-center gap-2 bg-emerald-800 hover:bg-emerald-700 text-white font-bold text-xs py-2 px-3 rounded-lg shadow-2xs transition active:scale-98"
+                className="w-full inline-flex items-center justify-center gap-1.5 bg-[#242b6b] hover:bg-[#1a2055] text-white font-bold text-xs py-2 px-3 rounded-xl shadow-xs transition active:scale-98"
               >
-                <span>अहवाल केंद्रात जा (Go to Reports)</span>
-                <ChevronRight className="w-3.5 h-3.5" />
+                <span>{isMarathi ? "अहवाल केंद्रात जा" : "Go to Reports Center"}</span>
+                <ChevronRight className="w-3.5 h-3.5 text-amber-400" />
               </Link>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Statutory Guidance & Quick Links Grid */}
-      <div className="grid grid-cols-1 gap-2.5 sm:gap-3">
-        {/* Quick Statutory Reference Card */}
-        <div className="bg-gradient-to-br from-slate-900 via-slate-900 to-blue-950 text-white rounded-xl p-3 sm:p-3.5 shadow-sm flex flex-col md:flex-row justify-between md:items-center gap-3">
-          <div className="max-w-2xl">
-            <div className="flex items-center gap-1.5 text-amber-400 text-[11px] font-bold uppercase tracking-wider">
-              <Landmark className="w-3.5 h-3.5" />
-              <span>वैधानिक मार्गदर्शक (MLRC १९६६)</span>
-            </div>
-            <h3 className="text-xs sm:text-sm font-black text-white mt-1 leading-snug">
-              आदिवासी व शासकीय जमीन संरक्षण (कलम ३६, ३६अ व ५०-५४)
-            </h3>
-            <p className="text-[11px] text-slate-300 mt-1 leading-relaxed font-normal">
-              कलम ३६ व ३६अ नुसार अनुसूचित जमातीच्या जमिनीचे गैर-आदिवासी व्यक्तीस हस्तांतरण प्रतिबंधित असून, सक्षम प्राधिकारी पूर्वपरवानगीशिवाय झालेले सर्व व्यवहार रद्दबातल ठरवून जमीन मूळ आदिवासी किंवा शासनाकडे जमा करण्यात येते.
-            </p>
+      {/* Statutory Guidance Banner - Sleek & Minimalist */}
+      <div className="bg-gradient-to-r from-[#17203d] via-[#1a2550] to-[#17203d] text-white rounded-2xl p-4 sm:p-5 shadow-xs border border-slate-800 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        <div className="space-y-1.5 max-w-3xl">
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-400/15 text-amber-300 border border-amber-400/25">
+              {isMarathi ? "वैधानिक मार्गदर्शक (MLRC १९६६)" : "Statutory Guidance (MLRC 1966)"}
+            </span>
           </div>
-
-          <div className="flex flex-col sm:flex-row gap-2 shrink-0">
-            <Link
-              href="/reports"
-              className="flex items-center justify-between gap-2 px-3 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-xs font-semibold text-white transition border border-white/10"
-            >
-              <span>प्रपत्र १ ते ६ अहवाल केंद्र</span>
-              <ChevronRight className="w-3.5 h-3.5 text-amber-400" />
-            </Link>
-            <Link
-              href="/documents"
-              className="flex items-center justify-between gap-2 px-3 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-xs font-semibold text-white transition border border-white/10"
-            >
-              <span>जिल्हा अभिलेखागार शोध</span>
-              <ChevronRight className="w-3.5 h-3.5 text-amber-400" />
-            </Link>
-          </div>
+          <h3 className="text-sm font-bold text-white tracking-tight">
+            {isMarathi ? "आदिवासी व शासकीय जमीन संरक्षण (कलम ३६, ३६अ व ५०-५४)" : "Tribal & Govt Land Protection (Sec 36, 36A & 50-54)"}
+          </h3>
+          <p className="text-xs text-slate-300 leading-relaxed font-normal">
+            {isMarathi
+              ? "कलम ३६ व ३६अ नुसार अनुसूचित जमातीच्या जमिनीचे विनापरवानगी गैर-आदिवासी व्यक्तीस हस्तांतरण प्रतिबंधित असून, सक्षम प्राधिकारी पूर्वपरवानगी नसलेले व्यवहार रद्दबातल ठरवून जमीन मूळ आदिवासी किंवा शासनाकडे जमा करण्यात येते."
+              : "Under MLRC Sections 36 & 36A, alienation of tribal land to non-tribals without prior sanction of the Collector is void; illegal transfers are rescinded and land is restored to the tribal or vested in Government."}
+          </p>
         </div>
-      </div>
 
-      {/* Recent Quasi-Judicial Proceedings */}
-      <div className="bg-white border border-slate-200/90 rounded-xl p-3 sm:p-3.5 shadow-2xs space-y-2">
-        <div className="flex justify-between items-center border-b border-slate-100 pb-2">
-          <div>
-            <h3 className="text-xs sm:text-sm font-bold text-slate-900">
-              अलिकडील अर्ध-न्यायिक सुनावणी नोंदी
-            </h3>
-          </div>
+        <div className="flex items-center gap-2 shrink-0 flex-wrap">
           <Link
-            href="/cases"
-            className="text-[11px] text-blue-900 hover:text-blue-800 font-bold flex items-center gap-0.5 transition"
+            href="/reports"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-xs font-bold text-white transition border border-white/10 shadow-2xs"
           >
-            <span>सर्व सुनावण्या पहा</span>
+            <span>{isMarathi ? "प्रपत्र १ ते ६ अहवाल" : "Prapatra 1-6 Reports"}</span>
+            <ChevronRight className="w-3.5 h-3.5 text-amber-400" />
+          </Link>
+          <Link
+            href="/documents"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs font-bold transition shadow-2xs"
+          >
+            <span>{isMarathi ? "जिल्हा अभिलेखागार" : "District Archives"}</span>
             <ChevronRight className="w-3.5 h-3.5" />
           </Link>
         </div>
-
-        {analytics.recentHearings?.length === 0 ? (
-          <p className="text-xs text-slate-400 py-3 text-center">कोणत्याही सुनावण्या नोंदवलेल्या नाहीत.</p>
-        ) : (
-          <div className="divide-y divide-slate-100">
-            {analytics.recentHearings?.slice(0, 3).map((h) => (
-              <div key={h.id} className="py-2 flex flex-col md:flex-row justify-between items-start md:items-center gap-1.5">
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-mono text-xs font-bold text-slate-900">
-                      {h.case?.caseNumber}
-                    </span>
-                    <span className="text-[10px] px-1.5 py-0.2 rounded bg-blue-50 text-blue-800 border border-blue-200 font-bold">
-                      {h.authority}
-                    </span>
-                    <span className="text-xs text-slate-500 font-medium">
-                      {h.case?.parcel?.villageName} (गट {h.case?.parcel?.gatNumber})
-                    </span>
-                  </div>
-                  <p className="text-xs text-slate-700 leading-snug mt-0.5 line-clamp-1">{h.proceedingsLog}</p>
-                </div>
-
-                <div className="text-right shrink-0 text-xs font-medium text-slate-500">
-                  <div className="flex items-center gap-1">
-                    <Calendar className="w-3 h-3 text-slate-400" />
-                    <span className="text-[11px]">दिनांक: {new Date(h.hearingDate).toLocaleDateString('mr-IN')}</span>
-                  </div>
-                  {h.nextHearingDate && (
-                    <span className="text-[10px] text-amber-700 font-bold block">
-                      पुढील: {new Date(h.nextHearingDate).toLocaleDateString('mr-IN')}
-                    </span>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
       </div>
     </div>
   );

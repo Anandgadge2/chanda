@@ -12,26 +12,28 @@ import {
   Compass,
 } from 'lucide-react';
 import { api } from '../../lib/api';
+import { useTranslation } from '../LanguageContext';
 
 const TALUKA_DETAILS = [
-  { id: 'chandrapur', nameMr: 'चंद्रपूर', nameEn: 'Chandrapur', code: 'CHA', sdo: 'चंद्रपूर उपविभाग', highlight: 'जिल्हा मुख्यालय' },
-  { id: 'warora', nameMr: 'वरोरा', nameEn: 'Warora', code: 'WAR', sdo: 'वरोरा उपविभाग', highlight: 'औद्योगिक व कृषी केंद्र' },
-  { id: 'ballarpur', nameMr: 'बल्लारपूर', nameEn: 'Ballarpur', code: 'BAL', sdo: 'चंद्रपूर उपविभाग', highlight: 'महसूल व वन पट्टा' },
-  { id: 'bhadravati', nameMr: 'भद्रावती', nameEn: 'Bhadravati', code: 'BHA', sdo: 'वरोरा उपविभाग', highlight: 'खनिज व कोळसा पट्टा' },
-  { id: 'rajura', nameMr: 'राजुरा', nameEn: 'Rajura', code: 'RAJ', sdo: 'राजुरा उपविभाग', highlight: 'सिमेंट व आदिवासी पट्टा' },
-  { id: 'mul', nameMr: 'मूल', nameEn: 'Mul', code: 'MUL', sdo: 'मूल उपविभाग', highlight: 'भाताचे कोठार' },
-  { id: 'chimur', nameMr: 'चिमूर', nameEn: 'Chimur', code: 'CHM', sdo: 'चिमूर उपविभाग', highlight: 'क्रांतिभूमी व ताडोबा परिसर' },
-  { id: 'gondpipri', nameMr: 'गोंडपिंपरी', nameEn: 'Gondpipri', code: 'GON', sdo: 'राजुरा उपविभाग', highlight: 'सीमावर्ती महसूल मंडळ' },
-  { id: 'nagbhid', nameMr: 'नागभीड', nameEn: 'Nagbhid', code: 'NAG', sdo: 'ब्रह्मपुरी उपविभाग', highlight: 'रेल्वे जंक्शन व जलसिंचन' },
-  { id: 'brahmapuri', nameMr: 'ब्रह्मपुरी', nameEn: 'Brahmapuri', code: 'BRA', sdo: 'ब्रह्मपुरी उपविभाग', highlight: 'वैनगंगा खोरे' },
-  { id: 'sindewahi', nameMr: 'सिंदेवाही', nameEn: 'Sindewahi', code: 'SIN', sdo: 'ब्रह्मपुरी उपविभाग', highlight: 'कृषी संशोधन केंद्र' },
-  { id: 'korpana', nameMr: 'कोरपना', nameEn: 'Korpana', code: 'KOR', sdo: 'राजुरा उपविभाग', highlight: 'आदिवासी बहुल क्षेत्र' },
-  { id: 'pombhurna', nameMr: 'पोंभुर्णा', nameEn: 'Pombhurna', code: 'POM', sdo: 'मूल उपविभाग', highlight: 'वनसंपदा पट्टा' },
-  { id: 'saoli', nameMr: 'सावली', nameEn: 'Saoli', code: 'SAO', sdo: 'मूल उपविभाग', highlight: 'तलाव व सिंचन क्षेत्र' },
-  { id: 'jivati', nameMr: 'जिवती', nameEn: 'Jivati', code: 'JIV', sdo: 'राजुरा उपविभाग', highlight: 'माणिकगड पहाडी व आदिवासी' },
+  { id: 'chandrapur', nameMr: 'चंद्रपूर', nameEn: 'Chandrapur', code: 'CHA', sdoMr: 'चंद्रपूर उपविभाग', sdoEn: 'Chandrapur Sub-Div', highlightMr: 'जिल्हा मुख्यालय', highlightEn: 'District HQ' },
+  { id: 'warora', nameMr: 'वरोरा', nameEn: 'Warora', code: 'WAR', sdoMr: 'वरोरा उपविभाग', sdoEn: 'Warora Sub-Div', highlightMr: 'औद्योगिक व कृषी केंद्र', highlightEn: 'Agri-Industrial Hub' },
+  { id: 'ballarpur', nameMr: 'बल्लारपूर', nameEn: 'Ballarpur', code: 'BAL', sdoMr: 'चंद्रपूर उपविभाग', sdoEn: 'Chandrapur Sub-Div', highlightMr: 'महसूल व वन पट्टा', highlightEn: 'Forest & Coal Belt' },
+  { id: 'bhadravati', nameMr: 'भद्रावती', nameEn: 'Bhadravati', code: 'BHA', sdoMr: 'वरोरा उपविभाग', sdoEn: 'Warora Sub-Div', highlightMr: 'खनिज व कोळसा पट्टा', highlightEn: 'Mining & Mineral Corridor' },
+  { id: 'rajura', nameMr: 'राजुरा', nameEn: 'Rajura', code: 'RAJ', sdoMr: 'राजुरा उपविभाग', sdoEn: 'Rajura Sub-Div', highlightMr: 'सिमेंट व आदिवासी पट्टा', highlightEn: 'Cement & Tribal Belt' },
+  { id: 'mul', nameMr: 'मूल', nameEn: 'Mul', code: 'MUL', sdoMr: 'मूल उपविभाग', sdoEn: 'Mul Sub-Div', highlightMr: 'भाताचे कोठार', highlightEn: 'Rice Bowl' },
+  { id: 'chimur', nameMr: 'चिमूर', nameEn: 'Chimur', code: 'CHM', sdoMr: 'चिमूर उपविभाग', sdoEn: 'Chimur Sub-Div', highlightMr: 'क्रांतिभूमी व ताडोबा परिसर', highlightEn: 'Historic & Tadoba Zone' },
+  { id: 'gondpipri', nameMr: 'गोंडपिंपरी', nameEn: 'Gondpipri', code: 'GON', sdoMr: 'राजुरा उपविभाग', sdoEn: 'Rajura Sub-Div', highlightMr: 'सीमावर्ती महसूल मंडळ', highlightEn: 'Border Revenue Circle' },
+  { id: 'nagbhid', nameMr: 'नागभीड', nameEn: 'Nagbhid', code: 'NAG', sdoMr: 'ब्रह्मपुरी उपविभाग', sdoEn: 'Brahmapuri Sub-Div', highlightMr: 'रेल्वे जंक्शन व जलसिंचन', highlightEn: 'Rail & Irrigation Hub' },
+  { id: 'brahmapuri', nameMr: 'ब्रह्मपुरी', nameEn: 'Brahmapuri', code: 'BRA', sdoMr: 'ब्रह्मपुरी उपविभाग', sdoEn: 'Brahmapuri Sub-Div', highlightMr: 'वैनगंगा खोरे', highlightEn: 'Wainganga Basin' },
+  { id: 'sindewahi', nameMr: 'सिंदेवाही', nameEn: 'Sindewahi', code: 'SIN', sdoMr: 'ब्रह्मपुरी उपविभाग', sdoEn: 'Brahmapuri Sub-Div', highlightMr: 'कृषी संशोधन केंद्र', highlightEn: 'Agri Research Center' },
+  { id: 'korpana', nameMr: 'कोरपना', nameEn: 'Korpana', code: 'KOR', sdoMr: 'राजुरा उपविभाग', sdoEn: 'Rajura Sub-Div', highlightMr: 'आदिवासी बहुल क्षेत्र', highlightEn: 'Tribal Sub-Plan Zone' },
+  { id: 'pombhurna', nameMr: 'पोंभुर्णा', nameEn: 'Pombhurna', code: 'POM', sdoMr: 'मूल उपविभाग', sdoEn: 'Mul Sub-Div', highlightMr: 'वनसंपदा पट्टा', highlightEn: 'Forest Resource Belt' },
+  { id: 'saoli', nameMr: 'सावली', nameEn: 'Saoli', code: 'SAO', sdoMr: 'मूल उपविभाग', sdoEn: 'Mul Sub-Div', highlightMr: 'तलाव व सिंचन क्षेत्र', highlightEn: 'Tank Irrigation Area' },
+  { id: 'jivati', nameMr: 'जिवती', nameEn: 'Jivati', code: 'JIV', sdoMr: 'राजुरा उपविभाग', sdoEn: 'Rajura Sub-Div', highlightMr: 'माणिकगड पहाडी व आदिवासी', highlightEn: 'Manikgarh Highlands' },
 ];
 
 export default function TalukaSlider() {
+  const { isMarathi } = useTranslation();
   const sliderRef = useRef(null);
   const [isMounted, setIsMounted] = useState(false);
   const [talukaLiveMap, setTalukaLiveMap] = useState(new Map());
@@ -108,37 +110,37 @@ export default function TalukaSlider() {
                 {t.code}
               </span>
               <span className="text-[10px] font-semibold text-amber-800 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">
-                {t.highlight}
+                {isMarathi ? t.highlightMr : t.highlightEn}
               </span>
             </div>
 
             {/* Taluka Title */}
             <div>
               <h3 className="text-base font-bold text-slate-900 group-hover:text-blue-950 transition">
-                तालुका {t.nameMr}
+                {isMarathi ? `तालुका ${t.nameMr}` : `${t.nameEn} Taluka`}
               </h3>
             </div>
 
             {/* Details list */}
             <div className="space-y-1.5 text-xs text-slate-600 pt-2 border-t border-slate-100">
               <div className="flex items-center justify-between">
-                <span className="text-slate-500">उपविभाग:</span>
-                <span className="font-semibold text-slate-800">{t.sdo}</span>
+                <span className="text-slate-500">{isMarathi ? 'उपविभाग:' : 'Sub-Div:'}</span>
+                <span className="font-semibold text-slate-800">{isMarathi ? t.sdoMr : t.sdoEn}</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-slate-500">नोंदणीकृत भूखंड:</span>
+                <span className="text-slate-500">{isMarathi ? 'नोंदणीकृत भूखंड:' : 'Parcels:'}</span>
                 <span className="font-mono font-bold text-slate-900">
-                  {parcelsCount ? parcelsCount.toLocaleString('mr-IN') : 'लोड होत आहे...'}
+                  {parcelsCount ? parcelsCount.toLocaleString(isMarathi ? 'mr-IN' : 'en-IN') : (isMarathi ? 'लोड होत आहे...' : 'Loading...')}
                 </span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-slate-500">चौकशी प्रकरणे:</span>
+                <span className="text-slate-500">{isMarathi ? 'चौकशी प्रकरणे:' : 'Inquiry Cases:'}</span>
                 <span className="font-mono font-bold text-amber-700">
-                  {violationCount.toLocaleString('mr-IN')}
+                  {violationCount.toLocaleString(isMarathi ? 'mr-IN' : 'en-IN')}
                 </span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-slate-500">क्षेत्रफळ:</span>
+                <span className="text-slate-500">{isMarathi ? 'क्षेत्रफळ:' : 'Total Area:'}</span>
                 <span className="font-mono font-semibold text-slate-700">
                   {areaHa} Ha
                 </span>
@@ -158,13 +160,15 @@ export default function TalukaSlider() {
           <div>
             <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-blue-100/80 text-blue-900 text-xs font-bold border border-blue-200">
               <Compass className="w-3.5 h-3.5 text-blue-700" />
-              <span>प्रशासकीय कार्यक्षेत्र</span>
+              <span>{isMarathi ? 'प्रशासकीय कार्यक्षेत्र' : 'Administrative Jurisdiction'}</span>
             </div>
             <h2 className="text-base sm:text-xl font-black text-slate-900 mt-1">
-              चंद्रपूर जिल्ह्यातील १५ तालुके व महसूल मंडळे
+              {isMarathi ? 'चंद्रपूर जिल्ह्यातील १५ तालुके व महसूल मंडळे' : '15 Talukas & Revenue Circles of Chandrapur'}
             </h2>
             <p className="text-[11px] sm:text-xs text-slate-600 mt-0.5 max-w-2xl">
-              जिल्ह्यातील सर्व १५ तालुक्यांतील गावनिहाय चालू ७/१२ अभिलेख, १९५० मूळ शीर्षक तपासणी व शर्तभंग खटले.
+              {isMarathi
+                ? 'जिल्ह्यातील सर्व १५ तालुक्यांतील गावनिहाय चालू ७/१२ अभिलेख, १९५० मूळ शीर्षक तपासणी व शर्तभंग खटले.'
+                : 'Taluka-level active 7/12 land records, 1950 baseline provenance audit and breach proceedings.'}
             </p>
           </div>
 
@@ -174,8 +178,8 @@ export default function TalukaSlider() {
               type="button"
               onClick={() => sliderRef.current?.slickPrev()}
               className="p-1.5 rounded-lg bg-white border border-slate-300 text-slate-700 hover:bg-slate-100 hover:text-blue-900 shadow-2xs transition active:scale-95 cursor-pointer"
-              aria-label="Previous slide"
-              title="मागील तालुका"
+              aria-label={isMarathi ? 'मागील तालुका' : 'Previous taluka'}
+              title={isMarathi ? 'मागील तालुका' : 'Previous taluka'}
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
@@ -183,8 +187,8 @@ export default function TalukaSlider() {
               type="button"
               onClick={() => sliderRef.current?.slickNext()}
               className="p-1.5 rounded-lg bg-white border border-slate-300 text-slate-700 hover:bg-slate-100 hover:text-blue-900 shadow-2xs transition active:scale-95 cursor-pointer"
-              aria-label="Next slide"
-              title="पुढील तालुका"
+              aria-label={isMarathi ? 'पुढील तालुका' : 'Next taluka'}
+              title={isMarathi ? 'पुढील तालुका' : 'Next taluka'}
             >
               <ChevronRight className="w-4 h-4" />
             </button>

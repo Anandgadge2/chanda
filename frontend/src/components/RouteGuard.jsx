@@ -5,10 +5,12 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ShieldAlert, LogIn, ArrowLeft, Lock } from 'lucide-react';
 import { useAuth } from './AuthContext';
+import { useTranslation } from './LanguageContext';
 import ChandrapurDistrictLogo from './landing/ChandrapurDistrictLogo';
 
 export default function RouteGuard({ children, allowedRoles = [] }) {
   const { user, loading, openLoginModal } = useAuth();
+  const { locale, isMarathi } = useTranslation();
   const pathname = usePathname();
 
   if (pathname === '/glossary') {
@@ -19,7 +21,7 @@ export default function RouteGuard({ children, allowedRoles = [] }) {
     return (
       <div className="min-h-[50vh] flex flex-col items-center justify-center p-8">
         <div className="w-12 h-12 rounded-full border-3 border-blue-900 border-t-transparent animate-spin mb-4" />
-        <p className="text-sm font-bold text-slate-700">सत्र पडताळणी सुरू आहे...</p>
+        <p className="text-sm font-bold text-slate-700">{isMarathi ? 'सत्र पडताळणी सुरू आहे...' : 'Verifying user session...'}</p>
       </div>
     );
   }
@@ -36,15 +38,15 @@ export default function RouteGuard({ children, allowedRoles = [] }) {
           <div className="flex items-center justify-center gap-2 mb-2">
             <ChandrapurDistrictLogo className="w-6 h-6" />
             <span className="text-xs font-bold text-slate-700 uppercase tracking-wider">
-              जिल्हाधिकारी कार्यालय, चंद्रपूर
+              {isMarathi ? 'जिल्हाधिकारी कार्यालय, चंद्रपूर' : 'District Collectorate, Chandrapur'}
             </span>
           </div>
 
           <h2 className="text-lg sm:text-xl font-black text-slate-900 mb-2">
-            प्रवेश निर्बंधित
+            {isMarathi ? 'प्रवेश निर्बंधित' : 'Access Restricted'}
           </h2>
           <p className="text-xs sm:text-sm text-slate-600 mb-6 leading-relaxed">
-            हे पृष्ठ केवळ अधिकृत महसूल अधिकाऱ्यांसाठी (Collector / SDO / तहसीलदार / तलाठी) उपलब्ध आहे. कृपया पुढे जाण्यापूर्वी लॉगिन करा.
+            {isMarathi ? 'हे पृष्ठ केवळ अधिकृत महसूल अधिकाऱ्यांसाठी (Collector / SDO / तहसीलदार / तलाठी) उपलब्ध आहे. कृपया पुढे जाण्यापूर्वी लॉगिन करा.' : 'This page is strictly reserved for authorized revenue officers (Collector / SDO / Tahsildar / Talathi). Please sign in to continue.'}
           </p>
 
           <div className="flex flex-col gap-3">
@@ -54,7 +56,7 @@ export default function RouteGuard({ children, allowedRoles = [] }) {
               className="w-full flex items-center justify-center gap-2 bg-blue-900 hover:bg-blue-800 text-white font-bold text-sm py-2.5 px-4 rounded-xl shadow-md transition active:scale-98"
             >
               <LogIn className="w-4 h-4" />
-              <span>अधिकारी लॉगिन करा</span>
+              <span>{isMarathi ? 'अधिकारी लॉगिन करा' : 'Sign in as Officer'}</span>
             </button>
 
             <Link
@@ -62,7 +64,7 @@ export default function RouteGuard({ children, allowedRoles = [] }) {
               className="w-full flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs py-2.5 px-4 rounded-xl transition"
             >
               <ArrowLeft className="w-4 h-4" />
-              <span>मुख्य सार्वजनिक पृष्ठावर परत जा</span>
+              <span>{isMarathi ? 'मुख्य सार्वजनिक पृष्ठावर परत जा' : 'Return to Public Portal'}</span>
             </Link>
           </div>
         </div>
@@ -80,13 +82,13 @@ export default function RouteGuard({ children, allowedRoles = [] }) {
           </div>
 
           <h2 className="text-lg font-black text-slate-900 mb-2">
-            या कृतीसाठी आपणास अधिकार नाहीत
+            {isMarathi ? 'या कृतीसाठी आपणास अधिकार नाहीत' : 'Insufficient Privileges'}
           </h2>
           <p className="text-xs text-slate-600 mb-4">
-            आपली भूमिका: <span className="font-bold text-slate-900">{user.role}</span> ({user.designation || 'अधिकारी'})
+            {isMarathi ? 'आपली भूमिका:' : 'Your Role:'} <span className="font-bold text-slate-900">{user.role}</span> ({user.designation || (isMarathi ? 'अधिकारी' : 'Officer')})
           </p>
           <p className="text-xs text-rose-700 bg-rose-50 p-3 rounded-xl border border-rose-100 mb-6">
-            हे मॉड्यूल वापरण्यासाठी खालीलपैकी एक पद असणे आवश्यक आहे:
+            {isMarathi ? 'हे मॉड्यूल वापरण्यासाठी खालीलपैकी एक पद असणे आवश्यक आहे:' : 'Accessing this module requires one of the following designations:'}
             <span className="block font-bold mt-1">{allowedRoles.join(', ')}</span>
           </p>
 
@@ -95,7 +97,7 @@ export default function RouteGuard({ children, allowedRoles = [] }) {
             className="inline-flex items-center gap-2 bg-blue-900 text-white text-xs font-bold py-2.5 px-5 rounded-xl hover:bg-blue-800 transition"
           >
             <ArrowLeft className="w-4 h-4" />
-            <span>डॅशबोर्डवर परत जा</span>
+            <span>{isMarathi ? 'डॅशबोर्डवर परत जा' : 'Return to Dashboard'}</span>
           </Link>
         </div>
       </div>

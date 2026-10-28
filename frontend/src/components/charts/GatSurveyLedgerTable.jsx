@@ -13,8 +13,10 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { TENURE_CLASSES, VIOLATION_TYPES } from '../../lib/constants';
+import { useTranslation } from '../LanguageContext';
 
 export default function GatSurveyLedgerTable({ parcels = [] }) {
+  const { isMarathi } = useTranslation();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTenure, setSelectedTenure] = useState('ALL');
 
@@ -47,13 +49,15 @@ export default function GatSurveyLedgerTable({ parcels = [] }) {
           </div>
           <div>
             <h3 className="text-xs sm:text-sm font-bold text-slate-900 flex items-center gap-1.5">
-              <span>गट व सर्व्हे क्रमांक महसूल अभिलेख सारणी</span>
+              <span>{isMarathi ? 'गट व सर्व्हे क्रमांक महसूल अभिलेख सारणी' : 'Gat & Survey Number Revenue Ledger'}</span>
               <span className="text-[10px] px-1.5 py-0.2 rounded bg-blue-100 text-blue-900 font-semibold">
-                {filteredParcels.length} भूखंड
+                {filteredParcels.length} {isMarathi ? 'भूखंड' : 'Parcels'}
               </span>
             </h3>
             <p className="text-[11px] text-slate-500 font-medium">
-              नवा गट क्र., जुना स.नं., क्षेत्र, पोटखराबा व वैधानिक चौकशी सविस्तर विवरण
+              {isMarathi
+                ? 'नवा गट क्र., जुना स.नं., क्षेत्र, पोटखराबा व वैधानिक चौकशी सविस्तर विवरण'
+                : 'New Gat No., Old Survey No., Area, Potkharaba & Statutory Inquiry Details'}
             </p>
           </div>
         </div>
@@ -62,7 +66,7 @@ export default function GatSurveyLedgerTable({ parcels = [] }) {
         <div className="flex items-center gap-2 flex-wrap">
           <div className="relative min-w-[160px] sm:min-w-[200px]">
             <label htmlFor="gat-search-input" className="sr-only">
-              गट, स.नं., किंवा गाव शोधा
+              {isMarathi ? 'गट, स.नं., किंवा गाव शोधा' : 'Search Gat, Survey No. or Village'}
             </label>
             <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" aria-hidden="true" />
             <input
@@ -70,12 +74,12 @@ export default function GatSurveyLedgerTable({ parcels = [] }) {
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="गट, स.नं., गाव शोधा..."
+              placeholder={isMarathi ? 'गट, स.नं., गाव शोधा...' : 'Search Gat, Survey No., Village...'}
               className="w-full pl-8 pr-2.5 py-1 text-xs border border-slate-200 rounded-lg bg-slate-50 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 transition"
             />
           </div>
 
-          <div className="inline-flex p-0.5 bg-slate-100 rounded-lg border border-slate-200 text-[11px] font-bold" role="group" aria-label="धारणाधिकार वर्ग फिल्टर">
+          <div className="inline-flex p-0.5 bg-slate-100 rounded-lg border border-slate-200 text-[11px] font-bold" role="group" aria-label={isMarathi ? 'धारणाधिकार वर्ग फिल्टर' : 'Tenure Class Filter'}>
             <button
               onClick={() => setSelectedTenure('ALL')}
               className={`px-2 py-0.5 rounded-md transition ${
@@ -84,7 +88,7 @@ export default function GatSurveyLedgerTable({ parcels = [] }) {
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              सर्व
+              {isMarathi ? 'सर्व' : 'All'}
             </button>
             <button
               onClick={() => setSelectedTenure('BHOGVATDAR_CLASS_2')}
@@ -94,7 +98,7 @@ export default function GatSurveyLedgerTable({ parcels = [] }) {
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              वर्ग-२
+              {isMarathi ? 'वर्ग-२' : 'Class-2'}
             </button>
             <button
               onClick={() => setSelectedTenure('SARKAR_SHASAN')}
@@ -104,7 +108,7 @@ export default function GatSurveyLedgerTable({ parcels = [] }) {
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              शासकीय
+              {isMarathi ? 'शासकीय' : 'Government'}
             </button>
           </div>
         </div>
@@ -114,30 +118,33 @@ export default function GatSurveyLedgerTable({ parcels = [] }) {
       <div className="overflow-x-auto rounded-lg border border-slate-200/80">
         <table className="w-full text-left border-collapse">
           <caption className="sr-only">
-            गट व सर्व्हे क्रमांक महसूल अभिलेख सारणी - नवा गट क्र., जुना स.नं., क्षेत्र, पोटखराबा व वैधानिक चौकशी सविस्तर विवरण
+            {isMarathi
+              ? 'गट व सर्व्हे क्रमांक महसूल अभिलेख सारणी - नवा गट क्र., जुना स.नं., क्षेत्र, पोटखराबा व वैधानिक चौकशी सविस्तर विवरण'
+              : 'Gat & Survey Number Revenue Ledger - New Gat No., Old Survey No., Area, Potkharaba & Statutory Inquiry Details'}
           </caption>
           <thead>
             <tr className="bg-slate-50/80 border-b border-slate-200 text-[11px] font-bold text-slate-600 uppercase tracking-wider">
-              <th scope="col" className="py-2 px-3">गट व स.नं.</th>
-              <th scope="col" className="py-2 px-3">गाव व तालुका</th>
-              <th scope="col" className="py-2 px-3">धारणाधिकार वर्ग</th>
-              <th scope="col" className="py-2 px-3">एकूण क्षेत्र (Ha)</th>
-              <th scope="col" className="py-2 px-3">लागवड वि. पोटखराबा</th>
-              <th scope="col" className="py-2 px-3">वैधानिक स्थिती / उल्लंघन</th>
-              <th scope="col" className="py-2 px-3 text-right">३६०° इतिहास</th>
+              <th scope="col" className="py-2 px-3">{isMarathi ? 'गट व स.नं.' : 'Gat & Survey No.'}</th>
+              <th scope="col" className="py-2 px-3">{isMarathi ? 'गाव व तालुका' : 'Village & Taluka'}</th>
+              <th scope="col" className="py-2 px-3">{isMarathi ? 'धारणाधिकार वर्ग' : 'Tenure Class'}</th>
+              <th scope="col" className="py-2 px-3">{isMarathi ? 'एकूण क्षेत्र (Ha)' : 'Total Area (Ha)'}</th>
+              <th scope="col" className="py-2 px-3">{isMarathi ? 'लागवड वि. पोटखराबा' : 'Cultivable vs Uncultivable'}</th>
+              <th scope="col" className="py-2 px-3">{isMarathi ? 'वैधानिक स्थिती / उल्लंघन' : 'Statutory Status / Breach'}</th>
+              <th scope="col" className="py-2 px-3 text-right">{isMarathi ? '३६०° इतिहास' : '360° History'}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100 text-xs text-slate-800 font-medium">
             {filteredParcels.length === 0 ? (
               <tr>
                 <td colSpan={7} className="py-6 text-center text-slate-400">
-                  कोणतीही भूखंड नोंद आढळली नाही.
+                  {isMarathi ? 'कोणतीही भूखंड नोंद आढळली नाही.' : 'No parcel records found.'}
                 </td>
               </tr>
             ) : (
               filteredParcels.map((p) => {
                 const tenure = TENURE_CLASSES[p.tenureClass] || {
                   labelMr: p.tenureClass,
+                  labelEn: p.tenureClass,
                   badgeClass: 'bg-slate-50 text-slate-700 border-slate-200',
                 };
                 const violation = p.violationType ? VIOLATION_TYPES[p.violationType] : null;
@@ -153,11 +160,11 @@ export default function GatSurveyLedgerTable({ parcels = [] }) {
                     <td className="py-2.5 px-3">
                       <div className="flex items-center gap-1.5">
                         <span className="font-mono font-black text-slate-900 bg-white border border-slate-200 px-2 py-0.5 rounded shadow-2xs text-[11px]">
-                          गट {p.gatNumber}
+                          {isMarathi ? `गट ${p.gatNumber}` : `Gat ${p.gatNumber}`}
                         </span>
                         {p.oldSurveyNo && (
                           <span className="font-mono text-[10px] text-slate-500 font-bold bg-slate-100 px-1.5 py-0.5 rounded">
-                            स.नं. {p.oldSurveyNo}
+                            {isMarathi ? `स.नं. ${p.oldSurveyNo}` : `Sr.No. ${p.oldSurveyNo}`}
                           </span>
                         )}
                       </div>
@@ -169,13 +176,15 @@ export default function GatSurveyLedgerTable({ parcels = [] }) {
                     {/* Village & Taluka */}
                     <td className="py-2.5 px-3">
                       <p className="font-bold text-slate-900 text-xs">{p.villageName}</p>
-                      <p className="text-[10px] text-slate-500 font-medium">ता. {p.taluka}</p>
+                      <p className="text-[10px] text-slate-500 font-medium">
+                        {isMarathi ? `ता. ${p.taluka}` : `Taluka ${p.taluka}`}
+                      </p>
                     </td>
 
                     {/* Tenure Class */}
                     <td className="py-2.5 px-3">
                       <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold border ${tenure.badgeClass}`}>
-                        {tenure.labelMr}
+                        {isMarathi ? tenure.labelMr : (tenure.labelEn || tenure.labelMr)}
                       </span>
                     </td>
 
@@ -198,16 +207,16 @@ export default function GatSurveyLedgerTable({ parcels = [] }) {
                     <td className="py-2.5 px-3">
                       <div className="space-y-0.5">
                         <div className="flex justify-between text-[10px] text-slate-600 font-semibold">
-                          <span>लागवड: {Number(p.cultivableAreaHa || 0).toFixed(2)}</span>
+                          <span>{isMarathi ? 'लागवड: ' : 'Cult.: '}{Number(p.cultivableAreaHa || 0).toFixed(2)}</span>
                           {Number(p.potkharabaAreaHa) > 0 && (
-                            <span className="text-amber-700">खराबा: {Number(p.potkharabaAreaHa).toFixed(2)}</span>
+                            <span className="text-amber-700">{isMarathi ? 'खराबा: ' : 'Uncult.: '}{Number(p.potkharabaAreaHa).toFixed(2)}</span>
                           )}
                         </div>
                         <div className="w-24 h-1.5 bg-amber-200 rounded-full overflow-hidden flex">
                           <div
                             className="bg-emerald-600 h-full"
                             style={{ width: `${cultPct}%` }}
-                            title={`लागवड: ${cultPct}%`}
+                            title={`${isMarathi ? 'लागवड' : 'Cultivable'}: ${cultPct}%`}
                           />
                         </div>
                       </div>
@@ -219,13 +228,13 @@ export default function GatSurveyLedgerTable({ parcels = [] }) {
                         <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-rose-50 text-rose-800 border border-rose-200">
                           <AlertTriangle className="w-3 h-3 shrink-0 text-rose-600" />
                           <span className="truncate max-w-[130px]">
-                            {violation?.labelMr || 'शर्तभंग चौकशी सक्रीय'}
+                            {isMarathi ? (violation?.labelMr || 'शर्तभंग चौकशी सक्रीय') : (violation?.labelEn || 'Active Breach Inquiry')}
                           </span>
                         </div>
                       ) : (
                         <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
                           <CheckCircle2 className="w-3 h-3 shrink-0 text-emerald-600" />
-                          <span>निर्दोष / निर्वेध</span>
+                          <span>{isMarathi ? 'निर्दोष / निर्वेध' : 'Clear / Undisputed'}</span>
                         </div>
                       )}
                     </td>
@@ -235,9 +244,9 @@ export default function GatSurveyLedgerTable({ parcels = [] }) {
                       <Link
                         href={`/parcels?search=${encodeURIComponent(p.gatNumber)}`}
                         className="inline-flex items-center gap-1 text-[11px] font-bold text-blue-900 hover:text-blue-700 bg-slate-50 hover:bg-blue-50 px-2 py-1 rounded-md border border-slate-200 transition"
-                        title="३६०° फेरफार इतिहास पहा"
+                        title={isMarathi ? '३६०° फेरफार इतिहास पहा' : 'View 360° Mutation History'}
                       >
-                        <span>तपासा</span>
+                        <span>{isMarathi ? 'तपासा' : 'Trace'}</span>
                         <ExternalLink className="w-3 h-3" />
                       </Link>
                     </td>
@@ -251,12 +260,12 @@ export default function GatSurveyLedgerTable({ parcels = [] }) {
 
       {/* Table Footer Navigation Note */}
       <div className="flex items-center justify-between text-[11px] text-slate-500 pt-1">
-        <span>सर्व ७/१२, फेरफार नोंदी व अभिलेख डिजिटायझेशन थेट संलग्न आहेत.</span>
+        <span>{isMarathi ? 'सर्व ७/१२, फेरफार नोंदी व अभिलेख डिजिटायझेशन थेट संलग्न आहेत.' : 'All 7/12, mutation records & digitization archives are directly linked.'}</span>
         <Link
           href="/parcels"
           className="text-blue-900 font-bold hover:underline"
         >
-          संपूर्ण भूखंड रजिस्टर उघडा &rarr;
+          {isMarathi ? 'संपूर्ण भूखंड रजिस्टर उघडा →' : 'Open Full Land Parcel Register →'}
         </Link>
       </div>
     </div>

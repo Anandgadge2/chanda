@@ -29,7 +29,9 @@
 html {
   font-size: 15.5px;
   scroll-behavior: smooth;
-  overflow-x: clip;
+  overflow-x: hidden !important;
+  max-width: 100vw;
+  width: 100%;
 }
 
 @media (min-width: 640px) {
@@ -72,9 +74,22 @@ body {
   color: #0f172a;
   min-height: 100vh;
   overflow-x: clip;
+  max-width: 100vw;
+  width: 100%;
+  position: relative;
   line-height: 1.55;
   letter-spacing: normal;
   -webkit-tap-highlight-color: transparent;
+}
+
+/* Strict Mobile Viewport Overflow Boundary */
+@media (max-width: 1023px) {
+  html, body {
+    overflow-x: hidden !important;
+    position: relative;
+    width: 100%;
+    max-width: 100vw;
+  }
 }
 
 /* Smooth anchor target scrolling offset for sticky navigation */

@@ -10,51 +10,66 @@ import {
   CheckCircle2,
   FileSpreadsheet,
 } from 'lucide-react';
+import { useTranslation } from '../LanguageContext';
 
 const STEPS = [
   {
-    step: '०१',
+    stepMr: '०१',
+    stepEn: '01',
     titleMr: 'गाववार महसूल अभिलेख संकलन व गट नोंदणी',
     titleEn: 'Village Revenue Records Ingestion & Parcel Registry',
-    desc: 'तलाठी व मंडळ अधिकाऱ्यांनी संकलित केलेल्या गाव अभिलेख नोंदवह्यांचे डिजिटायझेशन. प्रत्येक गट व सर्व्हे क्रमांकासाठी अधिकृत नोंदणी केली जाते.',
+    descMr: 'तलाठी व मंडळ अधिकाऱ्यांनी संकलित केलेल्या गाव अभिलेख नोंदवह्यांचे डिजिटायझेशन. प्रत्येक गट व सर्व्हे क्रमांकासाठी अधिकृत नोंदणी केली जाते.',
+    descEn: 'Digitization of village land registers gathered by Talathis and Circle Officers, establishing verified unique parcel IDs.',
     icon: UploadCloud,
     color: 'from-blue-600 to-indigo-600',
     link: '/bulk-upload',
-    linkText: 'एक्सेल अपलोड पोर्टल',
+    linkTextMr: 'एक्सेल अपलोड पोर्टल',
+    linkTextEn: 'Excel Upload Portal',
   },
   {
-    step: '०२',
+    stepMr: '०२',
+    stepEn: '02',
     titleMr: '१९५० मूळ शीर्षक साखळी पडताळणी',
     titleEn: '1950 Baseline Provenance Linkage',
-    desc: 'विद्यमान ७/१२ मधील नोंदींची १९५० च्या मूळ हक्कनोंदी व फेरफारांशी संगणकीय तुलना. बु.ग.दे. व ता.ग.दे. मधील पोकळ व बेकायदेशीर नोंदी त्वरित निष्पन्न होतात.',
+    descMr: 'विद्यमान ७/१२ मधील नोंदींची १९५० च्या मूळ हक्कनोंदी व फेरफारांशी संगणकीय तुलना. बु.ग.दे. व ता.ग.दे. मधील पोकळ व बेकायदेशीर नोंदी त्वरित निष्पन्न होतात.',
+    descEn: 'Algorithmic cross-referencing of active 7/12 entries against 1950 baseline sanads, uncovering void mutations and irregular grants.',
     icon: History,
     color: 'from-emerald-600 to-teal-600',
     link: '/parcels',
-    linkText: 'भूखंड साखळी शोधा',
+    linkTextMr: 'भूखंड साखळी शोधा',
+    linkTextEn: 'Trace Parcel History',
   },
   {
-    step: '०३',
+    stepMr: '०३',
+    stepEn: '03',
     titleMr: 'शर्तभंग नोंद व SDO अर्ध-न्यायिक सुनावणी',
     titleEn: 'Quasi-Judicial SDO Court Hearings',
-    desc: 'कलम ३६, ३६अ, ५०-५४ किंवा अकृषिक शर्तभंग आढळल्यास आपोआप खटला दाखल. नोटीस बजावणी, जागेचा पंचनामा व सुनावणी दैनंदिनीचे डिजिटल व्यवस्थापन.',
+    descMr: 'कलम ३६, ३६अ, ५०-५४ किंवा अकृषिक शर्तभंग आढळल्यास आपोआप खटला दाखल. नोटीस बजावणी, जागेचा पंचनामा व सुनावणी दैनंदिनीचे डिजिटल व्यवस्थापन.',
+    descEn: 'Automatic registration of inquiries upon Section 36, 36A, 50-54 or NA breach, streamlining summons, spot panchnamas, and daily roznama.',
     icon: Scale,
     color: 'from-amber-600 to-orange-600',
     link: '/cases',
-    linkText: 'सुनावणी प्रकरणे पहा',
+    linkTextMr: 'सुनावणी प्रकरणे पहा',
+    linkTextEn: 'View Hearing Cases',
   },
   {
-    step: '०४',
+    stepMr: '०४',
+    stepEn: '04',
     titleMr: 'शासन जमा आदेश व ७/१२ दुरुस्ती',
     titleEn: 'Govt Repossession & Mutation Update',
-    desc: 'उपविभागीय अधिकारी किंवा जिल्हाधिकाऱ्यांचा अंतिम आदेश पारित झाल्यावर अनधिकृत व्यवहार रद्दबातल ठरवून ७/१२ वर थेट "महाराष्ट्र शासन" नावाची दुरुस्ती.',
+    descMr: 'उपविभागीय अधिकारी किंवा जिल्हाधिकाऱ्यांचा अंतिम आदेश पारित झाल्यावर अनधिकृत व्यवहार रद्दबातल ठरवून ७/१२ वर थेट "महाराष्ट्र शासन" नावाची दुरुस्ती.',
+    descEn: 'Formal execution of Collector / SDO final repossession decrees, nullifying illegal conveyances and mutating ownership to Maharashtra Govt.',
     icon: ShieldCheck,
     color: 'from-indigo-600 to-blue-800',
     link: '/reports',
-    linkText: 'प्रपत्र-३ अहवाल पहा',
+    linkTextMr: 'प्रपत्र-३ अहवाल पहा',
+    linkTextEn: 'View Prapatra-3',
   },
 ];
 
 export default function WorkflowSection() {
+  const { isMarathi } = useTranslation();
+
   return (
     <section id="workflow" className="py-6 sm:py-8 bg-slate-50 text-slate-900 relative border-b border-slate-200">
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
@@ -62,13 +77,17 @@ export default function WorkflowSection() {
         <div className="text-center max-w-3xl mx-auto space-y-1.5 mb-4 sm:mb-5">
           <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-900 text-xs font-bold border border-blue-300">
             <ShieldCheck className="w-3.5 h-3.5 text-blue-700" />
-            <span>पारदर्शक महसूल कार्यप्रणाली</span>
+            <span>{isMarathi ? 'पारदर्शक महसूल कार्यप्रणाली' : 'Transparent Revenue Workflow'}</span>
           </div>
           <h2 className="text-lg sm:text-2xl font-black text-slate-900 tracking-tight">
-            गाव स्तरापासून ते शासन जमा आदेशापर्यंतची प्रक्रिया
+            {isMarathi
+              ? 'गाव स्तरापासून ते शासन जमा आदेशापर्यंतची प्रक्रिया'
+              : 'End-to-End Workflow: Ingestion to Government Repossession'}
           </h2>
           <p className="text-xs text-slate-600 leading-relaxed">
-            कच्च्या एक्सेल डेटाचे वैधानिक संनियंत्रणात रूपांतर करणारी ४-टप्पीय अत्याधुनिक डिजिटल चौकट.
+            {isMarathi
+              ? 'कच्च्या एक्सेल डेटाचे वैधानिक संनियंत्रणात रूपांतर करणारी ४-टप्पीय अत्याधुनिक डिजिटल चौकट.'
+              : 'A 4-stage statutory framework converting raw village land spreadsheets into enforceable audit controls.'}
           </p>
         </div>
 
@@ -85,7 +104,7 @@ export default function WorkflowSection() {
                   {/* Step Badge & Icon */}
                   <div className="flex items-center justify-between">
                     <span className="text-2xl font-black text-blue-900 font-mono">
-                      {stepItem.step}
+                      {isMarathi ? stepItem.stepMr : stepItem.stepEn}
                     </span>
                     <div
                       className={`w-11 h-11 rounded-2xl bg-gradient-to-br ${stepItem.color} flex items-center justify-center text-white shadow-xs group-hover:scale-110 transition-transform`}
@@ -97,14 +116,24 @@ export default function WorkflowSection() {
                   {/* Title & Desc */}
                   <div>
                     <h3 className="text-base font-black text-slate-900 leading-snug">
-                      {stepItem.titleMr}
+                      {isMarathi ? stepItem.titleMr : stepItem.titleEn}
                     </h3>
                   </div>
 
-                  <p className="text-xs text-slate-600 leading-relaxed">{stepItem.desc}</p>
+                  <p className="text-xs text-slate-600 leading-relaxed">
+                    {isMarathi ? stepItem.descMr : stepItem.descEn}
+                  </p>
                 </div>
 
-              
+                <div className="pt-2 border-t border-slate-100">
+                  <Link
+                    href={stepItem.link}
+                    className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-900 hover:text-blue-700 transition"
+                  >
+                    <span>{isMarathi ? stepItem.linkTextMr : stepItem.linkTextEn}</span>
+                    <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                  </Link>
+                </div>
               </div>
             );
           })}

@@ -1,7 +1,16 @@
 import './globals.css';
 import PortalLayout from '../components/PortalLayout';
 import { AuthProvider } from '../components/AuthContext';
+import { LanguageProvider } from '../components/LanguageContext';
 import ErrorBoundary from '../components/ErrorBoundary';
+
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+  userScalable: true,
+  themeColor: '#0f172a',
+};
 
 export const metadata = {
   title: 'जिल्हाधिकारी कार्यालय, चंद्रपूर | Chandrapur District Land Governance & Revenue Portal',
@@ -28,9 +37,11 @@ export default function RootLayout({ children }) {
       </head>
       <body className="bg-slate-50 text-slate-900 antialiased min-h-screen flex flex-col notranslate">
         <ErrorBoundary>
-          <AuthProvider>
-            <PortalLayout>{children}</PortalLayout>
-          </AuthProvider>
+          <LanguageProvider>
+            <AuthProvider>
+              <PortalLayout>{children}</PortalLayout>
+            </AuthProvider>
+          </LanguageProvider>
         </ErrorBoundary>
       </body>
     </html>

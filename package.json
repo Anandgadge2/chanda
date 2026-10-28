@@ -4,7 +4,8 @@
   "private": true,
   "description": "Chandrapur Land Records & Governance Platform",
   "scripts": {
-    "dev": "concurrently -k --names \"BACKEND,FRONTEND\" --prefix-colors \"magenta.bold,cyan.bold\" --prefix \"[{time}] [{name}]\" --timestamp-format \"HH:mm:ss\" \"npm --prefix backend run dev\" \"npm --prefix frontend run dev\"",
+    "predev": "node scripts/free-ports.js",
+    "dev": "concurrently --kill-others-on-fail --names \"BACKEND,FRONTEND\" --prefix-colors \"magenta.bold,cyan.bold\" --prefix \"[{time}] [{name}]\" --timestamp-format \"HH:mm:ss\" \"npm --prefix backend run dev\" \"npm --prefix frontend run dev\"",
     "dev:backend": "npm --prefix backend run dev",
     "dev:frontend": "npm --prefix frontend run dev",
     "build": "npm run db:generate --prefix backend && npm run build --prefix frontend",

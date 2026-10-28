@@ -25,9 +25,11 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../components/AuthContext';
 import { api } from '../../lib/api';
+import { useTranslation } from '../../components/LanguageContext';
 
 export default function SettingsPage() {
   const { user, login } = useAuth();
+  const { isMarathi } = useTranslation();
 
   // Profile Form State
   const [fullName, setFullName] = useState('');
@@ -84,9 +86,9 @@ export default function SettingsPage() {
         mobile,
         designation,
       });
-      setProfileSuccess(res.message || 'प्रोफाइल यशस्वीरित्या अद्यतनित करण्यात आले.');
+      setProfileSuccess(res.message || (isMarathi ? 'प्रोफाइल यशस्वीरित्या अद्यतनित करण्यात आले.' : 'Profile updated successfully.'));
     } catch (err) {
-      setProfileError(err.message || 'प्रोफाइल अद्यतन करताना त्रुटी आली.');
+      setProfileError(err.message || (isMarathi ? 'प्रोफाइल अद्यतन करताना त्रुटी आली.' : 'Failed to update profile.'));
     } finally {
       setProfileLoading(false);
     }
@@ -99,24 +101,24 @@ export default function SettingsPage() {
     setPasswordError('');
 
     if (newPassword !== confirmPassword) {
-      setPasswordError('नवीन संकेतशब्द आणि खात्री संकेतशब्द जुळत नाहीत.');
+      setPasswordError(isMarathi ? 'नवीन संकेतशब्द आणि खात्री संकेतशब्द जुळत नाहीत.' : 'New password and confirm password do not match.');
       return;
     }
 
     if (newPassword.length < 8) {
-      setPasswordError('नवीन संकेतशब्द किमान ८ अक्षरांचा असणे आवश्यक आहे.');
+      setPasswordError(isMarathi ? 'नवीन संकेतशब्द किमान ८ अक्षरांचा असणे आवश्यक आहे.' : 'New password must be at least 8 characters long.');
       return;
     }
 
     setPasswordLoading(true);
     try {
       const res = await api.changePassword(currentPassword, newPassword);
-      setPasswordSuccess(res.message || 'संकेतशब्द यशस्वीरित्या बदलण्यात आला.');
+      setPasswordSuccess(res.message || (isMarathi ? 'संकेतशब्द यशस्वीरित्या बदलण्यात आला.' : 'Password updated successfully.'));
       setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
     } catch (err) {
-      setPasswordError(err.message || 'संकेतशब्द बदलताना त्रुटी आली.');
+      setPasswordError(err.message || (isMarathi ? 'संकेतशब्द बदलताना त्रुटी आली.' : 'Failed to update password.'));
     } finally {
       setPasswordLoading(false);
     }
@@ -139,7 +141,7 @@ export default function SettingsPage() {
       downloadAnchor.remove();
       setExportSuccess(true);
     } catch (err) {
-      setDpdpaError(err.message || 'डेटा निर्यात अयशस्वी झाले.');
+      setDpdpaError(err.message || (isMarathi ? 'डेटा निर्यात अयशस्वी झाले.' : 'Failed to export data.'));
     } finally {
       setExportLoading(false);
     }
@@ -157,7 +159,7 @@ export default function SettingsPage() {
       const res = await api.requestDpdpaErasure(combinedReason);
       setErasureResult(res);
     } catch (err) {
-      setDpdpaError(err.message || 'विनंती नोंदवणे अयशस्वी झाले.');
+      setDpdpaError(err.message || (isMarathi ? 'विनंती नोंदवणे अयशस्वी झाले.' : 'Failed to submit request.'));
     } finally {
       setErasureLoading(false);
     }
@@ -169,15 +171,15 @@ export default function SettingsPage() {
         <div className="w-16 h-16 rounded-2xl bg-amber-100 text-amber-900 flex items-center justify-center mx-auto">
           <Lock className="w-8 h-8" />
         </div>
-        <h2 className="text-xl font-bold text-slate-900">सत्र समाप्त किंवा अनधिकृत प्रवेश</h2>
+        <h2 className="text-xl font-bold text-slate-900">{isMarathi ? 'सत्र समाप्त किंवा अनधिकृत प्रवेश' : 'Session Expired or Unauthorized Access'}</h2>
         <p className="text-xs sm:text-sm text-slate-600">
-          खाते सेटिंग्ज पाहण्यासाठी कृपया प्रथम महसूल अधिकारी खात्यात लॉगिन करा.
+          {isMarathi ? 'खाते सेटिंग्ज पाहण्यासाठी कृपया प्रथम महसूल अधिकारी खात्यात लॉगिन करा.' : 'Please sign in to your official revenue account to access settings.'}
         </p>
         <Link
           href="/"
           className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-900 text-white font-bold text-xs"
         >
-          मुख्य पृष्ठावर जा
+          {isMarathi ? 'मुख्य पृष्ठावर जा' : 'Go to Homepage'}
         </Link>
       </div>
     );
@@ -191,44 +193,44 @@ export default function SettingsPage() {
           <div className="flex items-center gap-2.5 min-w-0">
             <div className="relative shrink-0">
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-400 to-amber-600 text-slate-950 font-black text-sm flex items-center justify-center shadow-2xs">
-                {user.fullName ? user.fullName.charAt(0) : 'अ'}
+                {user.fullName ? user.fullName.charAt(0) : (isMarathi ? 'अ' : 'O')}
               </div>
               <span
                 className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 border border-white rounded-full"
-                title="सत्र सक्रिय"
+                title={isMarathi ? 'सत्र सक्रिय' : 'Session Active'}
               />
             </div>
 
             <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap leading-tight">
                 <h1 className="text-sm sm:text-base font-extrabold text-slate-900 truncate">
-                  {user.fullName || 'महसूल अधिकारी'}
+                  {user.fullName || (isMarathi ? 'महसूल अधिकारी' : 'Revenue Officer')}
                 </h1>
                 <span className="px-2 py-0.5 text-[10px] font-extrabold uppercase rounded-full bg-blue-100 text-blue-900 border border-blue-200">
                   {user.role}
                 </span>
                 <span className="px-2 py-0.5 text-[10px] font-extrabold rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200 flex items-center gap-1">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                  सक्रिय सत्र
+                  {isMarathi ? 'सक्रिय सत्र' : 'Active Session'}
                 </span>
               </div>
               <p className="text-[11px] text-slate-500 font-medium mt-0.5 flex items-center gap-1.5 truncate">
-                <span>{user.designation || 'प्रशासकीय पद'}</span>
+                <span>{user.designation || (isMarathi ? 'प्रशासकीय पद' : 'Administrative Post')}</span>
                 {user.taluka && (
                   <>
                     <span>•</span>
-                    <span>ता. {user.taluka}</span>
+                    <span>{isMarathi ? `ता. ${user.taluka}` : `Taluka ${user.taluka}`}</span>
                   </>
                 )}
                 <span>•</span>
-                <span>जिल्हाधिकारी कार्यालय चंद्रपूर</span>
+                <span>{isMarathi ? 'जिल्हाधिकारी कार्यालय चंद्रपूर' : 'District Collectorate Chandrapur'}</span>
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-2 self-start sm:self-center shrink-0">
             <span className="text-[11px] font-bold bg-white text-slate-700 px-2.5 py-1 rounded-lg border border-slate-200 shadow-2xs">
-              DPDPA संमती: v{user.consentVersion || '1.0-2026'}
+              {isMarathi ? 'DPDPA संमती: v' : 'DPDPA Consent: v'}{user.consentVersion || '1.0-2026'}
             </span>
           </div>
         </div>
@@ -246,7 +248,7 @@ export default function SettingsPage() {
           }`}
         >
           <User className="w-4 h-4 text-blue-700" />
-          <span>१. संपर्क व वैयक्तिक तपशील</span>
+          <span>{isMarathi ? '१. संपर्क व वैयक्तिक तपशील' : '1. Profile & Contact'}</span>
         </button>
 
         <button
@@ -259,7 +261,7 @@ export default function SettingsPage() {
           }`}
         >
           <KeyRound className="w-4 h-4 text-amber-600" />
-          <span>२. सुरक्षितता व संकेतशब्द</span>
+          <span>{isMarathi ? '२. सुरक्षितता व संकेतशब्द' : '2. Security & Password'}</span>
         </button>
 
         <button
@@ -272,7 +274,7 @@ export default function SettingsPage() {
           }`}
         >
           <ShieldCheck className="w-4 h-4 text-emerald-700" />
-          <span>३. DPDPA २०२३ डेटा अधिकार</span>
+          <span>{isMarathi ? '३. DPDPA २०२३ डेटा अधिकार' : '3. DPDPA 2023 Data Rights'}</span>
         </button>
       </div>
 
@@ -282,10 +284,10 @@ export default function SettingsPage() {
           <div>
             <h2 className="text-sm sm:text-base font-black text-slate-900 flex items-center gap-2">
               <User className="w-5 h-5 text-blue-800" />
-              <span>वैयक्तिक व संपर्क तपशील (Profile & Contact Information)</span>
+              <span>{isMarathi ? 'वैयक्तिक व संपर्क तपशील (Profile & Contact Information)' : 'Profile & Contact Information'}</span>
             </h2>
             <p className="text-xs text-slate-500 font-medium mt-0.5">
-              आपले नाव, अधिकृत ईमेल आणि मोबाइल क्रमांक अद्यतनित करा
+              {isMarathi ? 'आपले नाव, अधिकृत ईमेल आणि मोबाइल क्रमांक अद्यतनित करा' : 'Update your full name, official email, and mobile contact number'}
             </p>
           </div>
 
@@ -307,7 +309,7 @@ export default function SettingsPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <label htmlFor="settings-fullname" className="block text-xs font-bold text-slate-800">
-                  पूर्ण नाव (Full Name) *
+                  {isMarathi ? 'पूर्ण नाव (Full Name) *' : 'Full Name *'}
                 </label>
                 <div className="relative">
                   <User className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
@@ -324,7 +326,7 @@ export default function SettingsPage() {
 
               <div className="space-y-1.5">
                 <label htmlFor="settings-email" className="block text-xs font-bold text-slate-800">
-                  अधिकृत ईमेल पत्ता (Email) *
+                  {isMarathi ? 'अधिकृत ईमेल पत्ता (Email) *' : 'Official Email Address *'}
                 </label>
                 <div className="relative">
                   <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
@@ -341,14 +343,14 @@ export default function SettingsPage() {
 
               <div className="space-y-1.5">
                 <label htmlFor="settings-mobile" className="block text-xs font-bold text-slate-800">
-                  मोबाइल क्रमांक (Mobile Number)
+                  {isMarathi ? 'मोबाइल क्रमांक (Mobile Number)' : 'Mobile Number'}
                 </label>
                 <div className="relative">
                   <Phone className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                   <input
                     id="settings-mobile"
                     type="tel"
-                    placeholder="१० अंकी मोबाइल क्रमांक"
+                    placeholder={isMarathi ? '१० अंकी मोबाइल क्रमांक' : '10-digit mobile number'}
                     value={mobile}
                     onChange={(e) => setMobile(e.target.value)}
                     className="w-full pl-9 pr-3 py-2 text-xs border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-600 text-slate-900"
@@ -358,7 +360,7 @@ export default function SettingsPage() {
 
               <div className="space-y-1.5">
                 <label htmlFor="settings-designation" className="block text-xs font-bold text-slate-800">
-                  पदनाम (Designation)
+                  {isMarathi ? 'पदनाम (Designation)' : 'Designation'}
                 </label>
                 <div className="relative">
                   <Building className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
@@ -379,7 +381,7 @@ export default function SettingsPage() {
                 disabled={profileLoading}
                 className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-white bg-blue-900 hover:bg-blue-800 active:scale-98 transition shadow-xs disabled:opacity-50 cursor-pointer"
               >
-                {profileLoading ? 'जतन होत आहे...' : 'माहिती जतन करा (Save Changes)'}
+                {profileLoading ? (isMarathi ? 'जतन होत आहे...' : 'Saving...') : (isMarathi ? 'माहिती जतन करा (Save Changes)' : 'Save Changes')}
               </button>
             </div>
           </form>
@@ -392,10 +394,10 @@ export default function SettingsPage() {
           <div>
             <h2 className="text-sm sm:text-base font-black text-slate-900 flex items-center gap-2">
               <KeyRound className="w-5 h-5 text-amber-600" />
-              <span>सुरक्षितता व संकेतशब्द बदल (Change Password)</span>
+              <span>{isMarathi ? 'सुरक्षितता व संकेतशब्द बदल (Change Password)' : 'Security & Change Password'}</span>
             </h2>
             <p className="text-xs text-slate-500 font-medium mt-0.5">
-              आपल्या महसूल अधिकारी खात्याचा सुरक्षित संकेतशब्द वेळेवर अद्यतनित करा
+              {isMarathi ? 'आपल्या महसूल अधिकारी खात्याचा सुरक्षित संकेतशब्द वेळेवर अद्यतनित करा' : 'Regularly update your official revenue account password'}
             </p>
           </div>
 
@@ -416,7 +418,7 @@ export default function SettingsPage() {
           <form onSubmit={handleChangePassword} className="space-y-4 max-w-lg">
             <div className="space-y-1.5">
               <label htmlFor="settings-current-pw" className="block text-xs font-bold text-slate-800">
-                चालू संकेतशब्द (Current Password) *
+                {isMarathi ? 'चालू संकेतशब्द (Current Password) *' : 'Current Password *'}
               </label>
               <div className="relative">
                 <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
@@ -426,7 +428,7 @@ export default function SettingsPage() {
                   required
                   value={currentPassword}
                   onChange={(e) => setCurrentPassword(e.target.value)}
-                  placeholder="सध्याचा पासवर्ड टाका"
+                  placeholder={isMarathi ? 'सध्याचा पासवर्ड टाका' : 'Enter current password'}
                   className="w-full pl-9 pr-10 py-2 text-xs border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-600 text-slate-900"
                 />
                 <button
@@ -442,7 +444,7 @@ export default function SettingsPage() {
 
             <div className="space-y-1.5">
               <label htmlFor="settings-new-pw" className="block text-xs font-bold text-slate-800">
-                नवीन संकेतशब्द (New Password) *
+                {isMarathi ? 'नवीन संकेतशब्द (New Password) *' : 'New Password *'}
               </label>
               <div className="relative">
                 <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
@@ -452,7 +454,7 @@ export default function SettingsPage() {
                   required
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  placeholder="किमान ८ अक्षरे किंवा अंक"
+                  placeholder={isMarathi ? 'किमान ८ अक्षरे किंवा अंक' : 'Minimum 8 characters or digits'}
                   className="w-full pl-9 pr-10 py-2 text-xs border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-600 text-slate-900"
                 />
                 <button
@@ -464,12 +466,12 @@ export default function SettingsPage() {
                   {showNewPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
-              <p className="text-[11px] text-slate-400 font-medium">किमान ८ अक्षरे, अंक आणि विशेष चिन्ह वापरावे.</p>
+              <p className="text-[11px] text-slate-400 font-medium">{isMarathi ? 'किमान ८ अक्षरे, अंक आणि विशेष चिन्ह वापरावे.' : 'Use at least 8 characters with digits and symbols.'}</p>
             </div>
 
             <div className="space-y-1.5">
               <label htmlFor="settings-confirm-pw" className="block text-xs font-bold text-slate-800">
-                नवीन संकेतशब्दाची खात्री (Confirm New Password) *
+                {isMarathi ? 'नवीन संकेतशब्दाची खात्री (Confirm New Password) *' : 'Confirm New Password *'}
               </label>
               <div className="relative">
                 <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
@@ -479,7 +481,7 @@ export default function SettingsPage() {
                   required
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="नवीन पासवर्ड पुन्हा टाका"
+                  placeholder={isMarathi ? 'नवीन पासवर्ड पुन्हा टाका' : 'Re-enter new password'}
                   className="w-full pl-9 pr-3 py-2 text-xs border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-600 text-slate-900"
                 />
               </div>
@@ -491,7 +493,7 @@ export default function SettingsPage() {
                 disabled={passwordLoading}
                 className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-white bg-amber-600 hover:bg-amber-700 active:scale-98 transition shadow-xs disabled:opacity-50 cursor-pointer"
               >
-                {passwordLoading ? 'संकेतशब्द बदलत आहे...' : 'संकेतशब्द बदला (Update Password)'}
+                {passwordLoading ? (isMarathi ? 'संकेतशब्द बदलत आहे...' : 'Updating password...') : (isMarathi ? 'संकेतशब्द बदला (Update Password)' : 'Update Password')}
               </button>
             </div>
           </form>
@@ -507,15 +509,15 @@ export default function SettingsPage() {
               <div>
                 <h2 className="text-sm sm:text-base font-black text-slate-900 flex items-center gap-2">
                   <ShieldCheck className="w-5 h-5 text-emerald-700" />
-                  <span>डिजिटल व्यक्तिगत डेटा संरक्षण कायदा (DPDPA 2023) अधिकार</span>
+                  <span>{isMarathi ? 'डिजिटल व्यक्तिगत डेटा संरक्षण कायदा (DPDPA 2023) अधिकार' : 'Digital Personal Data Protection Act (DPDPA 2023) Rights'}</span>
                 </h2>
                 <p className="text-xs text-slate-500 font-medium mt-0.5">
-                  कलम ११ (डेटा माहिती व निर्यात) व कलम १२ (डेटा दुरुस्ती व निष्कासन विनंती)
+                  {isMarathi ? 'कलम ११ (डेटा माहिती व निर्यात) व कलम १२ (डेटा दुरुस्ती व निष्कासन विनंती)' : 'Section 11 (Data Access & Export) & Section 12 (Correction & Erasure Request)'}
                 </p>
               </div>
 
               <span className="text-[11px] font-bold px-3 py-1 bg-emerald-50 text-emerald-900 border border-emerald-300 rounded-full">
-                सक्रिय संमती: मान्य (Consent Active)
+                {isMarathi ? 'सक्रिय संमती: मान्य (Consent Active)' : 'Active Consent Recorded'}
               </span>
             </div>
 
@@ -533,21 +535,21 @@ export default function SettingsPage() {
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-black text-slate-900 flex items-center gap-1.5">
                       <FileJson className="w-4 h-4 text-blue-700" />
-                      कलम ११: वैयक्तिक डेटा निर्यात
+                      {isMarathi ? 'कलम ११: वैयक्तिक डेटा निर्यात' : 'Section 11: Personal Data Export'}
                     </span>
                     <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-100 text-blue-900 border border-blue-200">
                       Export Data
                     </span>
                   </div>
                   <p className="text-xs text-slate-600 leading-relaxed">
-                    आपल्या खात्यातील वैयक्तिक माहिती, सक्रिय लॉगिन सत्रे व सुरक्षा ऑडिट नोंदी संरचित JSON फाईल स्वरूपात डाउनलोड करा.
+                    {isMarathi ? 'आपल्या खात्यातील वैयक्तिक माहिती, सक्रिय लॉगिन सत्रे व सुरक्षा ऑडिट नोंदी संरचित JSON फाईल स्वरूपात डाउनलोड करा.' : 'Download your personal profile, active sessions, and security audit logs in structured JSON format.'}
                   </p>
                 </div>
 
                 {exportSuccess && (
                   <div role="status" className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-900 flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4 text-emerald-700 shrink-0" />
-                    <span>डेटा फाइल यशस्वीरित्या डाऊनलोड झाली!</span>
+                    <span>{isMarathi ? 'डेटा फाइल यशस्वीरित्या डाऊनलोड झाली!' : 'Data package downloaded successfully!'}</span>
                   </div>
                 )}
 
@@ -558,7 +560,7 @@ export default function SettingsPage() {
                   className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-white bg-blue-900 hover:bg-blue-800 active:scale-98 transition shadow-xs disabled:opacity-50 cursor-pointer"
                 >
                   <Download className="w-4 h-4" />
-                  <span>{exportLoading ? 'तयार होत आहे...' : 'माझा डेटा डाउनलोड करा (.JSON)'}</span>
+                  <span>{exportLoading ? (isMarathi ? 'तयार होत आहे...' : 'Generating...') : (isMarathi ? 'माझा डेटा डाउनलोड करा (.JSON)' : 'Download My Data (.JSON)')}</span>
                 </button>
               </div>
 
@@ -567,7 +569,7 @@ export default function SettingsPage() {
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-black text-slate-900 flex items-center gap-1.5">
                     <Trash2 className="w-4 h-4 text-rose-600" />
-                    कलम १२: डेटा निष्कासन विनंती
+                    {isMarathi ? 'कलम १२: डेटा निष्कासन विनंती' : 'Section 12: Data Erasure Request'}
                   </span>
                   <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-rose-100 text-rose-900 border border-rose-200">
                     Request Erasure
@@ -575,23 +577,23 @@ export default function SettingsPage() {
                 </div>
 
                 <p className="text-xs text-slate-600 leading-relaxed">
-                  आपले वैयक्तिक खाते आणि ओळख निष्कासित करण्याची किंवा दुरुस्त करण्याची विनंती नोंदवा.
+                  {isMarathi ? 'आपले वैयक्तिक खाते आणि ओळख निष्कासित करण्याची किंवा दुरुस्त करण्याची विनंती नोंदवा.' : 'Submit a request to erase or correct personal account and identity credentials.'}
                 </p>
 
                 {erasureResult ? (
                   <div role="status" className="p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-xs space-y-2 text-emerald-950">
                     <p className="font-bold flex items-center gap-1.5 text-emerald-900">
                       <CheckCircle2 className="w-4 h-4 text-emerald-700" />
-                      विनंती यशस्वीरित्या नोंदवली गेली!
+                      {isMarathi ? 'विनंती यशस्वीरित्या नोंदवली गेली!' : 'Request submitted successfully!'}
                     </p>
-                    <p><strong>तिकीट आयडी:</strong> <code className="bg-emerald-100 px-1 py-0.5 rounded">{erasureResult.requestId}</code></p>
-                    <p><strong>निवारण मुदत:</strong> ७२ कामकाजाचे तास (DPO पुनरावलोकन)</p>
+                    <p><strong>{isMarathi ? 'तिकीट आयडी:' : 'Ticket ID:'}</strong> <code className="bg-emerald-100 px-1 py-0.5 rounded">{erasureResult.requestId}</code></p>
+                    <p><strong>{isMarathi ? 'निवारण मुदत:' : 'Turnaround:'}</strong> {isMarathi ? '७२ कामकाजाचे तास (DPO पुनरावलोकन)' : '72 working hours (DPO Review)'}</p>
                   </div>
                 ) : (
                   <form onSubmit={handleErasureRequest} className="space-y-2.5">
                     <div>
                       <label htmlFor="settings-erasure-select" className="block text-[11px] font-bold text-slate-700 mb-1">
-                        निष्कासनाचे कारण:
+                        {isMarathi ? 'निष्कासनाचे कारण:' : 'Reason for Erasure:'}
                       </label>
                       <select
                         id="settings-erasure-select"
@@ -599,17 +601,17 @@ export default function SettingsPage() {
                         onChange={(e) => setErasureReason(e.target.value)}
                         className="w-full text-xs p-2 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-rose-500 text-slate-800"
                       >
-                        <option value="Account closure / खाते वापर बंद करणे">खाते वापर बंद करणे (Account closure)</option>
-                        <option value="Transfer to other district / इतर जिल्ह्यात बदली">इतर जिल्ह्यात बदली (Officer transfer)</option>
-                        <option value="Personal privacy request / वैयक्तिक गोपनीयता विनंती">वैयक्तिक गोपनीयता विनंती (Privacy request)</option>
-                        <option value="Other statutory reason / इतर वैधानिक कारण">इतर वैधानिक कारण (Other)</option>
+                        <option value="Account closure / खाते वापर बंद करणे">{isMarathi ? 'खाते वापर बंद करणे (Account closure)' : 'Account Closure'}</option>
+                        <option value="Transfer to other district / इतर जिल्ह्यात बदली">{isMarathi ? 'इतर जिल्ह्यात बदली (Officer transfer)' : 'Transfer to Other District'}</option>
+                        <option value="Personal privacy request / वैयक्तिक गोपनीयता विनंती">{isMarathi ? 'वैयक्तिक गोपनीयता विनंती (Privacy request)' : 'Personal Privacy Request'}</option>
+                        <option value="Other statutory reason / इतर वैधानिक कारण">{isMarathi ? 'इतर वैधानिक कारण (Other)' : 'Other Statutory Reason'}</option>
                       </select>
                     </div>
 
                     <div>
                       <input
                         type="text"
-                        placeholder="अतिरिक्त स्पष्टीकरण (पर्यायी)..."
+                        placeholder={isMarathi ? 'अतिरिक्त स्पष्टीकरण (पर्यायी)...' : 'Additional justification (optional)...'}
                         value={erasureNotes}
                         onChange={(e) => setErasureNotes(e.target.value)}
                         className="w-full text-xs p-2 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-rose-500 text-slate-800"
@@ -622,7 +624,7 @@ export default function SettingsPage() {
                       className="w-full inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 active:scale-98 transition shadow-xs disabled:opacity-50 cursor-pointer"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
-                      <span>{erasureLoading ? 'नोंदवत आहे...' : 'डेटा निष्कासन विनंती सादर करा'}</span>
+                      <span>{erasureLoading ? (isMarathi ? 'नोंदवत आहे...' : 'Submitting...') : (isMarathi ? 'डेटा निष्कासन विनंती सादर करा' : 'Submit Erasure Request')}</span>
                     </button>
                   </form>
                 )}
@@ -633,7 +635,7 @@ export default function SettingsPage() {
             <div className="pt-3 border-t border-slate-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
               <div className="flex items-center gap-1.5 text-slate-500">
                 <Clock className="w-3.5 h-3.5 text-slate-400" />
-                <span>तक्रार निवारण मुदत: कमाल ७२ तास (डेटा संरक्षण अधिकारी, चंद्रपूर)</span>
+                <span>{isMarathi ? 'तक्रार निवारण मुदत: कमाल ७२ तास (डेटा संरक्षण अधिकारी, चंद्रपूर)' : 'Grievance Resolution: Max 72 hours (Data Protection Officer, Chandrapur)'}</span>
               </div>
 
               <div className="flex items-center gap-3">
@@ -641,7 +643,7 @@ export default function SettingsPage() {
                   href="/privacy-policy"
                   className="text-blue-700 hover:text-blue-900 font-bold underline inline-flex items-center gap-1"
                 >
-                  <span>गोपनीयता धोरण</span>
+                  <span>{isMarathi ? 'गोपनीयता धोरण' : 'Privacy Policy'}</span>
                   <ArrowRight className="w-3 h-3" />
                 </Link>
                 <span className="text-slate-300">•</span>
@@ -649,7 +651,7 @@ export default function SettingsPage() {
                   href="/accessibility-statement"
                   className="text-slate-600 hover:text-slate-900 font-medium"
                 >
-                  सुलभता विधान
+                  {isMarathi ? 'सुलभता विधान' : 'Accessibility Statement'}
                 </Link>
               </div>
             </div>

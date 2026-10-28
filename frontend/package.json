@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "node -e \"const dir = require('fs').existsSync('src/app') ? '.' : 'frontend'; require('child_process').spawnSync('npx', ['next', 'dev', dir, '-p', '3000'], { stdio: 'inherit', shell: true });\"",
+    "dev": "next dev -p 3000",
     "build": "next build",
     "start": "next start -p 3000",
     "lint": "next lint"

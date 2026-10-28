@@ -9,12 +9,14 @@ import AuthModal from './landing/AuthModal';
 import LandingFooter from './landing/LandingFooter';
 import CookieConsentBanner from './CookieConsentBanner';
 import { useAuth } from './AuthContext';
+import { useTranslation } from './LanguageContext';
 
 const STANDALONE_PUBLIC_ROUTES = ['/', '/privacy-policy', '/terms', '/accessibility-statement'];
 
 export default function PortalLayout({ children }) {
   const pathname = usePathname();
   const { user, loading, isLoginModalOpen, closeLoginModal } = useAuth();
+  const { t } = useTranslation();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
@@ -57,9 +59,11 @@ export default function PortalLayout({ children }) {
   // Loading Session Check State (No sidebar flicker)
   if (loading && !isGlossary) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center text-slate-900 font-sans">
-        <div className="w-10 h-10 rounded-full border-3 border-blue-900 border-t-transparent animate-spin mb-3" />
-        <p className="text-xs font-bold text-slate-700">सत्र पडताळणी सुरू आहे...</p>
+      <div className="min-h-screen flex flex-col text-slate-900 font-sans">
+        <div className="flex-1 flex flex-col items-center justify-center">
+          <div className="w-10 h-10 rounded-full border-3 border-blue-900 border-t-transparent animate-spin mb-3" />
+          <p className="text-xs font-bold text-slate-700">{t('common.sessionCheck')}</p>
+        </div>
       </div>
     );
   }
@@ -109,20 +113,21 @@ export default function PortalLayout({ children }) {
 
   // Authenticated Officer Layout: Full Workspace with Sidebar
   return (
-    <div className="min-h-screen flex flex-col text-slate-900 font-sans">
+    <div className="min-h-screen flex flex-col text-slate-900 font-sans w-full max-w-full overflow-x-hidden lg:overflow-x-visible">
       <Navbar
         sidebarCollapsed={sidebarCollapsed}
         onToggleSidebar={handleToggleSidebar}
         onToggleMobileSidebar={() => setMobileSidebarOpen((prev) => !prev)}
       />
-      <div className="w-full px-3 sm:px-5 lg:px-6 flex-1 py-3 sm:py-4 flex gap-3 sm:gap-4">
+      <div className="w-full max-w-full px-3 sm:px-5 lg:px-6 flex-1 py-3 sm:py-4 flex items-start gap-3 sm:gap-4 min-w-0 overflow-x-hidden lg:overflow-x-visible">
         <Sidebar
           collapsed={sidebarCollapsed}
           mobileOpen={mobileSidebarOpen}
           onCloseMobile={() => setMobileSidebarOpen(false)}
+          onOpenMobile={() => setMobileSidebarOpen(true)}
           onToggleCollapse={handleToggleSidebar}
         />
-        <main id="main-content" className="flex-1 min-w-0">
+        <main id="main-content" className="flex-1 min-w-0 w-full max-w-full overflow-x-hidden relative z-10 pb-16 lg:pb-0">
           <RouteGuard>{children}</RouteGuard>
         </main>
       </div>

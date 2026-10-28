@@ -237,6 +237,7 @@ export function resolveParcel46Points(p) {
   const metaPoints = p.metadata?.auditPoints || {};
   const flags = p.metadata?.flags || {};
   const b1950 = p.backwardHistories?.find(b => b.epochYear === 1950) || {};
+  const b1972 = p.backwardHistories?.find(b => b.epochYear === 1972) || {};
   const b1995 = p.backwardHistories?.find(b => b.epochYear >= 1990) || {};
   const c = p.forwardCases?.[0] || {};
   const otherRights = p.metadata?.otherRights || '';
@@ -249,19 +250,28 @@ export function resolveParcel46Points(p) {
     return s;
   };
 
-  const b1950Ferfar = cleanPrefix(b1950.ferfarNumber, 'F-');
-  const b1950Khata = cleanPrefix(b1950.khataNumber, 'K-');
+  let b1950Ferfar = cleanPrefix(b1950.ferfarNumber, 'F-');
+  b1950Ferfar = cleanPrefix(b1950Ferfar, '1950-');
+  let b1950Khata = cleanPrefix(b1950.khataNumber, 'K-');
+  b1950Khata = cleanPrefix(b1950Khata, '1950-');
 
   // 1-3 Settlement (रिनंबरींग पर्चा - बंदोबस्त)
+  // Point 1: बंदोबस्त क्र.
   points[1] = b1950Ferfar && b1950Ferfar !== 'उपलब्ध नाही' && b1950Ferfar !== 'अधिकार अभिलेख उपलब्ध नाही'
     ? b1950Ferfar
-    : (p.oldSurveyNo && p.oldSurveyNo !== 'उपलब्ध नाही' ? p.oldSurveyNo : (p.gatNumber || '१'));
+    : (b1950Khata && b1950Khata !== 'उपलब्ध नाही' ? b1950Khata : (p.oldSurveyNo && p.oldSurveyNo !== 'उपलब्ध नाही' ? p.oldSurveyNo : (p.gatNumber || '-')));
 
-  const rawBkName = (b1950Khata && b1950Khata !== '15' && b1950Khata !== '_' && b1950Khata !== 'उपलब्ध नाही' && b1950Khata !== 'अधिकार अभिलेख उपलब्ध नाही')
-    ? b1950Khata
-    : (b1950.ownerName && b1950.ownerName !== '_' && b1950.ownerName !== 'उपलब्ध नाही' && b1950.ownerName !== 'अधिकार अभिलेख उपलब्ध नाही' ? b1950.ownerName : '');
+  // Point 2: बंदोबस्त नंबर प्रमाणे भोगवटदाराचे नाव (Must be an actual name, not survey number)
+  const isPureNumberOrSurvey = (val) => Boolean(val && String(val).trim().match(/^[0-9\/\.\-\,\s\(\)\_]+$/));
 
-  points[2] = rawBkName || (p.tenureClass === 'SARKAR_SHASAN' ? 'सरकार (शासकीय मूळ नोंद)' : (p.currentOwner || 'मूळ खातेदार'));
+  let rawBkName = '';
+  if (b1950.ownerName && b1950.ownerName !== '_' && b1950.ownerName !== 'उपलब्ध नाही' && b1950.ownerName !== 'अधिकार अभिलेख उपलब्ध नाही' && !isPureNumberOrSurvey(b1950.ownerName)) {
+    rawBkName = b1950.ownerName;
+  } else if (b1950Khata && !isPureNumberOrSurvey(b1950Khata) && b1950Khata !== '_' && b1950Khata !== 'उपलब्ध नाही') {
+    rawBkName = b1950Khata;
+  }
+
+  points[2] = rawBkName || (p.tenureClass === 'SARKAR_SHASAN' ? 'सरकार (शासकीय मूळ नोंद)' : (p.metadata?.ownerName || p.currentOwner || 'मूळ खातेदार'));
 
   const rawBkTenure = b1950.ownerName && (b1950.ownerName.includes('भूमि') || b1950.ownerName.includes('सरकार') || b1950.ownerName.includes('वर्ग') || b1950.ownerName.includes('पट्टेदार'))
     ? b1950.ownerName
@@ -269,15 +279,25 @@ export function resolveParcel46Points(p) {
   points[3] = rawBkTenure;
 
   // 4-6 Consolidation (एकत्रिकरण)
-  points[4] = (p.oldSurveyNo && p.oldSurveyNo !== 'उपलब्ध नाही' && p.oldSurveyNo !== '-')
-    ? p.oldSurveyNo
-    : (points[1] || p.gatNumber || '-');
+  let ekFerfar = cleanPrefix(b1972.ferfarNumber, 'F-');
+  ekFerfar = cleanPrefix(ekFerfar, 'EK-');
+  let ekKhata = cleanPrefix(b1972.khataNumber, 'K-');
+  ekKhata = cleanPrefix(ekKhata, 'EK-');
 
-  points[5] = b1995.ownerName && b1995.ownerName !== 'नाही' && b1995.ownerName !== '_'
-    ? b1995.ownerName
-    : (rawBkName || p.currentOwner || 'एकत्रिकरण नोंद');
+  points[4] = ekFerfar && ekFerfar !== 'उपलब्ध नाही' && ekFerfar !== 'नाही'
+    ? ekFerfar
+    : (ekKhata && ekKhata !== 'उपलब्ध नाही' && ekKhata !== 'नाही' ? ekKhata : (points[1] || p.gatNumber || '-'));
 
-  points[6] = b1995.tenureClass === 'BHOGVATDAR_CLASS_1'
+  let rawEkName = '';
+  if (b1972.ownerName && b1972.ownerName !== '_' && b1972.ownerName !== 'नाही' && !isPureNumberOrSurvey(b1972.ownerName)) {
+    rawEkName = b1972.ownerName;
+  } else if (b1995.ownerName && b1995.ownerName !== 'नाही' && b1995.ownerName !== '_' && !isPureNumberOrSurvey(b1995.ownerName)) {
+    rawEkName = b1995.ownerName;
+  }
+
+  points[5] = rawEkName || rawBkName || p.currentOwner || 'एकत्रिकरण नोंद';
+
+  points[6] = b1972.tenureClass === 'BHOGVATDAR_CLASS_1' || b1995.tenureClass === 'BHOGVATDAR_CLASS_1'
     ? 'भूमिस्वामी'
     : (p.tenureClass === 'SARKAR_SHASAN' ? 'सरकार' : 'सशर्थ भूमिधारी');
 
@@ -304,36 +324,61 @@ export function resolveParcel46Points(p) {
   points[18] = flags.isIllegalDeletion || c.violationType === 'GOVERNMENT_NAME_MISSING' ? 'होय' : 'नाही';
   points[19] = flags.isPokalist || c.violationType === 'POKALIST_NONDI' || otherRights.includes('बु.ग.दे') ? 'होय' : 'नाही';
 
-  // 20-35 Statutory Categories (वैधानिक कायदे तपासणी)
+  // 20-34 Statutory Categories (वैधानिक कायदे तपासणी - रकाने २० ते ३४)
   points[20] = metaPoints.point_20 || (otherRights.includes('कुळ') ? 'होय' : 'नाही');
   points[21] = metaPoints.point_21 || (p.tenureClass === 'DEVASTHAN_INAM' || otherRights.includes('इनाम') || otherRights.includes('वतन') ? 'होय' : 'नाही');
-  points[22] = metaPoints.point_22 || (otherRights.includes('भूमिहीन') || otherRights.includes('स्वातंत्र्य') || otherRights.includes('शेतमजूर') ? 'होय' : 'नाही');
-  points[23] = metaPoints.point_23 || (flags.isCorpAllot || otherRights.includes('संस्था') || otherRights.includes('उद्योग') ? 'होय' : 'नाही');
-  points[24] = metaPoints.point_24 || (p.ceilingRecords?.length > 0 || otherRights.includes('कमाल धारणा') || otherRights.includes('सिलिंग') ? 'होय' : 'नाही');
-  points[25] = metaPoints.point_25 || (otherRights.includes('गुरचरण') || otherRights.includes('चराई') || otherRights.includes('विकास') ? 'होय' : 'नाही');
-  points[26] = metaPoints.point_26 || (p.tenureClass === 'DEVASTHAN_INAM' || otherRights.includes('देवस्थान') ? 'होय' : 'नाही');
-  points[27] = metaPoints.point_27 || (flags.isTribal || p.tribalRecords?.length > 0 || otherRights.includes('आदिवासी') ? 'होय' : 'नाही');
-  points[28] = metaPoints.point_28 || (otherRights.includes('पुनर्वसन') || otherRights.includes('प्रकल्पग्रस्त') ? 'होय' : 'नाही');
-  points[29] = metaPoints.point_29 || (otherRights.includes('भाडेपट्टा') || otherRights.includes('लीज') ? 'होय' : 'नाही');
-  points[30] = metaPoints.point_30 || (p.bhudanRecords?.length > 0 || otherRights.includes('भूदान') || otherRights.includes('ग्रामदान') ? 'होय' : 'नाही');
-  points[31] = metaPoints.point_31 || (otherRights.includes('खाजगी वन') ? 'होय' : 'नाही');
-  points[32] = metaPoints.point_32 || (otherRights.includes('भूमीधारी') || rawBkTenure.includes('भूमीधारी') ? 'होय' : 'नाही');
-  points[33] = metaPoints.point_33 || 'नाही';
-  points[34] = metaPoints.point_34 || (otherRights.includes('वक्फ') || otherRights.includes('कब्रस्तान') ? 'होय' : 'नाही');
-  points[35] = metaPoints.point_35 || (otherRights.includes('अधिग्रहित') || otherRights.includes('राखीव') ? 'होय' : 'नाही');
+  points[22] = metaPoints.point_22 || (flags.isCorpAllot || flags.isPrivateAllot || otherRights.includes('संस्था') || otherRights.includes('उद्योग') || otherRights.includes('भूमिहीन') || otherRights.includes('प्रकल्प') ? 'होय' : 'नाही');
+  points[23] = metaPoints.point_23 || (p.ceilingRecords?.length > 0 || otherRights.includes('कमाल धारणा') || otherRights.includes('सिलिंग') ? 'होय' : 'नाही');
+  points[24] = metaPoints.point_24 || (otherRights.includes('गुरचरण') || otherRights.includes('चराई') || otherRights.includes('विकास') || otherRights.includes('प्राधिकरण') ? 'होय' : 'नाही');
+  points[25] = metaPoints.point_25 || (p.tenureClass === 'DEVASTHAN_INAM' || otherRights.includes('देवस्थान') ? 'होय' : 'नाही');
+  points[26] = metaPoints.point_26 || (flags.isTribal || p.tribalRecords?.length > 0 || otherRights.includes('आदिवासी') ? 'होय' : 'नाही');
+  points[27] = metaPoints.point_27 || (otherRights.includes('पुनर्वसन') || otherRights.includes('प्रकल्पग्रस्त') ? 'होय' : 'नाही');
+  points[28] = metaPoints.point_28 || (otherRights.includes('भाडेपट्टा') || otherRights.includes('लीज') ? 'होय' : 'नाही');
+  points[29] = metaPoints.point_29 || (p.bhudanRecords?.length > 0 || otherRights.includes('भूदान') || otherRights.includes('ग्रामदान') ? 'होय' : 'नाही');
+  points[30] = metaPoints.point_30 || (otherRights.includes('खाजगी वन') || otherRights.includes('वन जमीन') ? 'होय' : 'नाही');
+  points[31] = metaPoints.point_31 || (otherRights.includes('भूमीधारी') || rawBkTenure.includes('भूमीधारी') ? 'होय' : 'नाही');
+  points[32] = metaPoints.point_32 || (otherRights.includes('सूट') || otherRights.includes('कमाल मर्यादा') ? 'होय' : 'नाही');
+  points[33] = metaPoints.point_33 || (otherRights.includes('वक्फ') || otherRights.includes('कब्रस्तान') ? 'होय' : 'नाही');
+  points[34] = metaPoints.point_34 || (otherRights.includes('भूसंपादन') || otherRights.includes('अधिग्रहित') || otherRights.includes('राखीव') ? 'होय' : 'नाही');
 
-  // 36-46 Enforcement & Conversions (शर्तभंग, रूपांतरण व अद्यावत पडताळणी)
-  points[36] = metaPoints.point_36 || (flags.isShartbhang && p.tenureClass === 'BHOGVATDAR_CLASS_1' && b1950.tenureClass === 'BHOGVATDAR_CLASS_2' ? 'होय' : 'नाही');
-  points[37] = metaPoints.point_37 || (flags.isShartbhang || c.violationType === 'SHARTBHANG' ? 'होय' : 'नाही');
-  points[38] = metaPoints.point_38 || (flags.isTribal && otherRights.includes('हस्तांतरण') ? 'होय' : 'नाही');
-  points[39] = metaPoints.point_39 || (flags.isTribal && c.violationType === 'TRIBAL_LAND_VIOLATION' ? 'होय' : 'नाही');
-  points[40] = metaPoints.point_40 || (otherRights && otherRights !== '-' && otherRights !== '....' ? 'होय' : 'ईतर अधिकारात नोंद नाही');
-  points[41] = metaPoints.point_41 || (flags.isIllegalDeletion ? 'होय' : 'नाही');
-  points[42] = metaPoints.point_42 || (p.tenancy89ARecords?.length > 0 || otherRights.includes('कंपनी') ? 'होय' : 'नाही');
+  // 35-46 Enforcement & Conversions (शर्तभंग, रूपांतरण व अद्यावत पडताळणी - रकाने ३५ ते ४६)
+  // 35: भोग. वर्ग-२ मधून वर्ग-१ मध्ये विनापरवानगी रूपांतरण
+  points[35] = metaPoints.point_35 || ((flags.isShartbhang && p.tenureClass === 'BHOGVATDAR_CLASS_1' && b1950.tenureClass === 'BHOGVATDAR_CLASS_2') || otherRights.includes('रूपांतर') ? 'होय' : 'नाही');
+  // 36: मौका चौकशीअंती शर्तभंग
+  points[36] = metaPoints.point_36 || (flags.isShartbhang || c.violationType === 'SHARTBHANG' ? 'होय' : 'नाही');
+  // 37: आदिवासी ते आदिवासी हस्तांतरण
+  points[37] = metaPoints.point_37 || (flags.isTribal && otherRights.includes('हस्तांतरण') ? 'होय' : 'नाही');
+  // 38: आदिवासी ते गैर-आदिवासी हस्तांतरण
+  points[38] = metaPoints.point_38 || (flags.isTribal && c.violationType === 'TRIBAL_LAND_VIOLATION' ? 'होय' : 'नाही');
+  // 39: निर्बंधीत सत्ताप्रकारानुसार नोंद इतर अधिकारामध्ये
+  points[39] = metaPoints.point_39 || (otherRights && otherRights !== '-' && otherRights !== '....' ? 'होय' : 'ईतर अधिकारात नोंद नाही');
+  // 40: इतर अधिकारातील नोंदी/भूधारणा अवैधरित्या कमी
+  points[40] = metaPoints.point_40 || (flags.isIllegalDeletion || c.violationType === 'GOVERNMENT_NAME_MISSING' ? 'होय' : 'नाही');
+  // 41: भोगवटदार कंपनी/बिगर शेतकरी असल्यास परवानगी
+  points[41] = metaPoints.point_41 || (p.tenancy89ARecords?.length > 0 || otherRights.includes('कंपनी') ? 'होय' : 'नाही');
+  // 42: कलम ८९/८९अ अन्वये औद्योगिक प्रयोजनाकरिता कंपनीने धारण
+  points[42] = metaPoints.point_42 || (p.tenancy89ARecords?.[0]?.isGenuineIndustrialUse ? 'होय' : 'नाही');
+  // 43: खरेदी दिनांक
   points[43] = metaPoints.point_43 || (p.tenancy89ARecords?.[0]?.purchaseDate ? new Date(p.tenancy89ARecords[0].purchaseDate).toLocaleDateString('mr-IN') : '');
+  // 44: वापर सुरू केला आहे काय?
   points[44] = metaPoints.point_44 || (p.tenancy89ARecords?.[0]?.isGenuineIndustrialUse ? 'होय' : 'नाही');
+  // 45: विना परवानगी/हस्तांतरण/वापरात बदल
   points[45] = metaPoints.point_45 || (flags.isShartbhang ? 'होय' : 'नाही');
+  // 46: गाव नमुना १ क अद्यावत
   points[46] = metaPoints.point_46 || 'होय';
+
+  // HIGH FIDELITY OVERRIDE:
+  // If the upload or modal edit saved explicit officer entries in metaPoints,
+  // honor them verbatim (preserving '-', 'नाही', exact remarks, or order numbers)
+  for (let i = 1; i <= 46; i++) {
+    const rawVal = metaPoints[`point_${i}`];
+    if (rawVal !== undefined && rawVal !== null) {
+      const s = String(rawVal).trim();
+      if (s !== '') {
+        points[i] = s;
+      }
+    }
+  }
 
   return points;
 }

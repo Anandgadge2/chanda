@@ -5,10 +5,13 @@ import { createPortal } from 'react-dom';
 import { X, Calendar, Scale, CheckCircle2, AlertCircle } from 'lucide-react';
 import { api } from '../lib/api';
 import { useFocusTrap } from '../hooks/useFocusTrap';
+import { useTranslation } from './LanguageContext';
+import { formatVillageName } from '../lib/villageUtils';
 import SearchableSelect from './SearchableSelect';
 
 export default function AddHearingModal({ isOpen, onClose, caseItem, onHearingAdded }) {
   const trapRef = useFocusTrap(isOpen);
+  const { isMarathi } = useTranslation();
   const [mounted, setMounted] = useState(false);
   const [hearingDate, setHearingDate] = useState(new Date().toISOString().slice(0, 10));
 
@@ -59,13 +62,19 @@ export default function AddHearingModal({ isOpen, onClose, caseItem, onHearingAd
         nextHearingDate: nextHearingDate || null,
       });
 
-      setStatusMsg({ type: 'success', text: 'सुनावणी इतिवृत्त यशस्वीरीत्या नोंदवले गेले!' });
+      setStatusMsg({
+        type: 'success',
+        text: isMarathi ? 'सुनावणी इतिवृत्त यशस्वीरीत्या नोंदवले गेले!' : 'Hearing proceedings successfully recorded!',
+      });
       setTimeout(() => {
         if (onHearingAdded) onHearingAdded();
         onClose();
       }, 1000);
     } catch (err) {
-      setStatusMsg({ type: 'error', text: err.message || 'नोंदणी अयशस्वी' });
+      setStatusMsg({
+        type: 'error',
+        text: err.message || (isMarathi ? 'नोंदणी अयशस्वी' : 'Failed to record proceedings'),
+      });
     } finally {
       setLoading(false);
     }
@@ -97,14 +106,15 @@ export default function AddHearingModal({ isOpen, onClose, caseItem, onHearingAd
             <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
                 <h2 id="hearing-modal-title" className="text-sm sm:text-base font-black text-slate-900 leading-tight">
-                  सुनावणी इतिवृत्त नोंद
+                  {isMarathi ? 'सुनावणी इतिवृत्त नोंद' : 'Record Hearing Proceedings'}
                 </h2>
                 <span className="font-mono text-[10px] font-bold bg-slate-100 text-slate-800 px-2 py-0.5 rounded-full border border-slate-200">
                   {caseItem.caseNumber}
                 </span>
               </div>
               <p className="text-[11px] text-slate-500 truncate mt-0.5 font-medium">
-                {caseItem.parcel?.villageName ? `गाव: ${caseItem.parcel.villageName} • ` : ''}MLRC १९६६ अर्ध-न्यायिक सुनावणी
+                {caseItem.parcel?.villageName ? `${isMarathi ? 'गाव' : 'Village'}: ${formatVillageName(caseItem.parcel.villageName, isMarathi)} • ` : ''}
+                {isMarathi ? 'MLRC १९६६ अर्ध-न्यायिक सुनावणी' : 'MLRC 1966 Quasi-Judicial Proceeding'}
               </p>
             </div>
           </div>
@@ -112,7 +122,7 @@ export default function AddHearingModal({ isOpen, onClose, caseItem, onHearingAd
             type="button"
             onClick={onClose}
             className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 transition active:scale-90 flex items-center justify-center shrink-0 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
-            aria-label="संवाद बंद करा (Close dialog)"
+            aria-label={isMarathi ? 'संवाद बंद करा' : 'Close dialog'}
           >
             <X className="w-4 h-4" />
           </button>
@@ -143,7 +153,7 @@ export default function AddHearingModal({ isOpen, onClose, caseItem, onHearingAd
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
               <div>
                 <label htmlFor="hearing-date" className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1">
-                  सुनावणी दिनांक <span className="text-rose-500">*</span>
+                  {isMarathi ? 'सुनावणी दिनांक' : 'Hearing Date'} <span className="text-rose-500">*</span>
                 </label>
                 <input
                   id="hearing-date"
@@ -156,7 +166,7 @@ export default function AddHearingModal({ isOpen, onClose, caseItem, onHearingAd
               </div>
               <div>
                 <label htmlFor="hearing-next-date" className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1">
-                  पुढील तारीख (ऐच्छिक)
+                  {isMarathi ? 'पुढील तारीख (ऐच्छिक)' : 'Next Hearing Date (Optional)'}
                 </label>
                 <input
                   id="hearing-next-date"
@@ -170,21 +180,39 @@ export default function AddHearingModal({ isOpen, onClose, caseItem, onHearingAd
 
             <div>
               <label className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1">
-                सुनावणी सक्षम प्राधिकारी <span className="text-rose-500">*</span>
+                {isMarathi ? 'सुनावणी सक्षम प्राधिकारी' : 'Competent Hearing Authority'} <span className="text-rose-500">*</span>
               </label>
               <SearchableSelect
                 options={[
-                  { value: 'Sub-Divisional Officer (SDO) Warora', label: 'उपविभागीय अधिकारी (SDO) वरोरा' },
-                  { value: 'Sub-Divisional Officer (SDO) Rajura', label: 'उपविभागीय अधिकारी (SDO) राजुरा' },
-                  { value: 'Sub-Divisional Officer (SDO) Chandrapur', label: 'उपविभागीय अधिकारी (SDO) चंद्रपूर' },
-                  { value: 'Tehsildar Mul', label: 'तहसीलदार मूल' },
-                  { value: 'District Collector Chandrapur', label: 'जिल्हाधिकारी चंद्रपूर' },
-                  { value: 'Resident Deputy Collector (RDC)', label: 'निवासी उपजिल्हाधिकारी (RDC)' }
+                  {
+                    value: 'Sub-Divisional Officer (SDO) Warora',
+                    label: isMarathi ? 'उपविभागीय अधिकारी (SDO) वरोरा' : 'Sub-Divisional Officer (SDO) Warora',
+                  },
+                  {
+                    value: 'Sub-Divisional Officer (SDO) Rajura',
+                    label: isMarathi ? 'उपविभागीय अधिकारी (SDO) राजुरा' : 'Sub-Divisional Officer (SDO) Rajura',
+                  },
+                  {
+                    value: 'Sub-Divisional Officer (SDO) Chandrapur',
+                    label: isMarathi ? 'उपविभागीय अधिकारी (SDO) चंद्रपूर' : 'Sub-Divisional Officer (SDO) Chandrapur',
+                  },
+                  {
+                    value: 'Tehsildar Mul',
+                    label: isMarathi ? 'तहसीलदार मूल' : 'Tahsildar Mul',
+                  },
+                  {
+                    value: 'District Collector Chandrapur',
+                    label: isMarathi ? 'जिल्हाधिकारी चंद्रपूर' : 'District Collector Chandrapur',
+                  },
+                  {
+                    value: 'Resident Deputy Collector (RDC)',
+                    label: isMarathi ? 'निवासी उपजिल्हाधिकारी (RDC)' : 'Resident Deputy Collector (RDC)',
+                  },
                 ]}
                 value={authority}
                 onChange={(val) => setAuthority(val)}
-                placeholder="सुनावणी प्राधिकारी निवडा..."
-                searchPlaceholder="प्राधिकारी शोधा..."
+                placeholder={isMarathi ? 'सुनावणी प्राधिकारी निवडा...' : 'Select Hearing Authority...'}
+                searchPlaceholder={isMarathi ? 'प्राधिकारी शोधा...' : 'Search Authority...'}
                 icon={Scale}
                 showCount={false}
               />
@@ -192,7 +220,7 @@ export default function AddHearingModal({ isOpen, onClose, caseItem, onHearingAd
 
             <div>
               <label htmlFor="hearing-proceedings" className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1">
-                सुनावणी इतिवृत्त व आदेश शेरा <span className="text-rose-500">*</span>
+                {isMarathi ? 'सुनावणी इतिवृत्त व आदेश शेरा' : 'Hearing Proceedings & Order Remarks'} <span className="text-rose-500">*</span>
               </label>
               <textarea
                 id="hearing-proceedings"
@@ -200,7 +228,11 @@ export default function AddHearingModal({ isOpen, onClose, caseItem, onHearingAd
                 value={proceedingsLog}
                 onChange={(e) => setProceedingsLog(e.target.value)}
                 className="w-full border border-slate-200 rounded-xl p-3 text-xs bg-slate-50/60 hover:bg-white focus:bg-white focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-all font-medium focus:outline-none leading-relaxed"
-                placeholder="उदा. उभय पक्षांचा युक्तिवाद ऐकला. संबंधित तलाठी यांनी मूळ सनद फेरफार प्रत सादर करण्याचे निर्देश दिले."
+                placeholder={
+                  isMarathi
+                    ? 'उदा. उभय पक्षांचा युक्तिवाद ऐकला. संबंधित तलाठी यांनी मूळ सनद फेरफार प्रत सादर करण्याचे निर्देश दिले.'
+                    : 'e.g., Both parties heard. Talathi directed to produce 1950 baseline sanad and original mutation register copy.'
+                }
                 required
               />
             </div>
@@ -213,7 +245,7 @@ export default function AddHearingModal({ isOpen, onClose, caseItem, onHearingAd
               onClick={onClose}
               className="px-4 py-2.5 border border-slate-200 hover:bg-slate-100 text-slate-700 font-bold rounded-xl text-xs transition active:scale-95 cursor-pointer focus:outline-none"
             >
-              रद्द करा
+              {isMarathi ? 'रद्द करा' : 'Cancel'}
             </button>
             <button
               type="submit"
@@ -223,10 +255,10 @@ export default function AddHearingModal({ isOpen, onClose, caseItem, onHearingAd
               {loading ? (
                 <>
                   <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  <span>नोंद होत आहे...</span>
+                  <span>{isMarathi ? 'नोंद होत आहे...' : 'Saving...'}</span>
                 </>
               ) : (
-                <span>इतिवृत्त सेव्ह करा</span>
+                <span>{isMarathi ? 'इतिवृत्त सेव्ह करा' : 'Save Proceedings'}</span>
               )}
             </button>
           </div>

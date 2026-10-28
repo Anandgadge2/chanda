@@ -127,7 +127,15 @@ async function run() {
     if (!dbP) continue;
 
     const actualCurrentOwner = resolveActualOwner(p.ownerName, p.otherRights);
-    const bkOwner = p.backward?.tenure || p.backward?.owner || actualCurrentOwner;
+    // Prioritize actual owner name over tenure; do not overwrite valid owner with 'उपलब्ध नाही' tenure remarks
+    let bkOwner = p.backward?.owner;
+    if (!bkOwner || bkOwner.includes('उपलब्ध नाही') || bkOwner === '-' || bkOwner === '_') {
+      if (p.backward?.tenure && !p.backward.tenure.includes('उपलब्ध नाही') && p.backward.tenure !== '-' && p.backward.tenure !== '_') {
+        bkOwner = p.backward.tenure;
+      } else {
+        bkOwner = p.backward?.owner || actualCurrentOwner || 'नोंदणीकृत खातेदार';
+      }
+    }
     const bkKhata = p.backward?.owner ? `K-${String(p.backward.owner).slice(0, 30)}` : 'K-15';
     const bkFerfar = p.backward?.no ? `F-${String(p.backward.no).slice(0, 30)}` : (p.backward?.owner ? `F-${String(p.backward.owner).slice(0, 30)}` : 'F-04');
 

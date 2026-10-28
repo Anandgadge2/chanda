@@ -5,10 +5,12 @@ import { createPortal } from 'react-dom';
 import { X, Upload, FileText, CheckCircle2, AlertCircle } from 'lucide-react';
 import { api } from '../lib/api';
 import { useFocusTrap } from '../hooks/useFocusTrap';
+import { useTranslation } from './LanguageContext';
 import SearchableSelect from './SearchableSelect';
 
 export default function DocUploadModal({ isOpen, onClose, parcelId, caseId, onUploadSuccess }) {
   const trapRef = useFocusTrap(isOpen);
+  const { isMarathi } = useTranslation();
   const [mounted, setMounted] = useState(false);
   const [file, setFile] = useState(null);
 
@@ -52,7 +54,10 @@ export default function DocUploadModal({ isOpen, onClose, parcelId, caseId, onUp
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!file) {
-      setStatusMsg({ type: 'error', text: 'फाईल निवडणे आवश्यक आहे (File is required)' });
+      setStatusMsg({
+        type: 'error',
+        text: isMarathi ? 'फाईल निवडणे आवश्यक आहे (File is required)' : 'Please select a document file to upload',
+      });
       return;
     }
 
@@ -73,14 +78,19 @@ export default function DocUploadModal({ isOpen, onClose, parcelId, caseId, onUp
       const data = await api.uploadDocument(formData);
       setStatusMsg({
         type: 'success',
-        text: 'दस्तावेज Cloudinary वर अपलोड झाला व अभिलेखागारात नोंदवला गेला!',
+        text: isMarathi
+          ? 'दस्तावेज Cloudinary वर अपलोड झाला व अभिलेखागारात नोंदवला गेला!'
+          : 'Document uploaded to DMS archive and indexed successfully!',
       });
       setTimeout(() => {
         if (onUploadSuccess) onUploadSuccess(data.document);
         onClose();
       }, 1200);
     } catch (err) {
-      setStatusMsg({ type: 'error', text: err.message || 'अपलोड अयशस्वी (Upload failed)' });
+      setStatusMsg({
+        type: 'error',
+        text: err.message || (isMarathi ? 'अपलोड अयशस्वी (Upload failed)' : 'Document upload failed'),
+      });
     } finally {
       setUploading(false);
     }
@@ -111,10 +121,10 @@ export default function DocUploadModal({ isOpen, onClose, parcelId, caseId, onUp
             </div>
             <div className="min-w-0">
               <h2 id="upload-modal-title" className="text-sm sm:text-base font-black text-slate-900 leading-tight">
-                दस्तावेज अपलोड व अभिलेख नोंद
+                {isMarathi ? 'दस्तावेज अपलोड व अभिलेख नोंद' : 'Upload Document & Archive Record'}
               </h2>
               <p className="text-[11px] text-slate-500 truncate mt-0.5 font-medium">
-                डिजिटल व भौतिक अभिलेखागार संकलन (DMS)
+                {isMarathi ? 'डिजिटल व भौतिक अभिलेखागार संकलन (DMS)' : 'Digital & Physical Document Management (DMS)'}
               </p>
             </div>
           </div>
@@ -122,7 +132,7 @@ export default function DocUploadModal({ isOpen, onClose, parcelId, caseId, onUp
             type="button"
             onClick={onClose}
             className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 transition active:scale-90 flex items-center justify-center shrink-0 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
-            aria-label="संवाद बंद करा (Close dialog)"
+            aria-label={isMarathi ? 'संवाद बंद करा (Close dialog)' : 'Close dialog'}
           >
             <X className="w-4 h-4" />
           </button>
@@ -152,7 +162,7 @@ export default function DocUploadModal({ isOpen, onClose, parcelId, caseId, onUp
 
             <div>
               <label htmlFor="doc-title" className="text-xs font-semibold text-slate-700 block">
-                दस्तावेज शीर्षक <span className="text-rose-500">*</span>
+                {isMarathi ? 'दस्तावेज शीर्षक' : 'Document Title'} <span className="text-rose-500">*</span>
               </label>
               <input
                 id="doc-title"
@@ -160,28 +170,28 @@ export default function DocUploadModal({ isOpen, onClose, parcelId, caseId, onUp
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 className="w-full border border-slate-300 rounded-lg p-2.5 text-xs mt-1 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                placeholder="उदा. SDO आदेश क्र. १२/२०२४ किंवा स्थळ पंचनामा"
+                placeholder={isMarathi ? 'उदा. SDO आदेश क्र. १२/२०२४ किंवा स्थळ पंचनामा' : 'e.g. SDO Final Order No. 12/2026 or Spot Panchnama'}
                 required
               />
             </div>
 
             <div>
               <label className="text-xs font-semibold text-slate-700 block mb-1">
-                दस्तावेज प्रकार <span className="text-rose-500">*</span>
+                {isMarathi ? 'दस्तावेज प्रकार' : 'Document Category'} <span className="text-rose-500">*</span>
               </label>
               <SearchableSelect
                 options={[
-                  { value: 'SDO_ORDER', label: 'उपविभागीय अधिकारी (SDO) आदेश' },
-                  { value: 'COLLECTOR_ORDER', label: 'जिल्हाधिकारी आदेश (शासन जमा)' },
-                  { value: 'FIELD_PANCHNAMA', label: 'स्थळ पंचनामा व छायाचित्रे' },
-                  { value: 'OLD_7_12_ARCHIVE', label: 'सन १९५० जुना सातबारा' },
-                  { value: 'FERFAR_REGISTER_COPY', label: 'गाव नमुना ६ फेरफार' },
-                  { value: 'SHOW_CAUSE_NOTICE', label: 'कारणे दाखवा नोटीस' }
+                  { value: 'SDO_ORDER', label: isMarathi ? 'उपविभागीय अधिकारी (SDO) आदेश' : 'Sub-Divisional Officer (SDO) Order' },
+                  { value: 'COLLECTOR_ORDER', label: isMarathi ? 'जिल्हाधिकारी आदेश (शासन जमा)' : 'Collector Repossession Order' },
+                  { value: 'FIELD_PANCHNAMA', label: isMarathi ? 'स्थळ पंचनामा व छायाचित्रे' : 'Field Panchnama & Site Photographs' },
+                  { value: 'OLD_7_12_ARCHIVE', label: isMarathi ? 'सन १९५० जुना सातबारा' : '1950 Baseline 7/12 Sanad' },
+                  { value: 'FERFAR_REGISTER_COPY', label: isMarathi ? 'गाव नमुना ६ फेरफार' : 'Village Form 6 Mutation Register' },
+                  { value: 'SHOW_CAUSE_NOTICE', label: isMarathi ? 'कारणे दाखवा नोटीस' : 'Show Cause Statutory Notice' }
                 ]}
                 value={docType}
                 onChange={(val) => setDocType(val)}
-                placeholder="दस्तावेज प्रकार निवडा..."
-                searchPlaceholder="दस्तऐवज प्रकार शोधा..."
+                placeholder={isMarathi ? 'दस्तावेज प्रकार निवडा...' : 'Select Document Type...'}
+                searchPlaceholder={isMarathi ? 'दस्तऐवज प्रकार शोधा...' : 'Search Type...'}
                 showCount={false}
               />
             </div>
@@ -189,34 +199,40 @@ export default function DocUploadModal({ isOpen, onClose, parcelId, caseId, onUp
             {/* Physical Coordinate Fields */}
             <div className="bg-slate-50 p-3 rounded-lg border border-slate-200">
               <p className="text-[11px] font-bold text-slate-600 uppercase tracking-wide mb-2">
-                भौतिक अभिलेखागार स्थान
+                {isMarathi ? 'भौतिक अभिलेखागार स्थान' : 'Physical Record Room Coordinates'}
               </p>
               <div className="grid grid-cols-3 gap-2">
                 <div>
-                  <label htmlFor="doc-rack-no" className="text-[11px] font-semibold text-slate-600 block">रॅक क्र.</label>
+                  <label htmlFor="doc-rack-no" className="text-[11px] font-semibold text-slate-600 block">
+                    {isMarathi ? 'रॅक क्र.' : 'Rack No.'}
+                  </label>
                   <input
                     id="doc-rack-no"
-                    placeholder="उदा. R-04"
+                    placeholder="e.g. R-04"
                     value={rackNo}
                     onChange={(e) => setRackNo(e.target.value)}
                     className="border border-slate-300 rounded p-2 text-xs w-full mt-1 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
                   />
                 </div>
                 <div>
-                  <label htmlFor="doc-bundle-no" className="text-[11px] font-semibold text-slate-600 block">गठ्ठा क्र.</label>
+                  <label htmlFor="doc-bundle-no" className="text-[11px] font-semibold text-slate-600 block">
+                    {isMarathi ? 'गठ्ठा क्र.' : 'Bundle No.'}
+                  </label>
                   <input
                     id="doc-bundle-no"
-                    placeholder="उदा. B-12"
+                    placeholder="e.g. B-12"
                     value={bundleNo}
                     onChange={(e) => setBundleNo(e.target.value)}
                     className="border border-slate-300 rounded p-2 text-xs w-full mt-1 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
                   />
                 </div>
                 <div>
-                  <label htmlFor="doc-file-no" className="text-[11px] font-semibold text-slate-600 block">फाईल क्र.</label>
+                  <label htmlFor="doc-file-no" className="text-[11px] font-semibold text-slate-600 block">
+                    {isMarathi ? 'फाईल क्र.' : 'File No.'}
+                  </label>
                   <input
                     id="doc-file-no"
-                    placeholder="उदा. SDO/118"
+                    placeholder="e.g. SDO/118"
                     value={fileNo}
                     onChange={(e) => setFileNo(e.target.value)}
                     className="border border-slate-300 rounded p-2 text-xs w-full mt-1 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
@@ -228,7 +244,7 @@ export default function DocUploadModal({ isOpen, onClose, parcelId, caseId, onUp
             {/* File Upload Box */}
             <div>
               <label htmlFor="doc-file-input" className="text-xs font-semibold text-slate-700 block">
-                फाईल निवडा (PDF किंवा इमेज) <span className="text-rose-500">*</span>
+                {isMarathi ? 'फाईल निवडा (PDF किंवा इमेज)' : 'Select File (PDF or Image)'} <span className="text-rose-500">*</span>
               </label>
               <input
                 id="doc-file-input"
@@ -240,7 +256,8 @@ export default function DocUploadModal({ isOpen, onClose, parcelId, caseId, onUp
               />
               {file && (
                 <p className="text-[11px] text-slate-500 mt-1">
-                  निवडलेली फाईल: <span className="font-semibold text-slate-700">{file.name}</span> ({(file.size / 1024 / 1024).toFixed(2)} MB)
+                  {isMarathi ? 'निवडलेली फाईल: ' : 'Selected file: '}
+                  <span className="font-semibold text-slate-700">{file.name}</span> ({(file.size / 1024 / 1024).toFixed(2)} MB)
                 </p>
               )}
             </div>
@@ -253,7 +270,7 @@ export default function DocUploadModal({ isOpen, onClose, parcelId, caseId, onUp
               onClick={onClose}
               className="px-4 py-2.5 border border-slate-200 hover:bg-slate-100 text-slate-700 font-bold rounded-xl text-xs transition active:scale-95 cursor-pointer focus:outline-none"
             >
-              रद्द करा
+              {isMarathi ? 'रद्द करा' : 'Cancel'}
             </button>
             <button
               type="submit"
@@ -263,12 +280,12 @@ export default function DocUploadModal({ isOpen, onClose, parcelId, caseId, onUp
               {uploading ? (
                 <>
                   <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" aria-hidden="true" />
-                  <span>अपलोड होत आहे...</span>
+                  <span>{isMarathi ? 'अपलोड होत आहे...' : 'Uploading...'}</span>
                 </>
               ) : (
                 <>
                   <Upload className="w-3.5 h-3.5" aria-hidden="true" />
-                  <span>Cloudinary वर सेव्ह करा</span>
+                  <span>{isMarathi ? 'Cloudinary वर सेव्ह करा' : 'Upload to Cloud DMS'}</span>
                 </>
               )}
             </button>

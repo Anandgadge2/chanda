@@ -19,8 +19,10 @@ import { DMS_DOC_TYPES } from '../../lib/constants';
 import DocUploadModal from '../../components/DocUploadModal';
 import Pagination from '../../components/Pagination';
 import SearchableSelect from '../../components/SearchableSelect';
+import { useTranslation } from '../../components/LanguageContext';
 
 export default function DocumentsPage() {
+  const { isMarathi } = useTranslation();
   const [documents, setDocuments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [totalCount, setTotalCount] = useState(0);
@@ -78,17 +80,21 @@ export default function DocumentsPage() {
           <div className="min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
               <h1 className="text-sm sm:text-base font-extrabold text-slate-900 tracking-tight leading-tight truncate">
-                डिजिटल दस्तऐवज व भौतिक कपाट संदर्भ
+                {isMarathi ? 'डिजिटल दस्तऐवज व भौतिक कपाट संदर्भ' : 'Digital DMS & Record Room Repository'}
               </h1>
               <span className="text-[10px] font-extrabold uppercase tracking-wider bg-purple-100 text-purple-900 px-2 py-0.5 rounded-full border border-purple-300">
-                अभिलेखागार DMS
+                {isMarathi ? 'अभिलेखागार DMS' : 'Archives DMS'}
               </span>
               <span className="hidden md:inline text-[11px] text-slate-500 font-medium">
-                • सन १९५० जुने सातबारे, फेरफार पत्रके, SDO व जिल्हाधिकारी आदेश
+                {isMarathi
+                  ? '• सन १९५० जुने सातबारे, फेरफार पत्रके, SDO व जिल्हाधिकारी आदेश'
+                  : '• 1950 Baseline 7/12 extracts, mutation registers, SDO & Collector orders'}
               </span>
             </div>
             <p className="text-[11px] text-slate-500 md:hidden truncate font-medium">
-              सन १९५० जुने सातबारे, फेरफार पत्रके, SDO व जिल्हाधिकारी आदेश
+              {isMarathi
+                ? 'सन १९५० जुने सातबारे, फेरफार पत्रके, SDO व जिल्हाधिकारी आदेश'
+                : '1950 Baseline 7/12 extracts, mutation registers, SDO & Collector orders'}
             </p>
           </div>
         </div>
@@ -97,17 +103,17 @@ export default function DocumentsPage() {
           <button
             onClick={() => setUploadModalOpen(true)}
             className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-900 hover:bg-blue-800 text-white rounded-lg text-xs font-bold transition shadow-2xs active:scale-95 cursor-pointer"
-            title="नवीन दस्तऐवज जोडा"
+            title={isMarathi ? 'नवीन दस्तऐवज जोडा' : 'Add new document'}
           >
             <Plus className="w-3.5 h-3.5 text-white stroke-[2.5]" />
-            <span>नवीन दस्तऐवज</span>
+            <span>{isMarathi ? 'नवीन दस्तऐवज' : 'New Document'}</span>
           </button>
           <button
             onClick={() => fetchDocs(page)}
             disabled={loading}
             className="p-1.5 bg-white hover:bg-purple-50 border border-slate-300 text-slate-700 hover:text-slate-950 rounded-lg text-xs transition active:scale-95 shadow-2xs cursor-pointer"
-            title="रीफ्रेश करा"
-            aria-label="रीफ्रेश करा"
+            title={isMarathi ? 'रीफ्रेश करा' : 'Refresh'}
+            aria-label={isMarathi ? 'रीफ्रेश करा' : 'Refresh'}
           >
             <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-purple-600' : 'text-slate-700'}`} />
           </button>
@@ -120,7 +126,11 @@ export default function DocumentsPage() {
           <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
           <input
             type="text"
-            placeholder="दस्तऐवज शीर्षक, फाईल क्र., रॅक किंवा गठ्ठा क्र. शोधा..."
+            placeholder={
+              isMarathi
+                ? 'दस्तऐवज शीर्षक, फाईल क्र., रॅक किंवा गठ्ठा क्र. शोधा...'
+                : 'Search document title, file no, rack or bundle no...'
+            }
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full pl-10 pr-3.5 py-2.5 border border-slate-200 rounded-xl text-xs bg-slate-50/70 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-all font-medium"
@@ -130,16 +140,16 @@ export default function DocumentsPage() {
         <div className="w-full sm:w-72">
           <SearchableSelect
             options={[
-              { value: '', label: 'सर्व दस्तऐवज प्रकार' },
+              { value: '', label: isMarathi ? 'सर्व दस्तऐवज प्रकार' : 'All Document Types' },
               ...Object.entries(DMS_DOC_TYPES).map(([k, v]) => ({
                 value: k,
-                label: v.labelMr
-              }))
+                label: isMarathi ? v.labelMr : (v.labelEn || v.labelMr),
+              })),
             ]}
             value={docType}
             onChange={(val) => setDocType(val)}
-            placeholder="सर्व दस्तऐवज प्रकार"
-            searchPlaceholder="दस्तऐवज प्रकार शोधा..."
+            placeholder={isMarathi ? 'सर्व दस्तऐवज प्रकार' : 'All Document Types'}
+            searchPlaceholder={isMarathi ? 'दस्तऐवज प्रकार शोधा...' : 'Search document type...'}
             icon={Filter}
             showCount={false}
           />
@@ -150,17 +160,19 @@ export default function DocumentsPage() {
       <div className="bg-white/95 backdrop-blur-md border border-slate-200/80 rounded-2xl shadow-sm overflow-hidden">
         <div className="px-4 sm:px-5 py-3 border-b border-slate-200/80 bg-slate-50/60 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1.5">
           <div className="flex items-center gap-2">
-            <span className="text-xs font-bold text-slate-700">एकूण दस्तऐवज:</span>
+            <span className="text-xs font-bold text-slate-700">
+              {isMarathi ? 'एकूण दस्तऐवज:' : 'Total Documents:'}
+            </span>
             <span className="text-xs font-black text-blue-950 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-200/70">
               {totalCount}
             </span>
           </div>
           <div className="flex items-center gap-2">
             <span className="text-[11px] font-medium text-slate-500 hidden sm:inline">
-              चंद्रपूर अभिलेख कक्ष कोऑर्डिनेट्स
+              {isMarathi ? 'चंद्रपूर अभिलेख कक्ष कोऑर्डिनेट्स' : 'Chandrapur Record Room Coordinates'}
             </span>
             <span className="text-[10px] text-amber-800 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200 sm:hidden font-medium">
-              तक्ता आडवा स्क्रोल करा
+              {isMarathi ? 'तक्ता आडवा स्क्रोल करा' : 'Scroll table horizontally'}
             </span>
           </div>
         </div>
@@ -169,14 +181,14 @@ export default function DocumentsPage() {
           <table className="w-full text-left text-xs min-w-[720px]">
             <thead className="bg-slate-100/70 text-slate-600 font-bold border-b border-slate-200/80 text-[11px] uppercase tracking-wider">
               <tr>
-                <th className="py-3 px-4">दस्तऐवज शीर्षक व वर्गीकरण</th>
-                <th className="py-3 px-3">संलग्न भूखंड / केस</th>
-                <th className="py-3 px-3">भौतिक रॅक</th>
-                <th className="py-3 px-3">गठ्ठा</th>
-                <th className="py-3 px-3">फाईल क्र.</th>
-                <th className="py-3 px-3">आकार</th>
-                <th className="py-3 px-3">अपलोड दिनांक</th>
-                <th className="py-3 px-4 text-right">डिजिटल प्रत</th>
+                <th className="py-3 px-4">{isMarathi ? 'दस्तऐवज शीर्षक व वर्गीकरण' : 'Title & Classification'}</th>
+                <th className="py-3 px-3">{isMarathi ? 'संलग्न भूखंड / केस' : 'Linked Parcel / Case'}</th>
+                <th className="py-3 px-3">{isMarathi ? 'भौतिक रॅक' : 'Rack No.'}</th>
+                <th className="py-3 px-3">{isMarathi ? 'गठ्ठा' : 'Bundle'}</th>
+                <th className="py-3 px-3">{isMarathi ? 'फाईल क्र.' : 'File No.'}</th>
+                <th className="py-3 px-3">{isMarathi ? 'आकार' : 'Size'}</th>
+                <th className="py-3 px-3">{isMarathi ? 'अपलोड दिनांक' : 'Upload Date'}</th>
+                <th className="py-3 px-4 text-right">{isMarathi ? 'डिजिटल प्रत' : 'Digital Copy'}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -184,13 +196,15 @@ export default function DocumentsPage() {
                 <tr>
                   <td colSpan={8} className="py-16 text-center text-slate-500">
                     <div className="w-6 h-6 border-2 border-blue-900 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
-                    दस्तऐवज सूची लोड होत आहे...
+                    {isMarathi ? 'दस्तऐवज सूची लोड होत आहे...' : 'Loading document repository...'}
                   </td>
                 </tr>
               ) : documents.length === 0 ? (
                 <tr>
                   <td colSpan={8} className="py-16 text-center text-slate-500">
-                    कोणतेही दस्तऐवज सापडले नाहीत. कृपया वर दिलेल्या बटनावर क्लिक करून नवीन दस्तऐवज जोडा.
+                    {isMarathi
+                      ? 'कोणतेही दस्तऐवज सापडले नाहीत. कृपया वर दिलेल्या बटनावर क्लिक करून नवीन दस्तऐवज जोडा.'
+                      : 'No documents found. Click the button above to upload new documents.'}
                   </td>
                 </tr>
               ) : (
@@ -203,7 +217,7 @@ export default function DocumentsPage() {
                       <td className="py-3.5 px-4">
                         <div className="font-bold text-slate-900 text-xs">{doc.title}</div>
                         <span className="inline-block mt-0.5 text-[10px] font-semibold px-2 py-0.2 rounded bg-purple-50 text-purple-800 border border-purple-200">
-                          {docMeta?.labelMr || doc.docType}
+                          {isMarathi ? (docMeta?.labelMr || doc.docType) : (docMeta?.labelEn || docMeta?.labelMr || doc.docType)}
                         </span>
                       </td>
 
@@ -211,7 +225,7 @@ export default function DocumentsPage() {
                         {doc.parcel ? (
                           <div>
                             <div className="font-semibold text-slate-900">
-                              {doc.parcel.villageName} (गट {doc.parcel.gatNumber})
+                              {doc.parcel.villageName} ({isMarathi ? `गट ${doc.parcel.gatNumber}` : `Gat ${doc.parcel.gatNumber}`})
                             </div>
                             <div className="text-[10px] text-slate-500 font-mono">{doc.parcel.upi}</div>
                           </div>
@@ -220,7 +234,9 @@ export default function DocumentsPage() {
                             {doc.enforcementCase.caseNumber}
                           </div>
                         ) : (
-                          <span className="text-slate-400">सामान्य दस्तऐवज</span>
+                          <span className="text-slate-400">
+                            {isMarathi ? 'सामान्य दस्तऐवज' : 'General Document'}
+                          </span>
                         )}
                       </td>
 
@@ -253,7 +269,7 @@ export default function DocumentsPage() {
                       </td>
 
                       <td className="py-3.5 px-3 text-slate-500 text-[11px]">
-                        {new Date(doc.uploadedAt).toLocaleDateString('mr-IN')}
+                        {new Date(doc.uploadedAt).toLocaleDateString(isMarathi ? 'mr-IN' : 'en-IN')}
                       </td>
 
                       <td className="py-3.5 px-4 text-right">
@@ -263,7 +279,7 @@ export default function DocumentsPage() {
                           rel="noopener noreferrer"
                           className="inline-flex items-center gap-1 text-xs bg-blue-50 hover:bg-blue-100 text-blue-900 font-semibold px-2.5 py-1 rounded-lg border border-blue-200 transition"
                         >
-                          <span>PDF पहा</span>
+                          <span>{isMarathi ? 'PDF पहा' : 'View PDF'}</span>
                           <ExternalLink className="w-3 h-3" />
                         </a>
                       </td>

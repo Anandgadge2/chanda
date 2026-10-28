@@ -1,0 +1,65 @@
+{
+  "portal": {
+    "title": "जिल्हाधिकारी कार्यालय, चंद्रपूर",
+    "subTitle": "जमीन महसूल, भूमी अभिलेख व १९५० मूळ शीर्षक साखळी संनियंत्रण प्रणाली",
+    "district": "चंद्रपूर जिल्हा",
+    "mlrcBadge": "MLRC १९६६",
+    "govtOfMaharashtra": "महाराष्ट्र शासन",
+    "govtOfIndia": "भारत सरकार",
+    "skipToContent": "मुख्य सामग्रीकडे जा",
+    "officialTagline": "जमीन महसूल व भूमी अभिलेख संनियंत्रण प्रणाली"
+  },
+  "nav": {
+    "home": "मुख्य पृष्ठ",
+    "dashboard": "महसूल डॅशबोर्ड",
+    "parcels": "भूखंड नोंदवही (७/१२)",
+    "cases": "शर्तभंग व सुनावणी प्रकरणे",
+    "documents": "जिल्हा अभिलेखागार",
+    "bulkUpload": "गाव एक्सेल अपलोड",
+    "reports": "अहवाल व प्रपत्र जनरेशन",
+    "glossary": "महसूल शब्दावली व संक्षिप्त रूपे",
+    "settings": "खाते व सुरक्षा सेटिंग्ज",
+    "publicPortal": "सार्वजनिक पोर्टल",
+    "officerLogin": "अधिकारी लॉगिन",
+    "logout": "लॉगआउट करा",
+    "talukas": "१५ तालुके",
+    "provenance": "१९५० मूळ शीर्षक साखळी",
+    "acts": "MLRC १९६६ कायदे",
+    "workflow": "कार्यप्रणाली"
+  },
+  "accessibility": {
+    "size": "आकार:",
+    "contrast": "प्रखर कॉन्ट्रास्ट",
+    "highContrast": "प्रखर रंगछटा",
+    "decreaseFont": "लहान मजकूर",
+    "normalFont": "सामान्य मजकूर",
+    "increaseFont": "मोठा मजकूर",
+    "language": "भाषा"
+  },
+  "common": {
+    "search": "शोधा...",
+    "filter": "फिल्टर",
+    "actions": "कृती",
+    "status": "स्थिती",
+    "active": "सक्रिय",
+    "inactive": "निष्क्रिय",
+    "loading": "लोड होत आहे...",
+    "sessionCheck": "सत्र पडताळणी सुरू आहे...",
+    "save": "जतन करा",
+    "cancel": "रद्द करा",
+    "close": "बंद करा",
+    "back": "मागे जा",
+    "export": "निर्यात करा",
+    "print": "मुद्रित करा"
+  },
+  "roles": {
+    "collector": "जिल्हाधिकारी (Collector)",
+    "subCollector": "उपजिल्हाधिकारी / अपर जिल्हाधिकारी",
+    "sdo": "उपविभागीय अधिकारी (SDO / प्रांत)",
+    "tahsildar": "तहसीलदार (Tahsildar)",
+    "naibTahsildar": "नायब तहसीलदार (Naib Tahsildar)",
+    "circleOfficer": "मंडळ अधिकारी (Circle Officer)",
+    "talathi": "तलाठी (Talathi / पटवारी)",
+    "revenueOfficer": "महसूल अधिकारी"
+  }
+}

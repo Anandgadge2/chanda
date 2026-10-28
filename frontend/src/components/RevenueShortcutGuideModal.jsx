@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { REVENUE_SHORTCUTS, REVENUE_GLOSSARY_CATEGORIES } from '../lib/constants';
 import { useFocusTrap } from '../hooks/useFocusTrap';
+import { useTranslation } from './LanguageContext';
 
 export default function RevenueShortcutGuideModal({
   isOpen,
@@ -23,6 +24,7 @@ export default function RevenueShortcutGuideModal({
   initialQuery = '',
   initialCategory = 'ALL',
 }) {
+  const { locale, isMarathi } = useTranslation();
   const trapRef = useFocusTrap(isOpen);
   const [mounted, setMounted] = useState(false);
   const [searchQuery, setSearchQuery] = useState(initialQuery);
@@ -111,14 +113,14 @@ export default function RevenueShortcutGuideModal({
                   id="glossary-modal-title"
                   className="text-sm sm:text-base font-black text-slate-900 leading-tight"
                 >
-                  जमीन महसूल शब्दावली व संक्षिप्त रूपे
+                  {isMarathi ? 'जमीन महसूल शब्दावली व संक्षिप्त रूपे' : 'Land Revenue Glossary & Abbreviations'}
                 </h2>
                 <span className="text-[10px] font-bold bg-amber-100 text-amber-900 px-2 py-0.5 rounded-full border border-amber-200">
-                  MLRC १९६६ Glossary
+                  {isMarathi ? 'MLRC १९६६ Glossary' : 'MLRC 1966 Glossary'}
                 </span>
               </div>
               <p className="text-[11px] text-slate-500 truncate mt-0.5 hidden sm:block font-medium">
-                ७/१२ उतारा, फेरफार नोंदवही (गाव नमुना ६) व महसूल आदेशांमधील संक्षिप्त संज्ञा
+                {isMarathi ? '७/१२ उतारा, फेरफार नोंदवही (गाव नमुना ६) व महसूल आदेशांमधील संक्षिप्त संज्ञा' : 'Abbreviations across 7/12 extracts, VF-6 mutation registers, and revenue orders'}
               </p>
             </div>
           </div>
@@ -127,7 +129,7 @@ export default function RevenueShortcutGuideModal({
             type="button"
             onClick={onClose}
             className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 transition active:scale-90 flex items-center justify-center shrink-0 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
-            aria-label="संवाद बंद करा (Close glossary modal)"
+            aria-label={isMarathi ? 'संवाद बंद करा (Close glossary modal)' : 'Close glossary dialog'}
           >
             <X className="w-4 h-4" />
           </button>
@@ -137,8 +139,8 @@ export default function RevenueShortcutGuideModal({
         <div className="bg-amber-50/90 border-b border-amber-200/80 px-4 sm:px-6 py-2 text-[11px] sm:text-xs text-amber-950 flex items-center gap-2 shrink-0">
           <AlertTriangle className="w-3.5 h-3.5 text-amber-700 shrink-0" aria-hidden="true" />
           <p className="leading-normal truncate sm:whitespace-normal">
-            <span className="font-bold text-amber-900">महत्त्वाची सूचना: </span>
-            विनापरवानगी अ.कृ. वापर हा MLRC कलम ४४/४५ अन्वये गंभीर शर्तभंग असून त्यावर २५ पट दंड अथवा जमीन शासन जमा कारवाई होते.
+            <span className="font-bold text-amber-900">{isMarathi ? 'महत्त्वाची सूचना: ' : 'Statutory Note: '}</span>
+            {isMarathi ? 'विनापरवानगी अ.कृ. वापर हा MLRC कलम ४४/४५ अन्वये गंभीर शर्तभंग असून त्यावर २५ पट दंड अथवा जमीन शासन जमा कारवाई होते.' : 'Unauthorized Non-Agricultural (NA) use violates MLRC Sec 44/45, inviting up to 25x penalty or Government resumption.'}
           </p>
         </div>
 
@@ -146,7 +148,7 @@ export default function RevenueShortcutGuideModal({
         <div className="p-2.5 sm:p-3 bg-slate-50/70 border-b border-slate-200 space-y-2 shrink-0">
           <div className="relative">
             <label htmlFor="glossary-search" className="sr-only">
-              संक्षिप्त रूप शोधा
+              {isMarathi ? 'संक्षिप्त रूप शोधा' : 'Search abbreviation'}
             </label>
             <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" aria-hidden="true" />
             <input
@@ -154,14 +156,14 @@ export default function RevenueShortcutGuideModal({
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="संक्षिप्त रूप शोधा... (उदा. अ.कृ., विनापरवानगी, ख.ख., भो.व., बो., फे.नं.)"
+              placeholder={isMarathi ? 'संक्षिप्त रूप शोधा... (उदा. अ.कृ., विनापरवानगी, ख.ख., भो.व., बो., फे.नं.)' : 'Search abbreviations (e.g. NA, Tribal alienation, Khata, Bhogvatdar, Ferfar)...'}
               className="w-full pl-9 pr-8 py-1.5 text-xs sm:text-sm bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-900/20 focus:border-blue-800"
             />
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery('')}
                 className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5"
-                title="शोध साफ करा"
+                title={isMarathi ? 'शोध साफ करा' : 'Clear search'}
               >
                 <X className="w-3.5 h-3.5" />
               </button>
@@ -180,7 +182,7 @@ export default function RevenueShortcutGuideModal({
                     : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
                 }`}
               >
-                {cat.labelMr}
+                {isMarathi ? cat.labelMr : cat.labelEn}
               </button>
             ))}
           </div>
@@ -191,9 +193,9 @@ export default function RevenueShortcutGuideModal({
           {filteredItems.length === 0 ? (
             <div className="py-12 text-center space-y-2">
               <BookOpen className="w-8 h-8 text-slate-300 mx-auto" />
-              <p className="text-sm font-bold text-slate-700">कोणतीही संक्षिप्त संज्ञा सापडली नाही</p>
+              <p className="text-sm font-bold text-slate-700">{isMarathi ? 'कोणतीही संक्षिप्त संज्ञा सापडली नाही' : 'No matching terms found'}</p>
               <p className="text-xs text-slate-500">
-                कृपया वेगळा शब्द टाइप करा किंवा सर्व कॅटेगरी निवडून पुन्हा तपासा.
+                {isMarathi ? 'कृपया वेगळा शब्द टाइप करा किंवा सर्व कॅटेगरी निवडून पुन्हा तपासा.' : 'Please try another term or select All Categories.'}
               </p>
               <button
                 onClick={() => {
@@ -202,7 +204,7 @@ export default function RevenueShortcutGuideModal({
                 }}
                 className="mt-2 text-xs font-bold text-blue-900 hover:underline"
               >
-                सर्व संज्ञा पूर्ववत दाखवा
+                {isMarathi ? 'सर्व संज्ञा पूर्ववत दाखवा' : 'Reset & show all terms'}
               </button>
             </div>
           ) : (
@@ -251,31 +253,22 @@ export default function RevenueShortcutGuideModal({
 
                         {isCritical && (
                           <span className="text-[10px] font-bold bg-rose-600 text-white px-1.5 py-0.5 rounded shrink-0">
-                            वैधानिक उल्लंघन
+                            {isMarathi ? 'वैधानिक उल्लंघन' : 'Statutory Violation'}
                           </span>
                         )}
                       </div>
 
-                      {/* Full Forms */}
+                      {/* Full Form */}
                       <div className="mt-2">
                         <h3 className="text-sm font-black text-slate-900 leading-snug">
-                          {item.fullFormMr}
+                          {isMarathi ? item.fullFormMr : (item.fullFormEn || item.fullFormMr)}
                         </h3>
-                        <p className="text-[11px] font-medium text-slate-500 italic">
-                          {item.fullFormEn}
-                        </p>
                       </div>
 
-                      {/* Description Marathi */}
+                      {/* Description */}
                       <p className="text-xs text-slate-700 mt-2 leading-relaxed">
-                        {item.descriptionMr}
+                        {isMarathi ? item.descriptionMr : (item.descriptionEn || item.descriptionMr)}
                       </p>
-                    </div>
-
-                    {/* Footer: English Summary */}
-                    <div className="pt-2 border-t border-slate-200/70 text-[10px] text-slate-500 leading-normal">
-                      <span className="font-semibold text-slate-600">English: </span>
-                      {item.descriptionEn}
                     </div>
                   </div>
                 );
@@ -288,10 +281,10 @@ export default function RevenueShortcutGuideModal({
         <div className="px-4 sm:px-6 py-3 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row justify-between items-center gap-2 text-xs text-slate-500 shrink-0">
           <div className="flex items-center gap-2">
             <Scale className="w-3.5 h-3.5 text-blue-900" />
-            <span>संदर्भ: महाराष्ट्र जमीन महसूल संहिता (MLRC) १९६६ व महसूल नियम</span>
+            <span>{isMarathi ? 'संदर्भ: महाराष्ट्र जमीन महसूल संहिता (MLRC) १९६६ व महसूल नियम' : 'Reference: Maharashtra Land Revenue Code (MLRC) 1966 & Revenue Rules'}</span>
           </div>
           <div className="text-[11px] font-bold text-slate-700">
-            एकूण {filteredItems.length} पैकी {REVENUE_SHORTCUTS.length} संज्ञा उपलब्ध
+            {isMarathi ? `एकूण ${filteredItems.length} पैकी ${REVENUE_SHORTCUTS.length} संज्ञा उपलब्ध` : `Showing ${filteredItems.length} of ${REVENUE_SHORTCUTS.length} terms available`}
           </div>
         </div>
       </div>

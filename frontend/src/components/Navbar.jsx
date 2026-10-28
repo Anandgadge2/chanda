@@ -12,6 +12,8 @@ import {
 } from 'lucide-react';
 import ChandrapurDistrictLogo from './landing/ChandrapurDistrictLogo';
 import { useAuth } from './AuthContext';
+import { useTranslation } from './LanguageContext';
+import LanguageSwitcher from './LanguageSwitcher';
 import DpdpaRightsModal from './DpdpaRightsModal';
 
 export default function Navbar({
@@ -21,6 +23,7 @@ export default function Navbar({
   hideSidebarToggle = false,
 }) {
   const { user, logout, openLoginModal } = useAuth();
+  const { t, locale, isMarathi } = useTranslation();
   const [profileTrayOpen, setProfileTrayOpen] = useState(false);
   const [dpdpaModalOpen, setDpdpaModalOpen] = useState(false);
   const trayRef = useRef(null);
@@ -51,12 +54,47 @@ export default function Navbar({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [profileTrayOpen]);
 
-  const cleanDesignation = (user?.designation || (user?.role === 'COLLECTOR' ? 'जिल्हाधिकारी' : user?.role) || 'महसूल अधिकारी')
+  const cleanDesignation = (user?.designation || (user?.role === 'COLLECTOR' ? t('roles.collector') : user?.role) || t('roles.revenueOfficer'))
     .replace(/\s*\([^)]*[a-zA-Z][^)]*\)/g, '')
     .trim();
 
+  const displayOfficerName = () => {
+    if (!user) return '';
+    if (locale === 'en') {
+      if (user.role === 'COLLECTOR' || user.fullName?.includes('जिल्हाधिकारी')) {
+        return 'District Collector, Chandrapur';
+      }
+      if (user.role === 'SDO' || user.fullName?.includes('उपविभागीय')) {
+        return 'Sub-Divisional Officer (SDO)';
+      }
+      if (user.role === 'TAHSILDAR' || user.fullName?.includes('तहसीलदार')) {
+        return 'Tahsildar';
+      }
+      return user.fullNameEn || user.fullName || 'Revenue Officer';
+    }
+    return user.fullName || 'जिल्हाधिकारी, चंद्रपूर';
+  };
+
+  const displayDesignation = () => {
+    if (!user) return '';
+    if (locale === 'en') {
+      if (user.role === 'COLLECTOR' || user.designation?.includes('जिल्हाधिकारी')) {
+        return 'District Collector';
+      }
+      if (user.role === 'SDO') return 'Sub-Divisional Officer';
+      if (user.role === 'TAHSILDAR') return 'Tahsildar';
+      return 'Revenue Officer';
+    }
+    return cleanDesignation;
+  };
+
+  const officerDisplayName = displayOfficerName();
+  const officerInitial = isMarathi
+    ? (user?.fullName ? user.fullName.charAt(0) : 'अ')
+    : (user?.fullNameEn ? user.fullNameEn.charAt(0) : (officerDisplayName ? officerDisplayName.charAt(0) : 'D'));
+
   return (
-    <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/90 shadow-2xs">
+    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200/90 shadow-2xs">
       {/* National Tricolor Micro Accent Line */}
       <div className="h-[2px] w-full bg-gradient-to-r from-amber-500 via-white to-emerald-600 shadow-2xs" />
 
@@ -82,29 +120,33 @@ export default function Navbar({
               <div className="min-w-0">
                 <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
                   <span className="font-extrabold text-slate-950 text-xs sm:text-sm lg:text-base tracking-tight group-hover:text-blue-900 transition truncate">
-                    जिल्हाधिकारी कार्यालय, चंद्रपूर
+                    {t('portal.title')}
                   </span>
                   <span className="hidden sm:inline-block text-[10px] font-bold bg-amber-100 text-amber-950 px-2 py-0.2 rounded-full border border-amber-300 flex-shrink-0 shadow-2xs">
-                    MLRC १९६६
+                    {t('portal.mlrcBadge')}
                   </span>
                 </div>
                 <p className="text-[11px] text-slate-500 font-medium hidden md:block truncate leading-tight">
-                  जमीन महसूल व भूमी अभिलेख संनियंत्रण प्रणाली
+                  {t('portal.officialTagline')}
                 </p>
               </div>
             </Link>
           </div>
 
-          {/* Right: Public Portal Link & Executive Profile Tray */}
+          {/* Right: Language Switcher, Public Portal Link & Executive Profile Tray */}
           <div className="flex items-center gap-2 sm:gap-2.5 flex-shrink-0">
+            {/* Bilingual Switcher - Desktop / Tablet navbar (On mobile, housed in sidebar drawer footer) */}
+            <div className="hidden sm:inline-flex items-center">
+              <LanguageSwitcher variant="pill" />
+            </div>
+
             <Link
               href="/"
               className="inline-flex items-center gap-1.5 text-xs font-bold px-2.5 py-1.5 rounded-lg border border-slate-200/90 text-slate-700 hover:text-blue-900 hover:bg-blue-50/60 transition shadow-2xs"
-              title="सार्वजनिक पोर्टलवर जा"
+              title={t('nav.publicPortal')}
             >
               <ExternalLink className="w-3.5 h-3.5 text-slate-500" />
-              <span className="hidden md:inline">सार्वजनिक पोर्टल</span>
-              <span className="md:hidden">पोर्टल</span>
+              <span className="hidden md:inline">{t('nav.publicPortal')}</span>
             </Link>
 
             {user ? (
@@ -125,11 +167,11 @@ export default function Navbar({
                   {/* Officer Avatar with Online Indicator */}
                   <div className="relative flex-shrink-0">
                     <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-gradient-to-br from-blue-950 via-blue-900 to-indigo-900 text-white font-black text-xs flex items-center justify-center shadow-2xs">
-                      {user.fullName ? user.fullName.charAt(0) : 'अ'}
+                      {officerInitial}
                     </div>
                     <span
                       className="absolute -bottom-0.5 -right-0.5 w-2 h-2 bg-emerald-500 border border-white rounded-full"
-                      title="सत्र सक्रीय"
+                      title={t('common.active')}
                     />
                   </div>
 
@@ -137,7 +179,7 @@ export default function Navbar({
                   <div className="text-left hidden sm:flex flex-col justify-center min-w-0">
                     <div className="flex items-center gap-1 leading-tight">
                       <span className="text-xs font-bold text-slate-900 tracking-tight block max-w-[150px] lg:max-w-[190px] truncate">
-                        {user.fullName || 'महसूल अधिकारी'}
+                        {displayOfficerName()}
                       </span>
                       <ChevronDown
                         className={`w-3.5 h-3.5 text-slate-500 transition-transform duration-200 ${
@@ -146,7 +188,7 @@ export default function Navbar({
                       />
                     </div>
                     <span className="text-[10px] font-bold text-blue-900 block leading-tight mt-0.5 truncate max-w-[150px] lg:max-w-[190px]">
-                      {cleanDesignation}
+                      {displayDesignation()}
                     </span>
                   </div>
 
@@ -158,41 +200,34 @@ export default function Navbar({
                   />
                 </button>
 
-                {/* Clean, Standard, Minimalist Profile Dropdown */}
+                {/* Profile Tray Dropdown */}
                 {profileTrayOpen && (
                   <div
-                    className="absolute right-0 top-full mt-1.5 w-64 sm:w-72 bg-white rounded-xl shadow-lg border border-slate-200 p-1.5 z-50 animate-in fade-in zoom-in-95 duration-100 text-xs"
-                    role="dialog"
-                    aria-label="User Profile Details"
+                    className="absolute right-0 mt-2 w-72 sm:w-80 bg-white rounded-2xl shadow-xl border border-slate-200/90 p-3 space-y-3 z-50 text-xs animate-in fade-in slide-in-from-top-2 duration-150"
+                    role="menu"
                   >
-                    {/* Officer Identity Header */}
-                    <div className="px-3 py-2.5 border-b border-slate-100">
-                      <p className="font-extrabold text-slate-900 truncate text-xs sm:text-sm">
-                        {user.fullName || 'महसूल अधिकारी'}
-                      </p>
-                      <p className="text-[11px] text-slate-500 truncate mt-0.5 select-all font-medium">
-                        {user.email || 'collector.chandrapur@maharashtra.gov.in'}
-                      </p>
-                      <div className="flex items-center gap-1.5 mt-2">
-                        <span className="text-[10px] font-bold text-blue-900 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-200/80">
-                          {cleanDesignation}
-                        </span>
-                        <span className="text-[10px] text-emerald-700 font-semibold flex items-center gap-1 ml-auto">
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                          सत्र सक्रिय
-                        </span>
+                    <div className="pb-2.5 border-b border-slate-100 flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-950 to-indigo-900 text-white font-black text-sm flex items-center justify-center shadow-2xs">
+                        {officerInitial}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="font-bold text-slate-950 text-sm truncate">
+                          {displayOfficerName()}
+                        </p>
+                        <p className="text-[11px] font-semibold text-blue-900 truncate">
+                          {user.email || user.username}
+                        </p>
                       </div>
                     </div>
 
-                    {/* Standard Action Links */}
-                    <div className="py-1">
+                    <div className="space-y-1">
                       <Link
                         href="/settings"
                         onClick={() => setProfileTrayOpen(false)}
                         className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-700 hover:text-slate-950 hover:bg-slate-100 font-semibold transition cursor-pointer"
                       >
                         <Settings className="w-4 h-4 text-slate-500" />
-                        <span>खाते व सुरक्षा सेटिंग्ज</span>
+                        <span>{t('nav.settings')}</span>
                       </Link>
                     </div>
 
@@ -207,7 +242,7 @@ export default function Navbar({
                         className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-rose-600 hover:text-rose-700 hover:bg-rose-50 font-bold transition cursor-pointer text-left"
                       >
                         <LogOut className="w-4 h-4 text-rose-600" />
-                        <span>लॉगआउट करा</span>
+                        <span>{t('nav.logout')}</span>
                       </button>
                     </div>
                   </div>
@@ -228,7 +263,7 @@ export default function Navbar({
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-blue-950 bg-amber-400 hover:bg-amber-300 border border-amber-500/60 shadow-xs hover:shadow-md transition active:scale-95 cursor-pointer"
               >
                 <Lock className="w-3.5 h-3.5 text-blue-950" />
-                <span>अधिकारी लॉगिन</span>
+                <span>{t('nav.officerLogin')}</span>
               </button>
             )}
           </div>

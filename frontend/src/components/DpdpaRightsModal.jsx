@@ -17,8 +17,10 @@ import {
 } from 'lucide-react';
 import { useFocusTrap } from '../hooks/useFocusTrap';
 import { api } from '../lib/api';
+import { useTranslation } from './LanguageContext';
 
 export default function DpdpaRightsModal({ isOpen, onClose, user }) {
+  const { locale, isMarathi } = useTranslation();
   const [mounted, setMounted] = useState(false);
   const [activeTab, setActiveTab] = useState('export'); // 'export' | 'erasure'
   const [exportLoading, setExportLoading] = useState(false);
@@ -65,7 +67,7 @@ export default function DpdpaRightsModal({ isOpen, onClose, user }) {
       downloadAnchor.remove();
       setExportSuccess(true);
     } catch (err) {
-      setErrorMsg(err.message || 'डेटा निर्यात अयशस्वी झाले.');
+      setErrorMsg(err.message || (isMarathi ? 'डेटा निर्यात अयशस्वी झाले.' : 'Failed to export personal data.'));
     } finally {
       setExportLoading(false);
     }
@@ -80,7 +82,7 @@ export default function DpdpaRightsModal({ isOpen, onClose, user }) {
       const result = await api.requestDpdpaErasure(erasureReason);
       setErasureResult(result);
     } catch (err) {
-      setErrorMsg(err.message || 'विनंती नोंदवणे अयशस्वी झाले.');
+      setErrorMsg(err.message || (isMarathi ? 'विनंती नोंदवणे अयशस्वी झाले.' : 'Failed to submit erasure request.'));
     } finally {
       setErasureLoading(false);
     }
@@ -109,14 +111,14 @@ export default function DpdpaRightsModal({ isOpen, onClose, user }) {
             <div>
               <div className="flex items-center gap-2 flex-wrap">
                 <h2 id="dpdpa-rights-title" className="text-base sm:text-lg font-black text-slate-900">
-                  माझे डेटा संरक्षण अधिकार (DPDPA 2023)
+                  {isMarathi ? 'माझे डेटा संरक्षण अधिकार (DPDPA 2023)' : 'My Data Protection Rights (DPDPA 2023)'}
                 </h2>
                 <span className="px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wide bg-blue-100 text-blue-900 rounded-full border border-blue-200">
                   Data Principal Rights
                 </span>
               </div>
               <p className="text-xs text-slate-500 font-medium mt-0.5">
-                डिजिटल व्यक्तिगत डेटा संरक्षण कायदा २०२३ अंतर्गत डेटा निर्यात व निष्कासन सुविधा
+                {isMarathi ? 'डिजिटल व्यक्तिगत डेटा संरक्षण कायदा २०२३ अंतर्गत डेटा निर्यात व निष्कासन सुविधा' : 'Data export and erasure services under Digital Personal Data Protection Act 2023'}
               </p>
             </div>
           </div>
@@ -125,7 +127,7 @@ export default function DpdpaRightsModal({ isOpen, onClose, user }) {
             type="button"
             onClick={onClose}
             className="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400 shrink-0"
-            aria-label="खिडकी बंद करा (Close)"
+            aria-label={isMarathi ? 'खिडकी बंद करा (Close)' : 'Close dialog'}
           >
             <X className="w-5 h-5" aria-hidden="true" />
           </button>
@@ -146,7 +148,7 @@ export default function DpdpaRightsModal({ isOpen, onClose, user }) {
             }`}
           >
             <Download className="w-4 h-4 text-blue-600" />
-            <span>डेटा निर्यात (Export Sec 11)</span>
+            <span>{isMarathi ? 'डेटा निर्यात (Export Sec 11)' : 'Export My Data (Sec 11)'}</span>
           </button>
 
           <button
@@ -162,7 +164,7 @@ export default function DpdpaRightsModal({ isOpen, onClose, user }) {
             }`}
           >
             <Trash2 className="w-4 h-4 text-rose-600" />
-            <span>डेटा निष्कासन विनंती (Erasure Sec 12)</span>
+            <span>{isMarathi ? 'डेटा निष्कासन विनंती (Erasure Sec 12)' : 'Erasure Request (Sec 12)'}</span>
           </button>
         </div>
 
@@ -184,20 +186,20 @@ export default function DpdpaRightsModal({ isOpen, onClose, user }) {
                 <div className="flex items-center justify-between">
                   <h3 className="text-xs sm:text-sm font-bold text-slate-900 flex items-center gap-2">
                     <FileJson className="w-4 h-4 text-blue-600" />
-                    <span>वैयक्तिक प्रोफाइल व ऑडिट डेटा फाइल</span>
+                    <span>{isMarathi ? 'वैयक्तिक प्रोफाइल व ऑडिट डेटा फाइल' : 'Personal Profile & Audit Package'}</span>
                   </h3>
                   <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-900 border border-emerald-300">
-                    DPDPA कलम ११ सुसंगत
+                    {isMarathi ? 'DPDPA कलम ११ सुसंगत' : 'DPDPA Sec 11 Compliant'}
                   </span>
                 </div>
                 <p className="text-xs text-slate-600 leading-relaxed">
-                  या सुविधेद्वारे आपल्या खात्याशी संबंधित खालील माहिती संरचित व मशीन-वाचनीय (.JSON) स्वरूपात डाउनलोड करता येईल:
+                  {isMarathi ? 'या सुविधेद्वारे आपल्या खात्याशी संबंधित खालील माहिती संरचित व मशीन-वाचनीय (.JSON) स्वरूपात डाउनलोड करता येईल:' : 'Through this facility, the following information linked to your account can be downloaded in structured .JSON format:'}
                 </p>
                 <ul className="text-xs text-slate-600 space-y-1 pl-4 list-disc">
-                  <li>नाव, ईमेल, दूरध्वनी, पदनाम व तालुका तपशील</li>
-                  <li>गोपनीयता संमती तारीख व आवृत्ती तपशील ({user?.consentVersion || '1.0-2026'})</li>
-                  <li>सक्रिय लॉगिन सत्रे व IP पत्ते</li>
-                  <li>अलीकडील ५० सुरक्षा व महसूल ऑडिट क्रियाकलाप नोंदी</li>
+                  <li>{isMarathi ? 'नाव, ईमेल, दूरध्वनी, पदनाम व तालुका तपशील' : 'Name, email, phone, designation, and taluka allocation'}</li>
+                  <li>{isMarathi ? `गोपनीयता संमती तारीख व आवृत्ती तपशील (${user?.consentVersion || '1.0-2026'})` : `Privacy consent date and version records (${user?.consentVersion || '1.0-2026'})`}</li>
+                  <li>{isMarathi ? 'सक्रिय लॉगिन सत्रे व IP पत्ते' : 'Active login sessions and IP audit logs'}</li>
+                  <li>{isMarathi ? 'अलीकडील ५० सुरक्षा व महसूल ऑडिट क्रियाकलाप नोंदी' : 'Recent 50 security and revenue action audit logs'}</li>
                 </ul>
               </div>
 
@@ -208,9 +210,9 @@ export default function DpdpaRightsModal({ isOpen, onClose, user }) {
                 >
                   <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
                   <div className="text-xs text-emerald-900 space-y-1">
-                    <p className="font-bold">डेटा फाइल यशस्वीरित्या डाऊनलोड झाली!</p>
+                    <p className="font-bold">{isMarathi ? 'डेटा फाइल यशस्वीरित्या डाऊनलोड झाली!' : 'Data package downloaded successfully!'}</p>
                     <p className="text-emerald-700">
-                      आपल्या उपकरणावर JSON स्वरूपातील सुरक्षित डेटा कॉपी सेव्ह झाली आहे.
+                      {isMarathi ? 'आपल्या उपकरणावर JSON स्वरूपातील सुरक्षित डेटा कॉपी सेव्ह झाली आहे.' : 'A secure JSON copy of your data has been saved to your device.'}
                     </p>
                   </div>
                 </div>
@@ -218,7 +220,7 @@ export default function DpdpaRightsModal({ isOpen, onClose, user }) {
 
               <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-3">
                 <p className="text-[11px] text-slate-500">
-                  माहिती सुरक्षित ठेवणे ही वापरकर्त्याची जबाबदारी आहे.
+                  {isMarathi ? 'माहिती सुरक्षित ठेवणे ही वापरकर्त्याची जबाबदारी आहे.' : 'Safeguarding this downloaded data is the user responsibility.'}
                 </p>
                 <button
                   type="button"
@@ -229,12 +231,12 @@ export default function DpdpaRightsModal({ isOpen, onClose, user }) {
                   {exportLoading ? (
                     <>
                       <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                      <span>तयार होत आहे...</span>
+                      <span>{isMarathi ? 'तयार होत आहे...' : 'Generating...'}</span>
                     </>
                   ) : (
                     <>
                       <Download className="w-4 h-4" />
-                      <span>माझा डेटा डाउनलोड करा (.JSON)</span>
+                      <span>{isMarathi ? 'माझा डेटा डाउनलोड करा (.JSON)' : 'Download My Data (.JSON)'}</span>
                     </>
                   )}
                 </button>
@@ -252,13 +254,13 @@ export default function DpdpaRightsModal({ isOpen, onClose, user }) {
                   <div className="flex items-center gap-2.5">
                     <CheckCircle2 className="w-5 h-5 text-emerald-700 shrink-0" />
                     <h3 className="text-sm font-black text-emerald-950">
-                      डेटा निष्कासन विनंती यशस्वीरित्या नोंदवली गेली!
+                      {isMarathi ? 'डेटा निष्कासन विनंती यशस्वीरित्या नोंदवली गेली!' : 'Data erasure request submitted successfully!'}
                     </h3>
                   </div>
                   <div className="bg-white/80 p-3 rounded-xl border border-emerald-200 text-xs space-y-1 text-emerald-950">
-                    <p><strong>विनंती क्रमांक (Ticket ID):</strong> <code className="font-mono font-bold bg-emerald-100 px-1.5 py-0.5 rounded">{erasureResult.requestId}</code></p>
-                    <p><strong>निवारण कालमर्यादा:</strong> ७२ कामकाजाचे तास (DPDPA २०२३ नियमांनुसार)</p>
-                    <p><strong>अधिकारी:</strong> डेटा संरक्षण अधिकारी (DPO), जिल्हाधिकारी कार्यालय, चंद्रपूर</p>
+                    <p><strong>{isMarathi ? 'विनंती क्रमांक (Ticket ID):' : 'Request Ticket ID:'}</strong> <code className="font-mono font-bold bg-emerald-100 px-1.5 py-0.5 rounded">{erasureResult.requestId}</code></p>
+                    <p><strong>{isMarathi ? 'निवारण कालमर्यादा:' : 'Turnaround:'}</strong> {isMarathi ? '७२ कामकाजाचे तास (DPDPA २०२३ नियमांनुसार)' : '72 working hours (per DPDPA 2023 rules)'}</p>
+                    <p><strong>{isMarathi ? 'अधिकारी:' : 'Authority:'}</strong> {isMarathi ? 'डेटा संरक्षण अधिकारी (DPO), जिल्हाधिकारी कार्यालय, चंद्रपूर' : 'Data Protection Officer (DPO), District Collectorate, Chandrapur'}</p>
                   </div>
                   <p className="text-xs text-emerald-800">
                     {erasureResult.message}
@@ -268,7 +270,7 @@ export default function DpdpaRightsModal({ isOpen, onClose, user }) {
                     onClick={onClose}
                     className="mt-2 px-4 py-2 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold rounded-xl transition"
                   >
-                    समजले, बंद करा
+                    {isMarathi ? 'समजले, बंद करा' : 'Acknowledged, Close'}
                   </button>
                 </div>
               ) : (
@@ -277,16 +279,16 @@ export default function DpdpaRightsModal({ isOpen, onClose, user }) {
                   <div className="p-3.5 bg-amber-50 border border-amber-200 rounded-2xl flex items-start gap-3 text-amber-950 text-xs leading-relaxed">
                     <AlertTriangle className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
                     <div>
-                      <p className="font-bold mb-0.5">वैधानिक शासकीय अभिलेख सूचना (MLRC 1966):</p>
+                      <p className="font-bold mb-0.5">{isMarathi ? 'वैधानिक शासकीय अभिलेख सूचना (MLRC 1966):' : 'Statutory Government Record Notice (MLRC 1966):'}</p>
                       <p>
-                        महाराष्ट्र जमीन महसूल संहिता १९६६ अंतर्गत अधिकृत शासकीय नोंदी, शर्तभंग कार्यवाही, सुनावणी हुकूमनामे व जमीन महसूल अभिलेख हे वैधानिक कालावधीसाठी कायम ठेवणे बंधनकारक आहे. या विनंतीनुसार आपले वैयक्तिक लॉगिन खाते व ओळख निष्कासित केली जाईल.
+                        {isMarathi ? 'महाराष्ट्र जमीन महसूल संहिता १९६६ अंतर्गत अधिकृत शासकीय नोंदी, शर्तभंग कार्यवाही, सुनावणी हुकूमनामे व जमीन महसूल अभिलेख हे वैधानिक कालावधीसाठी कायम ठेवणे बंधनकारक आहे. या विनंतीनुसार आपले वैयक्तिक लॉगिन खाते व ओळख निष्कासित केली जाईल.' : 'Under MLRC 1966, official government records, violation orders, and land revenue logs must be preserved for statutory duration. This erasure request applies to your personal user account and identity credentials.'}
                       </p>
                     </div>
                   </div>
 
                   <div className="space-y-1.5">
                     <label htmlFor="erasure-reason" className="block text-xs font-bold text-slate-800">
-                      निष्कासन विनंतीचे कारण निवडा किंवा नमूद करा:
+                      {isMarathi ? 'निष्कासन विनंतीचे कारण निवडा किंवा नमूद करा:' : 'Select or specify the reason for erasure request:'}
                     </label>
                     <select
                       id="erasure-reason-select"
@@ -294,21 +296,21 @@ export default function DpdpaRightsModal({ isOpen, onClose, user }) {
                       onChange={(e) => setErasureReason(e.target.value)}
                       value={erasureReason}
                     >
-                      <option value="Account closure / खाते वापर बंद करणे">खाते वापर बंद करणे (Account closure)</option>
-                      <option value="Transfer to other district / इतर जिल्ह्यात बदली">इतर जिल्ह्यात बदली (Officer transfer)</option>
-                      <option value="Personal privacy request / वैयक्तिक गोपनीयता विनंती">वैयक्तिक गोपनीयता विनंती (Privacy request)</option>
-                      <option value="Other statutory reason / इतर वैधानिक कारण">इतर वैधानिक कारण (Other)</option>
+                      <option value="Account closure / खाते वापर बंद करणे">{isMarathi ? 'खाते वापर बंद करणे (Account closure)' : 'Account Closure'}</option>
+                      <option value="Transfer to other district / इतर जिल्ह्यात बदली">{isMarathi ? 'इतर जिल्ह्यात बदली (Officer transfer)' : 'Transfer to Other District'}</option>
+                      <option value="Personal privacy request / वैयक्तिक गोपनीयता विनंती">{isMarathi ? 'वैयक्तिक गोपनीयता विनंती (Privacy request)' : 'Personal Privacy Request'}</option>
+                      <option value="Other statutory reason / इतर वैधानिक कारण">{isMarathi ? 'इतर वैधानिक कारण (Other)' : 'Other Statutory Reason'}</option>
                     </select>
                   </div>
 
                   <div className="space-y-1.5">
                     <label htmlFor="erasure-notes" className="block text-xs font-semibold text-slate-600">
-                      अतिरिक्त विवरण (पर्यायी):
+                      {isMarathi ? 'अतिरिक्त विवरण (पर्यायी):' : 'Additional Remarks (Optional):'}
                     </label>
                     <textarea
                       id="erasure-notes"
                       rows={2}
-                      placeholder="अतिरिक्त माहिती किंवा विनंतीचे स्पष्टीकरण लिहा..."
+                      placeholder={isMarathi ? 'अतिरिक्त माहिती किंवा विनंतीचे स्पष्टीकरण लिहा...' : 'Provide additional details or justification...'}
                       className="w-full text-xs p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-rose-500 text-slate-800"
                       onChange={(e) => {
                         if (e.target.value.trim()) {
@@ -321,7 +323,7 @@ export default function DpdpaRightsModal({ isOpen, onClose, user }) {
                   <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-3">
                     <div className="flex items-center gap-1.5 text-[11px] text-slate-500">
                       <Clock className="w-3.5 h-3.5 text-slate-400" />
-                      <span>७२ तासांच्या आत कार्यवाही</span>
+                      <span>{isMarathi ? '७२ तासांच्या आत कार्यवाही' : 'Actioned within 72 hours'}</span>
                     </div>
                     <button
                       type="submit"
@@ -331,12 +333,12 @@ export default function DpdpaRightsModal({ isOpen, onClose, user }) {
                       {erasureLoading ? (
                         <>
                           <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                          <span>विनंती नोंदवत आहे...</span>
+                          <span>{isMarathi ? 'विनंती नोंदवत आहे...' : 'Submitting request...'}</span>
                         </>
                       ) : (
                         <>
                           <Trash2 className="w-4 h-4" />
-                          <span>डेटा निष्कासन विनंती सादर करा (Submit)</span>
+                          <span>{isMarathi ? 'डेटा निष्कासन विनंती सादर करा (Submit)' : 'Submit Erasure Request'}</span>
                         </>
                       )}
                     </button>
@@ -351,7 +353,7 @@ export default function DpdpaRightsModal({ isOpen, onClose, user }) {
         <div className="p-3 sm:p-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between text-xs text-slate-500 shrink-0">
           <div className="flex items-center gap-2">
             <Lock className="w-3.5 h-3.5 text-emerald-600" />
-            <span className="text-[11px]">DPDPA २०२३ व GIGW ३.० मानकांनुसार पूर्ण सुरक्षित</span>
+            <span className="text-[11px]">{isMarathi ? 'DPDPA २०२३ व GIGW ३.० मानकांनुसार पूर्ण सुरक्षित' : 'Fully compliant with DPDPA 2023 & GIGW 3.0 standards'}</span>
           </div>
           <button
             type="button"

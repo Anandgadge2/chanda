@@ -25,9 +25,11 @@ import {
 import ChandrapurDistrictLogo from '../../components/landing/ChandrapurDistrictLogo';
 import { REVENUE_SHORTCUTS, REVENUE_GLOSSARY_CATEGORIES } from '../../lib/constants';
 import { useAuth } from '../../components/AuthContext';
+import { useTranslation } from '../../components/LanguageContext';
 
 export default function RevenueGlossaryPage() {
   const { user } = useAuth();
+  const { isMarathi } = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('ALL');
 
@@ -63,17 +65,23 @@ export default function RevenueGlossaryPage() {
           <div className="min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
               <h1 className="text-sm sm:text-base font-extrabold text-slate-900 tracking-tight leading-tight truncate">
-                जमीन महसूल शब्दावली व संक्षिप्त रूपे (Glossary)
+                {isMarathi
+                  ? 'जमीन महसूल शब्दावली व संक्षिप्त रूपे (Glossary)'
+                  : 'Land Revenue Legal Glossary & Acronyms'}
               </h1>
               <span className="text-[10px] font-extrabold uppercase tracking-wider bg-amber-500 text-slate-950 px-2 py-0.5 rounded-full shadow-2xs">
-                MLRC १९६६
+                {isMarathi ? 'MLRC १९६६' : 'MLRC 1966'}
               </span>
               <span className="hidden md:inline text-[11px] text-slate-500 font-medium">
-                • ७/१२ उतारा, फेरफार नोंदवही (नमुना ६) संक्षिप्त शब्द व कलमे
+                {isMarathi
+                  ? '• ७/१२ उतारा, फेरफार नोंदवही (नमुना ६) संक्षिप्त शब्द व कलमे'
+                  : '• 7/12 extract, mutation register (Form VI) abbreviations & statutory sections'}
               </span>
             </div>
             <p className="text-[11px] text-slate-500 md:hidden truncate font-medium">
-              ७/१२ उतारा, फेरफार नोंदवही (नमुना ६) संक्षिप्त शब्द व कलमे
+              {isMarathi
+                ? '७/१२ उतारा, फेरफार नोंदवही (नमुना ६) संक्षिप्त शब्द व कलमे'
+                : '7/12 extract, mutation register (Form VI) abbreviations & statutory sections'}
             </p>
           </div>
         </div>
@@ -83,10 +91,10 @@ export default function RevenueGlossaryPage() {
             type="button"
             onClick={() => window.print()}
             className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-slate-50 border border-slate-300 rounded-lg text-xs font-bold text-slate-700 hover:text-slate-950 shadow-2xs transition active:scale-95 cursor-pointer"
-            title="शब्दावली अहवाल मुद्रित करा"
+            title={isMarathi ? 'शब्दावली अहवाल मुद्रित करा' : 'Print Glossary Report'}
           >
             <Printer className="w-3.5 h-3.5 text-slate-700" />
-            <span className="hidden sm:inline">प्रत मुद्रित करा</span>
+            <span className="hidden sm:inline">{isMarathi ? 'प्रत मुद्रित करा' : 'Print Glossary'}</span>
             <span className="sm:hidden">Print</span>
           </button>
           <Link
@@ -94,7 +102,7 @@ export default function RevenueGlossaryPage() {
             className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-950 bg-amber-400 hover:bg-amber-300 px-3 py-1.5 rounded-lg transition shadow-2xs active:scale-95 cursor-pointer"
           >
             <ArrowLeft className="w-3.5 h-3.5 text-slate-950 stroke-[2.5]" />
-            <span>{user ? 'महसूल डॅशबोर्ड' : 'मुख्य पृष्ठ'}</span>
+            <span>{user ? (isMarathi ? 'महसूल डॅशबोर्ड' : 'Revenue Dashboard') : (isMarathi ? 'मुख्य पृष्ठ' : 'Home')}</span>
           </Link>
         </div>
       </div>
@@ -104,7 +112,7 @@ export default function RevenueGlossaryPage() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-200 text-amber-950 text-xs font-black border border-amber-300 shadow-2xs">
             <AlertTriangle className="w-4 h-4 text-amber-800 shrink-0" />
-            <span>वैधानिक विश्लेषण: विनापरवानगी अ.कृ. वापर (Unauthorized Non-Agricultural Use)</span>
+            <span>{isMarathi ? 'वैधानिक विश्लेषण: विनापरवानगी अ.कृ. वापर (Unauthorized Non-Agricultural Use)' : 'Statutory Analysis: Unauthorized Non-Agricultural (NA) Use'}</span>
           </div>
           <span className="text-[11px] font-bold text-amber-900 bg-white/80 px-2.5 py-0.5 rounded-md border border-amber-200">
             MLRC 1966 कलम ४२, ४४, ४५ व ४७
@@ -113,7 +121,7 @@ export default function RevenueGlossaryPage() {
 
         <div>
           <h2 className="text-base sm:text-xl font-black text-slate-900 leading-snug">
-            "विनापरवानगी अ.कृ. वापर" म्हणजे काय आणि ७/१२ उताऱ्यावर त्याचा काय परिणाम होतो?
+            {isMarathi ? '"विनापरवानगी अ.कृ. वापर" म्हणजे काय आणि ७/१२ उताऱ्यावर त्याचा काय परिणाम होतो?' : 'What is "Unauthorized NA Use" and how does it affect 7/12 Land Records?'}
           </h2>
           <p className="text-xs text-slate-600 mt-0.5">
             शेतजमिनीचा बिगरशेती प्रयोजनासाठी वापर करताना लागणारी पूर्वपरवानगी व उल्लंघनावरील कारवाईची कायदेशीर माहिती
@@ -126,14 +134,22 @@ export default function RevenueGlossaryPage() {
             <div className="space-y-2">
               <h3 className="font-extrabold text-slate-900 flex items-center gap-1.5 text-xs sm:text-sm">
                 <Scale className="w-4 h-4 text-amber-700 shrink-0" />
-                <span>१. कायदेशीर व्याख्या व कलम संदर्भ</span>
+                <span>{isMarathi ? '१. कायदेशीर व्याख्या व कलम संदर्भ' : '1. Legal Definition & Statutory Sections'}</span>
               </h3>
               <p className="text-xs text-slate-700 leading-relaxed">
-                महाराष्ट्र जमीन महसूल संहिता (MLRC) १९६६ च्या <strong>कलम ४२ व ४४</strong> नुसार कोणतीही शेतजमीन निवासी, व्यावसायिक, हॉटेल किंवा औद्योगिक वापरासाठी वापरण्यापूर्वी सक्षम प्राधिकारी (जिल्हाधिकारी किंवा उपविभागीय अधिकारी - SDO) यांची अधिकृत <strong>अकृषिक (NA) परवानगी</strong> घेणे अनिवार्य आहे.
+                {isMarathi ? (
+                    <>महाराष्ट्र जमीन महसूल संहिता (MLRC) १९६६ च्या <strong>कलम ४२ व ४४</strong> नुसार कोणतीही शेतजमीन निवासी, व्यावसायिक, हॉटेल किंवा औद्योगिक वापरासाठी वापरण्यापूर्वी सक्षम प्राधिकारी (जिल्हाधिकारी किंवा उपविभागीय अधिकारी - SDO) यांची अधिकृत <strong>अकृषिक (NA) परवानगी</strong> घेणे अनिवार्य आहे.</>
+                  ) : (
+                    <>Under <strong>Sections 42 & 44</strong> of MLRC 1966, prior sanction for <strong>Non-Agricultural (NA) use</strong> from the competent authority (District Collector or SDO) is mandatory before putting agricultural land to residential, commercial, hospitality, or industrial use.</>
+                  )}
               </p>
             </div>
             <div className="text-xs text-amber-950 font-semibold bg-amber-50 p-2.5 rounded-lg border border-amber-200 leading-normal">
-              पूर्वपरवानगीशिवाय केलेला असा कोणताही वापर <strong>कलम ४५ व ४७</strong> अन्वये "विनापरवानगी अ.कृ. वापर" (Unauthorized Non-Agricultural Use) ठरतो.
+              {isMarathi ? (
+                    <>पूर्वपरवानगीशिवाय केलेला असा कोणताही वापर <strong>कलम ४५ व ४७</strong> अन्वये "विनापरवानगी अ.कृ. वापर" (Unauthorized Non-Agricultural Use) ठरतो.</>
+                  ) : (
+                    <>Any utilization without prior permission constitutes "Unauthorized Non-Agricultural Use" under <strong>Sections 45 & 47</strong>.</>
+                  )}
             </div>
           </div>
 
@@ -142,66 +158,66 @@ export default function RevenueGlossaryPage() {
             <div className="space-y-2">
               <h3 className="font-extrabold text-slate-900 flex items-center gap-1.5 text-xs sm:text-sm">
                 <ShieldAlert className="w-4 h-4 text-rose-700 shrink-0" />
-                <span>२. परिणाम, दंड व शासन जमा कारवाई</span>
+                <span>{isMarathi ? '२. परिणाम, दंड व शासन जमा कारवाई' : '2. Penalties & Repossession Proceedings'}</span>
               </h3>
               <ul className="space-y-1.5 list-disc pl-4 text-slate-700 text-xs leading-relaxed">
                 <li>
-                  <strong>७/१२ उताऱ्यावर शेरा:</strong> तलाठी/मंडळ अधिकाऱ्यांमार्फत ७/१२ च्या <em>'इतर हक्क'</em> किंवा <em>'पिक पाहणी'</em> रकान्यात विनापरवानगी अ.कृ. वापराची लाल नोंद होते.
+                  {isMarathi ? <><strong>७/१२ उताऱ्यावर शेरा:</strong> तलाठी/मंडळ अधिकाऱ्यांमार्फत ७/१२ च्या <em>'इतर हक्क'</em> किंवा <em>'पिक पाहणी'</em> रकान्यात विनापरवानगी अ.कृ. वापराची लाल नोंद होते.</> : <><strong>7/12 Adverse Remark:</strong> Red remark entered under Other Rights by Talathi/Circle Officer.</>}
                 </li>
                 <li>
-                  <strong>२५ पट दंडात्मक आकारणी:</strong> MLRC कलम ४५ अंतर्गत वार्षिक महसूल आकारणीच्या <strong>२५ पटींपर्यंत दंड</strong> आणि दंडात्मक अकृषिक कर वसूल केला जातो.
+                  {isMarathi ? <><strong>२५ पट दंडात्मक आकारणी:</strong> MLRC कलम ४५ अंतर्गत वार्षिक महसूल आकारणीच्या <strong>२५ पटींपर्यंत दंड</strong> आणि दंडात्मक अकृषिक कर वसूल केला जातो.</> : <><strong>Up to 25x Penalty:</strong> Penal non-agricultural assessment up to 25 times standard rate levied under Section 45.</>}
                 </li>
                 <li>
-                  <strong>शर्तभंग व शासन जमा:</strong> भोगवटादार वर्ग-२ जमीन असल्यास शर्तभंगाखाली जमीन राज्य शासनाकडे जप्त (शासन जमा) करण्याचे आदेश पारित होतात.
+                  {isMarathi ? <><strong>शर्तभंग व शासन जमा:</strong> भोगवटादार वर्ग-२ जमीन असल्यास शर्तभंगाखाली जमीन राज्य शासनाकडे जप्त (शासन जमा) करण्याचे आदेश पारित होतात.</> : <><strong>Breach & Vesting in Govt:</strong> For Class-2 holdings, land is resumed and vested back into the State Government.</>}
                 </li>
                 <li>
-                  <strong>नियमितीकरण:</strong> पात्र प्रकरणात नियमितीकरण शुल्क व विकास आकार भरून प्रकरण नियमित करून घ्यावे लागते.
+                  {isMarathi ? <><strong>नियमितीकरण:</strong> पात्र प्रकरणात नियमितीकरण शुल्क व विकास आकार भरून प्रकरण नियमित करून घ्यावे लागते.</> : <><strong>Regularization:</strong> In eligible cases, compounding penalty and development charges must be paid.</>}
                 </li>
               </ul>
             </div>
             <div className="text-[11px] text-rose-900 font-bold bg-rose-50 p-2 rounded-lg border border-rose-200">
-              धोका: असा शेरा असल्यास जमिनीचे खरेदीखत, बांधकाम परवानगी अथवा बँक कर्ज नामंजूर होते.
+              {isMarathi ? 'धोका: असा शेरा असल्यास जमिनीचे खरेदीखत, बांधकाम परवानगी अथवा बँक कर्ज नामंजूर होते.' : 'Risk: Such adverse entries prohibit registration of sale deeds, building sanction, and mortgage loans.'}
             </div>
           </div>
         </div>
       </div>
 
       {/* Quick Statistics Bar - Modern Metric Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
-        <div className="bg-white/95 backdrop-blur-md border border-slate-200/80 rounded-2xl p-4 shadow-sm text-center relative overflow-hidden transition-all hover:-translate-y-1 hover:shadow-md group">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-4">
+        <div className="bg-white/95 backdrop-blur-md border border-slate-200/80 rounded-2xl p-3 sm:p-4 shadow-sm text-center relative overflow-hidden transition-all hover:-translate-y-1 hover:shadow-md group">
           <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-amber-400 to-amber-600" />
           <span className="text-xl sm:text-2xl font-black text-amber-600 font-mono tracking-tight block">
             {REVENUE_SHORTCUTS.length}
           </span>
           <p className="text-[11px] text-slate-600 font-bold mt-1">
-            एकूण संक्षिप्त रूपे (Shortcuts)
+            {isMarathi ? 'एकूण संक्षिप्त रूपे (Shortcuts)' : 'Total Statutory Acronyms'}
           </p>
         </div>
-        <div className="bg-white/95 backdrop-blur-md border border-slate-200/80 rounded-2xl p-4 shadow-sm text-center relative overflow-hidden transition-all hover:-translate-y-1 hover:shadow-md group">
+        <div className="bg-white/95 backdrop-blur-md border border-slate-200/80 rounded-2xl p-3 sm:p-4 shadow-sm text-center relative overflow-hidden transition-all hover:-translate-y-1 hover:shadow-md group">
           <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-blue-500 to-indigo-600" />
           <span className="text-xl sm:text-2xl font-black text-blue-900 font-mono tracking-tight block">
             {REVENUE_GLOSSARY_CATEGORIES.length - 1}
           </span>
           <p className="text-[11px] text-slate-600 font-bold mt-1">
-            विषय वर्गवारी (Categories)
+            {isMarathi ? 'विषय वर्गवारी (Categories)' : 'Glossary Categories'}
           </p>
         </div>
-        <div className="bg-white/95 backdrop-blur-md border border-slate-200/80 rounded-2xl p-4 shadow-sm text-center relative overflow-hidden transition-all hover:-translate-y-1 hover:shadow-md group">
+        <div className="bg-white/95 backdrop-blur-md border border-slate-200/80 rounded-2xl p-3 sm:p-4 shadow-sm text-center relative overflow-hidden transition-all hover:-translate-y-1 hover:shadow-md group">
           <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-600" />
           <span className="text-base sm:text-lg font-black text-emerald-700 tracking-tight block">
             MLRC 1966
           </span>
           <p className="text-[11px] text-slate-600 font-bold mt-1">
-            वैधानिक संहिता व कलमे
+            {isMarathi ? 'वैधानिक संहिता व कलमे' : 'Statutory Code & Sections'}
           </p>
         </div>
-        <div className="bg-white/95 backdrop-blur-md border border-slate-200/80 rounded-2xl p-4 shadow-sm text-center relative overflow-hidden transition-all hover:-translate-y-1 hover:shadow-md group">
+        <div className="bg-white/95 backdrop-blur-md border border-slate-200/80 rounded-2xl p-3 sm:p-4 shadow-sm text-center relative overflow-hidden transition-all hover:-translate-y-1 hover:shadow-md group">
           <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-purple-500 to-fuchsia-600" />
           <span className="text-base sm:text-lg font-black text-purple-900 tracking-tight block">
-            १५ तालुके
+            {isMarathi ? '१५ तालुके' : '15 Talukas'}
           </span>
           <p className="text-[11px] text-slate-600 font-bold mt-1">
-            चंद्रपूर जिल्हा कार्यक्षेत्र
+            {isMarathi ? 'चंद्रपूर जिल्हा कार्यक्षेत्र' : 'Chandrapur District Jurisdiction'}
           </p>
         </div>
       </div>
@@ -215,7 +231,11 @@ export default function RevenueGlossaryPage() {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="संक्षिप्त रूप, पूर्ण रूप, इंग्रजी शब्द किंवा कलम शोधा... (उदा. अ.कृ., विनापरवानगी, ख.ख., भो.व., बो., फे.नं., NA)"
+              placeholder={
+                isMarathi
+                  ? 'संक्षिप्त रूप, पूर्ण रूप, इंग्रजी शब्द किंवा कलम शोधा... (उदा. अ.कृ., विनापरवानगी, ख.ख., भो.व., बो., फे.नं., NA)'
+                  : 'Search acronym, full form, English term or section... (e.g. NA, Sale Deed, Survey No, 36A)'
+              }
               className="w-full pl-10 pr-10 py-2.5 text-xs sm:text-sm bg-slate-50/70 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-all font-medium"
             />
             {searchQuery && (
@@ -223,7 +243,7 @@ export default function RevenueGlossaryPage() {
                 type="button"
                 onClick={() => setSearchQuery('')}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1"
-                title="शोध साफ करा"
+                title={isMarathi ? 'शोध साफ करा' : 'Clear search'}
               >
                 <X className="w-3.5 h-3.5" />
               </button>
@@ -239,7 +259,7 @@ export default function RevenueGlossaryPage() {
               }}
               className="px-4 py-2.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-100 text-slate-700 font-bold text-xs transition shrink-0 shadow-2xs"
             >
-              सर्व फिल्टर काढा
+              {isMarathi ? 'सर्व फिल्टर काढा' : 'Clear all filters'}
             </button>
           )}
         </div>
@@ -259,7 +279,7 @@ export default function RevenueGlossaryPage() {
                     : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200'
                 }`}
               >
-                {cat.labelMr}
+                {isMarathi ? cat.labelMr : cat.labelEn}
               </button>
             );
           })}
@@ -270,10 +290,19 @@ export default function RevenueGlossaryPage() {
       <div className="space-y-3">
         <div className="flex justify-between items-center text-xs text-slate-600 px-1 font-medium">
           <span>
-            एकूण <strong>{filteredShortcuts.length}</strong> संक्षिप्त संज्ञा उपलब्ध
+            {isMarathi ? (
+              <>एकूण <strong>{filteredShortcuts.length}</strong> संक्षिप्त संज्ञा उपलब्ध</>
+            ) : (
+              <>Showing <strong>{filteredShortcuts.length}</strong> glossary terms available</>
+            )}
           </span>
           <span className="hidden sm:inline">
-            सध्याची वर्गवारी: <strong className="text-slate-900">{REVENUE_GLOSSARY_CATEGORIES.find((c) => c.id === selectedCategory)?.labelMr}</strong>
+            {isMarathi ? 'सध्याची वर्गवारी: ' : 'Category: '}
+            <strong className="text-slate-900">
+              {isMarathi
+                ? REVENUE_GLOSSARY_CATEGORIES.find((c) => c.id === selectedCategory)?.labelMr
+                : REVENUE_GLOSSARY_CATEGORIES.find((c) => c.id === selectedCategory)?.labelEn}
+            </strong>
           </span>
         </div>
 
@@ -281,10 +310,14 @@ export default function RevenueGlossaryPage() {
           <div className="bg-white border border-slate-200 rounded-2xl py-16 px-4 text-center space-y-3">
             <BookOpen className="w-10 h-10 text-slate-300 mx-auto" />
             <h3 className="text-base font-bold text-slate-800">
-              '{searchQuery}' साठी कोणतीही संज्ञा सापडली नाही
+              {isMarathi
+                ? `'${searchQuery}' साठी कोणतीही संज्ञा सापडली नाही`
+                : `No term matching '${searchQuery}' found`}
             </h3>
             <p className="text-xs text-slate-500 max-w-md mx-auto">
-              कृपया स्पेलिंग तपासा किंवा इंग्रजी संज्ञा (उदा. NA, Sale Deed, Survey No) टाकून पुन्हा शोधा.
+              {isMarathi
+                ? 'कृपया स्पेलिंग तपासा किंवा इंग्रजी संज्ञा (उदा. NA, Sale Deed, Survey No) टाकून पुन्हा शोधा.'
+                : 'Please check your spelling or try searching with statutory terms (e.g. NA, Sale Deed, Survey No).'}
             </p>
             <button
               type="button"
@@ -294,7 +327,7 @@ export default function RevenueGlossaryPage() {
               }}
               className="inline-block mt-2 text-xs font-bold text-blue-950 bg-amber-100 px-3.5 py-2 rounded-xl border border-amber-300 hover:bg-amber-200 transition shadow-2xs"
             >
-              सर्व शब्दावली पूर्ववत पहा
+              {isMarathi ? 'सर्व शब्दावली पूर्ववत पहा' : 'Reset Glossary View'}
             </button>
           </div>
         ) : (
@@ -344,17 +377,17 @@ export default function RevenueGlossaryPage() {
 
                       {isCritical && (
                         <span className="text-[10px] font-bold bg-rose-600 text-white px-2 py-0.5 rounded-full shrink-0 shadow-2xs">
-                          वैधानिक उल्लंघन
+                          {isMarathi ? 'वैधानिक उल्लंघन' : 'Statutory Violation'}
                         </span>
                       )}
                       {isRestricted && (
                         <span className="text-[10px] font-bold bg-amber-500 text-white px-2 py-0.5 rounded-full shrink-0 shadow-2xs">
-                          परवानगी आवश्यक
+                          {isMarathi ? 'परवानगी आवश्यक' : 'Permission Required'}
                         </span>
                       )}
                       {isEncumbrance && (
                         <span className="text-[10px] font-bold bg-purple-600 text-white px-2 py-0.5 rounded-full shrink-0 shadow-2xs">
-                          बोजा / प्रभार
+                          {isMarathi ? 'बोजा / प्रभार' : 'Encumbrance / Charge'}
                         </span>
                       )}
                     </div>
@@ -362,23 +395,14 @@ export default function RevenueGlossaryPage() {
                     {/* Full Name */}
                     <div className="pt-0.5">
                       <h3 className="text-sm sm:text-base font-black text-slate-900 tracking-tight leading-snug">
-                        {item.fullFormMr}
+                        {isMarathi ? item.fullFormMr : item.fullFormEn}
                       </h3>
-                      <p className="text-xs font-semibold text-slate-500 italic">
-                        {item.fullFormEn}
-                      </p>
                     </div>
 
-                    {/* Marathi Description */}
+                    {/* Description */}
                     <p className="text-xs text-slate-700 leading-relaxed pt-1">
-                      {item.descriptionMr}
+                      {isMarathi ? item.descriptionMr : item.descriptionEn}
                     </p>
-                  </div>
-
-                  {/* Footer: English Summary */}
-                  <div className="pt-2.5 border-t border-slate-200/80 text-[11px] text-slate-600 leading-relaxed">
-                    <strong className="text-slate-800 font-semibold">Significance: </strong>
-                    {item.descriptionEn}
                   </div>
                 </div>
               );
@@ -392,14 +416,14 @@ export default function RevenueGlossaryPage() {
         <div className="flex items-center gap-2">
           <Scale className="w-4 h-4 text-blue-900 shrink-0" />
           <span>
-            ही नामावली महाराष्ट्र जमीन महसूल संहिता (MLRC) १९६६ आणि गाव नमुना १ ते २१ नियमांवर आधारित अधिकृत संदर्भासाठी आहे.
+            {isMarathi ? 'ही नामावली महाराष्ट्र जमीन महसूल संहिता (MLRC) १९६६ आणि गाव नमुना १ ते २१ नियमांवर आधारित अधिकृत संदर्भासाठी आहे.' : 'This glossary is compiled for official reference based on MLRC 1966 and Village Forms 1 to 21 rules.'}
           </span>
         </div>
         <Link
           href={user ? '/dashboard' : '/'}
           className="text-blue-900 font-bold hover:underline shrink-0"
         >
-          {user ? 'महसूल डॅशबोर्डवर जा →' : 'मुख्य पोर्टलवर जा →'}
+          {user ? (isMarathi ? 'महसूल डॅशबोर्डवर जा →' : 'Go to Revenue Dashboard →') : (isMarathi ? 'मुख्य पोर्टलवर जा →' : 'Go to Public Portal →')}
         </Link>
       </div>
     </div>

@@ -1,0 +1,65 @@
+{
+  "portal": {
+    "title": "Collector Office, Chandrapur",
+    "subTitle": "Land Revenue, Land Records & 1950 Title Provenance Monitoring System",
+    "district": "Chandrapur District",
+    "mlrcBadge": "MLRC 1966",
+    "govtOfMaharashtra": "Government of Maharashtra",
+    "govtOfIndia": "Government of India",
+    "skipToContent": "Skip to main content",
+    "officialTagline": "Land Revenue & Land Records Monitoring System"
+  },
+  "nav": {
+    "home": "Home",
+    "dashboard": "Revenue Dashboard",
+    "parcels": "Land Parcel Register (7/12)",
+    "cases": "Breach & Quasi-Judicial Cases",
+    "documents": "District Record Archives",
+    "bulkUpload": "Village Excel Upload",
+    "reports": "Reports & Statutory Formats",
+    "glossary": "Revenue Glossary & Abbreviations",
+    "settings": "Account & Security Settings",
+    "publicPortal": "Public Portal",
+    "officerLogin": "Officer Login",
+    "logout": "Log Out",
+    "talukas": "15 Talukas",
+    "provenance": "1950 Baseline Provenance",
+    "acts": "MLRC 1966 Statutory Acts",
+    "workflow": "Standard Workflow"
+  },
+  "accessibility": {
+    "size": "Size:",
+    "contrast": "High Contrast",
+    "highContrast": "High Contrast Mode",
+    "decreaseFont": "Decrease Font Size",
+    "normalFont": "Reset Font Size",
+    "increaseFont": "Increase Font Size",
+    "language": "Language"
+  },
+  "common": {
+    "search": "Search...",
+    "filter": "Filter",
+    "actions": "Actions",
+    "status": "Status",
+    "active": "Active",
+    "inactive": "Inactive",
+    "loading": "Loading...",
+    "sessionCheck": "Verifying session...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "close": "Close",
+    "back": "Back",
+    "export": "Export",
+    "print": "Print"
+  },
+  "roles": {
+    "collector": "District Collector & Magistrate",
+    "subCollector": "Sub-Collector / Additional Collector",
+    "sdo": "Sub-Divisional Officer (SDO / Prant)",
+    "tahsildar": "Tahsildar",
+    "naibTahsildar": "Naib Tahsildar",
+    "circleOfficer": "Circle Officer",
+    "talathi": "Talathi / Patwari",
+    "revenueOfficer": "Revenue Officer"
+  }
+}

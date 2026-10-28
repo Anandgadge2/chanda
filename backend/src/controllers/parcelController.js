@@ -2,7 +2,7 @@ import ExcelJS from 'exceljs';
 import prisma from '../config/prisma.js';
 import { generateSampleVillageTemplate } from '../utils/excelGenerator.js';
 import { invalidateAnalyticsCache } from './analyticsController.js';
-import { syncTalukaTotalRollup } from './prapatraController.js';
+import { syncTalukaTotalRollup, recalculateVillageRollup } from './prapatraController.js';
 import { logAudit } from '../middleware/auditMiddleware.js';
 
 /**
@@ -450,6 +450,186 @@ export const createParcel = async (req, res) => {
     res.status(201).json({ success: true, parcel });
   } catch (err) {
     console.error('Create parcel error:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+};
+
+/**
+ * Update Land Parcel Details & Backward Milestones
+ * PATCH /api/parcels/:upi
+ */
+export const updateParcel = async (req, res) => {
+  try {
+    const { upi } = req.params;
+    const {
+      ownerName,
+      tenureClass,
+      totalAreaHa,
+      agriAreaHa,
+      naAreaSqM,
+      potkharabaAreaHa,
+      hasActiveDispute,
+      otherRights,
+      oldSurveyNo,
+      subTypeCategory,
+      auditPoints,
+      flags,
+      forwardCaseUpdate,
+      backwardHistoryUpdate
+    } = req.body;
+
+    const existing = await prisma.landParcel.findUnique({
+      where: { upi },
+      include: { backwardHistories: true, forwardCases: true }
+    });
+
+    if (!existing) {
+      return res.status(404).json({ success: false, error: `Parcel with UPI ${upi} not found` });
+    }
+
+    const updateData = {};
+    if (tenureClass) updateData.tenureClass = tenureClass;
+
+    // Calculate total area if agriAreaHa or naAreaSqM provided
+    let calcTotalArea = null;
+    if (agriAreaHa !== undefined || naAreaSqM !== undefined) {
+      const agri = parseFloat(agriAreaHa) || 0;
+      const na = parseFloat(naAreaSqM) || 0;
+      calcTotalArea = Math.round((agri + (na / 10000.0)) * 10000) / 10000;
+    } else if (totalAreaHa !== undefined && totalAreaHa !== '') {
+      calcTotalArea = parseFloat(totalAreaHa);
+    }
+    if (calcTotalArea !== null && !isNaN(calcTotalArea)) {
+      updateData.totalAreaHa = calcTotalArea;
+    }
+
+    if (potkharabaAreaHa !== undefined && potkharabaAreaHa !== '') {
+      updateData.potkharabaAreaHa = parseFloat(potkharabaAreaHa);
+    }
+    if (hasActiveDispute !== undefined) updateData.hasActiveDispute = Boolean(hasActiveDispute);
+    if (oldSurveyNo !== undefined) updateData.oldSurveyNo = oldSurveyNo;
+
+    // Merge metadata
+    const currentMeta = (existing.metadata && typeof existing.metadata === 'object') ? existing.metadata : {};
+    const mergedAuditPoints = {
+      ...(currentMeta.auditPoints || {}),
+      ...(auditPoints && typeof auditPoints === 'object' ? auditPoints : {})
+    };
+    const mergedFlags = {
+      ...(currentMeta.flags || {}),
+      ...(flags && typeof flags === 'object' ? flags : {})
+    };
+
+    updateData.metadata = {
+      ...currentMeta,
+      ...(ownerName !== undefined ? { ownerName } : {}),
+      ...(otherRights !== undefined ? { otherRights } : {}),
+      ...(agriAreaHa !== undefined ? { agriAreaHa: parseFloat(agriAreaHa) || 0 } : {}),
+      ...(naAreaSqM !== undefined ? { naAreaSqM: parseFloat(naAreaSqM) || 0 } : {}),
+      ...(subTypeCategory !== undefined ? { subTypeCategory } : {}),
+      auditPoints: mergedAuditPoints,
+      flags: mergedFlags
+    };
+
+    const updatedParcel = await prisma.landParcel.update({
+      where: { upi },
+      data: updateData
+    });
+
+    // Handle Forward Case Updates (Enforcement violations)
+    if (forwardCaseUpdate && forwardCaseUpdate.violationType) {
+      const existingCase = existing.forwardCases?.find(c => c.violationType === forwardCaseUpdate.violationType);
+      const talukaCode = existing.taluka.slice(0, 3).toUpperCase();
+      const safeGat = String(existing.gatNumber).replace(/[\/\\ ]/g, '-');
+      const caseNumber = forwardCaseUpdate.caseNumber || `${forwardCaseUpdate.violationType.slice(0, 3)}/${talukaCode}/${existing.villageCode}/${safeGat}`;
+
+      if (existingCase) {
+        await prisma.forwardEnforcementCase.update({
+          where: { id: existingCase.id },
+          data: {
+            status: forwardCaseUpdate.status || existingCase.status,
+            occupantName: forwardCaseUpdate.occupantName !== undefined ? forwardCaseUpdate.occupantName : existingCase.occupantName,
+            prapatraCategory: forwardCaseUpdate.prapatraCategory || existingCase.prapatraCategory,
+            encroachedAreaHa: forwardCaseUpdate.encroachedAreaHa !== undefined ? parseFloat(forwardCaseUpdate.encroachedAreaHa) : existingCase.encroachedAreaHa,
+            isRepossessedToGovt: forwardCaseUpdate.isRepossessedToGovt !== undefined ? Boolean(forwardCaseUpdate.isRepossessedToGovt) : existingCase.isRepossessedToGovt
+          }
+        });
+      } else {
+        await prisma.forwardEnforcementCase.create({
+          data: {
+            parcelId: existing.id,
+            caseNumber,
+            violationType: forwardCaseUpdate.violationType,
+            status: forwardCaseUpdate.status || 'FLAGGED_IN_AUDIT',
+            occupantName: forwardCaseUpdate.occupantName || ownerName || 'खातेदार',
+            prapatraCategory: forwardCaseUpdate.prapatraCategory || 'प्रपत्र तपासणी',
+            encroachedAreaHa: parseFloat(forwardCaseUpdate.encroachedAreaHa) || updatedParcel.totalAreaHa,
+            isRepossessedToGovt: Boolean(forwardCaseUpdate.isRepossessedToGovt)
+          }
+        });
+      }
+    }
+
+    // Handle Backward History Timeline updates
+    if (backwardHistoryUpdate && backwardHistoryUpdate.epochYear) {
+      const epochYear = parseInt(backwardHistoryUpdate.epochYear, 10);
+      const existingEpoch = existing.backwardHistories.find(b => b.epochYear === epochYear);
+
+      if (existingEpoch) {
+        await prisma.backwardHistory.update({
+          where: { id: existingEpoch.id },
+          data: {
+            ownerName: backwardHistoryUpdate.ownerName !== undefined ? backwardHistoryUpdate.ownerName : existingEpoch.ownerName,
+            khataNumber: backwardHistoryUpdate.khataNumber !== undefined ? backwardHistoryUpdate.khataNumber : existingEpoch.khataNumber,
+            ferfarNumber: backwardHistoryUpdate.ferfarNumber !== undefined ? backwardHistoryUpdate.ferfarNumber : existingEpoch.ferfarNumber,
+            tenureClass: backwardHistoryUpdate.tenureClass || existingEpoch.tenureClass,
+            mutationType: backwardHistoryUpdate.mutationType || existingEpoch.mutationType,
+            remarks: backwardHistoryUpdate.remarks !== undefined ? backwardHistoryUpdate.remarks : existingEpoch.remarks,
+            areaHa: backwardHistoryUpdate.areaHa ? parseFloat(backwardHistoryUpdate.areaHa) : existingEpoch.areaHa,
+            wasGovtLand: backwardHistoryUpdate.wasGovtLand !== undefined ? Boolean(backwardHistoryUpdate.wasGovtLand) : (backwardHistoryUpdate.tenureClass === 'SARKAR_SHASAN' ? true : existingEpoch.wasGovtLand),
+          }
+        });
+      } else {
+        await prisma.backwardHistory.create({
+          data: {
+            parcelId: existing.id,
+            epochYear,
+            recordDate: backwardHistoryUpdate.recordDate ? new Date(backwardHistoryUpdate.recordDate) : new Date(`${epochYear}-01-01`),
+            ferfarNumber: backwardHistoryUpdate.ferfarNumber || ('F-' + epochYear),
+            ownerName: backwardHistoryUpdate.ownerName || updatedParcel.metadata?.ownerName || 'नोंदणीकृत खातेदार',
+            khataNumber: backwardHistoryUpdate.khataNumber || ('K-' + epochYear),
+            areaHa: backwardHistoryUpdate.areaHa ? parseFloat(backwardHistoryUpdate.areaHa) : updatedParcel.totalAreaHa,
+            tenureClass: backwardHistoryUpdate.tenureClass || updatedParcel.tenureClass,
+            wasGovtLand: backwardHistoryUpdate.wasGovtLand !== undefined ? Boolean(backwardHistoryUpdate.wasGovtLand) : (backwardHistoryUpdate.tenureClass === 'SARKAR_SHASAN'),
+            mutationType: backwardHistoryUpdate.mutationType || 'अधिकार अभिलेख फेरफार नोंद',
+            remarks: backwardHistoryUpdate.remarks || 'महसूल अधिकारी फेरबदल नोंद'
+          }
+        });
+      }
+    }
+
+    // Recalculate Village Rollup & Taluka Totals automatically so Dashboard & Reports update in real time!
+    await recalculateVillageRollup(existing.district, existing.taluka, existing.villageName);
+
+    invalidateParcelCache();
+    invalidateAnalyticsCache();
+
+    await logAudit({
+      userId: req.user?.id || null,
+      action: 'UPDATE_PARCEL',
+      entityType: 'LandParcel',
+      entityId: existing.id,
+      newData: { upi, updateData, backwardHistoryUpdate, forwardCaseUpdate },
+      req
+    });
+
+    res.json({
+      success: true,
+      message: 'जमीन पार्सल, ४६ तपासणी मुद्दे व गोषवारा यशस्वीरीत्या अद्ययावत केला.',
+      parcel: updatedParcel
+    });
+  } catch (err) {
+    console.error('Update parcel error:', err);
     res.status(500).json({ success: false, error: err.message });
   }
 };

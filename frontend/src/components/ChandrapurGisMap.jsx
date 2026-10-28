@@ -39,12 +39,14 @@ import {
   CHANDRAPUR_DISTRICT_BOUNDS,
   CHANDRAPUR_OUTLINE_PATH,
 } from '../lib/chandrapurMapData';
+import { useTranslation } from './LanguageContext';
 
 export default function ChandrapurGisMap({
   selectedTaluka = '',
   onSelectTaluka,
   analyticsData = [],
 }) {
+  const { isMarathi } = useTranslation();
   const [hoveredTaluka, setHoveredTaluka] = useState(null);
   const [hoveredPoi, setHoveredPoi] = useState(null);
   const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 });
@@ -83,9 +85,13 @@ export default function ChandrapurGisMap({
       return {
         level: 'critical',
         labelMr: 'अती-गंभीर जोखीम',
-        fullLabelMr: 'अती-गंभीर जोखीम (Critical Red Zone)',
+        labelEn: 'Critical Risk',
+        fullLabelMr: 'अती-गंभीर जोखीम',
+        fullLabelEn: 'Critical Red Zone',
         tagMr: 'रेड झोन',
+        tagEn: 'Red Zone',
         rangeMr: '२५०+ प्रकरणे',
+        rangeEn: '250+ Cases',
         fill: '#FECDD3', // Rose-200
         fillHover: '#FDA4AF', // Rose-300
         stroke: '#BE123C', // Rose-700
@@ -93,15 +99,20 @@ export default function ChandrapurGisMap({
         badgeText: 'text-rose-900 border-rose-300',
         icon: '🚨',
         guidanceMr: 'तातडीने SDO / जिल्हाधिकारी स्तरावर सुनावणी व MLRC कलम ५९ अन्वये नोटीस आवश्यक.',
+        guidanceEn: 'Immediate hearing required at SDO / Collector level and notice under MLRC Sec 59.',
       };
     }
     if (v >= 51) {
       return {
         level: 'high',
         labelMr: 'उच्च जोखीम',
-        fullLabelMr: 'उच्च जोखीम (High Risk Orange)',
+        labelEn: 'High Risk',
+        fullLabelMr: 'उच्च जोखीम',
+        fullLabelEn: 'High Risk Orange Zone',
         tagMr: 'ऑरेंज झोन',
+        tagEn: 'Orange Zone',
         rangeMr: '५१ - २५० प्रकरणे',
+        rangeEn: '51 - 250 Cases',
         fill: '#FFEDD5', // Orange-100
         fillHover: '#FED7AA', // Orange-200
         stroke: '#C2410C', // Orange-700
@@ -109,15 +120,20 @@ export default function ChandrapurGisMap({
         badgeText: 'text-orange-900 border-orange-300',
         icon: '⚠️',
         guidanceMr: 'तहसीलदार व मंडळ अधिकारी यांनी पंचनामे पूर्ण करून विल्हेवाट अहवाल सादर करावा.',
+        guidanceEn: 'Tahsildar and Circle Officer must complete panchnamas and submit disposal report.',
       };
     }
     if (v >= 15) {
       return {
         level: 'medium',
         labelMr: 'मध्यम जोखीम',
-        fullLabelMr: 'मध्यम जोखीम (Moderate Risk Yellow)',
+        labelEn: 'Medium Risk',
+        fullLabelMr: 'मध्यम जोखीम',
+        fullLabelEn: 'Moderate Risk Yellow Zone',
         tagMr: 'यलो झोन',
+        tagEn: 'Yellow Zone',
         rangeMr: '१५ - ५० प्रकरणे',
+        rangeEn: '15 - 50 Cases',
         fill: '#FEF9C3', // Yellow-100
         fillHover: '#FEF08A', // Yellow-200
         stroke: '#A16207', // Yellow-700
@@ -125,14 +141,19 @@ export default function ChandrapurGisMap({
         badgeText: 'text-amber-900 border-amber-300',
         icon: '⚡',
         guidanceMr: 'तलाठी स्तरावर फेरफार नोंदी व अकृषिक परवानगीची नियमित तपासणी सुरू ठेवावी.',
+        guidanceEn: 'Talathi level mutation entries and NA permissions should undergo routine verification.',
       };
     }
     return {
       level: 'low',
       labelMr: 'कमी जोखीम / सुरक्षित',
-      fullLabelMr: 'कमी जोखीम / सुरक्षित (Low Risk Green)',
+      labelEn: 'Low Risk / Safe',
+      fullLabelMr: 'कमी जोखीम / सुरक्षित',
+      fullLabelEn: 'Low Risk Green Zone',
       tagMr: 'ग्रीन झोन',
+      tagEn: 'Green Zone',
       rangeMr: '० - १४ प्रकरणे',
+      rangeEn: '0 - 14 Cases',
       fill: '#DCFCE7', // Green-100
       fillHover: '#BBF7D0', // Green-200
       stroke: '#15803D', // Green-700
@@ -140,6 +161,7 @@ export default function ChandrapurGisMap({
       badgeText: 'text-emerald-900 border-emerald-300',
       icon: '✅',
       guidanceMr: 'नियंत्रित व सुरक्षित क्षेत्र. सामान्य महसूल फेरफार नियमांनुसार संनियंत्रण.',
+      guidanceEn: 'Controlled safe zone. Regular monitoring under standard revenue rules.',
     };
   };
 
@@ -333,6 +355,16 @@ export default function ChandrapurGisMap({
   // If hovering on LEFT side -> open in RIGHT corner (so left map stays 100% visible)
   const getCornerDockStyle = (cardWidth = 320) => {
     const isRight = isHoverOnRightSide;
+    const isMobile = typeof window !== 'undefined' && window.innerWidth < 640;
+    if (isMobile) {
+      return {
+        bottom: '8px',
+        left: '8px',
+        right: '8px',
+        top: 'auto',
+        maxHeight: '52%',
+      };
+    }
     return {
       top: '10px',
       ...(isRight
@@ -365,6 +397,25 @@ export default function ChandrapurGisMap({
   };
 
   const handleMouseUp = () => setIsDragging(false);
+
+  const handleTouchStart = (e) => {
+    if (e.touches && e.touches.length === 1) {
+      const touch = e.touches[0];
+      setIsDragging(true);
+      setDragStart({ x: touch.clientX - panOffset.x, y: touch.clientY - panOffset.y });
+    }
+  };
+
+  const handleTouchMove = (e) => {
+    if (!isDragging || !e.touches || e.touches.length !== 1) return;
+    const touch = e.touches[0];
+    setPanOffset({
+      x: touch.clientX - dragStart.x,
+      y: touch.clientY - dragStart.y,
+    });
+  };
+
+  const handleTouchEnd = () => setIsDragging(false);
 
   // Fullscreen Toggle
   const toggleFullscreen = () => {
@@ -411,73 +462,102 @@ export default function ChandrapurGisMap({
       }`}
     >
       {/* Top Header & Command Bar */}
-      <div className="relative z-20 bg-slate-50/90 backdrop-blur-md border-b border-slate-200/90 px-3 py-2 sm:px-4 sm:py-2.5 flex flex-wrap items-center justify-between gap-2 text-slate-800">
+      <div className="relative z-10 bg-slate-50/90 backdrop-blur-md border-b border-slate-200/90 px-3 py-2 sm:px-4 sm:py-2.5 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 text-slate-800">
         {/* District & System Identity */}
-        <div className="flex items-center gap-2.5 min-w-0">
-          <div className="w-8 h-8 rounded-lg bg-blue-900 text-white flex items-center justify-center shadow-xs shrink-0 font-black">
-            <Compass className="w-4 h-4 animate-spin-slow" />
-          </div>
-          <div>
-            <div className="flex items-center gap-1.5 flex-wrap">
-              <span className="text-xs font-bold uppercase tracking-wider bg-blue-100 text-blue-900 px-2 py-0.5 rounded border border-blue-200">
-                अधिकृत GIS नकाशा
-              </span>
-              <h2 className="text-sm sm:text-base font-black text-slate-900 tracking-wide">
-                चंद्रपूर जिल्हा प्रशासकीय व महसूल जोखीम GIS नकाशा
-              </h2>
+        <div className="flex items-center justify-between w-full sm:w-auto gap-2 min-w-0">
+          <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-blue-900 text-white flex items-center justify-center shadow-xs shrink-0 font-black">
+              <Compass className="w-3.5 h-3.5 sm:w-4 sm:h-4 animate-spin-slow" />
             </div>
-            <p className="text-xs text-slate-500 font-medium hidden sm:block">
-              १५ तालुके • ६ उपविभाग (SDO) • थेट डेटाबेस संनियंत्रण (Live Database Sync)
-            </p>
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider bg-blue-100 text-blue-900 px-1.5 sm:px-2 py-0.5 rounded border border-blue-200">
+                  {isMarathi ? 'अधिकृत GIS नकाशा' : 'Official GIS Map'}
+                </span>
+                <h2 className="text-xs sm:text-base font-black text-slate-900 tracking-tight leading-snug">
+                  {isMarathi ? 'चंद्रपूर जिल्हा प्रशासकीय व महसूल जोखीम GIS नकाशा' : 'Chandrapur District Administrative & Revenue Risk GIS Map'}
+                </h2>
+              </div>
+              <p className="text-[11px] sm:text-xs text-slate-500 font-medium hidden sm:block">
+                {isMarathi
+                  ? '१५ तालुके • ६ उपविभाग • थेट डेटाबेस संनियंत्रण'
+                  : '15 Talukas • 6 Sub-Divisions (SDO)'}
+              </p>
+            </div>
+          </div>
+
+          {/* Mobile-only Zoom & Reset Controls */}
+          <div className="flex items-center gap-1 shrink-0 sm:hidden">
+            {selectedTaluka && (
+              <button
+                onClick={() => onSelectTaluka && onSelectTaluka('')}
+                className="inline-flex items-center gap-0.5 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 text-[10px] font-bold px-1.5 py-1 rounded-lg"
+                title={isMarathi ? 'सर्व १५ तालुके' : 'All 15 Talukas'}
+              >
+                <span>{isMarathi ? '१५' : '15'}</span>
+                <RotateCcw className="w-2.5 h-2.5 text-amber-700" />
+              </button>
+            )}
+            <div className="flex items-center bg-white rounded-lg border border-slate-200 p-0.5 shadow-2xs">
+              <button onClick={handleZoomIn} className="p-1 hover:bg-slate-100 text-slate-700 rounded" title={isMarathi ? 'झूम इन (+)' : 'Zoom in (+)'} aria-label="Zoom in">
+                <ZoomIn className="w-3.5 h-3.5" />
+              </button>
+              <button onClick={handleZoomOut} className="p-1 hover:bg-slate-100 text-slate-700 rounded" title={isMarathi ? 'झूम आउट (-)' : 'Zoom out (-)'} aria-label="Zoom out">
+                <ZoomOut className="w-3.5 h-3.5" />
+              </button>
+              <button onClick={handleResetZoom} className="p-1 hover:bg-slate-100 text-slate-700 rounded" title={isMarathi ? 'मूळ आकार' : 'Reset'} aria-label="Reset">
+                <RotateCcw className="w-3 h-3" />
+              </button>
+            </div>
           </div>
         </div>
 
         {/* View Mode Switcher Tabs */}
-        <div className="flex items-center gap-1 bg-slate-200/80 p-0.5 rounded-lg border border-slate-300/80 shrink-0 text-xs font-semibold">
+        <div className="w-full sm:w-auto flex items-center gap-1 bg-slate-200/80 p-0.5 rounded-lg border border-slate-300/80 text-xs font-semibold overflow-x-auto scrollbar-none">
           <button
             onClick={() => setViewMode('admin')}
-            className={`px-3 py-1.5 rounded-md text-xs sm:text-sm transition cursor-pointer flex items-center gap-1 ${
+            className={`flex-1 sm:flex-initial px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-md text-xs sm:text-sm transition cursor-pointer flex items-center justify-center gap-1 whitespace-nowrap ${
               viewMode === 'admin'
                 ? 'bg-white text-blue-950 font-bold shadow-xs'
                 : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/50'
             }`}
-            title="प्रशासकीय तालुका नकाशा (Image 2 संदर्भ)"
+            title={isMarathi ? 'प्रशासकीय तालुका नकाशा' : 'Administrative Taluka Map'}
           >
-            <span>प्रशासकीय नकाशा</span>
+            <span>{isMarathi ? 'प्रशासकीय नकाशा' : 'Admin Map'}</span>
           </button>
           <button
             onClick={() => setViewMode('risk')}
-            className={`px-3 py-1.5 rounded-md text-xs sm:text-sm transition cursor-pointer flex items-center gap-1 ${
+            className={`flex-1 sm:flex-initial px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-md text-xs sm:text-sm transition cursor-pointer flex items-center justify-center gap-1 whitespace-nowrap ${
               viewMode === 'risk'
                 ? 'bg-rose-600 text-white font-bold shadow-xs'
                 : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/50'
             }`}
-            title="शर्तभंग व जोखीम हीटमॅप"
+            title={isMarathi ? 'शर्तभंग व जोखीम हीटमॅप' : 'Breach & Risk Heatmap'}
           >
             <ShieldAlert className="w-3.5 h-3.5 text-amber-300" />
-            <span>शर्तभंग हीटमॅप</span>
+            <span>{isMarathi ? 'शर्तभंग हीटमॅप' : 'Heatmap'}</span>
           </button>
           <button
             onClick={() => setViewMode('sdo')}
-            className={`px-3 py-1.5 rounded-md text-xs sm:text-sm transition cursor-pointer flex items-center gap-1 ${
+            className={`flex-1 sm:flex-initial px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-md text-xs sm:text-sm transition cursor-pointer flex items-center justify-center gap-1 whitespace-nowrap ${
               viewMode === 'sdo'
                 ? 'bg-indigo-600 text-white font-bold shadow-xs'
                 : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/50'
             }`}
-            title="उपविभाग (SDO Circles)"
+            title={isMarathi ? 'उपविभाग' : 'Sub-Divisions (SDO Circles)'}
           >
-            <span>उपविभाग (SDO)</span>
+            <span>{isMarathi ? 'उपविभाग' : 'SDO Circles'}</span>
           </button>
         </div>
 
-        {/* Layer Controls & Zoom Tools */}
-        <div className="flex items-center gap-1.5 shrink-0">
+        {/* Desktop Layer Controls & Zoom Tools */}
+        <div className="hidden sm:flex items-center gap-1.5 shrink-0">
           {selectedTaluka && (
             <button
               onClick={() => onSelectTaluka && onSelectTaluka('')}
               className="inline-flex items-center gap-1 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 text-[11px] font-bold px-2 py-1 rounded-lg transition active:scale-95 cursor-pointer"
             >
-              <span>सर्व १५ तालुके</span>
+              <span>{isMarathi ? 'सर्व १५ तालुके' : 'All 15 Talukas'}</span>
               <RotateCcw className="w-3 h-3 text-amber-700" />
             </button>
           )}
@@ -487,21 +567,24 @@ export default function ChandrapurGisMap({
             <button
               onClick={handleZoomIn}
               className="p-1 hover:bg-slate-100 text-slate-700 rounded transition cursor-pointer"
-              title="झूम इन (+)"
+              title={isMarathi ? 'झूम इन (+)' : 'Zoom In (+)'}
+              aria-label="Zoom In"
             >
               <ZoomIn className="w-3.5 h-3.5" />
             </button>
             <button
               onClick={handleZoomOut}
               className="p-1 hover:bg-slate-100 text-slate-700 rounded transition cursor-pointer"
-              title="झूम आउट (-)"
+              title={isMarathi ? 'झूम आउट (-)' : 'Zoom Out (-)'}
+              aria-label="Zoom Out"
             >
               <ZoomOut className="w-3.5 h-3.5" />
             </button>
             <button
               onClick={handleResetZoom}
               className="p-1 hover:bg-slate-100 text-slate-700 rounded transition cursor-pointer"
-              title="मूळ आकार (Reset)"
+              title={isMarathi ? 'मूळ आकार (Reset)' : 'Reset Zoom'}
+              aria-label="Reset Zoom"
             >
               <RotateCcw className="w-3.5 h-3.5" />
             </button>
@@ -511,7 +594,8 @@ export default function ChandrapurGisMap({
           <button
             onClick={toggleFullscreen}
             className="p-1.5 bg-white hover:bg-slate-100 text-slate-700 rounded-lg border border-slate-200 shadow-2xs transition cursor-pointer"
-            title={isFullscreen ? 'सामान्य आकार' : 'पूर्ण स्क्रीन (Fullscreen)'}
+            title={isFullscreen ? (isMarathi ? 'सामान्य आकार' : 'Exit Fullscreen') : (isMarathi ? 'पूर्ण स्क्रीन' : 'Fullscreen')}
+            aria-label="Toggle Fullscreen"
           >
             {isFullscreen ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
           </button>
@@ -520,10 +604,10 @@ export default function ChandrapurGisMap({
 
       {/* Dynamic Contextual Bar for SDO Mode */}
       {viewMode === 'sdo' && (
-        <div className="relative z-10 bg-gradient-to-r from-indigo-50/95 via-white to-blue-50/85 border-b border-indigo-200/90 px-3 py-1.5 sm:px-4 flex items-center justify-between gap-2 overflow-x-auto text-xs scrollbar-none shadow-2xs">
+        <div className="relative z-10 bg-gradient-to-r from-indigo-50/95 via-white to-blue-50/85 border-b border-indigo-200/90 px-2 sm:px-4 py-1.5 flex items-center gap-2 overflow-x-auto w-full max-w-full min-w-0 text-xs scrollbar-none shadow-2xs" style={{ WebkitOverflowScrolling: 'touch' }}>
           <div className="flex items-center gap-1.5 shrink-0 text-indigo-950 font-bold">
             <Landmark className="w-3.5 h-3.5 text-indigo-700" />
-            <span className="text-xs font-black">उपविभाग (SDO):</span>
+            <span className="text-xs font-black">{isMarathi ? 'उपविभाग (SDO):' : 'Sub-Division (SDO):'}</span>
           </div>
 
           <div className="flex items-center gap-1.5 shrink-0 flex-nowrap">
@@ -535,7 +619,7 @@ export default function ChandrapurGisMap({
                   : 'bg-white text-slate-700 border-slate-200 hover:bg-indigo-50/60'
               }`}
             >
-              सर्व ६ उपविभाग
+              {isMarathi ? 'सर्व ६ उपविभाग' : 'All 6 Sub-Divisions'}
             </button>
 
             {SUB_DIVISIONS.map((sdo) => {
@@ -558,13 +642,13 @@ export default function ChandrapurGisMap({
                     className="w-2.5 h-2.5 rounded-full shrink-0"
                     style={{ backgroundColor: isAct ? '#FFFFFF' : sdo.color }}
                   />
-                  <span>{sdo.shortNameMr || sdo.nameMr}</span>
+                  <span>{isMarathi ? (sdo.shortNameMr || sdo.nameMr) : (sdo.shortNameEn || sdo.nameEn || sdo.id)}</span>
                   <span
                     className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${
                       isAct ? 'bg-white/20 text-white font-black' : 'bg-slate-100 text-slate-600'
                     }`}
                   >
-                    {sdo.talukas.length} तालुके
+                    {sdo.talukas.length} {isMarathi ? 'तालुके' : 'Talukas'}
                   </span>
                 </button>
               );
@@ -575,10 +659,10 @@ export default function ChandrapurGisMap({
 
       {/* Dynamic Contextual Bar for Heatmap Mode */}
       {viewMode === 'risk' && (
-        <div className="relative z-10 bg-gradient-to-r from-rose-50/95 via-white to-amber-50/85 border-b border-rose-200/90 px-3 py-1.5 sm:px-4 flex items-center justify-between gap-2 overflow-x-auto text-xs scrollbar-none shadow-2xs">
+        <div className="relative z-10 bg-gradient-to-r from-rose-50/95 via-white to-amber-50/85 border-b border-rose-200/90 px-2 sm:px-4 py-1.5 flex items-center gap-2 overflow-x-auto w-full max-w-full min-w-0 text-xs scrollbar-none shadow-2xs" style={{ WebkitOverflowScrolling: 'touch' }}>
           <div className="flex items-center gap-1.5 shrink-0 text-rose-950 font-bold">
             <ShieldAlert className="w-3.5 h-3.5 text-rose-600" />
-            <span className="text-xs font-black">शर्तभंग जोखीम स्तर:</span>
+            <span className="text-xs font-black">{isMarathi ? 'शर्तभंग जोखीम स्तर:' : 'Breach Risk Level:'}</span>
           </div>
 
           <div className="flex items-center gap-1.5 shrink-0 flex-nowrap">
@@ -590,7 +674,9 @@ export default function ChandrapurGisMap({
                   : 'bg-white text-slate-700 border-slate-200 hover:bg-rose-50/60'
               }`}
             >
-              सर्व तालुके ({riskStats.totalViolations.toLocaleString('mr-IN')} प्रकरणे)
+              {isMarathi
+                ? `सर्व तालुके (${riskStats.totalViolations.toLocaleString('mr-IN')} प्रकरणे)`
+                : `All Talukas (${riskStats.totalViolations.toLocaleString('en-IN')} Cases)`}
             </button>
 
             <button
@@ -601,9 +687,9 @@ export default function ChandrapurGisMap({
                   : 'bg-white text-rose-950 border-rose-300 hover:bg-rose-50'
               }`}
             >
-              <span>🔴 अती-गंभीर</span>
+              <span>{isMarathi ? '🔴 अती-गंभीर' : '🔴 Critical'}</span>
               <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono font-black ${selectedRiskLevel === 'critical' ? 'bg-white/20 text-white' : 'bg-rose-100 text-rose-900'}`}>
-                {riskStats.critical} तालुके • २५०+
+                {riskStats.critical} {isMarathi ? 'तालुके • २५०+' : 'Talukas • 250+'}
               </span>
             </button>
 
@@ -615,9 +701,9 @@ export default function ChandrapurGisMap({
                   : 'bg-white text-orange-950 border-orange-300 hover:bg-orange-50'
               }`}
             >
-              <span>🟠 उच्च जोखीम</span>
+              <span>{isMarathi ? '🟠 उच्च जोखीम' : '🟠 High Risk'}</span>
               <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono font-black ${selectedRiskLevel === 'high' ? 'bg-white/20 text-white' : 'bg-orange-100 text-orange-900'}`}>
-                {riskStats.high} तालुके • ५१-२५०
+                {riskStats.high} {isMarathi ? 'तालुके • ५१-२५०' : 'Talukas • 51-250'}
               </span>
             </button>
 
@@ -629,9 +715,9 @@ export default function ChandrapurGisMap({
                   : 'bg-white text-amber-950 border-amber-300 hover:bg-amber-50'
               }`}
             >
-              <span>🟡 मध्यम</span>
+              <span>{isMarathi ? '🟡 मध्यम' : '🟡 Medium'}</span>
               <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono font-black ${selectedRiskLevel === 'medium' ? 'bg-white/20 text-white' : 'bg-amber-100 text-amber-900'}`}>
-                {riskStats.medium} तालुके • १५-५०
+                {riskStats.medium} {isMarathi ? 'तालुके • १५-५०' : 'Talukas • 15-50'}
               </span>
             </button>
 
@@ -643,9 +729,9 @@ export default function ChandrapurGisMap({
                   : 'bg-white text-emerald-950 border-emerald-300 hover:bg-emerald-50'
               }`}
             >
-              <span>🟢 कमी / सुरक्षित</span>
+              <span>{isMarathi ? '🟢 कमी / सुरक्षित' : '🟢 Low / Safe'}</span>
               <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono font-black ${selectedRiskLevel === 'low' ? 'bg-white/20 text-white' : 'bg-emerald-100 text-emerald-900'}`}>
-                {riskStats.low} तालुके • ०-१४
+                {riskStats.low} {isMarathi ? 'तालुके • ०-१४' : 'Talukas • 0-14'}
               </span>
             </button>
           </div>
@@ -653,10 +739,10 @@ export default function ChandrapurGisMap({
       )}
 
       {/* Layer Visibility Toggles Bar (Clean Light Badges - Compact) */}
-      <div className="relative z-10 bg-slate-50/90 border-b border-slate-200/80 px-3 py-1 sm:px-4 flex items-center justify-between gap-1.5 overflow-x-auto text-xs scrollbar-none">
+      <div className="relative z-10 bg-slate-50/90 border-b border-slate-200/80 px-2 sm:px-4 py-1 flex items-center gap-1.5 overflow-x-auto w-full max-w-full min-w-0 text-xs scrollbar-none" style={{ WebkitOverflowScrolling: 'touch' }}>
         <div className="flex items-center gap-1.5 shrink-0 text-slate-600">
           <Layers className="w-3.5 h-3.5 text-blue-700" />
-          <span className="font-bold text-slate-700 text-[11px]">नकाशा स्तर:</span>
+          <span className="font-bold text-slate-700 text-[11px] whitespace-nowrap">{isMarathi ? 'नकाशा स्तर:' : 'Map Layers:'}</span>
         </div>
 
         <div className="flex items-center gap-1 shrink-0 flex-nowrap">
@@ -674,7 +760,7 @@ export default function ChandrapurGisMap({
             }`}
           >
             <Waves className="w-3 h-3 text-sky-600" />
-            <span>नद्या व जलसाठे</span>
+            <span>{isMarathi ? 'नद्या व जलसाठे' : 'Rivers & Waterbodies'}</span>
           </button>
 
           <button
@@ -686,7 +772,7 @@ export default function ChandrapurGisMap({
             }`}
           >
             <TreePine className="w-3 h-3 text-emerald-600" />
-            <span>ताडोबा अभयारण्य</span>
+            <span>{isMarathi ? 'ताडोबा अभयारण्य' : 'Tadoba Reserve'}</span>
           </button>
 
           <button
@@ -698,7 +784,7 @@ export default function ChandrapurGisMap({
             }`}
           >
             <Factory className="w-3 h-3 text-amber-600" />
-            <span>उद्योग व वीज केंद्र</span>
+            <span>{isMarathi ? 'उद्योग व वीज केंद्र' : 'Industries & Power'}</span>
           </button>
 
           <button
@@ -710,7 +796,7 @@ export default function ChandrapurGisMap({
             }`}
           >
             <Pickaxe className="w-3 h-3 text-stone-600" />
-            <span>कोळसा खाणी (WCL)</span>
+            <span>{isMarathi ? 'कोळसा खाणी (WCL)' : 'Coal Mines (WCL)'}</span>
           </button>
 
           <button
@@ -722,7 +808,7 @@ export default function ChandrapurGisMap({
             }`}
           >
             <Castle className="w-3 h-3 text-rose-600" />
-            <span>गोंड किल्ले व मंदिरे</span>
+            <span>{isMarathi ? 'गोंड किल्ले व मंदिरे' : 'Gond Forts & Temples'}</span>
           </button>
 
           <button
@@ -734,7 +820,7 @@ export default function ChandrapurGisMap({
             }`}
           >
             <Train className="w-3 h-3 text-indigo-600" />
-            <span>रेल्वे मार्ग</span>
+            <span>{isMarathi ? 'रेल्वे मार्ग' : 'Railways'}</span>
           </button>
 
           <button
@@ -746,7 +832,7 @@ export default function ChandrapurGisMap({
             }`}
           >
             <Info className="w-3 h-3 text-blue-700" />
-            <span>संदर्भ सूची</span>
+            <span>{isMarathi ? 'संदर्भ सूची' : 'Legend'}</span>
           </button>
         </div>
       </div>
@@ -770,6 +856,10 @@ export default function ChandrapurGisMap({
           setHoveredTaluka(null);
           setHoveredPoi(null);
         }}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        onTouchCancel={handleTouchEnd}
       >
         {/* Subtle, Crisp Geographic Grid */}
         <div className="absolute inset-0 pointer-events-none opacity-25 bg-[radial-gradient(#94a3b8_1px,transparent_1px)] [background-size:24px_24px]" />
@@ -890,7 +980,7 @@ export default function ChandrapurGisMap({
                   {/* Taluka Labels (Clean, High-Contrast Text with Crisp White Halo - Pure Marathi Only) */}
                   {layers.labels && (
                     <g pointerEvents="none" opacity={getTalukaOpacity(taluka)}>
-                      {/* Primary Marathi Label */}
+                      {/* Primary Taluka Label (Bilingual) */}
                       <text
                         x={taluka.center[0]}
                         y={taluka.center[1] + (viewMode === 'risk' || viewMode === 'sdo' ? 4.2 : 4.8)}
@@ -904,7 +994,7 @@ export default function ChandrapurGisMap({
                         paintOrder="stroke fill"
                         className="select-none font-sans"
                       >
-                        {taluka.nameMr}
+                        {isMarathi ? taluka.nameMr : (taluka.nameEn || taluka.id)}
                       </text>
 
                       {/* Direct Violation Count Pill in Risk Heatmap Mode */}
@@ -964,7 +1054,7 @@ export default function ChandrapurGisMap({
                               fontWeight="800"
                               className="select-none font-bold"
                             >
-                              {sdo.shortNameMr || sdo.nameMr.replace(' उपविभाग', '')}
+                              {isMarathi ? (sdo.shortNameMr || sdo.nameMr.replace(' उपविभाग', '')) : (sdo.shortNameEn || sdo.nameEn || sdo.id)}
                             </text>
                           </g>
                         );
@@ -1024,9 +1114,9 @@ export default function ChandrapurGisMap({
               className="cursor-pointer"
               onMouseEnter={() =>
                 setHoveredPoi({
-                  nameMr: TADOBA_RESERVE.nameMr,
-                  badge: 'राष्ट्रीय उद्यान व व्याघ्र प्रकल्प',
-                  description: TADOBA_RESERVE.description,
+                  nameMr: isMarathi ? TADOBA_RESERVE.nameMr : (TADOBA_RESERVE.nameEn || TADOBA_RESERVE.nameMr),
+                  badge: isMarathi ? 'राष्ट्रीय उद्यान व व्याघ्र प्रकल्प' : 'National Park & Tiger Reserve',
+                  description: isMarathi ? TADOBA_RESERVE.description : (TADOBA_RESERVE.descEn || TADOBA_RESERVE.description),
                   taluka: 'Chimur / Bhadravati / Chandrapur',
                 })
               }
@@ -1052,7 +1142,7 @@ export default function ChandrapurGisMap({
                 paintOrder="stroke fill"
                 className="select-none font-sans"
               >
-                🌲 ताडोबा अभयारण्य
+                {isMarathi ? '🌲 ताडोबा अभयारण्य' : '🌲 Tadoba Reserve'}
               </text>
             </g>
           )}
@@ -1071,10 +1161,10 @@ export default function ChandrapurGisMap({
                       setHoveredPoi({
                         id: river.id,
                         pos: river.labels?.[0]?.pos || [150, 150],
-                        nameMr: river.nameMr,
-                        badge: 'प्रमुख जीवनदायिनी नदी (River)',
-                        description: river.description || 'शेती, सिंचन व उद्योगांसाठी अत्यंत महत्त्वाची जलवाहिनी.',
-                        taluka: river.talukas || 'चंद्रपूर जिल्हा',
+                        nameMr: isMarathi ? river.nameMr : (river.nameEn || river.nameMr),
+                        badge: isMarathi ? 'प्रमुख नदी' : 'Major River',
+                        description: isMarathi ? (river.description || 'शेती, सिंचन व उद्योगांसाठी अत्यंत महत्त्वाची जलवाहिनी.') : (river.descEn || 'Lifeline river vital for agriculture, irrigation and industry.'),
+                        taluka: isMarathi ? (river.talukas || 'चंद्रपूर जिल्हा') : (river.talukasEn || river.talukas || 'Chandrapur District'),
                       })
                     }
                     onMouseLeave={() => setHoveredPoi(null)}
@@ -1123,10 +1213,10 @@ export default function ChandrapurGisMap({
                       setHoveredPoi({
                         id: res.id,
                         pos: res.pos,
-                        nameMr: res.nameMr,
-                        badge: 'प्रमुख जलसाठा / तलाव (Lake & Reservoir)',
-                        description: res.description || 'पिण्याच्या व सिंचनाच्या पाण्याचा मुख्य आधार.',
-                        taluka: res.taluka || 'चंद्रपूर',
+                        nameMr: isMarathi ? res.nameMr : (res.nameEn || res.nameMr),
+                        badge: isMarathi ? 'प्रमुख जलसाठा / तलाव' : 'Major Lake & Reservoir',
+                        description: isMarathi ? (res.description || 'पिण्याच्या व सिंचनाच्या पाण्याचा मुख्य आधार.') : (res.descEn || 'Key source for drinking water and agricultural irrigation.'),
+                        taluka: isMarathi ? (res.taluka || 'चंद्रपूर') : (res.talukaEn || res.taluka || 'Chandrapur'),
                       })
                     }
                     onMouseLeave={() => setHoveredPoi(null)}
@@ -1156,7 +1246,7 @@ export default function ChandrapurGisMap({
                       paintOrder="stroke fill"
                       className="select-none tracking-tight pointer-events-none"
                     >
-                      {res.nameMr}
+                      {isMarathi ? res.nameMr : (res.nameEn || res.nameMr)}
                     </text>
                   </g>
                 ))}
@@ -1276,7 +1366,7 @@ export default function ChandrapurGisMap({
                         '0 0 3px #FFFFFF, 0 0 5px #FFFFFF',
                     }}
                   >
-                    {region.nameMr}
+                    {isMarathi ? region.nameMr : (region.nameEn || region.nameMr)}
                   </text>
                   {region.subText && (
                     <text
@@ -1290,7 +1380,7 @@ export default function ChandrapurGisMap({
                         textShadow: '0 0 3px #FFFFFF',
                       }}
                     >
-                      {region.subText}
+                      {isMarathi ? region.subText : (region.subTextEn || region.subText)}
                     </text>
                   )}
                 </g>
@@ -1315,13 +1405,13 @@ export default function ChandrapurGisMap({
 
           return (
             <div
-              className={`absolute z-40 pointer-events-none transition-all duration-200 ease-out w-[280px] sm:w-[320px] max-w-[calc(100%-20px)] ${
+              className={`absolute z-40 pointer-events-auto sm:pointer-events-none transition-all duration-200 ease-out w-auto sm:w-[320px] max-w-[calc(100%-16px)] sm:max-w-[calc(100%-20px)] ${
                 isRight ? 'slide-in-from-left-3' : 'slide-in-from-right-3'
               }`}
               style={getCornerDockStyle(320)}
             >
               {/* Frosted Glassmorphism Container */}
-              <div className="bg-white/90 backdrop-blur-xl text-slate-900 p-2.5 sm:p-3 rounded-xl border border-white/90 shadow-[0_12px_36px_-10px_rgba(15,23,42,0.25)] ring-1 ring-slate-900/10 overflow-y-auto max-h-[inherit]">
+              <div className="bg-white/95 backdrop-blur-xl text-slate-900 p-2.5 sm:p-3 rounded-xl border border-white/90 shadow-[0_12px_36px_-10px_rgba(15,23,42,0.25)] ring-1 ring-slate-900/10 overflow-y-auto max-h-[inherit]">
                 {/* Header: Taluka Name + SDO */}
                 <div className="bg-gradient-to-r from-blue-500/15 via-indigo-500/10 to-sky-500/15 -mx-2.5 -mt-2.5 sm:-mx-3 sm:-mt-3 p-2.5 sm:p-3 rounded-t-xl border-b border-white/60 backdrop-blur-md mb-2">
                   <div className="flex items-center justify-between gap-2">
@@ -1331,16 +1421,30 @@ export default function ChandrapurGisMap({
                       </div>
                       <div className="min-w-0">
                         <h3 className="text-sm sm:text-base font-black text-slate-900 leading-tight">
-                          तालुका {hoveredTaluka.nameMr}
+                          {isMarathi ? `तालुका ${hoveredTaluka.nameMr}` : `${hoveredTaluka.nameEn || hoveredTaluka.id} Taluka`}
                         </h3>
                         <span className="text-[10px] font-bold text-indigo-900">
-                          {hoveredTaluka.sdoSubdivision}
+                          {isMarathi ? hoveredTaluka.sdoSubdivision : (hoveredTaluka.sdoSubdivisionEn || (sdo ? sdo.nameEn : hoveredTaluka.sdoSubdivision))}
                         </span>
                       </div>
                     </div>
-                    <span className="text-[11px] px-2 py-0.5 rounded-full bg-blue-50 text-blue-950 border border-blue-200 font-bold shrink-0">
-                      {liveVillages} गावे
-                    </span>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <span className="text-[11px] px-2 py-0.5 rounded-full bg-blue-50 text-blue-950 border border-blue-200 font-bold shrink-0">
+                        {liveVillages} {isMarathi ? 'गावे' : 'Villages'}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setHoveredTaluka(null);
+                        }}
+                        className="sm:hidden p-1 text-slate-500 hover:text-slate-900 rounded-full hover:bg-slate-100 cursor-pointer pointer-events-auto"
+                        title={isMarathi ? 'बंद करा' : 'Close'}
+                        aria-label={isMarathi ? 'बंद करा' : 'Close'}
+                      >
+                        ✕
+                      </button>
+                    </div>
                   </div>
                 </div>
 
@@ -1350,14 +1454,14 @@ export default function ChandrapurGisMap({
                     <div className="flex items-center justify-between gap-1 mb-0.5">
                       <span className="font-bold text-[11px] flex items-center gap-1">
                         <span>{risk.icon}</span>
-                        <span>{risk.labelMr}</span>
+                        <span>{isMarathi ? risk.labelMr : (risk.labelEn || risk.labelMr)}</span>
                       </span>
                       <span className="text-[11px] font-black font-mono">
-                        {liveViolations.toLocaleString('mr-IN')}
+                        {liveViolations.toLocaleString(isMarathi ? 'mr-IN' : 'en-IN')}
                       </span>
                     </div>
                     <p className="text-[10px] leading-tight font-medium opacity-90">
-                      {risk.guidanceMr}
+                      {isMarathi ? risk.guidanceMr : (risk.guidanceEn || risk.guidanceMr)}
                     </p>
                   </div>
                 )}
@@ -1367,10 +1471,10 @@ export default function ChandrapurGisMap({
                     <div className="flex items-center justify-between gap-1">
                       <span className="font-bold text-[11px] flex items-center gap-1">
                         <Landmark className="w-3 h-3 text-indigo-700" />
-                        <span>{sdo.nameMr}</span>
+                        <span>{isMarathi ? sdo.nameMr : (sdo.nameEn || sdo.nameMr)}</span>
                       </span>
                       <span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-white text-indigo-900 border border-indigo-200">
-                        प्रांत कार्यालय
+                        {isMarathi ? 'प्रांत कार्यालय' : 'Prant Office'}
                       </span>
                     </div>
                     <p className="text-[10px] text-indigo-900/90 mt-0.5 font-medium">
@@ -1382,34 +1486,44 @@ export default function ChandrapurGisMap({
                 {/* Live Revenue Statistics Grid */}
                 <div className="grid grid-cols-2 gap-1.5 text-xs mb-2">
                   <div className="bg-blue-50/70 border border-blue-200/80 p-1.5 rounded-lg">
-                    <span className="text-blue-900 text-[10px] block font-semibold">७/१२ भूखंड:</span>
+                    <span className="text-blue-900 text-[10px] block font-semibold">
+                      {isMarathi ? '७/१२ भूखंड:' : '7/12 Parcels:'}
+                    </span>
                     <span className="font-black text-slate-900 text-xs sm:text-sm">
-                      {liveParcels.toLocaleString('mr-IN')}
+                      {liveParcels.toLocaleString(isMarathi ? 'mr-IN' : 'en-IN')}
                     </span>
                   </div>
                   <div className={`p-1.5 rounded-lg border ${viewMode === 'risk' ? risk.badgeBg : 'bg-amber-50/70 border-amber-200/80'}`}>
-                    <span className="text-amber-900 text-[10px] block font-bold">शर्तभंग:</span>
+                    <span className="text-amber-900 text-[10px] block font-bold">
+                      {isMarathi ? 'शर्तभंग:' : 'Breaches:'}
+                    </span>
                     <span className="font-black text-amber-900 text-xs sm:text-sm">
-                      {liveViolations.toLocaleString('mr-IN')}
+                      {liveViolations.toLocaleString(isMarathi ? 'mr-IN' : 'en-IN')}
                     </span>
                   </div>
                   <div className="bg-rose-50/70 border border-rose-200/80 p-1.5 rounded-lg">
-                    <span className="text-rose-900 text-[10px] block font-semibold">चौकशी/वाद:</span>
+                    <span className="text-rose-900 text-[10px] block font-semibold">
+                      {isMarathi ? 'चौकशी/वाद:' : 'Inquiries/Disputes:'}
+                    </span>
                     <span className="font-black text-rose-800 text-xs sm:text-sm">
-                      {liveDisputes.toLocaleString('mr-IN')} गट
+                      {liveDisputes.toLocaleString(isMarathi ? 'mr-IN' : 'en-IN')} {isMarathi ? 'गट' : 'Gat'}
                     </span>
                   </div>
                   <div className="bg-emerald-50/70 border border-emerald-200/80 p-1.5 rounded-lg">
-                    <span className="text-emerald-900 text-[10px] block font-semibold">एकूण क्षेत्र:</span>
+                    <span className="text-emerald-900 text-[10px] block font-semibold">
+                      {isMarathi ? 'एकूण क्षेत्र:' : 'Total Area:'}
+                    </span>
                     <span className="font-black text-emerald-800 text-xs sm:text-sm">
-                      {Math.round(liveArea).toLocaleString('mr-IN')} Ha
+                      {Math.round(liveArea).toLocaleString(isMarathi ? 'mr-IN' : 'en-IN')} Ha
                     </span>
                   </div>
                   {liveRepossessed > 0 && (
                     <div className="bg-teal-50/70 border border-teal-200/80 p-1.5 rounded-lg col-span-2">
-                      <span className="text-teal-900 text-[10px] block font-semibold">शासन जमा (जप्त):</span>
+                      <span className="text-teal-900 text-[10px] block font-semibold">
+                        {isMarathi ? 'शासन जमा (जप्त):' : 'Govt Vested:'}
+                      </span>
                       <span className="font-black text-teal-800 text-xs">
-                        {liveRepossessed.toLocaleString('mr-IN')} प्रकरणे ({liveRepossessedArea.toFixed(2)} Ha)
+                        {liveRepossessed.toLocaleString(isMarathi ? 'mr-IN' : 'en-IN')} {isMarathi ? 'प्रकरणे' : 'Cases'} ({liveRepossessedArea.toFixed(2)} Ha)
                       </span>
                     </div>
                   )}
@@ -1418,15 +1532,17 @@ export default function ChandrapurGisMap({
                 {/* Features */}
                 <div className="bg-slate-50/70 rounded-lg p-1.5 border border-slate-200/60 mb-1.5">
                   <p className="text-[10px] text-slate-700 leading-snug">
-                    <span className="text-slate-900 font-bold">वैशिष्ट्ये: </span>
-                    {hoveredTaluka.keyHighlights}
+                    <span className="text-slate-900 font-bold">
+                      {isMarathi ? 'वैशिष्ट्ये: ' : 'Key Features: '}
+                    </span>
+                    {isMarathi ? hoveredTaluka.keyHighlights : (hoveredTaluka.keyHighlightsEn || hoveredTaluka.keyHighlights)}
                   </p>
                 </div>
 
                 {/* Action Hint */}
                 <div className="text-[10px] text-slate-500 text-center pt-1 border-t border-slate-200/60 flex items-center justify-center gap-1 font-semibold">
                   <Sparkles className="w-3 h-3 text-amber-600" />
-                  <span>क्लिक करून डेटा फिल्टर करा</span>
+                  <span>{isMarathi ? 'क्लिक करून डेटा फिल्टर करा' : 'Click to filter data'}</span>
                 </div>
               </div>
             </div>
@@ -1444,14 +1560,16 @@ export default function ChandrapurGisMap({
             <div className="bg-white/90 backdrop-blur-xl text-slate-900 p-2.5 sm:p-3 rounded-xl border border-white/90 shadow-[0_12px_36px_-10px_rgba(15,23,42,0.25)] ring-1 ring-slate-900/10">
               <div className="flex items-center gap-1.5 mb-1 font-bold">
                 <span className="text-blue-600 text-sm">📍</span>
-                <span className="text-slate-900 text-xs sm:text-sm font-black">{hoveredPoi.nameMr}</span>
+                <span className="text-slate-900 text-xs sm:text-sm font-black">
+                  {isMarathi ? hoveredPoi.nameMr : (hoveredPoi.nameEn || hoveredPoi.nameMr)}
+                </span>
               </div>
               <div className="text-[10px] text-blue-900 font-bold mb-1 bg-blue-50 border border-blue-200 px-1.5 py-0.2 rounded inline-block">
-                {hoveredPoi.badge} {hoveredPoi.taluka ? `• ${hoveredPoi.taluka}` : ''}
+                {isMarathi ? (hoveredPoi.badgeMr || hoveredPoi.badge) : (hoveredPoi.badgeEn || hoveredPoi.badge)} {hoveredPoi.taluka ? `• ${hoveredPoi.taluka}` : ''}
               </div>
-              {hoveredPoi.description && (
+              {(hoveredPoi.description || hoveredPoi.descEn) && (
                 <p className="text-[10px] text-slate-700 leading-relaxed font-medium mt-0.5">
-                  {hoveredPoi.description}
+                  {isMarathi ? hoveredPoi.description : (hoveredPoi.descEn || hoveredPoi.description)}
                 </p>
               )}
             </div>
@@ -1460,22 +1578,22 @@ export default function ChandrapurGisMap({
 
         {/* Dynamic Mini Risk Bar in Heatmap Mode */}
         {viewMode === 'risk' && !showLegend && (
-          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-20 bg-white/90 backdrop-blur-md border border-slate-200/90 px-3 py-1 rounded-full shadow-xs flex items-center gap-2.5 text-[11px] font-bold pointer-events-none select-none">
-            <span className="flex items-center gap-1 text-rose-900">
+          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-20 bg-white/95 backdrop-blur-md border border-slate-200/90 px-2.5 py-1 rounded-full shadow-xs flex items-center gap-1.5 sm:gap-2.5 text-[10px] sm:text-[11px] font-bold pointer-events-none select-none max-w-[calc(100%-1rem)] overflow-x-auto scrollbar-none whitespace-nowrap">
+            <span className="flex items-center gap-1 text-rose-900 shrink-0">
               <span className="w-2 h-2 rounded-full bg-rose-200 border border-rose-600 inline-block" />
-              <span>अती-गंभीर (२५०+)</span>
+              <span>{isMarathi ? 'अती-गंभीर (२५०+)' : 'Critical (250+)'}</span>
             </span>
-            <span className="flex items-center gap-1 text-orange-900">
+            <span className="flex items-center gap-1 text-orange-900 shrink-0">
               <span className="w-2 h-2 rounded-full bg-orange-100 border border-orange-600 inline-block" />
-              <span>उच्च (५१-२५०)</span>
+              <span>{isMarathi ? 'उच्च (५१-२५०)' : 'High (51-250)'}</span>
             </span>
-            <span className="flex items-center gap-1 text-amber-900">
+            <span className="flex items-center gap-1 text-amber-900 shrink-0">
               <span className="w-2 h-2 rounded-full bg-yellow-100 border border-yellow-600 inline-block" />
-              <span>मध्यम (१५-५०)</span>
+              <span>{isMarathi ? 'मध्यम (१५-५०)' : 'Medium (15-50)'}</span>
             </span>
-            <span className="flex items-center gap-1 text-emerald-900">
+            <span className="flex items-center gap-1 text-emerald-900 shrink-0">
               <span className="w-2 h-2 rounded-full bg-emerald-100 border border-emerald-600 inline-block" />
-              <span>कमी (०-१४)</span>
+              <span>{isMarathi ? 'कमी (०-१४)' : 'Low (0-14)'}</span>
             </span>
           </div>
         )}
@@ -1486,15 +1604,15 @@ export default function ChandrapurGisMap({
             <div className="flex items-center justify-between border-b border-slate-200 pb-1 mb-2">
               <span className="font-black text-blue-950 uppercase tracking-wider text-[10px]">
                 {viewMode === 'risk'
-                  ? 'शर्तभंग जोखीम दर्शक (Risk Scale)'
+                  ? (isMarathi ? 'शर्तभंग जोखीम दर्शक' : 'Breach Risk Scale')
                   : viewMode === 'sdo'
-                  ? '६ उपविभाग संदर्भ (SDO Circles)'
-                  : 'संदर्भ सूची (Map Legend)'}
+                  ? (isMarathi ? '६ उपविभाग संदर्भ' : '6 SDO Circles Reference')
+                  : (isMarathi ? 'संदर्भ सूची' : 'Map Legend')}
               </span>
               <button
                 onClick={() => setShowLegend(false)}
                 className="text-slate-400 hover:text-slate-700 text-xs px-1 cursor-pointer font-bold"
-                title="बंद करा"
+                title={isMarathi ? 'बंद करा' : 'Close'}
               >
                 ✕
               </button>
@@ -1506,39 +1624,39 @@ export default function ChandrapurGisMap({
                 <div className="flex items-center justify-between gap-1.5 text-xs">
                   <div className="flex items-center gap-1.5">
                     <span className="w-3 h-3 rounded bg-rose-200 border border-rose-700 shrink-0"></span>
-                    <span className="font-bold text-rose-950">अती-गंभीर (Critical)</span>
+                    <span className="font-bold text-rose-950">{isMarathi ? 'अती-गंभीर' : 'Critical (250+)'}</span>
                   </div>
-                  <span className="font-mono font-bold text-rose-800">२५०+</span>
+                  <span className="font-mono font-bold text-rose-800">{isMarathi ? '२५०+' : '250+'}</span>
                 </div>
 
                 <div className="flex items-center justify-between gap-1.5 text-xs">
                   <div className="flex items-center gap-1.5">
                     <span className="w-3 h-3 rounded bg-orange-100 border border-orange-700 shrink-0"></span>
-                    <span className="font-bold text-orange-950">उच्च जोखीम (High)</span>
+                    <span className="font-bold text-orange-950">{isMarathi ? 'उच्च जोखीम' : 'High Risk (51-250)'}</span>
                   </div>
-                  <span className="font-mono font-bold text-orange-800">५१-२५०</span>
+                  <span className="font-mono font-bold text-orange-800">{isMarathi ? '५१-२५०' : '51-250'}</span>
                 </div>
 
                 <div className="flex items-center justify-between gap-1.5 text-xs">
                   <div className="flex items-center gap-1.5">
                     <span className="w-3 h-3 rounded bg-yellow-100 border border-yellow-700 shrink-0"></span>
-                    <span className="font-bold text-amber-950">मध्यम जोखीम (Medium)</span>
+                    <span className="font-bold text-amber-950">{isMarathi ? 'मध्यम जोखीम' : 'Medium Risk (15-50)'}</span>
                   </div>
-                  <span className="font-mono font-bold text-amber-800">१५-५०</span>
+                  <span className="font-mono font-bold text-amber-800">{isMarathi ? '१५-५०' : '15-50'}</span>
                 </div>
 
                 <div className="flex items-center justify-between gap-1.5 text-xs">
                   <div className="flex items-center gap-1.5">
                     <span className="w-3 h-3 rounded bg-emerald-100 border border-emerald-700 shrink-0"></span>
-                    <span className="font-bold text-emerald-950">कमी / सुरक्षित (Low)</span>
+                    <span className="font-bold text-emerald-950">{isMarathi ? 'कमी / सुरक्षित' : 'Low / Safe (0-14)'}</span>
                   </div>
-                  <span className="font-mono font-bold text-emerald-800">०-१४</span>
+                  <span className="font-mono font-bold text-emerald-800">{isMarathi ? '०-१४' : '0-14'}</span>
                 </div>
 
                 <div className="pt-1.5 border-t border-slate-100 text-[10px] text-slate-500 font-semibold flex items-center justify-between">
-                  <span>जिल्हा एकूण:</span>
+                  <span>{isMarathi ? 'जिल्हा एकूण:' : 'District Total:'}</span>
                   <span className="font-bold text-rose-700 font-mono">
-                    {riskStats.totalViolations.toLocaleString('mr-IN')} प्रकरणे
+                    {riskStats.totalViolations.toLocaleString(isMarathi ? 'mr-IN' : 'en-IN')} {isMarathi ? 'प्रकरणे' : 'Cases'}
                   </span>
                 </div>
               </div>
@@ -1558,7 +1676,7 @@ export default function ChandrapurGisMap({
                       style={{ backgroundColor: sdo.color }}
                     />
                     <span className={`font-bold ${selectedSdo === sdo.id ? 'text-indigo-950 underline' : 'text-slate-700'}`}>
-                      {sdo.shortNameMr}
+                      {isMarathi ? (sdo.shortNameMr || sdo.nameMr) : (sdo.shortNameEn || sdo.nameEn || sdo.id)}
                     </span>
                   </button>
                 ))}
@@ -1570,43 +1688,43 @@ export default function ChandrapurGisMap({
               <div className="grid grid-cols-2 gap-x-2 gap-y-1.5 text-slate-700 text-[10px]">
                 <div className="flex items-center gap-1.5">
                   <span className="w-2.5 h-2.5 rounded-full bg-blue-900 border border-white shadow-2xs"></span>
-                  <span>जिल्हा मुख्यालय (HQ)</span>
+                  <span>{isMarathi ? 'जिल्हा मुख्यालय' : 'District HQ'}</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <span className="w-2 h-2 rounded-full bg-slate-700"></span>
-                  <span>तालुका केंद्र</span>
+                  <span>{isMarathi ? 'तालुका केंद्र' : 'Taluka Center'}</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <span className="w-3 h-0.5 bg-sky-600"></span>
-                  <span>प्रमुख नद्या</span>
+                  <span>{isMarathi ? 'प्रमुख नद्या' : 'Major Rivers'}</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <span className="w-3 h-0.5 border-b border-dashed border-slate-700"></span>
-                  <span>रेल्वे मार्ग</span>
+                  <span>{isMarathi ? 'रेल्वे मार्ग' : 'Railways'}</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <span className="text-[10px]">⛏</span>
-                  <span>कोळसा खाणी</span>
+                  <span>{isMarathi ? 'कोळसा खाणी' : 'Coal Mines'}</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <span className="text-[10px]">🏭</span>
-                  <span>सिमेंट उद्योग</span>
+                  <span>{isMarathi ? 'सिमेंट उद्योग' : 'Cement Industry'}</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <span className="text-[10px]">⚡</span>
-                  <span>CSTPS वीज केंद्र</span>
+                  <span>{isMarathi ? 'CSTPS वीज केंद्र' : 'CSTPS Power Plant'}</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <span className="text-[10px]">🐅</span>
-                  <span>ताडोबा अभयारण्य</span>
+                  <span>{isMarathi ? 'ताडोबा अभयारण्य' : 'Tadoba Reserve'}</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <span className="text-[10px]">🏰</span>
-                  <span>ऐतिहासिक किल्ले</span>
+                  <span>{isMarathi ? 'ऐतिहासिक किल्ले' : 'Gond Forts'}</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <span className="text-[10px]">📄</span>
-                  <span>कागद उद्योग (BILT)</span>
+                  <span>{isMarathi ? 'कागद उद्योग' : 'Paper Industry'}</span>
                 </div>
               </div>
             )}
@@ -1622,60 +1740,68 @@ export default function ChandrapurGisMap({
             <div className="space-y-1">
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-900 border border-blue-200">
-                  निवडलेला तालुका
+                  {isMarathi ? 'निवडलेला तालुका' : 'Selected Taluka'}
                 </span>
                 <h3 className="text-base sm:text-lg font-black text-slate-900 flex items-center gap-2">
-                  <span>तालुका {activeTalukaProfile.nameMr}</span>
+                  <span>{isMarathi ? `तालुका ${activeTalukaProfile.nameMr}` : `${activeTalukaProfile.nameEn || activeTalukaProfile.id} Taluka`}</span>
                 </h3>
                 <span className="text-xs text-blue-900 font-bold">
-                  • {activeTalukaProfile.sdoSubdivision}
+                  • {isMarathi ? activeTalukaProfile.sdoSubdivision : (activeTalukaProfile.sdoSubdivisionEn || activeTalukaProfile.sdoSubdivision)}
                 </span>
               </div>
               <p className="text-xs text-slate-600 leading-snug">
-                <span className="text-slate-500">{activeTalukaProfile.tehsildarOffice} | </span>
-                {activeTalukaProfile.keyHighlights}
+                <span className="text-slate-500">{isMarathi ? activeTalukaProfile.tehsildarOffice : (activeTalukaProfile.tehsildarOfficeEn || activeTalukaProfile.tehsildarOffice)} | </span>
+                {isMarathi ? activeTalukaProfile.keyHighlights : (activeTalukaProfile.keyHighlightsEn || activeTalukaProfile.keyHighlights)}
               </p>
             </div>
 
             {/* Micro Stats Grid */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs shrink-0 w-full lg:w-auto">
               <div className="bg-white border border-slate-200 px-3 py-1.5 rounded-lg text-center shadow-2xs">
-                <span className="text-[10px] text-slate-500 block font-medium">नोंदणीकृत ७/१२</span>
+                <span className="text-[10px] text-slate-500 block font-medium">
+                  {isMarathi ? 'नोंदणीकृत ७/१२' : 'Registered 7/12'}
+                </span>
                 <span className="font-black text-slate-900 text-sm">
-                  {Number(activeTalukaProfile.liveParcelCount || activeTalukaProfile.total712).toLocaleString('mr-IN')}
+                  {Number(activeTalukaProfile.liveParcelCount || activeTalukaProfile.total712).toLocaleString(isMarathi ? 'mr-IN' : 'en-IN')}
                 </span>
                 <span className="text-[10px] text-blue-700 block font-semibold">
-                  {Number(activeTalukaProfile.liveVillageCount || activeTalukaProfile.villagesCount || 0)} गावे
+                  {Number(activeTalukaProfile.liveVillageCount || activeTalukaProfile.villagesCount || 0)} {isMarathi ? 'गावे' : 'Villages'}
                 </span>
               </div>
 
               <div className="bg-amber-50 border border-amber-200 px-3 py-1.5 rounded-lg text-center shadow-2xs">
-                <span className="text-[10px] text-amber-800 block font-bold">शर्तभंग चौकशी</span>
+                <span className="text-[10px] text-amber-800 block font-bold">
+                  {isMarathi ? 'शर्तभंग चौकशी' : 'Breach Inquiries'}
+                </span>
                 <span className="font-black text-amber-700 text-sm">
-                  {Number(activeTalukaProfile.liveViolationCount || activeTalukaProfile.shartbhang).toLocaleString('mr-IN')}
+                  {Number(activeTalukaProfile.liveViolationCount || activeTalukaProfile.shartbhang).toLocaleString(isMarathi ? 'mr-IN' : 'en-IN')}
                 </span>
                 <span className="text-[10px] text-amber-900 block font-medium">
-                  प्रकरणे
+                  {isMarathi ? 'प्रकरणे' : 'Cases'}
                 </span>
               </div>
 
               <div className="bg-rose-50 border border-rose-200 px-3 py-1.5 rounded-lg text-center shadow-2xs">
-                <span className="text-[10px] text-rose-800 block font-medium">चौकशी/वाद गट</span>
+                <span className="text-[10px] text-rose-800 block font-medium">
+                  {isMarathi ? 'चौकशी/वाद गट' : 'Inquiries / Disputes'}
+                </span>
                 <span className="font-black text-rose-700 text-sm">
-                  {Number(activeTalukaProfile.liveDisputeCount || 0).toLocaleString('mr-IN')} गट
+                  {Number(activeTalukaProfile.liveDisputeCount || 0).toLocaleString(isMarathi ? 'mr-IN' : 'en-IN')} {isMarathi ? 'गट' : 'Gat'}
                 </span>
                 <span className="text-[10px] text-rose-900 block font-medium">
-                  {activeTalukaProfile.liveRepossessedCount > 0 ? `${activeTalukaProfile.liveRepossessedCount} शासन जमा` : 'सक्रिय वाद'}
+                  {activeTalukaProfile.liveRepossessedCount > 0 ? (isMarathi ? `${activeTalukaProfile.liveRepossessedCount} शासन जमा` : `${activeTalukaProfile.liveRepossessedCount} Govt Vested`) : (isMarathi ? 'सक्रिय वाद' : 'Active Disputes')}
                 </span>
               </div>
 
               <div className="bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-lg text-center shadow-2xs">
-                <span className="text-[10px] text-emerald-800 block font-medium">एकूण क्षेत्र</span>
+                <span className="text-[10px] text-emerald-800 block font-medium">
+                  {isMarathi ? 'एकूण क्षेत्र' : 'Total Area'}
+                </span>
                 <span className="font-black text-emerald-700 text-sm">
-                  {Math.round(activeTalukaProfile.liveTotalAreaHa).toLocaleString('mr-IN')} Ha
+                  {Math.round(activeTalukaProfile.liveTotalAreaHa).toLocaleString(isMarathi ? 'mr-IN' : 'en-IN')} Ha
                 </span>
                 <span className="text-[10px] text-emerald-900 block font-medium">
-                  {Math.round(activeTalukaProfile.liveCultivableAreaHa).toLocaleString('mr-IN')} Ha लागवडीयोग्य
+                  {Math.round(activeTalukaProfile.liveCultivableAreaHa).toLocaleString(isMarathi ? 'mr-IN' : 'en-IN')} {isMarathi ? 'Ha लागवडीयोग्य' : 'Ha Cultivable'}
                 </span>
               </div>
             </div>
@@ -1686,7 +1812,7 @@ export default function ChandrapurGisMap({
                 href={`/parcels?taluka=${encodeURIComponent(activeTalukaProfile.id)}`}
                 className="inline-flex items-center gap-1.5 bg-blue-900 hover:bg-blue-800 text-white font-bold px-3 py-1.5 rounded-lg text-xs shadow-2xs transition active:scale-95 cursor-pointer"
               >
-                <span>भूखंड यादी</span>
+                <span>{isMarathi ? 'भूखंड यादी' : 'Parcel Register'}</span>
                 <ChevronRight className="w-3.5 h-3.5" />
               </Link>
 
@@ -1694,7 +1820,7 @@ export default function ChandrapurGisMap({
                 href={`/cases?taluka=${encodeURIComponent(activeTalukaProfile.id)}`}
                 className="inline-flex items-center gap-1.5 bg-white hover:bg-slate-50 text-slate-800 font-bold px-3 py-1.5 rounded-lg text-xs border border-slate-200 shadow-2xs transition cursor-pointer"
               >
-                <span>सुनावण्या</span>
+                <span>{isMarathi ? 'सुनावण्या' : 'Hearings'}</span>
                 <ExternalLink className="w-3.5 h-3.5" />
               </Link>
 
@@ -1702,7 +1828,7 @@ export default function ChandrapurGisMap({
                 onClick={() => onSelectTaluka && onSelectTaluka('')}
                 className="text-xs text-slate-500 hover:text-slate-800 underline px-1 transition cursor-pointer"
               >
-                सर्व तालुके दाखवा
+                {isMarathi ? 'सर्व तालुके दाखवा' : 'Show All Talukas'}
               </button>
             </div>
           </div>
@@ -1716,18 +1842,18 @@ export default function ChandrapurGisMap({
             <div className="space-y-1">
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-900 border border-indigo-300">
-                  निवडलेला उपविभाग (SDO Circle)
+                  {isMarathi ? 'निवडलेला उपविभाग' : 'Selected Sub-Division (SDO)'}
                 </span>
                 <h3 className="text-base sm:text-lg font-black text-slate-900 flex items-center gap-2">
-                  <span>{selectedSdoData.nameMr}</span>
+                  <span>{isMarathi ? selectedSdoData.nameMr : (selectedSdoData.nameEn || selectedSdoData.nameMr)}</span>
                 </h3>
               </div>
               <p className="text-xs text-indigo-950 font-semibold leading-snug">
-                <span className="text-slate-600">सक्षम अधिकारी: </span>
+                <span className="text-slate-600">{isMarathi ? 'सक्षम अधिकारी: ' : 'Competent Officer: '}</span>
                 {selectedSdoData.sdoOfficer}
               </p>
               <p className="text-xs text-slate-600">
-                <span className="font-bold text-slate-700">समाविष्ट तालुके: </span>
+                <span className="font-bold text-slate-700">{isMarathi ? 'समाविष्ट तालुके: ' : 'Included Talukas: '}</span>
                 {selectedSdoData.talukas.join(', ')}
               </p>
             </div>
@@ -1743,30 +1869,38 @@ export default function ChandrapurGisMap({
               return (
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs shrink-0 w-full lg:w-auto">
                   <div className="bg-white border border-slate-200 px-3 py-1.5 rounded-lg text-center shadow-2xs">
-                    <span className="text-[10px] text-slate-500 block font-medium">महसूल गावे</span>
+                    <span className="text-[10px] text-slate-500 block font-medium">
+                      {isMarathi ? 'महसूल गावे' : 'Revenue Villages'}
+                    </span>
                     <span className="font-black text-slate-900 text-sm">
-                      {stats.villages} गावे
+                      {stats.villages} {isMarathi ? 'गावे' : 'Villages'}
                     </span>
                   </div>
 
                   <div className="bg-blue-50 border border-blue-200 px-3 py-1.5 rounded-lg text-center shadow-2xs">
-                    <span className="text-[10px] text-blue-900 block font-medium">नोंदणीकृत ७/१२</span>
+                    <span className="text-[10px] text-blue-900 block font-medium">
+                      {isMarathi ? 'नोंदणीकृत ७/१२' : 'Registered 7/12'}
+                    </span>
                     <span className="font-black text-blue-950 text-sm">
-                      {stats.parcels.toLocaleString('mr-IN')}
+                      {stats.parcels.toLocaleString(isMarathi ? 'mr-IN' : 'en-IN')}
                     </span>
                   </div>
 
                   <div className="bg-amber-50 border border-amber-200 px-3 py-1.5 rounded-lg text-center shadow-2xs">
-                    <span className="text-[10px] text-amber-800 block font-bold">शर्तभंग प्रकरणे</span>
+                    <span className="text-[10px] text-amber-800 block font-bold">
+                      {isMarathi ? 'शर्तभंग प्रकरणे' : 'Breach Cases'}
+                    </span>
                     <span className="font-black text-amber-700 text-sm">
-                      {stats.violations.toLocaleString('mr-IN')}
+                      {stats.violations.toLocaleString(isMarathi ? 'mr-IN' : 'en-IN')}
                     </span>
                   </div>
 
                   <div className="bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-lg text-center shadow-2xs">
-                    <span className="text-[10px] text-emerald-800 block font-medium">एकूण क्षेत्र</span>
+                    <span className="text-[10px] text-emerald-800 block font-medium">
+                      {isMarathi ? 'एकूण क्षेत्र' : 'Total Area'}
+                    </span>
                     <span className="font-black text-emerald-700 text-sm">
-                      {Math.round(stats.area).toLocaleString('mr-IN')} Ha
+                      {Math.round(stats.area).toLocaleString(isMarathi ? 'mr-IN' : 'en-IN')} Ha
                     </span>
                   </div>
                 </div>
@@ -1778,7 +1912,7 @@ export default function ChandrapurGisMap({
                 onClick={() => setSelectedSdo('all')}
                 className="text-xs text-slate-500 hover:text-slate-800 underline px-1 transition cursor-pointer"
               >
-                सर्व उपविभाग दाखवा
+                {isMarathi ? 'सर्व उपविभाग दाखवा' : 'Show All Sub-Divisions'}
               </button>
             </div>
           </div>

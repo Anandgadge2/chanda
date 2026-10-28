@@ -8,7 +8,7 @@ import { logAudit } from '../middleware/auditMiddleware.js';
  */
 export const getCases = async (req, res) => {
   try {
-    const { search, violationType, status, taluka, isRepossessedToGovt, page = 1, limit = 30 } = req.query;
+    const { search, violationType, status, taluka, village, villageName, isRepossessedToGovt, page = 1, limit = 30 } = req.query;
 
     const pageNum = Math.max(1, parseInt(page, 10));
     const take = Math.min(100, Math.max(1, parseInt(limit, 10)));
@@ -21,11 +21,17 @@ export const getCases = async (req, res) => {
     if (isRepossessedToGovt !== undefined && isRepossessedToGovt !== '') {
       andConditions.push({ isRepossessedToGovt: isRepossessedToGovt === 'true' });
     }
-    if (taluka) {
+    const parcelConditions = {};
+    if (taluka && taluka !== 'all' && taluka !== 'सर्व तालुके') {
+      parcelConditions.taluka = { equals: taluka, mode: 'insensitive' };
+    }
+    const targetVillage = village || villageName;
+    if (targetVillage && targetVillage !== 'all' && targetVillage !== 'सर्व गावे') {
+      parcelConditions.villageName = { equals: targetVillage.trim(), mode: 'insensitive' };
+    }
+    if (Object.keys(parcelConditions).length > 0) {
       andConditions.push({
-        parcel: {
-          taluka: { equals: taluka, mode: 'insensitive' },
-        },
+        parcel: parcelConditions,
       });
     }
     if (search && search.trim()) {
