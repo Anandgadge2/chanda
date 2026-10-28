@@ -87,6 +87,8 @@ export default function BulkUploadPage() {
   const [parcelFile, setParcelFile] = useState(null);
 
   const [uploading, setUploading] = useState(false);
+  const [inspecting, setInspecting] = useState(false);
+  const [diffReport, setDiffReport] = useState(null);
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
 
@@ -95,7 +97,39 @@ export default function BulkUploadPage() {
     if (selected.length > 0) {
       setPrapatraFiles(selected);
       setResult(null);
+      setDiffReport(null);
       setError(null);
+    }
+  };
+
+  const handleInspectDiff = async (e) => {
+    if (e) e.preventDefault();
+    if (!prapatraFiles || prapatraFiles.length === 0) {
+      setError(isMarathi ? 'कृपया किमान एक १ ते ४५ प्रपत्र (.xlsx) फाईल निवडा.' : 'Please select at least one 1 to 45 Prapatra (.xlsx) file.');
+      return;
+    }
+
+    setInspecting(true);
+    setError(null);
+    setResult(null);
+
+    const formData = new FormData();
+    formData.append('taluka', selectedTaluka);
+    if (villageName.trim() && prapatraFiles.length === 1) {
+      formData.append('villageName', villageName.trim());
+    }
+
+    prapatraFiles.forEach((f) => {
+      formData.append('files', f);
+    });
+
+    try {
+      const data = await api.inspectPrapatraDiff(formData);
+      setDiffReport(data);
+    } catch (err) {
+      setError(err.message || (isMarathi ? 'पडताळणी अयशस्वी झाली.' : 'Inspection failed.'));
+    } finally {
+      setInspecting(false);
     }
   };
 
@@ -168,6 +202,8 @@ export default function BulkUploadPage() {
     setParcelFile(null);
     setVillageName('');
     setResult(null);
+    setDiffReport(null);
+    setInspecting(false);
     setError(null);
   };
 
@@ -524,6 +560,28 @@ export default function BulkUploadPage() {
                               <span>•</span>
                               <span>{isMarathi ? 'दाखल प्रकरणे: ' : 'Cases Created: '}<strong className="text-amber-700">{r.casesCreated || 0}</strong></span>
                             </div>
+                            {r.reconciliation && (
+                              <div className="mt-1.5 pt-1.5 border-t border-emerald-100 flex flex-wrap gap-1.5 text-[10px]">
+                                <span className="px-2 py-0.5 bg-emerald-50 text-emerald-900 border border-emerald-200 rounded font-bold">
+                                  ✓ {isMarathi ? `पुनरावृत्ती / सुरक्षित: ${r.reconciliation.unchangedPreserved} गट` : `Unchanged Preserved: ${r.reconciliation.unchangedPreserved} Gats`}
+                                </span>
+                                {r.reconciliation.modifiedUpdated > 0 && (
+                                  <span className="px-2 py-0.5 bg-amber-50 text-amber-900 border border-amber-200 rounded font-bold">
+                                    ✏️ {isMarathi ? `माहिती अपडेट: ${r.reconciliation.modifiedUpdated} गट` : `Updated: ${r.reconciliation.modifiedUpdated} Gats`}
+                                  </span>
+                                )}
+                                {r.reconciliation.netNewSeeded > 0 && (
+                                  <span className="px-2 py-0.5 bg-blue-50 text-blue-900 border border-blue-200 rounded font-bold">
+                                    ✦ {isMarathi ? `नवीन सिड: ${r.reconciliation.netNewSeeded} गट` : `Net-New Seeded: ${r.reconciliation.netNewSeeded} Gats`}
+                                  </span>
+                                )}
+                                {r.reconciliation.omittedWarning > 0 && (
+                                  <span className="px-2 py-0.5 bg-rose-50 text-rose-900 border border-rose-200 rounded font-bold">
+                                    ⚠️ {isMarathi ? `फाईलमध्ये नसलेले: ${r.reconciliation.omittedWarning} गट (सुरक्षित)` : `Omitted: ${r.reconciliation.omittedWarning} Gats (Retained)`}
+                                  </span>
+                                )}
+                              </div>
+                            )}
                             {r.gatNumbersSample && r.gatNumbersSample.length > 0 && (
                               <div className="mt-1 pt-1 border-t border-slate-100 flex items-center gap-1.5 flex-wrap">
                                 <span className="text-[10px] font-bold text-slate-500">
@@ -574,28 +632,209 @@ export default function BulkUploadPage() {
               </div>
             )}
 
+            {/* Pre-Flight Reconciliation Diff Inspection Card */}
+            {diffReport && diffReport.diffResults && diffReport.diffResults.length > 0 && (
+              <div className="bg-slate-50 border-2 border-slate-300 rounded-2xl p-4 sm:p-5 shadow-sm space-y-4 animate-in fade-in">
+                <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2 border-b border-slate-200 pb-3">
+                  <div>
+                    <h4 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                      <ShieldAlert className="w-4 h-4 text-emerald-700" />
+                      {isMarathi ? 'डेटाबेस फेर-तपासणी अहवाल (Pre-Flight Reconciliation Diff)' : 'Pre-Flight Reconciliation Diff'}
+                    </h4>
+                    <p className="text-[11px] text-slate-600">
+                      {isMarathi
+                        ? 'आधीपासून अस्तित्वात असलेला डेटा सुरक्षित राहील; जुने रेकॉर्ड्स डिलीट न करता केवळ बदल झालेले व नवीन रेकॉर्ड्स सिड केले जातील.'
+                        : 'Existing records will be safely preserved without deleting legal histories; only modified and net-new rows will be updated/seeded.'}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setDiffReport(null)}
+                    className="text-[11px] text-slate-500 hover:text-slate-800 underline self-start sm:self-auto cursor-pointer"
+                  >
+                    {isMarathi ? 'अहवाल बंद करा' : 'Dismiss'}
+                  </button>
+                </div>
+
+                {diffReport.diffResults.map((dr, idx) => (
+                  <div key={idx} className="bg-white border border-slate-200 rounded-xl p-3.5 space-y-3">
+                    <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-2">
+                      <div className="flex items-center gap-2">
+                        <span className="font-black text-slate-900 text-xs sm:text-sm">
+                          {isMarathi ? `गाव: ${dr.village}` : `Village: ${dr.village}`}
+                        </span>
+                        <span className="text-[10px] bg-slate-100 text-slate-700 font-mono px-2 py-0.5 rounded font-bold">
+                          {dr.fileName}
+                        </span>
+                      </div>
+                      <div className="text-[11px] text-slate-600">
+                        {isMarathi ? `फाईलमध्ये एकूण: ` : `Total in Sheet: `}
+                        <strong className="text-slate-900">{dr.stats.totalInSheet}</strong>
+                        {' • '}
+                        {isMarathi ? `डेटाबेसमध्ये पूर्वीचे: ` : `In Database: `}
+                        <strong className="text-slate-900">{dr.stats.totalInDb}</strong>
+                      </div>
+                    </div>
+
+                    {/* Metric Badges */}
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                      <div className="p-2.5 bg-emerald-50/70 border border-emerald-200 rounded-lg">
+                        <span className="text-[10px] text-emerald-800 font-bold block flex items-center gap-1">
+                          <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                          {isMarathi ? 'पुनरावृत्ती (Duplicates)' : 'Unchanged Duplicates'}
+                        </span>
+                        <span className="text-lg font-black text-emerald-800">
+                          {dr.stats.unchangedCount}
+                        </span>
+                        <span className="text-[9px] text-emerald-600 block">
+                          {isMarathi ? 'आधीपासून सुरक्षित (बदल नाही)' : 'Already in DB (Preserved)'}
+                        </span>
+                      </div>
+
+                      <div className="p-2.5 bg-amber-50/70 border border-amber-200 rounded-lg">
+                        <span className="text-[10px] text-amber-800 font-bold block flex items-center gap-1">
+                          <AlertCircle className="w-3 h-3 text-amber-600" />
+                          {isMarathi ? 'माहिती बदललेले (Modified)' : 'Modified Rows'}
+                        </span>
+                        <span className="text-lg font-black text-amber-800">
+                          {dr.stats.modifiedCount}
+                        </span>
+                        <span className="text-[9px] text-amber-600 block">
+                          {isMarathi ? 'क्षेत्र / वर्ग / तक्रार बदललेली' : 'Area/Tenure/Dispute changes'}
+                        </span>
+                      </div>
+
+                      <div className="p-2.5 bg-blue-50/70 border border-blue-200 rounded-lg">
+                        <span className="text-[10px] text-blue-800 font-bold block flex items-center gap-1">
+                          <UploadCloud className="w-3 h-3 text-blue-600" />
+                          {isMarathi ? 'नवीन सिड होणारे (Net-New)' : 'Net-New Parcels'}
+                        </span>
+                        <span className="text-lg font-black text-blue-800">
+                          {dr.stats.netNewCount}
+                        </span>
+                        <span className="text-[9px] text-blue-600 block">
+                          {isMarathi ? 'डेटाबेसमध्ये नवीन भर पडेल' : 'New parcels to be added'}
+                        </span>
+                      </div>
+
+                      <div className="p-2.5 bg-rose-50/70 border border-rose-200 rounded-lg">
+                        <span className="text-[10px] text-rose-800 font-bold block flex items-center gap-1">
+                          <ShieldAlert className="w-3 h-3 text-rose-600" />
+                          {isMarathi ? 'फाईलमध्ये नसलेले (Omitted)' : 'Omitted in File'}
+                        </span>
+                        <span className="text-lg font-black text-rose-800">
+                          {dr.stats.omittedCount}
+                        </span>
+                        <span className="text-[9px] text-rose-600 block">
+                          {isMarathi ? 'डेटाबेसमध्ये राहतील (सुरक्षित)' : 'Retained safely in DB'}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Detailed Expandable Sections */}
+                    {dr.diff.modifiedRows && dr.diff.modifiedRows.length > 0 && (
+                      <div className="p-2.5 bg-amber-50/40 border border-amber-200 rounded-lg text-xs space-y-1.5">
+                        <span className="font-bold text-amber-900 block text-[11px]">
+                          {isMarathi ? 'बदल झालेल्या गटांचा तपशील (Field-Level Modifications):' : 'Modified Gats Details:'}
+                        </span>
+                        <div className="max-h-36 overflow-y-auto space-y-1 divide-y divide-amber-100">
+                          {dr.diff.modifiedRows.map((mr, mi) => (
+                            <div key={mi} className="pt-1 flex flex-wrap items-center justify-between gap-1 text-[11px]">
+                              <span className="font-mono font-bold text-slate-800">
+                                {isMarathi ? `गट क्र. ${mr.gatNumber}` : `Gat ${mr.gatNumber}`}
+                              </span>
+                              <div className="flex flex-wrap gap-1.5">
+                                {mr.diffs.map((d, di) => (
+                                  <span key={di} className="px-1.5 py-0.5 bg-white border border-amber-300 rounded text-[10px] text-amber-900">
+                                    {d.label}: <span className="line-through text-slate-500">{String(d.old)}</span> &rarr; <strong className="text-emerald-700">{String(d.new)}</strong>
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {dr.diff.unchangedRows && dr.diff.unchangedRows.length > 0 && (
+                      <div className="p-2.5 bg-emerald-50/40 border border-emerald-100 rounded-lg text-xs">
+                        <span className="font-bold text-emerald-950 block text-[11px]">
+                          {isMarathi ? 'आधीपासून अस्तित्वात असलेले गट (Unchanged / Duplicates - सुरक्षित):' : 'Unchanged / Duplicate Gats Sample:'}
+                        </span>
+                        <div className="flex flex-wrap gap-1 mt-1 max-h-24 overflow-y-auto">
+                          {dr.diff.unchangedRows.slice(0, 30).map((ur, ui) => (
+                            <span key={ui} className="px-1.5 py-0.5 bg-white text-emerald-800 text-[10px] rounded font-mono border border-emerald-200">
+                              {ur.gatNumber}
+                            </span>
+                          ))}
+                          {dr.diff.unchangedRows.length > 30 && (
+                            <span className="text-[10px] text-slate-500 font-medium px-1">
+                              +{dr.diff.unchangedRows.length - 30} {isMarathi ? 'इतर गट' : 'more'}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {dr.diff.netNewRows && dr.diff.netNewRows.length > 0 && (
+                      <div className="p-2.5 bg-blue-50/40 border border-blue-100 rounded-lg text-xs">
+                        <span className="font-bold text-blue-950 block text-[11px]">
+                          {isMarathi ? 'नवीन जोडले जाणारे गट (Net-New Parcels):' : 'Net-New Parcels to be Added:'}
+                        </span>
+                        <div className="flex flex-wrap gap-1 mt-1 max-h-24 overflow-y-auto">
+                          {dr.diff.netNewRows.map((nr, ni) => (
+                            <span key={ni} className="px-1.5 py-0.5 bg-white text-blue-800 text-[10px] rounded font-mono font-bold border border-blue-200">
+                              {nr.gatNumber} ({nr.totalAreaHa} हे.)
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+
             <div className="flex flex-col sm:flex-row justify-end gap-2.5 sm:gap-3 pt-2">
               <button
                 type="button"
                 onClick={clearForm}
-                className="w-full sm:w-auto px-4 py-2 border border-slate-300 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50 transition"
+                className="w-full sm:w-auto px-4 py-2 border border-slate-300 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50 transition cursor-pointer"
               >
                 {isMarathi ? 'साफ करा (Clear)' : 'Clear'}
               </button>
               <button
+                type="button"
+                onClick={handleInspectDiff}
+                disabled={prapatraFiles.length === 0 || inspecting || uploading}
+                className="w-full sm:w-auto bg-slate-800 hover:bg-slate-900 text-white font-semibold px-5 py-2.5 rounded-xl text-xs shadow-sm transition disabled:opacity-50 flex items-center justify-center gap-2 active:scale-95 cursor-pointer"
+              >
+                {inspecting ? (
+                  <>
+                    <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <span>{isMarathi ? 'डेटाबेस पडताळणी सुरू आहे...' : 'Inspecting existing data...'}</span>
+                  </>
+                ) : (
+                  <>
+                    <FileSpreadsheet className="w-4 h-4 text-emerald-400" />
+                    <span>{isMarathi ? 'पडताळणी व पुनरावृत्ती तपासा (Inspect Duplicates)' : 'Inspect & Detect Duplicates'}</span>
+                  </>
+                )}
+              </button>
+              <button
                 type="submit"
                 disabled={prapatraFiles.length === 0 || uploading}
-                className="w-full sm:w-auto bg-emerald-700 hover:bg-emerald-800 text-white font-semibold px-6 py-2.5 rounded-xl text-xs shadow-sm transition disabled:opacity-50 flex items-center justify-center gap-2 active:scale-95"
+                className="w-full sm:w-auto bg-emerald-700 hover:bg-emerald-800 text-white font-semibold px-6 py-2.5 rounded-xl text-xs shadow-sm transition disabled:opacity-50 flex items-center justify-center gap-2 active:scale-95 cursor-pointer"
               >
                 {uploading ? (
                   <>
                     <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    <span>{isMarathi ? 'तपासणी व सिडिंग सुरू आहे...' : 'Ingesting and seeding data...'}</span>
+                    <span>{isMarathi ? 'तपासणी व सुरक्षित सिडिंग सुरू आहे...' : 'Reconciling and seeding data...'}</span>
                   </>
                 ) : (
                   <>
                     <UploadCloud className="w-4 h-4" />
-                    <span>{isMarathi ? '१ ते ४५ प्रपत्र सिस्टीममध्ये समाविष्ट करा (Ingest & Seed)' : 'Ingest & Seed Booklets'}</span>
+                    <span>{isMarathi ? 'बदल तपासून सुरक्षित सिड करा (Reconcile & Seed)' : 'Reconcile & Seed Data'}</span>
                   </>
                 )}
               </button>

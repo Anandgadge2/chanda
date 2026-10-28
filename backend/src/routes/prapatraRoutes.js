@@ -8,7 +8,8 @@ import {
   getTalukaVillages,
   getBookletCategories,
   updatePrapatraRollup,
-  uploadPrapatraExcel
+  uploadPrapatraExcel,
+  inspectPrapatraDiff
 } from '../controllers/prapatraController.js';
 import { authenticate, authorize } from '../middleware/authMiddleware.js';
 
@@ -39,6 +40,18 @@ router.get('/summary', getDistrictSummary);
  * @query   taluka (e.g. 'Warora', 'all')
  */
 router.get('/villages', getTalukaVillages);
+
+/**
+ * @route   POST /api/prapatra/inspect-diff
+ * @desc    Dry-run pre-flight diff inspection of Excel booklet vs DB records
+ */
+router.post(
+  '/inspect-diff',
+  authenticate,
+  authorize('SUPERADMIN', 'COLLECTOR', 'SUB_COLLECTOR', 'SDO', 'TEHSILDAR', 'NAIB_TEHSILDAR', 'CIRCLE_OFFICER', 'TALATHI'),
+  upload.any(),
+  inspectPrapatraDiff
+);
 
 /**
  * @route   POST /api/prapatra/upload

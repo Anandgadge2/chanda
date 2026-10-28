@@ -522,6 +522,21 @@ export const api = {
     return resData;
   },
 
+  inspectPrapatraDiff: async (formData) => {
+    const res = await fetch(`${BASE_URL}/api/prapatra/inspect-diff`, {
+      method: 'POST',
+      headers: {
+        ...getAuthHeaders(),
+      },
+      body: formData,
+    });
+    const resData = await res.json();
+    if (!res.ok) {
+      throw new Error(resData.error || 'तपासणी प्रपत्र पडताळणी अयशस्वी झाली.');
+    }
+    return resData;
+  },
+
   uploadPrapatraExcel: async (formData) => {
     const res = await fetch(`${BASE_URL}/api/prapatra/upload`, {
       method: 'POST',

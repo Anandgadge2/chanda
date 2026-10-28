@@ -160,7 +160,7 @@ export default function ReportsPage() {
   const [pageSize, setPageSize] = useState(25);
 
   // Data states
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [summaryData, setSummaryData] = useState([]);
   const [parcels, setParcels] = useState([]);
   const [activeScope, setActiveScope] = useState('');
@@ -929,7 +929,13 @@ export default function ReportsPage() {
             <span className="text-[11px] font-bold text-slate-400">
               {isMarathi ? 'एकूण सर्व्हे / गट संख्या' : 'Total Survey / Gat Parcels'}
             </span>
-            <div className="text-xl font-black text-slate-900 mt-0.5">{stats.totalCount}</div>
+            <div className="text-xl font-black text-slate-900 mt-0.5">
+              {loading && parcels.length === 0 ? (
+                <div className="h-6 w-16 bg-slate-200 rounded animate-pulse my-0.5" />
+              ) : (
+                stats.totalCount
+              )}
+            </div>
             <span className="text-[10px] text-slate-500 font-medium">
               {isMarathi ? 'तपासणी केलेले ७/१२' : 'Audited 7/12 Records'}
             </span>
@@ -939,7 +945,13 @@ export default function ReportsPage() {
             <span className="text-[11px] font-bold text-slate-400">
               {isMarathi ? 'एकूण क्षेत्र (हेक्टर)' : 'Total Area (Ha)'}
             </span>
-            <div className="text-xl font-black text-slate-900 mt-0.5">{stats.totalAreaHa}</div>
+            <div className="text-xl font-black text-slate-900 mt-0.5">
+              {loading && parcels.length === 0 ? (
+                <div className="h-6 w-20 bg-slate-200 rounded animate-pulse my-0.5" />
+              ) : (
+                stats.totalAreaHa
+              )}
+            </div>
             <span className="text-[10px] text-slate-500 font-medium">
               {isMarathi ? 'हेक्टर आर क्षेत्र' : 'Hectare-Are Area'}
             </span>
@@ -949,7 +961,13 @@ export default function ReportsPage() {
             <span className="text-[11px] font-bold text-slate-400">
               {isMarathi ? 'भोगवटादार वर्ग २ / शासकीय' : 'Class-2 / Govt Land'}
             </span>
-            <div className="text-xl font-black text-amber-600 mt-0.5">{stats.class2Count}</div>
+            <div className="text-xl font-black text-amber-600 mt-0.5">
+              {loading && parcels.length === 0 ? (
+                <div className="h-6 w-14 bg-slate-200 rounded animate-pulse my-0.5" />
+              ) : (
+                stats.class2Count
+              )}
+            </div>
             <span className="text-[10px] text-slate-500 font-medium">
               {isMarathi ? 'अविभाज्य शर्तीवरील जमिनी' : 'Restricted Tenure Holdings'}
             </span>
@@ -959,7 +977,13 @@ export default function ReportsPage() {
             <span className="text-[11px] font-bold text-slate-400">
               {isMarathi ? 'शर्तभंग / संशयित बाबी' : 'Breaches / Flagged Issues'}
             </span>
-            <div className="text-xl font-black text-rose-600 mt-0.5">{stats.shartbhangCount}</div>
+            <div className="text-xl font-black text-rose-600 mt-0.5">
+              {loading && parcels.length === 0 ? (
+                <div className="h-6 w-14 bg-slate-200 rounded animate-pulse my-0.5" />
+              ) : (
+                stats.shartbhangCount
+              )}
+            </div>
             <span className="text-[10px] text-slate-500 font-medium">
               {isMarathi ? 'विशेष चौकशी आवश्यक' : 'Inquiry Required'}
             </span>
@@ -984,8 +1008,15 @@ export default function ReportsPage() {
                     ? currentCategory.nameMr
                     : currentCategory.nameEn}
                 </h2>
-                <span className="text-[10px] px-2 py-0.5 bg-blue-100 text-blue-800 rounded-md font-mono">
-                  {parcels.length} {isMarathi ? 'अभिलेख' : 'Records'}
+                <span className="text-[10px] px-2.5 py-0.5 bg-blue-100 text-blue-800 rounded-md font-mono flex items-center gap-1.5 font-bold">
+                  {loading ? (
+                    <>
+                      <span className="w-1.5 h-1.5 rounded-full bg-blue-600 animate-ping" />
+                      <span>{isMarathi ? 'डेटा लोड होत आहे...' : 'Loading data...'}</span>
+                    </>
+                  ) : (
+                    `${parcels.length} ${isMarathi ? 'अभिलेख' : 'Records'}`
+                  )}
                 </span>
               </div>
               <p className="text-xs text-slate-500 mt-0.5">

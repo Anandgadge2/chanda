@@ -5,6 +5,7 @@ import { promisify } from 'util';
 import prisma from '../config/prisma.js';
 import { archiveExcelToGCS } from '../config/gcs.js';
 import { parsePrapatraBuffer } from '../parsers/prapatraParserJs.js';
+import { inspectVillageDiff, reconcileAndSeedVillage } from '../services/prapatraReconciliationService.js';
 
 const execAsync = promisify(exec);
 const execFileAsync = promisify(execFile);
@@ -1020,6 +1021,119 @@ const mapTenureToEnum = (rawTenure, fallback = 'BHOGVATDAR_CLASS_2') => {
 };
 
 /**
+ * Dry-run Pre-flight Diff Inspection of Official 1 to 45 Points Excel Sheet(s)
+ * Does NOT modify the database. Parses sheet and compares with existing records.
+ */
+export const inspectPrapatraDiff = async (req, res) => {
+  try {
+    const uploadedFiles = req.files && req.files.length > 0
+      ? req.files
+      : (req.file ? [req.file] : []);
+
+    if (uploadedFiles.length === 0) {
+      return res.status(400).json({ success: false, error: 'कृपया एक्सेल (.xlsx) फाईल निवडा.' });
+    }
+
+    const talukaInput = req.body.taluka || 'Chandrapur';
+    const targetTaluka = TALUKA_ALIASES[talukaInput.toLowerCase()] || talukaInput;
+
+    const currentDir = path.dirname(new URL(import.meta.url).pathname.replace(/^\/([a-zA-Z]:)/, '$1'));
+    const possiblePaths = [
+      path.resolve(currentDir, '../parsers/prapatraParser.py'),
+      path.resolve(process.cwd(), 'src/parsers/prapatraParser.py'),
+      path.resolve(process.cwd(), 'backend/src/parsers/prapatraParser.py'),
+      'D:/chanda/backend/src/parsers/prapatraParser.py',
+      path.resolve(process.cwd(), 'data/parse_single_sheet.py')
+    ];
+    const pythonScript = possiblePaths.find(p => fs.existsSync(p));
+
+    const diffResults = [];
+    const errors = [];
+
+    for (const file of uploadedFiles) {
+      let tempFilePath = null;
+      try {
+        const ext = path.extname(file.originalname) || '.xlsx';
+        tempFilePath = `${file.path}${ext}`;
+        fs.renameSync(file.path, tempFilePath);
+        const fileBuffer = fs.readFileSync(tempFilePath);
+
+        let parsedResult;
+        try {
+          parsedResult = await parsePrapatraBuffer(fileBuffer, targetTaluka, file.originalname);
+        } catch (jsErr) {
+          if (pythonScript) {
+            try {
+              const { stdout } = await execFileAsync('python', [pythonScript, tempFilePath, targetTaluka, file.originalname], {
+                encoding: 'utf-8',
+                maxBuffer: 50 * 1024 * 1024
+              });
+              parsedResult = JSON.parse(stdout);
+            } catch (pyErr) {
+              throw new Error(`फाईल पार्सिंगमध्ये त्रुटी (${file.originalname}): ${jsErr.message}`);
+            }
+          } else {
+            throw new Error(`फाईल पार्सिंगमध्ये त्रुटी (${file.originalname}): ${jsErr.message}`);
+          }
+        }
+
+        if (!parsedResult || !parsedResult.success) {
+          throw new Error(parsedResult?.error || `फाईल पार्सिंगमध्ये त्रुटी: ${file.originalname}`);
+        }
+
+        const { villageName, stats, parcels } = parsedResult;
+        const isHash = (val) => !val || /^[0-9a-f]{16,}$/i.test(val.trim());
+        let derivedVillage = villageName;
+        if (isHash(derivedVillage)) {
+          derivedVillage = file.originalname ? file.originalname.replace(/\.[^/.]+$/, '').trim() : 'गाव';
+        }
+
+        const finalVillage = (uploadedFiles.length === 1 && req.body.villageName && req.body.villageName.trim())
+          ? req.body.villageName.trim()
+          : derivedVillage;
+
+        if (!parcels || parcels.length === 0) {
+          errors.push({
+            file: file.originalname,
+            error: `सदर फाईलमध्ये कोणतेही वैध सातबारा / खातेदार रेकॉर्ड आढळले नाहीत.`
+          });
+          continue;
+        }
+
+        const villageDiff = await inspectVillageDiff(parcels, targetTaluka, finalVillage);
+        diffResults.push({
+          fileName: file.originalname,
+          village: finalVillage,
+          taluka: targetTaluka,
+          stats: villageDiff.stats,
+          diff: villageDiff,
+          parserStats: stats
+        });
+      } catch (fErr) {
+        errors.push({ file: file.originalname, error: fErr.message });
+      } finally {
+        if (tempFilePath && fs.existsSync(tempFilePath)) {
+          try { fs.unlinkSync(tempFilePath); } catch (e) {}
+        }
+        if (file.path && fs.existsSync(file.path)) {
+          try { fs.unlinkSync(file.path); } catch (e) {}
+        }
+      }
+    }
+
+    return res.status(200).json({
+      success: diffResults.length > 0,
+      targetTaluka,
+      diffResults,
+      errors
+    });
+  } catch (err) {
+    console.error('inspectPrapatraDiff error:', err);
+    return res.status(500).json({ success: false, error: err.message });
+  }
+};
+
+/**
  * Upload & Ingest Official 1 to 45 Points Excel Sheet(s)
  * Fully seeds PrapatraRollup, LandParcel, ForwardEnforcementCase, and BackwardHistory
  */
@@ -1198,218 +1312,21 @@ export const uploadPrapatraExcel = async (req, res) => {
         villageCode = String(villageCount).padStart(3, '0');
       }
 
-      // 3. Prepare parcels with clean deterministic UPI
-      let casesCount = 0;
-      let backwardCount = 0;
+      // 3. Reconcile and Seed (Idempotent: preserves unchanged duplicates, updates modified, seeds net-new)
+      let reconcileRes = {
+        executionSummary: { unchangedPreserved: 0, modifiedUpdated: 0, netNewSeeded: 0, omittedWarning: 0, casesCreated: 0, backwardCreated: 0 },
+        diffResult: { unchangedRows: [], modifiedRows: [], netNewRows: [], omittedRows: [] },
+        rollup: rollupRecord
+      };
 
       if (parcels && parcels.length > 0) {
-        // Clear prior raw parcels for this village if re-uploading, to guarantee 100% synchronization with the updated sheet
-        await prisma.landParcel.deleteMany({
-          where: {
-            taluka: { equals: targetTaluka, mode: 'insensitive' },
-            villageName: { equals: finalVillage, mode: 'insensitive' }
-          }
+        reconcileRes = await reconcileAndSeedVillage({
+          parcels,
+          stats,
+          targetTaluka,
+          finalVillage,
+          villageCode
         });
-
-        const talukaPrefix = targetTaluka.slice(0, 3).toUpperCase();
-        const parcelData = parcels.map((p, idx) => {
-          const safeGat = String(p.gatNumber || idx + 1).replace(/[^0-9a-zA-Z]/g, '-').slice(0, 16);
-          const upi = `MH-CHA-${talukaPrefix}-${villageCode}-${safeGat}-${idx + 1}`;
-          return {
-            upi,
-            district: 'Chandrapur',
-            taluka: targetTaluka,
-            revenueCircle: `मंडळ ${finalVillage.slice(0, 20)}`,
-            villageCode,
-            villageName: finalVillage,
-            oldSurveyNo: p.oldSurveyNo || null,
-            gatNumber: p.gatNumber,
-            totalAreaHa: p.totalAreaHa,
-            tenureClass: p.tenureClass,
-            hasActiveDispute: Boolean(p.flags?.isShartbhang || p.flags?.isEncroached || p.flags?.isTribal || p.flags?.isPokalist),
-            metadata: {
-              ownerName: p.ownerName,
-              otherRights: p.otherRights,
-              agriAreaHa: p.agriAreaHa || p.totalAreaHa,
-              naAreaSqM: p.naAreaSqM || 0,
-              subTypeCategory: p.subTypeCategory || null,
-              auditPoints: p.auditPoints || {},
-              flags: p.flags
-            }
-          };
-        });
-
-        // Upsert/Insert parcels in memory-safe chunks of 500 rows to prevent DB timeouts
-        const CHUNK_SIZE = 500;
-        for (let c = 0; c < parcelData.length; c += CHUNK_SIZE) {
-          const chunk = parcelData.slice(c, c + CHUNK_SIZE);
-          await prisma.landParcel.createMany({
-            data: chunk,
-            skipDuplicates: true
-          });
-        }
-
-        // Query dbParcels to get their UUIDs for relational seeding
-        const upiList = parcelData.map(pd => pd.upi);
-        const dbParcels = await prisma.landParcel.findMany({
-          where: { upi: { in: upiList } },
-          select: { id: true, upi: true, taluka: true, villageCode: true, gatNumber: true, totalAreaHa: true }
-        });
-        const upiToParcel = new Map(dbParcels.map(p => [p.upi, p]));
-
-        // 4. Auto-Seed Forward Enforcement Cases
-        const forwardCaseList = [];
-        const backwardHistoryList = [];
-
-        for (let i = 0; i < parcels.length; i++) {
-          const p = parcels[i];
-          const pd = parcelData[i];
-          const dbP = upiToParcel.get(pd.upi);
-          if (!dbP) continue;
-
-          const safeGatDash = String(dbP.gatNumber).replace(/[\/\\ ]/g, '-');
-
-          if (p.flags?.isEncroached) {
-            forwardCaseList.push({
-              parcelId: dbP.id,
-              caseNumber: `ENC/${talukaPrefix}/${dbP.villageCode}/${safeGatDash}`,
-              violationType: 'ENCROACHMENT',
-              status: 'FLAGGED_IN_AUDIT',
-              encroachedAreaHa: dbP.totalAreaHa,
-              occupantName: p.ownerName || 'अनाधिकृत अतिक्रमणधारक',
-              prapatraCategory: 'प्रपत्र ५ (अतिक्रमण)',
-              investigatingOfficer: `तहसीलदार ${targetTaluka}`
-            });
-          } else if (p.flags?.isTribal && (p.flags?.isShartbhang || p.flags?.isIllegalDeletion)) {
-            forwardCaseList.push({
-              parcelId: dbP.id,
-              caseNumber: `TRB/${talukaPrefix}/${dbP.villageCode}/${safeGatDash}`,
-              violationType: 'TRIBAL_LAND_VIOLATION',
-              status: 'NOTICE_ISSUED',
-              encroachedAreaHa: dbP.totalAreaHa,
-              occupantName: p.ownerName || 'आदिवासी जमीन खरेदीदार',
-              prapatraCategory: 'प्रपत्र ७ (आदिवासी जमीन)',
-              investigatingOfficer: `उपविभागीय अधिकारी (SDO) ${targetTaluka}`
-            });
-          } else if (p.flags?.isShartbhang) {
-            forwardCaseList.push({
-              parcelId: dbP.id,
-              caseNumber: `SHT/${talukaPrefix}/${dbP.villageCode}/${safeGatDash}`,
-              violationType: 'SHARTBHANG',
-              status: 'FLAGGED_IN_AUDIT',
-              encroachedAreaHa: dbP.totalAreaHa,
-              occupantName: p.ownerName || 'वाटपदार / पट्टेदार',
-              prapatraCategory: 'प्रपत्र ३/४ (शर्तभंग)',
-              investigatingOfficer: `नायब तहसीलदार ${targetTaluka}`
-            });
-          } else if (p.flags?.isPokalist) {
-            forwardCaseList.push({
-              parcelId: dbP.id,
-              caseNumber: `POK/${talukaPrefix}/${dbP.villageCode}/${safeGatDash}`,
-              violationType: 'POKALIST_NONDI',
-              status: 'FLAGGED_IN_AUDIT',
-              encroachedAreaHa: dbP.totalAreaHa,
-              occupantName: p.ownerName || 'पोकळीस्त खातेदार',
-              prapatraCategory: 'प्रपत्र २ (पोकळीस्त नोंद)',
-              investigatingOfficer: `तलाठी / मंडळ अधिकारी`
-            });
-          }
-
-          // 5. Auto-Seed Full Multi-Stage Backward Provenance Milestones
-          const bk = p.backward || {};
-          const set1950 = bk.settlement1950 || {};
-          const ek1972 = bk.ekatrikaran1972 || {};
-          const res1995 = bk.resurvey1995 || {};
-
-          // Stage 1: 1950 Bandobast Baseline
-          const b1950Owner = set1950.owner || (p.flags?.isGovt ? 'महाराष्ट्र शासन (Sarkar)' : (p.ownerName || 'मूळ खातेदार'));
-          const b1950Tenure = mapTenureToEnum(set1950.tenure, p.flags?.isGovt ? 'SARKAR_SHASAN' : (p.tenureClass || 'BHOGVATDAR_CLASS_1'));
-          const b1950No = set1950.no || dbP.oldSurveyNo || dbP.gatNumber || '1';
-
-          backwardHistoryList.push({
-            parcelId: dbP.id,
-            epochYear: 1950,
-            recordDate: new Date('1950-06-15'),
-            ferfarNumber: `F-1950-${String(b1950No).slice(0, 30)}`,
-            ownerName: String(b1950Owner).slice(0, 240),
-            khataNumber: `K-${String(b1950No).slice(0, 30)}`,
-            areaHa: dbP.totalAreaHa,
-            tenureClass: b1950Tenure,
-            wasGovtLand: Boolean(p.flags?.isGovt || p.flags?.isIllegalDeletion || b1950Tenure === 'SARKAR_SHASAN'),
-            mutationType: p.flags?.isGovt ? 'शासकीय मूळ नोंद' : 'सन १९५० बंदोबस्त नोंद',
-            remarks: 'हस्तलिखित अधिकार अभिलेख नोंद (Baseline Record)'
-          });
-
-          // Stage 2: 1972 Consolidation Scheme (एकत्रिकरण नोंद)
-          if (ek1972.owner || ek1972.no) {
-            const ekOwner = ek1972.owner || b1950Owner;
-            const ekTenure = mapTenureToEnum(ek1972.tenure, dbP.tenureClass);
-            const ekNo = ek1972.no || b1950No;
-            backwardHistoryList.push({
-              parcelId: dbP.id,
-              epochYear: 1972,
-              recordDate: new Date('1972-04-01'),
-              ferfarNumber: `F-EK-${String(ekNo).slice(0, 30)}`,
-              ownerName: String(ekOwner).slice(0, 240),
-              khataNumber: `K-EK-${String(ekNo).slice(0, 30)}`,
-              areaHa: dbP.totalAreaHa,
-              tenureClass: ekTenure,
-              wasGovtLand: Boolean(ekTenure === 'SARKAR_SHASAN'),
-              mutationType: 'एकत्रिकरण योजना नोंद',
-              remarks: 'जमीन एकत्रिकरण व पुनर्रचना नोंद (Consolidation Scheme)'
-            });
-          }
-
-          // Stage 3: 1995 Resurvey (पुनर्मोजणी ७/१२ नोंद)
-          if (res1995.owner || res1995.no) {
-            const resOwner = res1995.owner || p.ownerName;
-            const resTenure = mapTenureToEnum(res1995.tenure, dbP.tenureClass);
-            const resNo = res1995.no || dbP.gatNumber;
-            backwardHistoryList.push({
-              parcelId: dbP.id,
-              epochYear: 1995,
-              recordDate: new Date('1995-10-24'),
-              ferfarNumber: `F-RES-${String(resNo).slice(0, 30)}`,
-              ownerName: String(resOwner).slice(0, 240),
-              khataNumber: `K-RES-${String(resNo).slice(0, 30)}`,
-              areaHa: dbP.totalAreaHa,
-              tenureClass: resTenure,
-              wasGovtLand: Boolean(resTenure === 'SARKAR_SHASAN'),
-              mutationType: 'पुनर्मोजणी अधिकार अभिलेख नोंद',
-              remarks: 'पुनर्मोजणी व संगणकीकृत ७/१२ पूर्व नोंद'
-            });
-          }
-        }
-
-        if (forwardCaseList.length > 0) {
-          for (let c = 0; c < forwardCaseList.length; c += CHUNK_SIZE) {
-            const chunk = forwardCaseList.slice(c, c + CHUNK_SIZE);
-            const createdCases = await prisma.forwardEnforcementCase.createMany({
-              data: chunk,
-              skipDuplicates: true
-            });
-            casesCount += createdCases.count;
-          }
-        }
-
-        if (backwardHistoryList.length > 0) {
-          const existingBk = await prisma.backwardHistory.findMany({
-            where: { parcelId: { in: dbParcels.map(p => p.id) } },
-            select: { parcelId: true, epochYear: true }
-          });
-          const existingSet = new Set(existingBk.map(b => `${b.parcelId}_${b.epochYear}`));
-          const newBk = backwardHistoryList.filter(b => !existingSet.has(`${b.parcelId}_${b.epochYear}`));
-          if (newBk.length > 0) {
-            for (let c = 0; c < newBk.length; c += CHUNK_SIZE) {
-              const chunk = newBk.slice(c, c + CHUNK_SIZE);
-              const createdBk = await prisma.backwardHistory.createMany({
-                data: chunk,
-                skipDuplicates: true
-              });
-              backwardCount += createdBk.count;
-            }
-          }
-        }
       }
 
       // Collect all distinct Gat / Survey numbers to show the user explicitly
@@ -1422,12 +1339,25 @@ export const uploadPrapatraExcel = async (req, res) => {
         parcelsCount: parcels?.length || 0,
         uniqueGatCount: distinctGats.length,
         gatNumbersSample: distinctGats.slice(0, 20),
-        casesCreated: casesCount,
-        provenanceCreated: backwardCount,
+        casesCreated: reconcileRes.executionSummary.casesCreated,
+        provenanceCreated: reconcileRes.executionSummary.backwardCreated,
+        reconciliation: {
+          unchangedPreserved: reconcileRes.executionSummary.unchangedPreserved,
+          modifiedUpdated: reconcileRes.executionSummary.modifiedUpdated,
+          netNewSeeded: reconcileRes.executionSummary.netNewSeeded,
+          omittedWarning: reconcileRes.executionSummary.omittedWarning,
+          totalParcelsInDb: reconcileRes.executionSummary.totalParcelsInDb,
+          diffSample: {
+            unchangedGatsSample: reconcileRes.diffResult.unchangedRows.slice(0, 15).map(r => r.gatNumber),
+            modifiedGatsSample: reconcileRes.diffResult.modifiedRows.slice(0, 10).map(r => ({ gatNumber: r.gatNumber, diffs: r.diffs })),
+            netNewGatsSample: reconcileRes.diffResult.netNewRows.slice(0, 15).map(r => r.gatNumber),
+            omittedGatsSample: reconcileRes.diffResult.omittedRows.slice(0, 10).map(r => r.gatNumber)
+          }
+        },
         auditArchive: auditArchive ? auditArchive.storageUrl : null,
         gcsPath: auditArchive ? auditArchive.gcsPath : null,
         stats,
-        rollup: rollupRecord
+        rollup: reconcileRes.rollup || rollupRecord
       });
 
     } catch (fileErr) {
