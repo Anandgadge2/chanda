@@ -35,7 +35,7 @@ import ArchivalDocumentViewer from './ArchivalDocumentViewer';
 import RevenueShortcutGuideModal from './RevenueShortcutGuideModal';
 import { useFocusTrap } from '../hooks/useFocusTrap';
 import { useTranslation } from './LanguageContext';
-import { formatVillageName } from '../lib/villageUtils';
+import { formatVillageName, formatTalukaName } from '../lib/villageUtils';
 
 export default function ParcelTraceDrawer({ upi, onClose, onRefresh }) {
   const { locale, isMarathi } = useTranslation();
@@ -201,7 +201,7 @@ export default function ParcelTraceDrawer({ upi, onClose, onRefresh }) {
             </div>
 
             <div className="text-xs text-slate-500 truncate flex items-center gap-2 mt-1">
-              <span>{isMarathi ? 'तालुका:' : 'Taluka:'} <span className="text-slate-700 font-medium">{parcel?.taluka}</span></span>
+              <span>{isMarathi ? 'तालुका:' : 'Taluka:'} <span className="text-slate-700 font-medium">{formatTalukaName(parcel?.taluka, isMarathi)}</span></span>
               <span className="text-slate-300">•</span>
               <span>{isMarathi ? 'महसूल मंडळ:' : 'Revenue Circle:'} <span className="text-slate-700 font-medium">{parcel?.revenueCircle || '-'}</span></span>
               <span className="text-slate-300">•</span>

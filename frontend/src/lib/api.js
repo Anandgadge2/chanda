@@ -597,6 +597,115 @@ export const api = {
     }
     return res.json();
   },
+
+  getRenumberingParchaData: async (taluka = '', village = '') => {
+    const params = new URLSearchParams();
+    if (taluka && taluka !== 'all') params.append('taluka', taluka);
+    if (village && village !== 'all') params.append('village', village);
+    const res = await dedupedFetch(`${BASE_URL}/api/prapatra/renumbering-parcha/data?${params.toString()}`);
+    if (!res.ok) {
+      throw new Error('रिनंबरिंग पर्चा डेटा लोड करणे अयशस्वी झाले.');
+    }
+    return res.json();
+  },
+
+  exportRenumberingParchaExcel: async (payload = {}) => {
+    const res = await fetch(`${BASE_URL}/api/prapatra/renumbering-parcha/export-excel`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...getAuthHeaders(),
+      },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ error: 'रिनंबरिंग पर्चा एक्सेल डाऊनलोड अयशस्वी झाले.' }));
+      throw new Error(err.error || 'रिनंबरिंग पर्चा एक्सेल डाऊनलोड अयशस्वी झाले.');
+    }
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    const vName = payload.header?.villageName ? `_${payload.header.villageName}` : '';
+    a.download = `Renumbering_Parcha${vName}_${new Date().toISOString().slice(0, 10)}.xlsx`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
+  },
+
+  exportRenumberingParchaPdf: async (payload = {}) => {
+    const res = await fetch(`${BASE_URL}/api/prapatra/renumbering-parcha/export-pdf`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...getAuthHeaders(),
+      },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ error: 'रिनंबरिंग पर्चा पीडीएफ डाऊनलोड अयशस्वी झाले.' }));
+      throw new Error(err.error || 'रिनंबरिंग पर्चा पीडीएफ डाऊनलोड अयशस्वी झाले.');
+    }
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    const vName = payload.header?.villageName ? `_${payload.header.villageName}` : '';
+    a.download = `Renumbering_Parcha${vName}_${new Date().toISOString().slice(0, 10)}.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
+  },
+
+  exportGoshwaraExcel: async (payload = {}) => {
+    const res = await fetch(`${BASE_URL}/api/prapatra/goshwara/export-excel`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...getAuthHeaders(),
+      },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ error: 'गोषवारा एक्सेल डाऊनलोड अयशस्वी झाले.' }));
+      throw new Error(err.error || 'गोषवारा एक्सेल डाऊनलोड अयशस्वी झाले.');
+    }
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    const tierName = payload.tier === 'village' ? 'Gavacha' : (payload.tier === 'taluka' ? 'Talukyacha' : (payload.tier === 'district' ? 'Jilhacha' : 'Sarva'));
+    a.download = `${tierName}_Ghoshwara_${new Date().toISOString().slice(0, 10)}.xlsx`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
+  },
+
+  exportGoshwaraPdf: async (payload = {}) => {
+    const res = await fetch(`${BASE_URL}/api/prapatra/goshwara/export-pdf`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...getAuthHeaders(),
+      },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ error: 'गोषवारा पीडीएफ डाऊनलोड अयशस्वी झाले.' }));
+      throw new Error(err.error || 'गोषवारा पीडीएफ डाऊनलोड अयशस्वी झाले.');
+    }
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    const tierName = payload.tier === 'village' ? 'Gavacha' : (payload.tier === 'taluka' ? 'Talukyacha' : (payload.tier === 'district' ? 'Jilhacha' : 'Sarva'));
+    a.download = `${tierName}_Ghoshwara_${new Date().toISOString().slice(0, 10)}.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
+  },
 };
-
-

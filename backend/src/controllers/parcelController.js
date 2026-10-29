@@ -225,6 +225,170 @@ export const invalidateParcelCache = () => {
  * List Parcels with Filtering & Pagination
  * GET /api/parcels
  */
+
+/**
+ * Maps 1 to 17 Statutory Subject Booklets to Prisma filtering criteria
+ */
+export function getBookletParcelConditions(category) {
+  const num = parseInt(category, 10);
+  if (isNaN(num) || num < 1 || num > 17) return null;
+
+  switch (num) {
+    case 1:
+      return [
+        { tenureClass: 'SARKAR_SHASAN' },
+        { backwardHistories: { some: { wasGovtLand: true } } },
+        { metadata: { path: ['flags', 'isGovt'], equals: true } },
+        { metadata: { path: ['otherRights'], string_contains: 'गायरान' } },
+        { metadata: { path: ['otherRights'], string_contains: 'पहाड' } },
+        { metadata: { path: ['otherRights'], string_contains: 'खडक' } },
+        { metadata: { path: ['subTypeCategory'], string_contains: 'सरकारी' } }
+      ];
+    case 2:
+      return [
+        { metadata: { path: ['otherRights'], string_contains: 'कुळ' } },
+        { metadata: { path: ['otherRights'], string_contains: 'शेतजमीन' } },
+        { backwardHistories: { some: { tenureClass: 'BHOGVATDAR_CLASS_2' } } },
+        { forwardCases: { some: { violationType: 'SHARTBHANG' } } },
+        { metadata: { path: ['subTypeCategory'], string_contains: 'कुळ' } },
+        { metadata: { path: ['auditPoints', 'point_20'], equals: 'होय' } }
+      ];
+    case 3:
+      return [
+        { tenureClass: 'DEVASTHAN_INAM' },
+        { metadata: { path: ['otherRights'], string_contains: 'इनाम' } },
+        { metadata: { path: ['otherRights'], string_contains: 'वतन' } },
+        { metadata: { path: ['subTypeCategory'], string_contains: 'इनाम' } },
+        { metadata: { path: ['subTypeCategory'], string_contains: 'वतन' } },
+        { metadata: { path: ['auditPoints', 'point_21'], equals: 'होय' } }
+      ];
+    case 4:
+      return [
+        { metadata: { path: ['otherRights'], string_contains: 'भूमिहीन' } },
+        { metadata: { path: ['otherRights'], string_contains: 'शेतमजूर' } },
+        { metadata: { path: ['otherRights'], string_contains: 'स्वातंत्र्य' } },
+        { metadata: { path: ['subTypeCategory'], string_contains: 'भूमिहीन' } },
+        { metadata: { path: ['auditPoints', 'point_22'], equals: 'होय' } }
+      ];
+    case 5:
+      return [
+        { metadata: { path: ['flags', 'isCorpAllot'], equals: true } },
+        { metadata: { path: ['otherRights'], string_contains: 'संस्था' } },
+        { metadata: { path: ['otherRights'], string_contains: 'उद्योग' } },
+        { metadata: { path: ['otherRights'], string_contains: 'प्रकल्प' } },
+        { metadata: { path: ['subTypeCategory'], string_contains: 'गृहनिर्माण' } },
+        { metadata: { path: ['subTypeCategory'], string_contains: 'औद्योगिक' } },
+        { metadata: { path: ['subTypeCategory'], string_contains: 'संस्था' } }
+      ];
+    case 6:
+      return [
+        { ceilingRecords: { some: {} } },
+        { metadata: { path: ['otherRights'], string_contains: 'कमाल' } },
+        { metadata: { path: ['otherRights'], string_contains: 'सिलिंग' } },
+        { metadata: { path: ['subTypeCategory'], string_contains: 'कमाल धारणा' } },
+        { metadata: { path: ['auditPoints', 'point_23'], equals: 'होय' } }
+      ];
+    case 7:
+      return [
+        { metadata: { path: ['otherRights'], string_contains: 'गुरचरण' } },
+        { metadata: { path: ['otherRights'], string_contains: 'चराई' } },
+        { metadata: { path: ['otherRights'], string_contains: 'विकास' } },
+        { metadata: { path: ['subTypeCategory'], string_contains: 'विकास आराखडा' } },
+        { metadata: { path: ['subTypeCategory'], string_contains: 'गुरचरण' } },
+        { metadata: { path: ['auditPoints', 'point_24'], equals: 'होय' } }
+      ];
+    case 8:
+      return [
+        { tenureClass: 'DEVASTHAN_INAM' },
+        { metadata: { path: ['otherRights'], string_contains: 'देवस्थान' } },
+        { metadata: { path: ['otherRights'], string_contains: 'इनाम' } },
+        { metadata: { path: ['subTypeCategory'], string_contains: 'देवस्थान' } },
+        { metadata: { path: ['auditPoints', 'point_25'], equals: 'होय' } }
+      ];
+    case 9:
+      return [
+        { metadata: { path: ['flags', 'isTribal'], equals: true } },
+        { tribalRecords: { some: {} } },
+        { metadata: { path: ['otherRights'], string_contains: 'आदिवासी' } },
+        { forwardCases: { some: { violationType: 'TRIBAL_LAND_VIOLATION' } } },
+        { metadata: { path: ['subTypeCategory'], string_contains: 'आदिवासी' } },
+        { metadata: { path: ['auditPoints', 'point_26'], equals: 'होय' } }
+      ];
+    case 10:
+      return [
+        { metadata: { path: ['otherRights'], string_contains: 'पुनर्वसन' } },
+        { metadata: { path: ['otherRights'], string_contains: 'प्रकल्पग्रस्त' } },
+        { metadata: { path: ['subTypeCategory'], string_contains: 'पुनर्वसन' } },
+        { metadata: { path: ['auditPoints', 'point_27'], equals: 'होय' } }
+      ];
+    case 11:
+      return [
+        { metadata: { path: ['otherRights'], string_contains: 'भाडेपट्टा' } },
+        { metadata: { path: ['otherRights'], string_contains: 'लीज' } },
+        { metadata: { path: ['subTypeCategory'], string_contains: 'भाडेपट्टा' } },
+        { metadata: { path: ['auditPoints', 'point_28'], equals: 'होय' } }
+      ];
+    case 12:
+      return [
+        { bhudanRecords: { some: {} } },
+        { metadata: { path: ['otherRights'], string_contains: 'भूदान' } },
+        { metadata: { path: ['otherRights'], string_contains: 'ग्रामदान' } },
+        { metadata: { path: ['subTypeCategory'], string_contains: 'भूदान' } },
+        { metadata: { path: ['subTypeCategory'], string_contains: 'ग्रामदान' } },
+        { metadata: { path: ['auditPoints', 'point_29'], equals: 'होय' } }
+      ];
+    case 13:
+      return [
+        { tenureClass: 'FOREST_JANGAL' },
+        { metadata: { path: ['otherRights'], string_contains: 'खाजगी वन' } },
+        { metadata: { path: ['subTypeCategory'], string_contains: 'खाजगी वने' } },
+        { metadata: { path: ['auditPoints', 'point_30'], equals: 'होय' } }
+      ];
+    case 14:
+      return [
+        { metadata: { path: ['otherRights'], string_contains: 'भूमीधारी' } },
+        { metadata: { path: ['otherRights'], string_contains: 'भूमिधारी' } },
+        { backwardHistories: { some: { ownerName: { contains: 'भूमीधारी' } } } },
+        { backwardHistories: { some: { ownerName: { contains: 'भूमिधारी' } } } },
+        { metadata: { path: ['subTypeCategory'], string_contains: 'भूमीधारी' } },
+        { metadata: { path: ['auditPoints', 'point_31'], equals: 'होय' } },
+        { metadata: { path: ['auditPoints', 'point_32'], equals: 'होय' } }
+      ];
+    case 15:
+      return [
+        { metadata: { path: ['otherRights'], string_contains: 'सूट' } },
+        { metadata: { path: ['otherRights'], string_contains: 'सुट' } },
+        { metadata: { path: ['otherRights'], string_contains: 'कमाल मर्यादा' } },
+        { metadata: { path: ['otherRights'], string_contains: 'विशेष सूट' } },
+        { metadata: { path: ['subTypeCategory'], string_contains: 'विशेष सूट' } },
+        { metadata: { path: ['auditPoints', 'point_32'], equals: 'होय' } },
+        { metadata: { path: ['auditPoints', 'point_33'], equals: 'होय' } }
+      ];
+    case 16:
+      return [
+        { metadata: { path: ['otherRights'], string_contains: 'वक्फ' } },
+        { metadata: { path: ['otherRights'], string_contains: 'कब्रस्तान' } },
+        { metadata: { path: ['otherRights'], string_contains: 'इदगाह' } },
+        { metadata: { path: ['otherRights'], string_contains: 'मस्जिद' } },
+        { metadata: { path: ['subTypeCategory'], string_contains: 'वक्फ' } },
+        { metadata: { path: ['auditPoints', 'point_33'], equals: 'होय' } },
+        { metadata: { path: ['auditPoints', 'point_34'], equals: 'होय' } }
+      ];
+    case 17:
+      return [
+        { metadata: { path: ['otherRights'], string_contains: 'भूसंपादन' } },
+        { metadata: { path: ['otherRights'], string_contains: 'अधिग्रहित' } },
+        { metadata: { path: ['otherRights'], string_contains: 'राखीव' } },
+        { metadata: { path: ['otherRights'], string_contains: 'राष्ट्रीय महामार्ग' } },
+        { metadata: { path: ['subTypeCategory'], string_contains: 'भूसंपादन' } },
+        { metadata: { path: ['auditPoints', 'point_34'], equals: 'होय' } },
+        { metadata: { path: ['auditPoints', 'point_35'], equals: 'होय' } }
+      ];
+    default:
+      return null;
+  }
+}
+
 export const getParcels = async (req, res) => {
   try {
     const {
@@ -235,6 +399,9 @@ export const getParcels = async (req, res) => {
       tenureClass,
       hasActiveDispute,
       search,
+      bookletCategory,
+      prapatraCategory,
+      booklet,
       page = 1,
       limit = 20,
     } = req.query;
@@ -259,16 +426,32 @@ export const getParcels = async (req, res) => {
       where.hasActiveDispute = hasActiveDispute === 'true';
     }
 
+    const andClauses = [];
+
     if (search) {
-      where.OR = [
-        { upi: { contains: search, mode: 'insensitive' } },
-        { gatNumber: { contains: search, mode: 'insensitive' } },
-        { oldSurveyNo: { contains: search, mode: 'insensitive' } },
-        { villageName: { contains: search, mode: 'insensitive' } },
-      ];
+      andClauses.push({
+        OR: [
+          { upi: { contains: search, mode: 'insensitive' } },
+          { gatNumber: { contains: search, mode: 'insensitive' } },
+          { oldSurveyNo: { contains: search, mode: 'insensitive' } },
+          { villageName: { contains: search, mode: 'insensitive' } },
+        ]
+      });
     }
 
-    const cacheKey = JSON.stringify({ taluka, villageCode, villageName: targetVillage, tenureClass, hasActiveDispute, search, pageNum, take });
+    const targetBooklet = bookletCategory || prapatraCategory || booklet;
+    if (targetBooklet && targetBooklet !== 'all' && targetBooklet !== 'सर्व') {
+      const bookletConditions = getBookletParcelConditions(targetBooklet);
+      if (bookletConditions && bookletConditions.length > 0) {
+        andClauses.push({ OR: bookletConditions });
+      }
+    }
+
+    if (andClauses.length > 0) {
+      where.AND = andClauses;
+    }
+
+    const cacheKey = JSON.stringify({ taluka, villageCode, villageName: targetVillage, tenureClass, hasActiveDispute, targetBooklet, search, pageNum, take });
     let pending = inFlightParcelLists.get(cacheKey);
 
     if (!pending) {

@@ -110,6 +110,7 @@ export const TALUKA_MR_TO_EN = {
   'मूल': 'Mul',
   'चिमूर': 'Chimur',
   'बल्लारपूर': 'Ballarpur',
+  'बल्लारपुर': 'Ballarpur',
   'भद्रावती': 'Bhadravati',
   'सिंदेवाही': 'Sindewahi',
   'ब्रह्मपुरी': 'Brahmapuri',
@@ -117,7 +118,9 @@ export const TALUKA_MR_TO_EN = {
   'गोंडपिपरी': 'Gondpipri',
   'कोरपना': 'Korpana',
   'पोंभुर्णा': 'Pombhurna',
+  'पोंभूर्णा': 'Pombhurna',
   'सावली': 'Saoli',
+  'साओली': 'Saoli',
   'जिवती': 'Jivati',
 };
 
@@ -128,14 +131,20 @@ export const TALUKA_EN_TO_MR = {
   'Mul': 'मूल',
   'Chimur': 'चिमूर',
   'Ballarpur': 'बल्लारपूर',
+  'Ballarshah': 'बल्लारपूर',
+  'Balharshah': 'बल्लारपूर',
   'Bhadravati': 'भद्रावती',
+  'Bhadrawati': 'भद्रावती',
   'Sindewahi': 'सिंदेवाही',
+  'Sindhewahi': 'सिंदेवाही',
   'Brahmapuri': 'ब्रह्मपुरी',
   'Nagbhid': 'नागभीड',
   'Gondpipri': 'गोंडपिपरी',
+  'Gondpipari': 'गोंडपिपरी',
   'Korpana': 'कोरपना',
   'Pombhurna': 'पोंभुर्णा',
   'Saoli': 'सावली',
+  'Sawali': 'सावली',
   'Jivati': 'जिवती',
 };
 

@@ -125,7 +125,7 @@ function buildDetailedParcelsSheet(ws, prapatraNum, prapatraTitle, parcelRecords
     const isEven = idx % 2 === 0;
     const r = ws.addRow([
       idx + 1,
-      p.taluka || '-',
+      TALUKA_EN_TO_MR[p.taluka] || p.taluka || '-',
       cleanVillageName(p.villageName),
       p.gatNumber || '-',
       p.oldSurveyNo || '-',

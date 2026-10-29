@@ -31,8 +31,30 @@ import RevenueShortcutGuideModal from '../../components/RevenueShortcutGuideModa
 import Pagination from '../../components/Pagination';
 import SearchableSelect from '../../components/SearchableSelect';
 import { useTranslation } from '../../components/LanguageContext';
-import { formatVillageName } from '../../lib/villageUtils';
+import { formatVillageName, formatTalukaName } from '../../lib/villageUtils';
 import clsx from 'clsx';
+
+
+// 17 Statutory Subject Booklets (प्रपत्र / विषय १७ पुस्तिका)
+export const BOOKLET_17_CATEGORIES = [
+  { id: 1, nameMr: '१. सरकारी जमीन (गायरान, वन, पहाड, खडक)', nameEn: '1. Govt Land (Gairan, Forest, Hill)', shortMr: '१. सरकारी जमीन', shortEn: '1. Govt Land' },
+  { id: 2, nameMr: '२. कुळ वहिवाट व शेतजमीन कायदा', nameEn: '2. Tenancy & Agrl Land Act', shortMr: '२. कुळ वहिवाट', shortEn: '2. Tenancy' },
+  { id: 3, nameMr: '३. जमिन इनाम व वतन जमिनी', nameEn: '3. Inam & Watan Lands', shortMr: '३. इनाम व वतन', shortEn: '3. Inam & Watan' },
+  { id: 4, nameMr: '४. म.ज.म.अधि. १९६६ भूमिहीन वाटप', nameEn: '4. MLRC 1966 Landless Grants', shortMr: '४. भूमिहीन वाटप', shortEn: '4. Landless Grants' },
+  { id: 5, nameMr: '५. म.ज.म.अधि. १९६६ संस्था/उद्योग', nameEn: '5. MLRC 1966 Institutions/Industries', shortMr: '५. संस्था/उद्योग वाटप', shortEn: '5. Institutions' },
+  { id: 6, nameMr: '६. महाराष्ट्र शेतजमीन कमाल धारणा १९६१', nameEn: '6. Land Ceiling Surplus Allotment', shortMr: '६. कमाल धारणा (सिलिंग)', shortEn: '6. Ceiling Surplus' },
+  { id: 7, nameMr: '७. विकास आराखडा व गुरचरण जमिनी', nameEn: '7. Development Plan & Gurcharan', shortMr: '७. विकास व गुरचरण', shortEn: '7. DP & Gurcharan' },
+  { id: 8, nameMr: '८. जमीन देवस्थान इनाम जमिनी', nameEn: '8. Devasthan Inam Lands', shortMr: '८. देवस्थान इनाम', shortEn: '8. Devasthan Inam' },
+  { id: 9, nameMr: '९. आदिवासी खातेदारांचे जमिनी', nameEn: '9. Tribal Khatedar Lands (Sec 36)', shortMr: '९. आदिवासी जमिनी', shortEn: '9. Tribal Lands' },
+  { id: 10, nameMr: '१०. पुनर्वसन अधिनियम १९९९ कलम १६', nameEn: '10. Rehabilitation Act 1999 Sec 16', shortMr: '१०. पुनर्वसन प्रदान', shortEn: '10. Rehabilitation' },
+  { id: 11, nameMr: '११. भाडेपट्ट्याने दिलेली शासकीय जमीन', nameEn: '11. Government Leased Lands', shortMr: '११. शासकीय भाडेपट्टा', shortEn: '11. Leased Lands' },
+  { id: 12, nameMr: '१२. भूदान व ग्रामदान प्रदान जमिनी', nameEn: '12. Bhoodan & Gramdan Lands', shortMr: '१२. भूदान व ग्रामदान', shortEn: '12. Bhoodan' },
+  { id: 13, nameMr: '१३. खाजगी वने संपादन अधिनियम १९७५', nameEn: '13. Private Forest Acquisition Act', shortMr: '१३. खाजगी वने', shortEn: '13. Private Forests' },
+  { id: 14, nameMr: '१४. भूमीधारी हक्क प्राप्त जमिनी', nameEn: '14. Bhumidhari Rights Lands', shortMr: '१४. भूमीधारी हक्क', shortEn: '14. Bhumidhari' },
+  { id: 15, nameMr: '१५. कमाल जमीन धारणा सूट जमीन', nameEn: '15. Ceiling Exemption Holdings', shortMr: '१५. कमाल धारणा सूट', shortEn: '15. Ceiling Exemption' },
+  { id: 16, nameMr: '१६. वक्फ बोर्डाचे मालकीची जमीन', nameEn: '16. Waqf Board Registered Lands', shortMr: '१६. वक्फ बोर्ड जमीन', shortEn: '16. Waqf Board' },
+  { id: 17, nameMr: '१७. भूसंपादन अधिग्रहित / राखीव जमीन', nameEn: '17. Land Acquisition Reserved Lands', shortMr: '१७. भूसंपादन / राखीव', shortEn: '17. Land Acquisition' }
+];
 
 export default function ParcelsPage() {
   const { isMarathi } = useTranslation();
@@ -43,18 +65,26 @@ export default function ParcelsPage() {
   const [totalPages, setTotalPages] = useState(1);
   const limit = 20;
 
-  // Filters
+  // Draft Filter Inputs
   const [taluka, setTaluka] = useState('');
   const [village, setVillage] = useState('');
   const [villageOptions, setVillageOptions] = useState([]);
   const [loadingVillages, setLoadingVillages] = useState(false);
+  const [bookletCategory, setBookletCategory] = useState('');
   const [tenureClass, setTenureClass] = useState('');
   const [hasActiveDispute, setHasActiveDispute] = useState('');
   const [search, setSearch] = useState('');
   const [showMobileFilters, setShowMobileFilters] = useState(false);
 
-  // Debounced search ref
-  const searchTimeoutRef = useRef(null);
+  // Applied Filters (used for backend queries and active badge display)
+  const [appliedFilters, setAppliedFilters] = useState({
+    taluka: '',
+    village: '',
+    bookletCategory: '',
+    tenureClass: '',
+    hasActiveDispute: '',
+    search: '',
+  });
 
   // Sorting
   const [sortColumn, setSortColumn] = useState(null);
@@ -68,15 +98,56 @@ export default function ParcelsPage() {
   const [uploadModalParcelId, setUploadModalParcelId] = useState(null);
   const [glossaryModalOpen, setGlossaryModalOpen] = useState(false);
 
-  // Read query params from URL on mount if navigated with ?taluka=...&village=...
+  // Fetch Parcels with specified target page and filters
+  const fetchParcels = async (targetPage = page, filtersToUse = appliedFilters) => {
+    setLoading(true);
+    try {
+      const params = { page: targetPage, limit };
+      if (filtersToUse.taluka) params.taluka = filtersToUse.taluka;
+      if (filtersToUse.village && filtersToUse.village !== 'all') params.village = filtersToUse.village;
+      if (filtersToUse.bookletCategory) params.bookletCategory = filtersToUse.bookletCategory;
+      if (filtersToUse.tenureClass) params.tenureClass = filtersToUse.tenureClass;
+      if (filtersToUse.hasActiveDispute !== '') params.hasActiveDispute = filtersToUse.hasActiveDispute;
+      if (filtersToUse.search && filtersToUse.search.trim()) params.search = filtersToUse.search.trim();
+
+      const data = await api.getParcels(params);
+      setParcels(data.parcels || []);
+      setTotalCount(data.pagination?.total || 0);
+      setTotalPages(data.pagination?.totalPages || 1);
+    } catch (err) {
+      console.error('Failed to load parcels:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Read query params from URL on mount
   useEffect(() => {
+    let initialFilters = {
+      taluka: '',
+      village: '',
+      bookletCategory: '',
+      tenureClass: '',
+      hasActiveDispute: '',
+      search: '',
+    };
     if (typeof window !== 'undefined') {
       const urlParams = new URLSearchParams(window.location.search);
-      const qTaluka = urlParams.get('taluka');
-      const qVillage = urlParams.get('village');
+      const qTaluka = urlParams.get('taluka') || '';
+      const qVillage = urlParams.get('village') || '';
+      const qBooklet = urlParams.get('booklet') || urlParams.get('category') || '';
       if (qTaluka) setTaluka(qTaluka);
       if (qVillage) setVillage(qVillage);
+      if (qBooklet) setBookletCategory(qBooklet);
+      initialFilters = {
+        ...initialFilters,
+        taluka: qTaluka,
+        village: qVillage,
+        bookletCategory: qBooklet,
+      };
     }
+    setAppliedFilters(initialFilters);
+    fetchParcels(1, initialFilters);
   }, []);
 
   // Dynamically load villages for selected taluka
@@ -106,65 +177,72 @@ export default function ParcelsPage() {
     };
   }, [taluka]);
 
-  const fetchParcels = async (targetPage = page, customSearch = search) => {
-    setLoading(true);
-    try {
-      const params = { page: targetPage, limit };
-      if (taluka) params.taluka = taluka;
-      if (village && village !== 'all') params.village = village;
-      if (tenureClass) params.tenureClass = tenureClass;
-      if (hasActiveDispute !== '') params.hasActiveDispute = hasActiveDispute;
-      if (customSearch && customSearch.trim()) params.search = customSearch.trim();
+  // Check if draft filters have unapplied changes
+  const isFilterPending = useMemo(() => {
+    return (
+      taluka !== appliedFilters.taluka ||
+      village !== appliedFilters.village ||
+      bookletCategory !== appliedFilters.bookletCategory ||
+      tenureClass !== appliedFilters.tenureClass ||
+      hasActiveDispute !== appliedFilters.hasActiveDispute ||
+      search.trim() !== appliedFilters.search.trim()
+    );
+  }, [taluka, village, bookletCategory, tenureClass, hasActiveDispute, search, appliedFilters]);
 
-      const data = await api.getParcels(params);
-      setParcels(data.parcels || []);
-      setTotalCount(data.pagination?.total || 0);
-      setTotalPages(data.pagination?.totalPages || 1);
-    } catch (err) {
-      console.error('Failed to load parcels:', err);
-    } finally {
-      setLoading(false);
-    }
+  // Apply filters button handler
+  const handleApplyFilters = () => {
+    const nextFilters = {
+      taluka,
+      village,
+      bookletCategory,
+      tenureClass,
+      hasActiveDispute,
+      search: search.trim(),
+    };
+    setAppliedFilters(nextFilters);
+    setPage(1);
+    fetchParcels(1, nextFilters);
   };
 
-  // Trigger search on filter changes
-  useEffect(() => {
-    setPage(1);
-    fetchParcels(1, search);
-  }, [taluka, village, tenureClass, hasActiveDispute]);
-
-  // Live search debounced
+  // Search input change handler
   const handleSearchChange = (e) => {
-    const val = e.target.value;
-    setSearch(val);
-    if (searchTimeoutRef.current) {
-      clearTimeout(searchTimeoutRef.current);
-    }
-    searchTimeoutRef.current = setTimeout(() => {
-      setPage(1);
-      fetchParcels(1, val);
-    }, 300);
+    setSearch(e.target.value);
   };
 
   const handleClearSearch = () => {
     setSearch('');
+    const nextFilters = {
+      ...appliedFilters,
+      search: '',
+    };
+    setAppliedFilters(nextFilters);
     setPage(1);
-    fetchParcels(1, '');
+    fetchParcels(1, nextFilters);
   };
 
   const handleResetFilters = () => {
-    setSearch('');
+    const cleanFilters = {
+      taluka: '',
+      village: '',
+      bookletCategory: '',
+      tenureClass: '',
+      hasActiveDispute: '',
+      search: '',
+    };
     setTaluka('');
     setVillage('');
+    setBookletCategory('');
     setTenureClass('');
     setHasActiveDispute('');
+    setSearch('');
+    setAppliedFilters(cleanFilters);
     setPage(1);
-    fetchParcels(1, '');
+    fetchParcels(1, cleanFilters);
   };
 
   const handlePageChange = (newPage) => {
     setPage(newPage);
-    fetchParcels(newPage, search);
+    fetchParcels(newPage, appliedFilters);
   };
 
   // Copy to clipboard
@@ -222,7 +300,25 @@ export default function ParcelsPage() {
   }, [parcels]);
 
   const activeFiltersCount =
-    (search ? 1 : 0) + (taluka ? 1 : 0) + (village ? 1 : 0) + (tenureClass ? 1 : 0) + (hasActiveDispute !== '' ? 1 : 0);
+    (appliedFilters.search ? 1 : 0) +
+    (appliedFilters.taluka ? 1 : 0) +
+    (appliedFilters.village ? 1 : 0) +
+    (appliedFilters.bookletCategory ? 1 : 0) +
+    (appliedFilters.tenureClass ? 1 : 0) +
+    (appliedFilters.hasActiveDispute !== '' ? 1 : 0);
+
+  const bookletSelectOptions = useMemo(() => [
+    {
+      value: '',
+      label: isMarathi ? 'सर्व प्रपत्र / विषय (१-१७)' : 'All Booklets (1-17)',
+      subtext: isMarathi ? '१७ वैधानिक विषय पुस्तिका' : '17 Statutory Booklets'
+    },
+    ...BOOKLET_17_CATEGORIES.map((cat) => ({
+      value: String(cat.id),
+      label: isMarathi ? cat.nameMr : cat.nameEn,
+      subtext: isMarathi ? `पुस्तिका क्र. ${cat.id}` : `Booklet #${cat.id}`
+    }))
+  ], [isMarathi]);
 
   const talukaSelectOptions = useMemo(() => [
     { value: '', label: isMarathi ? `सर्व तालुके (${CHANDRAPUR_TALUKAS.length})` : `All Talukas (${CHANDRAPUR_TALUKAS.length})` },
@@ -368,27 +464,33 @@ export default function ParcelsPage() {
       </div>
 
       {/* Modern Filter & Search Command Toolbar */}
-      <div className="relative z-30 bg-white/95 backdrop-blur-xl border border-slate-200/90 rounded-2xl p-2.5 shadow-xs flex flex-col lg:flex-row items-stretch lg:items-center gap-2 sm:gap-2.5">
+      <div className="relative z-30 bg-white/95 backdrop-blur-xl border border-slate-200/90 rounded-2xl p-2 sm:p-2.5 shadow-xs flex flex-col lg:flex-row items-stretch lg:items-center gap-1.5 sm:gap-2">
         {/* Live Search Input & Mobile Filters Toggle Button */}
         <div className="flex items-center gap-2 flex-1 min-w-0">
-          <div className="relative flex-1 min-w-0">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+          <div className="relative flex-1 min-w-[140px]">
+            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
             <input
               type="text"
               value={search}
               onChange={handleSearchChange}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  handleApplyFilters();
+                }
+              }}
               placeholder={
                 isMarathi
-                  ? 'गट क्र., जुना स.नं., गाव किंवा UPI शोधा...'
-                  : 'Search Gat No., Old Survey No., Village or UPI...'
+                  ? 'गट क्र., जुना स.नं., गाव, UPI शोधा...'
+                  : 'Search Gat, Survey, Village or UPI...'
               }
-              className="w-full pl-10 pr-8 py-2 text-xs bg-slate-50/80 hover:bg-white focus:bg-white border border-slate-200 rounded-xl font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition shadow-2xs"
+              className="w-full h-9 pl-8 pr-7 text-xs bg-slate-50/80 hover:bg-white focus:bg-white border border-slate-200 rounded-xl font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition shadow-2xs"
             />
             {search && (
               <button
                 type="button"
                 onClick={handleClearSearch}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5 cursor-pointer"
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5 cursor-pointer"
                 title={isMarathi ? 'शोध साफ करा' : 'Clear search'}
               >
                 <X className="w-3.5 h-3.5" />
@@ -401,7 +503,7 @@ export default function ParcelsPage() {
             type="button"
             onClick={() => setShowMobileFilters((p) => !p)}
             className={clsx(
-              'lg:hidden px-2.5 py-2 rounded-xl border text-xs font-bold transition-all flex items-center gap-1.5 shrink-0 active:scale-95 shadow-2xs cursor-pointer',
+              'lg:hidden h-9 px-2.5 rounded-xl border text-xs font-bold transition-all flex items-center gap-1.5 shrink-0 active:scale-95 shadow-2xs cursor-pointer',
               showMobileFilters || activeFiltersCount > 0
                 ? 'bg-emerald-700 text-white border-emerald-700 shadow-xs'
                 : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200'
@@ -418,17 +520,17 @@ export default function ParcelsPage() {
           </button>
         </div>
 
-        {/* Filter Dropdowns Suite: Collapsible on mobile, clean row on desktop */}
+        {/* Filter Dropdowns Suite: Guaranteed Single Row on Desktop (lg/xl) */}
         <div
           className={clsx(
-            'items-center gap-2 sm:gap-2.5',
+            'items-center gap-1.5 sm:gap-2',
             showMobileFilters
               ? 'grid grid-cols-1 sm:grid-cols-2 pt-2 border-t border-slate-100 lg:border-t-0 lg:pt-0 lg:flex lg:flex-nowrap'
               : 'hidden lg:flex lg:flex-nowrap'
           )}
         >
           {/* Taluka Dropdown */}
-          <div className="w-full sm:w-auto sm:min-w-[150px] sm:max-w-[190px]">
+          <div className="w-full sm:w-[125px] lg:w-[130px] xl:w-[140px] shrink-0">
             <SearchableSelect
               options={talukaSelectOptions}
               value={taluka}
@@ -444,7 +546,7 @@ export default function ParcelsPage() {
           </div>
 
           {/* Village Dropdown */}
-          <div className="w-full sm:w-auto sm:min-w-[155px] sm:max-w-[210px]">
+          <div className="w-full sm:w-[130px] lg:w-[135px] xl:w-[145px] shrink-0">
             <SearchableSelect
               options={villageSelectOptions}
               value={village}
@@ -456,41 +558,74 @@ export default function ParcelsPage() {
             />
           </div>
 
+          {/* प्रपत्र / विषय १७ पुस्तिका Dropdown */}
+          <div className="w-full sm:w-[160px] lg:w-[170px] xl:w-[190px] shrink-0">
+            <SearchableSelect
+              options={bookletSelectOptions}
+              value={bookletCategory}
+              onChange={(val) => setBookletCategory(val)}
+              placeholder={isMarathi ? 'सर्व प्रपत्र / विषय' : 'All Booklets (1-17)'}
+              searchPlaceholder={isMarathi ? 'प्रपत्र / विषय शोधा...' : 'Search booklets...'}
+              icon={BookOpen}
+              showCount={false}
+            />
+          </div>
+
           {/* Tenure Class Dropdown */}
-          <div className="w-full sm:w-auto sm:min-w-[155px] sm:max-w-[190px]">
+          <div className="w-full sm:w-[125px] lg:w-[130px] xl:w-[140px] shrink-0">
             <SearchableSelect
               options={tenureSelectOptions}
               value={tenureClass}
               onChange={(val) => setTenureClass(val)}
-              placeholder={isMarathi ? 'सर्व धारणा प्रकार' : 'All Tenure Types'}
-              searchPlaceholder={isMarathi ? 'धारणा प्रकार शोधा...' : 'Search tenure...'}
+              placeholder={isMarathi ? 'सर्व धारणा प्रकार' : 'All Tenure'}
+              searchPlaceholder={isMarathi ? 'धारणा शोधा...' : 'Search tenure...'}
               showCount={false}
             />
           </div>
 
           {/* Dispute Status Dropdown */}
-          <div className="w-full sm:w-auto sm:min-w-[145px] sm:max-w-[180px]">
+          <div className="w-full sm:w-[115px] lg:w-[120px] xl:w-[130px] shrink-0">
             <SearchableSelect
               options={disputeSelectOptions}
               value={hasActiveDispute}
               onChange={(val) => setHasActiveDispute(val)}
-              placeholder={isMarathi ? 'सर्व वाद स्थिती' : 'All Dispute Statuses'}
+              placeholder={isMarathi ? 'सर्व वाद स्थिती' : 'All Dispute'}
               searchPlaceholder={isMarathi ? 'वाद स्थिती शोधा...' : 'Search dispute...'}
               showCount={false}
             />
           </div>
 
-          {/* Reset Filter Button if active */}
-          {activeFiltersCount > 0 && (
+          {/* Apply Button ("लागू करा" / "Apply") */}
+          <button
+            type="button"
+            onClick={handleApplyFilters}
+            disabled={loading}
+            className={clsx(
+              'h-9 px-3 sm:px-3.5 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95 shrink-0 shadow-xs cursor-pointer select-none w-full sm:w-auto',
+              isFilterPending
+                ? 'bg-emerald-600 hover:bg-emerald-700 text-white ring-2 ring-emerald-400/60 ring-offset-1 shadow-emerald-700/20'
+                : 'bg-[#242b6b] hover:bg-[#1a2053] text-white'
+            )}
+            title={isMarathi ? 'निवडलेले फिल्टर्स लागू करा (Enter)' : 'Apply Selected Filters (Enter)'}
+          >
+            <Filter className="w-3.5 h-3.5 shrink-0" />
+            <span>{isMarathi ? 'लागू करा' : 'Apply'}</span>
+            {isFilterPending && (
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-300 animate-pulse shrink-0" />
+            )}
+          </button>
+
+          {/* Reset Filter Button if active or modified */}
+          {(activeFiltersCount > 0 || isFilterPending) && (
             <button
               type="button"
               onClick={handleResetFilters}
-              className="p-2 sm:p-1.5 text-rose-600 hover:bg-rose-50 rounded-xl border border-rose-200 transition shrink-0 cursor-pointer flex items-center justify-center gap-1 text-xs font-bold w-full sm:w-auto"
+              className="h-9 px-2 sm:px-2.5 text-rose-600 hover:bg-rose-50 hover:text-rose-700 rounded-xl border border-rose-200 transition shrink-0 cursor-pointer flex items-center justify-center gap-1 text-xs font-bold w-full sm:w-auto shadow-2xs"
               title={isMarathi ? 'सर्व फिल्टर्स साफ करा' : 'Clear all filters'}
               aria-label={isMarathi ? 'सर्व फिल्टर्स साफ करा' : 'Clear all filters'}
             >
-              <X className="w-3.5 h-3.5" />
-              <span className="lg:hidden">{isMarathi ? 'फिल्टर्स साफ करा' : 'Clear filters'}</span>
+              <X className="w-3.5 h-3.5 shrink-0" />
+              <span className="lg:hidden">{isMarathi ? 'फिल्टर्स साफ करा' : 'Clear'}</span>
             </button>
           )}
         </div>
@@ -512,12 +647,24 @@ export default function ParcelsPage() {
               <span className="text-xs font-semibold text-slate-600">
                 {totalCount} {isMarathi ? 'नोंदणीकृत भूखंड (गट क्र.)' : 'Registered Parcels (Gat No.)'}
               </span>
-              {village && (
+              {appliedFilters.village && (
                 <>
                   <span className="text-slate-300">•</span>
                   <span className="inline-flex items-center gap-1 text-[11px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200/80 px-2 py-0.5 rounded-full">
                     <LandPlot className="w-3 h-3 text-emerald-600" />
-                    {isMarathi ? `गाव: ${formatVillageName(village, true)}` : `Village: ${formatVillageName(village, false)}`}
+                    {isMarathi ? `गाव: ${formatVillageName(appliedFilters.village, true)}` : `Village: ${formatVillageName(appliedFilters.village, false)}`}
+                  </span>
+                </>
+              )}
+              {appliedFilters.bookletCategory && (
+                <>
+                  <span className="text-slate-300">•</span>
+                  <span className="inline-flex items-center gap-1 text-[11px] font-bold bg-indigo-50 text-indigo-900 border border-indigo-200/80 px-2 py-0.5 rounded-full">
+                    <BookOpen className="w-3 h-3 text-indigo-600" />
+                    {(() => {
+                      const cat = BOOKLET_17_CATEGORIES.find((c) => String(c.id) === String(appliedFilters.bookletCategory));
+                      return isMarathi ? (cat?.shortMr || `पुस्तिका क्र. ${appliedFilters.bookletCategory}`) : (cat?.shortEn || `Booklet #${appliedFilters.bookletCategory}`);
+                    })()}
                   </span>
                 </>
               )}
@@ -785,7 +932,7 @@ export default function ParcelsPage() {
                           </div>
                           <div className="text-[11px] text-slate-400 flex items-center gap-1 mt-0.5">
                             <MapPin className="w-3 h-3 text-slate-400 shrink-0" />
-                            <span>{parcel.taluka}</span>
+                            <span>{formatTalukaName(parcel.taluka, isMarathi)}</span>
                           </div>
                         </div>
                       </td>

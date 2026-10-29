@@ -67,7 +67,7 @@ export const generateBookletPdf = async (type, cases, stream, filters = {}) => {
     body.push(row);
   });
 
-  const talukaText = filters.taluka ? `तालुका: ${filters.taluka}` : 'तालुका: सर्व तालुके';
+  const talukaText = filters.taluka ? `तालुका: ${TALUKA_EN_TO_MR[filters.taluka] || filters.taluka}` : 'तालुका: सर्व तालुके';
   const villageText = filters.village ? `गाव: ${filters.village}` : 'गाव: सर्व गावे';
 
   const docDefinition = {
@@ -298,7 +298,7 @@ export const generatePrapatraPdf = async (prapatraNum, summaryRecords = [], parc
   parcelsToRender.forEach((p, idx) => {
     detailedBody.push([
       { text: (idx + 1).toString(), style: 'tableCell' },
-      { text: `${p.taluka || ''}\n${cleanVillageName(p.villageName)}`, style: 'tableCell', alignment: 'left' },
+      { text: `${(p.taluka ? (TALUKA_EN_TO_MR[p.taluka] || p.taluka) : '')}\n${cleanVillageName(p.villageName)}`, style: 'tableCell', alignment: 'left' },
       { text: p.gatNumber || '-', style: 'tableCell' },
       { text: p.oldSurveyNo || '-', style: 'tableCell' },
       { text: Number(p.totalAreaHa || 0).toFixed(4), style: 'tableCell', alignment: 'right' },

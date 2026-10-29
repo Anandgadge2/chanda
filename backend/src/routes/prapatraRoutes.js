@@ -9,7 +9,12 @@ import {
   getBookletCategories,
   updatePrapatraRollup,
   uploadPrapatraExcel,
-  inspectPrapatraDiff
+  inspectPrapatraDiff,
+  getRenumberingParchaData,
+  exportRenumberingParchaExcel,
+  exportRenumberingParchaPdf,
+  exportGoshwaraExcel,
+  exportGoshwaraPdf
 } from '../controllers/prapatraController.js';
 import { authenticate, authorize } from '../middleware/authMiddleware.js';
 
@@ -82,6 +87,13 @@ router.get('/categories', getBookletCategories);
  * @desc    Get Prapatra 1-17 or Master Checklist in JSON, Excel, or PDF format
  * @query   taluka, village, search, filterType, format ('json', 'excel', 'pdf')
  */
+router.get('/renumbering-parcha/data', getRenumberingParchaData);
+router.post('/renumbering-parcha/export-excel', exportRenumberingParchaExcel);
+router.post('/renumbering-parcha/export-pdf', exportRenumberingParchaPdf);
+
+router.post('/goshwara/export-excel', exportGoshwaraExcel);
+router.post('/goshwara/export-pdf', exportGoshwaraPdf);
+
 router.get('/:id', getPrapatraReport);
 
 export default router;

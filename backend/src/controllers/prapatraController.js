@@ -19,6 +19,10 @@ import {
 } from '../utils/prapatraGenerator.js';
 import { generatePrapatraPdf } from '../utils/pdfGenerator.js';
 import {
+  generateRenumberingParchaExcel,
+  generateRenumberingParchaPdf
+} from '../utils/renumberingGenerator.js';
+import {
   generateMasterChecklistExcel,
   generateMasterChecklistPdf,
   generateChecklistParcelsPdf,
@@ -407,10 +411,18 @@ export async function calculateDynamicGoshwaraRollup(filters = {}) {
       COALESCE(SUM(CASE WHEN tenure_class = 'BHOGVATDAR_CLASS_1' THEN total_area_ha ELSE 0 END), 0)::float as "c1Area",
       COUNT(CASE WHEN tenure_class = 'BHOGVATDAR_CLASS_2' THEN 1 END)::int as "c2Count",
       COALESCE(SUM(CASE WHEN tenure_class = 'BHOGVATDAR_CLASS_2' THEN total_area_ha ELSE 0 END), 0)::float as "c2Area",
+      COUNT(CASE WHEN tenure_class = 'SARKAR_SHASAN' THEN 1 END)::int as "sarkarCount",
+      COALESCE(SUM(CASE WHEN tenure_class = 'SARKAR_SHASAN' THEN total_area_ha ELSE 0 END), 0)::float as "sarkarArea",
+      COUNT(CASE WHEN tenure_class = 'DEVASTHAN_INAM' THEN 1 END)::int as "inamCount",
+      COALESCE(SUM(CASE WHEN tenure_class = 'DEVASTHAN_INAM' THEN total_area_ha ELSE 0 END), 0)::float as "inamArea",
+      COUNT(CASE WHEN tenure_class = 'FOREST_JANGAL' THEN 1 END)::int as "forestCount",
+      COALESCE(SUM(CASE WHEN tenure_class = 'FOREST_JANGAL' THEN total_area_ha ELSE 0 END), 0)::float as "forestArea",
       COUNT(CASE WHEN (metadata->'flags'->>'isShartbhang' = 'true' AND tenure_class = 'BHOGVATDAR_CLASS_1') OR (metadata->>'otherRights' LIKE '%रूपांतर%') THEN 1 END)::int as "convCount",
       COALESCE(SUM(CASE WHEN (metadata->'flags'->>'isShartbhang' = 'true' AND tenure_class = 'BHOGVATDAR_CLASS_1') OR (metadata->>'otherRights' LIKE '%रूपांतर%') THEN total_area_ha ELSE 0 END), 0)::float as "convArea",
       COUNT(CASE WHEN metadata->>'otherRights' IS NULL OR metadata->>'otherRights' = '' OR metadata->>'otherRights' = '-' OR metadata->>'otherRights' = '....' THEN 1 END)::int as "noOtherCount",
       COALESCE(SUM(CASE WHEN metadata->>'otherRights' IS NULL OR metadata->>'otherRights' = '' OR metadata->>'otherRights' = '-' OR metadata->>'otherRights' = '....' THEN total_area_ha ELSE 0 END), 0)::float as "noOtherArea",
+      COUNT(CASE WHEN metadata->'flags'->>'isIllegalDeletion' = 'true' OR metadata->'auditPoints'->>'point_40' = 'होय' OR metadata->'flags'->>'isShartbhang' = 'true' THEN 1 END)::int as "delCount",
+      COALESCE(SUM(CASE WHEN metadata->'flags'->>'isIllegalDeletion' = 'true' OR metadata->'auditPoints'->>'point_40' = 'होय' OR metadata->'flags'->>'isShartbhang' = 'true' THEN total_area_ha ELSE 0 END), 0)::float as "delArea",
       COUNT(CASE WHEN metadata->'flags'->>'isShartbhang' = 'true' OR metadata->'flags'->>'isIllegalDeletion' = 'true' THEN 1 END)::int as "shartCount",
       COALESCE(SUM(CASE WHEN metadata->'flags'->>'isShartbhang' = 'true' OR metadata->'flags'->>'isIllegalDeletion' = 'true' THEN total_area_ha ELSE 0 END), 0)::float as "shartArea"
     FROM land_parcels
@@ -438,10 +450,18 @@ export async function calculateDynamicGoshwaraRollup(filters = {}) {
     c1Area: r.c1Area.toFixed(2),
     c2Count: r.c2Count,
     c2Area: r.c2Area.toFixed(2),
+    sarkarCount: r.sarkarCount || 0,
+    sarkarArea: (r.sarkarArea || 0).toFixed(2),
+    inamCount: r.inamCount || 0,
+    inamArea: (r.inamArea || 0).toFixed(2),
+    forestCount: r.forestCount || 0,
+    forestArea: (r.forestArea || 0).toFixed(2),
     convCount: r.convCount,
     convArea: r.convArea.toFixed(2),
     noOtherCount: r.noOtherCount,
     noOtherArea: r.noOtherArea.toFixed(2),
+    delCount: r.delCount ?? r.shartCount ?? 0,
+    delArea: (r.delArea ?? r.shartArea ?? 0).toFixed(2),
     shartCount: r.shartCount,
     shartArea: r.shartArea.toFixed(2),
     remarks: r.shartCount > 0 ? 'शर्तभंग / अनधिकृत हस्तांतरण' : 'तपासणी प्रमाणित'
@@ -462,10 +482,18 @@ export async function calculateDynamicGoshwaraRollup(filters = {}) {
         c1Area: 0,
         c2Count: 0,
         c2Area: 0,
+        sarkarCount: 0,
+        sarkarArea: 0,
+        inamCount: 0,
+        inamArea: 0,
+        forestCount: 0,
+        forestArea: 0,
         convCount: 0,
         convArea: 0,
         noOtherCount: 0,
         noOtherArea: 0,
+        delCount: 0,
+        delArea: 0,
         shartCount: 0,
         shartArea: 0,
         remarks: `${TALUKA_EN_TO_MR[r.taluka] || r.taluka} तालुका एकत्रित`
@@ -478,10 +506,18 @@ export async function calculateDynamicGoshwaraRollup(filters = {}) {
     t.c1Area += r.c1Area;
     t.c2Count += r.c2Count;
     t.c2Area += r.c2Area;
+    t.sarkarCount += (r.sarkarCount || 0);
+    t.sarkarArea += (r.sarkarArea || 0);
+    t.inamCount += (r.inamCount || 0);
+    t.inamArea += (r.inamArea || 0);
+    t.forestCount += (r.forestCount || 0);
+    t.forestArea += (r.forestArea || 0);
     t.convCount += r.convCount;
     t.convArea += r.convArea;
     t.noOtherCount += r.noOtherCount;
     t.noOtherArea += r.noOtherArea;
+    t.delCount += (r.delCount ?? r.shartCount ?? 0);
+    t.delArea += (r.delArea ?? r.shartArea ?? 0);
     t.shartCount += r.shartCount;
     t.shartArea += r.shartArea;
   });
@@ -491,8 +527,12 @@ export async function calculateDynamicGoshwaraRollup(filters = {}) {
     totalArea: t.totalAreaHa.toFixed(2),
     c1Area: t.c1Area.toFixed(2),
     c2Area: t.c2Area.toFixed(2),
+    sarkarArea: t.sarkarArea.toFixed(2),
+    inamArea: t.inamArea.toFixed(2),
+    forestArea: t.forestArea.toFixed(2),
     convArea: t.convArea.toFixed(2),
     noOtherArea: t.noOtherArea.toFixed(2),
+    delArea: t.delArea.toFixed(2),
     shartArea: t.shartArea.toFixed(2)
   })).sort((a, b) => a.taluka.localeCompare(b.taluka));
 
@@ -510,10 +550,18 @@ export async function calculateDynamicGoshwaraRollup(filters = {}) {
       c1Area: 0,
       c2Count: 0,
       c2Area: 0,
+      sarkarCount: 0,
+      sarkarArea: 0,
+      inamCount: 0,
+      inamArea: 0,
+      forestCount: 0,
+      forestArea: 0,
       convCount: 0,
       convArea: 0,
       noOtherCount: 0,
       noOtherArea: 0,
+      delCount: 0,
+      delArea: 0,
       shartCount: 0,
       shartArea: 0,
       remarks: isAllTalukas ? 'जिल्हास्तरीय एकत्रित गोषवारा' : `${TALUKA_EN_TO_MR[targetTaluka] || targetTaluka} तालुकास्तरीय गोषवारा`
@@ -526,10 +574,18 @@ export async function calculateDynamicGoshwaraRollup(filters = {}) {
       rawDist.c1Area += parseFloat(t.c1Area) || 0;
       rawDist.c2Count += t.c2Count;
       rawDist.c2Area += parseFloat(t.c2Area) || 0;
+      rawDist.sarkarCount += t.sarkarCount;
+      rawDist.sarkarArea += parseFloat(t.sarkarArea) || 0;
+      rawDist.inamCount += t.inamCount;
+      rawDist.inamArea += parseFloat(t.inamArea) || 0;
+      rawDist.forestCount += t.forestCount;
+      rawDist.forestArea += parseFloat(t.forestArea) || 0;
       rawDist.convCount += t.convCount;
       rawDist.convArea += parseFloat(t.convArea) || 0;
       rawDist.noOtherCount += t.noOtherCount;
       rawDist.noOtherArea += parseFloat(t.noOtherArea) || 0;
+      rawDist.delCount += t.delCount;
+      rawDist.delArea += parseFloat(t.delArea) || 0;
       rawDist.shartCount += t.shartCount;
       rawDist.shartArea += parseFloat(t.shartArea) || 0;
     });
@@ -539,8 +595,12 @@ export async function calculateDynamicGoshwaraRollup(filters = {}) {
       totalArea: rawDist.totalAreaHa.toFixed(2),
       c1Area: rawDist.c1Area.toFixed(2),
       c2Area: rawDist.c2Area.toFixed(2),
+      sarkarArea: rawDist.sarkarArea.toFixed(2),
+      inamArea: rawDist.inamArea.toFixed(2),
+      forestArea: rawDist.forestArea.toFixed(2),
       convArea: rawDist.convArea.toFixed(2),
       noOtherArea: rawDist.noOtherArea.toFixed(2),
+      delArea: rawDist.delArea.toFixed(2),
       shartArea: rawDist.shartArea.toFixed(2)
     };
   } else {
@@ -1182,7 +1242,12 @@ export const getPrapatraReport = async (req, res) => {
       if (isChecklist) {
         if (view === 'summary') {
           res.setHeader('Content-Disposition', `attachment; filename=Checklist_Goshwara_Rollup_${safeScope}_${timestamp}.xlsx`);
-          return await generateChecklistSummaryExcel(summaryExportRows, scopeName, res);
+          return await generateChecklistSummaryExcel({
+            tier: req.query.tier || 'all',
+            districtRows: dynamicRollupData.districtTotal ? [dynamicRollupData.districtTotal] : [],
+            talukaRows: dynamicRollupData.byTaluka || [],
+            villageRows: dynamicRollupData.byVillage || []
+          }, scopeName, res);
         }
         res.setHeader('Content-Disposition', `attachment; filename=Checklist-46_Chandrapur_${safeScope}_${timestamp}.xlsx`);
         return await generateMasterChecklistExcel(formattedParcels, scopeName, res);
@@ -1210,7 +1275,12 @@ export const getPrapatraReport = async (req, res) => {
       if (isChecklist) {
         if (view === 'summary') {
           res.setHeader('Content-Disposition', `attachment; filename=Checklist_Goshwara_Rollup_${safeScope}_${timestamp}.pdf`);
-          return await generateChecklistSummaryPdf(summaryExportRows, scopeName, res);
+          return await generateChecklistSummaryPdf({
+            tier: req.query.tier || 'all',
+            districtRows: dynamicRollupData.districtTotal ? [dynamicRollupData.districtTotal] : [],
+            talukaRows: dynamicRollupData.byTaluka || [],
+            villageRows: dynamicRollupData.byVillage || []
+          }, scopeName, res);
         }
         if (view === 'parcels') {
           res.setHeader('Content-Disposition', `attachment; filename=Sankshipt_7-12_List_${safeScope}_${timestamp}.pdf`);
@@ -1850,5 +1920,307 @@ export const getDistrictSummary = async (req, res) => {
   } catch (err) {
     console.error('getDistrictSummary error:', err);
     return res.status(500).json({ success: false, error: err.message });
+  }
+};
+
+const TALUKA_SUBDIVISIONS = {
+  Chandrapur: 'चंद्रपूर',
+  Ballarpur: 'चंद्रपूर',
+  Warora: 'वरोरा',
+  Bhadravati: 'वरोरा',
+  Rajura: 'राजुरा',
+  Korpana: 'राजुरा',
+  Jivati: 'राजुरा',
+  Mul: 'मूल',
+  Saoli: 'मूल',
+  Pombhurna: 'मूल',
+  Brahmapuri: 'ब्रह्मपुरी',
+  Nagbhid: 'ब्रह्मपुरी',
+  Sindewahi: 'ब्रह्मपुरी',
+  Chimur: 'चिमूर',
+  Gondpipri: 'गोंडपिपरी'
+};
+
+const TALUKA_MR_NAMES = {
+  Chandrapur: 'चंद्रपूर',
+  Ballarpur: 'बल्लारपूर',
+  Warora: 'वरोरा',
+  Bhadravati: 'भद्रावती',
+  Rajura: 'राजुरा',
+  Korpana: 'कोरपना',
+  Jivati: 'जिवती',
+  Mul: 'मूल',
+  Saoli: 'सावली',
+  Pombhurna: 'पोंभुर्णा',
+  Brahmapuri: 'ब्रह्मपुरी',
+  Nagbhid: 'नागभीड',
+  Sindewahi: 'सिंदेवाही',
+  Chimur: 'चिमूर',
+  Gondpipri: 'गोंडपिपरी'
+};
+
+/**
+ * GET /api/prapatra/renumbering-parcha/data
+ * Fetch initial or village-specific data for the editable Renumbering Parcha
+ */
+export const getRenumberingParchaData = async (req, res) => {
+  try {
+    const { taluka = '', village = '' } = req.query;
+
+    const hasTaluka = taluka && taluka !== 'all' && taluka !== 'सर्व तालुके' && taluka !== 'All Talukas';
+    const hasVillage = village && village !== 'all' && village !== 'सर्व गावे' && village !== 'All Villages';
+
+    const MR_TO_EN_TALUKA = {
+      'चंद्रपूर': 'Chandrapur',
+      'बल्लारपूर': 'Ballarpur',
+      'वरोरा': 'Warora',
+      'भद्रावती': 'Bhadravati',
+      'राजुरा': 'Rajura',
+      'कोरपना': 'Korpana',
+      'जिवती': 'Jivati',
+      'मूल': 'Mul',
+      'सावली': 'Saoli',
+      'पोंभुर्णा': 'Pombhurna',
+      'ब्रह्मपुरी': 'Brahmapuri',
+      'नागभीड': 'Nagbhid',
+      'सिंदेवाही': 'Sindewahi',
+      'चिमूर': 'Chimur',
+      'गोंडपिपरी': 'Gondpipri'
+    };
+
+    let targetTaluka = '';
+    if (hasTaluka) {
+      if (MR_TO_EN_TALUKA[taluka]) {
+        targetTaluka = MR_TO_EN_TALUKA[taluka];
+      } else {
+        const lower = String(taluka).trim().toLowerCase();
+        targetTaluka = TALUKA_ALIASES[lower] ||
+          Object.keys(TALUKA_MR_NAMES).find(k => k.toLowerCase() === lower) ||
+          taluka;
+      }
+    }
+
+    const cleanVillage = hasVillage ? cleanVillageName(village) : '';
+    const mrTaluka = targetTaluka ? (TALUKA_MR_NAMES[targetTaluka] || taluka) : '';
+    const subDiv = targetTaluka ? (TALUKA_SUBDIVISIONS[targetTaluka] || '') : '';
+
+    // If no village is selected, show empty data as per critic review
+    if (!cleanVillage) {
+      return res.status(200).json({
+        success: true,
+        header: {
+          villageName: '',
+          taluka: mrTaluka,
+          subDivision: subDiv,
+          district: 'चंद्रपूर'
+        },
+        rows: []
+      });
+    }
+
+    let parcels = [];
+    try {
+      const whereCondition = {
+        AND: [
+          targetTaluka
+            ? {
+                OR: [
+                  { taluka: { equals: targetTaluka, mode: 'insensitive' } },
+                  { taluka: { contains: targetTaluka, mode: 'insensitive' } },
+                  ...(TALUKA_MR_NAMES[targetTaluka] ? [{ taluka: { contains: TALUKA_MR_NAMES[targetTaluka], mode: 'insensitive' } }] : [])
+                ]
+              }
+            : {},
+          {
+            OR: [
+              { villageName: { contains: cleanVillage, mode: 'insensitive' } },
+              { villageName: { contains: village, mode: 'insensitive' } },
+              { revenueCircle: { contains: cleanVillage, mode: 'insensitive' } }
+            ]
+          }
+        ]
+      };
+
+      parcels = await prisma.landParcel.findMany({
+        where: whereCondition,
+        include: {
+          backwardHistories: true
+        },
+        take: 1500
+      });
+    } catch (e) {
+      console.warn('Could not query parcels for renumbering parcha:', e.message);
+    }
+
+    const header = {
+      villageName: cleanVillage,
+      taluka: mrTaluka,
+      subDivision: subDiv,
+      district: 'चंद्रपूर'
+    };
+
+    const cleanVal = (v) => {
+      if (!v) return '';
+      const str = String(v).trim();
+      if (/^\d{4}-\d{2}-\d{2}/.test(str)) {
+        const parts = str.split(' ')[0].split('-');
+        if (parts.length === 3) {
+          const d = parseInt(parts[2], 10);
+          const m = parseInt(parts[1], 10);
+          return `${d}/${m}`;
+        }
+      }
+      return str;
+    };
+
+    let rows = [];
+    if (parcels.length > 0) {
+      rows = parcels.map((p, idx) => {
+        const pts = resolveParcel46Points(p);
+        const bNo = cleanVal(p.oldSurveyNo || pts[1]);
+        const eNo = cleanVal(pts[4] && pts[4] !== (p.oldSurveyNo || pts[1]) ? pts[4] : '');
+        const pNo = cleanVal(p.gatNumber || pts[7]);
+
+        return {
+          id: p.id || String(idx + 1),
+          bandobastNo: bNo,
+          col2: '',
+          ekatrikaranNo: eNo,
+          col4: '',
+          punarmajaniNo: pNo
+        };
+      });
+
+      // Natural ascending numerical sort by punarmajaniNo (Gat number)
+      rows.sort((a, b) => {
+        const numA = parseFloat(a.punarmajaniNo) || 0;
+        const numB = parseFloat(b.punarmajaniNo) || 0;
+        if (numA !== numB) return numA - numB;
+        return String(a.punarmajaniNo).localeCompare(String(b.punarmajaniNo), undefined, { numeric: true });
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      header,
+      rows
+    });
+  } catch (err) {
+    console.error('getRenumberingParchaData error:', err);
+    return res.status(500).json({ success: false, error: err.message });
+  }
+};
+
+/**
+ * POST /api/prapatra/renumbering-parcha/export-excel
+ * Export the user-edited Renumbering Parcha exactly to Excel
+ */
+export const exportRenumberingParchaExcel = async (req, res) => {
+  try {
+    const { header = {}, rows = [] } = req.body || {};
+    const safeVillage = (header.villageName || 'Village').replace(/[^a-zA-Z0-9\u0900-\u097F_-]/g, '_');
+    const filename = `Renumbering_Parcha_${safeVillage}_${Date.now()}.xlsx`;
+
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(filename)}"`);
+
+    await generateRenumberingParchaExcel({ header, rows }, res);
+  } catch (err) {
+    console.error('exportRenumberingParchaExcel error:', err);
+    if (!res.headersSent) {
+      return res.status(500).json({ success: false, error: err.message });
+    }
+  }
+};
+
+/**
+ * POST /api/prapatra/renumbering-parcha/export-pdf
+ * Export the user-edited Renumbering Parcha exactly to PDF
+ */
+export const exportRenumberingParchaPdf = async (req, res) => {
+  try {
+    const { header = {}, rows = [] } = req.body || {};
+    const safeVillage = (header.villageName || 'Village').replace(/[^a-zA-Z0-9\u0900-\u097F_-]/g, '_');
+    const filename = `Renumbering_Parcha_${safeVillage}_${Date.now()}.pdf`;
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(filename)}"`);
+
+    await generateRenumberingParchaPdf({ header, rows }, res);
+  } catch (err) {
+    console.error('exportRenumberingParchaPdf error:', err);
+    if (!res.headersSent) {
+      return res.status(500).json({ success: false, error: err.message });
+    }
+  }
+};
+
+/**
+ * POST /api/prapatra/goshwara/export-excel
+ * Export the user-edited Ghoshwara table strictly matching the official format
+ */
+export const exportGoshwaraExcel = async (req, res) => {
+  try {
+    const {
+      tier = 'all',
+      districtRows = [],
+      talukaRows = [],
+      villageRows = [],
+      scopeName = 'Chandrapur'
+    } = req.body || {};
+
+    const timestamp = new Date().toISOString().slice(0, 10);
+    const safeScope = (scopeName || 'Chandrapur').replace(/[^a-zA-Z0-9\u0900-\u097F_-]/g, '_');
+    const filename = `Ghoshwara_${safeScope}_${timestamp}.xlsx`;
+
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(filename)}"`);
+
+    await generateChecklistSummaryExcel({
+      tier,
+      districtRows,
+      talukaRows,
+      villageRows
+    }, scopeName, res);
+  } catch (err) {
+    console.error('exportGoshwaraExcel error:', err);
+    if (!res.headersSent) {
+      return res.status(500).json({ success: false, error: err.message });
+    }
+  }
+};
+
+/**
+ * POST /api/prapatra/goshwara/export-pdf
+ * Export the user-edited Ghoshwara table strictly matching the official format
+ */
+export const exportGoshwaraPdf = async (req, res) => {
+  try {
+    const {
+      tier = 'all',
+      districtRows = [],
+      talukaRows = [],
+      villageRows = [],
+      scopeName = 'Chandrapur'
+    } = req.body || {};
+
+    const timestamp = new Date().toISOString().slice(0, 10);
+    const safeScope = (scopeName || 'Chandrapur').replace(/[^a-zA-Z0-9\u0900-\u097F_-]/g, '_');
+    const filename = `Ghoshwara_${safeScope}_${timestamp}.pdf`;
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(filename)}"`);
+
+    await generateChecklistSummaryPdf({
+      tier,
+      districtRows,
+      talukaRows,
+      villageRows
+    }, scopeName, res);
+  } catch (err) {
+    console.error('exportGoshwaraPdf error:', err);
+    if (!res.headersSent) {
+      return res.status(500).json({ success: false, error: err.message });
+    }
   }
 };

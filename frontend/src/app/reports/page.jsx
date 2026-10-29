@@ -30,12 +30,16 @@ import {
   User,
   MapPin,
   ChevronDown,
-  Edit3
+  Edit3,
+  Check,
+  RotateCcw,
+  Save
 } from 'lucide-react';
 import clsx from 'clsx';
 import { CHANDRAPUR_TALUKAS } from '../../lib/constants';
 import { api } from '../../lib/api';
 import EditParcelModal from '../../components/EditParcelModal';
+import RenumberingParchaView from '../../components/RenumberingParchaView';
 import Pagination from '../../components/Pagination';
 import SearchableSelect from '../../components/SearchableSelect';
 import { useTranslation } from '../../components/LanguageContext';
@@ -132,6 +136,7 @@ export default function ReportsPage() {
   const [activeTab, setActiveTab] = useState('checklist');
   const [selectedCatId, setSelectedCatId] = useState(1);
   const [selectedPrapatraId, setSelectedPrapatraId] = useState(1);
+  const [renumberingExportHandlers, setRenumberingExportHandlers] = useState(null);
 
   // DRAFT FILTERS (Controlled by input selectors in UI)
   const [draftTaluka, setDraftTaluka] = useState('all');
@@ -164,6 +169,7 @@ export default function ReportsPage() {
   // For 'prapatra5': 'prapatraData' (Sheet 1), 'prapatraSummary' (Sheet 2)
   // For 'categories': 'categoryData' (Sheet 1), 'categorySummary' (Sheet 2)
   const [activeView, setActiveView] = useState('timeline');
+  const isGoshwaraView = activeTab === 'goshwara';
   const [goshwaraTier, setGoshwaraTier] = useState('all'); // 'all', 'village', 'taluka', 'district'
   const [prapatraTier, setPrapatraTier] = useState('all'); // 'all', 'taluka', 'village'
   const [prapatraSearch, setPrapatraSearch] = useState('');
@@ -207,6 +213,74 @@ export default function ReportsPage() {
     }
   }, [inspectedParcel]);
 
+  // Ghoshwara editable overrides state & persistence
+  const [goshwaraEdits, setGoshwaraEdits] = useState({});
+  const [editingRowKey, setEditingRowKey] = useState(null);
+  const [editFormData, setEditFormData] = useState({});
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('chandrapur_goshwara_edits');
+      if (saved) {
+        setGoshwaraEdits(JSON.parse(saved));
+      }
+    } catch (e) {
+      console.warn('Failed to load goshwara edits from localStorage', e);
+    }
+  }, []);
+
+  const handleStartEdit = (rowKey, row) => {
+    setEditingRowKey(rowKey);
+    setEditFormData({
+      totalSurveys: row.totalSurveys,
+      totalArea: row.totalArea,
+      c1Surveys: row.c1Surveys,
+      c1Area: row.c1Area,
+      c2Surveys: row.c2Surveys,
+      c2Area: row.c2Area,
+      convSurveys: row.convSurveys,
+      convArea: row.convArea,
+      noOtherSurveys: row.noOtherSurveys,
+      noOtherArea: row.noOtherArea,
+      delSurveys: row.delSurveys,
+      delArea: row.delArea,
+    });
+  };
+
+  const handleSaveEdit = (rowKey) => {
+    setGoshwaraEdits((prev) => {
+      const next = { ...prev, [rowKey]: editFormData };
+      try {
+        localStorage.setItem('chandrapur_goshwara_edits', JSON.stringify(next));
+      } catch (e) {}
+      return next;
+    });
+    setEditingRowKey(null);
+    setToastMessage({
+      type: 'success',
+      text: isMarathi ? 'गोषवारा नोंद यशस्वीरीत्या जतन केली.' : 'Goshwara record saved successfully.'
+    });
+    setTimeout(() => setToastMessage(null), 4000);
+  };
+
+  const handleCancelEdit = () => {
+    setEditingRowKey(null);
+    setEditFormData({});
+  };
+
+  const handleResetAllEdits = () => {
+    setGoshwaraEdits({});
+    try {
+      localStorage.removeItem('chandrapur_goshwara_edits');
+    } catch (e) {}
+    setEditingRowKey(null);
+    setToastMessage({
+      type: 'success',
+      text: isMarathi ? 'सर्व बदल पूर्ववत करण्यात आले.' : 'All manual edits reset to calculated values.'
+    });
+    setTimeout(() => setToastMessage(null), 4000);
+  };
+
   // Dynamically load villages for draft taluka
   useEffect(() => {
     async function loadVillages() {
@@ -224,7 +298,7 @@ export default function ReportsPage() {
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const reportId = activeTab === 'checklist' 
+      const reportId = (activeTab === 'checklist' || activeTab === 'goshwara') 
         ? 'checklist' 
         : (activeTab === 'prapatra5' ? selectedPrapatraId : selectedCatId);
       const isBooklet = activeTab === 'categories';
@@ -444,7 +518,7 @@ export default function ReportsPage() {
   }, [parcels, page, pageSize]);
 
   // Download URLs
-  const currentReportId = activeTab === 'checklist' 
+  const currentReportId = (activeTab === 'checklist' || activeTab === 'goshwara') 
     ? 'checklist' 
     : (activeTab === 'prapatra5' ? selectedPrapatraId : selectedCatId);
   const isBookletMode = activeTab === 'categories';
@@ -456,7 +530,7 @@ export default function ReportsPage() {
     tenure: tenureFilter,
     violation: violationFilter,
     booklet: isBookletMode ? 'true' : 'false',
-    view: activeTab === 'checklist' ? activeView : undefined
+    view: activeTab === 'checklist' ? activeView : (activeTab === 'goshwara' ? 'summary' : undefined)
   });
   const pdfDownloadUrl = api.getPrapatraPdfUrl(currentReportId, {
     taluka,
@@ -465,7 +539,7 @@ export default function ReportsPage() {
     tenure: tenureFilter,
     violation: violationFilter,
     booklet: isBookletMode ? 'true' : 'false',
-    view: activeTab === 'checklist' ? activeView : undefined
+    view: activeTab === 'checklist' ? activeView : (activeTab === 'goshwara' ? 'summary' : undefined)
   });
 
   // Prapatra Summary Filtered Rows & Aggregates
@@ -563,8 +637,146 @@ export default function ReportsPage() {
     return summaryData || [];
   }, [serverRollup, summaryData, taluka]);
 
+  // Processed Ghoshwara Rows with manual edits overlaid
+  const { processedDistrictRows, processedTalukaRows, processedVillageRows } = useMemo(() => {
+    const rawDistrict = serverRollup?.districtTotal ? [serverRollup.districtTotal] : (
+      summaryData.filter(r => r.villageName === 'संपूर्ण जिल्हा (१५ तालुके गोषवारा)' || r.villageName === 'Whole District Rollup')
+    );
+    const rawTaluka = serverRollup?.byTaluka?.length > 0 ? serverRollup.byTaluka : (
+      summaryData.filter(r => r.villageName === 'संपूर्ण तालुका (All Villages)')
+    );
+    const rawVillage = serverRollup?.byVillage?.length > 0 ? serverRollup.byVillage : (
+      summaryData.filter(r => r.villageName && r.villageName !== 'संपूर्ण तालुका (All Villages)' && r.villageName !== 'संपूर्ण जिल्हा (१५ तालुके गोषवारा)' && r.villageName !== 'Whole District Rollup')
+    );
+
+    const mapRow = (r, idx, type) => {
+      const isDistrictTotal = type === 'district' || r.villageName === 'संपूर्ण जिल्हा (१५ तालुके गोषवारा)' || r.villageName === 'Whole District Rollup';
+      const isTalukaTotal = type === 'taluka' || r.villageName === 'संपूर्ण तालुका (All Villages)';
+
+      const name = isDistrictTotal
+        ? (isMarathi ? 'चंद्रपूर जिल्हा' : 'Chandrapur District')
+        : isTalukaTotal
+        ? formatTalukaName(r.taluka, isMarathi)
+        : cleanVillageName(r.villageName || r.taluka || '-');
+
+      const rowKey = r.id || `${type}-${r.taluka || 'taluka'}-${r.villageName || idx}`;
+      const edit = goshwaraEdits[rowKey];
+
+      const rawTotalSurveys = Number(r.total712Count || r.totalGovtLandCount || 0);
+      const rawTotalArea = r.totalArea !== undefined ? r.totalArea : (r.totalAreaHa !== undefined ? Number(r.totalAreaHa).toFixed(2) : '0.00');
+      const rawC1Surveys = Number(r.c1Count !== undefined ? r.c1Count : (r.govtFound1950Count || 0));
+      const rawC1Area = r.c1Area !== undefined ? r.c1Area : '0.00';
+      const rawC2Surveys = Number(r.c2Count !== undefined ? r.c2Count : (r.pendingRectifyCount || 0));
+      const rawC2Area = r.c2Area !== undefined ? r.c2Area : '0.00';
+      const rawConvSurveys = Number(r.convCount !== undefined ? r.convCount : (r.illegalDeletionsCount || 0));
+      const rawConvArea = r.convArea !== undefined ? r.convArea : '0.00';
+      const rawNoOtherSurveys = Number(r.noOtherCount !== undefined ? r.noOtherCount : (r.pokalistPendingCount || 0));
+      const rawNoOtherArea = r.noOtherArea !== undefined ? r.noOtherArea : '0.00';
+      const rawDelSurveys = Number(r.delCount !== undefined ? r.delCount : (r.illegalReductionCount !== undefined ? r.illegalReductionCount : (r.shartCount || 0)));
+      const rawDelArea = r.delArea !== undefined ? r.delArea : (r.delAreaHa !== undefined ? r.delAreaHa : (r.shartArea !== undefined ? r.shartArea : '0.00'));
+
+      return {
+        id: rowKey,
+        key: rowKey,
+        name,
+        taluka: r.taluka,
+        villageName: r.villageName,
+        totalSurveys: edit?.totalSurveys !== undefined ? Number(edit.totalSurveys) : rawTotalSurveys,
+        totalArea: edit?.totalArea !== undefined ? Number(edit.totalArea).toFixed(2) : Number(rawTotalArea).toFixed(2),
+        c1Surveys: edit?.c1Surveys !== undefined ? Number(edit.c1Surveys) : rawC1Surveys,
+        c1Area: edit?.c1Area !== undefined ? Number(edit.c1Area).toFixed(2) : Number(rawC1Area).toFixed(2),
+        c2Surveys: edit?.c2Surveys !== undefined ? Number(edit.c2Surveys) : rawC2Surveys,
+        c2Area: edit?.c2Area !== undefined ? Number(edit.c2Area).toFixed(2) : Number(rawC2Area).toFixed(2),
+        convSurveys: edit?.convSurveys !== undefined ? Number(edit.convSurveys) : rawConvSurveys,
+        convArea: edit?.convArea !== undefined ? Number(edit.convArea).toFixed(2) : Number(rawConvArea).toFixed(2),
+        noOtherSurveys: edit?.noOtherSurveys !== undefined ? Number(edit.noOtherSurveys) : rawNoOtherSurveys,
+        noOtherArea: edit?.noOtherArea !== undefined ? Number(edit.noOtherArea).toFixed(2) : Number(rawNoOtherArea).toFixed(2),
+        delSurveys: edit?.delSurveys !== undefined ? Number(edit.delSurveys) : rawDelSurveys,
+        delArea: edit?.delArea !== undefined ? Number(edit.delArea).toFixed(2) : Number(rawDelArea).toFixed(2),
+        hasEdit: Boolean(edit)
+      };
+    };
+
+    const pVillage = rawVillage.map((r, i) => mapRow(r, i, 'village'));
+    const pTaluka = rawTaluka.map((r, i) => mapRow(r, i, 'taluka'));
+    let pDistrict = rawDistrict.map((r, i) => mapRow(r, i, 'district'));
+
+    if (pDistrict.length === 0 && (pTaluka.length > 0 || pVillage.length > 0)) {
+      const source = pTaluka.length > 0 ? pTaluka : pVillage;
+      pDistrict = [{
+        id: 'dist-total',
+        key: 'dist-total',
+        name: isMarathi ? 'चंद्रपूर जिल्हा' : 'Chandrapur District',
+        totalSurveys: source.reduce((a, b) => a + b.totalSurveys, 0),
+        totalArea: source.reduce((a, b) => a + parseFloat(b.totalArea), 0).toFixed(2),
+        c1Surveys: source.reduce((a, b) => a + b.c1Surveys, 0),
+        c1Area: source.reduce((a, b) => a + parseFloat(b.c1Area), 0).toFixed(2),
+        c2Surveys: source.reduce((a, b) => a + b.c2Surveys, 0),
+        c2Area: source.reduce((a, b) => a + parseFloat(b.c2Area), 0).toFixed(2),
+        convSurveys: source.reduce((a, b) => a + b.convSurveys, 0),
+        convArea: source.reduce((a, b) => a + parseFloat(b.convArea), 0).toFixed(2),
+        noOtherSurveys: source.reduce((a, b) => a + b.noOtherSurveys, 0),
+        noOtherArea: source.reduce((a, b) => a + parseFloat(b.noOtherArea), 0).toFixed(2),
+        delSurveys: source.reduce((a, b) => a + b.delSurveys, 0),
+        delArea: source.reduce((a, b) => a + parseFloat(b.delArea), 0).toFixed(2),
+      }];
+    }
+
+    return {
+      processedDistrictRows: pDistrict,
+      processedTalukaRows: pTaluka,
+      processedVillageRows: pVillage
+    };
+  }, [serverRollup, summaryData, goshwaraEdits, isMarathi]);
+
+  // Dedicated export function sending exact current/edited Goshwara tables
+  const exportCurrentGoshwara = async (type) => {
+    const isExcel = type === 'excel';
+    if (isExcel) setDownloadingExcel(true);
+    else setDownloadingPdf(true);
+
+    try {
+      const effectiveTier = village !== 'all' ? 'village' : (taluka !== 'all' ? 'taluka' : 'all');
+      const payload = {
+        tier: effectiveTier,
+        scopeName: activeScope || taluka || 'Chandrapur',
+        districtRows: processedDistrictRows,
+        talukaRows: processedTalukaRows,
+        villageRows: processedVillageRows
+      };
+
+      if (isExcel) {
+        await api.exportGoshwaraExcel(payload);
+      } else {
+        await api.exportGoshwaraPdf(payload);
+      }
+
+      setToastMessage({
+        type: 'success',
+        text: isMarathi 
+          ? `गोषवारा ${isExcel ? 'एक्सेल (.xlsx)' : 'पीडीएफ (.pdf)'} यशस्वीरीत्या डाऊनलोड झाला.`
+          : `Goshwara ${isExcel ? 'Excel (.xlsx)' : 'PDF (.pdf)'} downloaded successfully.`
+      });
+      setTimeout(() => setToastMessage(null), 5000);
+    } catch (err) {
+      console.warn('Custom goshwara export failed, falling back to URL download:', err);
+      const url = isExcel ? excelDownloadUrl : pdfDownloadUrl;
+      window.location.href = url;
+    } finally {
+      if (isExcel) setDownloadingExcel(false);
+      else setDownloadingPdf(false);
+    }
+  };
+
   // Robust programmatic download with feedback
   const handleDownload = async (type) => {
+    if (activeTab === 'renumbering') {
+      if (type === 'excel') return renumberingExportHandlers?.exportExcel?.();
+      else return renumberingExportHandlers?.exportPdf?.();
+    }
+    if (activeTab === 'goshwara' || (activeTab === 'checklist' && activeView === 'summary')) {
+      return exportCurrentGoshwara(type);
+    }
     const isExcel = type === 'excel';
     if (isExcel) setDownloadingExcel(true);
     else setDownloadingPdf(true);
@@ -581,7 +793,7 @@ export default function ReportsPage() {
             ? `Prapatra-${selectedPrapatraId}_Chandrapur.xlsx` 
             : activeTab === 'categories' 
             ? `Category-${selectedCatId}_Booklet.xlsx` 
-            : (activeView === 'summary' ? `Checklist_Goshwara_Rollup.xlsx` : `Checklist-46_Chandrapur.xlsx`))
+            : (activeTab === 'goshwara' || activeView === 'summary' ? `Checklist_Goshwara_Rollup.xlsx` : `Checklist-46_Chandrapur.xlsx`))
         : (activeTab === 'prapatra5' 
             ? `Prapatra-${selectedPrapatraId}_Chandrapur.pdf` 
             : activeTab === 'categories' 
@@ -623,21 +835,25 @@ export default function ReportsPage() {
   const isFilterPending =
     draftTaluka !== appliedFilters.taluka ||
     draftVillage !== appliedFilters.village ||
-    draftTenure !== appliedFilters.tenure ||
-    draftViolation !== appliedFilters.violation ||
-    draftSearch.trim() !== appliedFilters.search;
+    (!isGoshwaraView && activeTab !== 'prapatra5' && (
+      draftTenure !== appliedFilters.tenure ||
+      draftViolation !== appliedFilters.violation ||
+      draftSearch.trim() !== appliedFilters.search
+    ));
 
   const hasActiveFilters =
     appliedFilters.taluka !== 'all' ||
     appliedFilters.village !== 'all' ||
-    appliedFilters.tenure !== 'all' ||
-    appliedFilters.violation !== 'all' ||
-    appliedFilters.search !== '' ||
     draftTaluka !== 'all' ||
     draftVillage !== 'all' ||
-    draftTenure !== 'all' ||
-    draftViolation !== 'all' ||
-    draftSearch !== '';
+    (!isGoshwaraView && activeTab !== 'prapatra5' && (
+      appliedFilters.tenure !== 'all' ||
+      appliedFilters.violation !== 'all' ||
+      appliedFilters.search !== '' ||
+      draftTenure !== 'all' ||
+      draftViolation !== 'all' ||
+      draftSearch !== ''
+    ));
 
   const handleApplyFilters = () => {
     setAppliedFilters({
@@ -729,6 +945,381 @@ export default function ReportsPage() {
     }))
   ], [isMarathi]);
 
+  // Strictly formatted official 14-column Goshwara Table Section Component
+  const renderGoshwaraTableSection = (title, nameHeader, rows) => {
+    const sumSurveys = rows.reduce((a, b) => a + Number(b.totalSurveys || 0), 0);
+    const sumArea = rows.reduce((a, b) => a + parseFloat(b.totalArea || 0), 0).toFixed(2);
+    const sumC1 = rows.reduce((a, b) => a + Number(b.c1Surveys || 0), 0);
+    const sumC1A = rows.reduce((a, b) => a + parseFloat(b.c1Area || 0), 0).toFixed(2);
+    const sumC2 = rows.reduce((a, b) => a + Number(b.c2Surveys || 0), 0);
+    const sumC2A = rows.reduce((a, b) => a + parseFloat(b.c2Area || 0), 0).toFixed(2);
+    const sumConv = rows.reduce((a, b) => a + Number(b.convSurveys || 0), 0);
+    const sumConvA = rows.reduce((a, b) => a + parseFloat(b.convArea || 0), 0).toFixed(2);
+    const sumNo = rows.reduce((a, b) => a + Number(b.noOtherSurveys || 0), 0);
+    const sumNoA = rows.reduce((a, b) => a + parseFloat(b.noOtherArea || 0), 0).toFixed(2);
+    const sumDel = rows.reduce((a, b) => a + Number(b.delSurveys || 0), 0);
+    const sumDelA = rows.reduce((a, b) => a + parseFloat(b.delArea || 0), 0).toFixed(2);
+
+    return (
+      <div className="space-y-0 mb-6 bg-white rounded-xl shadow-xs border border-slate-300 overflow-hidden">
+        {/* Strictly formatted Title Banner from user format */}
+        <div className="bg-slate-100 text-slate-900 font-extrabold text-sm md:text-base py-2.5 px-4 text-center tracking-wide border-b border-slate-300 flex items-center justify-between">
+          <div className="w-16 hidden sm:block" />
+          <span className="flex-1 text-center font-black text-slate-800">{title}</span>
+          <span className="text-[11px] font-semibold text-slate-500 bg-white border border-slate-200 px-2 py-0.5 rounded-md">
+            {rows.length} {isMarathi ? 'घटक' : 'Items'}
+          </span>
+        </div>
+
+        <div className="overflow-x-auto max-h-[600px] overflow-y-auto">
+          <table className="w-full text-left border-collapse text-xs min-w-[1100px]">
+            <thead className="sticky top-0 z-10 shadow-2xs">
+              {/* Row 1: Super Headers */}
+              <tr className="bg-slate-50 text-slate-900 font-bold border-b border-slate-300 text-center text-[11px]">
+                <th rowSpan={2} className="py-2.5 px-2 border-r border-slate-300 w-12 bg-slate-100/80">{isMarathi ? 'अ.क्र.' : 'Sr.'}</th>
+                <th rowSpan={2} className="py-2.5 px-3 border-r border-slate-300 text-left min-w-[150px] bg-slate-100/80">{nameHeader}</th>
+                <th rowSpan={2} className="py-2.5 px-2.5 border-r border-slate-300 w-24 bg-slate-100/80">{isMarathi ? 'एकूण सर्व्हे क्रमांक' : 'Total Survey No.'}</th>
+                <th rowSpan={2} className="py-2.5 px-2.5 border-r border-slate-300 w-28 text-right bg-slate-100/80">{isMarathi ? 'एकूण क्षेत्र(हे.आर.)' : 'Total Area (Ha.R)'}</th>
+                <th colSpan={2} className="py-1.5 px-2 border-r border-slate-300 bg-blue-50/70 text-blue-950 font-black">
+                  {isMarathi ? 'एकूण भोगवटदार वर्ग 1 जमिनी' : 'Total Occupant Class 1 Lands'}
+                </th>
+                <th colSpan={2} className="py-1.5 px-2 border-r border-slate-300 bg-amber-50/70 text-amber-950 font-black">
+                  {isMarathi ? 'एकूण भोगवटदार वर्ग 2 जमिनी' : 'Total Occupant Class 2 Lands'}
+                </th>
+                <th colSpan={2} className="py-1.5 px-2 border-r border-slate-300 bg-rose-50/70 text-rose-950 font-black">
+                  {isMarathi ? 'अवैधरित्या वर्ग 2 मधून वर्ग 1 केलेल्या जमिनी' : 'Illegally Converted Class 2 to 1'}
+                </th>
+                <th colSpan={2} className="py-1.5 px-2 border-r border-slate-300 bg-purple-50/70 text-purple-950 font-black">
+                  {isMarathi ? 'इतर अधिकारात नोंद न घेतलेल्या जमिनी' : 'Lands Without Other Rights Entry'}
+                </th>
+                <th colSpan={2} className="py-1.5 px-2 border-r border-slate-300 bg-emerald-50/70 text-emerald-950 font-black">
+                  {isMarathi ? 'अवैधरित्या इतर अधिकारामधून नोंद कमी केलेल्या जमिनी' : 'Illegally Deleted From Other Rights'}
+                </th>
+                <th rowSpan={2} className="py-2.5 px-2 w-20 text-center border-l border-slate-300 bg-slate-100/80">
+                  {isMarathi ? 'कृती' : 'Action'}
+                </th>
+              </tr>
+              {/* Row 2: Sub-Headers */}
+              <tr className="bg-slate-50 text-[10px] text-slate-700 font-bold border-b border-slate-300 text-center">
+                <th className="py-1.5 px-1.5 border-r border-slate-300 w-16">{isMarathi ? 'एकूण सर्व्हे क्रमांक' : 'Survey No.'}</th>
+                <th className="py-1.5 px-1.5 border-r border-slate-300 w-20 text-right">{isMarathi ? 'एकूण क्षेत्र(हे.आर.)' : 'Area (Ha.R)'}</th>
+                <th className="py-1.5 px-1.5 border-r border-slate-300 w-16">{isMarathi ? 'एकूण सर्व्हे क्रमांक' : 'Survey No.'}</th>
+                <th className="py-1.5 px-1.5 border-r border-slate-300 w-20 text-right">{isMarathi ? 'एकूण क्षेत्र(हे.आर.)' : 'Area (Ha.R)'}</th>
+                <th className="py-1.5 px-1.5 border-r border-slate-300 w-16 text-rose-900">{isMarathi ? 'एकूण सर्व्हे क्रमांक' : 'Survey No.'}</th>
+                <th className="py-1.5 px-1.5 border-r border-slate-300 w-20 text-right text-rose-900">{isMarathi ? 'एकूण क्षेत्र(हे.आर.)' : 'Area (Ha.R)'}</th>
+                <th className="py-1.5 px-1.5 border-r border-slate-300 w-16 text-purple-900">{isMarathi ? 'एकूण सर्व्हे क्रमांक' : 'Survey No.'}</th>
+                <th className="py-1.5 px-1.5 border-r border-slate-300 w-20 text-right text-purple-900">{isMarathi ? 'एकूण क्षेत्र(हे.आर.)' : 'Area (Ha.R)'}</th>
+                <th className="py-1.5 px-1.5 border-r border-slate-300 w-16 text-emerald-900">{isMarathi ? 'एकूण सर्व्हे क्रमांक' : 'Survey No.'}</th>
+                <th className="py-1.5 px-1.5 border-r border-slate-300 w-20 text-right text-emerald-900">{isMarathi ? 'एकूण क्षेत्र(हे.आर.)' : 'Area (Ha.R)'}</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-200">
+              {rows.length === 0 ? (
+                <tr>
+                  <td colSpan={15} className="py-8 text-center text-slate-400">
+                    {isMarathi ? 'या पत्रकाकरिता डेटा उपलब्ध नाही.' : 'No data available for this sheet.'}
+                  </td>
+                </tr>
+              ) : (
+                rows.map((row, idx) => {
+                  const isEditing = editingRowKey === row.key;
+                  return (
+                    <tr
+                      key={row.key}
+                      className={clsx(
+                        'transition-colors',
+                        isEditing ? 'bg-amber-50/70 ring-1 ring-amber-300' : (idx % 2 === 1 ? 'bg-slate-50/50 hover:bg-blue-50/30' : 'bg-white hover:bg-blue-50/30')
+                      )}
+                    >
+                      <td className="py-2 px-2 text-center border-r border-slate-200 font-mono text-slate-500 font-semibold">
+                        {idx + 1}
+                      </td>
+                      <td className="py-2 px-3 border-r border-slate-200 font-medium text-slate-900">
+                        <div className="flex items-center gap-1.5">
+                          <span>{row.name}</span>
+                          {row.hasEdit && (
+                            <span className="text-[9px] bg-blue-100 text-blue-700 px-1 py-0.2 rounded font-bold" title="वापरकर्त्याने संपादित केलेले">
+                              {isMarathi ? 'सुधारित' : 'Edited'}
+                            </span>
+                          )}
+                        </div>
+                      </td>
+
+                      {/* Total Surveys & Total Area */}
+                      {isEditing ? (
+                        <>
+                          <td className="py-1 px-1 border-r border-slate-200">
+                            <input
+                              type="number"
+                              min="0"
+                              value={editFormData.totalSurveys ?? ''}
+                              onChange={(e) => setEditFormData(prev => ({ ...prev, totalSurveys: e.target.value }))}
+                              className="w-full px-1.5 py-0.5 text-xs text-center border border-blue-400 rounded bg-white font-mono focus:outline-blue-600 font-bold"
+                            />
+                          </td>
+                          <td className="py-1 px-1 border-r border-slate-200">
+                            <input
+                              type="number"
+                              step="0.01"
+                              min="0"
+                              value={editFormData.totalArea ?? ''}
+                              onChange={(e) => setEditFormData(prev => ({ ...prev, totalArea: e.target.value }))}
+                              className="w-full px-1.5 py-0.5 text-xs text-right border border-blue-400 rounded bg-white font-mono focus:outline-blue-600 font-bold"
+                            />
+                          </td>
+                          {/* Class 1 */}
+                          <td className="py-1 px-1 border-r border-slate-200">
+                            <input
+                              type="number"
+                              min="0"
+                              value={editFormData.c1Surveys ?? ''}
+                              onChange={(e) => setEditFormData(prev => ({ ...prev, c1Surveys: e.target.value }))}
+                              className="w-full px-1.5 py-0.5 text-xs text-center border border-blue-400 rounded bg-white font-mono focus:outline-blue-600 text-blue-800"
+                            />
+                          </td>
+                          <td className="py-1 px-1 border-r border-slate-200">
+                            <input
+                              type="number"
+                              step="0.01"
+                              min="0"
+                              value={editFormData.c1Area ?? ''}
+                              onChange={(e) => setEditFormData(prev => ({ ...prev, c1Area: e.target.value }))}
+                              className="w-full px-1.5 py-0.5 text-xs text-right border border-blue-400 rounded bg-white font-mono focus:outline-blue-600 text-blue-800"
+                            />
+                          </td>
+                          {/* Class 2 */}
+                          <td className="py-1 px-1 border-r border-slate-200">
+                            <input
+                              type="number"
+                              min="0"
+                              value={editFormData.c2Surveys ?? ''}
+                              onChange={(e) => setEditFormData(prev => ({ ...prev, c2Surveys: e.target.value }))}
+                              className="w-full px-1.5 py-0.5 text-xs text-center border border-blue-400 rounded bg-white font-mono focus:outline-blue-600 text-amber-800"
+                            />
+                          </td>
+                          <td className="py-1 px-1 border-r border-slate-200">
+                            <input
+                              type="number"
+                              step="0.01"
+                              min="0"
+                              value={editFormData.c2Area ?? ''}
+                              onChange={(e) => setEditFormData(prev => ({ ...prev, c2Area: e.target.value }))}
+                              className="w-full px-1.5 py-0.5 text-xs text-right border border-blue-400 rounded bg-white font-mono focus:outline-blue-600 text-amber-800"
+                            />
+                          </td>
+                          {/* Conversion */}
+                          <td className="py-1 px-1 border-r border-slate-200">
+                            <input
+                              type="number"
+                              min="0"
+                              value={editFormData.convSurveys ?? ''}
+                              onChange={(e) => setEditFormData(prev => ({ ...prev, convSurveys: e.target.value }))}
+                              className="w-full px-1.5 py-0.5 text-xs text-center border border-rose-400 rounded bg-white font-mono focus:outline-rose-600 text-rose-800"
+                            />
+                          </td>
+                          <td className="py-1 px-1 border-r border-slate-200">
+                            <input
+                              type="number"
+                              step="0.01"
+                              min="0"
+                              value={editFormData.convArea ?? ''}
+                              onChange={(e) => setEditFormData(prev => ({ ...prev, convArea: e.target.value }))}
+                              className="w-full px-1.5 py-0.5 text-xs text-right border border-rose-400 rounded bg-white font-mono focus:outline-rose-600 text-rose-800"
+                            />
+                          </td>
+                          {/* No Other Rights */}
+                          <td className="py-1 px-1 border-r border-slate-200">
+                            <input
+                              type="number"
+                              min="0"
+                              value={editFormData.noOtherSurveys ?? ''}
+                              onChange={(e) => setEditFormData(prev => ({ ...prev, noOtherSurveys: e.target.value }))}
+                              className="w-full px-1.5 py-0.5 text-xs text-center border border-purple-400 rounded bg-white font-mono focus:outline-purple-600 text-purple-800"
+                            />
+                          </td>
+                          <td className="py-1 px-1 border-r border-slate-200">
+                            <input
+                              type="number"
+                              step="0.01"
+                              min="0"
+                              value={editFormData.noOtherArea ?? ''}
+                              onChange={(e) => setEditFormData(prev => ({ ...prev, noOtherArea: e.target.value }))}
+                              className="w-full px-1.5 py-0.5 text-xs text-right border border-purple-400 rounded bg-white font-mono focus:outline-purple-600 text-purple-800"
+                            />
+                          </td>
+                          {/* Illegal Deletion */}
+                          <td className="py-1 px-1 border-r border-slate-200">
+                            <input
+                              type="number"
+                              min="0"
+                              value={editFormData.delSurveys ?? ''}
+                              onChange={(e) => setEditFormData(prev => ({ ...prev, delSurveys: e.target.value }))}
+                              className="w-full px-1.5 py-0.5 text-xs text-center border border-emerald-400 rounded bg-white font-mono focus:outline-emerald-600 text-emerald-800"
+                            />
+                          </td>
+                          <td className="py-1 px-1 border-r border-slate-200">
+                            <input
+                              type="number"
+                              step="0.01"
+                              min="0"
+                              value={editFormData.delArea ?? ''}
+                              onChange={(e) => setEditFormData(prev => ({ ...prev, delArea: e.target.value }))}
+                              className="w-full px-1.5 py-0.5 text-xs text-right border border-emerald-400 rounded bg-white font-mono focus:outline-emerald-600 text-emerald-800"
+                            />
+                          </td>
+                          {/* Action Buttons */}
+                          <td className="py-1 px-1 text-center">
+                            <div className="flex items-center justify-center gap-1">
+                              <button
+                                type="button"
+                                onClick={() => handleSaveEdit(row.key)}
+                                className="p-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded cursor-pointer transition shadow-xs"
+                                title={isMarathi ? 'जतन करा' : 'Save'}
+                              >
+                                <Check className="w-3.5 h-3.5" />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={handleCancelEdit}
+                                className="p-1 bg-slate-400 hover:bg-slate-500 text-white rounded cursor-pointer transition shadow-xs"
+                                title={isMarathi ? 'रद्द करा' : 'Cancel'}
+                              >
+                                <X className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </td>
+                        </>
+                      ) : (
+                        <>
+                          <td className="py-2 px-2.5 text-center border-r border-slate-200 font-mono font-bold text-slate-800">
+                            {row.totalSurveys}
+                          </td>
+                          <td className="py-2 px-2.5 text-right border-r border-slate-200 font-mono text-slate-700 font-semibold">
+                            {row.totalArea}
+                          </td>
+
+                          {/* Class 1 */}
+                          <td className="py-2 px-1.5 text-center border-r border-slate-200 font-mono text-blue-700 font-bold">
+                            {row.c1Surveys}
+                          </td>
+                          <td className="py-2 px-1.5 text-right border-r border-slate-200 font-mono text-slate-600">
+                            {row.c1Area}
+                          </td>
+
+                          {/* Class 2 */}
+                          <td className="py-2 px-1.5 text-center border-r border-slate-200 font-mono text-amber-700 font-bold">
+                            {row.c2Surveys}
+                          </td>
+                          <td className="py-2 px-1.5 text-right border-r border-slate-200 font-mono text-slate-600">
+                            {row.c2Area}
+                          </td>
+
+                          {/* Conversion 2 to 1 */}
+                          <td className="py-2 px-1.5 text-center border-r border-slate-200 font-mono text-rose-700 font-bold">
+                            {row.convSurveys}
+                          </td>
+                          <td className="py-2 px-1.5 text-right border-r border-slate-200 font-mono text-rose-600">
+                            {row.convArea}
+                          </td>
+
+                          {/* No Other Rights */}
+                          <td className="py-2 px-1.5 text-center border-r border-slate-200 font-mono text-purple-700 font-bold">
+                            {row.noOtherSurveys}
+                          </td>
+                          <td className="py-2 px-1.5 text-right border-r border-slate-200 font-mono text-purple-600">
+                            {row.noOtherArea}
+                          </td>
+
+                          {/* Illegal Deletion */}
+                          <td className="py-2 px-1.5 text-center border-r border-slate-200 font-mono text-emerald-700 font-bold">
+                            {row.delSurveys}
+                          </td>
+                          <td className="py-2 px-1.5 text-right border-r border-slate-200 font-mono text-emerald-600">
+                            {row.delArea}
+                          </td>
+
+                          {/* Edit Action Button */}
+                          <td className="py-1 px-1 text-center">
+                            <button
+                              type="button"
+                              onClick={() => handleStartEdit(row.key, row)}
+                              className="px-2 py-1 text-blue-700 hover:bg-blue-50 border border-blue-200 rounded text-[11px] font-semibold cursor-pointer transition flex items-center justify-center gap-1 mx-auto"
+                              title={isMarathi ? 'संपादन करा' : 'Edit Row'}
+                            >
+                              <Edit3 className="w-3 h-3 text-blue-600" />
+                              <span className="hidden sm:inline">{isMarathi ? 'बदला' : 'Edit'}</span>
+                            </button>
+                          </td>
+                        </>
+                      )}
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+            {/* Grand Total Footer */}
+            {rows.length > 0 && (
+              <tfoot className="bg-slate-100 font-bold border-t-2 border-slate-300 text-slate-900">
+                <tr>
+                  <td className="py-2.5 px-2 text-center border-r border-slate-300 font-black">
+                    {isMarathi ? 'एकूण' : 'Total'}
+                  </td>
+                  <td className="py-2.5 px-3 border-r border-slate-300 font-black">
+                    -
+                  </td>
+                  <td className="py-2.5 px-2.5 text-center border-r border-slate-300 font-mono font-black text-slate-900">
+                    {sumSurveys}
+                  </td>
+                  <td className="py-2.5 px-2.5 text-right border-r border-slate-300 font-mono font-black text-slate-900">
+                    {sumArea}
+                  </td>
+                  {/* Class 1 Total */}
+                  <td className="py-2.5 px-1.5 text-center border-r border-slate-300 font-mono font-black text-blue-900">
+                    {sumC1}
+                  </td>
+                  <td className="py-2.5 px-1.5 text-right border-r border-slate-300 font-mono font-black text-blue-900">
+                    {sumC1A}
+                  </td>
+                  {/* Class 2 Total */}
+                  <td className="py-2.5 px-1.5 text-center border-r border-slate-300 font-mono font-black text-amber-900">
+                    {sumC2}
+                  </td>
+                  <td className="py-2.5 px-1.5 text-right border-r border-slate-300 font-mono font-black text-amber-900">
+                    {sumC2A}
+                  </td>
+                  {/* Conversion Total */}
+                  <td className="py-2.5 px-1.5 text-center border-r border-slate-300 font-mono font-black text-rose-900">
+                    {sumConv}
+                  </td>
+                  <td className="py-2.5 px-1.5 text-right border-r border-slate-300 font-mono font-black text-rose-900">
+                    {sumConvA}
+                  </td>
+                  {/* No Other Rights Total */}
+                  <td className="py-2.5 px-1.5 text-center border-r border-slate-300 font-mono font-black text-purple-900">
+                    {sumNo}
+                  </td>
+                  <td className="py-2.5 px-1.5 text-right border-r border-slate-300 font-mono font-black text-purple-900">
+                    {sumNoA}
+                  </td>
+                  {/* Illegal Deletion Total */}
+                  <td className="py-2.5 px-1.5 text-center border-r border-slate-300 font-mono font-black text-emerald-900">
+                    {sumDel}
+                  </td>
+                  <td className="py-2.5 px-1.5 text-right border-r border-slate-300 font-mono font-black text-emerald-900">
+                    {sumDelA}
+                  </td>
+                  <td className="py-2.5 px-2 text-center text-slate-400">
+                    -
+                  </td>
+                </tr>
+              </tfoot>
+            )}
+          </table>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="space-y-3 sm:space-y-4 font-sans text-slate-800">
       <div className="w-full space-y-3 sm:space-y-4">
@@ -778,17 +1369,27 @@ export default function ReportsPage() {
               <span>
                 {downloadingExcel
                   ? (isMarathi ? 'बुकलेट तयार होत आहे...' : 'Generating...')
-                  : activeTab === 'checklist' && activeView === 'summary'
+                  : activeTab === 'goshwara' || (activeTab === 'checklist' && activeView === 'summary')
                   ? (isMarathi ? 'गोषवारा (.xlsx)' : 'Abstract (.xlsx)')
                   : activeTab === 'checklist' && activeView === 'timeline'
                   ? (isMarathi ? '४६ सूची (.xlsx)' : '46 Points (.xlsx)')
                   : activeTab === 'prapatra5'
                   ? (isMarathi ? `प्रपत्र ${selectedPrapatraId} बुकलेट (.xlsx)` : `Prapatra ${selectedPrapatraId} (.xlsx)`)
+                  : activeTab === 'renumbering'
+                  ? (isMarathi ? 'रिनंबरिंग (.xlsx)' : 'Renumbering (.xlsx)')
                   : (isMarathi ? 'एक्सेल (.xlsx)' : 'Excel (.xlsx)')}
               </span>
-              <span className="bg-emerald-800 text-[10px] px-1.5 py-0.2 rounded-full font-mono font-bold">
-                {activeTab === 'checklist' && activeView === 'summary' ? summaryData.length : activeTab === 'prapatra5' && activeView === 'prapatraSummary' ? summaryData.length : parcels.length}
-              </span>
+              {activeTab !== 'renumbering' && (
+                <span className="bg-emerald-800 text-[10px] px-1.5 py-0.2 rounded-full font-mono font-bold">
+                  {isGoshwaraView
+                    ? (village !== 'all'
+                        ? processedVillageRows.length
+                        : taluka !== 'all'
+                        ? processedTalukaRows.length + processedVillageRows.length
+                        : processedVillageRows.length + processedTalukaRows.length + processedDistrictRows.length)
+                    : parcels.length}
+                </span>
+              )}
             </button>
 
             {/* If on 46-Point Timeline, hide PDF button and show informative badge */}
@@ -823,12 +1424,14 @@ export default function ReportsPage() {
                 <span>
                   {downloadingPdf
                     ? (isMarathi ? 'तयार होत आहे...' : 'Generating...')
-                    : activeTab === 'checklist' && activeView === 'summary'
+                    : activeTab === 'goshwara' || (activeTab === 'checklist' && activeView === 'summary')
                     ? (isMarathi ? 'गोषवारा (.pdf)' : 'Abstract (.pdf)')
                     : activeTab === 'checklist' && activeView === 'parcels'
                     ? (isMarathi ? 'संक्षिप्त ७/१२ (.pdf)' : 'Compact 7/12 (.pdf)')
                     : activeTab === 'prapatra5'
                     ? (isMarathi ? `प्रपत्र ${selectedPrapatraId} (.pdf)` : `Prapatra ${selectedPrapatraId} (.pdf)`)
+                    : activeTab === 'renumbering'
+                    ? (isMarathi ? 'रिनंबरिंग (.pdf)' : 'Renumbering (.pdf)')
                     : (isMarathi ? 'पीडीएफ (.pdf)' : 'PDF (.pdf)')}
                 </span>
               </button>
@@ -839,67 +1442,88 @@ export default function ReportsPage() {
         </header>
 
         {/* =========================================================
-            TOP SEGMENTED TABS
+            TOP SEGMENTED TABS (PURE MARATHI, NO BADGES, NO OVERFLOW SCROLL)
         ========================================================= */}
-        <div className="flex items-center justify-between border-b border-slate-200 gap-2 overflow-x-auto">
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => {
-                setActiveTab('checklist');
-                setActiveView('timeline');
-              }}
-              className={`pb-3 px-4 text-xs sm:text-sm font-bold border-b-2 transition flex items-center gap-2 cursor-pointer shrink-0 ${
-                activeTab === 'checklist'
-                  ? 'border-blue-600 text-blue-700'
-                  : 'border-transparent text-slate-500 hover:text-slate-800'
-              }`}
-            >
-              <ShieldCheck className="w-4 h-4" />
-              <span>{isMarathi ? '१ ते ४६ मुद्द्यांची तपासणी सूची' : '1 to 46 Checkpoint Audit Matrix'}</span>
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 font-mono">
-                Master Checklist
-              </span>
-            </button>
+        <div className="flex flex-wrap items-center border-b border-slate-200 gap-1 sm:gap-2">
+          <button
+            type="button"
+            onClick={() => {
+              setActiveTab('checklist');
+              setActiveView('timeline');
+            }}
+            className={`pb-2.5 pt-1 px-3 sm:px-4 text-xs sm:text-sm font-bold border-b-2 transition flex items-center gap-1.5 cursor-pointer shrink-0 ${
+              activeTab === 'checklist'
+                ? 'border-blue-600 text-blue-700'
+                : 'border-transparent text-slate-500 hover:text-slate-800'
+            }`}
+          >
+            <ShieldCheck className="w-4 h-4" />
+            <span>{isMarathi ? '१ ते ४६ मुद्द्यांची तपासणी सूची' : '1 to 46 Checkpoint Audit Matrix'}</span>
+          </button>
 
-            <button
-              type="button"
-              onClick={() => {
-                setActiveTab('prapatra5');
-                setActiveView('prapatraData');
-              }}
-              className={`pb-3 px-4 text-xs sm:text-sm font-bold border-b-2 transition flex items-center gap-2 cursor-pointer shrink-0 ${
-                activeTab === 'prapatra5'
-                  ? 'border-emerald-600 text-emerald-700'
-                  : 'border-transparent text-slate-500 hover:text-slate-800'
-              }`}
-            >
-              <FileText className="w-4 h-4" />
-              <span>{isMarathi ? 'शासकीय प्रपत्र क्र. १ ते ५' : 'Official Prapatras 1 to 5'}</span>
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-mono">
-                Official 5 Booklets (PDF Docs)
-              </span>
-            </button>
+          <button
+            type="button"
+            onClick={() => {
+              setActiveTab('goshwara');
+            }}
+            className={`pb-2.5 pt-1 px-3 sm:px-4 text-xs sm:text-sm font-bold border-b-2 transition flex items-center gap-1.5 cursor-pointer shrink-0 ${
+              activeTab === 'goshwara'
+                ? 'border-purple-600 text-purple-700'
+                : 'border-transparent text-slate-500 hover:text-slate-800'
+            }`}
+          >
+            <Layers className="w-4 h-4" />
+            <span>{isMarathi ? 'गोषवारा' : 'Abstract'}</span>
+          </button>
 
-            <button
-              type="button"
-              onClick={() => {
-                setActiveTab('categories');
-                setActiveView('categoryData');
-              }}
-              className={`pb-3 px-4 text-xs sm:text-sm font-bold border-b-2 transition flex items-center gap-2 cursor-pointer shrink-0 ${
-                activeTab === 'categories'
-                  ? 'border-indigo-600 text-indigo-700'
-                  : 'border-transparent text-slate-500 hover:text-slate-800'
-              }`}
-            >
-              <Layers className="w-4 h-4" />
-              <span>{isMarathi ? '१ ते १७ विषयनिहाय बुकलेट्स' : '1 to 17 Subject Booklets'}</span>
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-800 font-mono">
-                17 Booklets (Excel Format)
-              </span>
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={() => {
+              setActiveTab('prapatra5');
+              setActiveView('prapatraData');
+              setDraftSearch('');
+              setAppliedFilters(prev => ({ ...prev, search: '' }));
+            }}
+            className={`pb-2.5 pt-1 px-3 sm:px-4 text-xs sm:text-sm font-bold border-b-2 transition flex items-center gap-1.5 cursor-pointer shrink-0 ${
+              activeTab === 'prapatra5'
+                ? 'border-emerald-600 text-emerald-700'
+                : 'border-transparent text-slate-500 hover:text-slate-800'
+            }`}
+          >
+            <FileText className="w-4 h-4" />
+            <span>{isMarathi ? 'शासकीय प्रपत्र क्र. १ ते ५' : 'Official Prapatras 1 to 5'}</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setActiveTab('categories');
+              setActiveView('categoryData');
+            }}
+            className={`pb-2.5 pt-1 px-3 sm:px-4 text-xs sm:text-sm font-bold border-b-2 transition flex items-center gap-1.5 cursor-pointer shrink-0 ${
+              activeTab === 'categories'
+                ? 'border-indigo-600 text-indigo-700'
+                : 'border-transparent text-slate-500 hover:text-slate-800'
+            }`}
+          >
+            <Layers className="w-4 h-4" />
+            <span>{isMarathi ? '१ ते १७ विषयनिहाय बुकलेट्स' : '1 to 17 Subject Booklets'}</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setActiveTab('renumbering');
+            }}
+            className={`pb-2.5 pt-1 px-3 sm:px-4 text-xs sm:text-sm font-bold border-b-2 transition flex items-center gap-1.5 cursor-pointer shrink-0 ${
+              activeTab === 'renumbering'
+                ? 'border-amber-600 text-amber-700'
+                : 'border-transparent text-slate-500 hover:text-slate-800'
+            }`}
+          >
+            <TableProperties className="w-4 h-4" />
+            <span>{isMarathi ? 'रिनंबरिंग पर्चा (नोंदवही)' : 'Renumbering Parcha (Register)'}</span>
+          </button>
         </div>
 
         {/* =========================================================
@@ -973,6 +1597,71 @@ export default function ReportsPage() {
         {/* =========================================================
             COMPREHENSIVE MULTI-FILTER SUITE (ALL SEARCHABLE)
         ========================================================= */}
+        {activeTab === 'renumbering' ? (
+          <div className="bg-white border border-slate-200/90 rounded-2xl p-3 sm:p-3.5 shadow-xs">
+            <div className="flex flex-col md:flex-row items-stretch md:items-end gap-2.5">
+              {/* 1. Taluka Dropdown */}
+              <div className="flex-1 space-y-1">
+                <label className="text-[11px] font-bold text-slate-700 flex items-center gap-1">
+                  <Building2 className="w-3.5 h-3.5 text-amber-600" />
+                  <span>{isMarathi ? 'तालुका निवडा' : 'Select Taluka'}</span>
+                </label>
+                <SearchableSelect
+                  options={talukaSelectOptions}
+                  value={draftTaluka}
+                  onChange={val => {
+                    setDraftTaluka(val);
+                    setDraftVillage('all');
+                  }}
+                  placeholder={isMarathi ? 'सर्व तालुके' : 'All Talukas'}
+                  searchPlaceholder={isMarathi ? 'तालुका शोधा...' : 'Search taluka...'}
+                  icon={Building2}
+                  showCount={false}
+                />
+              </div>
+
+              {/* 2. Village Dropdown */}
+              <div className="flex-1 space-y-1">
+                <label className="text-[11px] font-bold text-slate-700 flex items-center gap-1">
+                  <LandPlot className="w-3.5 h-3.5 text-amber-600" />
+                  <span>{isMarathi ? `गाव निवडा ${villageOptions.length > 0 ? `(${villageOptions.length})` : ''}` : 'Select Village'}</span>
+                </label>
+                <SearchableSelect
+                  options={villageSelectOptions}
+                  value={draftVillage}
+                  onChange={val => setDraftVillage(val)}
+                  placeholder={isMarathi ? 'सर्व गावे' : 'All Villages'}
+                  searchPlaceholder={isMarathi ? 'गाव शोधा...' : 'Search village...'}
+                  icon={LandPlot}
+                  showCount={true}
+                />
+              </div>
+
+              {/* 3. Action Buttons: लागू करा (Apply) + रीसेट (Reset) */}
+              <div className="flex items-center gap-2 pt-1 md:pt-0 shrink-0">
+                <button
+                  type="button"
+                  onClick={handleApplyFilters}
+                  className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-blue-700 hover:bg-blue-800 active:scale-95 text-white font-bold text-xs rounded-xl shadow-xs transition cursor-pointer"
+                  title={isMarathi ? 'फिल्टर लागू करा' : 'Apply Filters'}
+                >
+                  <Filter className="w-3.5 h-3.5" />
+                  <span>{isMarathi ? 'लागू करा' : 'Apply'}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleResetFilters}
+                  className="inline-flex items-center justify-center gap-1 px-3 py-2.5 bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-700 font-bold text-xs rounded-xl border border-slate-300 shadow-2xs transition cursor-pointer"
+                  title={isMarathi ? 'फिल्टर्स पूर्ववत करा' : 'Reset Filters'}
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  <span>{isMarathi ? 'रीसेट' : 'Reset'}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : (
         <div className="bg-white border border-slate-200/80 rounded-2xl p-3.5 sm:p-4 shadow-xs space-y-3">
           <div>
             {/* <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700 min-w-0">
@@ -1019,8 +1708,12 @@ export default function ReportsPage() {
             className={clsx(
               'gap-2.5 items-end',
               showMobileFilters
-                ? 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 pt-1'
-                : 'hidden md:grid md:grid-cols-3 lg:grid-cols-6'
+                ? ((isGoshwaraView || activeTab === 'prapatra5')
+                    ? 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 max-w-4xl pt-1'
+                    : 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 pt-1')
+                : ((isGoshwaraView || activeTab === 'prapatra5')
+                    ? 'hidden md:grid md:grid-cols-3 max-w-4xl'
+                    : 'hidden md:grid md:grid-cols-3 lg:grid-cols-6')
             )}
           >
             {/* 1. Taluka Dropdown */}
@@ -1060,74 +1753,80 @@ export default function ReportsPage() {
               />
             </div>
 
-            {/* 3. Tenure Class Filter */}
-            <div className="space-y-1">
-              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
-                {isMarathi ? 'धारणा प्रकार' : 'Tenure Type'}
-              </label>
-              <SearchableSelect
-                options={tenureSelectOptions}
-                value={draftTenure}
-                onChange={val => setDraftTenure(val)}
-                placeholder={isMarathi ? 'सर्व धारणा प्रकार' : 'All Tenure Types'}
-                searchPlaceholder={isMarathi ? 'धारणा प्रकार शोधा...' : 'Search tenure...'}
-                icon={Scale}
-                showCount={false}
-              />
-            </div>
-
-            {/* 4. Violation / Audit Finding Filter */}
-            <div className="space-y-1">
-              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
-                {isMarathi ? 'तपासणी निष्कर्ष' : 'Audit Finding'}
-              </label>
-              <SearchableSelect
-                options={violationSelectOptions}
-                value={draftViolation}
-                onChange={val => setDraftViolation(val)}
-                placeholder={isMarathi ? 'सर्व तपासणी निष्कर्ष' : 'All Audit Findings'}
-                searchPlaceholder={isMarathi ? 'तपासणी निष्कर्ष शोधा...' : 'Search findings...'}
-                icon={AlertTriangle}
-                showCount={false}
-              />
-            </div>
-
-            {/* 5. Search Box */}
-            <div className="space-y-1">
-              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
-                {isMarathi ? 'शोध' : 'Search'}
-              </label>
-              <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:border-blue-500 transition-all h-[36px]">
-                <Search className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                <input
-                  type="text"
-                  placeholder={isMarathi ? 'गट क्र. / स.नं. / खातेदार...' : 'Gat No. / Survey No. / Khatedar...'}
-                  value={draftSearch}
-                  onChange={e => setDraftSearch(e.target.value)}
-                  onKeyDown={e => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault();
-                      handleApplyFilters();
-                    }
-                  }}
-                  className="bg-transparent text-xs text-slate-800 outline-none w-full placeholder:text-slate-400 font-medium"
+            {/* 3. Tenure Class Filter - Hidden in Goshwara View and Prapatra 1 to 5 */}
+            {!isGoshwaraView && activeTab !== 'prapatra5' && (
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                  {isMarathi ? 'धारणा प्रकार' : 'Tenure Type'}
+                </label>
+                <SearchableSelect
+                  options={tenureSelectOptions}
+                  value={draftTenure}
+                  onChange={val => setDraftTenure(val)}
+                  placeholder={isMarathi ? 'सर्व धारणा प्रकार' : 'All Tenure Types'}
+                  searchPlaceholder={isMarathi ? 'धारणा प्रकार शोधा...' : 'Search tenure...'}
+                  icon={Scale}
+                  showCount={false}
                 />
-                {draftSearch && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setDraftSearch('');
-                      if (appliedFilters.search) {
-                        setAppliedFilters(prev => ({ ...prev, search: '' }));
+              </div>
+            )}
+
+            {/* 4. Violation / Audit Finding Filter - Hidden in Goshwara View and Prapatra 1 to 5 */}
+            {!isGoshwaraView && activeTab !== 'prapatra5' && (
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                  {isMarathi ? 'तपासणी निष्कर्ष' : 'Audit Finding'}
+                </label>
+                <SearchableSelect
+                  options={violationSelectOptions}
+                  value={draftViolation}
+                  onChange={val => setDraftViolation(val)}
+                  placeholder={isMarathi ? 'सर्व तपासणी निष्कर्ष' : 'All Audit Findings'}
+                  searchPlaceholder={isMarathi ? 'तपासणी निष्कर्ष शोधा...' : 'Search findings...'}
+                  icon={AlertTriangle}
+                  showCount={false}
+                />
+              </div>
+            )}
+
+            {/* 5. Search Box - Hidden in Goshwara View and Prapatra 1 to 5 */}
+            {!isGoshwaraView && activeTab !== 'prapatra5' && (
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                  {isMarathi ? 'शोध' : 'Search'}
+                </label>
+                <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:border-blue-500 transition-all h-[36px]">
+                  <Search className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                  <input
+                    type="text"
+                    placeholder={isMarathi ? 'गट क्र. / स.नं. / खातेदार...' : 'Gat No. / Survey No. / Khatedar...'}
+                    value={draftSearch}
+                    onChange={e => setDraftSearch(e.target.value)}
+                    onKeyDown={e => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        handleApplyFilters();
                       }
                     }}
-                    className="text-slate-400 hover:text-slate-600 cursor-pointer"
-                  >
-                    <X className="w-3.5 h-3.5" />
-                  </button>
-                )}
+                    className="bg-transparent text-xs text-slate-800 outline-none w-full placeholder:text-slate-400 font-medium"
+                  />
+                  {draftSearch && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setDraftSearch('');
+                        if (appliedFilters.search) {
+                          setAppliedFilters(prev => ({ ...prev, search: '' }));
+                        }
+                      }}
+                      className="text-slate-400 hover:text-slate-600 cursor-pointer"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* 6. Action Controls: Apply & Refresh Buttons */}
             <div className="space-y-1">
@@ -1168,10 +1867,12 @@ export default function ReportsPage() {
             </div>
           </div>
         </div>
+        )}
 
         {/* =========================================================
-            METRICS KPI STRIP
+            METRICS KPI STRIP (Hidden in Goshwara View & Prapatra 1 to 5)
         ========================================================= */}
+        {activeTab !== 'renumbering' && !isGoshwaraView && activeTab !== 'prapatra5' && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <div className="bg-white border border-slate-200/80 rounded-2xl p-3.5 shadow-xs">
             <span className="text-[11px] font-bold text-slate-400">
@@ -1213,10 +1914,18 @@ export default function ReportsPage() {
             </span>
           </div>
         </div>
+        )}
 
         {/* =========================================================
             VIEW SWITCHER & TABLE CARD
         ========================================================= */}
+        {activeTab === 'renumbering' ? (
+          <RenumberingParchaView
+            selectedTaluka={appliedFilters.taluka}
+            selectedVillage={appliedFilters.village}
+            onRegisterExportHandlers={setRenumberingExportHandlers}
+          />
+        ) : (
         <div className="bg-white border border-slate-200/80 rounded-2xl shadow-xs overflow-hidden">
           
           {/* Card Sub-Header & Table View Toggle */}
@@ -1224,7 +1933,11 @@ export default function ReportsPage() {
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="text-sm font-bold text-slate-900">
-                  {activeTab === 'checklist'
+                  {activeTab === 'goshwara'
+                    ? isMarathi
+                      ? '१ ते ४६ मुद्द्यांचा जिल्हा, तालुका व गाव गोषवारा'
+                      : '1 to 46 Checkpoint Audit Abstract & Rollup'
+                    : activeTab === 'checklist'
                     ? isMarathi
                       ? 'महसूल अधिकार अभिलेख (७/१२) तपासणी सूची (१ ते ४६)'
                       : 'Record-of-Rights (7/12) Audit Checklist (1 to 46)'
@@ -1243,8 +1956,8 @@ export default function ReportsPage() {
                       <span>{isMarathi ? 'डेटा लोड होत आहे...' : 'Loading data...'}</span>
                     </>
                   ) : (
-                    activeTab === 'prapatra5' && activeView === 'prapatraSummary'
-                      ? `${summaryData.length} ${isMarathi ? 'गोषवारा नोंदी' : 'Summary Records'}`
+                    activeTab === 'goshwara'
+                      ? `${processedVillageRows.length + processedTalukaRows.length + processedDistrictRows.length} ${isMarathi ? 'गोषवारा नोंदी' : 'Summary Records'}`
                       : activeTab === 'categories' && activeView === 'categorySummary'
                       ? `${categoryRollupRows.length} ${isMarathi ? 'गोषवारा नोंदी' : 'Summary Records'}`
                       : `${serverRollup?.districtTotal?.total712Count ?? parcels.length} ${isMarathi ? 'अभिलेख' : 'Records'}`
@@ -1285,92 +1998,34 @@ export default function ReportsPage() {
                     <TableProperties className="w-3.5 h-3.5" />
                     <span>{isMarathi ? 'संक्षिप्त ७/१२ यादी' : 'Compact 7/12 List'}</span>
                   </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setActiveView('summary')}
-                    className={`px-3 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shrink-0 ${
-                      activeView === 'summary'
-                        ? 'bg-white text-slate-900 shadow-2xs font-extrabold'
-                        : 'text-slate-600 hover:text-slate-900'
-                    }`}
-                  >
-                    <Layers className="w-3.5 h-3.5" />
-                    <span>{isMarathi ? 'गोषवारा (Rollup)' : 'Abstract (Rollup)'}</span>
-                  </button>
                 </>
+              )}
+
+              {activeTab === 'goshwara' && (
+                <div className="flex items-center gap-1.5 text-xs font-bold text-purple-900 bg-purple-100/70 px-3 py-1 rounded-lg shrink-0">
+                  <Layers className="w-3.5 h-3.5 text-purple-700" />
+                  <span>{isMarathi ? 'जिल्हा, तालुका व गाव एकत्रित गोषवारा' : 'District, Taluka & Village Rollup'}</span>
+                </div>
               )}
 
               {activeTab === 'prapatra5' && (
-                <>
-                  <button
-                    type="button"
-                    onClick={() => setActiveView('prapatraData')}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shrink-0 ${
-                      activeView === 'prapatraData'
-                        ? 'bg-emerald-800 text-white shadow-2xs font-extrabold'
-                        : 'text-slate-600 hover:text-slate-900'
-                    }`}
-                  >
-                    <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-300" />
-                    <span>{isMarathi ? 'सविस्तर ७/१२ डेटा यादी (शीट १)' : 'Detailed 7/12 Records (Sheet 1)'}</span>
-                    <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-emerald-950/60 text-white font-mono font-bold">
-                      {parcels.length}
-                    </span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setActiveView('prapatraSummary')}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shrink-0 ${
-                      activeView === 'prapatraSummary'
-                        ? 'bg-emerald-800 text-white shadow-2xs font-extrabold'
-                        : 'text-slate-600 hover:text-slate-900'
-                    }`}
-                  >
-                    <Layers className="w-3.5 h-3.5 text-emerald-300" />
-                    <span>{isMarathi ? 'अधिकृत प्रपत्र गोषवारा (शीट २)' : 'Statutory Prapatra Rollup (Sheet 2)'}</span>
-                    <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-emerald-950/60 text-white font-mono font-bold">
-                      {summaryData.length}
-                    </span>
-                  </button>
-                </>
+                <div className="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-emerald-800 text-white shadow-2xs shrink-0">
+                  <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-300" />
+                  <span>{isMarathi ? 'सविस्तर ७/१२ डेटा यादी' : 'Detailed 7/12 Records'}</span>
+                  <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-emerald-950/60 text-white font-mono font-bold">
+                    {parcels.length}
+                  </span>
+                </div>
               )}
 
               {activeTab === 'categories' && (
-                <>
-                  <button
-                    type="button"
-                    onClick={() => setActiveView('categoryData')}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shrink-0 ${
-                      activeView === 'categoryData'
-                        ? 'bg-indigo-900 text-white shadow-2xs font-extrabold'
-                        : 'text-slate-600 hover:text-slate-900'
-                    }`}
-                  >
-                    <FileSpreadsheet className="w-3.5 h-3.5 text-indigo-300" />
-                    <span>{isMarathi ? 'सविस्तर ७/१२ डेटा यादी (शीट १)' : 'Detailed 7/12 Records (Sheet 1)'}</span>
-                    <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-indigo-950/60 text-white font-mono font-bold">
-                      {serverRollup?.districtTotal?.total712Count ?? parcels.length}
-                    </span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setActiveView('categorySummary')}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shrink-0 ${
-                      activeView === 'categorySummary'
-                        ? 'bg-indigo-900 text-white shadow-2xs font-extrabold'
-                        : 'text-slate-600 hover:text-slate-900'
-                    }`}
-                  >
-                    <Layers className="w-3.5 h-3.5 text-indigo-300" />
-                    <span>{isMarathi ? 'विषयनिहाय गोषवारा (शीट २)' : 'Subject Rollup (Sheet 2)'}</span>
-                    <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-indigo-950/60 text-white font-mono font-bold">
-                      {categoryRollupRows.length}
-                    </span>
-                  </button>
-                </>
+                <div className="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-indigo-900 text-white shadow-2xs shrink-0">
+                  <FileSpreadsheet className="w-3.5 h-3.5 text-indigo-300" />
+                  <span>{isMarathi ? 'सविस्तर ७/१२ डेटा यादी' : 'Detailed 7/12 Records'}</span>
+                  <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-indigo-950/60 text-white font-mono font-bold">
+                    {serverRollup?.districtTotal?.total712Count ?? parcels.length}
+                  </span>
+                </div>
               )}
             </div>
           </div>
@@ -1379,345 +2034,7 @@ export default function ReportsPage() {
               VIEW LOGIC: PRAPATRA 1 TO 5 VS CATEGORIES VS MASTER CHECKLIST
           ========================================================= */}
           {activeTab === 'prapatra5' ? (
-            activeView === 'prapatraSummary' ? (
-              /* =========================================================
-                  PRAPATRA 1 TO 5 OFFICIAL SUMMARY TABLE (SHEET 2 FORMAT)
-              ========================================================= */
-              <div className="space-y-3 p-3.5 sm:p-4">
-                {/* Header Banner */}
-                <div className="p-3 sm:p-4 bg-gradient-to-r from-emerald-50 via-teal-50/50 to-white border border-emerald-200/90 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-2xs">
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-9 h-9 rounded-xl bg-emerald-800 text-white flex items-center justify-center shrink-0 shadow-2xs">
-                      <Layers className="w-5 h-5 text-emerald-200" />
-                    </div>
-                    <div>
-                      <h3 className="text-sm sm:text-base font-black text-slate-900 tracking-tight">
-                        {isMarathi ? currentPrapatra5.nameMr : currentPrapatra5.nameEn} — {isMarathi ? 'अधिकृत गोषवारा' : 'Statutory Rollup'}
-                      </h3>
-                      <p className="text-xs text-slate-500 mt-0.5">
-                        {isMarathi
-                          ? 'महाराष्ट्र जमीन महसूल संहिता (MLRC 1966) विहित नमुना — डाऊनलोड एक्सेल बुकलेट शीट २'
-                          : 'Official statutory summary format — Downloaded Excel Booklet Sheet 2'}
-                      </p>
-                    </div>
-                  </div>
-                  <span className="text-xs font-bold bg-emerald-100 text-emerald-950 px-3 py-1 rounded-xl shrink-0">
-                    {filteredPrapatraSummaryRows.length} {isMarathi ? 'नोंदी' : 'Rows'}
-                  </span>
-                </div>
-
-                {/* Sub-Filters: 3-Tier Selector & Search */}
-                <div className="flex flex-wrap items-center justify-between gap-2.5 pt-1">
-                  <div className="flex items-center gap-1.5 bg-slate-100 p-1 rounded-xl text-xs font-bold text-slate-700 overflow-x-auto">
-                    <span className="px-2 text-slate-500 font-medium shrink-0">{isMarathi ? 'गोषवारा स्तर:' : 'Summary Tier:'}</span>
-                    <button
-                      type="button"
-                      onClick={() => setPrapatraTier('all')}
-                      className={`px-3 py-1.5 rounded-lg transition cursor-pointer shrink-0 ${
-                        prapatraTier === 'all'
-                          ? 'bg-white text-emerald-900 shadow-2xs font-extrabold'
-                          : 'text-slate-600 hover:text-slate-900'
-                      }`}
-                    >
-                      {isMarathi ? 'सर्व गोषवारा (All Records)' : 'All Records'}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setPrapatraTier('taluka')}
-                      className={`px-3 py-1.5 rounded-lg transition cursor-pointer shrink-0 ${
-                        prapatraTier === 'taluka'
-                          ? 'bg-emerald-700 text-white shadow-2xs font-extrabold'
-                          : 'text-slate-600 hover:text-slate-900'
-                      }`}
-                    >
-                      {isMarathi ? 'तालुका गोषवारा (Taluka)' : 'Taluka Summary'}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setPrapatraTier('village')}
-                      className={`px-3 py-1.5 rounded-lg transition cursor-pointer shrink-0 ${
-                        prapatraTier === 'village'
-                          ? 'bg-teal-700 text-white shadow-2xs font-extrabold'
-                          : 'text-slate-600 hover:text-slate-900'
-                      }`}
-                    >
-                      {isMarathi ? 'गाव गोषवारा (Village)' : 'Village Summary'}
-                    </button>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5">
-                      <Search className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                      <input
-                        type="text"
-                        placeholder={isMarathi ? 'तालुका किंवा गाव शोधा...' : 'Search taluka/village...'}
-                        value={prapatraSearch}
-                        onChange={e => setPrapatraSearch(e.target.value)}
-                        className="bg-transparent text-xs text-slate-800 outline-none w-44 placeholder:text-slate-400 font-medium"
-                      />
-                      {prapatraSearch && (
-                        <button onClick={() => setPrapatraSearch('')} className="text-slate-400 hover:text-slate-600">
-                          <X className="w-3.5 h-3.5" />
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Table */}
-                <div className="overflow-x-auto max-h-[640px] overflow-y-auto border border-slate-200 rounded-xl shadow-2xs bg-white" style={{ WebkitOverflowScrolling: 'touch' }}>
-                  <table className="w-full text-left border-collapse text-xs min-w-[840px]">
-                    <thead className="sticky top-0 z-10 shadow-xs">
-                      <tr className="bg-slate-100 text-slate-800 font-bold border-b border-slate-200 text-center">
-                        <th className="py-2.5 px-2.5 border-r border-slate-200 w-12">{isMarathi ? 'अ.क्र.' : 'Sr.'}</th>
-                        <th className="py-2.5 px-3 border-r border-slate-200 text-left min-w-[180px]">
-                          {prapatraTier === 'taluka' ? (isMarathi ? 'तालुक्याचे नाव' : 'Taluka') : (isMarathi ? 'जिल्हा / तालुका / गाव' : 'District / Taluka / Village')}
-                        </th>
-                        {selectedPrapatraId === 1 && (
-                          <>
-                            <th className="py-2 px-2 border-r border-slate-200 text-center w-24">एकूण ७/१२<br /><span className="text-[10px] font-normal">[२(अ)]</span></th>
-                            <th className="py-2 px-2 border-r border-slate-200 text-center w-28">१९५० तपासणी<br /><span className="text-[10px] font-normal">[३(अ)]</span></th>
-                            <th className="py-2 px-2 border-r border-slate-200 text-center w-28">सरकार नोंद<br /><span className="text-[10px] font-normal">[४(अ)]</span></th>
-                            <th className="py-2 px-2 border-r border-slate-200 text-center w-28 text-rose-700 bg-rose-50/60">अवैध नोंद कमी<br /><span className="text-[10px] font-normal">[५(अ)]</span></th>
-                            <th className="py-2 px-2 border-r border-slate-200 text-center w-24 text-emerald-700 bg-emerald-50/60">दुरुस्ती केलेले<br /><span className="text-[10px] font-normal">[६(अ)]</span></th>
-                            <th className="py-2 px-2 border-r border-slate-200 text-center w-24 text-amber-700 bg-amber-50/60">दुरुस्तीस शिल्लक<br /><span className="text-[10px] font-normal">[७(अ)]</span></th>
-                            <th className="py-2 px-3 text-left min-w-[120px]">शेरा</th>
-                          </>
-                        )}
-                        {selectedPrapatraId === 2 && (
-                          <>
-                            <th className="py-2 px-2 border-r border-slate-200 text-center w-28">एकूण ७/१२ संख्या</th>
-                            <th className="py-2 px-2 border-r border-slate-200 text-center w-36 text-amber-700 bg-amber-50/60">पोकळीस्त नोंद ७/१२<br /><span className="text-[10px] font-normal">[२(अ)]</span></th>
-                            <th className="py-2 px-2 border-r border-slate-200 text-center w-32 text-emerald-700 bg-emerald-50/60">वगळण्यात आलेल्या नोंदी<br /><span className="text-[10px] font-normal">[३(अ)]</span></th>
-                            <th className="py-2 px-2 border-r border-slate-200 text-center w-32 text-rose-700 bg-rose-50/60">वगळण्यास शिल्लक<br /><span className="text-[10px] font-normal">[४(अ)]</span></th>
-                            <th className="py-2 px-3 text-left min-w-[120px]">शेरा</th>
-                          </>
-                        )}
-                        {selectedPrapatraId === 3 && (
-                          <>
-                            <th className="py-2 px-2 border-r border-slate-200 text-center w-40">शासकीय विभाग वाटप ७/१२<br /><span className="text-[10px] font-normal">[२(अ)]</span></th>
-                            <th className="py-2 px-2 border-r border-slate-200 text-center w-40 text-rose-700 bg-rose-50/60">अनधिकृत हस्तांतरण / शर्तभंग<br /><span className="text-[10px] font-normal">[३(अ)]</span></th>
-                            <th className="py-2 px-2 border-r border-slate-200 text-center w-40 text-emerald-700 bg-emerald-50/60">मालकी पुर्ववत / शासन जमा<br /><span className="text-[10px] font-normal">[४(अ)]</span></th>
-                            <th className="py-2 px-3 text-left min-w-[120px]">शेरा</th>
-                          </>
-                        )}
-                        {selectedPrapatraId === 4 && (
-                          <>
-                            <th className="py-2 px-2 border-r border-slate-200 text-center w-44">संस्था/व्यक्ती प्रदान जमिनी ७/१२<br /><span className="text-[10px] font-normal">[२(अ)]</span></th>
-                            <th className="py-2 px-2 border-r border-slate-200 text-center w-40 text-rose-700 bg-rose-50/60">अनधिकृत हस्तांतरण / शर्तभंग<br /><span className="text-[10px] font-normal">[३(अ)]</span></th>
-                            <th className="py-2 px-2 border-r border-slate-200 text-center w-40 text-emerald-700 bg-emerald-50/60">मालकी पुर्ववत / शासन जमा<br /><span className="text-[10px] font-normal">[४(अ)]</span></th>
-                            <th className="py-2 px-3 text-left min-w-[120px]">शेरा</th>
-                          </>
-                        )}
-                        {selectedPrapatraId === 5 && (
-                          <>
-                            <th className="py-2 px-2 border-r border-slate-200 text-center w-36">शासकीय जमिनी ७/१२ संख्या<br /><span className="text-[10px] font-normal">[२(अ)]</span></th>
-                            <th className="py-2 px-2 border-r border-slate-200 text-center w-32">वाटप केलेल्या जमिनी<br /><span className="text-[10px] font-normal">[३(अ)]</span></th>
-                            <th className="py-2 px-2 border-r border-slate-200 text-center w-28 text-rose-700 bg-rose-50/60">शर्तभंग झालेल्या<br /><span className="text-[10px] font-normal">[४(अ)]</span></th>
-                            <th className="py-2 px-2 border-r border-slate-200 text-center w-28 text-amber-700 bg-amber-50/60">अतिक्रमण असलेल्या<br /><span className="text-[10px] font-normal">[५(अ)]</span></th>
-                            <th className="py-2 px-2 border-r border-slate-200 text-center w-28 text-emerald-700 bg-emerald-50/60">मोजणी झालेल्या<br /><span className="text-[10px] font-normal">[६(अ)]</span></th>
-                            <th className="py-2 px-3 text-left min-w-[120px]">शेरा</th>
-                          </>
-                        )}
-                      </tr>
-                      {/* Column numbering row */}
-                      <tr className="bg-slate-50 text-[10px] text-slate-400 text-center border-b border-slate-200">
-                        <th className="py-0.5 border-r border-slate-200">१</th>
-                        <th className="py-0.5 border-r border-slate-200">२</th>
-                        <th className="py-0.5 border-r border-slate-200">३</th>
-                        <th className="py-0.5 border-r border-slate-200">४</th>
-                        <th className="py-0.5 border-r border-slate-200">५</th>
-                        <th className="py-0.5 border-r border-slate-200">६</th>
-                        {selectedPrapatraId === 1 && (
-                          <>
-                            <th className="py-0.5 border-r border-slate-200">७</th>
-                            <th className="py-0.5 border-r border-slate-200">८</th>
-                            <th className="py-0.5">९</th>
-                          </>
-                        )}
-                        {selectedPrapatraId === 2 && <th className="py-0.5">७</th>}
-                        {selectedPrapatraId === 5 && (
-                          <>
-                            <th className="py-0.5 border-r border-slate-200">७</th>
-                            <th className="py-0.5">८</th>
-                          </>
-                        )}
-                        {(selectedPrapatraId === 3 || selectedPrapatraId === 4) && null}
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100 font-sans">
-                      {loading && filteredPrapatraSummaryRows.length === 0 ? (
-                        Array.from({ length: 8 }).map((_, sIdx) => (
-                          <tr key={`skel-p-sum-${sIdx}`} className="animate-pulse border-b border-slate-100">
-                            <td className="py-2.5 px-2.5 text-center border-r border-slate-100"><div className="h-4 w-6 bg-slate-200 rounded mx-auto" /></td>
-                            <td className="py-2.5 px-3 border-r border-slate-100"><div className="h-4 w-32 bg-slate-200 rounded" /></td>
-                            <td className="py-2.5 px-2 text-center border-r border-slate-100"><div className="h-4 w-12 bg-slate-200 rounded mx-auto" /></td>
-                            <td className="py-2.5 px-2 text-center border-r border-slate-100"><div className="h-4 w-12 bg-slate-200 rounded mx-auto" /></td>
-                            <td className="py-2.5 px-2 text-center border-r border-slate-100"><div className="h-4 w-12 bg-slate-200 rounded mx-auto" /></td>
-                            <td className="py-2.5 px-3 border-r border-slate-100"><div className="h-4 w-20 bg-slate-200 rounded" /></td>
-                          </tr>
-                        ))
-                      ) : filteredPrapatraSummaryRows.length === 0 ? (
-                        <tr>
-                          <td colSpan={10} className="py-16 text-center text-slate-400">
-                            <Info className="w-8 h-8 mx-auto mb-2 text-slate-300" />
-                            <span className="text-sm font-semibold">{isMarathi ? 'कोणतीही गोषवारा नोंद आढळली नाही.' : 'No summary records found.'}</span>
-                          </td>
-                        </tr>
-                      ) : (
-                        filteredPrapatraSummaryRows.map((row, idx) => {
-                          const isTalukaTotal = row.villageName === 'संपूर्ण तालुका (All Villages)';
-                          const isDistrictTotal = row.villageName === 'संपूर्ण जिल्हा (१५ तालुके गोषवारा)' || row.villageName === 'Whole District Rollup';
-                          const talukaDisplay = formatTalukaName(row.taluka, isMarathi);
-                          const displayName = isDistrictTotal
-                            ? (isMarathi ? 'चंद्रपूर जिल्हा (एकत्रित गोषवारा)' : 'Chandrapur District Grand Total')
-                            : isTalukaTotal
-                            ? (row.taluka ? `${talukaDisplay} (${isMarathi ? 'संपूर्ण तालुका' : 'Whole Taluka'})` : (isMarathi ? 'सर्व तालुके' : 'All Talukas'))
-                            : formatVillageName(row.villageName || row.taluka, isMarathi);
-
-                          return (
-                            <tr
-                              key={row.id || idx}
-                              className={`transition ${
-                                isDistrictTotal
-                                  ? 'bg-emerald-100/70 font-black text-emerald-950 border-y-2 border-emerald-400'
-                                  : isTalukaTotal
-                                  ? 'bg-emerald-50/80 font-bold text-emerald-950'
-                                  : 'hover:bg-slate-50'
-                              }`}
-                            >
-                              <td className="py-2 px-2.5 text-center border-r border-slate-100 font-mono text-slate-400 font-medium">
-                                {idx + 1}
-                              </td>
-                              <td className="py-2 px-3 border-r border-slate-100 font-medium text-slate-900">
-                                <span className={isDistrictTotal || isTalukaTotal ? 'font-bold' : ''}>
-                                  {displayName}
-                                </span>
-                              </td>
-
-                              {selectedPrapatraId === 1 && (
-                                <>
-                                  <td className="py-2 px-2 text-center border-r border-slate-100 font-mono font-bold">{row.total712Count || 0}</td>
-                                  <td className="py-2 px-2 text-center border-r border-slate-100 font-mono text-slate-700">{row.inspected1950Count || 0}</td>
-                                  <td className="py-2 px-2 text-center border-r border-slate-100 font-mono text-slate-700">{row.govtFound1950Count || 0}</td>
-                                  <td className="py-2 px-2 text-center border-r border-slate-100 font-mono font-bold text-rose-700 bg-rose-50/30">{row.illegalDeletionsCount || 0}</td>
-                                  <td className="py-2 px-2 text-center border-r border-slate-100 font-mono font-bold text-emerald-700 bg-emerald-50/30">{row.rectifiedCount || 0}</td>
-                                  <td className="py-2 px-2 text-center border-r border-slate-100 font-mono font-bold text-amber-700 bg-amber-50/30">{row.pendingRectifyCount || 0}</td>
-                                  <td className="py-2 px-3 text-slate-500 text-[11px] max-w-[140px] truncate">{formatRemarks(row.remarks, isMarathi)}</td>
-                                </>
-                              )}
-
-                              {selectedPrapatraId === 2 && (
-                                <>
-                                  <td className="py-2 px-2 text-center border-r border-slate-100 font-mono font-bold">{row.total712Count || 0}</td>
-                                  <td className="py-2 px-2 text-center border-r border-slate-100 font-mono font-bold text-amber-700 bg-amber-50/30">{row.pokalistCount || 0}</td>
-                                  <td className="py-2 px-2 text-center border-r border-slate-100 font-mono font-bold text-emerald-700 bg-emerald-50/30">{row.pokalistRemovedCount || 0}</td>
-                                  <td className="py-2 px-2 text-center border-r border-slate-100 font-mono font-bold text-rose-700 bg-rose-50/30">{row.pokalistPendingCount || 0}</td>
-                                  <td className="py-2 px-3 text-slate-500 text-[11px] max-w-[140px] truncate">{formatRemarks(row.remarks, isMarathi)}</td>
-                                </>
-                              )}
-
-                              {selectedPrapatraId === 3 && (
-                                <>
-                                  <td className="py-2 px-2 text-center border-r border-slate-100 font-mono font-bold">{row.govtDeptsAllottedCount || 0}</td>
-                                  <td className="py-2 px-2 text-center border-r border-slate-100 font-mono font-bold text-rose-700 bg-rose-50/30">{row.govtDeptsShartbhang || 0}</td>
-                                  <td className="py-2 px-2 text-center border-r border-slate-100 font-mono font-bold text-emerald-700 bg-emerald-50/30">{row.govtDeptsRestoredGovt || 0}</td>
-                                  <td className="py-2 px-3 text-slate-500 text-[11px] max-w-[140px] truncate">{formatRemarks(row.remarks, isMarathi)}</td>
-                                </>
-                              )}
-
-                              {selectedPrapatraId === 4 && (
-                                <>
-                                  <td className="py-2 px-2 text-center border-r border-slate-100 font-mono font-bold">{row.privateAllottedCount || 0}</td>
-                                  <td className="py-2 px-2 text-center border-r border-slate-100 font-mono font-bold text-rose-700 bg-rose-50/30">{row.privateShartbhang || 0}</td>
-                                  <td className="py-2 px-2 text-center border-r border-slate-100 font-mono font-bold text-emerald-700 bg-emerald-50/30">{row.privateRestoredGovt || 0}</td>
-                                  <td className="py-2 px-3 text-slate-500 text-[11px] max-w-[140px] truncate">{formatRemarks(row.remarks, isMarathi)}</td>
-                                </>
-                              )}
-
-                              {selectedPrapatraId === 5 && (
-                                <>
-                                  <td className="py-2 px-2 text-center border-r border-slate-100 font-mono font-bold">{row.totalGovtLandCount || 0}</td>
-                                  <td className="py-2 px-2 text-center border-r border-slate-100 font-mono text-slate-700">{row.govtAllottedCount || 0}</td>
-                                  <td className="py-2 px-2 text-center border-r border-slate-100 font-mono font-bold text-rose-700 bg-rose-50/30">{row.govtShartbhangCount || 0}</td>
-                                  <td className="py-2 px-2 text-center border-r border-slate-100 font-mono font-bold text-amber-700 bg-amber-50/30">{row.govtEncroachedCount || 0}</td>
-                                  <td className="py-2 px-2 text-center border-r border-slate-100 font-mono font-bold text-emerald-700 bg-emerald-50/30">{row.govtMojaniDoneCount || 0}</td>
-                                  <td className="py-2 px-3 text-slate-500 text-[11px] max-w-[140px] truncate">{formatRemarks(row.remarks, isMarathi)}</td>
-                                </>
-                              )}
-                            </tr>
-                          );
-                        })
-                      )}
-                    </tbody>
-
-                    {/* Grand Total Summary Row */}
-                    {filteredPrapatraSummaryRows.length > 0 && (
-                      <tfoot className="sticky bottom-0 z-10 bg-slate-100 font-bold border-t-2 border-slate-300">
-                        <tr className="bg-slate-200/90 text-slate-900">
-                          <td className="py-2.5 px-2.5 text-center border-r border-slate-300 font-mono">∑</td>
-                          <td className="py-2.5 px-3 border-r border-slate-300 font-black">
-                            {isMarathi ? 'एकूण बेरीज (Consolidated Total)' : 'Consolidated Total'}
-                          </td>
-
-                          {selectedPrapatraId === 1 && (
-                            <>
-                              <td className="py-2.5 px-2 text-center border-r border-slate-300 font-mono font-black">{prapatraTotals.total712Count}</td>
-                              <td className="py-2.5 px-2 text-center border-r border-slate-300 font-mono font-black">{prapatraTotals.inspected1950Count}</td>
-                              <td className="py-2.5 px-2 text-center border-r border-slate-300 font-mono font-black">{prapatraTotals.govtFound1950Count}</td>
-                              <td className="py-2.5 px-2 text-center border-r border-slate-300 font-mono font-black text-rose-800 bg-rose-100/60">{prapatraTotals.illegalDeletionsCount}</td>
-                              <td className="py-2.5 px-2 text-center border-r border-slate-300 font-mono font-black text-emerald-800 bg-emerald-100/60">{prapatraTotals.rectifiedCount}</td>
-                              <td className="py-2.5 px-2 text-center border-r border-slate-300 font-mono font-black text-amber-800 bg-amber-100/60">{prapatraTotals.pendingRectifyCount}</td>
-                              <td className="py-2.5 px-3 text-slate-600">-</td>
-                            </>
-                          )}
-
-                          {selectedPrapatraId === 2 && (
-                            <>
-                              <td className="py-2.5 px-2 text-center border-r border-slate-300 font-mono font-black">{prapatraTotals.total712Count}</td>
-                              <td className="py-2.5 px-2 text-center border-r border-slate-300 font-mono font-black text-amber-800 bg-amber-100/60">{prapatraTotals.pokalistCount}</td>
-                              <td className="py-2.5 px-2 text-center border-r border-slate-300 font-mono font-black text-emerald-800 bg-emerald-100/60">{prapatraTotals.pokalistRemovedCount}</td>
-                              <td className="py-2.5 px-2 text-center border-r border-slate-300 font-mono font-black text-rose-800 bg-rose-100/60">{prapatraTotals.pokalistPendingCount}</td>
-                              <td className="py-2.5 px-3 text-slate-600">-</td>
-                            </>
-                          )}
-
-                          {selectedPrapatraId === 3 && (
-                            <>
-                              <td className="py-2.5 px-2 text-center border-r border-slate-300 font-mono font-black">{prapatraTotals.govtDeptsAllottedCount}</td>
-                              <td className="py-2.5 px-2 text-center border-r border-slate-300 font-mono font-black text-rose-800 bg-rose-100/60">{prapatraTotals.govtDeptsShartbhang}</td>
-                              <td className="py-2.5 px-2 text-center border-r border-slate-300 font-mono font-black text-emerald-800 bg-emerald-100/60">{prapatraTotals.govtDeptsRestoredGovt}</td>
-                              <td className="py-2.5 px-3 text-slate-600">-</td>
-                            </>
-                          )}
-
-                          {selectedPrapatraId === 4 && (
-                            <>
-                              <td className="py-2.5 px-2 text-center border-r border-slate-300 font-mono font-black">{prapatraTotals.privateAllottedCount}</td>
-                              <td className="py-2.5 px-2 text-center border-r border-slate-300 font-mono font-black text-rose-800 bg-rose-100/60">{prapatraTotals.privateShartbhang}</td>
-                              <td className="py-2.5 px-2 text-center border-r border-slate-300 font-mono font-black text-emerald-800 bg-emerald-100/60">{prapatraTotals.privateRestoredGovt}</td>
-                              <td className="py-2.5 px-3 text-slate-600">-</td>
-                            </>
-                          )}
-
-                          {selectedPrapatraId === 5 && (
-                            <>
-                              <td className="py-2.5 px-2 text-center border-r border-slate-300 font-mono font-black">{prapatraTotals.totalGovtLandCount}</td>
-                              <td className="py-2.5 px-2 text-center border-r border-slate-300 font-mono font-black">{prapatraTotals.govtAllottedCount}</td>
-                              <td className="py-2.5 px-2 text-center border-r border-slate-300 font-mono font-black text-rose-800 bg-rose-100/60">{prapatraTotals.govtShartbhangCount}</td>
-                              <td className="py-2.5 px-2 text-center border-r border-slate-300 font-mono font-black text-amber-800 bg-amber-100/60">{prapatraTotals.govtEncroachedCount}</td>
-                              <td className="py-2.5 px-2 text-center border-r border-slate-300 font-mono font-black text-emerald-800 bg-emerald-100/60">{prapatraTotals.govtMojaniDoneCount}</td>
-                              <td className="py-2.5 px-3 text-slate-600">-</td>
-                            </>
-                          )}
-                        </tr>
-                      </tfoot>
-                    )}
-                  </table>
-                </div>
-              </div>
-            ) : (
-              /* =========================================================
+            /* =========================================================
                   PRAPATRA 1 TO 5 DETAILED PARCELS TABLE (SHEET 1 FORMAT)
               ========================================================= */
               <div>
@@ -1817,7 +2134,7 @@ export default function ReportsPage() {
                                 {p.excelSrNo || p.srNo || ((page - 1) * effectivePageSize + idx + 1)}
                               </td>
                               <td className="py-2 px-3 border-r border-slate-200 text-slate-700 font-medium">
-                                {p.taluka}
+                                {formatTalukaName(p.taluka, isMarathi)}
                               </td>
                               <td className="py-2 px-3 border-r border-slate-200 font-medium text-slate-900">
                                 {formatVillageName(p.villageName, isMarathi)}
@@ -1905,7 +2222,6 @@ export default function ReportsPage() {
                   </div>
                 )}
               </div>
-            )
           ) : activeTab === 'categories' ? (
             activeView === 'categorySummary' ? (
               /* =========================================================
@@ -1942,7 +2258,15 @@ export default function ReportsPage() {
                         <th className="py-2.5 px-3 border-r border-slate-200 text-left min-w-[180px]">{isMarathi ? 'जिल्हा / तालुका / गाव' : 'District / Taluka / Village'}</th>
                         <th className="py-2.5 px-2.5 border-r border-slate-200 text-center w-28 text-indigo-900 bg-indigo-50/50">{isMarathi ? 'एकूण ७/१२' : 'Total 7/12'}</th>
                         <th className="py-2.5 px-2.5 border-r border-slate-200 text-right w-28 text-emerald-800">{isMarathi ? 'एकूण क्षेत्र (हे.)' : 'Area (Ha)'}</th>
-                        <th className="py-2.5 px-2.5 border-r border-slate-200 text-center w-36 text-blue-900 bg-blue-50/60">{isMarathi ? 'भोग. वर्ग १ / वर्ग २' : 'Class 1 / Class 2'}</th>
+                        <th className="py-2.5 px-2.5 border-r border-slate-200 text-center w-36 text-blue-900 bg-blue-50/60">
+                          {currentCategory.id === 1
+                            ? (isMarathi ? 'शासकीय जमीन' : 'Govt Land')
+                            : currentCategory.id === 3 || currentCategory.id === 8
+                            ? (isMarathi ? 'इनाम / देवस्थान' : 'Inam / Devasthan')
+                            : currentCategory.id === 13
+                            ? (isMarathi ? 'वन जमीन' : 'Forest Land')
+                            : (isMarathi ? 'भोग. वर्ग १ / वर्ग २' : 'Class 1 / Class 2')}
+                        </th>
                         <th className="py-2.5 px-2.5 border-r border-slate-200 text-center w-32 text-rose-800 bg-rose-50/60">{isMarathi ? 'शर्तभंग / संशयित' : 'Breaches'}</th>
                         <th className="py-2.5 px-3 text-left min-w-[150px]">{isMarathi ? 'शेरा' : 'Remarks'}</th>
                       </tr>
@@ -1984,9 +2308,46 @@ export default function ReportsPage() {
                                 {row.totalArea || (row.totalAreaHa ? Number(row.totalAreaHa).toFixed(2) : '0.00')}
                               </td>
                               <td className="py-2 px-2.5 text-center border-r border-slate-100 font-mono text-xs">
-                                <span className="text-emerald-700 font-bold">{row.c1Count || 0}</span>
-                                <span className="text-slate-400 mx-1">/</span>
-                                <span className="text-amber-700 font-bold">{row.c2Count || 0}</span>
+                                {row.sarkarCount > 0 ? (
+                                  <div className="flex flex-col items-center justify-center leading-tight">
+                                    <span className="text-blue-900 font-bold bg-blue-50 px-2 py-0.5 rounded border border-blue-200 shadow-2xs">
+                                      {row.sarkarCount} {isMarathi ? 'शासकीय' : 'Govt'}
+                                    </span>
+                                    {(row.c1Count > 0 || row.c2Count > 0) && (
+                                      <span className="text-[10px] text-slate-500 mt-0.5">
+                                        {isMarathi ? `वर्ग १: ${row.c1Count || 0} | वर्ग २: ${row.c2Count || 0}` : `C1: ${row.c1Count || 0} | C2: ${row.c2Count || 0}`}
+                                      </span>
+                                    )}
+                                  </div>
+                                ) : row.inamCount > 0 ? (
+                                  <div className="flex flex-col items-center justify-center leading-tight">
+                                    <span className="text-amber-900 font-bold bg-amber-50 px-2 py-0.5 rounded border border-amber-200 shadow-2xs">
+                                      {row.inamCount} {isMarathi ? 'इनाम' : 'Inam'}
+                                    </span>
+                                    {(row.c1Count > 0 || row.c2Count > 0) && (
+                                      <span className="text-[10px] text-slate-500 mt-0.5">
+                                        {isMarathi ? `वर्ग १: ${row.c1Count || 0} | वर्ग २: ${row.c2Count || 0}` : `C1: ${row.c1Count || 0} | C2: ${row.c2Count || 0}`}
+                                      </span>
+                                    )}
+                                  </div>
+                                ) : row.forestCount > 0 ? (
+                                  <div className="flex flex-col items-center justify-center leading-tight">
+                                    <span className="text-emerald-900 font-bold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 shadow-2xs">
+                                      {row.forestCount} {isMarathi ? 'वन जमीन' : 'Forest'}
+                                    </span>
+                                    {(row.c1Count > 0 || row.c2Count > 0) && (
+                                      <span className="text-[10px] text-slate-500 mt-0.5">
+                                        {isMarathi ? `वर्ग १: ${row.c1Count || 0} | वर्ग २: ${row.c2Count || 0}` : `C1: ${row.c1Count || 0} | C2: ${row.c2Count || 0}`}
+                                      </span>
+                                    )}
+                                  </div>
+                                ) : (
+                                  <div>
+                                    <span className="text-emerald-700 font-bold">{row.c1Count || 0}</span>
+                                    <span className="text-slate-400 mx-1">/</span>
+                                    <span className="text-amber-700 font-bold">{row.c2Count || 0}</span>
+                                  </div>
+                                )}
                               </td>
                               <td className="py-2 px-2.5 text-center border-r border-slate-100 font-mono font-bold text-rose-700 bg-rose-50/30">
                                 {row.shartCount || 0}
@@ -2100,7 +2461,7 @@ export default function ReportsPage() {
                               <td className="py-2 px-2 text-center border-r border-slate-200 font-mono text-slate-600">
                                 {p.excelSrNo || p.srNo || ((page - 1) * effectivePageSize + idx + 1)}
                               </td>
-                              <td className="py-2 px-3 border-r border-slate-200 text-slate-700 font-medium">{p.taluka}</td>
+                              <td className="py-2 px-3 border-r border-slate-200 text-slate-700 font-medium">{formatTalukaName(p.taluka, isMarathi)}</td>
                               <td className="py-2 px-3 border-r border-slate-200 font-medium text-slate-900">{formatVillageName(p.villageName, isMarathi)}</td>
                               <td className="py-2 px-2 text-center border-r border-slate-200 font-mono font-bold text-slate-800">{p.gatNumber || '-'}</td>
                               <td className="py-2 px-2 text-center border-r border-slate-200 font-mono text-slate-600">{p.oldSurveyNo || '-'}</td>
@@ -2165,6 +2526,57 @@ export default function ReportsPage() {
                 )}
               </div>
             )
+          ) : activeTab === 'goshwara' ? (
+            /* =========================================================
+                TAB 2: GOSHWARA SUMMARY ROLLUP TABLE (STRICT OFFICIAL FORMAT)
+            ========================================================= */
+            <div className="space-y-4 p-4">
+              {/* Optional Reset Bar if any manual edits exist */}
+              {Object.keys(goshwaraEdits).length > 0 && (
+                <div className="flex items-center justify-between pb-3 border-b border-slate-200 bg-amber-50/60 p-2.5 rounded-xl border border-amber-200/80">
+                  <span className="text-xs text-amber-900 font-semibold flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+                    {isMarathi ? 'तक्त्यामध्ये वापरकर्त्याने सुधारित केलेल्या नोंदी समाविष्ट आहेत.' : 'Custom manual edits are active in the table.'}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={handleResetAllEdits}
+                    className="px-2.5 py-1.5 bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 rounded-lg text-xs font-bold cursor-pointer transition flex items-center gap-1 shadow-2xs"
+                    title={isMarathi ? 'केलेले सर्व बदल पूर्ववत करा' : 'Reset all manual edits'}
+                  >
+                    <RotateCcw className="w-3.5 h-3.5" />
+                    <span>{isMarathi ? 'बदल रीसेट करा' : 'Reset Edits'} ({Object.keys(goshwaraEdits).length})</span>
+                  </button>
+                </div>
+              )}
+
+              {/* Render Goshwara table(s) dynamically based on active filter selection */}
+              <div className="relative">
+                {loading ? (
+                  <div className="py-24 text-center">
+                    <div className="w-8 h-8 border-[3px] border-slate-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-2" />
+                    <span className="text-xs text-slate-500 font-semibold">{isMarathi ? 'गोषवारा डेटा लोड होत आहे...' : 'Loading Goshwara data...'}</span>
+                  </div>
+                ) : (
+                  <>
+                    {village !== 'all' ? (
+                      renderGoshwaraTableSection('गावाचा गोषवारा', isMarathi ? 'गावाचे नाव' : 'Village Name', processedVillageRows)
+                    ) : taluka !== 'all' ? (
+                      <div className="space-y-8">
+                        {renderGoshwaraTableSection('तालुक्याचा गोषवारा', isMarathi ? 'तालुक्याचे नाव' : 'Taluka Name', processedTalukaRows)}
+                        {renderGoshwaraTableSection('गावाचा गोषवारा', isMarathi ? 'गावाचे नाव' : 'Village Name', processedVillageRows)}
+                      </div>
+                    ) : (
+                      <div className="space-y-8">
+                        {renderGoshwaraTableSection('जिल्हाचा गोषवारा', isMarathi ? 'जिल्हाचे नाव' : 'District Name', processedDistrictRows)}
+                        {renderGoshwaraTableSection('तालुक्याचा गोषवारा', isMarathi ? 'तालुक्याचे नाव' : 'Taluka Name', processedTalukaRows)}
+                        {renderGoshwaraTableSection('गावाचा गोषवारा', isMarathi ? 'गावाचे नाव' : 'Village Name', processedVillageRows)}
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            </div>
           ) : (
             /* =========================================================
                 TAB 1: 1 TO 46 MASTER CHECKLIST AUDIT
@@ -2364,7 +2776,7 @@ export default function ReportsPage() {
                             </td>
                             <td className="py-2 px-3 border-r border-slate-200 font-medium text-slate-900">
                               {formatVillageName(p.villageName, isMarathi)}
-                              <span className="block text-[9px] text-slate-400">{p.taluka}</span>
+                              <span className="block text-[9px] text-slate-400">{formatTalukaName(p.taluka, isMarathi)}</span>
                             </td>
                             <td className="py-2 px-2 text-center border-r border-slate-200 font-mono font-bold text-slate-800">
                               {p.gatNumber || p.oldSurveyNo || '-'}
@@ -2473,7 +2885,7 @@ export default function ReportsPage() {
                 </div>
               )}
             </div>
-          ) : activeView === 'parcels' ? (
+          ) : (
             <div>
               <div className="relative">
                 <div className="overflow-x-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
@@ -2528,7 +2940,7 @@ export default function ReportsPage() {
                           </td>
                           <td className="py-2.5 px-3 border-r border-slate-100 font-medium text-slate-900">
                             {formatVillageName(p.villageName, isMarathi)}
-                            <span className="block text-[10px] text-slate-400">{p.taluka}</span>
+                            <span className="block text-[10px] text-slate-400">{formatTalukaName(p.taluka, isMarathi)}</span>
                           </td>
                           <td className="py-2.5 px-3 text-center border-r border-slate-100 font-mono font-bold text-slate-800">
                             {p.gatNumber || p.oldSurveyNo || '-'}
@@ -2616,340 +3028,6 @@ export default function ReportsPage() {
                 </div>
               )}
             </div>
-          ) : (
-            /* =========================================================
-                VIEW 2: GOSHWARA SUMMARY ROLLUP TABLE (SHEET 2 FORMAT)
-            ========================================================= */
-            <div className="space-y-3 p-4">
-              {/* 3-Tier Goshwara Selector */}
-              <div className="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-slate-200">
-                <div className="flex items-center gap-1.5 bg-slate-100 p-1 rounded-xl text-xs font-bold text-slate-700">
-                  <span className="px-2 text-slate-500 font-medium">{isMarathi ? 'गोषवारा स्तर:' : 'Summary Tier:'}</span>
-                  <button
-                    type="button"
-                    onClick={() => setGoshwaraTier('all')}
-                    className={`px-3 py-1.5 rounded-lg transition cursor-pointer ${
-                      goshwaraTier === 'all'
-                        ? 'bg-white text-blue-900 shadow-2xs font-extrabold'
-                        : 'text-slate-600 hover:text-slate-900'
-                    }`}
-                  >
-                    {isMarathi ? 'सर्व गोषवारा (All Tiers)' : 'All Summary Tiers'}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setGoshwaraTier('district');
-                      if (taluka !== 'all') setTaluka('all');
-                      if (village !== 'all') setVillage('all');
-                    }}
-                    className={`px-3 py-1.5 rounded-lg transition cursor-pointer ${
-                      goshwaraTier === 'district'
-                        ? 'bg-teal-700 text-white shadow-2xs font-extrabold'
-                        : 'text-slate-600 hover:text-slate-900'
-                    }`}
-                  >
-                    {isMarathi ? 'जिल्हाचा गोषवारा (District)' : 'District Summary'}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setGoshwaraTier('taluka');
-                      if (village !== 'all') setVillage('all');
-                    }}
-                    className={`px-3 py-1.5 rounded-lg transition cursor-pointer ${
-                      goshwaraTier === 'taluka'
-                        ? 'bg-blue-700 text-white shadow-2xs font-extrabold'
-                        : 'text-slate-600 hover:text-slate-900'
-                    }`}
-                  >
-                    {isMarathi ? 'तालुक्याचा गोषवारा (Taluka)' : 'Taluka Summary'}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setGoshwaraTier('village')}
-                    className={`px-3 py-1.5 rounded-lg transition cursor-pointer ${
-                      goshwaraTier === 'village'
-                        ? 'bg-indigo-700 text-white shadow-2xs font-extrabold'
-                        : 'text-slate-600 hover:text-slate-900'
-                    }`}
-                  >
-                    {isMarathi ? 'गावाचा गोषवारा (Village)' : 'Village Summary'}
-                  </button>
-                </div>
-
-                <div className="text-[11px] text-slate-500 font-medium flex items-center gap-2">
-                  <span>{isMarathi ? 'अधिकृत पत्रक:' : 'Official Sheet:'} <span className="font-bold text-slate-800">{isMarathi ? '१ ते ४५ मुद्द्यांचा गोषवारा (Sheet 2)' : '1 to 45 Points Summary Rollup (Sheet 2)'}</span></span>
-                </div>
-              </div>
-
-              {/* Table with Sheet 2 Sub-Headers */}
-              <div className="relative">
-                <div className="overflow-x-auto max-h-[680px] overflow-y-auto border border-slate-200 rounded-xl shadow-2xs" style={{ WebkitOverflowScrolling: 'touch' }}>
-                <table className="w-full text-left border-collapse text-xs min-w-[880px]">
-                  <thead className="sticky top-0 z-10 shadow-xs">
-                    {/* Row 1: Super Headers */}
-                    <tr className="bg-slate-100 text-slate-800 font-bold border-b border-slate-200 text-center">
-                      <th rowSpan={2} className="py-2 px-2.5 border-r border-slate-200 w-10">{isMarathi ? 'अ.क्र.' : 'Sr.'}</th>
-                      <th rowSpan={2} className="py-2 px-3 border-r border-slate-200 text-left min-w-[170px]">
-                        {goshwaraTier === 'district'
-                          ? (isMarathi ? 'जिल्हाचे नाव' : 'District Name')
-                          : goshwaraTier === 'taluka'
-                          ? (isMarathi ? 'तालुक्याचे नाव' : 'Taluka Name')
-                          : (isMarathi ? 'गाव / तालुका' : 'Village / Taluka')}
-                      </th>
-                      <th rowSpan={2} className="py-2 px-2.5 border-r border-slate-200 w-20">{isMarathi ? 'एकूण सर्व्हे' : 'Total Surveys'}</th>
-                      <th rowSpan={2} className="py-2 px-2.5 border-r border-slate-200 w-24 text-right">{isMarathi ? 'एकूण क्षेत्र (हे.)' : 'Total Area (Ha)'}</th>
-                      <th colSpan={2} className="py-1 px-2 border-r border-slate-200 bg-blue-50/60 text-blue-900">
-                        {isMarathi ? 'भोग. वर्ग १' : 'Occupant Class 1'}
-                      </th>
-                      <th colSpan={2} className="py-1 px-2 border-r border-slate-200 bg-amber-50/60 text-amber-900">
-                        {isMarathi ? 'भोग. वर्ग २' : 'Occupant Class 2'}
-                      </th>
-                      <th colSpan={2} className="py-1 px-2 border-r border-slate-200 bg-rose-50/60 text-rose-900">
-                        {isMarathi ? 'अवैध रूपांतरण (२ ते १)' : 'Illegal Conversion (2 to 1)'}
-                      </th>
-                      <th colSpan={2} className="py-1 px-2 border-r border-slate-200 bg-purple-50/60 text-purple-900">
-                        {isMarathi ? 'इतर अधिकार नोंद नाही' : 'No Other Rights Entry'}
-                      </th>
-                      <th colSpan={2} className="py-1 px-2 border-r border-slate-200 bg-emerald-50/60 text-emerald-900">
-                        {isMarathi ? 'शर्तभंग' : 'Condition Breach'}
-                      </th>
-                      <th rowSpan={2} className="py-2 px-3 text-left min-w-[100px]">{isMarathi ? 'शेरा' : 'Remarks'}</th>
-                    </tr>
-                    {/* Row 2: Sub-Headers (संख्या | क्षेत्र) */}
-                    <tr className="bg-slate-50 text-[10px] text-slate-600 font-bold border-b border-slate-200 text-center">
-                      <th className="py-1 px-1.5 border-r border-slate-200 w-14">{isMarathi ? 'सर्व्हे' : 'Surveys'}</th>
-                      <th className="py-1 px-1.5 border-r border-slate-200 w-16 text-right">{isMarathi ? 'क्षेत्र (हे.)' : 'Area (Ha)'}</th>
-                      <th className="py-1 px-1.5 border-r border-slate-200 w-14">{isMarathi ? 'सर्व्हे' : 'Surveys'}</th>
-                      <th className="py-1 px-1.5 border-r border-slate-200 w-16 text-right">{isMarathi ? 'क्षेत्र (हे.)' : 'Area (Ha)'}</th>
-                      <th className="py-1 px-1.5 border-r border-slate-200 w-14 text-rose-700">{isMarathi ? 'सर्व्हे' : 'Surveys'}</th>
-                      <th className="py-1 px-1.5 border-r border-slate-200 w-16 text-right text-rose-700">{isMarathi ? 'क्षेत्र (हे.)' : 'Area (Ha)'}</th>
-                      <th className="py-1 px-1.5 border-r border-slate-200 w-14 text-purple-700">{isMarathi ? 'सर्व्हे' : 'Surveys'}</th>
-                      <th className="py-1 px-1.5 border-r border-slate-200 w-16 text-right text-purple-700">{isMarathi ? 'क्षेत्र (हे.)' : 'Area (Ha)'}</th>
-                      <th className="py-1 px-1.5 border-r border-slate-200 w-14 text-emerald-700">{isMarathi ? 'सर्व्हे' : 'Surveys'}</th>
-                      <th className="py-1 px-1.5 border-r border-slate-200 w-16 text-right text-emerald-700">{isMarathi ? 'क्षेत्र (हे.)' : 'Area (Ha)'}</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {(() => {
-                      // Dynamically compute displayRows:
-                      // Prioritize serverRollup (accurate server aggregation across all database records with filters)
-                      // Fallback to dynamicRollup or summaryData if serverRollup is not yet available
-                      let displayRows = [];
-                      const rollupSource = serverRollup || (dynamicRollup?.districtTotal ? dynamicRollup : null);
-
-                      if (rollupSource && (rollupSource.districtTotal || (rollupSource.byTaluka && rollupSource.byTaluka.length > 0) || (rollupSource.byVillage && rollupSource.byVillage.length > 0))) {
-                        if (goshwaraTier === 'taluka') {
-                          displayRows = rollupSource.byTaluka || [];
-                        } else if (goshwaraTier === 'village') {
-                          displayRows = rollupSource.byVillage || [];
-                        } else if (goshwaraTier === 'district') {
-                          displayRows = rollupSource.districtTotal ? [rollupSource.districtTotal] : [];
-                        } else {
-                          // All Summary Tiers ('all')
-                          // When taluka is selected (e.g. Ballarpur):
-                          // Show only the selected Taluka row at top, followed by its villages (no duplicate district total)
-                          // When taluka === 'all':
-                          // Show District Grand Total at top, followed by ALL 15 Talukas, followed by ALL Villages!
-                          if (taluka !== 'all') {
-                            displayRows = [
-                              ...(rollupSource.byTaluka || []),
-                              ...(rollupSource.byVillage || [])
-                            ];
-                          } else {
-                            displayRows = [
-                              ...(rollupSource.districtTotal ? [rollupSource.districtTotal] : []),
-                              ...(rollupSource.byTaluka || []),
-                              ...(rollupSource.byVillage || [])
-                            ];
-                          }
-                        }
-                      } else {
-                        // Fallback to server summaryData if rollupSource is not available
-                        if (goshwaraTier === 'taluka') {
-                          displayRows = summaryData.filter(r => r.villageName === 'संपूर्ण तालुका (All Villages)');
-                        } else if (goshwaraTier === 'village') {
-                          displayRows = summaryData.filter(r => r.villageName && r.villageName !== 'संपूर्ण तालुका (All Villages)');
-                        } else if (goshwaraTier === 'district') {
-                          const talukaRows = summaryData.filter(r => r.villageName === 'संपूर्ण तालुका (All Villages)');
-                          const rowsToSum = talukaRows.length > 0 ? talukaRows : summaryData;
-                          const totalCnt = rowsToSum.reduce((acc, r) => acc + (r.total712Count || 0), 0);
-                          const c1 = rowsToSum.reduce((acc, r) => acc + (r.govtFound1950Count || 0), 0);
-                          const c2 = rowsToSum.reduce((acc, r) => acc + (r.pendingRectifyCount || 0), 0);
-                          const conv = rowsToSum.reduce((acc, r) => acc + (r.illegalDeletionsCount || 0), 0);
-                          const noOther = rowsToSum.reduce((acc, r) => acc + (r.pokalistPendingCount || 0), 0);
-                          const shart = rowsToSum.reduce((acc, r) => acc + ((r.govtDeptsShartbhang || 0) + (r.privateShartbhang || 0)), 0);
-
-                          displayRows = [{
-                            id: 'district-chandrapur-grand-total',
-                            district: 'Chandrapur',
-                            taluka: 'चंद्रपूर जिल्हा',
-                            villageName: 'संपूर्ण जिल्हा (१५ तालुke गोषवारा)',
-                            total712Count: totalCnt,
-                            c1Count: c1,
-                            c2Count: c2,
-                            convCount: conv,
-                            noOtherCount: noOther,
-                            shartCount: shart,
-                            remarks: 'जिल्हास्तरीय एकत्रित गोषवारा'
-                          }];
-                        } else {
-                          displayRows = [...summaryData].sort((a, b) => {
-                            const talukaCmp = (a.taluka || '').localeCompare(b.taluka || '');
-                            if (talukaCmp !== 0) return talukaCmp;
-                            const isATotal = a.villageName === 'संपूर्ण तालुका (All Villages)';
-                            const isBTotal = b.villageName === 'संपूर्ण तालुका (All Villages)';
-                            if (isATotal && !isBTotal) return -1;
-                            if (!isATotal && isBTotal) return 1;
-                            return (a.villageName || '').localeCompare(b.villageName || '');
-                          });
-                        }
-                      }
-
-                      if (loading) {
-                        return (
-                          <tr>
-                            <td colSpan={15} className="h-64" />
-                          </tr>
-                        );
-                      }
-
-                      if (displayRows.length === 0) {
-                        return (
-                          <tr>
-                            <td colSpan={15} className="py-12 text-center text-slate-500">
-                              <p className="font-semibold text-sm text-slate-600">
-                                {isMarathi ? 'या गोषवारा स्तरासाठी डेटा उपलब्ध नाही.' : 'No summary data available for this tier.'}
-                              </p>
-                              <p className="text-xs text-slate-400 mt-1">
-                                {isMarathi
-                                  ? 'कृपया वरील तालुका / गाव किंवा तपासणी निकष तपासा.'
-                                  : 'Please verify the Taluka / Village or audit criteria above.'}
-                              </p>
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setGoshwaraTier('all');
-                                  resetFilters();
-                                }}
-                                className="mt-3 px-3 py-1.5 bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 rounded-lg text-xs font-semibold cursor-pointer transition shadow-2xs"
-                              >
-                                {isMarathi ? 'फिल्टर रीसेट करा (Reset All)' : 'Reset Filters & Show All'}
-                              </button>
-                            </td>
-                          </tr>
-                        );
-                      }
-
-                      return displayRows.map((row, idx) => {
-                        const isTalukaTotal = row.villageName === 'संपूर्ण तालुका (All Villages)';
-                        const isDistrictTotal = row.villageName === 'संपूर्ण जिल्हा (१५ तालुके गोषवारा)' || row.villageName === 'Whole District Rollup';
-                        
-                        const talukaDisplay = formatTalukaName(row.taluka, isMarathi);
-                        const displayName = isDistrictTotal
-                          ? (isMarathi ? 'चंद्रपूर जिल्हा (एकत्रित गोषवारा)' : 'Chandrapur District (Consolidated Rollup)')
-                          : isTalukaTotal
-                          ? (row.taluka ? `${talukaDisplay} (${isMarathi ? 'संपूर्ण तालुका' : 'Whole Taluka'})` : (isMarathi ? 'सर्व तालुके' : 'All Talukas'))
-                          : formatVillageName(row.villageName || row.taluka, isMarathi);
-
-                        const totalCount = row.total712Count || row.totalGovtLandCount || 0;
-                        const totalArea = row.totalArea !== undefined ? row.totalArea : (row.totalAreaHa !== undefined ? Number(row.totalAreaHa).toFixed(2) : '0.00');
-                        const c1Count = row.c1Count !== undefined ? row.c1Count : (row.govtFound1950Count || 0);
-                        const c1Area = row.c1Area !== undefined ? row.c1Area : '0.00';
-                        const c2Count = row.c2Count !== undefined ? row.c2Count : (row.pendingRectifyCount || 0);
-                        const c2Area = row.c2Area !== undefined ? row.c2Area : '0.00';
-                        const convCount = row.convCount !== undefined ? row.convCount : (row.illegalDeletionsCount || row.govtDeptsShartbhang || 0);
-                        const convArea = row.convArea !== undefined ? row.convArea : '0.00';
-                        const noOtherCount = row.noOtherCount !== undefined ? row.noOtherCount : (row.pokalistPendingCount || 0);
-                        const noOtherArea = row.noOtherArea !== undefined ? row.noOtherArea : '0.00';
-                        const shartCount = row.shartCount !== undefined ? row.shartCount : ((row.govtDeptsShartbhang || 0) + (row.privateShartbhang || 0));
-                        const shartArea = row.shartArea !== undefined ? row.shartArea : '0.00';
-
-                        return (
-                          <tr
-                            key={row.id || idx}
-                            className={`transition ${
-                              isDistrictTotal
-                                ? 'bg-teal-50 font-black text-teal-950 border-y-2 border-teal-300'
-                                : isTalukaTotal
-                                ? 'bg-blue-50/80 font-bold text-blue-950'
-                                : 'hover:bg-slate-50'
-                            }`}
-                          >
-                            <td className="py-2 px-2.5 text-center border-r border-slate-100 font-mono text-slate-400">
-                              {idx + 1}
-                            </td>
-                            <td className="py-2 px-3 border-r border-slate-100 font-medium text-slate-900">
-                              <span className={isDistrictTotal || isTalukaTotal ? 'font-bold' : ''}>
-                                {displayName}
-                              </span>
-                            </td>
-                            <td className="py-2 px-2.5 text-center border-r border-slate-100 font-mono font-bold">
-                              {totalCount}
-                            </td>
-                            <td className="py-2 px-2.5 text-right border-r border-slate-100 font-mono">
-                              {totalArea}
-                            </td>
-
-                            {/* Class 1 (Count | Area) */}
-                            <td className="py-2 px-1.5 text-center border-r border-slate-100 font-mono text-blue-700 font-bold">
-                              {c1Count}
-                            </td>
-                            <td className="py-2 px-1.5 text-right border-r border-slate-100 font-mono text-slate-600">
-                              {c1Area}
-                            </td>
-
-                            {/* Class 2 (Count | Area) */}
-                            <td className="py-2 px-1.5 text-center border-r border-slate-100 font-mono text-amber-700 font-bold">
-                              {c2Count}
-                            </td>
-                            <td className="py-2 px-1.5 text-right border-r border-slate-100 font-mono text-slate-600">
-                              {c2Area}
-                            </td>
-
-                            {/* Illegal Conversion 2 to 1 (Count | Area) */}
-                            <td className="py-2 px-1.5 text-center border-r border-slate-100 font-mono text-rose-700 font-bold">
-                              {convCount}
-                            </td>
-                            <td className="py-2 px-1.5 text-right border-r border-slate-100 font-mono text-rose-600">
-                              {convArea}
-                            </td>
-
-                            {/* No Other Rights Noted (Count | Area) */}
-                            <td className="py-2 px-1.5 text-center border-r border-slate-100 font-mono text-purple-700 font-bold">
-                              {noOtherCount}
-                            </td>
-                            <td className="py-2 px-1.5 text-right border-r border-slate-100 font-mono text-purple-600">
-                              {noOtherArea}
-                            </td>
-
-                            {/* Shartbhang (Count | Area) */}
-                            <td className="py-2 px-1.5 text-center border-r border-slate-100 font-mono text-emerald-700 font-bold">
-                              {shartCount}
-                            </td>
-                            <td className="py-2 px-1.5 text-right border-r border-slate-100 font-mono text-emerald-600">
-                              {shartArea}
-                            </td>
-
-                            <td className="py-2 px-3 text-slate-500 text-[11px]  max-w-[120px]">
-                              {formatRemarks(row.remarks, isMarathi)}
-                            </td>
-                          </tr>
-                        );
-                      });
-                    })()}
-                  </tbody>
-                </table>
-              </div>
-
-              {loading && (
-                <div className="absolute inset-x-0 bottom-0 top-[65px] flex items-center justify-center pointer-events-none">
-                  <div className="w-8 h-8 border-[3px] border-slate-200 border-t-blue-600 rounded-full animate-spin" />
-                </div>
-              )}
-            </div>
-            </div>
           ))}
 
           {/* =========================================================
@@ -2981,6 +3059,7 @@ export default function ReportsPage() {
             </div>
           </div> */}
         </div>
+        )}
 
         {/* =========================================================
             HISTORICAL BACKWARD TIMELINE & 46-POINTS AUDIT MODAL
@@ -3041,7 +3120,7 @@ export default function ReportsPage() {
                   </h3>
                   <span className="inline-flex items-center gap-1 text-xs px-2.5 py-0.5 rounded-md bg-slate-100 text-slate-700 border border-slate-200/80 font-medium">
                     <MapPin className="w-3 h-3 text-slate-500 shrink-0" />
-                    {formatVillageName(inspectedParcel.villageName, isMarathi)}, {isMarathi ? 'ता.' : 'Tal.'} {inspectedParcel.taluka}
+                    {formatVillageName(inspectedParcel.villageName, isMarathi)}, {isMarathi ? 'ता.' : 'Tal.'} {formatTalukaName(inspectedParcel.taluka, isMarathi)}
                   </span>
                   {inspectedParcel.upi && (
                     <span className="font-mono text-[11px] bg-slate-50 text-slate-500 border border-slate-200 px-2 py-0.5 rounded font-medium">

@@ -1,7 +1,7 @@
 'use client';
 
 import { useTranslation } from './LanguageContext';
-import { formatVillageName } from '../lib/villageUtils';
+import { formatVillageName, formatTalukaName } from '../lib/villageUtils';
 import { useState, useRef, useEffect } from 'react';
 import {
   ZoomIn,
@@ -317,7 +317,7 @@ export default function ArchivalDocumentViewer({
                   <span>{isMarathi ? 'महाराष्ट्र शासन • महसूल व वन विभाग' : 'Government of Maharashtra • Revenue & Forest Dept'}</span>
                 </div>
                 <h4 className="text-base sm:text-lg font-extrabold text-slate-900 tracking-tight">
-                  {isMarathi ? `जिल्हाधिकारी कार्यालय चंद्रपूर | ${parcel?.taluka ? 'तालुका ' + parcel.taluka : 'चंद्रपूर जिल्हा'}` : `Collectorate Chandrapur | ${parcel?.taluka ? 'Taluka ' + parcel.taluka : 'Chandrapur District'}`}
+                  {isMarathi ? `जिल्हाधिकारी कार्यालय चंद्रपूर | ${parcel?.taluka ? 'तालुका ' + formatTalukaName(parcel.taluka, true) : 'चंद्रपूर जिल्हा'}` : `Collectorate Chandrapur | ${parcel?.taluka ? 'Taluka ' + formatTalukaName(parcel.taluka, false) : 'Chandrapur District'}`}
                 </h4>
                 <p className="text-xs sm:text-sm font-bold text-amber-900 mt-0.5">
                   {selectedEpoch?.epochYear === 1950
@@ -329,7 +329,7 @@ export default function ArchivalDocumentViewer({
                     : (isMarathi ? 'प्रमाणित अभिलेख दस्तऐवज प्रत' : 'Certified Archival Document Copy')}
                 </p>
                 <p className="text-[11px] text-slate-700 font-medium mt-0.5">
-                  {isMarathi ? 'गाव:' : 'Village:'} {parcel?.villageName ? formatVillageName(parcel.villageName, isMarathi) : '—'} | {isMarathi ? 'महसूल मंडळ:' : 'Circle:'} {parcel?.revenueCircle || '—'} | {isMarathi ? 'तालुका:' : 'Taluka:'} {parcel?.taluka || '—'} | {isMarathi ? 'जिल्हा: चंद्रपूर' : 'District: Chandrapur'}
+                  {isMarathi ? 'गाव:' : 'Village:'} {parcel?.villageName ? formatVillageName(parcel.villageName, isMarathi) : '—'} | {isMarathi ? 'महसूल मंडळ:' : 'Circle:'} {parcel?.revenueCircle || '—'} | {isMarathi ? 'तालुका:' : 'Taluka:'} {parcel?.taluka ? formatTalukaName(parcel.taluka, isMarathi) : '—'} | {isMarathi ? 'जिल्हा: चंद्रपूर' : 'District: Chandrapur'}
                 </p>
               </div>
 
@@ -439,7 +439,7 @@ export default function ArchivalDocumentViewer({
                   <div className="w-16 h-16 rounded-full border-2 border-rose-800 p-0.5 flex flex-col items-center justify-center text-[7.5px] font-extrabold text-rose-800 uppercase text-center rotate-[-10deg] bg-rose-50/40 shadow-xs">
                     <div className="border border-rose-700/70 rounded-full w-full h-full flex flex-col items-center justify-center p-0.5 leading-tight">
                       <span>{isMarathi ? 'तालुका' : 'Taluka'}</span>
-                      <span className="font-black">{parcel?.taluka || (isMarathi ? 'चंद्रपूर' : 'Chandrapur')}</span>
+                      <span className="font-black">{formatTalukaName(parcel?.taluka, isMarathi) || (isMarathi ? 'चंद्रपूर' : 'Chandrapur')}</span>
                       <Award className="w-2.5 h-2.5 text-rose-800 my-0.5" />
                       <span>{isMarathi ? 'सत्य प्रत' : 'True Copy'}</span>
                     </div>

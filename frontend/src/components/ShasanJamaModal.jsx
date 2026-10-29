@@ -16,7 +16,7 @@ import { api } from '../lib/api';
 import { useAuth } from './AuthContext';
 import { useFocusTrap } from '../hooks/useFocusTrap';
 import { useTranslation } from './LanguageContext';
-import { formatVillageName } from '../lib/villageUtils';
+import { formatVillageName, formatTalukaName } from '../lib/villageUtils';
 
 export default function ShasanJamaModal({ isOpen, onClose, caseItem, onSuccess = () => {} }) {
   const trapRef = useFocusTrap(isOpen);
@@ -193,7 +193,7 @@ export default function ShasanJamaModal({ isOpen, onClose, caseItem, onSuccess =
               <div className="flex justify-between text-slate-600">
                 <span>{isMarathi ? 'स्थान:' : 'Location:'}</span>
                 <span className="font-medium text-slate-800">
-                  {formatVillageName(caseItem.parcel?.villageName, isMarathi)}, {isMarathi ? 'तालुका' : 'Taluka'} {caseItem.parcel?.taluka} ({isMarathi ? 'गट क्र.' : 'Gat No.'}{' '}
+                  {formatVillageName(caseItem.parcel?.villageName, isMarathi)}, {isMarathi ? 'तालुका' : 'Taluka'} {formatTalukaName(caseItem.parcel?.taluka, isMarathi)} ({isMarathi ? 'गट क्र.' : 'Gat No.'}{' '}
                   {caseItem.parcel?.gatNumber})
                 </span>
               </div>
