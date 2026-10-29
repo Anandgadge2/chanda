@@ -330,13 +330,37 @@ export async function calculateDynamicGoshwaraRollup(filters = {}) {
       if (prapatraNum === 1) {
         whereClauses.push(`(tenure_class = 'SARKAR_SHASAN' OR metadata->'flags'->>'isGovt' = 'true' OR metadata->>'otherRights' LIKE '%गायरान%' OR metadata->>'otherRights' LIKE '%पहाड%')`);
       } else if (prapatraNum === 2) {
-        whereClauses.push(`(metadata->>'otherRights' LIKE '%कुळ%' OR metadata->>'otherRights' LIKE '%शेतजमीन%')`);
+        whereClauses.push(`(metadata->>'otherRights' LIKE '%कुळ%' OR metadata->>'otherRights' LIKE '%शेतजमीन%' OR metadata->'auditPoints'->>'point_20' = 'होय')`);
       } else if (prapatraNum === 3) {
-        whereClauses.push(`(tenure_class = 'DEVASTHAN_INAM' OR metadata->>'otherRights' LIKE '%इनाम%' OR metadata->>'otherRights' LIKE '%वतन%')`);
+        whereClauses.push(`(tenure_class = 'DEVASTHAN_INAM' OR metadata->>'otherRights' LIKE '%इनाम%' OR metadata->>'otherRights' LIKE '%वतन%' OR metadata->'auditPoints'->>'point_21' = 'होय')`);
       } else if (prapatraNum === 4) {
-        whereClauses.push(`(metadata->>'otherRights' LIKE '%भूमिहीन%' OR metadata->>'otherRights' LIKE '%शेतमजूर%' OR metadata->>'otherRights' LIKE '%स्वातंत्र्य%')`);
+        whereClauses.push(`(metadata->>'otherRights' LIKE '%भूमिहीन%' OR metadata->>'otherRights' LIKE '%शेतमजूर%' OR metadata->>'otherRights' LIKE '%स्वातंत्र्य%' OR metadata->'auditPoints'->>'point_22' = 'होय')`);
       } else if (prapatraNum === 5) {
-        whereClauses.push(`(metadata->'flags'->>'isCorpAllot' = 'true' OR metadata->>'otherRights' LIKE '%संस्था%' OR metadata->>'otherRights' LIKE '%उद्योग%' OR metadata->>'otherRights' LIKE '%प्रकल्प%')`);
+        whereClauses.push(`(metadata->'flags'->>'isCorpAllot' = 'true' OR metadata->>'otherRights' LIKE '%संस्था%' OR metadata->>'otherRights' LIKE '%उद्योग%' OR metadata->>'otherRights' LIKE '%प्रकल्प%' OR metadata->'auditPoints'->>'point_23' = 'होय')`);
+      } else if (prapatraNum === 6) {
+        whereClauses.push(`(metadata->>'otherRights' LIKE '%कमाल%' OR metadata->>'otherRights' LIKE '%सिलिंग%' OR metadata->>'otherRights' LIKE '%सीलिंग%' OR metadata->'auditPoints'->>'point_24' = 'होय')`);
+      } else if (prapatraNum === 7) {
+        whereClauses.push(`(metadata->>'otherRights' LIKE '%गुरचरण%' OR metadata->>'otherRights' LIKE '%चराई%' OR metadata->>'otherRights' LIKE '%विकास%' OR metadata->'auditPoints'->>'point_25' = 'होय')`);
+      } else if (prapatraNum === 8) {
+        whereClauses.push(`(tenure_class = 'DEVASTHAN_INAM' OR metadata->>'otherRights' LIKE '%देवस्थान%' OR metadata->'auditPoints'->>'point_26' = 'होय')`);
+      } else if (prapatraNum === 9) {
+        whereClauses.push(`(metadata->'flags'->>'isTribal' = 'true' OR metadata->>'otherRights' LIKE '%आदिवासी%' OR metadata->'auditPoints'->>'point_27' = 'होय')`);
+      } else if (prapatraNum === 10) {
+        whereClauses.push(`(metadata->>'otherRights' LIKE '%पुनर्वसन%' OR metadata->>'otherRights' LIKE '%प्रकल्पग्रस्त%' OR metadata->'auditPoints'->>'point_28' = 'होय')`);
+      } else if (prapatraNum === 11) {
+        whereClauses.push(`(metadata->>'otherRights' LIKE '%भाडेपट्टा%' OR metadata->>'otherRights' LIKE '%लीज%' OR metadata->'auditPoints'->>'point_29' = 'होय')`);
+      } else if (prapatraNum === 12) {
+        whereClauses.push(`(metadata->>'otherRights' LIKE '%भूदान%' OR metadata->>'otherRights' LIKE '%ग्रामदान%' OR metadata->'auditPoints'->>'point_30' = 'होय')`);
+      } else if (prapatraNum === 13) {
+        whereClauses.push(`(tenure_class = 'FOREST_JANGAL' OR metadata->>'otherRights' LIKE '%खाजगी वन%' OR metadata->>'otherRights' LIKE '%वन जमीन%' OR metadata->'auditPoints'->>'point_31' = 'होय')`);
+      } else if (prapatraNum === 14) {
+        whereClauses.push(`(metadata->>'otherRights' LIKE '%भूमीधारी%' OR metadata->>'otherRights' LIKE '%भूमिधारी%' OR metadata->'auditPoints'->>'point_32' = 'होय' OR EXISTS (SELECT 1 FROM backward_histories bh WHERE bh.parcel_id = land_parcels.id AND (bh.owner_name LIKE '%भूमीधारी%' OR bh.owner_name LIKE '%भूमिधारी%')))`);
+      } else if (prapatraNum === 15) {
+        whereClauses.push(`(metadata->>'otherRights' LIKE '%सूट%' OR metadata->>'otherRights' LIKE '%सुट%' OR metadata->>'otherRights' LIKE '%कमाल मर्यादा%' OR metadata->>'otherRights' LIKE '%विशेष सूट%' OR metadata->'auditPoints'->>'point_33' = 'होय' OR (metadata->>'otherRights' LIKE '%सिलिंग%' AND metadata->>'otherRights' LIKE '%अतिरिक्त%'))`);
+      } else if (prapatraNum === 16) {
+        whereClauses.push(`(metadata->>'otherRights' LIKE '%वक्फ%' OR metadata->>'otherRights' LIKE '%कब्रस्तान%' OR metadata->>'otherRights' LIKE '%इदगाह%' OR metadata->>'otherRights' LIKE '%मस्जिद%' OR metadata->'auditPoints'->>'point_34' = 'होय')`);
+      } else if (prapatraNum === 17) {
+        whereClauses.push(`(metadata->>'otherRights' LIKE '%भूसंपादन%' OR metadata->>'otherRights' LIKE '%अधिग्रहित%' OR metadata->>'otherRights' LIKE '%राखीव%' OR metadata->>'otherRights' LIKE '%राष्ट्रीय महामार्ग%' OR metadata->'auditPoints'->>'point_35' = 'होय')`);
       }
     } else {
       if (prapatraNum === 1) {
@@ -500,6 +524,27 @@ export async function calculateDynamicGoshwaraRollup(filters = {}) {
       convArea: rawDist.convArea.toFixed(2),
       noOtherArea: rawDist.noOtherArea.toFixed(2),
       shartArea: rawDist.shartArea.toFixed(2)
+    };
+  } else {
+    distTotal = {
+      id: 'district-chandrapur-grand-total',
+      district: 'Chandrapur',
+      taluka: isAllTalukas ? 'चंद्रपूर जिल्हा' : `${targetTaluka} तालुका`,
+      villageName: isAllTalukas ? 'संपूर्ण जिल्हा (१५ तालुके गोषवारा)' : `${targetTaluka} तालुका एकत्रित गोषवारा`,
+      total712Count: 0,
+      totalAreaHa: 0,
+      totalArea: '0.00',
+      c1Count: 0,
+      c1Area: '0.00',
+      c2Count: 0,
+      c2Area: '0.00',
+      convCount: 0,
+      convArea: '0.00',
+      noOtherCount: 0,
+      noOtherArea: '0.00',
+      shartCount: 0,
+      shartArea: '0.00',
+      remarks: 'माहिती उपलब्ध नाही'
     };
   }
 
@@ -877,21 +922,40 @@ export const getPrapatraReport = async (req, res) => {
       } else if (prapatraNum === 14) {
         prapatraParcelConditions = [
           { metadata: { path: ['otherRights'], string_contains: 'भूमीधारी' } },
-          { tenureClass: 'BHOGVATDAR_CLASS_2' }
+          { metadata: { path: ['otherRights'], string_contains: 'भूमिधारी' } },
+          { metadata: { path: ['auditPoints', 'point_32'], equals: 'होय' } },
+          { backwardHistories: { some: { ownerName: { contains: 'भूमीधारी' } } } },
+          { backwardHistories: { some: { ownerName: { contains: 'भूमिधारी' } } } }
         ];
       } else if (prapatraNum === 15) {
         prapatraParcelConditions = [
-          { metadata: { path: ['otherRights'], string_contains: 'सूट' } }
+          { metadata: { path: ['otherRights'], string_contains: 'सूट' } },
+          { metadata: { path: ['otherRights'], string_contains: 'सुट' } },
+          { metadata: { path: ['otherRights'], string_contains: 'कमाल मर्यादा' } },
+          { metadata: { path: ['otherRights'], string_contains: 'विशेष सूट' } },
+          { metadata: { path: ['auditPoints', 'point_33'], equals: 'होय' } },
+          {
+            AND: [
+              { metadata: { path: ['otherRights'], string_contains: 'सिलिंग' } },
+              { metadata: { path: ['otherRights'], string_contains: 'अतिरिक्त' } }
+            ]
+          }
         ];
       } else if (prapatraNum === 16) {
         prapatraParcelConditions = [
           { metadata: { path: ['otherRights'], string_contains: 'वक्फ' } },
-          { metadata: { path: ['otherRights'], string_contains: 'कब्रस्तान' } }
+          { metadata: { path: ['otherRights'], string_contains: 'कब्रस्तान' } },
+          { metadata: { path: ['otherRights'], string_contains: 'इदगाह' } },
+          { metadata: { path: ['otherRights'], string_contains: 'मस्जिद' } },
+          { metadata: { path: ['auditPoints', 'point_34'], equals: 'होय' } }
         ];
       } else if (prapatraNum === 17) {
         prapatraParcelConditions = [
           { metadata: { path: ['otherRights'], string_contains: 'भूसंपादन' } },
-          { metadata: { path: ['otherRights'], string_contains: 'राखीव' } }
+          { metadata: { path: ['otherRights'], string_contains: 'अधिग्रहित' } },
+          { metadata: { path: ['otherRights'], string_contains: 'राखीव' } },
+          { metadata: { path: ['otherRights'], string_contains: 'राष्ट्रीय महामार्ग' } },
+          { metadata: { path: ['auditPoints', 'point_35'], equals: 'होय' } }
         ];
       }
     }

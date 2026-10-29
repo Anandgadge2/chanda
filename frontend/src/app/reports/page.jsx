@@ -541,6 +541,24 @@ export default function ReportsPage() {
     return totals;
   }, [filteredPrapatraSummaryRows, prapatraTier]);
 
+  // Category Subject Rollup Rows (Sheet 2 format) from serverRollup
+  const categoryRollupRows = useMemo(() => {
+    if (serverRollup) {
+      if (taluka && taluka !== 'all') {
+        return [
+          ...(serverRollup.byTaluka || []),
+          ...(serverRollup.byVillage || [])
+        ];
+      }
+      return [
+        ...(serverRollup.districtTotal ? [serverRollup.districtTotal] : []),
+        ...(serverRollup.byTaluka || []),
+        ...(serverRollup.byVillage || [])
+      ];
+    }
+    return summaryData || [];
+  }, [serverRollup, summaryData, taluka]);
+
   // Robust programmatic download with feedback
   const handleDownload = async (type) => {
     const isExcel = type === 'excel';
@@ -1176,7 +1194,9 @@ export default function ReportsPage() {
                   ) : (
                     activeTab === 'prapatra5' && activeView === 'prapatraSummary'
                       ? `${summaryData.length} ${isMarathi ? 'गोषवारा नोंदी' : 'Summary Records'}`
-                      : `${parcels.length} ${isMarathi ? 'अभिलेख' : 'Records'}`
+                      : activeTab === 'categories' && activeView === 'categorySummary'
+                      ? `${categoryRollupRows.length} ${isMarathi ? 'गोषवारा नोंदी' : 'Summary Records'}`
+                      : `${serverRollup?.districtTotal?.total712Count ?? parcels.length} ${isMarathi ? 'अभिलेख' : 'Records'}`
                   )}
                 </span>
               </div>
@@ -1280,7 +1300,7 @@ export default function ReportsPage() {
                     <FileSpreadsheet className="w-3.5 h-3.5 text-indigo-300" />
                     <span>{isMarathi ? 'सविस्तर ७/१२ डेटा यादी (शीट १)' : 'Detailed 7/12 Records (Sheet 1)'}</span>
                     <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-indigo-950/60 text-white font-mono font-bold">
-                      {parcels.length}
+                      {serverRollup?.districtTotal?.total712Count ?? parcels.length}
                     </span>
                   </button>
 
@@ -1296,7 +1316,7 @@ export default function ReportsPage() {
                     <Layers className="w-3.5 h-3.5 text-indigo-300" />
                     <span>{isMarathi ? 'विषयनिहाय गोषवारा (शीट २)' : 'Subject Rollup (Sheet 2)'}</span>
                     <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-indigo-950/60 text-white font-mono font-bold">
-                      {summaryData.length}
+                      {categoryRollupRows.length}
                     </span>
                   </button>
                 </>
@@ -1666,8 +1686,8 @@ export default function ReportsPage() {
                   </h3>
                   <p className="text-xs text-slate-500 mt-1">
                     {isMarathi
-                      ? `कार्यक्षेत्र: ${formatScopeText(activeScope, true)} | एकूण अभिलेख: ${parcels.length} (डाऊनलोड एक्सेल बुकलेट - शीट १ नमुना)`
-                      : `Scope: ${formatScopeText(activeScope, false)} | Total Records: ${parcels.length} (Downloaded Booklet Sheet 1 Format)`}
+                      ? `कार्यक्षेत्र: ${formatScopeText(activeScope, true)} | एकूण अभिलेख: ${serverRollup?.districtTotal?.total712Count ?? parcels.length} (डाऊनलोड एक्सेल बुकलेट - शीट १ नमुना)`
+                      : `Scope: ${formatScopeText(activeScope, false)} | Total Records: ${serverRollup?.districtTotal?.total712Count ?? parcels.length} (Downloaded Booklet Sheet 1 Format)`}
                   </p>
                 </div>
 
@@ -1857,35 +1877,36 @@ export default function ReportsPage() {
                     </div>
                   </div>
                   <span className="text-xs font-bold bg-indigo-100 text-indigo-950 px-3 py-1 rounded-xl shrink-0">
-                    {summaryData.length} {isMarathi ? 'नोंदी' : 'Rows'}
+                    {categoryRollupRows.length} {isMarathi ? 'नोंदी' : 'Rows'}
                   </span>
                 </div>
 
                 {/* Table */}
                 <div className="overflow-x-auto max-h-[640px] overflow-y-auto border border-slate-200 rounded-xl shadow-2xs bg-white">
-                  <table className="w-full text-left border-collapse text-xs min-w-[760px]">
+                  <table className="w-full text-left border-collapse text-xs min-w-[820px]">
                     <thead className="sticky top-0 z-10 shadow-xs">
                       <tr className="bg-slate-100 text-slate-800 font-bold border-b border-slate-200 text-center">
                         <th className="py-2.5 px-2.5 border-r border-slate-200 w-12">{isMarathi ? 'अ.क्र.' : 'Sr.'}</th>
                         <th className="py-2.5 px-3 border-r border-slate-200 text-left min-w-[180px]">{isMarathi ? 'जिल्हा / तालुका / गाव' : 'District / Taluka / Village'}</th>
-                        <th className="py-2.5 px-2.5 border-r border-slate-200 text-center w-28">{isMarathi ? 'एकूण ७/१२' : 'Total 7/12'}</th>
-                        <th className="py-2.5 px-2.5 border-r border-slate-200 text-center w-36 text-amber-800 bg-amber-50/60">{isMarathi ? 'संबंधित विषय ७/१२' : 'Subject 7/12'}</th>
+                        <th className="py-2.5 px-2.5 border-r border-slate-200 text-center w-28 text-indigo-900 bg-indigo-50/50">{isMarathi ? 'एकूण ७/१२' : 'Total 7/12'}</th>
+                        <th className="py-2.5 px-2.5 border-r border-slate-200 text-right w-28 text-emerald-800">{isMarathi ? 'एकूण क्षेत्र (हे.)' : 'Area (Ha)'}</th>
+                        <th className="py-2.5 px-2.5 border-r border-slate-200 text-center w-36 text-blue-900 bg-blue-50/60">{isMarathi ? 'भोग. वर्ग १ / वर्ग २' : 'Class 1 / Class 2'}</th>
                         <th className="py-2.5 px-2.5 border-r border-slate-200 text-center w-32 text-rose-800 bg-rose-50/60">{isMarathi ? 'शर्तभंग / संशयित' : 'Breaches'}</th>
-                        <th className="py-2.5 px-3 text-left min-w-[140px]">{isMarathi ? 'शेरा' : 'Remarks'}</th>
+                        <th className="py-2.5 px-3 text-left min-w-[150px]">{isMarathi ? 'शेरा' : 'Remarks'}</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100 font-sans">
-                      {summaryData.length === 0 ? (
+                      {categoryRollupRows.length === 0 ? (
                         <tr>
-                          <td colSpan={6} className="py-16 text-center text-slate-400">
+                          <td colSpan={7} className="py-16 text-center text-slate-400">
                             <Info className="w-8 h-8 mx-auto mb-2 text-slate-300" />
                             <span className="text-sm font-semibold">{isMarathi ? 'कोणतीही गोषवारा नोंद आढळली नाही.' : 'No summary records found.'}</span>
                           </td>
                         </tr>
                       ) : (
-                        summaryData.map((row, idx) => {
-                          const isTalukaTotal = row.villageName === 'संपूर्ण तालुका (All Villages)';
-                          const isDistrictTotal = row.villageName === 'संपूर्ण जिल्हा (१५ तालुके गोषवारा)' || row.villageName === 'Whole District Rollup';
+                        categoryRollupRows.map((row, idx) => {
+                          const isTalukaTotal = row.villageName === 'संपूर्ण तालुका (All Villages)' || row.id?.startsWith('t-');
+                          const isDistrictTotal = row.id === 'district-chandrapur-grand-total' || row.villageName === 'संपूर्ण जिल्हा (१५ तालुके गोषवारा)' || row.villageName === 'Whole District Rollup';
                           const displayName = isDistrictTotal
                             ? (isMarathi ? 'चंद्रपूर जिल्हा (एकत्रित गोषवारा)' : 'Chandrapur District Grand Total')
                             : isTalukaTotal
@@ -1905,14 +1926,21 @@ export default function ReportsPage() {
                             >
                               <td className="py-2 px-2.5 text-center border-r border-slate-100 font-mono text-slate-400">{idx + 1}</td>
                               <td className="py-2 px-3 border-r border-slate-100 font-medium text-slate-900">{displayName}</td>
-                              <td className="py-2 px-2.5 text-center border-r border-slate-100 font-mono font-bold">{row.total712Count || 0}</td>
-                              <td className="py-2 px-2.5 text-center border-r border-slate-100 font-mono font-bold text-amber-700 bg-amber-50/30">
-                                {row.govtDeptsAllottedCount || row.privateAllottedCount || row.totalGovtLandCount || row.govtFound1950Count || 0}
+                              <td className="py-2 px-2.5 text-center border-r border-slate-100 font-mono font-bold text-indigo-950 bg-indigo-50/20">{row.total712Count || 0}</td>
+                              <td className="py-2 px-2.5 text-right border-r border-slate-100 font-mono font-bold text-emerald-800">
+                                {row.totalArea || (row.totalAreaHa ? Number(row.totalAreaHa).toFixed(2) : '0.00')}
+                              </td>
+                              <td className="py-2 px-2.5 text-center border-r border-slate-100 font-mono text-xs">
+                                <span className="text-emerald-700 font-bold">{row.c1Count || 0}</span>
+                                <span className="text-slate-400 mx-1">/</span>
+                                <span className="text-amber-700 font-bold">{row.c2Count || 0}</span>
                               </td>
                               <td className="py-2 px-2.5 text-center border-r border-slate-100 font-mono font-bold text-rose-700 bg-rose-50/30">
-                                {row.govtDeptsShartbhang || row.privateShartbhang || row.govtShartbhangCount || row.illegalDeletionsCount || 0}
+                                {row.shartCount || 0}
                               </td>
-                              <td className="py-2 px-3 text-slate-500 text-[11px] truncate max-w-[140px]">{row.remarks || '-'}</td>
+                              <td className="py-2 px-3 text-slate-600 text-[11px] truncate max-w-[160px]">
+                                {row.remarks || (row.shartCount > 0 ? 'शर्तभंग / संशयित नोंद' : 'तपासणी प्रमाणित')}
+                              </td>
                             </tr>
                           );
                         })
@@ -1942,8 +1970,8 @@ export default function ReportsPage() {
                   </h3>
                   <p className="text-xs text-slate-500 mt-1">
                     {isMarathi
-                      ? `कार्यक्षेत्र: ${formatScopeText(activeScope, true)} | एकूण अभिलेख: ${parcels.length} (डाऊनलोड एक्सेल बुकलेट - शीट १ नमुना)`
-                      : `Scope: ${formatScopeText(activeScope, false)} | Total Records: ${parcels.length} (Downloaded Booklet Sheet 1 Format)`}
+                      ? `कार्यक्षेत्र: ${formatScopeText(activeScope, true)} | एकूण अभिलेख: ${serverRollup?.districtTotal?.total712Count ?? parcels.length} (डाऊनलोड एक्सेल बुकलेट - शीट १ नमुना)`
+                      : `Scope: ${formatScopeText(activeScope, false)} | Total Records: ${serverRollup?.districtTotal?.total712Count ?? parcels.length} (Downloaded Booklet Sheet 1 Format)`}
                   </p>
                 </div>
 

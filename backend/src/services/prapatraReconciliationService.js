@@ -256,57 +256,61 @@ export const reconcileAndSeedVillage = async ({
   const pendingForwardCases = [];
   const pendingBackwardHistories = [];
 
-  // 3. Batch Update MODIFIED parcels
-  for (const m of diffResult.modifiedRows) {
-    const incoming = parcels[m.rowNumber - 1];
-    if (!incoming) continue;
+  // 3. Batch Update MODIFIED parcels in parallel chunks
+  const MOD_CHUNK_SIZE = 25;
+  for (let c = 0; c < diffResult.modifiedRows.length; c += MOD_CHUNK_SIZE) {
+    const chunk = diffResult.modifiedRows.slice(c, c + MOD_CHUNK_SIZE);
+    await Promise.all(chunk.map(async (m) => {
+      const incoming = parcels[m.rowNumber - 1];
+      if (!incoming) return;
 
-    const hasDispute = Boolean(
-      incoming.flags?.isShartbhang ||
-      incoming.flags?.isEncroached ||
-      incoming.flags?.isTribal ||
-      incoming.flags?.isPokalist
-    );
+      const hasDispute = Boolean(
+        incoming.flags?.isShartbhang ||
+        incoming.flags?.isEncroached ||
+        incoming.flags?.isTribal ||
+        incoming.flags?.isPokalist
+      );
 
-    await prisma.landParcel.update({
-      where: { id: m.parcelId },
-      data: {
-        totalAreaHa: incoming.totalAreaHa,
-        tenureClass: incoming.tenureClass,
-        hasActiveDispute: hasDispute,
-        metadata: {
-          ownerName: incoming.ownerName,
-          otherRights: incoming.otherRights,
-          agriAreaHa: incoming.agriAreaHa || incoming.totalAreaHa,
-          naAreaSqM: incoming.naAreaSqM || 0,
-          subTypeCategory: incoming.subTypeCategory || null,
-          auditPoints: incoming.auditPoints || {},
-          flags: incoming.flags,
-          lastReconciledAt: new Date().toISOString()
+      await prisma.landParcel.update({
+        where: { id: m.parcelId },
+        data: {
+          totalAreaHa: incoming.totalAreaHa,
+          tenureClass: incoming.tenureClass,
+          hasActiveDispute: hasDispute,
+          metadata: {
+            ownerName: incoming.ownerName,
+            otherRights: incoming.otherRights,
+            agriAreaHa: incoming.agriAreaHa || incoming.totalAreaHa,
+            naAreaSqM: incoming.naAreaSqM || 0,
+            subTypeCategory: incoming.subTypeCategory || null,
+            auditPoints: incoming.auditPoints || {},
+            flags: incoming.flags,
+            lastReconciledAt: new Date().toISOString()
+          }
         }
-      }
-    });
-    updatedParcelsCount++;
-
-    if ((incoming.flags?.isShartbhang || incoming.flags?.isEncroached || incoming.flags?.isTribal || incoming.flags?.isPokalist) && !existingCaseParcelIds.has(m.parcelId)) {
-      const safeGatDash = String(m.gatNumber).replace(/[\/\\ ]/g, '-');
-      const vType = incoming.flags?.isEncroached ? 'ENCROACHMENT' :
-                    incoming.flags?.isTribal ? 'TRIBAL_LAND_VIOLATION' :
-                    incoming.flags?.isShartbhang ? 'SHARTBHANG' : 'POKALIST_NONDI';
-      pendingForwardCases.push({
-        parcelId: m.parcelId,
-        caseNumber: `${vType.slice(0, 3)}/${talukaPrefix}/${villageCode}/${safeGatDash}-${Date.now().toString().slice(-4)}${pendingForwardCases.length}`,
-        violationType: vType,
-        status: incoming.flags?.isTribal ? 'NOTICE_ISSUED' : 'FLAGGED_IN_AUDIT',
-        encroachedAreaHa: incoming.totalAreaHa,
-        occupantName: incoming.ownerName || 'नोंदविलेला खातेदार',
-        prapatraCategory: incoming.flags?.isTribal ? 'प्रपत्र ८ (आदिवासी जमीन)' :
-                          incoming.flags?.isEncroached ? 'प्रपत्र ५ (अतिक्रमण)' :
-                          incoming.flags?.isShartbhang ? 'प्रपत्र ६/७ (शर्तभंग)' : 'प्रपत्र ९ (पोकळीस्त नोंदी)',
-        investigatingOfficer: incoming.flags?.isTribal ? `उपविभागीय अधिकारी (SDO) ${targetTaluka}` : `तहसीलदार ${targetTaluka}`
       });
-      existingCaseParcelIds.add(m.parcelId);
-    }
+      updatedParcelsCount++;
+
+      if ((incoming.flags?.isShartbhang || incoming.flags?.isEncroached || incoming.flags?.isTribal || incoming.flags?.isPokalist) && !existingCaseParcelIds.has(m.parcelId)) {
+        const safeGatDash = String(m.gatNumber).replace(/[\/\\ ]/g, '-');
+        const vType = incoming.flags?.isEncroached ? 'ENCROACHMENT' :
+                      incoming.flags?.isTribal ? 'TRIBAL_LAND_VIOLATION' :
+                      incoming.flags?.isShartbhang ? 'SHARTBHANG' : 'POKALIST_NONDI';
+        pendingForwardCases.push({
+          parcelId: m.parcelId,
+          caseNumber: `${vType.slice(0, 3)}/${talukaPrefix}/${villageCode}/${safeGatDash}-${Date.now().toString().slice(-4)}${pendingForwardCases.length}`,
+          violationType: vType,
+          status: incoming.flags?.isTribal ? 'NOTICE_ISSUED' : 'FLAGGED_IN_AUDIT',
+          encroachedAreaHa: incoming.totalAreaHa,
+          occupantName: incoming.ownerName || 'नोंदविलेला खातेदार',
+          prapatraCategory: incoming.flags?.isTribal ? 'प्रपत्र ८ (आदिवासी जमीन)' :
+                            incoming.flags?.isEncroached ? 'प्रपत्र ५ (अतिक्रमण)' :
+                            incoming.flags?.isShartbhang ? 'प्रपत्र ६/७ (शर्तभंग)' : 'प्रपत्र ९ (पोकळीस्त नोंदी)',
+          investigatingOfficer: incoming.flags?.isTribal ? `उपविभागीय अधिकारी (SDO) ${targetTaluka}` : `तहसीलदार ${targetTaluka}`
+        });
+        existingCaseParcelIds.add(m.parcelId);
+      }
+    }));
   }
 
   // 3b. Backfill missing forward cases and backward histories for UNCHANGED parcels
