@@ -238,6 +238,24 @@ export const reconcileAndSeedVillage = async ({
   let casesCreatedCount = 0;
   let backwardCreatedCount = 0;
 
+  // Pre-fetch all existing case parcelIds and backward parcelIds for this village
+  const existingCaseParcelIds = new Set(
+    (await prisma.forwardEnforcementCase.findMany({
+      where: { parcel: { taluka: { equals: targetTaluka, mode: 'insensitive' }, villageName: { equals: finalVillage, mode: 'insensitive' } } },
+      select: { parcelId: true }
+    })).map(c => c.parcelId)
+  );
+
+  const existingBackwardParcelIds = new Set(
+    (await prisma.backwardHistory.findMany({
+      where: { parcel: { taluka: { equals: targetTaluka, mode: 'insensitive' }, villageName: { equals: finalVillage, mode: 'insensitive' } } },
+      select: { parcelId: true }
+    })).map(b => b.parcelId)
+  );
+
+  const pendingForwardCases = [];
+  const pendingBackwardHistories = [];
+
   // 3. Batch Update MODIFIED parcels
   for (const m of diffResult.modifiedRows) {
     const incoming = parcels[m.rowNumber - 1];
@@ -270,30 +288,99 @@ export const reconcileAndSeedVillage = async ({
     });
     updatedParcelsCount++;
 
-    // Check if new enforcement case should be generated for newly flagged violation
-    if (incoming.flags?.isShartbhang || incoming.flags?.isEncroached || incoming.flags?.isTribal || incoming.flags?.isPokalist) {
-      const existingCase = await prisma.forwardEnforcementCase.findFirst({
-        where: { parcelId: m.parcelId }
+    if ((incoming.flags?.isShartbhang || incoming.flags?.isEncroached || incoming.flags?.isTribal || incoming.flags?.isPokalist) && !existingCaseParcelIds.has(m.parcelId)) {
+      const safeGatDash = String(m.gatNumber).replace(/[\/\\ ]/g, '-');
+      const vType = incoming.flags?.isEncroached ? 'ENCROACHMENT' :
+                    incoming.flags?.isTribal ? 'TRIBAL_LAND_VIOLATION' :
+                    incoming.flags?.isShartbhang ? 'SHARTBHANG' : 'POKALIST_NONDI';
+      pendingForwardCases.push({
+        parcelId: m.parcelId,
+        caseNumber: `${vType.slice(0, 3)}/${talukaPrefix}/${villageCode}/${safeGatDash}-${Date.now().toString().slice(-4)}${pendingForwardCases.length}`,
+        violationType: vType,
+        status: incoming.flags?.isTribal ? 'NOTICE_ISSUED' : 'FLAGGED_IN_AUDIT',
+        encroachedAreaHa: incoming.totalAreaHa,
+        occupantName: incoming.ownerName || 'नोंदविलेला खातेदार',
+        prapatraCategory: incoming.flags?.isTribal ? 'प्रपत्र ८ (आदिवासी जमीन)' :
+                          incoming.flags?.isEncroached ? 'प्रपत्र ५ (अतिक्रमण)' :
+                          incoming.flags?.isShartbhang ? 'प्रपत्र ६/७ (शर्तभंग)' : 'प्रपत्र ९ (पोकळीस्त नोंदी)',
+        investigatingOfficer: incoming.flags?.isTribal ? `उपविभागीय अधिकारी (SDO) ${targetTaluka}` : `तहसीलदार ${targetTaluka}`
       });
-      if (!existingCase) {
-        const safeGatDash = String(m.gatNumber).replace(/[\/\\ ]/g, '-');
-        const vType = incoming.flags?.isEncroached ? 'ENCROACHMENT' :
-                      incoming.flags?.isTribal ? 'TRIBAL_LAND_VIOLATION' :
-                      incoming.flags?.isShartbhang ? 'SHARTBHANG' : 'POKALIST_NONDI';
-        await prisma.forwardEnforcementCase.create({
-          data: {
-            parcelId: m.parcelId,
-            caseNumber: `${vType.slice(0, 3)}/${talukaPrefix}/${villageCode}/${safeGatDash}`,
-            violationType: vType,
-            status: 'FLAGGED_IN_AUDIT',
-            encroachedAreaHa: incoming.totalAreaHa,
-            occupantName: incoming.ownerName || 'नोंदविलेला खातेदार',
-            prapatraCategory: 'प्रपत्र ५/९ तपासणी',
-            investigatingOfficer: `तहसीलदार ${targetTaluka}`
-          }
-        });
-        casesCreatedCount++;
-      }
+      existingCaseParcelIds.add(m.parcelId);
+    }
+  }
+
+  // 3b. Backfill missing forward cases and backward histories for UNCHANGED parcels
+  for (const u of diffResult.unchangedRows) {
+    const incoming = parcels[u.rowNumber - 1];
+    if (!incoming) continue;
+
+    if ((incoming.flags?.isShartbhang || incoming.flags?.isEncroached || incoming.flags?.isTribal || incoming.flags?.isPokalist) && !existingCaseParcelIds.has(u.parcelId)) {
+      const safeGatDash = String(u.gatNumber).replace(/[\/\\ ]/g, '-');
+      const vType = incoming.flags?.isEncroached ? 'ENCROACHMENT' :
+                    incoming.flags?.isTribal ? 'TRIBAL_LAND_VIOLATION' :
+                    incoming.flags?.isShartbhang ? 'SHARTBHANG' : 'POKALIST_NONDI';
+      pendingForwardCases.push({
+        parcelId: u.parcelId,
+        caseNumber: `${vType.slice(0, 3)}/${talukaPrefix}/${villageCode}/${safeGatDash}-${Date.now().toString().slice(-4)}${pendingForwardCases.length}`,
+        violationType: vType,
+        status: incoming.flags?.isTribal ? 'NOTICE_ISSUED' : 'FLAGGED_IN_AUDIT',
+        encroachedAreaHa: incoming.totalAreaHa,
+        occupantName: incoming.ownerName || 'नोंदविलेला खातेदार',
+        prapatraCategory: incoming.flags?.isTribal ? 'प्रपत्र ८ (आदिवासी जमीन)' :
+                          incoming.flags?.isEncroached ? 'प्रपत्र ५ (अतिक्रमण)' :
+                          incoming.flags?.isShartbhang ? 'प्रपत्र ६/७ (शर्तभंग)' : 'प्रपत्र ९ (पोकळीस्त नोंदी)',
+        investigatingOfficer: incoming.flags?.isTribal ? `उपविभागीय अधिकारी (SDO) ${targetTaluka}` : `तहसीलदार ${targetTaluka}`
+      });
+      existingCaseParcelIds.add(u.parcelId);
+    }
+
+    if (!existingBackwardParcelIds.has(u.parcelId)) {
+      const bk = incoming.backward || {};
+      const set1950 = bk.settlement1950 || {};
+      const b1950Owner = set1950.owner || (incoming.flags?.isGovt ? 'शासकीय जमीन (Sarkar)' : (incoming.ownerName || 'मूळ खातेदार'));
+      const b1950Tenure = mapTenureToEnum(set1950.tenure, incoming.flags?.isGovt ? 'SARKAR_SHASAN' : (incoming.tenureClass || 'BHOGVATDAR_CLASS_1'));
+      const b1950No = set1950.no || u.gatNumber || '1';
+
+      pendingBackwardHistories.push({
+        parcelId: u.parcelId,
+        epochYear: 1950,
+        recordDate: new Date('1950-06-15'),
+        ferfarNumber: `F-1950-${String(b1950No).slice(0, 30)}`,
+        ownerName: String(b1950Owner).slice(0, 240),
+        khataNumber: `K-${String(b1950No).slice(0, 30)}`,
+        areaHa: u.totalAreaHa,
+        tenureClass: b1950Tenure,
+        wasGovtLand: Boolean(incoming.flags?.isGovt || incoming.flags?.isIllegalDeletion || b1950Tenure === 'SARKAR_SHASAN'),
+        mutationType: incoming.flags?.isGovt ? 'शासन जमा नोंद' : 'मूळ बंदोबस्त नोंद',
+        remarks: 'स्वातंत्र्योत्तर बंदोबस्त अभिलेख नोंद (Baseline Record)'
+      });
+      existingBackwardParcelIds.add(u.parcelId);
+    }
+  }
+
+  // Insert any pending forward cases in batch
+  if (pendingForwardCases.length > 0) {
+    const CHUNK_SIZE = 500;
+    for (let c = 0; c < pendingForwardCases.length; c += CHUNK_SIZE) {
+      const chunk = pendingForwardCases.slice(c, c + CHUNK_SIZE);
+      const created = await prisma.forwardEnforcementCase.createMany({
+        data: chunk,
+        skipDuplicates: true
+      });
+      casesCreatedCount += created.count;
+    }
+  }
+
+  // Insert any pending backward histories in batch
+  if (pendingBackwardHistories.length > 0) {
+    const CHUNK_SIZE = 500;
+    for (let c = 0; c < pendingBackwardHistories.length; c += CHUNK_SIZE) {
+      const chunk = pendingBackwardHistories.slice(c, c + CHUNK_SIZE);
+      const created = await prisma.backwardHistory.createMany({
+        data: chunk,
+        skipDuplicates: true
+      });
+      backwardCreatedCount += created.count;
     }
   }
 
@@ -381,10 +468,10 @@ export const reconcileAndSeedVillage = async ({
           prapatraCategory: 'प्रपत्र ५ (अतिक्रमण)',
           investigatingOfficer: `तहसीलदार ${targetTaluka}`
         });
-      } else if (p.flags?.isTribal && (p.flags?.isShartbhang || p.flags?.isIllegalDeletion)) {
+      } else if (p.flags?.isTribal) {
         forwardCaseList.push({
           parcelId: dbP.id,
-          caseNumber: `TRB/${talukaPrefix}/${dbP.villageCode}/${safeGatDash}`,
+          caseNumber: `TRB/${talukaPrefix}/${dbP.villageCode}/${safeGatDash}-${Date.now().toString().slice(-4)}`,
           violationType: 'TRIBAL_LAND_VIOLATION',
           status: 'NOTICE_ISSUED',
           encroachedAreaHa: dbP.totalAreaHa,
@@ -436,6 +523,42 @@ export const reconcileAndSeedVillage = async ({
         mutationType: p.flags?.isGovt ? 'शासन जमा नोंद' : 'मूळ बंदोबस्त नोंद',
         remarks: 'स्वातंत्र्योत्तर बंदोबस्त अभिलेख नोंद (Baseline Record)'
       });
+
+      // 1972 Ekatrikaran Milestone
+      const set1972 = bk.ekatrikaran1972 || {};
+      if (set1972.owner || set1972.no) {
+        backwardHistoryList.push({
+          parcelId: dbP.id,
+          epochYear: 1972,
+          recordDate: new Date('1972-04-01'),
+          ferfarNumber: `F-EK-${String(set1972.no || dbP.gatNumber).slice(0, 30)}`,
+          ownerName: String(set1972.owner || b1950Owner).slice(0, 240),
+          khataNumber: `K-EK-${String(set1972.no || dbP.gatNumber).slice(0, 30)}`,
+          areaHa: dbP.totalAreaHa,
+          tenureClass: mapTenureToEnum(set1972.tenure, b1950Tenure),
+          wasGovtLand: Boolean(p.flags?.isGovt),
+          mutationType: 'एकत्रिकरण योजना नोंद',
+          remarks: 'जमीन एकत्रिकरण व पुनर्रचना नोंद (Consolidation Scheme)'
+        });
+      }
+
+      // 1995 Resurvey Milestone
+      const set1995 = bk.resurvey1995 || {};
+      if (set1995.owner || set1995.no) {
+        backwardHistoryList.push({
+          parcelId: dbP.id,
+          epochYear: 1995,
+          recordDate: new Date('1995-10-24'),
+          ferfarNumber: `F-RES-${String(set1995.no || dbP.gatNumber).slice(0, 30)}`,
+          ownerName: String(set1995.owner || p.ownerName).slice(0, 240),
+          khataNumber: `K-RES-${String(set1995.no || dbP.gatNumber).slice(0, 30)}`,
+          areaHa: dbP.totalAreaHa,
+          tenureClass: mapTenureToEnum(set1995.tenure, p.tenureClass),
+          wasGovtLand: Boolean(p.flags?.isGovt),
+          mutationType: 'पुनर्मोजणी अधिकार अभिलेख नोंद',
+          remarks: 'पुनर्मोजणी व संगणकीकृत ७/१२ पूर्व नोंद'
+        });
+      }
     }
 
     if (forwardCaseList.length > 0) {
@@ -479,7 +602,7 @@ export const reconcileAndSeedVillage = async ({
 
   const shartbhangCount = await prisma.forwardEnforcementCase.count({
     where: {
-      landParcel: {
+      parcel: {
         taluka: { equals: targetTaluka, mode: 'insensitive' },
         villageName: { equals: finalVillage, mode: 'insensitive' }
       },
@@ -489,7 +612,7 @@ export const reconcileAndSeedVillage = async ({
 
   const encroachedCount = await prisma.forwardEnforcementCase.count({
     where: {
-      landParcel: {
+      parcel: {
         taluka: { equals: targetTaluka, mode: 'insensitive' },
         villageName: { equals: finalVillage, mode: 'insensitive' }
       },

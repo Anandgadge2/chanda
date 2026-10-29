@@ -392,21 +392,23 @@ export async function parsePrapatraBuffer(input, talukaOverride = '', originalFn
     const col21PrivateAllot = auditPoints['point_22'] || '';
     const col22Encroach = auditPoints['point_15'] || '';
     const col23Mojani = auditPoints['point_16'] || '';
-    const col35Class2To1 = auditPoints['point_35'] || '';
-    const col36Shartbhang = auditPoints['point_36'] || '';
-    const col37Tribal1 = auditPoints['point_37'] || '';
-    const col38Tribal2 = auditPoints['point_38'] || '';
+    const col35Class2To1 = auditPoints['point_36'] || '';
+    const col36Shartbhang = auditPoints['point_37'] || '';
+    const col37Tribal1 = auditPoints['point_38'] || '';
+    const col38Tribal2 = auditPoints['point_39'] || '';
+    const colTribalOwner = auditPoints['point_27'] || '';
 
-    const isGovt = ['शासकीय', 'सरकार', 'महाराष्ट्र शासन', 'गायरान', 'पडीत'].some(k => col17Sarkar.includes(k) || ownerClean.includes(k));
+    const isGovt = ['शासकीय', 'सरकार', 'महाराष्ट्र शासन', 'गायरान', 'पडीत', 'गावठान'].some(k => col17Sarkar.includes(k) || ownerClean.includes(k));
     const isIllegalDel = ['होय', 'आहे', 'तफावत', 'कमी'].some(k => col18IllegalDel.includes(k));
     const isPokalist = ['होय', 'आहे', 'नोंद', 'बु.ग.दे'].some(k => col19Pokalist.includes(k));
-    const isEncroach = ['होय', 'आहे', 'अतिक्रमण'].some(k => col22Encroach.includes(k));
+    const isEncroach = ['होय', 'आहे', 'अतिक्रमण'].some(k => col22Encroach.includes(k) || rightsClean.includes('अतिक्रमण'));
     const isMojani = ['होय', 'आहे', 'झाली'].some(k => col23Mojani.includes(k));
-    const isShartbhang = ['होय', 'आहे', 'उल्लंघन', 'शर्तभंग'].some(k => col36Shartbhang.includes(k));
-    const isTribal = ['होय', 'आहे'].some(k => col37Tribal1.includes(k) || col38Tribal2.includes(k)) || rightsClean.includes('आदिवासी');
+    const isShartbhang = ['होय', 'आहे', 'उल्लंघन', 'शर्तभंग'].some(k => col36Shartbhang.includes(k) || rightsClean.includes('शर्तभंग'));
+    const isTribal = ['होय', 'आहे'].some(k => col37Tribal1.includes(k) || col38Tribal2.includes(k) || colTribalOwner.includes(k)) ||
+                     ['आदिवासी', 'आदीवासी', 'कलम ३६', 'कलम 36', '36A', '३६अ'].some(k => rightsClean.includes(k) || ownerClean.includes(k));
     const isCorpAllot = false;
     const isPrivateAllot = ['होय', 'आहे'].some(k => col21PrivateAllot.includes(k));
-    const isClass2To1 = ['होय', 'आहे', 'रूपांतर'].some(k => col35Class2To1.includes(k));
+    const isClass2To1 = ['होय', 'आहे', 'रूपांतर', 'रुपांतरीत'].some(k => col35Class2To1.includes(k));
 
     const tenureEnum = normalizeTenure(tenureRaw, rightsClean, bTenure, ownerClean);
 
