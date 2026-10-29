@@ -771,8 +771,8 @@ export default function ReportsPage() {
   // Robust programmatic download with feedback
   const handleDownload = async (type) => {
     if (activeTab === 'renumbering') {
-      if (type === 'excel') return renumberingExportHandlers?.exportExcel?.();
-      else return renumberingExportHandlers?.exportPdf?.();
+      if (type === 'excel') { setDownloadingExcel(true); try { await renumberingExportHandlers?.exportExcel?.(); } finally { setDownloadingExcel(false); } return; }
+      else { setDownloadingPdf(true); try { await renumberingExportHandlers?.exportPdf?.(); } finally { setDownloadingPdf(false); } return; }
     }
     if (activeTab === 'goshwara' || (activeTab === 'checklist' && activeView === 'summary')) {
       return exportCurrentGoshwara(type);
@@ -835,7 +835,7 @@ export default function ReportsPage() {
   const isFilterPending =
     draftTaluka !== appliedFilters.taluka ||
     draftVillage !== appliedFilters.village ||
-    (!isGoshwaraView && activeTab !== 'prapatra5' && (
+    (!isGoshwaraView && activeTab !== 'prapatra5' && activeTab !== 'renumbering' && (
       draftTenure !== appliedFilters.tenure ||
       draftViolation !== appliedFilters.violation ||
       draftSearch.trim() !== appliedFilters.search
@@ -846,7 +846,7 @@ export default function ReportsPage() {
     appliedFilters.village !== 'all' ||
     draftTaluka !== 'all' ||
     draftVillage !== 'all' ||
-    (!isGoshwaraView && activeTab !== 'prapatra5' && (
+    (!isGoshwaraView && activeTab !== 'prapatra5' && activeTab !== 'renumbering' && (
       appliedFilters.tenure !== 'all' ||
       appliedFilters.violation !== 'all' ||
       appliedFilters.search !== '' ||
@@ -870,7 +870,7 @@ export default function ReportsPage() {
     }
   };
 
-  const resetFilters = () => {
+  const handleResetFilters = () => {
     setDraftTaluka('all');
     setDraftVillage('all');
     setDraftTenure('all');
@@ -1693,7 +1693,7 @@ export default function ReportsPage() {
               {hasActiveFilters && (
                 <button
                   type="button"
-                  onClick={resetFilters}
+                  onClick={handleResetFilters}
                   className="text-xs text-rose-600 hover:text-rose-800 font-bold px-2 py-1.5 rounded-lg hover:bg-rose-50 transition cursor-pointer flex items-center gap-1"
                 >
                   <X className="w-3.5 h-3.5" />
