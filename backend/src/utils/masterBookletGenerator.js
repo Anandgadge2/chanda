@@ -875,19 +875,27 @@ export async function generateChecklistSummaryPdf(summaryData, scopeName, res) {
   ];
 
   summaryData.forEach((row, idx) => {
-    const isTotal = row.villageName === 'संपूर्ण तालुका (All Villages)' || row.villageName === 'एकूण' || row.isTotal;
+    const isDistrictTotal = row.villageName === 'संपूर्ण जिल्हा (१५ तालुके गोषवारा)' || row.villageName === 'Whole District Rollup';
+    const isTalukaTotal = row.villageName === 'संपूर्ण तालुका (All Villages)' || row.villageName === 'एकूण' || row.isTotal;
+    const isTotal = isDistrictTotal || isTalukaTotal;
     const totalCount = row.total712Count || row.totalGovtLandCount || 0;
-    const estArea = (totalCount * 1.65).toFixed(2);
-    const class1 = row.govtFound1950Count || Math.floor(totalCount * 0.4);
-    const class2 = row.pendingRectifyCount || Math.floor(totalCount * 0.6);
-    const illegal = row.illegalDeletionsCount || row.govtDeptsShartbhang || 0;
-    const shartbhang = row.privateShartbhang || 0;
+    const totalAreaVal = row.totalArea !== undefined ? row.totalArea : (row.totalAreaHa !== undefined ? Number(row.totalAreaHa).toFixed(2) : (totalCount * 1.65).toFixed(2));
+    const class1 = row.c1Count !== undefined ? row.c1Count : (row.govtFound1950Count || Math.floor(totalCount * 0.4));
+    const class2 = row.c2Count !== undefined ? row.c2Count : (row.pendingRectifyCount || Math.floor(totalCount * 0.6));
+    const illegal = row.convCount !== undefined ? row.convCount : (row.illegalDeletionsCount || row.govtDeptsShartbhang || 0);
+    const shartbhang = row.shartCount !== undefined ? row.shartCount : ((row.govtDeptsShartbhang || 0) + (row.privateShartbhang || 0));
+
+    const displayName = isDistrictTotal
+      ? 'चंद्रपूर जिल्हा (एकत्रित गोषवारा)'
+      : isTalukaTotal
+      ? (row.taluka ? `${row.taluka} (संपूर्ण तालुका)` : 'सर्व तालुके')
+      : cleanVillageName(row.villageName || row.taluka || '-');
 
     tableBody.push([
       { text: isTotal ? 'एकूण' : String(idx + 1), style: isTotal ? 'tdTotalCenter' : 'tdCenter' },
-      { text: cleanVillageName(row.villageName || row.taluka || '-'), style: isTotal ? 'tdTotal' : 'td' },
+      { text: displayName, style: isTotal ? 'tdTotal' : 'td' },
       { text: String(totalCount), style: isTotal ? 'tdTotalCenter' : 'tdCenter' },
-      { text: String(estArea), style: isTotal ? 'tdTotalRight' : 'tdRight' },
+      { text: String(totalAreaVal), style: isTotal ? 'tdTotalRight' : 'tdRight' },
       { text: String(class1), style: isTotal ? 'tdTotalCenter' : 'tdCenter' },
       { text: String(class2), style: isTotal ? 'tdTotalCenter' : 'tdCenter' },
       { text: String(illegal), style: illegal > 0 ? 'tdAlert' : (isTotal ? 'tdTotalCenter' : 'tdCenter') },
@@ -1030,19 +1038,27 @@ export async function generateChecklistSummaryExcel(summaryData, scopeName, res)
   });
 
   summaryData.forEach((row, idx) => {
-    const isTotal = row.villageName === 'संपूर्ण तालुका (All Villages)' || row.isTotal;
+    const isDistrictTotal = row.villageName === 'संपूर्ण जिल्हा (१५ तालुके गोषवारा)' || row.villageName === 'Whole District Rollup';
+    const isTalukaTotal = row.villageName === 'संपूर्ण तालुका (All Villages)' || row.villageName === 'एकूण' || row.isTotal;
+    const isTotal = isDistrictTotal || isTalukaTotal;
     const totalCount = row.total712Count || row.totalGovtLandCount || 0;
-    const estArea = Number((totalCount * 1.65).toFixed(2));
-    const class1 = row.govtFound1950Count || Math.floor(totalCount * 0.4);
-    const class2 = row.pendingRectifyCount || Math.floor(totalCount * 0.6);
-    const illegal = row.illegalDeletionsCount || row.govtDeptsShartbhang || 0;
-    const shartbhang = row.privateShartbhang || 0;
+    const totalAreaVal = row.totalArea !== undefined ? parseFloat(row.totalArea) : (row.totalAreaHa !== undefined ? parseFloat(row.totalAreaHa) : Number((totalCount * 1.65).toFixed(2)));
+    const class1 = row.c1Count !== undefined ? row.c1Count : (row.govtFound1950Count || Math.floor(totalCount * 0.4));
+    const class2 = row.c2Count !== undefined ? row.c2Count : (row.pendingRectifyCount || Math.floor(totalCount * 0.6));
+    const illegal = row.convCount !== undefined ? row.convCount : (row.illegalDeletionsCount || row.govtDeptsShartbhang || 0);
+    const shartbhang = row.shartCount !== undefined ? row.shartCount : ((row.govtDeptsShartbhang || 0) + (row.privateShartbhang || 0));
+
+    const displayName = isDistrictTotal
+      ? 'चंद्रपूर जिल्हा (एकत्रित गोषवारा)'
+      : isTalukaTotal
+      ? (row.taluka ? `${row.taluka} (संपूर्ण तालुका)` : 'सर्व तालुके')
+      : cleanVillageName(row.villageName || row.taluka || '-');
 
     const r = ws.addRow([
       isTotal ? 'एकूण' : (idx + 1),
-      cleanVillageName(row.villageName || row.taluka || '-'),
+      displayName,
       totalCount,
-      estArea,
+      totalAreaVal,
       class1,
       class2,
       illegal,

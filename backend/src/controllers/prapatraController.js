@@ -235,6 +235,282 @@ export async function recalculateVillageRollup(district = 'Chandrapur', taluka, 
 }
 
 /**
+ * High-performance dynamic aggregation for Goshwara Rollup (Sheet 2)
+ * Accurately aggregates across all 43,545+ database records with any active filters
+ */
+export async function calculateDynamicGoshwaraRollup(filters = {}) {
+  const {
+    taluka = 'all',
+    village = 'all',
+    search = '',
+    tenure = 'all',
+    violation = 'all',
+    areaRange = 'all',
+    prapatraNum = 0,
+    booklet = 'false'
+  } = filters;
+
+  const targetTaluka = TALUKA_ALIASES[taluka?.toLowerCase()] || taluka;
+  const isAllTalukas = !taluka || taluka === 'all' || taluka === 'सर्व तालुके' || taluka === 'सर्व तालुके (१५)';
+  const isAllVillages = !village || village === 'all' || village === 'सर्व गावे';
+
+  const whereClauses = [];
+  const params = [];
+
+  // 1. Taluka
+  if (!isAllTalukas) {
+    params.push(targetTaluka);
+    whereClauses.push(`taluka ILIKE $${params.length}`);
+  }
+
+  // 2. Village
+  if (!isAllVillages) {
+    const cleanV = cleanVillageName(village);
+    params.push(`%${cleanV}%`);
+    whereClauses.push(`village_name ILIKE $${params.length}`);
+  }
+
+  // 3. Tenure
+  if (tenure && tenure !== 'all') {
+    params.push(tenure);
+    whereClauses.push(`tenure_class::text = $${params.length}`);
+  }
+
+  // 4. Area Range
+  if (areaRange && areaRange !== 'all') {
+    if (areaRange === 'under1') {
+      whereClauses.push(`total_area_ha <= 1.0`);
+    } else if (areaRange === '1to5') {
+      whereClauses.push(`total_area_ha > 1.0 AND total_area_ha <= 5.0`);
+    } else if (areaRange === '5to10') {
+      whereClauses.push(`total_area_ha > 5.0 AND total_area_ha <= 10.0`);
+    } else if (areaRange === 'above10') {
+      whereClauses.push(`total_area_ha > 10.0`);
+    }
+  }
+
+  // 5. Search
+  if (search && search.trim()) {
+    const s = `%${search.trim()}%`;
+    params.push(s);
+    const pIdx = params.length;
+    whereClauses.push(`(
+      village_name ILIKE $${pIdx} OR 
+      gat_number ILIKE $${pIdx} OR 
+      old_survey_no ILIKE $${pIdx} OR 
+      upi ILIKE $${pIdx} OR 
+      metadata->>'ownerName' ILIKE $${pIdx} OR 
+      metadata->>'otherRights' ILIKE $${pIdx}
+    )`);
+  }
+
+  // 6. Violation
+  if (violation && violation !== 'all') {
+    if (violation === 'shartbhang') {
+      whereClauses.push(`(metadata->'flags'->>'isShartbhang' = 'true')`);
+    } else if (violation === 'illegalConversion') {
+      whereClauses.push(`(
+        (metadata->'flags'->>'isShartbhang' = 'true' AND tenure_class = 'BHOGVATDAR_CLASS_1') OR
+        metadata->>'otherRights' LIKE '%रूपांतर%'
+      )`);
+    } else if (violation === 'illegalDeletion') {
+      whereClauses.push(`(metadata->'flags'->>'isIllegalDeletion' = 'true')`);
+    } else if (violation === 'pokalist') {
+      whereClauses.push(`(metadata->'flags'->>'isPokalist' = 'true' OR metadata->>'otherRights' LIKE '%बु.ग.दे%')`);
+    } else if (violation === 'tribalViolation') {
+      whereClauses.push(`(metadata->'flags'->>'isTribal' = 'true' OR metadata->>'otherRights' LIKE '%आदिवासी%')`);
+    } else if (violation === 'encroachment') {
+      whereClauses.push(`(metadata->'flags'->>'isEncroached' = 'true')`);
+    }
+  }
+
+  // 7. Prapatra / Booklet specific conditions if prapatraNum > 0
+  if (prapatraNum > 0) {
+    if (booklet === 'true') {
+      if (prapatraNum === 1) {
+        whereClauses.push(`(tenure_class = 'SARKAR_SHASAN' OR metadata->'flags'->>'isGovt' = 'true' OR metadata->>'otherRights' LIKE '%गायरान%' OR metadata->>'otherRights' LIKE '%पहाड%')`);
+      } else if (prapatraNum === 2) {
+        whereClauses.push(`(metadata->>'otherRights' LIKE '%कुळ%' OR metadata->>'otherRights' LIKE '%शेतजमीन%')`);
+      } else if (prapatraNum === 3) {
+        whereClauses.push(`(tenure_class = 'DEVASTHAN_INAM' OR metadata->>'otherRights' LIKE '%इनाम%' OR metadata->>'otherRights' LIKE '%वतन%')`);
+      } else if (prapatraNum === 4) {
+        whereClauses.push(`(metadata->>'otherRights' LIKE '%भूमिहीन%' OR metadata->>'otherRights' LIKE '%शेतमजूर%' OR metadata->>'otherRights' LIKE '%स्वातंत्र्य%')`);
+      } else if (prapatraNum === 5) {
+        whereClauses.push(`(metadata->'flags'->>'isCorpAllot' = 'true' OR metadata->>'otherRights' LIKE '%संस्था%' OR metadata->>'otherRights' LIKE '%उद्योग%' OR metadata->>'otherRights' LIKE '%प्रकल्प%')`);
+      }
+    } else {
+      if (prapatraNum === 1) {
+        whereClauses.push(`(tenure_class = 'SARKAR_SHASAN' OR metadata->'flags'->>'isGovt' = 'true' OR metadata->'flags'->>'isIllegalDeletion' = 'true')`);
+      } else if (prapatraNum === 2) {
+        whereClauses.push(`(metadata->'flags'->>'isPokalist' = 'true' OR metadata->>'otherRights' LIKE '%बु.ग.दे%' OR metadata->>'otherRights' LIKE '%ता.ग.दे%')`);
+      } else if (prapatraNum === 3) {
+        whereClauses.push(`(metadata->'flags'->>'isCorpAllot' = 'true')`);
+      } else if (prapatraNum === 4) {
+        whereClauses.push(`(metadata->'flags'->>'isPrivateAllot' = 'true')`);
+      } else if (prapatraNum === 5) {
+        whereClauses.push(`(tenure_class = 'SARKAR_SHASAN' OR metadata->'flags'->>'isGovt' = 'true' OR metadata->'flags'->>'isEncroached' = 'true')`);
+      }
+    }
+  }
+
+  const whereSql = whereClauses.length > 0 ? `WHERE ${whereClauses.join(' AND ')}` : '';
+
+  const sql = `
+    SELECT 
+      taluka,
+      COALESCE(village_name, '') as "villageName",
+      COUNT(*)::int as "total712Count",
+      COALESCE(SUM(total_area_ha), 0)::float as "totalAreaHa",
+      COUNT(CASE WHEN tenure_class = 'BHOGVATDAR_CLASS_1' THEN 1 END)::int as "c1Count",
+      COALESCE(SUM(CASE WHEN tenure_class = 'BHOGVATDAR_CLASS_1' THEN total_area_ha ELSE 0 END), 0)::float as "c1Area",
+      COUNT(CASE WHEN tenure_class = 'BHOGVATDAR_CLASS_2' THEN 1 END)::int as "c2Count",
+      COALESCE(SUM(CASE WHEN tenure_class = 'BHOGVATDAR_CLASS_2' THEN total_area_ha ELSE 0 END), 0)::float as "c2Area",
+      COUNT(CASE WHEN (metadata->'flags'->>'isShartbhang' = 'true' AND tenure_class = 'BHOGVATDAR_CLASS_1') OR (metadata->>'otherRights' LIKE '%रूपांतर%') THEN 1 END)::int as "convCount",
+      COALESCE(SUM(CASE WHEN (metadata->'flags'->>'isShartbhang' = 'true' AND tenure_class = 'BHOGVATDAR_CLASS_1') OR (metadata->>'otherRights' LIKE '%रूपांतर%') THEN total_area_ha ELSE 0 END), 0)::float as "convArea",
+      COUNT(CASE WHEN metadata->>'otherRights' IS NULL OR metadata->>'otherRights' = '' OR metadata->>'otherRights' = '-' OR metadata->>'otherRights' = '....' THEN 1 END)::int as "noOtherCount",
+      COALESCE(SUM(CASE WHEN metadata->>'otherRights' IS NULL OR metadata->>'otherRights' = '' OR metadata->>'otherRights' = '-' OR metadata->>'otherRights' = '....' THEN total_area_ha ELSE 0 END), 0)::float as "noOtherArea",
+      COUNT(CASE WHEN metadata->'flags'->>'isShartbhang' = 'true' OR metadata->'flags'->>'isIllegalDeletion' = 'true' THEN 1 END)::int as "shartCount",
+      COALESCE(SUM(CASE WHEN metadata->'flags'->>'isShartbhang' = 'true' OR metadata->'flags'->>'isIllegalDeletion' = 'true' THEN total_area_ha ELSE 0 END), 0)::float as "shartArea"
+    FROM land_parcels
+    ${whereSql}
+    GROUP BY taluka, village_name
+    ORDER BY taluka, village_name
+  `;
+
+  let rows = [];
+  try {
+    rows = await prisma.$queryRawUnsafe(sql, ...params);
+  } catch (err) {
+    console.error('calculateDynamicGoshwaraRollup SQL error:', err);
+  }
+
+  // 1. byVillage
+  const byVillage = rows.map((r, idx) => ({
+    id: `v-${r.taluka}-${r.villageName || idx}`,
+    taluka: r.taluka,
+    villageName: cleanVillageName(r.villageName),
+    total712Count: r.total712Count,
+    totalAreaHa: r.totalAreaHa,
+    totalArea: r.totalAreaHa.toFixed(2),
+    c1Count: r.c1Count,
+    c1Area: r.c1Area.toFixed(2),
+    c2Count: r.c2Count,
+    c2Area: r.c2Area.toFixed(2),
+    convCount: r.convCount,
+    convArea: r.convArea.toFixed(2),
+    noOtherCount: r.noOtherCount,
+    noOtherArea: r.noOtherArea.toFixed(2),
+    shartCount: r.shartCount,
+    shartArea: r.shartArea.toFixed(2),
+    remarks: r.shartCount > 0 ? 'शर्तभंग / अनधिकृत हस्तांतरण' : 'तपासणी प्रमाणित'
+  })).sort((a, b) => a.villageName.localeCompare(b.villageName, 'mr'));
+
+  // 2. byTaluka
+  const talukaMap = new Map();
+  rows.forEach(r => {
+    if (!talukaMap.has(r.taluka)) {
+      talukaMap.set(r.taluka, {
+        id: `t-${r.taluka}`,
+        district: 'Chandrapur',
+        taluka: r.taluka,
+        villageName: 'संपूर्ण तालुका (All Villages)',
+        total712Count: 0,
+        totalAreaHa: 0,
+        c1Count: 0,
+        c1Area: 0,
+        c2Count: 0,
+        c2Area: 0,
+        convCount: 0,
+        convArea: 0,
+        noOtherCount: 0,
+        noOtherArea: 0,
+        shartCount: 0,
+        shartArea: 0,
+        remarks: `${r.taluka} तालुका एकत्रित`
+      });
+    }
+    const t = talukaMap.get(r.taluka);
+    t.total712Count += r.total712Count;
+    t.totalAreaHa += r.totalAreaHa;
+    t.c1Count += r.c1Count;
+    t.c1Area += r.c1Area;
+    t.c2Count += r.c2Count;
+    t.c2Area += r.c2Area;
+    t.convCount += r.convCount;
+    t.convArea += r.convArea;
+    t.noOtherCount += r.noOtherCount;
+    t.noOtherArea += r.noOtherArea;
+    t.shartCount += r.shartCount;
+    t.shartArea += r.shartArea;
+  });
+
+  const byTaluka = Array.from(talukaMap.values()).map(t => ({
+    ...t,
+    totalArea: t.totalAreaHa.toFixed(2),
+    c1Area: t.c1Area.toFixed(2),
+    c2Area: t.c2Area.toFixed(2),
+    convArea: t.convArea.toFixed(2),
+    noOtherArea: t.noOtherArea.toFixed(2),
+    shartArea: t.shartArea.toFixed(2)
+  })).sort((a, b) => a.taluka.localeCompare(b.taluka));
+
+  // 3. districtTotal
+  let distTotal = null;
+  if (byTaluka.length > 0) {
+    const rawDist = {
+      id: 'district-chandrapur-grand-total',
+      district: 'Chandrapur',
+      taluka: isAllTalukas ? 'चंद्रपूर जिल्हा' : `${targetTaluka} तालुका`,
+      villageName: isAllTalukas ? 'संपूर्ण जिल्हा (१५ तालुके गोषवारा)' : `${targetTaluka} तालुका एकत्रित गोषवारा`,
+      total712Count: 0,
+      totalAreaHa: 0,
+      c1Count: 0,
+      c1Area: 0,
+      c2Count: 0,
+      c2Area: 0,
+      convCount: 0,
+      convArea: 0,
+      noOtherCount: 0,
+      noOtherArea: 0,
+      shartCount: 0,
+      shartArea: 0,
+      remarks: isAllTalukas ? 'जिल्हास्तरीय एकत्रित गोषवारा' : `${targetTaluka} तालुकास्तरीय गोषवारा`
+    };
+
+    byTaluka.forEach(t => {
+      rawDist.total712Count += t.total712Count;
+      rawDist.totalAreaHa += t.totalAreaHa;
+      rawDist.c1Count += t.c1Count;
+      rawDist.c1Area += parseFloat(t.c1Area) || 0;
+      rawDist.c2Count += t.c2Count;
+      rawDist.c2Area += parseFloat(t.c2Area) || 0;
+      rawDist.convCount += t.convCount;
+      rawDist.convArea += parseFloat(t.convArea) || 0;
+      rawDist.noOtherCount += t.noOtherCount;
+      rawDist.noOtherArea += parseFloat(t.noOtherArea) || 0;
+      rawDist.shartCount += t.shartCount;
+      rawDist.shartArea += parseFloat(t.shartArea) || 0;
+    });
+
+    distTotal = {
+      ...rawDist,
+      totalArea: rawDist.totalAreaHa.toFixed(2),
+      c1Area: rawDist.c1Area.toFixed(2),
+      c2Area: rawDist.c2Area.toFixed(2),
+      convArea: rawDist.convArea.toFixed(2),
+      noOtherArea: rawDist.noOtherArea.toFixed(2),
+      shartArea: rawDist.shartArea.toFixed(2)
+    };
+  }
+
+  return {
+    districtTotal: distTotal,
+    byTaluka,
+    byVillage
+  };
+}
+
+/**
  * Controller to fetch data & stream Excel for Prapatra 1 to 5
  * Supports dynamic filtering by Taluka, Village, Search text, and Alert/Violation Type
  */
@@ -631,7 +907,7 @@ export const getPrapatraReport = async (req, res) => {
       }
     }
 
-    const maxParcels = (format === 'excel' || format === 'xlsx') ? 5000 : (format === 'pdf' ? 500 : 2000);
+    const maxParcels = (format === 'excel' || format === 'xlsx') ? 2500 : (format === 'pdf' ? 500 : 2000);
 
     let rawParcels = await prisma.landParcel.findMany({
       where: parcelWhere,
@@ -793,16 +1069,34 @@ export const getPrapatraReport = async (req, res) => {
       });
     }
 
+    // High-precision Rollup Calculation (Sheet 2 format) across all records with active filters
+    const dynamicRollupData = await calculateDynamicGoshwaraRollup({
+      taluka,
+      village,
+      search,
+      tenure,
+      violation,
+      areaRange,
+      prapatraNum,
+      booklet
+    });
+
+    const summaryExportRows = [
+      ...(dynamicRollupData.districtTotal ? [dynamicRollupData.districtTotal] : []),
+      ...dynamicRollupData.byTaluka,
+      ...dynamicRollupData.byVillage
+    ];
+
     // If Excel export requested
     if (format === 'excel' || format === 'xlsx') {
       const timestamp = new Date().toISOString().slice(0, 10);
-      const safeScope = targetTaluka.replace(/[^a-zA-Z0-9]/g, '_');
+      const safeScope = (targetTaluka || 'Chandrapur').replace(/[^a-zA-Z0-9]/g, '_');
       res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
 
       if (isChecklist) {
         if (view === 'summary') {
           res.setHeader('Content-Disposition', `attachment; filename=Checklist_Goshwara_Rollup_${safeScope}_${timestamp}.xlsx`);
-          return await generateChecklistSummaryExcel(records, scopeName, res);
+          return await generateChecklistSummaryExcel(summaryExportRows, scopeName, res);
         }
         res.setHeader('Content-Disposition', `attachment; filename=Checklist-46_Chandrapur_${safeScope}_${timestamp}.xlsx`);
         return await generateMasterChecklistExcel(formattedParcels, scopeName, res);
@@ -824,13 +1118,13 @@ export const getPrapatraReport = async (req, res) => {
     // If PDF export requested
     if (format === 'pdf') {
       const timestamp = new Date().toISOString().slice(0, 10);
-      const safeScope = targetTaluka.replace(/[^a-zA-Z0-9]/g, '_');
+      const safeScope = (targetTaluka || 'Chandrapur').replace(/[^a-zA-Z0-9]/g, '_');
       res.setHeader('Content-Type', 'application/pdf');
 
       if (isChecklist) {
         if (view === 'summary') {
           res.setHeader('Content-Disposition', `attachment; filename=Checklist_Goshwara_Rollup_${safeScope}_${timestamp}.pdf`);
-          return await generateChecklistSummaryPdf(records, scopeName, res);
+          return await generateChecklistSummaryPdf(summaryExportRows, scopeName, res);
         }
         if (view === 'parcels') {
           res.setHeader('Content-Disposition', `attachment; filename=Sankshipt_7-12_List_${safeScope}_${timestamp}.pdf`);
@@ -866,6 +1160,7 @@ export const getPrapatraReport = async (req, res) => {
       data: records,
       parcels: formattedParcels,
       totalParcelsCount: formattedParcels.length,
+      rollup: dynamicRollupData,
       checklistPoints: isChecklist ? CHECKLIST_46_POINTS : undefined
     });
   } catch (err) {
