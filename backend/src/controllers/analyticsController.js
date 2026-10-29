@@ -66,6 +66,23 @@ const fetchSummaryFromDatabase = async (taluka) => {
          AND fec.status NOT IN ('FINAL_ORDER_PASSED', 'RECTIFIED_7_12', 'DISMISSED')
          AND (${talukaParam}::text IS NULL OR LOWER(lp.taluka) = LOWER(${talukaParam}))) as "inProgressAreaHa",
 
+      -- Class 2 to Class 1 Conversions (Count)
+      (SELECT COUNT(DISTINCT lp.id)::int FROM land_parcels lp
+       JOIN backward_histories bh ON bh.parcel_id = lp.id
+       WHERE lp.tenure_class = 'BHOGVATDAR_CLASS_1'
+         AND bh.tenure_class = 'BHOGVATDAR_CLASS_2'
+         AND (${talukaParam}::text IS NULL OR LOWER(lp.taluka) = LOWER(${talukaParam}))) as "totalClass2To1Conversions",
+
+      -- Class 2 to Class 1 Converted Area (Ha)
+      (SELECT COALESCE(SUM(conv_sub.total_area_ha), 0)::float FROM (
+         SELECT DISTINCT lp.id, lp.total_area_ha
+         FROM land_parcels lp
+         JOIN backward_histories bh ON bh.parcel_id = lp.id
+         WHERE lp.tenure_class = 'BHOGVATDAR_CLASS_1'
+           AND bh.tenure_class = 'BHOGVATDAR_CLASS_2'
+           AND (${talukaParam}::text IS NULL OR LOWER(lp.taluka) = LOWER(${talukaParam}))
+       ) conv_sub) as "totalClass2To1AreaHa",
+
       -- Violations Grouped by Statutory Category
       (SELECT COALESCE(json_agg(json_build_object(
         'type', vt.violation_type,
@@ -286,6 +303,8 @@ const fetchSummaryFromDatabase = async (taluka) => {
     totalRepossessedCases: Number(row.totalRepossessedCases || 0),
     inProgressCases: Number(row.inProgressCases ?? (row.totalViolations - (row.totalRepossessedCases || 0))),
     inProgressAreaHa: Number(row.inProgressAreaHa || 0),
+    totalClass2To1Conversions: Number(row.totalClass2To1Conversions || 0),
+    totalClass2To1AreaHa: Number(row.totalClass2To1AreaHa || 0),
     violationsByType: row.violationsByType || [],
     tenureDistribution: row.tenureDistribution || [],
     talukaDistribution: row.talukaDistribution || [],

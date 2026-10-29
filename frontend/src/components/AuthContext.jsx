@@ -62,6 +62,9 @@ export function AuthProvider({ children }) {
   const login = async (email, password) => {
     const data = await api.login(email, password);
     if (data.success && data.token) {
+      try {
+        localStorage.setItem('chanda_sidebar_collapsed', 'true');
+      } catch {}
       setToken(data.token);
       setUser(data.user);
       setIsLoginModalOpen(false);

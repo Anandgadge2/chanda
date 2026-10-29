@@ -14,6 +14,7 @@ import {
   Filter,
   Layers,
   MapPin,
+  ArrowRightLeft,
 } from 'lucide-react';
 import MetricCard from '../../components/MetricCard';
 import LandTypeDonutChart from '../../components/charts/LandTypeDonutChart';
@@ -33,6 +34,8 @@ export default function DashboardPage() {
     totalParcels: 0,
     totalVillages: 0,
     totalViolations: 0,
+    totalClass2To1Conversions: 0,
+    totalClass2To1AreaHa: 0,
     pendingHearings: 0,
     totalRepossessedHa: 0,
     totalRepossessedCases: 0,
@@ -188,12 +191,12 @@ export default function DashboardPage() {
         />
 
         <MetricCard
-          titleMr="शासन जमा कार्यवाही (प्रक्रियेत)"
-          titleEn="Govt Vesting in Progress"
-          value={(analytics.inProgressCases ?? (analytics.totalViolations - (analytics.totalRepossessedCases || 0)) ?? 0).toLocaleString(isMarathi ? 'mr-IN' : 'en-IN')}
-          subtext={`${Number(analytics.totalRepossessedCases || 0).toLocaleString('mr-IN')} पूर्ण (${Number(analytics.totalRepossessedHa || 0).toFixed(2)} Ha शासन जमा)`}
-          subtextEn={`${Number(analytics.totalRepossessedCases || 0)} Completed (${Number(analytics.totalRepossessedHa || 0).toFixed(2)} Ha Vested)`}
-          icon={ShieldCheck}
+          titleMr="वर्ग २ ते वर्ग १ रूपांतर"
+          titleEn="Class 2 to Class 1 Conversion"
+          value={(analytics.totalClass2To1Conversions || 0).toLocaleString(isMarathi ? 'mr-IN' : 'en-IN')}
+          subtext={`${Number(analytics.totalClass2To1AreaHa || 0).toFixed(2)} Ha रूपांतरित`}
+          subtextEn={`${Number(analytics.totalClass2To1AreaHa || 0).toFixed(2)} Ha Converted`}
+          icon={ArrowRightLeft}
           badgeColor="bg-emerald-50 border-emerald-200"
           iconColor="text-emerald-600"
           textColor="text-emerald-600"

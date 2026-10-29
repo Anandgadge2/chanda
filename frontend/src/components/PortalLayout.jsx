@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { usePathname } from 'next/navigation';
 import Navbar from './Navbar';
 import Sidebar from './Sidebar';
@@ -17,18 +17,34 @@ export default function PortalLayout({ children }) {
   const pathname = usePathname();
   const { user, loading, isLoginModalOpen, closeLoginModal } = useAuth();
   const { t } = useTranslation();
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const prevUserRef = useRef(user);
 
-  // Restore saved sidebar collapsed state on client mount
+  // Restore saved sidebar collapsed state on client mount (defaults to collapsed)
   useEffect(() => {
     try {
       const saved = localStorage.getItem('chanda_sidebar_collapsed');
       if (saved !== null) {
         setSidebarCollapsed(saved === 'true');
+      } else {
+        setSidebarCollapsed(true);
       }
-    } catch {}
+    } catch {
+      setSidebarCollapsed(true);
+    }
   }, []);
+
+  // On login: always reset sidebar to collapsed initially
+  useEffect(() => {
+    if (!prevUserRef.current && user) {
+      setSidebarCollapsed(true);
+      try {
+        localStorage.setItem('chanda_sidebar_collapsed', 'true');
+      } catch {}
+    }
+    prevUserRef.current = user;
+  }, [user]);
 
   const handleToggleSidebar = () => {
     setSidebarCollapsed((prev) => {

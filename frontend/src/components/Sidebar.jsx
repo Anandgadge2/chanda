@@ -36,18 +36,18 @@ export const navItems = [
     labelEn: 'Land Parcel Register',
     icon: MapPin,
   },
-  {
-    href: '/cases',
-    labelMr: 'शर्तभंग व सुनावणी प्रकरणे',
-    labelEn: 'Breach & Judicial Cases',
-    icon: Scale,
-  },
-  {
-    href: '/documents',
-    labelMr: 'जिल्हा अभिलेखागार',
-    labelEn: 'District Archives',
-    icon: FolderArchive,
-  },
+  // {
+  //   href: '/cases',
+  //   labelMr: 'शर्तभंग व सुनावणी प्रकरणे',
+  //   labelEn: 'Breach & Judicial Cases',
+  //   icon: Scale,
+  // },
+  // {
+  //   href: '/documents',
+  //   labelMr: 'जिल्हा अभिलेखागार',
+  //   labelEn: 'District Archives',
+  //   icon: FolderArchive,
+  // },
   {
     href: '/bulk-upload',
     labelMr: 'गाव एक्सेल अपलोड',
@@ -60,12 +60,12 @@ export const navItems = [
     labelEn: 'Reports & Prapatra',
     icon: FileSpreadsheet,
   },
-  {
-    href: '/glossary',
-    labelMr: 'महसूल शब्दावली व संक्षेप',
-    labelEn: 'Revenue Glossary & Terms',
-    icon: BookOpen,
-  },
+  // {
+  //   href: '/glossary',
+  //   labelMr: 'महसूल शब्दावली व संक्षेप',
+  //   labelEn: 'Revenue Glossary & Terms',
+  //   icon: BookOpen,
+  // },
   {
     href: '/settings',
     labelMr: 'खाते व सुरक्षा सेटिंग्ज',
@@ -98,11 +98,15 @@ export default function Sidebar({
 
   // Mobile quick nav items (Top 4 essentials + Menu button)
   const mobileQuickItems = [
-    navItems[0], // Dashboard
-    navItems[1], // Parcels
-    navItems[2], // Cases
-    navItems[5], // Reports
-  ];
+    '/dashboard',
+    '/parcels',
+    '/cases',
+    '/bulk-upload',
+    '/reports',
+  ]
+    .map((href) => navItems.find((n) => n.href === href))
+    .filter(Boolean)
+    .slice(0, 4);
 
   return (
     <>
@@ -261,7 +265,8 @@ export default function Sidebar({
         aria-label={isMarathi ? 'मोबाईल जलद नेव्हिगेशन' : 'Mobile Quick Navigation'}
         className="lg:hidden fixed bottom-3 inset-x-3 max-w-[340px] mx-auto z-40 bg-white/95 backdrop-blur-md border border-slate-200/90 rounded-full shadow-xl shadow-slate-900/10 px-3 py-1.5 flex items-center justify-between"
       >
-        {mobileQuickItems.map((item) => {
+        {mobileQuickItems.filter(Boolean).map((item) => {
+          if (!item || !item.icon) return null;
           const Icon = item.icon;
           const isActive = pathname === item.href;
           const label = isMarathi ? item.labelMr : item.labelEn;
