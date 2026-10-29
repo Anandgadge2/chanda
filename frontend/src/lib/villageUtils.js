@@ -103,7 +103,7 @@ const DEVA_DICT = {
   'गोविंदपूर': 'Govindpur',
 };
 
-const TALUKA_MR_TO_EN = {
+export const TALUKA_MR_TO_EN = {
   'वरोरा': 'Warora',
   'राजुरा': 'Rajura',
   'चंद्रपूर': 'Chandrapur',
@@ -121,7 +121,7 @@ const TALUKA_MR_TO_EN = {
   'जिवती': 'Jivati',
 };
 
-const TALUKA_EN_TO_MR = {
+export const TALUKA_EN_TO_MR = {
   'Warora': 'वरोरा',
   'Rajura': 'राजुरा',
   'Chandrapur': 'चंद्रपूर',
@@ -138,6 +138,49 @@ const TALUKA_EN_TO_MR = {
   'Saoli': 'सावली',
   'Jivati': 'जिवती',
 };
+
+/**
+ * Format Taluka Name to Marathi or English
+ */
+export function formatTalukaName(name, isMarathi = true) {
+  if (!name) return '';
+  const clean = String(name).trim();
+  if (isMarathi) {
+    if (TALUKA_MR_TO_EN[clean]) return clean;
+    const found = TALUKA_EN_TO_MR[clean] ||
+      Object.entries(TALUKA_EN_TO_MR).find(([en]) => en.toLowerCase() === clean.toLowerCase())?.[1];
+    return found || clean;
+  }
+  if (TALUKA_EN_TO_MR[clean]) return clean;
+  return TALUKA_MR_TO_EN[clean] || clean;
+}
+
+/**
+ * Format and transliterate/translate remark strings for Goshwara and Checklist tables
+ */
+export function formatRemarks(remark, isMarathi = true) {
+  if (!remark || remark === '-') return '-';
+  let str = String(remark).trim();
+  if (isMarathi) {
+    for (const [en, mr] of Object.entries(TALUKA_EN_TO_MR)) {
+      str = str.replace(new RegExp(`\\b${en}\\b`, 'gi'), mr);
+    }
+    str = str.replace(/Taluka Total/gi, 'तालुका एकत्रित');
+    str = str.replace(/Taluka Consolidated/gi, 'तालुका एकत्रित');
+    str = str.replace(/District Consolidated Rollup/gi, 'जिल्हास्तरीय एकत्रित गोषवारा');
+    str = str.replace(/Whole Taluka/gi, 'संपूर्ण तालुका');
+    str = str.replace(/All Villages/gi, 'सर्व गावे');
+  } else {
+    for (const [mr, en] of Object.entries(TALUKA_MR_TO_EN)) {
+      str = str.replace(new RegExp(mr, 'g'), en);
+    }
+    str = str.replace(/तालुका एकत्रित/gi, 'Taluka Total');
+    str = str.replace(/जिल्हास्तरीय एकत्रित गोषवारा/gi, 'District Consolidated Rollup');
+    str = str.replace(/संपूर्ण तालुका/gi, 'Whole Taluka');
+    str = str.replace(/सर्व गावे/gi, 'All Villages');
+  }
+  return str;
+}
 
 const VOWELS = {
   'अ': 'a', 'आ': 'a', 'इ': 'i', 'ई': 'i', 'उ': 'u', 'ऊ': 'u',

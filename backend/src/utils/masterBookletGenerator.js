@@ -37,6 +37,30 @@ const thinBorder = {
   right: { style: 'thin', color: { argb: BORDER_COLOR } }
 };
 
+const TALUKA_EN_TO_MR = {
+  'Warora': 'वरोरा',
+  'Rajura': 'राजुरा',
+  'Chandrapur': 'चंद्रपूर',
+  'Mul': 'मूल',
+  'Chimur': 'चिमूर',
+  'Ballarpur': 'बल्लारपूर',
+  'Bhadravati': 'भद्रावती',
+  'Sindewahi': 'सिंदेवाही',
+  'Brahmapuri': 'ब्रह्मपुरी',
+  'Nagbhid': 'नागभीड',
+  'Gondpipri': 'गोंडपिपरी',
+  'Korpana': 'कोरपना',
+  'Pombhurna': 'पोंभुर्णा',
+  'Saoli': 'सावली',
+  'Jivati': 'जिवती',
+};
+
+const formatTalukaMr = (name) => {
+  if (!name) return '';
+  const clean = String(name).trim();
+  return TALUKA_EN_TO_MR[clean] || clean;
+};
+
 // 17 Official Statutory Categories
 export const BOOKLET_CATEGORIES = [
   {
@@ -888,7 +912,7 @@ export async function generateChecklistSummaryPdf(summaryData, scopeName, res) {
     const displayName = isDistrictTotal
       ? 'चंद्रपूर जिल्हा (एकत्रित गोषवारा)'
       : isTalukaTotal
-      ? (row.taluka ? `${row.taluka} (संपूर्ण तालुका)` : 'सर्व तालुके')
+      ? (row.taluka ? `${formatTalukaMr(row.taluka)} (संपूर्ण तालुका)` : 'सर्व तालुके')
       : cleanVillageName(row.villageName || row.taluka || '-');
 
     tableBody.push([
@@ -1051,7 +1075,7 @@ export async function generateChecklistSummaryExcel(summaryData, scopeName, res)
     const displayName = isDistrictTotal
       ? 'चंद्रपूर जिल्हा (एकत्रित गोषवारा)'
       : isTalukaTotal
-      ? (row.taluka ? `${row.taluka} (संपूर्ण तालुका)` : 'सर्व तालुके')
+      ? (row.taluka ? `${formatTalukaMr(row.taluka)} (संपूर्ण तालुका)` : 'सर्व तालुके')
       : cleanVillageName(row.villageName || row.taluka || '-');
 
     const r = ws.addRow([
@@ -1383,7 +1407,7 @@ export async function generateCategoryBookletExcel(catId, summaryData, parcels, 
       const dataRows = rows.length > 0 ? rows : summaryData;
       dataRows.forEach((row, idx) => {
         const isTot = row.villageName === 'संपूर्ण तालुका (All Villages)';
-        const nameVal = isTot ? `${row.taluka} (संपूर्ण तालुका)` : cleanVillageName(row.villageName || row.taluka || 'गाव');
+        const nameVal = isTot ? `${formatTalukaMr(row.taluka)} (संपूर्ण तालुका)` : cleanVillageName(row.villageName || row.taluka || 'गाव');
         const count712 = row.total712Count || row.totalGovtLandCount || 0;
         const areaHa = Number(row.totalAreaHa || (count712 * 1.65));
         const c1 = row.govtFound1950Count || Math.floor(count712 * 0.4);
@@ -1487,7 +1511,7 @@ export async function generateCategoryBookletPdf(catId, summaryData, parcels, sc
 
   summaryData.slice(0, 35).forEach((r, idx) => {
     const isTot = r.villageName === 'संपूर्ण तालुका (All Villages)';
-    const nameVal = isTot ? `${r.taluka} (संपूर्ण तालुका)` : cleanVillageName(r.villageName || r.taluka || 'गाव');
+    const nameVal = isTot ? `${formatTalukaMr(r.taluka)} (संपूर्ण तालुका)` : cleanVillageName(r.villageName || r.taluka || 'गाव');
     const cnt = r.total712Count || 0;
     const c1 = r.govtFound1950Count || Math.floor(cnt * 0.4);
     const c2 = r.pendingRectifyCount || Math.floor(cnt * 0.6);

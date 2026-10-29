@@ -4,6 +4,31 @@ import { fileURLToPath } from 'url';
 import { getRowData, getTitle2, getFormNumber } from './bookletExcelGenerator.js';
 import { cleanVillageName } from './prapatraGenerator.js';
 
+const TALUKA_EN_TO_MR = {
+  'Warora': 'वरोरा',
+  'Rajura': 'राजुरा',
+  'Chandrapur': 'चंद्रपूर',
+  'Mul': 'मूल',
+  'Chimur': 'चिमूर',
+  'Ballarpur': 'बल्लारपूर',
+  'Bhadravati': 'भद्रावती',
+  'Sindewahi': 'सिंदेवाही',
+  'Brahmapuri': 'ब्रह्मपुरी',
+  'Nagbhid': 'नागभीड',
+  'Gondpipri': 'गोंडपिपरी',
+  'Korpana': 'कोरपना',
+  'Pombhurna': 'पोंभुर्णा',
+  'Saoli': 'सावली',
+  'Jivati': 'जिवती',
+};
+
+const formatTalukaRowName = (r) => {
+  if (r.villageName && r.villageName !== 'संपूर्ण तालुका (All Villages)') {
+    return cleanVillageName(r.villageName);
+  }
+  return r.taluka ? `${TALUKA_EN_TO_MR[r.taluka] || r.taluka} (संपूर्ण तालुका)` : 'एकूण';
+};
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -169,7 +194,7 @@ export const generatePrapatraPdf = async (prapatraNum, summaryRecords = [], parc
     summaryWidths = [24, 180, 75, 75, 75, 75, 65, 65, 90];
     summaryRowsMapper = (r, i) => [
       i + 1,
-      r.villageName && r.villageName !== 'संपूर्ण तालुका (All Villages)' ? cleanVillageName(r.villageName) : (r.taluka || 'एकूण'),
+      formatTalukaRowName(r),
       r.total712Count || 0,
       r.inspected1950Count || 0,
       r.govtFound1950Count || 0,
@@ -187,7 +212,7 @@ export const generatePrapatraPdf = async (prapatraNum, summaryRecords = [], parc
     summaryWidths = [30, 240, 95, 95, 95, 95, 100];
     summaryRowsMapper = (r, i) => [
       i + 1,
-      r.villageName && r.villageName !== 'संपूर्ण तालुका (All Villages)' ? cleanVillageName(r.villageName) : (r.taluka || 'एकूण'),
+      formatTalukaRowName(r),
       r.total712Count || 0,
       r.pokalistCount || 0,
       r.pokalistRemovedCount || 0,
@@ -203,7 +228,7 @@ export const generatePrapatraPdf = async (prapatraNum, summaryRecords = [], parc
     summaryWidths = [30, 240, 95, 95, 95, 95, 100];
     summaryRowsMapper = (r, i) => [
       i + 1,
-      r.villageName && r.villageName !== 'संपूर्ण तालुका (All Villages)' ? cleanVillageName(r.villageName) : (r.taluka || 'एकूण'),
+      formatTalukaRowName(r),
       r.govtDeptsAllottedCount || 0,
       r.govtDeptsShartbhang || 0,
       r.govtDeptsRestoredGovt || 0,
@@ -219,7 +244,7 @@ export const generatePrapatraPdf = async (prapatraNum, summaryRecords = [], parc
     summaryWidths = [30, 240, 95, 95, 95, 95, 100];
     summaryRowsMapper = (r, i) => [
       i + 1,
-      r.villageName && r.villageName !== 'संपूर्ण तालुका (All Villages)' ? cleanVillageName(r.villageName) : (r.taluka || 'एकूण'),
+      formatTalukaRowName(r),
       r.privateAllottedCount || 0,
       r.privateShartbhang || 0,
       r.privateRestoredGovt || 0,
@@ -235,7 +260,7 @@ export const generatePrapatraPdf = async (prapatraNum, summaryRecords = [], parc
     summaryWidths = [30, 240, 95, 95, 95, 95, 100];
     summaryRowsMapper = (r, i) => [
       i + 1,
-      r.villageName && r.villageName !== 'संपूर्ण तालुका (All Villages)' ? cleanVillageName(r.villageName) : (r.taluka || 'एकूण'),
+      formatTalukaRowName(r),
       r.totalGovtLandCount || 0,
       r.govtEncroachedCount || 0,
       r.govtMojaniDoneCount || 0,

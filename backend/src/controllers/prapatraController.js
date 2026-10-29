@@ -53,6 +53,24 @@ const TALUKA_ALIASES = {
   jivati: 'Jivati'
 };
 
+export const TALUKA_EN_TO_MR = {
+  'Warora': 'वरोरा',
+  'Rajura': 'राजुरा',
+  'Chandrapur': 'चंद्रपूर',
+  'Mul': 'मूल',
+  'Chimur': 'चिमूर',
+  'Ballarpur': 'बल्लारपूर',
+  'Bhadravati': 'भद्रावती',
+  'Sindewahi': 'सिंदेवाही',
+  'Brahmapuri': 'ब्रह्मपुरी',
+  'Nagbhid': 'नागभीड',
+  'Gondpipri': 'गोंडपिपरी',
+  'Korpana': 'कोरपना',
+  'Pombhurna': 'पोंभुर्णा',
+  'Saoli': 'सावली',
+  'Jivati': 'जिवती',
+};
+
 const NUMERIC_ROLLUP_FIELDS = [
   'total712Count', 'inspected1950Count', 'govtFound1950Count',
   'illegalDeletionsCount', 'rectifiedCount', 'pendingRectifyCount',
@@ -450,7 +468,7 @@ export async function calculateDynamicGoshwaraRollup(filters = {}) {
         noOtherArea: 0,
         shartCount: 0,
         shartArea: 0,
-        remarks: `${r.taluka} तालुका एकत्रित`
+        remarks: `${TALUKA_EN_TO_MR[r.taluka] || r.taluka} तालुका एकत्रित`
       });
     }
     const t = talukaMap.get(r.taluka);
@@ -484,8 +502,8 @@ export async function calculateDynamicGoshwaraRollup(filters = {}) {
     const rawDist = {
       id: 'district-chandrapur-grand-total',
       district: 'Chandrapur',
-      taluka: isAllTalukas ? 'चंद्रपूर जिल्हा' : `${targetTaluka} तालुका`,
-      villageName: isAllTalukas ? 'संपूर्ण जिल्हा (१५ तालुके गोषवारा)' : `${targetTaluka} तालुका एकत्रित गोषवारा`,
+      taluka: isAllTalukas ? 'चंद्रपूर जिल्हा' : `${TALUKA_EN_TO_MR[targetTaluka] || targetTaluka} तालुका`,
+      villageName: isAllTalukas ? 'संपूर्ण जिल्हा (१५ तालुके गोषवारा)' : `${TALUKA_EN_TO_MR[targetTaluka] || targetTaluka} तालुका एकत्रित गोषवारा`,
       total712Count: 0,
       totalAreaHa: 0,
       c1Count: 0,
@@ -498,7 +516,7 @@ export async function calculateDynamicGoshwaraRollup(filters = {}) {
       noOtherArea: 0,
       shartCount: 0,
       shartArea: 0,
-      remarks: isAllTalukas ? 'जिल्हास्तरीय एकत्रित गोषवारा' : `${targetTaluka} तालुकास्तरीय गोषवारा`
+      remarks: isAllTalukas ? 'जिल्हास्तरीय एकत्रित गोषवारा' : `${TALUKA_EN_TO_MR[targetTaluka] || targetTaluka} तालुकास्तरीय गोषवारा`
     };
 
     byTaluka.forEach(t => {
@@ -529,8 +547,8 @@ export async function calculateDynamicGoshwaraRollup(filters = {}) {
     distTotal = {
       id: 'district-chandrapur-grand-total',
       district: 'Chandrapur',
-      taluka: isAllTalukas ? 'चंद्रपूर जिल्हा' : `${targetTaluka} तालुका`,
-      villageName: isAllTalukas ? 'संपूर्ण जिल्हा (१५ तालुके गोषवारा)' : `${targetTaluka} तालुका एकत्रित गोषवारा`,
+      taluka: isAllTalukas ? 'चंद्रपूर जिल्हा' : `${TALUKA_EN_TO_MR[targetTaluka] || targetTaluka} तालुका`,
+      villageName: isAllTalukas ? 'संपूर्ण जिल्हा (१५ तालुके गोषवारा)' : `${TALUKA_EN_TO_MR[targetTaluka] || targetTaluka} तालुका एकत्रित गोषवारा`,
       total712Count: 0,
       totalAreaHa: 0,
       totalArea: '0.00',
@@ -715,11 +733,15 @@ export const getPrapatraReport = async (req, res) => {
       const s = search.trim();
       const searchConditions = [
         { villageName: { contains: s, mode: 'insensitive' } },
+        { taluka: { contains: s, mode: 'insensitive' } },
         { gatNumber: { contains: s, mode: 'insensitive' } },
         { oldSurveyNo: { contains: s, mode: 'insensitive' } },
         { upi: { contains: s, mode: 'insensitive' } },
         { metadata: { path: ['ownerName'], string_contains: s } },
-        { metadata: { path: ['otherRights'], string_contains: s } }
+        { metadata: { path: ['otherRights'], string_contains: s } },
+        { backwardHistories: { some: { ownerName: { contains: s, mode: 'insensitive' } } } },
+        { forwardCases: { some: { occupantName: { contains: s, mode: 'insensitive' } } } },
+        { forwardCases: { some: { caseNumber: { contains: s, mode: 'insensitive' } } } }
       ];
       if (parcelWhere.OR) {
         parcelWhere.AND = [{ OR: parcelWhere.OR }, { OR: searchConditions }];

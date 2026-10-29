@@ -38,11 +38,30 @@ export function cleanVillageName(name) {
   return raw || name || 'अज्ञात गाव';
 }
 
+const TALUKA_EN_TO_MR = {
+  'Warora': 'वरोरा',
+  'Rajura': 'राजुरा',
+  'Chandrapur': 'चंद्रपूर',
+  'Mul': 'मूल',
+  'Chimur': 'चिमूर',
+  'Ballarpur': 'बल्लारपूर',
+  'Bhadravati': 'भद्रावती',
+  'Sindewahi': 'सिंदेवाही',
+  'Brahmapuri': 'ब्रह्मपुरी',
+  'Nagbhid': 'नागभीड',
+  'Gondpipri': 'गोंडपिपरी',
+  'Korpana': 'कोरपना',
+  'Pombhurna': 'पोंभुर्णा',
+  'Saoli': 'सावली',
+  'Jivati': 'जिवती',
+};
+
 const getRowDisplayName = (row) => {
   if (row.villageName && row.villageName !== 'संपूर्ण तालुका (All Villages)') {
     return cleanVillageName(row.villageName);
   }
-  return row.name || row.taluka || cleanVillageName(row.villageName) || 'एकूण';
+  const tMr = row.taluka ? (TALUKA_EN_TO_MR[row.taluka] || row.taluka) : null;
+  return row.name || (tMr ? `${tMr} (संपूर्ण तालुका)` : null) || cleanVillageName(row.villageName) || 'एकूण';
 };
 
 /**

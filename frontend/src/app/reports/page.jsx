@@ -39,7 +39,7 @@ import EditParcelModal from '../../components/EditParcelModal';
 import Pagination from '../../components/Pagination';
 import SearchableSelect from '../../components/SearchableSelect';
 import { useTranslation } from '../../components/LanguageContext';
-import { cleanVillageName, formatVillageName, formatScopeText } from '../../lib/villageUtils';
+import { cleanVillageName, formatVillageName, formatScopeText, formatTalukaName, formatRemarks } from '../../lib/villageUtils';
 
 // 17 Official Statutory Booklet Categories
 const STATUTORY_CATEGORIES = [
@@ -133,25 +133,31 @@ export default function ReportsPage() {
   const [selectedCatId, setSelectedCatId] = useState(1);
   const [selectedPrapatraId, setSelectedPrapatraId] = useState(1);
 
-  // Administrative Filters
-  const [taluka, setTaluka] = useState('all');
-  const [village, setVillage] = useState('all');
+  // DRAFT FILTERS (Controlled by input selectors in UI)
+  const [draftTaluka, setDraftTaluka] = useState('all');
+  const [draftVillage, setDraftVillage] = useState('all');
+  const [draftTenure, setDraftTenure] = useState('all');
+  const [draftViolation, setDraftViolation] = useState('all');
+  const [draftSearch, setDraftSearch] = useState('');
+
+  // APPLIED FILTERS (Active query & export parameters)
+  const [appliedFilters, setAppliedFilters] = useState({
+    taluka: 'all',
+    village: 'all',
+    tenure: 'all',
+    violation: 'all',
+    search: '',
+  });
+
   const [villageOptions, setVillageOptions] = useState([]);
-  const [search, setSearch] = useState('');
-  const [debouncedSearch, setDebouncedSearch] = useState('');
 
-  // Debounce search input (300ms) to prevent high-frequency requests & race conditions
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedSearch(search);
-    }, 300);
-    return () => clearTimeout(handler);
-  }, [search]);
-
-  // Additional Detailed Filters
-  const [tenureFilter, setTenureFilter] = useState('all');
-  const [violationFilter, setViolationFilter] = useState('all');
-  const [areaRangeFilter, setAreaRangeFilter] = useState('all');
+  // Aliases for seamless backward compatibility across table, cards, and child views
+  const taluka = appliedFilters.taluka;
+  const village = appliedFilters.village;
+  const tenureFilter = appliedFilters.tenure;
+  const violationFilter = appliedFilters.violation;
+  const search = appliedFilters.search;
+  const debouncedSearch = appliedFilters.search;
 
   // View state:
   // For 'checklist': 'timeline', 'parcels', 'summary'
@@ -201,20 +207,20 @@ export default function ReportsPage() {
     }
   }, [inspectedParcel]);
 
-  // Dynamically load villages for selected taluka
+  // Dynamically load villages for draft taluka
   useEffect(() => {
     async function loadVillages() {
       try {
-        const res = await api.getTalukaVillages(taluka);
+        const res = await api.getTalukaVillages(draftTaluka);
         setVillageOptions(res.villages || []);
       } catch (err) {
         console.error('Failed to load villages list:', err);
       }
     }
     loadVillages();
-  }, [taluka]);
+  }, [draftTaluka]);
 
-  // Load report data
+  // Load report data (triggers ONLY when appliedFilters change or tabs change)
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
@@ -224,12 +230,11 @@ export default function ReportsPage() {
       const isBooklet = activeTab === 'categories';
 
       const res = await api.getPrapatraReport(reportId, {
-        taluka,
-        village,
-        search: debouncedSearch,
-        tenure: tenureFilter,
-        violation: violationFilter,
-        areaRange: areaRangeFilter,
+        taluka: appliedFilters.taluka,
+        village: appliedFilters.village,
+        search: appliedFilters.search,
+        tenure: appliedFilters.tenure,
+        violation: appliedFilters.violation,
         booklet: isBooklet ? 'true' : 'false'
       });
       setSummaryData(res.data || []);
@@ -242,7 +247,7 @@ export default function ReportsPage() {
     } finally {
       setLoading(false);
     }
-  }, [activeTab, selectedCatId, selectedPrapatraId, taluka, village, debouncedSearch, tenureFilter, violationFilter, areaRangeFilter]);
+  }, [activeTab, selectedCatId, selectedPrapatraId, appliedFilters]);
 
   useEffect(() => {
     loadData();
@@ -260,7 +265,8 @@ export default function ReportsPage() {
 
   // Compute aggregate metrics
   const stats = useMemo(() => {
-    if (serverRollup?.districtTotal) {
+    const hasSearchOrSpecificFilter = Boolean(appliedFilters.search || appliedFilters.tenure !== 'all' || appliedFilters.violation !== 'all');
+    if (serverRollup?.districtTotal && !hasSearchOrSpecificFilter) {
       return {
         totalCount: serverRollup.districtTotal.total712Count,
         totalAreaHa: serverRollup.districtTotal.totalArea,
@@ -297,7 +303,7 @@ export default function ReportsPage() {
       class2Count,
       shartbhangCount
     };
-  }, [serverRollup, parcels]);
+  }, [serverRollup, parcels, appliedFilters]);
 
   // Dynamic rollup computed from filtered parcels for 100% mathematical accuracy across all views
   const dynamicRollup = useMemo(() => {
@@ -384,7 +390,7 @@ export default function ReportsPage() {
           noOtherArea: 0,
           shartCount: 0,
           shartArea: 0,
-          remarks: isMarathi ? `${tName} तालुका एकत्रित` : `${tName} Taluka Total`
+          remarks: isMarathi ? `${formatTalukaName(tName, true)} तालुका एकत्रित` : `${formatTalukaName(tName, false)} Taluka Total`
         });
       }
       const tEntry = talukaMap.get(tName);
@@ -449,7 +455,6 @@ export default function ReportsPage() {
     search: debouncedSearch,
     tenure: tenureFilter,
     violation: violationFilter,
-    areaRange: areaRangeFilter,
     booklet: isBookletMode ? 'true' : 'false',
     view: activeTab === 'checklist' ? activeView : undefined
   });
@@ -459,7 +464,6 @@ export default function ReportsPage() {
     search: debouncedSearch,
     tenure: tenureFilter,
     violation: violationFilter,
-    areaRange: areaRangeFilter,
     booklet: isBookletMode ? 'true' : 'false',
     view: activeTab === 'checklist' ? activeView : undefined
   });
@@ -616,21 +620,53 @@ export default function ReportsPage() {
     }
   };
 
+  const isFilterPending =
+    draftTaluka !== appliedFilters.taluka ||
+    draftVillage !== appliedFilters.village ||
+    draftTenure !== appliedFilters.tenure ||
+    draftViolation !== appliedFilters.violation ||
+    draftSearch.trim() !== appliedFilters.search;
+
   const hasActiveFilters =
-    taluka !== 'all' ||
-    village !== 'all' ||
-    search !== '' ||
-    tenureFilter !== 'all' ||
-    violationFilter !== 'all' ||
-    areaRangeFilter !== 'all';
+    appliedFilters.taluka !== 'all' ||
+    appliedFilters.village !== 'all' ||
+    appliedFilters.tenure !== 'all' ||
+    appliedFilters.violation !== 'all' ||
+    appliedFilters.search !== '' ||
+    draftTaluka !== 'all' ||
+    draftVillage !== 'all' ||
+    draftTenure !== 'all' ||
+    draftViolation !== 'all' ||
+    draftSearch !== '';
+
+  const handleApplyFilters = () => {
+    setAppliedFilters({
+      taluka: draftTaluka,
+      village: draftVillage,
+      tenure: draftTenure,
+      violation: draftViolation,
+      search: draftSearch.trim(),
+    });
+    if (draftVillage !== 'all') {
+      setGoshwaraTier('village');
+    } else if (draftTaluka !== 'all') {
+      if (goshwaraTier === 'district') setGoshwaraTier('taluka');
+    }
+  };
 
   const resetFilters = () => {
-    setTaluka('all');
-    setVillage('all');
-    setSearch('');
-    setTenureFilter('all');
-    setViolationFilter('all');
-    setAreaRangeFilter('all');
+    setDraftTaluka('all');
+    setDraftVillage('all');
+    setDraftTenure('all');
+    setDraftViolation('all');
+    setDraftSearch('');
+    setAppliedFilters({
+      taluka: 'all',
+      village: 'all',
+      tenure: 'all',
+      violation: 'all',
+      search: '',
+    });
   };
 
   // Searchable Dropdown Options
@@ -675,14 +711,6 @@ export default function ReportsPage() {
     { value: 'pokalist', label: isMarathi ? 'पोकळीस्त नोंदी (बु.ग.दे.)' : 'Hollow Remarks (Bu.Ga.De)' },
     { value: 'tribalViolation', label: isMarathi ? 'आदिवासी जमीन हस्तांतरण' : 'Tribal Land Alienation' },
     { value: 'encroachment', label: isMarathi ? 'शासकीय अतिक्रमण' : 'Govt Land Encroachment' },
-  ], [isMarathi]);
-
-  const areaRangeSelectOptions = useMemo(() => [
-    { value: 'all', label: isMarathi ? 'सर्व क्षेत्र' : 'All Area Sizes' },
-    { value: 'under1', label: isMarathi ? '१ हेक्टर पेक्षा कमी' : 'Less than 1 Ha' },
-    { value: '1to5', label: isMarathi ? '१ ते ५ हेक्टर' : '1 to 5 Ha' },
-    { value: '5to10', label: isMarathi ? '५ ते १० हेक्टर' : '5 to 10 Ha' },
-    { value: 'above10', label: isMarathi ? '१० हेक्टर पेक्षा जास्त' : 'Above 10 Ha' },
   ], [isMarathi]);
 
   const categorySelectOptions = useMemo(() => [
@@ -806,15 +834,7 @@ export default function ReportsPage() {
               </button>
             )}
 
-            <button
-              onClick={loadData}
-              disabled={loading}
-              className="p-1.5 text-slate-700 hover:text-slate-950 bg-white hover:bg-teal-50 rounded-lg border border-slate-300 transition active:scale-95 shadow-2xs cursor-pointer"
-              title={isMarathi ? 'डेटा रिफ्रेश करा' : 'Refresh data'}
-              aria-label={isMarathi ? 'डेटा रिफ्रेश करा' : 'Refresh data'}
-            >
-              <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-teal-600' : 'text-slate-700'}`} />
-            </button>
+
           </div>
         </header>
 
@@ -997,7 +1017,7 @@ export default function ReportsPage() {
 
           <div
             className={clsx(
-              'gap-2.5',
+              'gap-2.5 items-end',
               showMobileFilters
                 ? 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 pt-1'
                 : 'hidden md:grid md:grid-cols-3 lg:grid-cols-6'
@@ -1010,13 +1030,10 @@ export default function ReportsPage() {
               </label>
               <SearchableSelect
                 options={talukaSelectOptions}
-                value={taluka}
+                value={draftTaluka}
                 onChange={val => {
-                  setTaluka(val);
-                  setVillage('all');
-                  if (val !== 'all' && goshwaraTier === 'district') {
-                    setGoshwaraTier('taluka');
-                  }
+                  setDraftTaluka(val);
+                  setDraftVillage('all');
                 }}
                 placeholder={isMarathi ? 'सर्व तालुके' : 'All Talukas'}
                 searchPlaceholder={isMarathi ? 'तालुका शोधा...' : 'Search taluka...'}
@@ -1025,19 +1042,16 @@ export default function ReportsPage() {
               />
             </div>
 
-            {/* 2. Village Dropdown (Searchable!) */}
+            {/* 2. Village Dropdown (Searchable) */}
             <div className="space-y-1">
               <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
                 {isMarathi ? `गाव ${villageOptions.length > 0 ? `(${villageOptions.length})` : ''}` : `Village ${villageOptions.length > 0 ? `(${villageOptions.length})` : ''}`}
               </label>
               <SearchableSelect
                 options={villageSelectOptions}
-                value={village}
+                value={draftVillage}
                 onChange={val => {
-                  setVillage(val);
-                  if (val !== 'all') {
-                    setGoshwaraTier('village');
-                  }
+                  setDraftVillage(val);
                 }}
                 placeholder={isMarathi ? 'सर्व गावे' : 'All Villages'}
                 searchPlaceholder={isMarathi ? 'गाव शोधा...' : 'Search village...'}
@@ -1053,8 +1067,8 @@ export default function ReportsPage() {
               </label>
               <SearchableSelect
                 options={tenureSelectOptions}
-                value={tenureFilter}
-                onChange={val => setTenureFilter(val)}
+                value={draftTenure}
+                onChange={val => setDraftTenure(val)}
                 placeholder={isMarathi ? 'सर्व धारणा प्रकार' : 'All Tenure Types'}
                 searchPlaceholder={isMarathi ? 'धारणा प्रकार शोधा...' : 'Search tenure...'}
                 icon={Scale}
@@ -1069,8 +1083,8 @@ export default function ReportsPage() {
               </label>
               <SearchableSelect
                 options={violationSelectOptions}
-                value={violationFilter}
-                onChange={val => setViolationFilter(val)}
+                value={draftViolation}
+                onChange={val => setDraftViolation(val)}
                 placeholder={isMarathi ? 'सर्व तपासणी निष्कर्ष' : 'All Audit Findings'}
                 searchPlaceholder={isMarathi ? 'तपासणी निष्कर्ष शोधा...' : 'Search findings...'}
                 icon={AlertTriangle}
@@ -1078,41 +1092,78 @@ export default function ReportsPage() {
               />
             </div>
 
-            {/* 5. Area Range Filter */}
-            <div className="space-y-1">
-              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
-                {isMarathi ? 'क्षेत्र मर्यादा' : 'Area Range'}
-              </label>
-              <SearchableSelect
-                options={areaRangeSelectOptions}
-                value={areaRangeFilter}
-                onChange={val => setAreaRangeFilter(val)}
-                placeholder={isMarathi ? 'सर्व क्षेत्र' : 'All Area Sizes'}
-                searchPlaceholder={isMarathi ? 'क्षेत्र मर्यादा शोधा...' : 'Search area range...'}
-                icon={Filter}
-                showCount={false}
-              />
-            </div>
-
-            {/* 6. Multi-Field Search */}
+            {/* 5. Search Box */}
             <div className="space-y-1">
               <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
                 {isMarathi ? 'शोध' : 'Search'}
               </label>
-              <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5">
+              <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:border-blue-500 transition-all h-[36px]">
                 <Search className="w-3.5 h-3.5 text-slate-400 shrink-0" />
                 <input
                   type="text"
                   placeholder={isMarathi ? 'गट क्र. / स.नं. / खातेदार...' : 'Gat No. / Survey No. / Khatedar...'}
-                  value={search}
-                  onChange={e => setSearch(e.target.value)}
+                  value={draftSearch}
+                  onChange={e => setDraftSearch(e.target.value)}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      handleApplyFilters();
+                    }
+                  }}
                   className="bg-transparent text-xs text-slate-800 outline-none w-full placeholder:text-slate-400 font-medium"
                 />
-                {search && (
-                  <button onClick={() => setSearch('')} className="text-slate-400 hover:text-slate-600">
+                {draftSearch && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setDraftSearch('');
+                      if (appliedFilters.search) {
+                        setAppliedFilters(prev => ({ ...prev, search: '' }));
+                      }
+                    }}
+                    className="text-slate-400 hover:text-slate-600 cursor-pointer"
+                  >
                     <X className="w-3.5 h-3.5" />
                   </button>
                 )}
+              </div>
+            </div>
+
+            {/* 6. Action Controls: Apply & Refresh Buttons */}
+            <div className="space-y-1">
+              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                {isMarathi ? 'फिल्टर कृती' : 'Action'}
+              </label>
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={handleApplyFilters}
+                  disabled={loading}
+                  className={clsx(
+                    'flex-1 text-xs font-bold py-1.5 px-3 rounded-xl shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 h-[36px]',
+                    isFilterPending
+                      ? 'bg-gradient-to-r from-blue-700 to-indigo-700 hover:from-blue-800 hover:to-indigo-800 text-white ring-2 ring-blue-500/30'
+                      : 'bg-blue-900 hover:bg-blue-950 text-white'
+                  )}
+                  title={isMarathi ? 'फिल्टर्स लागू करा (Enter)' : 'Apply Filters (Enter)'}
+                >
+                  <Filter className="w-3.5 h-3.5 shrink-0" />
+                  <span>{isMarathi ? 'लागू करा' : 'Apply'}</span>
+                  {isFilterPending && (
+                    <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse shrink-0" />
+                  )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={loadData}
+                  disabled={loading}
+                  className="h-[36px] w-[36px] text-slate-700 hover:text-blue-900 bg-slate-100 hover:bg-slate-200 border border-slate-300/80 rounded-xl transition-all active:scale-95 shadow-2xs cursor-pointer shrink-0 flex items-center justify-center"
+                  title={isMarathi ? 'डेटा रिफ्रेश करा' : 'Refresh data'}
+                  aria-label={isMarathi ? 'डेटा रिफ्रेश करा' : 'Refresh data'}
+                >
+                  <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-blue-600' : 'text-slate-700'}`} />
+                </button>
               </div>
             </div>
           </div>
@@ -1517,10 +1568,11 @@ export default function ReportsPage() {
                         filteredPrapatraSummaryRows.map((row, idx) => {
                           const isTalukaTotal = row.villageName === 'संपूर्ण तालुका (All Villages)';
                           const isDistrictTotal = row.villageName === 'संपूर्ण जिल्हा (१५ तालुके गोषवारा)' || row.villageName === 'Whole District Rollup';
+                          const talukaDisplay = formatTalukaName(row.taluka, isMarathi);
                           const displayName = isDistrictTotal
                             ? (isMarathi ? 'चंद्रपूर जिल्हा (एकत्रित गोषवारा)' : 'Chandrapur District Grand Total')
                             : isTalukaTotal
-                            ? (row.taluka ? `${row.taluka} (संपूर्ण तालुका)` : (isMarathi ? 'सर्व तालुके' : 'All Talukas'))
+                            ? (row.taluka ? `${talukaDisplay} (${isMarathi ? 'संपूर्ण तालुका' : 'Whole Taluka'})` : (isMarathi ? 'सर्व तालुके' : 'All Talukas'))
                             : formatVillageName(row.villageName || row.taluka, isMarathi);
 
                           return (
@@ -1551,7 +1603,7 @@ export default function ReportsPage() {
                                   <td className="py-2 px-2 text-center border-r border-slate-100 font-mono font-bold text-rose-700 bg-rose-50/30">{row.illegalDeletionsCount || 0}</td>
                                   <td className="py-2 px-2 text-center border-r border-slate-100 font-mono font-bold text-emerald-700 bg-emerald-50/30">{row.rectifiedCount || 0}</td>
                                   <td className="py-2 px-2 text-center border-r border-slate-100 font-mono font-bold text-amber-700 bg-amber-50/30">{row.pendingRectifyCount || 0}</td>
-                                  <td className="py-2 px-3 text-slate-500 text-[11px] max-w-[140px] truncate">{row.remarks || '-'}</td>
+                                  <td className="py-2 px-3 text-slate-500 text-[11px] max-w-[140px] truncate">{formatRemarks(row.remarks, isMarathi)}</td>
                                 </>
                               )}
 
@@ -1561,7 +1613,7 @@ export default function ReportsPage() {
                                   <td className="py-2 px-2 text-center border-r border-slate-100 font-mono font-bold text-amber-700 bg-amber-50/30">{row.pokalistCount || 0}</td>
                                   <td className="py-2 px-2 text-center border-r border-slate-100 font-mono font-bold text-emerald-700 bg-emerald-50/30">{row.pokalistRemovedCount || 0}</td>
                                   <td className="py-2 px-2 text-center border-r border-slate-100 font-mono font-bold text-rose-700 bg-rose-50/30">{row.pokalistPendingCount || 0}</td>
-                                  <td className="py-2 px-3 text-slate-500 text-[11px] max-w-[140px] truncate">{row.remarks || '-'}</td>
+                                  <td className="py-2 px-3 text-slate-500 text-[11px] max-w-[140px] truncate">{formatRemarks(row.remarks, isMarathi)}</td>
                                 </>
                               )}
 
@@ -1570,7 +1622,7 @@ export default function ReportsPage() {
                                   <td className="py-2 px-2 text-center border-r border-slate-100 font-mono font-bold">{row.govtDeptsAllottedCount || 0}</td>
                                   <td className="py-2 px-2 text-center border-r border-slate-100 font-mono font-bold text-rose-700 bg-rose-50/30">{row.govtDeptsShartbhang || 0}</td>
                                   <td className="py-2 px-2 text-center border-r border-slate-100 font-mono font-bold text-emerald-700 bg-emerald-50/30">{row.govtDeptsRestoredGovt || 0}</td>
-                                  <td className="py-2 px-3 text-slate-500 text-[11px] max-w-[140px] truncate">{row.remarks || '-'}</td>
+                                  <td className="py-2 px-3 text-slate-500 text-[11px] max-w-[140px] truncate">{formatRemarks(row.remarks, isMarathi)}</td>
                                 </>
                               )}
 
@@ -1579,7 +1631,7 @@ export default function ReportsPage() {
                                   <td className="py-2 px-2 text-center border-r border-slate-100 font-mono font-bold">{row.privateAllottedCount || 0}</td>
                                   <td className="py-2 px-2 text-center border-r border-slate-100 font-mono font-bold text-rose-700 bg-rose-50/30">{row.privateShartbhang || 0}</td>
                                   <td className="py-2 px-2 text-center border-r border-slate-100 font-mono font-bold text-emerald-700 bg-emerald-50/30">{row.privateRestoredGovt || 0}</td>
-                                  <td className="py-2 px-3 text-slate-500 text-[11px] max-w-[140px] truncate">{row.remarks || '-'}</td>
+                                  <td className="py-2 px-3 text-slate-500 text-[11px] max-w-[140px] truncate">{formatRemarks(row.remarks, isMarathi)}</td>
                                 </>
                               )}
 
@@ -1590,7 +1642,7 @@ export default function ReportsPage() {
                                   <td className="py-2 px-2 text-center border-r border-slate-100 font-mono font-bold text-rose-700 bg-rose-50/30">{row.govtShartbhangCount || 0}</td>
                                   <td className="py-2 px-2 text-center border-r border-slate-100 font-mono font-bold text-amber-700 bg-amber-50/30">{row.govtEncroachedCount || 0}</td>
                                   <td className="py-2 px-2 text-center border-r border-slate-100 font-mono font-bold text-emerald-700 bg-emerald-50/30">{row.govtMojaniDoneCount || 0}</td>
-                                  <td className="py-2 px-3 text-slate-500 text-[11px] max-w-[140px] truncate">{row.remarks || '-'}</td>
+                                  <td className="py-2 px-3 text-slate-500 text-[11px] max-w-[140px] truncate">{formatRemarks(row.remarks, isMarathi)}</td>
                                 </>
                               )}
                             </tr>
@@ -1907,10 +1959,11 @@ export default function ReportsPage() {
                         categoryRollupRows.map((row, idx) => {
                           const isTalukaTotal = row.villageName === 'संपूर्ण तालुका (All Villages)' || row.id?.startsWith('t-');
                           const isDistrictTotal = row.id === 'district-chandrapur-grand-total' || row.villageName === 'संपूर्ण जिल्हा (१५ तालुके गोषवारा)' || row.villageName === 'Whole District Rollup';
+                          const talukaDisplay = formatTalukaName(row.taluka, isMarathi);
                           const displayName = isDistrictTotal
                             ? (isMarathi ? 'चंद्रपूर जिल्हा (एकत्रित गोषवारा)' : 'Chandrapur District Grand Total')
                             : isTalukaTotal
-                            ? (row.taluka ? `${row.taluka} (संपूर्ण तालुका)` : (isMarathi ? 'सर्व तालुके' : 'All Talukas'))
+                            ? (row.taluka ? `${talukaDisplay} (${isMarathi ? 'संपूर्ण तालुका' : 'Whole Taluka'})` : (isMarathi ? 'सर्व तालुके' : 'All Talukas'))
                             : formatVillageName(row.villageName || row.taluka, isMarathi);
 
                           return (
@@ -1939,7 +1992,7 @@ export default function ReportsPage() {
                                 {row.shartCount || 0}
                               </td>
                               <td className="py-2 px-3 text-slate-600 text-[11px] truncate max-w-[160px]">
-                                {row.remarks || (row.shartCount > 0 ? 'शर्तभंग / संशयित नोंद' : 'तपासणी प्रमाणित')}
+                                {formatRemarks(row.remarks, isMarathi) !== '-' ? formatRemarks(row.remarks, isMarathi) : (row.shartCount > 0 ? (isMarathi ? 'शर्तभंग / संशयित नोंद' : 'Breach / Suspected') : (isMarathi ? 'तपासणी प्रमाणित' : 'Audit Certified'))}
                               </td>
                             </tr>
                           );
@@ -2793,10 +2846,11 @@ export default function ReportsPage() {
                         const isTalukaTotal = row.villageName === 'संपूर्ण तालुका (All Villages)';
                         const isDistrictTotal = row.villageName === 'संपूर्ण जिल्हा (१५ तालुके गोषवारा)' || row.villageName === 'Whole District Rollup';
                         
+                        const talukaDisplay = formatTalukaName(row.taluka, isMarathi);
                         const displayName = isDistrictTotal
                           ? (isMarathi ? 'चंद्रपूर जिल्हा (एकत्रित गोषवारा)' : 'Chandrapur District (Consolidated Rollup)')
                           : isTalukaTotal
-                          ? (row.taluka ? (isMarathi ? `${row.taluka} (संपूर्ण तालुका)` : `${row.taluka} (Whole Taluka)`) : (isMarathi ? 'सर्व तालुके' : 'All Talukas'))
+                          ? (row.taluka ? `${talukaDisplay} (${isMarathi ? 'संपूर्ण तालुका' : 'Whole Taluka'})` : (isMarathi ? 'सर्व तालुके' : 'All Talukas'))
                           : formatVillageName(row.villageName || row.taluka, isMarathi);
 
                         const totalCount = row.total712Count || row.totalGovtLandCount || 0;
@@ -2879,7 +2933,7 @@ export default function ReportsPage() {
                             </td>
 
                             <td className="py-2 px-3 text-slate-500 text-[11px]  max-w-[120px]">
-                              {row.remarks || '-'}
+                              {formatRemarks(row.remarks, isMarathi)}
                             </td>
                           </tr>
                         );
