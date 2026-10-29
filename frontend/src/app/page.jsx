@@ -6,8 +6,6 @@ import LandingHero from '../components/landing/LandingHero';
 import HeroBannerSlider from '../components/landing/HeroBannerSlider';
 import ProvenanceShowcase from '../components/landing/ProvenanceShowcase';
 import TalukaSlider from '../components/landing/TalukaSlider';
-import LegalComplianceSection from '../components/landing/LegalComplianceSection';
-import WorkflowSection from '../components/landing/WorkflowSection';
 import LandingFooter from '../components/landing/LandingFooter';
 import AuthModal from '../components/landing/AuthModal';
 
@@ -39,11 +37,8 @@ export default function HomePage() {
       {/* 15 Talukas Explorer Carousel */}
       <TalukaSlider />
 
-      {/* MLRC 1966 Statutory Legal Compliance Sections */}
-      <LegalComplianceSection />
+     
 
-      {/* 4-Step Land Governance & Enforcement Workflow */}
-      <WorkflowSection />
 
       {/* Official Multi-Column Government Footer */}
       <LandingFooter />

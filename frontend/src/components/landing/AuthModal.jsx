@@ -38,7 +38,7 @@ const HIERARCHY_OFFICERS = [
     rankEn: '1',
     titleMr: 'जिल्हाधिकारी, चंद्रपूर',
     titleEn: 'District Collector & Magistrate, Chandrapur',
-    roleTag: 'Apex Authority',
+    roleTag: 'Main Authority',
     badgeMr: 'जिल्हाधिकारी (Collector)',
     badgeEn: 'Collector & DM',
     jurisdictionMr: 'संपूर्ण चंद्रपूर जिल्हा (District-wide)',
@@ -277,7 +277,7 @@ export default function AuthModal({ isOpen, onClose }) {
               <div className="flex items-center justify-between px-1 mb-2.5">
                 <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
                   <Users2 className="w-3.5 h-3.5 text-slate-400" />
-                  <span>{isMarathi ? 'पदानुक्रम (Hierarchy)' : 'Officer Hierarchy'}</span>
+                  <span>{isMarathi ? 'पदानुक्रम' : 'Officer Hierarchy'}</span>
                 </span>
                 <span className="text-[10px] text-slate-400 font-medium">
                   {isMarathi ? '१ ते ७ पदे' : '7 Official Roles'}
@@ -360,16 +360,7 @@ export default function AuthModal({ isOpen, onClose }) {
                   </p>
                 </div>
 
-                <button
-                  type="button"
-                  onClick={(e) => handleExecuteLogin(e, currentOfficer.email, currentOfficer.password)}
-                  disabled={loading}
-                  className="shrink-0 px-2.5 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 font-semibold text-xs transition-colors flex items-center gap-1 active:scale-95 disabled:opacity-50"
-                  title={isMarathi ? 'या खात्यावर थेट चाचणी लॉगिन करा' : 'Direct Demo Login'}
-                >
-                  <Sparkles className="w-3.5 h-3.5 text-blue-600" />
-                  <span>{isMarathi ? 'थेट प्रवेश' : 'Quick Login'}</span>
-                </button>
+               
               </div>
 
               {/* Messages */}
