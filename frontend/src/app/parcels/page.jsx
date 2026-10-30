@@ -21,7 +21,9 @@ import {
   X,
   History,
   Filter,
+  RotateCcw,
   ChevronDown,
+  LayoutGrid,
 } from 'lucide-react';
 import { api } from '../../lib/api';
 import { CHANDRAPUR_TALUKAS, TENURE_CLASSES } from '../../lib/constants';
@@ -63,7 +65,7 @@ export default function ParcelsPage() {
   const [totalCount, setTotalCount] = useState(0);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const limit = 20;
+  const [limit, setLimit] = useState(25);
 
   // Draft Filter Inputs
   const [taluka, setTaluka] = useState('');
@@ -75,6 +77,7 @@ export default function ParcelsPage() {
   const [hasActiveDispute, setHasActiveDispute] = useState('');
   const [search, setSearch] = useState('');
   const [showMobileFilters, setShowMobileFilters] = useState(false);
+  const [mobileViewMode, setMobileViewMode] = useState('cards'); // 'cards' | 'table'
 
   // Applied Filters (used for backend queries and active badge display)
   const [appliedFilters, setAppliedFilters] = useState({
@@ -98,11 +101,15 @@ export default function ParcelsPage() {
   const [uploadModalParcelId, setUploadModalParcelId] = useState(null);
   const [glossaryModalOpen, setGlossaryModalOpen] = useState(false);
 
-  // Fetch Parcels with specified target page and filters
-  const fetchParcels = async (targetPage = page, filtersToUse = appliedFilters) => {
+  // Fetch Parcels with specified target page, filters and limit
+  const fetchParcels = async (
+    targetPage = page,
+    filtersToUse = appliedFilters,
+    targetLimit = limit
+  ) => {
     setLoading(true);
     try {
-      const params = { page: targetPage, limit };
+      const params = { page: targetPage, limit: targetLimit };
       if (filtersToUse.taluka) params.taluka = filtersToUse.taluka;
       if (filtersToUse.village && filtersToUse.village !== 'all') params.village = filtersToUse.village;
       if (filtersToUse.bookletCategory) params.bookletCategory = filtersToUse.bookletCategory;
@@ -147,7 +154,7 @@ export default function ParcelsPage() {
       };
     }
     setAppliedFilters(initialFilters);
-    fetchParcels(1, initialFilters);
+    fetchParcels(1, initialFilters, limit);
   }, []);
 
   // Dynamically load villages for selected taluka
@@ -201,7 +208,7 @@ export default function ParcelsPage() {
     };
     setAppliedFilters(nextFilters);
     setPage(1);
-    fetchParcels(1, nextFilters);
+    fetchParcels(1, nextFilters, limit);
   };
 
   // Search input change handler
@@ -211,13 +218,6 @@ export default function ParcelsPage() {
 
   const handleClearSearch = () => {
     setSearch('');
-    const nextFilters = {
-      ...appliedFilters,
-      search: '',
-    };
-    setAppliedFilters(nextFilters);
-    setPage(1);
-    fetchParcels(1, nextFilters);
   };
 
   const handleResetFilters = () => {
@@ -237,12 +237,18 @@ export default function ParcelsPage() {
     setSearch('');
     setAppliedFilters(cleanFilters);
     setPage(1);
-    fetchParcels(1, cleanFilters);
+    fetchParcels(1, cleanFilters, limit);
   };
 
   const handlePageChange = (newPage) => {
     setPage(newPage);
-    fetchParcels(newPage, appliedFilters);
+    fetchParcels(newPage, appliedFilters, limit, sortColumn, sortDirection);
+  };
+
+  const handlePageSizeChange = (newLimit) => {
+    setLimit(newLimit);
+    setPage(1);
+    fetchParcels(1, appliedFilters, newLimit, sortColumn, sortDirection);
   };
 
   // Copy to clipboard
@@ -255,42 +261,115 @@ export default function ParcelsPage() {
     }, 2000);
   };
 
-  // Column Sorting Handler
-  const handleSort = (column) => {
-    if (sortColumn === column) {
-      if (sortDirection === 'asc') {
-        setSortDirection('desc');
-      } else {
-        setSortColumn(null);
-        setSortDirection('asc');
-      }
-    } else {
-      setSortColumn(column);
-      setSortDirection('asc');
-    }
+  // Natural alphanumeric comparator for Gat & Survey numbers (properly orders 1, 2, 3... 10, 11/1, 101, 112)
+  const compareGatNumbers = (aGatRaw, bGatRaw, aHissaRaw, bHissaRaw) => {
+    const toAscii = (s) => String(s || '').replace(/[०-९]/g, (d) => '०१२३४५६७८९'.indexOf(d)).trim();
+    const aGat = toAscii(aGatRaw);
+    const bGat = toAscii(bGatRaw);
+
+    const gatResult = aGat.localeCompare(bGat, undefined, {
+      numeric: true,
+      sensitivity: 'base',
+    });
+
+    if (gatResult !== 0) return gatResult;
+
+    const aHissa = toAscii(aHissaRaw || '0');
+    const bHissa = toAscii(bHissaRaw || '0');
+    return aHissa.localeCompare(bHissa, undefined, {
+      numeric: true,
+      sensitivity: 'base',
+    });
   };
 
-  // Sorted Parcels List
+  const getParcelOwnerName = (p) =>
+    p.currentOwner ||
+    p.metadata?.currentOwner ||
+    p.metadata?.ownerName ||
+    (p.tenureClass === 'SARKAR_SHASAN'
+      ? (isMarathi ? 'महाराष्ट्र शासन' : 'Government of Maharashtra')
+      : (isMarathi ? 'नोंद उपलब्ध नाही' : 'No record available'));
+
+  // Column Sorting Handler (Instant In-Memory Sorting, Zero Network Overhead)
+  const handleSort = (column) => {
+    let nextColumn = sortColumn;
+    let nextDirection = 'asc';
+
+    if (sortColumn === column) {
+      if (sortDirection === 'asc') {
+        nextDirection = 'desc';
+      } else {
+        nextColumn = null;
+        nextDirection = 'asc';
+      }
+    } else {
+      nextColumn = column;
+      // Default mutationCount to descending first so parcels with most mutations appear first
+      nextDirection = column === 'mutationCount' ? 'desc' : 'asc';
+    }
+
+    setSortColumn(nextColumn);
+    setSortDirection(nextDirection);
+  };
+
+  // Sorted Parcels List (Instant Client-Side Sorting)
   const sortedParcels = useMemo(() => {
-    if (!sortColumn) return parcels;
+    if (!sortColumn) {
+      // By default, if records on the page belong to the same village, sort naturally by Gat Number
+      const isSingleVillage = parcels.length > 0 && parcels.every((p) => p.villageName === parcels[0].villageName);
+      if (isSingleVillage) {
+        return [...parcels].sort((a, b) =>
+          compareGatNumbers(a.gatNumber, b.gatNumber, a.hissaNumber, b.hissaNumber)
+        );
+      }
+      return parcels;
+    }
 
     return [...parcels].sort((a, b) => {
-      let aVal = a[sortColumn];
-      let bVal = b[sortColumn];
-
-      if (sortColumn === 'totalAreaHa') {
-        aVal = Number(aVal || 0);
-        bVal = Number(bVal || 0);
-      } else if (typeof aVal === 'string') {
-        aVal = aVal.toLowerCase();
-        bVal = (bVal || '').toLowerCase();
+      if (sortColumn === 'gatNumber') {
+        const res = compareGatNumbers(a.gatNumber, b.gatNumber, a.hissaNumber, b.hissaNumber);
+        return sortDirection === 'asc' ? res : -res;
       }
 
-      if (aVal < bVal) return sortDirection === 'asc' ? -1 : 1;
-      if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1;
-      return 0;
+      if (sortColumn === 'mutationCount') {
+        const aCount = a._count?.backwardHistories ?? a.backwardHistories?.length ?? 0;
+        const bCount = b._count?.backwardHistories ?? b.backwardHistories?.length ?? 0;
+        return sortDirection === 'asc' ? aCount - bCount : bCount - aCount;
+      }
+
+      if (sortColumn === 'currentOwner') {
+        const aOwner = getParcelOwnerName(a);
+        const bOwner = getParcelOwnerName(b);
+        const res = aOwner.localeCompare(bOwner, isMarathi ? 'mr' : 'en', { sensitivity: 'base' });
+        return sortDirection === 'asc' ? res : -res;
+      }
+
+      if (sortColumn === 'totalAreaHa') {
+        const aVal = Number(a.totalAreaHa || 0);
+        const bVal = Number(b.totalAreaHa || 0);
+        return sortDirection === 'asc' ? aVal - bVal : bVal - aVal;
+      }
+
+      if (sortColumn === 'villageName') {
+        const aVal = formatVillageName(a.villageName, isMarathi);
+        const bVal = formatVillageName(b.villageName, isMarathi);
+        const res = aVal.localeCompare(bVal, isMarathi ? 'mr' : 'en', { sensitivity: 'base' });
+        return sortDirection === 'asc' ? res : -res;
+      }
+
+      if (sortColumn === 'tenureClass') {
+        const aLabel = getTenureDetails(a.tenureClass)?.label || '';
+        const bLabel = getTenureDetails(b.tenureClass)?.label || '';
+        const res = aLabel.localeCompare(bLabel, isMarathi ? 'mr' : 'en', { sensitivity: 'base' });
+        return sortDirection === 'asc' ? res : -res;
+      }
+
+      let aVal = a[sortColumn] || '';
+      let bVal = b[sortColumn] || '';
+      const res = String(aVal).localeCompare(String(bVal), undefined, { numeric: true, sensitivity: 'base' });
+      return sortDirection === 'asc' ? res : -res;
     });
-  }, [parcels, sortColumn, sortDirection]);
+  }, [parcels, sortColumn, sortDirection, isMarathi]);
 
   // Summary counts for compact header pills
   const stats = useMemo(() => {
@@ -452,7 +531,7 @@ export default function ParcelsPage() {
           </button>
 
           <button
-            onClick={() => fetchParcels(page, search)}
+            onClick={() => fetchParcels(page, appliedFilters, limit)}
             disabled={loading}
             className="p-1.5 rounded-lg bg-white hover:bg-emerald-50 text-slate-700 hover:text-slate-950 border border-slate-300 text-xs transition-all active:scale-95 shadow-2xs cursor-pointer"
             title={isMarathi ? 'तक्ता रीफ्रेश करा' : 'Refresh Table'}
@@ -615,19 +694,18 @@ export default function ParcelsPage() {
             )}
           </button>
 
-          {/* Reset Filter Button if active or modified */}
-          {(activeFiltersCount > 0 || isFilterPending) && (
-            <button
-              type="button"
-              onClick={handleResetFilters}
-              className="h-9 px-2 sm:px-2.5 text-rose-600 hover:bg-rose-50 hover:text-rose-700 rounded-xl border border-rose-200 transition shrink-0 cursor-pointer flex items-center justify-center gap-1 text-xs font-bold w-full sm:w-auto shadow-2xs"
-              title={isMarathi ? 'सर्व फिल्टर्स साफ करा' : 'Clear all filters'}
-              aria-label={isMarathi ? 'सर्व फिल्टर्स साफ करा' : 'Clear all filters'}
-            >
-              <X className="w-3.5 h-3.5 shrink-0" />
-              <span className="lg:hidden">{isMarathi ? 'फिल्टर्स साफ करा' : 'Clear'}</span>
-            </button>
-          )}
+          {/* Reset Filters Button ("रीसेट" / "Reset") */}
+          <button
+            type="button"
+            onClick={handleResetFilters}
+            disabled={loading}
+            className="h-9 px-3 sm:px-3 text-slate-700 hover:text-rose-700 bg-slate-100 hover:bg-rose-50 rounded-xl border border-slate-300 hover:border-rose-300 transition-all active:scale-95 shrink-0 cursor-pointer flex items-center justify-center gap-1.5 text-xs font-bold w-full sm:w-auto shadow-2xs"
+            title={isMarathi ? 'सर्व फिल्टर्स रीसेट करा' : 'Reset all filters'}
+            aria-label={isMarathi ? 'सर्व फिल्टर्स रीसेट करा' : 'Reset all filters'}
+          >
+            <RotateCcw className="w-3.5 h-3.5 text-rose-600 shrink-0" />
+            <span>{isMarathi ? 'रीसेट' : 'Reset'}</span>
+          </button>
         </div>
       </div>
 
@@ -687,14 +765,44 @@ export default function ParcelsPage() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2 self-end sm:self-auto">
+          <div className="flex items-center gap-2 self-end sm:self-auto flex-wrap">
+            {/* View Mode Switcher on Mobile/Tablet */}
+            <div className="inline-flex md:hidden p-0.5 rounded-lg bg-slate-200/80 border border-slate-300">
+              <button
+                type="button"
+                onClick={() => setMobileViewMode('cards')}
+                className={clsx(
+                  'px-2 py-1 rounded-md text-[11px] font-bold flex items-center gap-1 transition cursor-pointer',
+                  mobileViewMode === 'cards' ? 'bg-white text-blue-950 shadow-2xs' : 'text-slate-600 hover:text-slate-900'
+                )}
+                title={isMarathi ? 'कार्ड दृश्य' : 'Card View'}
+              >
+                <LayoutGrid className="w-3.5 h-3.5" />
+                <span>{isMarathi ? 'कार्ड' : 'Cards'}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setMobileViewMode('table')}
+                className={clsx(
+                  'px-2 py-1 rounded-md text-[11px] font-bold flex items-center gap-1 transition cursor-pointer',
+                  mobileViewMode === 'table' ? 'bg-white text-blue-950 shadow-2xs' : 'text-slate-600 hover:text-slate-900'
+                )}
+                title={isMarathi ? 'तक्ता दृश्य' : 'Table View'}
+              >
+                <Layers className="w-3.5 h-3.5" />
+                <span>{isMarathi ? 'तक्ता' : 'Table'}</span>
+              </button>
+            </div>
+
             <span className="hidden md:inline-flex items-center gap-1.5 text-[11px] text-slate-500 bg-white px-2.5 py-1 rounded-md border border-slate-200">
               <Eye className="w-3.5 h-3.5 text-blue-700" />
               <span>{isMarathi ? 'ओळीवर क्लिक करून ३६०° साखळी पहा' : 'Click a row to view 360° Provenance Chain'}</span>
             </span>
-            <span className="md:hidden text-[10px] text-amber-800 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200 font-semibold">
-              {isMarathi ? 'तक्ता आडवा स्क्रोल करा ↔' : 'Scroll table horizontally ↔'}
-            </span>
+            {mobileViewMode === 'table' && (
+              <span className="md:hidden text-[10px] text-amber-800 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200 font-semibold">
+                {isMarathi ? 'तक्ता आडवा स्क्रोल करा ↔' : 'Scroll table horizontally ↔'}
+              </span>
+            )}
           </div>
         </div>
 
@@ -735,8 +843,158 @@ export default function ParcelsPage() {
             )}
           </div>
         ) : (
-          <div className="w-full overflow-x-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
-            <table className="w-full border-collapse text-xs min-w-[840px]">
+          <>
+            {/* Mobile Cards View (Shown on screens < md when mobileViewMode === 'cards') */}
+            {mobileViewMode === 'cards' && (
+              <div className="md:hidden p-2.5 sm:p-3 space-y-2.5 bg-slate-50/60 divide-y divide-slate-100">
+                {sortedParcels.map((parcel, index) => {
+                  const tenure = getTenureDetails(parcel.tenureClass);
+                  const hasDispute = parcel.hasActiveDispute;
+                  const isCopied = copiedUpi === parcel.upi;
+                  const areaHa = Number(parcel.totalAreaHa || 0);
+                  const areaAcres = (areaHa * 2.47105).toFixed(2);
+                  const activeCase = parcel.forwardCases && parcel.forwardCases[0];
+                  const ownerName =
+                    parcel.currentOwner ||
+                    parcel.metadata?.currentOwner ||
+                    parcel.metadata?.ownerName ||
+                    (parcel.tenureClass === 'SARKAR_SHASAN'
+                      ? (isMarathi ? 'महाराष्ट्र शासन' : 'Government of Maharashtra')
+                      : (isMarathi ? 'नोंद उपलब्ध नाही' : 'No record available'));
+
+                  return (
+                    <div
+                      key={`mob-${parcel.id}`}
+                      className="bg-white rounded-xl border border-slate-200/90 shadow-2xs hover:shadow-xs p-3 space-y-2.5 transition active:scale-[0.99]"
+                    >
+                      {/* Top Row: Gat Badge, Old Survey, Copy UPI */}
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className="px-2.5 py-1 rounded-lg bg-emerald-100/80 text-emerald-950 border border-emerald-300 font-extrabold text-xs">
+                            {isMarathi ? 'गट क्र.' : 'Gat'} {parcel.gatNumber}
+                          </span>
+                          {parcel.hissaNumber && parcel.hissaNumber !== '0' && (
+                            <span className="px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 text-[10px] font-bold">
+                              {isMarathi ? 'हि.' : 'H.'} {parcel.hissaNumber}
+                            </span>
+                          )}
+                          {parcel.oldSurveyNo && (
+                            <span className="text-[11px] text-slate-500 font-medium">
+                              ({isMarathi ? 'जुना स.नं.' : 'Old S.'} {parcel.oldSurveyNo})
+                            </span>
+                          )}
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => handleCopyUpi(parcel.upi)}
+                          className="inline-flex items-center gap-1 text-[10px] font-mono font-medium px-2 py-0.5 rounded bg-slate-50 hover:bg-slate-100 text-slate-600 border border-slate-200 cursor-pointer"
+                          title={isMarathi ? 'UPI कॉपी करा' : 'Copy UPI'}
+                        >
+                          {isCopied ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3 text-slate-400" />}
+                          <span className="truncate max-w-[85px]">{parcel.upi?.slice(-10) || 'UPI'}</span>
+                        </button>
+                      </div>
+
+                      {/* Location: Village & Taluka */}
+                      <div className="flex items-center gap-1 text-xs text-slate-600 font-medium">
+                        <MapPin className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+                        <span className="font-bold text-slate-900">{formatVillageName(parcel.villageName, isMarathi)}</span>
+                        <span className="text-slate-300">•</span>
+                        <span>{formatTalukaName(parcel.taluka, isMarathi)}</span>
+                      </div>
+
+                      {/* Owner / Khatedar Card */}
+                      <div className="p-2 rounded-lg bg-slate-50/90 border border-slate-100">
+                        <span className="text-[9.5px] text-slate-400 font-bold uppercase tracking-wider block mb-0.5">
+                          {isMarathi ? 'खातेदार / भोगवटदार' : 'Khatedar / Occupant'}
+                        </span>
+                        <p className="text-xs font-bold text-slate-900 leading-snug line-clamp-2">
+                          {ownerName}
+                        </p>
+                      </div>
+
+                      {/* Metrics: Area & Tenure */}
+                      <div className="grid grid-cols-2 gap-2 text-xs">
+                        <div className="p-2 rounded-lg bg-slate-50/80 border border-slate-100">
+                          <span className="text-[9.5px] text-slate-400 font-medium block">
+                            {isMarathi ? 'क्षेत्रफळ' : 'Total Area'}
+                          </span>
+                          <span className="font-extrabold text-slate-900 font-mono text-xs">
+                            {areaHa.toFixed(2)} {isMarathi ? 'हे.' : 'Ha'}
+                          </span>
+                          <span className="text-[10px] text-slate-500 font-medium ml-1">
+                            ({areaAcres} {isMarathi ? 'एकर' : 'Ac'})
+                          </span>
+                        </div>
+
+                        <div className="p-2 rounded-lg bg-slate-50/80 border border-slate-100 flex flex-col justify-between">
+                          <span className="text-[9.5px] text-slate-400 font-medium block">
+                            {isMarathi ? 'धारणा प्रकार' : 'Tenure'}
+                          </span>
+                          <span className={clsx('inline-flex items-center gap-1 text-[11px] font-bold px-1.5 py-0.5 rounded border mt-0.5 w-fit', tenure.badgeClass)}>
+                            {tenure.icon}
+                            <span className="truncate max-w-[110px]">{tenure.label}</span>
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Dispute Status Bar */}
+                      {hasDispute ? (
+                        <div className="p-2 rounded-lg bg-rose-50 border border-rose-200/80 flex items-center justify-between text-xs">
+                          <div className="flex items-center gap-1.5 text-rose-800 font-bold text-[11px]">
+                            <AlertTriangle className="w-3.5 h-3.5 text-rose-600 shrink-0" />
+                            <span>{isMarathi ? 'शर्तभंग / सक्रिय वाद' : 'Breach / Dispute Flagged'}</span>
+                          </div>
+                          {activeCase && (
+                            <span className="text-[10px] font-mono text-rose-700 bg-rose-100 px-1.5 py-0.2 rounded font-semibold">
+                              {activeCase.caseNumber}
+                            </span>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-1 text-[11px] text-emerald-700 font-semibold px-1">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                          <span>{isMarathi ? 'निर्वैध नोंद (Clear Record)' : 'Clear Record'}</span>
+                        </div>
+                      )}
+
+                      {/* Quick Action CTAs */}
+                      <div className="pt-1.5 border-t border-slate-100 flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setSelectedUpi(parcel.upi)}
+                          className="flex-1 py-2 px-3 rounded-xl bg-blue-900 hover:bg-blue-800 active:scale-95 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-2xs transition cursor-pointer"
+                        >
+                          <Eye className="w-3.5 h-3.5 text-amber-400" />
+                          <span>{isMarathi ? '३६०° साखळी पहा' : 'View 360° Trace'}</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => setUploadModalParcelId(parcel.id)}
+                          className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition active:scale-95 cursor-pointer"
+                          title={isMarathi ? 'दस्तऐवज जोडा' : 'Attach Document'}
+                          aria-label={isMarathi ? 'दस्तऐवज जोडा' : 'Attach Document'}
+                        >
+                          <Upload className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Desktop Table (and mobile when mobileViewMode === 'table') */}
+            <div
+              className={clsx(
+                'w-full overflow-x-auto touch-scroll',
+                mobileViewMode === 'cards' ? 'hidden md:block' : 'block'
+              )}
+              style={{ WebkitOverflowScrolling: 'touch' }}
+            >
+              <table className="w-full border-collapse text-xs min-w-[840px]">
               {/* Native Table Head with Balanced Proportions */}
               <thead className="bg-slate-50 text-slate-600 text-[11px] font-bold uppercase tracking-wider border-b border-slate-200 select-none">
                 <tr>
@@ -805,12 +1063,57 @@ export default function ParcelsPage() {
                     </div>
                   </th>
 
-                  {/* Col 5: Current Owner / Khatedar */}
+                  {/* Col 5: Current Owner / Khatedar & Ferfar */}
                   <th
                     scope="col"
                     className="py-2.5 px-3 w-[20%] text-left"
                   >
-                    <span>{isMarathi ? 'सध्याचे खातेदार / भोगवटदार' : 'Current Khatedar / Occupant'}</span>
+                    <div className="flex items-center justify-between gap-1.5">
+                      {/* Khatedar Sort */}
+                      <button
+                        type="button"
+                        onClick={() => handleSort('currentOwner')}
+                        className="inline-flex items-center gap-1 hover:text-blue-900 transition text-left group/owner cursor-pointer"
+                        title={isMarathi ? 'खातेदारानुसार क्रमवारी लावा' : 'Sort by Khatedar'}
+                      >
+                        <span className="font-bold">
+                          {isMarathi ? 'खातेदार / भोगवटदार' : 'Khatedar / Occupant'}
+                        </span>
+                        {sortColumn === 'currentOwner' ? (
+                          sortDirection === 'asc' ? (
+                            <ArrowUp className="w-3.5 h-3.5 text-blue-900 shrink-0" />
+                          ) : (
+                            <ArrowDown className="w-3.5 h-3.5 text-blue-900 shrink-0" />
+                          )
+                        ) : (
+                          <ArrowUpDown className="w-3 h-3 text-slate-300 group-hover/owner:text-slate-600 shrink-0" />
+                        )}
+                      </button>
+
+                      {/* Ferfar / Mutation Sort Badge */}
+                      <button
+                        type="button"
+                        onClick={() => handleSort('mutationCount')}
+                        className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold border transition shrink-0 cursor-pointer ${
+                          sortColumn === 'mutationCount'
+                            ? 'bg-blue-100 text-blue-900 border-blue-400 shadow-2xs'
+                            : 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-blue-50 hover:text-blue-800 hover:border-blue-300'
+                        }`}
+                        title={isMarathi ? 'फेरफार संख्येनुसार क्रमवारी लावा (सर्वात जास्त / कमी)' : 'Sort by Mutation Count (Highest / Lowest)'}
+                      >
+                        <History className="w-2.5 h-2.5 shrink-0" />
+                        <span>{isMarathi ? 'फेरफार' : 'Ferfar'}</span>
+                        {sortColumn === 'mutationCount' ? (
+                          sortDirection === 'asc' ? (
+                            <ArrowUp className="w-3 h-3 text-blue-900 shrink-0" />
+                          ) : (
+                            <ArrowDown className="w-3 h-3 text-blue-900 shrink-0" />
+                          )
+                        ) : (
+                          <ArrowUpDown className="w-2.5 h-2.5 text-slate-400 shrink-0" />
+                        )}
+                      </button>
+                    </div>
                   </th>
 
                   {/* Col 6: Area */}
@@ -871,7 +1174,8 @@ export default function ParcelsPage() {
                   const tenure = getTenureDetails(parcel.tenureClass);
                   const hasDispute = parcel.hasActiveDispute;
                   const isCopied = copiedUpi === parcel.upi;
-                  const rowNumber = (page - 1) * limit + index + 1;
+                  const numericLimit = limit === 'all' ? (totalCount || 1) : (Number(limit) || 25);
+                  const rowNumber = limit === 'all' ? index + 1 : (page - 1) * numericLimit + index + 1;
                   const areaHa = Number(parcel.totalAreaHa || 0);
                   const areaAcres = (areaHa * 2.47105).toFixed(2);
                   const potkharabaHa = Number(parcel.potkharabaAreaHa || 0);
@@ -1055,8 +1359,9 @@ export default function ParcelsPage() {
               </tbody>
             </table>
           </div>
-        )}
-      </div>
+        </>
+      )}
+    </div>
 
       {/* Pagination Controls */}
       <Pagination
@@ -1064,7 +1369,10 @@ export default function ParcelsPage() {
         totalPages={totalPages}
         totalCount={totalCount}
         limit={limit}
+        pageSize={limit}
         onPageChange={handlePageChange}
+        onPageSizeChange={handlePageSizeChange}
+        pageSizeOptions={[25, 50, 100, 'all']}
       />
 
       {/* 360 Trace Drawer */}
@@ -1072,7 +1380,7 @@ export default function ParcelsPage() {
         <ParcelTraceDrawer
           upi={selectedUpi}
           onClose={() => setSelectedUpi(null)}
-          onRefresh={() => fetchParcels(page, search)}
+          onRefresh={() => fetchParcels(page, appliedFilters, limit)}
         />
       )}
 
@@ -1082,7 +1390,7 @@ export default function ParcelsPage() {
           isOpen={Boolean(uploadModalParcelId)}
           onClose={() => setUploadModalParcelId(null)}
           parcelId={uploadModalParcelId}
-          onUploadSuccess={() => fetchParcels(page, search)}
+          onUploadSuccess={() => fetchParcels(page, appliedFilters, limit)}
         />
       )}
 

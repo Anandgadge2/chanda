@@ -71,7 +71,7 @@ export default function RenumberingParchaView({
 }) {
   const { isMarathi } = useTranslation();
 
-  // Header State (१ ते ४५ मुद्द्यांचा गोषवारा)
+  // Header State (Matching Image 2: गावाचे नाव & तालुक्याचे नाव)
   const [header, setHeader] = useState({
     villageName: '',
     taluka: '',
@@ -79,7 +79,7 @@ export default function RenumberingParchaView({
     district: 'चंद्रपूर'
   });
 
-  // Table Rows (रिनंबरिंग पर्चा)
+  // Table Rows (रिनंबरिंग पर्चा - 4 Columns)
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(false);
   const [downloadingExcel, setDownloadingExcel] = useState(false);
@@ -93,7 +93,7 @@ export default function RenumberingParchaView({
     const effectiveTaluka = t !== undefined ? t : selectedTaluka;
     const effectiveVillage = v !== undefined ? v : selectedVillage;
 
-    // If nothing selected or "all", show empty state
+    // If no valid village is selected, show empty state
     if (!effectiveVillage || effectiveVillage === 'all' || effectiveVillage === 'सर्व गावे') {
       const isTalukaGiven = effectiveTaluka && effectiveTaluka !== 'all' && effectiveTaluka !== 'सर्व तालुके';
       const tMr = isTalukaGiven ? (TALUKA_MR_MAP[effectiveTaluka] || effectiveTaluka) : '';
@@ -168,14 +168,26 @@ export default function RenumberingParchaView({
       const updated = [...prev];
       updated.splice(index + 1, 0, {
         id: `ins_${Date.now()}`,
+        chaluSurveyNo: '',
         bandobastNo: '',
-        col2: '',
         ekatrikaranNo: '',
-        col4: '',
         punarmajaniNo: ''
       });
       return updated;
     });
+  };
+
+  const addNewRow = () => {
+    setRows(prev => [
+      ...prev,
+      {
+        id: `ins_${Date.now()}`,
+        chaluSurveyNo: '',
+        bandobastNo: '',
+        ekatrikaranNo: '',
+        punarmajaniNo: ''
+      }
+    ]);
   };
 
   const deleteRow = (index) => {
@@ -231,14 +243,14 @@ export default function RenumberingParchaView({
 
   return (
     <div className="space-y-3">
-      {/* Compact Row Controls Bar */}
+      {/* Top Header Controls Bar */}
       <div className="flex flex-wrap items-center justify-between gap-2 px-1">
         <div className="flex items-center gap-2 text-xs font-bold text-slate-800">
           <TableProperties className="w-4 h-4 text-amber-600" />
           <span>
             {hasVillageSelected
-              ? `रिनंबरिंग नोंदवही — ${header.villageName || selectedVillage}`
-              : 'रिनंबरिंग नोंदवही (कृपया गाव निवडा)'}
+              ? `रिनंबरिंग पर्चा नोंदवही — ${header.villageName || selectedVillage}`
+              : 'रिनंबरिंग पर्चा नोंदवही (कृपया गाव निवडा)'}
           </span>
           <span className="text-[11px] font-mono font-normal text-slate-500">
             ({rows.length} पंक्ती)
@@ -261,6 +273,15 @@ export default function RenumberingParchaView({
               <span>पुन्हा लोड करा</span>
             </button>
           )}
+          <button
+            type="button"
+            onClick={addNewRow}
+            className="inline-flex items-center gap-1 px-2 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold text-xs rounded-lg border border-emerald-200 transition cursor-pointer"
+            title="नवीन पंक्ती जोडा"
+          >
+            <Plus className="w-3 h-3 text-emerald-600" />
+            <span>पंक्ती जोडा</span>
+          </button>
           {rows.length > 0 && (
             <button
               type="button"
@@ -284,120 +305,67 @@ export default function RenumberingParchaView({
       )}
 
       {/* =========================================================================
-          AUTHENTIC REVENUE REGISTER (EXACT FORMAT MATCHING IMAGE 2)
-          No horizontal scrolling, compact responsive width
+          AUTHENTIC REVENUE REGISTER TABLE (EXACT MATCH TO IMAGE 2)
+          Format:
+          - Row 1: Centered title "रिनंबरिंग पर्चा"
+          - Row 2: "गावाचे नाव - ..." (Left) | "तालुक्याचे नाव - ..." (Right)
+          - Row 3: चालू सर्व्हे क्रमांक | बंदोबस्त नंबर | एकत्रीकरण नंबर | पुनर्मोजणी नंबर
+          - Data Rows
       ========================================================================= */}
       <div className="bg-white border border-slate-900 rounded-xl p-3 sm:p-5 shadow-xs">
-        <div className="w-full max-w-4xl mx-auto space-y-3">
+        <div className="w-full max-w-4xl mx-auto space-y-2">
 
-          {/* -------------------------------------------------------------
-              TOP TABLE: १ ते ४५ मुद्द्यांचा गोषवारा
-          ------------------------------------------------------------- */}
+          {/* Unified Register Table */}
           <div className="border border-black bg-white">
-            <div className="border-b border-black py-1.5 text-center font-bold text-sm sm:text-base text-slate-900 tracking-wide bg-slate-50">
-              १ ते ४५ मुद्द्यांचा गोषवारा
-            </div>
-
-            <div className="divide-y divide-black font-sans text-xs">
-              {/* Row 1: गावाचे नाव */}
-              <div className="grid grid-cols-12">
-                <div className="col-span-3 border-r border-black p-1.5 font-bold text-slate-900 flex items-center justify-center bg-slate-50/70">
-                  गावाचे नाव
-                </div>
-                <div className="col-span-9 p-0.5">
-                  <input
-                    type="text"
-                    value={header.villageName}
-                    onChange={(e) => handleHeaderChange('villageName', e.target.value)}
-                    placeholder={hasVillageSelected ? '' : 'गाव निवडा किंवा येथे प्रविष्ट करा...'}
-                    className="w-full h-full px-2 py-1 text-slate-900 font-semibold focus:outline-none focus:bg-amber-50 rounded"
-                  />
-                </div>
-              </div>
-
-              {/* Row 2: तालुक्याचे नाव */}
-              <div className="grid grid-cols-12">
-                <div className="col-span-3 border-r border-black p-1.5 font-bold text-slate-900 flex items-center justify-center bg-slate-50/70">
-                  तालुक्याचे नाव
-                </div>
-                <div className="col-span-9 p-0.5">
-                  <input
-                    type="text"
-                    value={header.taluka}
-                    onChange={(e) => handleHeaderChange('taluka', e.target.value)}
-                    placeholder={hasVillageSelected ? '' : 'तालुका निवडा किंवा येथे प्रविष्ट करा...'}
-                    className="w-full h-full px-2 py-1 text-slate-900 font-semibold focus:outline-none focus:bg-amber-50 rounded"
-                  />
-                </div>
-              </div>
-
-              {/* Row 3: उपविभागाचे नाव */}
-              <div className="grid grid-cols-12">
-                <div className="col-span-3 border-r border-black p-1.5 font-bold text-slate-900 flex items-center justify-center bg-slate-50/70">
-                  उपविभागाचे नाव
-                </div>
-                <div className="col-span-9 p-0.5">
-                  <input
-                    type="text"
-                    value={header.subDivision}
-                    onChange={(e) => handleHeaderChange('subDivision', e.target.value)}
-                    placeholder=""
-                    className="w-full h-full px-2 py-1 text-slate-900 font-semibold focus:outline-none focus:bg-amber-50 rounded"
-                  />
-                </div>
-              </div>
-
-              {/* Row 4: जिल्ह्याचे नाव */}
-              <div className="grid grid-cols-12">
-                <div className="col-span-3 border-r border-black p-1.5 font-bold text-slate-900 flex items-center justify-center bg-slate-50/70">
-                  जिल्ह्याचे नाव
-                </div>
-                <div className="col-span-9 p-0.5">
-                  <input
-                    type="text"
-                    value={header.district}
-                    onChange={(e) => handleHeaderChange('district', e.target.value)}
-                    placeholder="चंद्रपूर"
-                    className="w-full h-full px-2 py-1 text-slate-900 font-semibold focus:outline-none focus:bg-amber-50 rounded"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Spacer */}
-          <div className="h-1.5" />
-
-          {/* -------------------------------------------------------------
-              LOWER TABLE: रिनंबरिंग पर्चा
-          ------------------------------------------------------------- */}
-          <div className="border border-black bg-white">
-            <div className="border-b border-black py-1.5 text-center font-bold text-sm sm:text-base text-slate-900 tracking-wide bg-slate-50">
+            
+            {/* Header Row 1: Title (Centered, across all 4 columns) */}
+            <div className="border-b border-black py-2 text-center font-bold text-base sm:text-lg text-slate-900 tracking-wide bg-slate-50/70">
               रिनंबरिंग पर्चा
             </div>
 
-            {/* Column Headers (5 Columns exactly like Image 2) */}
-            <div className="border-b border-black grid grid-cols-12 bg-slate-50/80 font-bold text-xs text-slate-900 text-center divide-x divide-black">
-              <div className="col-span-2 py-1.5 px-1 flex items-center justify-center">
+            {/* Header Row 2: Jurisdiction (गावाचे नाव & तालुक्याचे नाव) */}
+            <div className="border-b border-black grid grid-cols-2 divide-x divide-black bg-white text-xs sm:text-sm">
+              <div className="p-1.5 px-3 flex items-center gap-1.5 font-bold text-slate-900">
+                <span className="shrink-0">गावाचे नाव -</span>
+                <input
+                  type="text"
+                  value={header.villageName}
+                  onChange={(e) => handleHeaderChange('villageName', e.target.value)}
+                  placeholder={hasVillageSelected ? '' : 'गाव प्रविष्ट करा...'}
+                  className="w-full px-1.5 py-0.5 text-slate-900 font-semibold focus:outline-none focus:bg-amber-50 rounded"
+                />
+              </div>
+              <div className="p-1.5 px-3 flex items-center gap-1.5 font-bold text-slate-900">
+                <span className="shrink-0">तालुक्याचे नाव -</span>
+                <input
+                  type="text"
+                  value={header.taluka}
+                  onChange={(e) => handleHeaderChange('taluka', e.target.value)}
+                  placeholder={hasVillageSelected ? '' : 'तालुका प्रविष्ट करा...'}
+                  className="w-full px-1.5 py-0.5 text-slate-900 font-semibold focus:outline-none focus:bg-amber-50 rounded"
+                />
+              </div>
+            </div>
+
+            {/* Header Row 3: 4 Column Names */}
+            <div className="border-b border-black grid grid-cols-4 divide-x divide-black bg-slate-50 font-bold text-xs sm:text-sm text-slate-900 text-center">
+              <div className="py-2 px-1 flex items-center justify-center">
+                चालू सर्व्हे क्रमांक
+              </div>
+              <div className="py-2 px-1 flex items-center justify-center">
                 बंदोबस्त नंबर
               </div>
-              <div className="col-span-2 py-1.5 px-1 flex items-center justify-center text-slate-400">
-                {/* रिकामी जागा */}
+              <div className="py-2 px-1 flex items-center justify-center">
+                एकत्रीकरण नंबर
               </div>
-              <div className="col-span-3 py-1.5 px-1 flex items-center justify-center">
-                एकत्रिकरण नंबर
-              </div>
-              <div className="col-span-2 py-1.5 px-1 flex items-center justify-center text-slate-400">
-                {/* रिकामी जागा */}
-              </div>
-              <div className="col-span-3 py-1.5 px-1 flex items-center justify-center">
+              <div className="py-2 px-1 flex items-center justify-center">
                 पुनर्मोजणी नंबर
               </div>
             </div>
 
             {/* Data Rows */}
             {rows.length === 0 ? (
-              <div className="py-10 px-4 text-center text-slate-400 text-xs">
+              <div className="py-12 px-4 text-center text-slate-400 text-xs sm:text-sm">
                 {hasVillageSelected ? (
                   <span>या गावासाठी रिनंबरिंग अभिलेख उपलब्ध नाहीत.</span>
                 ) : (
@@ -410,64 +378,53 @@ export default function RenumberingParchaView({
                 )}
               </div>
             ) : (
-              <div className="divide-y divide-black font-sans text-xs">
+              <div className="divide-y divide-black font-sans text-xs sm:text-sm">
                 {rows.map((row, idx) => (
                   <div
                     key={row.id || idx}
-                    className="grid grid-cols-12 divide-x divide-black group hover:bg-amber-50/30 transition relative"
+                    className="grid grid-cols-4 divide-x divide-black group hover:bg-amber-50/30 transition relative"
                   >
-                    {/* Col 1: बंदोबस्त नंबर */}
-                    <div className="col-span-2 p-0.5">
+                    {/* Col 1: चालू सर्व्हे क्रमांक */}
+                    <div className="p-0.5">
                       <input
                         type="text"
-                        value={row.bandobastNo}
+                        value={row.chaluSurveyNo || ''}
+                        onChange={(e) => handleCellChange(idx, 'chaluSurveyNo', e.target.value)}
+                        placeholder=""
+                        className="w-full text-center py-1.5 px-1 text-slate-900 font-semibold focus:outline-none focus:bg-amber-100/60 rounded"
+                      />
+                    </div>
+
+                    {/* Col 2: बंदोबस्त नंबर */}
+                    <div className="p-0.5">
+                      <input
+                        type="text"
+                        value={row.bandobastNo || ''}
                         onChange={(e) => handleCellChange(idx, 'bandobastNo', e.target.value)}
                         placeholder=""
-                        className="w-full text-center py-1 px-1 text-slate-900 font-semibold focus:outline-none focus:bg-amber-100/60 rounded"
+                        className="w-full text-center py-1.5 px-1 text-slate-900 font-semibold focus:outline-none focus:bg-amber-100/60 rounded"
                       />
                     </div>
 
-                    {/* Col 2: (Blank space as in template) */}
-                    <div className="col-span-2 p-0.5">
+                    {/* Col 3: एकत्रीकरण नंबर */}
+                    <div className="p-0.5">
                       <input
                         type="text"
-                        value={row.col2}
-                        onChange={(e) => handleCellChange(idx, 'col2', e.target.value)}
-                        placeholder=""
-                        className="w-full text-center py-1 px-1 text-slate-800 focus:outline-none focus:bg-amber-100/60 rounded"
-                      />
-                    </div>
-
-                    {/* Col 3: एकत्रिकरण नंबर */}
-                    <div className="col-span-3 p-0.5">
-                      <input
-                        type="text"
-                        value={row.ekatrikaranNo}
+                        value={row.ekatrikaranNo || ''}
                         onChange={(e) => handleCellChange(idx, 'ekatrikaranNo', e.target.value)}
                         placeholder=""
-                        className="w-full text-center py-1 px-1 text-slate-900 font-semibold focus:outline-none focus:bg-amber-100/60 rounded"
+                        className="w-full text-center py-1.5 px-1 text-slate-900 font-semibold focus:outline-none focus:bg-amber-100/60 rounded"
                       />
                     </div>
 
-                    {/* Col 4: (Blank space as in template) */}
-                    <div className="col-span-2 p-0.5">
+                    {/* Col 4: पुनर्मोजणी नंबर */}
+                    <div className="p-0.5 relative">
                       <input
                         type="text"
-                        value={row.col4}
-                        onChange={(e) => handleCellChange(idx, 'col4', e.target.value)}
-                        placeholder=""
-                        className="w-full text-center py-1 px-1 text-slate-800 focus:outline-none focus:bg-amber-100/60 rounded"
-                      />
-                    </div>
-
-                    {/* Col 5: पुनर्मोजणी नंबर */}
-                    <div className="col-span-3 p-0.5 relative">
-                      <input
-                        type="text"
-                        value={row.punarmajaniNo}
+                        value={row.punarmajaniNo || ''}
                         onChange={(e) => handleCellChange(idx, 'punarmajaniNo', e.target.value)}
                         placeholder=""
-                        className="w-full text-center py-1 px-1 text-slate-900 font-semibold focus:outline-none focus:bg-amber-100/60 rounded"
+                        className="w-full text-center py-1.5 px-1 text-slate-900 font-semibold focus:outline-none focus:bg-amber-100/60 rounded"
                       />
 
                       {/* Row Actions on hover */}

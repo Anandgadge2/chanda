@@ -435,7 +435,7 @@ export default function EditParcelModal({ isOpen, onClose, parcel, onUpdateSucce
         </div>
 
         {/* 3-Tab Switcher - Responsive & Touch-friendly */}
-        <div className="flex border-b border-slate-200/90 px-3 sm:px-6 bg-slate-50/70 gap-1.5 sm:gap-3 pt-2 overflow-x-auto no-scrollbar shrink-0">
+        <div className="flex border-b border-slate-200/90 px-3 sm:px-6 bg-slate-50/70 gap-1.5 sm:gap-3 pt-2 overflow-x-auto no-scrollbar touch-scroll shrink-0">
           <button
             type="button"
             onClick={() => setActiveTab('current')}
@@ -1007,7 +1007,7 @@ export default function EditParcelModal({ isOpen, onClose, parcel, onUpdateSucce
           </div>
 
           {/* PINNED Sticky Form Actions Footer - ALWAYS VISIBLE */}
-          <div className="px-4 sm:px-6 py-3.5 sm:py-4 border-t border-slate-200/90 bg-slate-50/90 backdrop-blur-md shrink-0 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+          <div className="px-4 sm:px-6 py-3 sm:py-4 border-t border-slate-200/90 bg-slate-50/90 backdrop-blur-md shrink-0 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-3 pb-safe">
             <div className="flex items-center gap-2 text-xs text-slate-500">
               <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
               <span>{isMarathi ? 'बदल सेव्ह होताच गाव व तालुक्याचा गोषवारा तात्काळ फेरगणती होईल.' : 'Village & taluka rollups auto-recalculated on save.'}</span>

@@ -135,7 +135,7 @@ export default function PortalLayout({ children }) {
         onToggleSidebar={handleToggleSidebar}
         onToggleMobileSidebar={() => setMobileSidebarOpen((prev) => !prev)}
       />
-      <div className="w-full max-w-full px-3 sm:px-5 lg:px-6 flex-1 py-3 sm:py-4 flex items-start gap-3 sm:gap-4 min-w-0 overflow-x-hidden lg:overflow-x-visible">
+      <div className="w-full max-w-full px-2.5 sm:px-5 lg:px-6 flex-1 py-2.5 sm:py-4 flex items-start gap-3 sm:gap-4 min-w-0 overflow-x-hidden lg:overflow-x-visible">
         <Sidebar
           collapsed={sidebarCollapsed}
           mobileOpen={mobileSidebarOpen}
@@ -143,7 +143,7 @@ export default function PortalLayout({ children }) {
           onOpenMobile={() => setMobileSidebarOpen(true)}
           onToggleCollapse={handleToggleSidebar}
         />
-        <main id="main-content" className="flex-1 min-w-0 w-full max-w-full overflow-x-hidden relative pb-16 lg:pb-0">
+        <main id="main-content" className="flex-1 min-w-0 w-full max-w-full overflow-x-hidden relative pb-20 lg:pb-4 pb-safe">
           <RouteGuard>{children}</RouteGuard>
         </main>
       </div>

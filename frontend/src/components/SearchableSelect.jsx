@@ -115,9 +115,7 @@ export default function SearchableSelect({
     if (isOpen && containerRef.current) {
       const rect = containerRef.current.getBoundingClientRect();
       const viewportWidth = typeof window !== 'undefined' ? window.innerWidth : 1000;
-      if (viewportWidth < 640) {
-        setDropdownAlign('left');
-      } else if (align === 'right' || rect.left + 280 > viewportWidth) {
+      if (align === 'right' || rect.left + 260 > viewportWidth) {
         setDropdownAlign('right');
       } else {
         setDropdownAlign('left');
@@ -249,6 +247,14 @@ export default function SearchableSelect({
 
   const isFiltered = value !== undefined && value !== null && value !== '' && value !== 'all';
 
+  // Determine intelligent clear value based on provided clearValue or options convention
+  const effectiveClearValue = useMemo(() => {
+    if (clearValue !== undefined && clearValue !== '') return clearValue;
+    if (normalizedOptions.some((o) => o.value === 'all')) return 'all';
+    if (normalizedOptions.some((o) => o.value === '')) return '';
+    return normalizedOptions[0]?.value ?? '';
+  }, [clearValue, normalizedOptions]);
+
   return (
     <div
       ref={containerRef}
@@ -300,12 +306,12 @@ export default function SearchableSelect({
               tabIndex={0}
               onClick={(e) => {
                 e.stopPropagation();
-                handleSelect(clearValue);
+                handleSelect(effectiveClearValue);
               }}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
                   e.stopPropagation();
-                  handleSelect(clearValue);
+                  handleSelect(effectiveClearValue);
                 }
               }}
               title={isMarathi ? 'हा फिल्टर साफ करा' : 'Clear this filter'}
@@ -333,7 +339,7 @@ export default function SearchableSelect({
           ref={dropdownRef}
           className={`absolute ${
             dropdownAlign === 'right' ? 'right-0' : 'left-0'
-          } mt-1.5 w-full min-w-[240px] sm:min-w-[270px] max-w-[calc(100vw-1.5rem)] sm:max-w-[340px] bg-white border border-slate-200/90 rounded-2xl shadow-xl shadow-slate-900/12 z-[100] flex flex-col max-h-[340px] overflow-hidden animate-in fade-in zoom-in-95 duration-150 ${dropdownClassName}`}
+          } mt-1.5 w-full min-w-[240px] sm:min-w-[270px] max-w-[calc(100vw-2rem)] sm:max-w-[340px] bg-white border border-slate-200/90 rounded-2xl shadow-xl shadow-slate-900/12 z-[100] flex flex-col max-h-[340px] overflow-hidden animate-in fade-in zoom-in-95 duration-150 ${dropdownClassName}`}
         >
           {/* Fixed Search Header */}
           <div className="p-2.5 border-b border-slate-100 bg-slate-50/80 shrink-0">
@@ -345,7 +351,7 @@ export default function SearchableSelect({
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder={effectiveSearchPlaceholder}
-                className="w-full pl-9 pr-8 py-2 text-xs bg-white border border-slate-200/90 rounded-xl text-slate-900 font-medium placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#242b6b]/15 focus:border-[#242b6b] transition shadow-2xs tracking-normal"
+                className="w-full pl-9 pr-8 py-2 text-sm sm:text-xs bg-white border border-slate-200/90 rounded-xl text-slate-900 font-medium placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#242b6b]/15 focus:border-[#242b6b] transition shadow-2xs tracking-normal"
               />
               {searchTerm && (
                 <button

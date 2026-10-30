@@ -210,41 +210,41 @@ export default function ParcelTraceDrawer({ upi, onClose, onRefresh }) {
           </div>
 
           {/* Header Action Tools */}
-          <div className="flex items-center gap-1.5 shrink-0">
-            {/* Revenue Glossary Trigger */}
+          <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
+            {/* Revenue Glossary Trigger - Desktop/Tablet */}
             <button
               type="button"
               onClick={() => {
                 setGlossaryInitialQuery('');
                 setGlossaryModalOpen(true);
               }}
-              className="px-2.5 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 border border-slate-200/80 transition flex items-center gap-1.5 cursor-pointer"
+              className="hidden sm:flex px-2.5 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 border border-slate-200/80 transition items-center gap-1.5 cursor-pointer"
               title={isMarathi ? '७/१२ संक्षिप्त रूपे मार्गदर्शक (Glossary)' : '7/12 Abbreviations Glossary'}
             >
               <BookOpen className="w-3.5 h-3.5 text-slate-500" />
-              <span className="hidden sm:inline">{isMarathi ? 'संक्षिप्त रूपे मदत' : 'Glossary Help'}</span>
+              <span>{isMarathi ? 'संक्षिप्त रूपे' : 'Glossary'}</span>
             </button>
 
             {/* Edit / Rectification Button */}
             <button
               type="button"
               onClick={() => setEditModalOpen(true)}
-              className="px-2.5 py-1.5 rounded-lg text-xs font-medium text-emerald-700 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 transition flex items-center gap-1.5 cursor-pointer"
+              className="px-2 sm:px-2.5 py-1.5 rounded-lg text-xs font-semibold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 transition flex items-center gap-1 sm:gap-1.5 cursor-pointer shadow-2xs active:scale-95"
               title={isMarathi ? 'अभिलेख दुरुस्ती करा (Edit Parcel & Timeline)' : 'Edit Parcel & Timeline'}
             >
               <Edit3 className="w-3.5 h-3.5 text-emerald-600" />
-              <span>{isMarathi ? 'दुरुस्ती करा' : 'Edit Parcel'}</span>
+              <span className="hidden xs:inline">{isMarathi ? 'दुरुस्ती' : 'Edit'}</span>
             </button>
 
-            {/* Print / Export */}
+            {/* Print / Export - Desktop/Tablet */}
             <button
               type="button"
               onClick={() => window.print()}
-              className="px-2.5 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 border border-slate-200/80 transition flex items-center gap-1.5 cursor-pointer"
+              className="hidden sm:flex px-2.5 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 border border-slate-200/80 transition items-center gap-1.5 cursor-pointer"
               title={isMarathi ? 'अहवाल प्रिंट करा (Print Dossier)' : 'Print Dossier'}
             >
               <Printer className="w-3.5 h-3.5 text-slate-500" />
-              <span className="hidden sm:inline">{isMarathi ? 'अहवाल प्रिंट' : 'Print Report'}</span>
+              <span>{isMarathi ? 'प्रिंट' : 'Print'}</span>
             </button>
 
             {/* Split View Toggle */}
@@ -259,16 +259,16 @@ export default function ParcelTraceDrawer({ upi, onClose, onRefresh }) {
               title={isSplitView ? (isMarathi ? 'केवळ माहिती दृश्य' : 'Details View Only') : (isMarathi ? 'बाजू-बाजूने स्कॅन दृश्य' : 'Side-by-Side Scan View')}
             >
               <Columns className="w-3.5 h-3.5 text-blue-600" />
-              <span>{isSplitView ? (isMarathi ? 'बाजू-बाजूने दृश्य' : 'Split View') : (isMarathi ? 'केवळ माहिती' : 'Details Only')}</span>
+              <span>{isSplitView ? (isMarathi ? 'बाजू-बाजूने' : 'Split') : (isMarathi ? 'केवळ माहिती' : 'Details')}</span>
             </button>
 
-            <div className="h-4 w-px bg-slate-200 mx-1" />
+            <div className="h-4 w-px bg-slate-200 mx-0.5 sm:mx-1 hidden sm:block" />
 
-            {/* Fullscreen Modal Toggle */}
+            {/* Fullscreen Modal Toggle - Desktop/Tablet */}
             <button
               type="button"
               onClick={() => setIsFullscreen((prev) => !prev)}
-              className="p-1.5 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition cursor-pointer"
+              className="hidden sm:flex p-1.5 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition cursor-pointer"
               title={isFullscreen ? (isMarathi ? 'पूर्ण स्क्रीन बंद करा' : 'Exit Fullscreen') : (isMarathi ? 'पूर्ण स्क्रीन करा' : 'Enter Fullscreen')}
               aria-label={isFullscreen ? (isMarathi ? 'पूर्ण स्क्रीन बंद करा' : 'Exit Fullscreen') : (isMarathi ? 'पूर्ण स्क्रीन करा' : 'Enter Fullscreen')}
             >

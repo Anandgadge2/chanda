@@ -26,6 +26,7 @@ import {
   ArrowRight,
   FileText,
   Filter,
+  RotateCcw,
 } from 'lucide-react';
 import { api } from '../../lib/api';
 import {
@@ -54,18 +55,28 @@ export default function CasesPage() {
   const [totalCount, setTotalCount] = useState(0);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const limit = 10;
+  const [limit, setLimit] = useState(25);
 
-  // Search & Filters (in a single row)
-  const [search, setSearch] = useState('');
-  const [taluka, setTaluka] = useState('');
-  const [village, setVillage] = useState('');
+  // Draft Filter Inputs
+  const [draftSearch, setDraftSearch] = useState('');
+  const [draftTaluka, setDraftTaluka] = useState('');
+  const [draftVillage, setDraftVillage] = useState('');
   const [villageOptions, setVillageOptions] = useState([]);
   const [loadingVillages, setLoadingVillages] = useState(false);
-  const [violationType, setViolationType] = useState('');
-  const [status, setStatus] = useState('');
-  const [isRepossessedToGovt, setIsRepossessedToGovt] = useState('');
+  const [draftViolationType, setDraftViolationType] = useState('');
+  const [draftStatus, setDraftStatus] = useState('');
+  const [draftIsRepossessedToGovt, setDraftIsRepossessedToGovt] = useState('');
   const [showMobileFilters, setShowMobileFilters] = useState(false);
+
+  // Applied Filters (used for backend queries and active badge display)
+  const [appliedFilters, setAppliedFilters] = useState({
+    search: '',
+    taluka: '',
+    village: '',
+    violationType: '',
+    status: '',
+    isRepossessedToGovt: '',
+  });
 
   // Summary Stats for KPI cards
   const [stats, setStats] = useState({
@@ -89,18 +100,31 @@ export default function CasesPage() {
   // Copy Feedback State
   const [copiedCaseNumber, setCopiedCaseNumber] = useState(null);
 
-  // Search debounce ref
-  const searchTimeoutRef = useRef(null);
-
   // Read query params from URL on mount if navigated with ?taluka=...&village=...
   useEffect(() => {
+    let initialFilters = {
+      search: '',
+      taluka: '',
+      village: '',
+      violationType: '',
+      status: '',
+      isRepossessedToGovt: '',
+    };
     if (typeof window !== 'undefined') {
       const urlParams = new URLSearchParams(window.location.search);
-      const qTaluka = urlParams.get('taluka');
-      const qVillage = urlParams.get('village');
-      if (qTaluka) setTaluka(qTaluka);
-      if (qVillage) setVillage(qVillage);
+      const qTaluka = urlParams.get('taluka') || '';
+      const qVillage = urlParams.get('village') || '';
+      if (qTaluka) {
+        setDraftTaluka(qTaluka);
+        initialFilters.taluka = qTaluka;
+      }
+      if (qVillage) {
+        setDraftVillage(qVillage);
+        initialFilters.village = qVillage;
+      }
     }
+    setAppliedFilters(initialFilters);
+    fetchCases(1, initialFilters);
   }, []);
 
   // Dynamically load villages for selected taluka
@@ -109,7 +133,7 @@ export default function CasesPage() {
     async function loadVillages() {
       setLoadingVillages(true);
       try {
-        const res = await api.getTalukaVillages(taluka || 'all');
+        const res = await api.getTalukaVillages(draftTaluka || 'all');
         if (isMounted) {
           setVillageOptions(res.villages || []);
         }
@@ -128,23 +152,34 @@ export default function CasesPage() {
     return () => {
       isMounted = false;
     };
-  }, [taluka]);
+  }, [draftTaluka]);
 
   const handleTalukaChange = (newTaluka) => {
-    setTaluka(newTaluka);
-    setVillage('');
+    setDraftTaluka(newTaluka);
+    setDraftVillage('');
   };
 
-  const fetchCases = async (targetPage = page, customSearch = search) => {
+  const isFilterPending = useMemo(() => {
+    return (
+      draftTaluka !== appliedFilters.taluka ||
+      draftVillage !== appliedFilters.village ||
+      draftViolationType !== appliedFilters.violationType ||
+      draftStatus !== appliedFilters.status ||
+      draftIsRepossessedToGovt !== appliedFilters.isRepossessedToGovt ||
+      draftSearch.trim() !== appliedFilters.search.trim()
+    );
+  }, [draftTaluka, draftVillage, draftViolationType, draftStatus, draftIsRepossessedToGovt, draftSearch, appliedFilters]);
+
+  const fetchCases = async (targetPage = page, filtersToUse = appliedFilters, targetLimit = limit) => {
     setLoading(true);
     try {
-      const params = { page: targetPage, limit };
-      if (customSearch && customSearch.trim()) params.search = customSearch.trim();
-      if (taluka) params.taluka = taluka;
-      if (village && village !== 'all') params.village = village;
-      if (violationType) params.violationType = violationType;
-      if (status) params.status = status;
-      if (isRepossessedToGovt !== '') params.isRepossessedToGovt = isRepossessedToGovt;
+      const params = { page: targetPage, limit: targetLimit };
+      if (filtersToUse.search && filtersToUse.search.trim()) params.search = filtersToUse.search.trim();
+      if (filtersToUse.taluka) params.taluka = filtersToUse.taluka;
+      if (filtersToUse.village && filtersToUse.village !== 'all') params.village = filtersToUse.village;
+      if (filtersToUse.violationType) params.violationType = filtersToUse.violationType;
+      if (filtersToUse.status) params.status = filtersToUse.status;
+      if (filtersToUse.isRepossessedToGovt !== '') params.isRepossessedToGovt = filtersToUse.isRepossessedToGovt;
 
       const data = await api.getCases(params);
       setCases(data.cases || []);
@@ -166,44 +201,60 @@ export default function CasesPage() {
     }
   };
 
-  useEffect(() => {
+  const handleApplyFilters = () => {
+    const nextFilters = {
+      search: draftSearch.trim(),
+      taluka: draftTaluka,
+      village: draftVillage,
+      violationType: draftViolationType,
+      status: draftStatus,
+      isRepossessedToGovt: draftIsRepossessedToGovt,
+    };
+    setAppliedFilters(nextFilters);
     setPage(1);
-    fetchCases(1, search);
-  }, [taluka, village, violationType, status, isRepossessedToGovt]);
-
-  // Handle live search with debounce
-  const handleSearchChange = (e) => {
-    const val = e.target.value;
-    setSearch(val);
-    if (searchTimeoutRef.current) {
-      clearTimeout(searchTimeoutRef.current);
-    }
-    searchTimeoutRef.current = setTimeout(() => {
-      setPage(1);
-      fetchCases(1, val);
-    }, 300);
+    fetchCases(1, nextFilters);
   };
 
   const handleClearSearch = () => {
-    setSearch('');
-    setPage(1);
-    fetchCases(1, '');
+    setDraftSearch('');
   };
 
   const handleResetFilters = () => {
-    setSearch('');
-    setTaluka('');
-    setVillage('');
-    setViolationType('');
-    setStatus('');
-    setIsRepossessedToGovt('');
+    const cleanFilters = {
+      search: '',
+      taluka: '',
+      village: '',
+      violationType: '',
+      status: '',
+      isRepossessedToGovt: '',
+    };
+    setDraftSearch('');
+    setDraftTaluka('');
+    setDraftVillage('');
+    setDraftViolationType('');
+    setDraftStatus('');
+    setDraftIsRepossessedToGovt('');
+    setAppliedFilters(cleanFilters);
     setPage(1);
-    fetchCases(1, '');
+    fetchCases(1, cleanFilters);
+  };
+
+  const handleMetricCardFilter = (newStatus, newRepossessed) => {
+    setDraftStatus(newStatus);
+    setDraftIsRepossessedToGovt(newRepossessed);
+    const nextFilters = {
+      ...appliedFilters,
+      status: newStatus,
+      isRepossessedToGovt: newRepossessed,
+    };
+    setAppliedFilters(nextFilters);
+    setPage(1);
+    fetchCases(1, nextFilters);
   };
 
   const handlePageChange = (newPage) => {
     setPage(newPage);
-    fetchCases(newPage);
+    fetchCases(newPage, appliedFilters);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -229,12 +280,12 @@ export default function CasesPage() {
   };
 
   const activeFiltersCount =
-    (taluka ? 1 : 0) +
-    (village ? 1 : 0) +
-    (violationType ? 1 : 0) +
-    (status ? 1 : 0) +
-    (isRepossessedToGovt !== '' ? 1 : 0) +
-    (search ? 1 : 0);
+    (appliedFilters.taluka ? 1 : 0) +
+    (appliedFilters.village ? 1 : 0) +
+    (appliedFilters.violationType ? 1 : 0) +
+    (appliedFilters.status ? 1 : 0) +
+    (appliedFilters.isRepossessedToGovt !== '' ? 1 : 0) +
+    (appliedFilters.search ? 1 : 0);
 
   const talukaSelectOptions = useMemo(() => [
     {
@@ -348,12 +399,9 @@ export default function CasesPage() {
         {/* Metric 1: Total Cases */}
         <button
           type="button"
-          onClick={() => {
-            setStatus('');
-            setIsRepossessedToGovt('');
-          }}
+          onClick={() => handleMetricCardFilter('', '')}
           className={`p-2.5 sm:p-3 rounded-xl border text-left transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xs active:scale-98 relative overflow-hidden group cursor-pointer ${
-            status === '' && isRepossessedToGovt === ''
+            appliedFilters.status === '' && appliedFilters.isRepossessedToGovt === ''
               ? 'bg-blue-50/90 border-blue-500 shadow-xs ring-1 ring-blue-500/30'
               : 'bg-white/95 backdrop-blur-md border-slate-200/90 hover:border-slate-300 shadow-2xs'
           }`}
@@ -378,12 +426,9 @@ export default function CasesPage() {
         {/* Metric 2: Active Hearings */}
         <button
           type="button"
-          onClick={() => {
-            setStatus('HEARING_SCHEDULED');
-            setIsRepossessedToGovt('');
-          }}
+          onClick={() => handleMetricCardFilter('HEARING_SCHEDULED', '')}
           className={`p-2.5 sm:p-3 rounded-xl border text-left transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xs active:scale-98 relative overflow-hidden group cursor-pointer ${
-            status === 'HEARING_SCHEDULED'
+            appliedFilters.status === 'HEARING_SCHEDULED'
               ? 'bg-indigo-50/90 border-indigo-500 shadow-xs ring-1 ring-indigo-500/30'
               : 'bg-white/95 backdrop-blur-md border-slate-200/90 hover:border-slate-300 shadow-2xs'
           }`}
@@ -408,12 +453,9 @@ export default function CasesPage() {
         {/* Metric 3: Show Cause Notices */}
         <button
           type="button"
-          onClick={() => {
-            setStatus('NOTICE_ISSUED');
-            setIsRepossessedToGovt('');
-          }}
+          onClick={() => handleMetricCardFilter('NOTICE_ISSUED', '')}
           className={`p-2.5 sm:p-3 rounded-xl border text-left transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xs active:scale-98 relative overflow-hidden group cursor-pointer ${
-            status === 'NOTICE_ISSUED'
+            appliedFilters.status === 'NOTICE_ISSUED'
               ? 'bg-amber-50/90 border-amber-500 shadow-xs ring-1 ring-amber-500/30'
               : 'bg-white/95 backdrop-blur-md border-slate-200/90 hover:border-slate-300 shadow-2xs'
           }`}
@@ -438,12 +480,9 @@ export default function CasesPage() {
         {/* Metric 4: Shasan Jama */}
         <button
           type="button"
-          onClick={() => {
-            setStatus('');
-            setIsRepossessedToGovt('true');
-          }}
+          onClick={() => handleMetricCardFilter('', 'true')}
           className={`p-2.5 sm:p-3 rounded-xl border text-left transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xs active:scale-98 relative overflow-hidden group cursor-pointer ${
-            isRepossessedToGovt === 'true'
+            appliedFilters.isRepossessedToGovt === 'true'
               ? 'bg-emerald-50/90 border-emerald-500 shadow-xs ring-1 ring-emerald-500/30'
               : 'bg-white/95 backdrop-blur-md border-slate-200/90 hover:border-slate-300 shadow-2xs'
           }`}
@@ -494,8 +533,14 @@ export default function CasesPage() {
             <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
             <input
               type="text"
-              value={search}
-              onChange={handleSearchChange}
+              value={draftSearch}
+              onChange={(e) => setDraftSearch(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  handleApplyFilters();
+                }
+              }}
               placeholder={
                 isMarathi
                   ? 'केस क्र., गट क्र., गाव किंवा कब्जेदार शोधा...'
@@ -503,11 +548,11 @@ export default function CasesPage() {
               }
               className="w-full pl-10 pr-8 py-2 text-xs bg-slate-50/80 hover:bg-white focus:bg-white border border-slate-200 rounded-xl font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition shadow-2xs"
             />
-            {search && (
+            {draftSearch && (
               <button
                 type="button"
                 onClick={handleClearSearch}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5 rounded-lg"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5 rounded-lg cursor-pointer"
                 title={isMarathi ? 'शोध साफ करा' : 'Clear search'}
               >
                 <X className="w-3.5 h-3.5" />
@@ -550,7 +595,7 @@ export default function CasesPage() {
           <div className="w-full sm:w-auto sm:min-w-[140px] sm:max-w-[190px]">
             <SearchableSelect
               options={talukaSelectOptions}
-              value={taluka}
+              value={draftTaluka}
               onChange={(val) => handleTalukaChange(val)}
               placeholder={isMarathi ? 'सर्व तालुके' : 'All Talukas'}
               searchPlaceholder={isMarathi ? 'तालुका शोधा...' : 'Search taluka...'}
@@ -562,8 +607,8 @@ export default function CasesPage() {
           <div className="w-full sm:w-auto sm:min-w-[140px] sm:max-w-[190px]">
             <SearchableSelect
               options={villageSelectOptions}
-              value={village}
-              onChange={(val) => setVillage(val)}
+              value={draftVillage}
+              onChange={(val) => setDraftVillage(val)}
               placeholder={isMarathi ? 'सर्व गावे' : 'All Villages'}
               searchPlaceholder={isMarathi ? 'गाव शोधा...' : 'Search village...'}
               disabled={loadingVillages}
@@ -575,8 +620,8 @@ export default function CasesPage() {
           <div className="w-full sm:w-auto sm:min-w-[160px] sm:max-w-[210px]">
             <SearchableSelect
               options={violationSelectOptions}
-              value={violationType}
-              onChange={(val) => setViolationType(val)}
+              value={draftViolationType}
+              onChange={(val) => setDraftViolationType(val)}
               placeholder={isMarathi ? 'सर्व उल्लंघन प्रकार' : 'All Violation Types'}
               searchPlaceholder={isMarathi ? 'उल्लंघन शोधा...' : 'Search violation...'}
               showCount={false}
@@ -587,8 +632,8 @@ export default function CasesPage() {
           <div className="w-full sm:w-auto sm:min-w-[145px] sm:max-w-[185px]">
             <SearchableSelect
               options={statusSelectOptions}
-              value={status}
-              onChange={(val) => setStatus(val)}
+              value={draftStatus}
+              onChange={(val) => setDraftStatus(val)}
               placeholder={isMarathi ? 'सर्व सद्यस्थिती' : 'All Statuses'}
               searchPlaceholder={isMarathi ? 'स्थिती शोधा...' : 'Search status...'}
               showCount={false}
@@ -599,28 +644,46 @@ export default function CasesPage() {
           <div className="w-full sm:w-auto sm:min-w-[140px] sm:max-w-[175px]">
             <SearchableSelect
               options={shasanJamaSelectOptions}
-              value={isRepossessedToGovt}
-              onChange={(val) => setIsRepossessedToGovt(val)}
+              value={draftIsRepossessedToGovt}
+              onChange={(val) => setDraftIsRepossessedToGovt(val)}
               placeholder={isMarathi ? 'शासन जमा स्थिती' : 'Govt Repossession'}
               searchPlaceholder={isMarathi ? 'शोधा...' : 'Search...'}
               showCount={false}
             />
           </div>
 
-          {/* Reset Filter Button if active */}
-          {activeFiltersCount > 0 && (
-            <button
-              type="button"
-              onClick={handleResetFilters}
-              className="px-2.5 py-2 text-rose-600 hover:bg-rose-50 rounded-xl border border-rose-200 transition shrink-0 flex items-center justify-center gap-1 text-xs font-bold w-full sm:w-auto cursor-pointer"
-              title={isMarathi ? 'सर्व फिल्टर्स साफ करा' : 'Clear all filters'}
-              aria-label={isMarathi ? 'सर्व फिल्टर्स साफ करा' : 'Clear all filters'}
-            >
-              <X className="w-3.5 h-3.5" />
-              <span className="md:hidden">{isMarathi ? 'फिल्टर्स साफ करा' : 'Clear filters'}</span>
-              <span className="hidden xl:inline">{isMarathi ? 'साफ करा' : 'Clear'}</span>
-            </button>
-          )}
+          {/* Apply Button ("लागू करा" / "Apply") */}
+          <button
+            type="button"
+            onClick={handleApplyFilters}
+            disabled={loading}
+            className={clsx(
+              'h-9 px-3 sm:px-3.5 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95 shrink-0 shadow-xs cursor-pointer select-none w-full sm:w-auto',
+              isFilterPending
+                ? 'bg-blue-600 hover:bg-blue-700 text-white ring-2 ring-blue-400/60 ring-offset-1 shadow-blue-700/20'
+                : 'bg-[#242b6b] hover:bg-[#1a2053] text-white'
+            )}
+            title={isMarathi ? 'निवडलेले फिल्टर्स लागू करा (Enter)' : 'Apply Selected Filters (Enter)'}
+          >
+            <Filter className="w-3.5 h-3.5 shrink-0" />
+            <span>{isMarathi ? 'लागू करा' : 'Apply'}</span>
+            {isFilterPending && (
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-300 animate-pulse shrink-0" />
+            )}
+          </button>
+
+          {/* Reset Filters Button ("रीसेट" / "Reset") */}
+          <button
+            type="button"
+            onClick={handleResetFilters}
+            disabled={loading}
+            className="h-9 px-3 sm:px-3 text-slate-700 hover:text-rose-700 bg-slate-100 hover:bg-rose-50 rounded-xl border border-slate-300 hover:border-rose-300 transition-all active:scale-95 shrink-0 cursor-pointer flex items-center justify-center gap-1.5 text-xs font-bold w-full sm:w-auto shadow-2xs"
+            title={isMarathi ? 'सर्व फिल्टर्स रीसेट करा' : 'Reset all filters'}
+            aria-label={isMarathi ? 'सर्व फिल्टर्स रीसेट करा' : 'Reset all filters'}
+          >
+            <RotateCcw className="w-3.5 h-3.5 text-rose-600 shrink-0" />
+            <span>{isMarathi ? 'रीसेट' : 'Reset'}</span>
+          </button>
         </div>
       </div>
 
@@ -639,12 +702,12 @@ export default function CasesPage() {
               <span className="text-[11px] font-extrabold px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-900 border border-blue-200 font-mono">
                 {totalCount} {isMarathi ? 'नोंदणी' : 'Records'}
               </span>
-              {village && (
+              {appliedFilters.village && (
                 <>
                   <span className="text-slate-300">•</span>
                   <span className="inline-flex items-center gap-1 text-[11px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200/80 px-2.5 py-0.5 rounded-full">
                     <MapPin className="w-3 h-3 text-emerald-600" />
-                    {isMarathi ? `गाव: ${formatVillageName(village, true)}` : `Village: ${formatVillageName(village, false)}`}
+                    {isMarathi ? `गाव: ${formatVillageName(appliedFilters.village, true)}` : `Village: ${formatVillageName(appliedFilters.village, false)}`}
                   </span>
                 </>
               )}
@@ -707,7 +770,8 @@ export default function CasesPage() {
                 const isCopied = copiedCaseNumber === c.caseNumber;
                 const hasProceedings = Boolean((c.hearings && c.hearings.length > 0) || c.finalOrderDetails);
                 const isExpanded = hasProceedings && expandedRowIds.has(c.id);
-                const rowNumber = (page - 1) * limit + index + 1;
+                const numericLimit = limit === 'all' ? (totalCount || 1) : (Number(limit) || 25);
+  const rowNumber = limit === 'all' ? index + 1 : (page - 1) * numericLimit + index + 1;
 
                 return (
                   <div key={c.id} className="p-3.5 bg-white space-y-2.5">
@@ -1392,7 +1456,10 @@ export default function CasesPage() {
             totalPages={totalPages}
             totalCount={totalCount}
             limit={limit}
+            pageSize={limit}
             onPageChange={handlePageChange}
+            onPageSizeChange={handlePageSizeChange}
+            pageSizeOptions={[25, 50, 100, 'all']}
           />
         </div>
       </div>

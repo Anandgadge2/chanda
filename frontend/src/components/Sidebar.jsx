@@ -263,7 +263,7 @@ export default function Sidebar({
          ───────────────────────────────────────────────────────────── */}
       <nav
         aria-label={isMarathi ? 'मोबाईल जलद नेव्हिगेशन' : 'Mobile Quick Navigation'}
-        className="lg:hidden fixed bottom-3 inset-x-3 max-w-[340px] mx-auto z-40 bg-white/95 backdrop-blur-md border border-slate-200/90 rounded-full shadow-xl shadow-slate-900/10 px-3 py-1.5 flex items-center justify-between"
+        className="lg:hidden fixed bottom-[calc(0.75rem+env(safe-area-inset-bottom,0px))] inset-x-3 max-w-[350px] mx-auto z-40 bg-white/95 backdrop-blur-md border border-slate-200/90 rounded-full shadow-xl shadow-slate-900/15 px-3 py-1.5 flex items-center justify-between"
       >
         {mobileQuickItems.filter(Boolean).map((item) => {
           if (!item || !item.icon) return null;
@@ -276,11 +276,12 @@ export default function Sidebar({
               key={item.href}
               href={item.href}
               aria-label={label}
+              title={label}
               aria-current={isActive ? 'page' : undefined}
               className={clsx(
-                'w-10 h-10 rounded-full flex items-center justify-center transition-all',
+                'w-10 h-10 rounded-full flex items-center justify-center transition-all cursor-pointer active:scale-95',
                 isActive
-                  ? 'bg-gradient-to-b from-[#1b2559] to-[#13193a] text-amber-400 shadow-md ring-2 ring-blue-500/25'
+                  ? 'bg-gradient-to-b from-[#1b2559] to-[#13193a] text-amber-400 shadow-md ring-2 ring-blue-500/25 scale-105'
                   : 'text-slate-500 hover:text-blue-900 hover:bg-slate-100/60'
               )}
             >
@@ -293,8 +294,9 @@ export default function Sidebar({
         <button
           type="button"
           onClick={onOpenMobile}
-          className="w-10 h-10 rounded-full flex items-center justify-center text-slate-600 hover:text-blue-900 hover:bg-slate-100 transition-all cursor-pointer"
+          className="w-10 h-10 rounded-full flex items-center justify-center text-slate-600 hover:text-blue-900 hover:bg-slate-100 active:scale-95 transition-all cursor-pointer"
           aria-label={isMarathi ? 'सर्व विभाग मेनू उघडा' : 'Open All Modules Menu'}
+          title={isMarathi ? 'सर्व विभाग मेनू उघडा' : 'Open All Modules Menu'}
         >
           <Menu className="w-5 h-5" />
         </button>
@@ -324,7 +326,7 @@ export default function Sidebar({
           aria-modal="true"
           aria-label={isMarathi ? 'प्रशासकीय विभाग नेव्हिगेशन' : 'Administrative Modules Navigation'}
           className={clsx(
-            'relative w-72 max-w-[85vw] bg-white h-full shadow-2xl flex flex-col p-4 rounded-r-3xl border-r border-slate-200 overflow-y-auto transform transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]',
+            'relative w-72 max-w-[85vw] bg-white h-full shadow-2xl flex flex-col p-4 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] rounded-r-3xl border-r border-slate-200 overflow-y-auto transform transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]',
             mobileOpen ? 'translate-x-0' : '-translate-x-full'
           )}
         >

@@ -74,13 +74,13 @@ model LandParcel {
   // Administrative Hierarchy
   district         String      @default("Chandrapur") @db.VarChar(64)
   taluka           String      @db.VarChar(64)
-  revenueCircle    String?     @map("revenue_circle") @db.VarChar(64)
+  revenueCircle    String?     @map("revenue_circle") @db.VarChar(128)
   villageCode      String      @map("village_code") @db.VarChar(32)
-  villageName      String      @map("village_name") @db.VarChar(128)
+  villageName      String      @map("village_name") @db.VarChar(255)
   
   // Survey & Spatial Identification
-  oldSurveyNo      String?     @map("old_survey_no") @db.VarChar(32) // जुना स.नं.
-  gatNumber        String      @map("gat_number") @db.VarChar(32)     // नवा गट क्र.
+  oldSurveyNo      String?     @map("old_survey_no") @db.VarChar(255) // जुना स.नं.
+  gatNumber        String      @map("gat_number") @db.VarChar(64)     // नवा गट क्र.
   hissaNumber      String?     @map("hissa_number") @db.VarChar(16)   // हिस्सा क्र.
   
   // Area & Tenure
@@ -119,10 +119,10 @@ model BackwardHistory {
   
   epochYear    Int         @map("epoch_year") // e.g., 1950, 1972, 1995
   recordDate   DateTime?   @map("record_date") @db.Date
-  ferfarNumber String?     @map("ferfar_number") @db.VarChar(64)
+  ferfarNumber String?     @map("ferfar_number") @db.VarChar(128)
   
   ownerName    String      @map("owner_name") @db.VarChar(255)
-  khataNumber  String?     @map("khata_number") @db.VarChar(64)
+  khataNumber  String?     @map("khata_number") @db.VarChar(128)
   areaHa       Decimal     @map("area_ha") @db.Decimal(12, 4)
   tenureClass  TenureClass @map("tenure_class")
   

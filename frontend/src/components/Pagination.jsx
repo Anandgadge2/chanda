@@ -1,18 +1,18 @@
 'use client';
 
-import React from 'react';
-import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
+import React, { useMemo } from 'react';
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, ChevronDown } from 'lucide-react';
 import { useTranslation } from './LanguageContext';
 
 export default function Pagination({
   currentPage = 1,
   totalPages,
   totalCount = 0,
-  limit = 20,
+  limit = 25,
   pageSize,
   onPageChange = () => {},
   onPageSizeChange,
-  pageSizeOptions = [25, 50, 100, 250, 'all'],
+  pageSizeOptions = [25, 50, 100, 'all'],
   embedded = false,
   className = '',
 }) {
@@ -21,16 +21,26 @@ export default function Pagination({
   const isAll = pageSize === 'all' || limit === 'all';
   const effectiveLimit = isAll
     ? (totalCount || 1)
-    : (Number(pageSize || limit) || 20);
+    : (Number(pageSize || limit) || 25);
 
   const computedTotalPages = isAll
     ? 1
     : Math.max(1, Math.ceil(totalCount / effectiveLimit));
 
-  const finalTotalPages =
-    totalPages !== undefined && totalPages !== null && totalPages > 1
+  const finalTotalPages = isAll
+    ? 1
+    : (totalPages !== undefined && totalPages !== null && totalPages >= 1
       ? totalPages
-      : computedTotalPages;
+      : computedTotalPages);
+
+  const options = useMemo(() => {
+    const list = [...pageSizeOptions];
+    const currentVal = isAll ? 'all' : Number(pageSize || limit);
+    if (currentVal && !list.includes(currentVal) && !list.includes(String(currentVal))) {
+      list.unshift(currentVal);
+    }
+    return list;
+  }, [pageSizeOptions, isAll, pageSize, limit]);
 
   if (finalTotalPages <= 1 && totalCount <= effectiveLimit && !onPageSizeChange) {
     return null;
@@ -91,19 +101,25 @@ export default function Pagination({
 
         {/* Rows Per Page Dropdown */}
         {onPageSizeChange && (
-          <div className="flex items-center gap-1.5 text-xs text-slate-600 font-medium border-l border-slate-200 pl-3">
-            <span>{isMarathi ? 'प्रति पृष्ठ:' : 'Per page:'}</span>
-            <select
-              value={isAll ? 'all' : (pageSize || limit)}
-              onChange={(e) => onPageSizeChange(e.target.value === 'all' ? 'all' : Number(e.target.value))}
-              className="px-2 py-1 bg-white border border-slate-200 rounded-md text-xs font-semibold text-slate-800 hover:border-slate-300 focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer"
-            >
-              {pageSizeOptions.map((opt) => (
-                <option key={opt} value={opt}>
-                  {opt === 'all' ? (isMarathi ? 'सर्व (All)' : 'All') : opt}
-                </option>
-              ))}
-            </select>
+          <div className="flex items-center gap-1.5 text-xs text-slate-600 font-medium sm:border-l sm:border-slate-200 sm:pl-3">
+            <span className="whitespace-nowrap">{isMarathi ? 'प्रति पृष्ठ:' : 'Per page:'}</span>
+            <div className="relative inline-flex items-center">
+              <select
+                value={isAll ? 'all' : (pageSize || limit)}
+                onChange={(e) => onPageSizeChange(e.target.value === 'all' ? 'all' : Number(e.target.value))}
+                aria-label={isMarathi ? 'प्रति पृष्ठ नोंदी निवडा' : 'Select rows per page'}
+                className="appearance-none pl-2.5 pr-7 py-1 bg-white border border-slate-300 hover:border-slate-400 rounded-lg text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 cursor-pointer shadow-2xs transition"
+              >
+                {options.map((opt) => (
+                  <option key={opt} value={opt} className="font-semibold text-slate-800">
+                    {opt === 'all' ? (isMarathi ? 'सर्व (All)' : 'All') : opt}
+                  </option>
+                ))}
+              </select>
+              <div className="pointer-events-none absolute right-2 flex items-center text-slate-500">
+                <ChevronDown className="w-3.5 h-3.5" />
+              </div>
+            </div>
           </div>
         )}
       </div>
@@ -114,7 +130,7 @@ export default function Pagination({
         <button
           type="button"
           onClick={() => onPageChange(1)}
-          disabled={currentPage <= 1}
+          disabled={currentPage <= 1 || isAll}
           className="inline-flex items-center justify-center p-1.5 rounded-lg border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:hover:bg-transparent disabled:cursor-not-allowed transition active:scale-95 cursor-pointer"
           title={isMarathi ? 'पहिले पृष्ठ' : 'First page'}
           aria-label={isMarathi ? 'पहिले पृष्ठ' : 'First page'}
@@ -126,7 +142,7 @@ export default function Pagination({
         <button
           type="button"
           onClick={() => onPageChange(currentPage - 1)}
-          disabled={currentPage <= 1}
+          disabled={currentPage <= 1 || isAll}
           className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:hover:bg-transparent disabled:cursor-not-allowed transition active:scale-95 cursor-pointer"
           aria-label={isMarathi ? 'मागील पृष्ठ' : 'Previous page'}
         >
@@ -134,8 +150,8 @@ export default function Pagination({
           <span className="hidden sm:inline">{isMarathi ? 'मागील' : 'Previous'}</span>
         </button>
 
-        {/* Number Pills */}
-        <div className="flex items-center gap-1">
+        {/* Number Pills - Desktop/Tablet */}
+        <div className="hidden sm:flex items-center gap-1">
           {getPageNumbers().map((p, idx) =>
             p === '...' ? (
               <span key={`dots-${idx}`} className="px-2 text-xs text-slate-400 font-bold">
@@ -146,6 +162,7 @@ export default function Pagination({
                 key={`page-${p}`}
                 type="button"
                 onClick={() => onPageChange(p)}
+                disabled={isAll}
                 className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg text-xs font-bold transition flex items-center justify-center cursor-pointer ${
                   currentPage === p
                     ? 'bg-blue-900 text-white shadow-xs'
@@ -158,11 +175,16 @@ export default function Pagination({
           )}
         </div>
 
+        {/* Compact Mobile Page Indicator */}
+        <div className="sm:hidden px-2.5 py-1 rounded-lg bg-slate-100 border border-slate-200 text-xs font-bold text-slate-700 font-mono">
+          {currentPage} / {finalTotalPages}
+        </div>
+
         {/* Next */}
         <button
           type="button"
           onClick={() => onPageChange(currentPage + 1)}
-          disabled={currentPage >= finalTotalPages}
+          disabled={currentPage >= finalTotalPages || isAll}
           className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:hover:bg-transparent disabled:cursor-not-allowed transition active:scale-95 cursor-pointer"
           aria-label={isMarathi ? 'पुढील पृष्ठ' : 'Next page'}
         >
@@ -174,7 +196,7 @@ export default function Pagination({
         <button
           type="button"
           onClick={() => onPageChange(finalTotalPages)}
-          disabled={currentPage >= finalTotalPages}
+          disabled={currentPage >= finalTotalPages || isAll}
           className="inline-flex items-center justify-center p-1.5 rounded-lg border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:hover:bg-transparent disabled:cursor-not-allowed transition active:scale-95 cursor-pointer"
           title={isMarathi ? 'शेवटचे पृष्ठ' : 'Last page'}
           aria-label={isMarathi ? 'शेवटचे पृष्ठ' : 'Last page'}

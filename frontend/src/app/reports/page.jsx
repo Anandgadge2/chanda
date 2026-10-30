@@ -156,6 +156,9 @@ export default function ReportsPage() {
 
   const [villageOptions, setVillageOptions] = useState([]);
 
+  const isDraftTalukaSelected = Boolean(draftTaluka && draftTaluka !== 'all' && draftTaluka !== 'सर्व तालुके');
+  const isDraftVillageSelected = Boolean(draftVillage && draftVillage !== 'all' && draftVillage !== 'सर्व गावे');
+
   // Aliases for seamless backward compatibility across table, cards, and child views
   const taluka = appliedFilters.taluka;
   const village = appliedFilters.village;
@@ -285,6 +288,10 @@ export default function ReportsPage() {
   useEffect(() => {
     async function loadVillages() {
       try {
+        if (!draftTaluka || draftTaluka === 'all' || draftTaluka === 'सर्व तालुके') {
+          setVillageOptions([]);
+          return;
+        }
         const res = await api.getTalukaVillages(draftTaluka);
         setVillageOptions(res.villages || []);
       } catch (err) {
@@ -1442,9 +1449,9 @@ export default function ReportsPage() {
         </header>
 
         {/* =========================================================
-            TOP SEGMENTED TABS (PURE MARATHI, NO BADGES, NO OVERFLOW SCROLL)
+            TOP SEGMENTED TABS (PURE MARATHI, HORIZONTALLY SCROLLABLE ON MOBILE)
         ========================================================= */}
-        <div className="flex flex-wrap items-center border-b border-slate-200 gap-1 sm:gap-2">
+        <div className="flex items-center overflow-x-auto no-scrollbar border-b border-slate-200 gap-1 sm:gap-2 pb-0.5 touch-scroll -mx-1 px-1">
           <button
             type="button"
             onClick={() => {
@@ -1613,14 +1620,14 @@ export default function ReportsPage() {
                     setDraftTaluka(val);
                     setDraftVillage('all');
                   }}
-                  placeholder={isMarathi ? 'सर्व तालुके' : 'All Talukas'}
+                  placeholder={isMarathi ? 'तालुका निवडा...' : 'Select Taluka...'}
                   searchPlaceholder={isMarathi ? 'तालुका शोधा...' : 'Search taluka...'}
                   icon={Building2}
                   showCount={false}
                 />
               </div>
 
-              {/* 2. Village Dropdown */}
+              {/* 2. Village Dropdown (Disabled until Taluka is selected) */}
               <div className="flex-1 space-y-1">
                 <label className="text-[11px] font-bold text-slate-700 flex items-center gap-1">
                   <LandPlot className="w-3.5 h-3.5 text-amber-600" />
@@ -1630,7 +1637,12 @@ export default function ReportsPage() {
                   options={villageSelectOptions}
                   value={draftVillage}
                   onChange={val => setDraftVillage(val)}
-                  placeholder={isMarathi ? 'सर्व गावे' : 'All Villages'}
+                  disabled={!isDraftTalukaSelected}
+                  placeholder={
+                    !isDraftTalukaSelected
+                      ? (isMarathi ? 'प्रथम तालुका निवडा' : 'Select Taluka first')
+                      : (isMarathi ? 'गाव निवडा...' : 'Select Village...')
+                  }
                   searchPlaceholder={isMarathi ? 'गाव शोधा...' : 'Search village...'}
                   icon={LandPlot}
                   showCount={true}
@@ -1642,8 +1654,20 @@ export default function ReportsPage() {
                 <button
                   type="button"
                   onClick={handleApplyFilters}
-                  className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-blue-700 hover:bg-blue-800 active:scale-95 text-white font-bold text-xs rounded-xl shadow-xs transition cursor-pointer"
-                  title={isMarathi ? 'फिल्टर लागू करा' : 'Apply Filters'}
+                  disabled={!isDraftTalukaSelected || !isDraftVillageSelected || loading}
+                  className={clsx(
+                    "inline-flex items-center justify-center gap-1.5 px-4 py-2.5 font-bold text-xs rounded-xl shadow-xs transition",
+                    (!isDraftTalukaSelected || !isDraftVillageSelected || loading)
+                      ? "bg-slate-200 text-slate-400 cursor-not-allowed opacity-60 pointer-events-none"
+                      : "bg-blue-700 hover:bg-blue-800 active:scale-95 text-white cursor-pointer"
+                  )}
+                  title={
+                    !isDraftTalukaSelected
+                      ? (isMarathi ? 'कृपया प्रथम तालुका निवडा' : 'Please select Taluka first')
+                      : (!isDraftVillageSelected
+                          ? (isMarathi ? 'कृपया गाव निवडा' : 'Please select Village')
+                          : (isMarathi ? 'फिल्टर लागू करा' : 'Apply Filters'))
+                  }
                 >
                   <Filter className="w-3.5 h-3.5" />
                   <span>{isMarathi ? 'लागू करा' : 'Apply'}</span>
@@ -1725,9 +1749,10 @@ export default function ReportsPage() {
                 options={talukaSelectOptions}
                 value={draftTaluka}
                 onChange={val => {
-                  setDraftTaluka(val);
+                  setDraftTaluka(val || 'all');
                   setDraftVillage('all');
                 }}
+                clearValue="all"
                 placeholder={isMarathi ? 'सर्व तालुके' : 'All Talukas'}
                 searchPlaceholder={isMarathi ? 'तालुका शोधा...' : 'Search taluka...'}
                 icon={Building2}
@@ -1735,7 +1760,7 @@ export default function ReportsPage() {
               />
             </div>
 
-            {/* 2. Village Dropdown (Searchable) */}
+            {/* 2. Village Dropdown (Searchable, disabled if no Taluka selected) */}
             <div className="space-y-1">
               <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
                 {isMarathi ? `गाव ${villageOptions.length > 0 ? `(${villageOptions.length})` : ''}` : `Village ${villageOptions.length > 0 ? `(${villageOptions.length})` : ''}`}
@@ -1744,9 +1769,15 @@ export default function ReportsPage() {
                 options={villageSelectOptions}
                 value={draftVillage}
                 onChange={val => {
-                  setDraftVillage(val);
+                  setDraftVillage(val || 'all');
                 }}
-                placeholder={isMarathi ? 'सर्व गावे' : 'All Villages'}
+                clearValue="all"
+                disabled={!isDraftTalukaSelected}
+                placeholder={
+                  !isDraftTalukaSelected
+                    ? (isMarathi ? 'प्रथम तालुका निवडा' : 'Select Taluka first')
+                    : (isMarathi ? 'सर्व गावे' : 'All Villages')
+                }
                 searchPlaceholder={isMarathi ? 'गाव शोधा...' : 'Search village...'}
                 icon={LandPlot}
                 showCount={true}
@@ -1762,7 +1793,8 @@ export default function ReportsPage() {
                 <SearchableSelect
                   options={tenureSelectOptions}
                   value={draftTenure}
-                  onChange={val => setDraftTenure(val)}
+                  onChange={val => setDraftTenure(val || 'all')}
+                  clearValue="all"
                   placeholder={isMarathi ? 'सर्व धारणा प्रकार' : 'All Tenure Types'}
                   searchPlaceholder={isMarathi ? 'धारणा प्रकार शोधा...' : 'Search tenure...'}
                   icon={Scale}
@@ -1780,7 +1812,8 @@ export default function ReportsPage() {
                 <SearchableSelect
                   options={violationSelectOptions}
                   value={draftViolation}
-                  onChange={val => setDraftViolation(val)}
+                  onChange={val => setDraftViolation(val || 'all')}
+                  clearValue="all"
                   placeholder={isMarathi ? 'सर्व तपासणी निष्कर्ष' : 'All Audit Findings'}
                   searchPlaceholder={isMarathi ? 'तपासणी निष्कर्ष शोधा...' : 'Search findings...'}
                   icon={AlertTriangle}
@@ -1813,13 +1846,9 @@ export default function ReportsPage() {
                   {draftSearch && (
                     <button
                       type="button"
-                      onClick={() => {
-                        setDraftSearch('');
-                        if (appliedFilters.search) {
-                          setAppliedFilters(prev => ({ ...prev, search: '' }));
-                        }
-                      }}
-                      className="text-slate-400 hover:text-slate-600 cursor-pointer"
+                      onClick={() => setDraftSearch('')}
+                      className="text-slate-400 hover:text-slate-600 cursor-pointer p-0.5"
+                      title={isMarathi ? 'शोध मजकूर साफ करा' : 'Clear search text'}
                     >
                       <X className="w-3.5 h-3.5" />
                     </button>
@@ -1828,7 +1857,7 @@ export default function ReportsPage() {
               </div>
             )}
 
-            {/* 6. Action Controls: Apply & Refresh Buttons */}
+            {/* 6. Action Controls: Apply & Reset Buttons */}
             <div className="space-y-1">
               <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
                 {isMarathi ? 'फिल्टर कृती' : 'Action'}
@@ -1851,6 +1880,17 @@ export default function ReportsPage() {
                   {isFilterPending && (
                     <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse shrink-0" />
                   )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleResetFilters}
+                  disabled={loading}
+                  className="inline-flex items-center justify-center gap-1 px-3 py-1.5 bg-slate-100 hover:bg-rose-50 text-slate-700 hover:text-rose-700 border border-slate-300 hover:border-rose-300 rounded-xl font-bold text-xs transition-all active:scale-95 shadow-2xs cursor-pointer shrink-0 h-[36px]"
+                  title={isMarathi ? 'सर्व फिल्टर्स रीसेट करा' : 'Reset all filters'}
+                >
+                  <RotateCcw className="w-3.5 h-3.5 text-rose-600 shrink-0" />
+                  <span>{isMarathi ? 'रीसेट' : 'Reset'}</span>
                 </button>
 
                 <button

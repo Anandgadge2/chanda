@@ -185,9 +185,13 @@ export const getDocuments = async (req, res) => {
   try {
     const { parcelId, caseId, docType, search, page = 1, limit = 30 } = req.query;
 
-    const pageNum = Math.max(1, parseInt(page, 10));
-    const take = Math.min(100, Math.max(1, parseInt(limit, 10)));
-    const skip = (pageNum - 1) * take;
+    const isAll = limit === 'all' || limit === 'ALL';
+    const parsedLimit = parseInt(limit, 10);
+    const take = isAll
+      ? 2000
+      : (isNaN(parsedLimit) ? 25 : Math.min(500, Math.max(1, parsedLimit)));
+    const pageNum = isAll ? 1 : Math.max(1, parseInt(page, 10) || 1);
+    const skip = isAll ? 0 : (pageNum - 1) * take;
 
     const where = {};
     if (parcelId) where.parcelId = parcelId;
@@ -242,8 +246,8 @@ export const getDocuments = async (req, res) => {
       pagination: {
         total: totalCount,
         page: pageNum,
-        limit: take,
-        totalPages: Math.ceil(totalCount / take),
+        limit: isAll ? totalCount : take,
+        totalPages: isAll ? 1 : Math.ceil(totalCount / take),
       },
     });
   } catch (err) {

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   FolderArchive,
   UploadCloud,
@@ -13,7 +13,10 @@ import {
   Plus,
   Landmark,
   HardDrive,
+  RotateCcw,
+  X,
 } from 'lucide-react';
+import clsx from 'clsx';
 import { api } from '../../lib/api';
 import { DMS_DOC_TYPES } from '../../lib/constants';
 import DocUploadModal from '../../components/DocUploadModal';
@@ -28,19 +31,26 @@ export default function DocumentsPage() {
   const [totalCount, setTotalCount] = useState(0);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const limit = 15;
+  const [limit, setLimit] = useState(25);
 
-  // Filters
-  const [docType, setDocType] = useState('');
-  const [search, setSearch] = useState('');
+  // Draft Filters
+  const [draftDocType, setDraftDocType] = useState('');
+  const [draftSearch, setDraftSearch] = useState('');
+
+  // Applied Filters
+  const [appliedFilters, setAppliedFilters] = useState({
+    docType: '',
+    search: '',
+  });
+
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
 
-  const fetchDocs = async (targetPage = page) => {
+  const fetchDocs = async (targetPage = page, filtersToUse = appliedFilters) => {
     setLoading(true);
     try {
       const params = { page: targetPage, limit };
-      if (docType) params.docType = docType;
-      if (search) params.search = search;
+      if (filtersToUse.docType) params.docType = filtersToUse.docType;
+      if (filtersToUse.search && filtersToUse.search.trim()) params.search = filtersToUse.search.trim();
 
       const data = await api.getDocuments(params);
       setDocuments(data.documents || []);
@@ -54,19 +64,42 @@ export default function DocumentsPage() {
   };
 
   useEffect(() => {
+    fetchDocs(1, appliedFilters);
+  }, []);
+
+  const isFilterPending = useMemo(() => {
+    return (
+      draftDocType !== appliedFilters.docType ||
+      draftSearch.trim() !== appliedFilters.search.trim()
+    );
+  }, [draftDocType, draftSearch, appliedFilters]);
+
+  const handleApplyFilters = (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+    const nextFilters = {
+      docType: draftDocType,
+      search: draftSearch.trim(),
+    };
+    setAppliedFilters(nextFilters);
     setPage(1);
-    fetchDocs(1);
-  }, [docType]);
+    fetchDocs(1, nextFilters);
+  };
+
+  const handleResetFilters = () => {
+    const cleanFilters = {
+      docType: '',
+      search: '',
+    };
+    setDraftDocType('');
+    setDraftSearch('');
+    setAppliedFilters(cleanFilters);
+    setPage(1);
+    fetchDocs(1, cleanFilters);
+  };
 
   const handlePageChange = (newPage) => {
     setPage(newPage);
-    fetchDocs(newPage);
-  };
-
-  const handleSearchSubmit = (e) => {
-    e.preventDefault();
-    setPage(1);
-    fetchDocs(1);
+    fetchDocs(newPage, appliedFilters);
   };
 
   return (
@@ -109,7 +142,7 @@ export default function DocumentsPage() {
             <span>{isMarathi ? 'नवीन दस्तऐवज' : 'New Document'}</span>
           </button>
           <button
-            onClick={() => fetchDocs(page)}
+            onClick={() => fetchDocs(page, appliedFilters)}
             disabled={loading}
             className="p-1.5 bg-white hover:bg-purple-50 border border-slate-300 text-slate-700 hover:text-slate-950 rounded-lg text-xs transition active:scale-95 shadow-2xs cursor-pointer"
             title={isMarathi ? 'रीफ्रेश करा' : 'Refresh'}
@@ -121,9 +154,10 @@ export default function DocumentsPage() {
       </div>
 
       {/* Filter Command Bar */}
-      <div className="bg-white/90 backdrop-blur-md border border-slate-200/80 rounded-xl p-2.5 shadow-2xs flex flex-col sm:flex-row gap-2.5 items-stretch sm:items-center">
-        <form onSubmit={handleSearchSubmit} className="flex-1 min-w-[200px] relative">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
+      <div className="bg-white/90 backdrop-blur-md border border-slate-200/80 rounded-xl p-2.5 shadow-2xs flex flex-col sm:flex-row gap-2 sm:gap-2.5 items-stretch sm:items-center">
+        {/* Search Input */}
+        <div className="flex-1 min-w-[200px] relative">
+          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
           <input
             type="text"
             placeholder={
@@ -131,13 +165,30 @@ export default function DocumentsPage() {
                 ? 'दस्तऐवज शीर्षक, फाईल क्र., रॅक किंवा गठ्ठा क्र. शोधा...'
                 : 'Search document title, file no, rack or bundle no...'
             }
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-3.5 py-2.5 border border-slate-200 rounded-xl text-xs bg-slate-50/70 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-all font-medium"
+            value={draftSearch}
+            onChange={(e) => setDraftSearch(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                handleApplyFilters();
+              }
+            }}
+            className="w-full pl-10 pr-8 py-2 border border-slate-200 rounded-xl text-xs bg-slate-50/70 focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-600/20 focus:border-purple-600 transition-all font-medium h-9"
           />
-        </form>
+          {draftSearch && (
+            <button
+              type="button"
+              onClick={() => setDraftSearch('')}
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5 rounded-lg cursor-pointer"
+              title={isMarathi ? 'शोध साफ करा' : 'Clear search'}
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </div>
 
-        <div className="w-full sm:w-72">
+        {/* Document Type Dropdown */}
+        <div className="w-full sm:w-64">
           <SearchableSelect
             options={[
               { value: '', label: isMarathi ? 'सर्व दस्तऐवज प्रकार' : 'All Document Types' },
@@ -146,13 +197,47 @@ export default function DocumentsPage() {
                 label: isMarathi ? v.labelMr : (v.labelEn || v.labelMr),
               })),
             ]}
-            value={docType}
-            onChange={(val) => setDocType(val)}
+            value={draftDocType}
+            onChange={(val) => setDraftDocType(val)}
             placeholder={isMarathi ? 'सर्व दस्तऐवज प्रकार' : 'All Document Types'}
             searchPlaceholder={isMarathi ? 'दस्तऐवज प्रकार शोधा...' : 'Search document type...'}
             icon={Filter}
             showCount={false}
           />
+        </div>
+
+        {/* Action Buttons: Apply & Reset */}
+        <div className="flex items-center gap-1.5 shrink-0">
+          <button
+            type="button"
+            onClick={handleApplyFilters}
+            disabled={loading}
+            className={clsx(
+              'h-9 px-3.5 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95 shrink-0 shadow-xs cursor-pointer select-none w-full sm:w-auto',
+              isFilterPending
+                ? 'bg-purple-600 hover:bg-purple-700 text-white ring-2 ring-purple-400/60 ring-offset-1 shadow-purple-700/20'
+                : 'bg-purple-900 hover:bg-purple-950 text-white'
+            )}
+            title={isMarathi ? 'फिल्टर्स लागू करा (Enter)' : 'Apply Filters (Enter)'}
+          >
+            <Filter className="w-3.5 h-3.5 shrink-0" />
+            <span>{isMarathi ? 'लागू करा' : 'Apply'}</span>
+            {isFilterPending && (
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-300 animate-pulse shrink-0" />
+            )}
+          </button>
+
+          <button
+            type="button"
+            onClick={handleResetFilters}
+            disabled={loading}
+            className="h-9 px-3 text-slate-700 hover:text-rose-700 bg-slate-100 hover:bg-rose-50 rounded-xl border border-slate-300 hover:border-rose-300 transition-all active:scale-95 shrink-0 cursor-pointer flex items-center justify-center gap-1.5 text-xs font-bold w-full sm:w-auto shadow-2xs"
+            title={isMarathi ? 'सर्व फिल्टर्स रीसेट करा' : 'Reset all filters'}
+            aria-label={isMarathi ? 'सर्व फिल्टर्स रीसेट करा' : 'Reset all filters'}
+          >
+            <RotateCcw className="w-3.5 h-3.5 text-rose-600 shrink-0" />
+            <span>{isMarathi ? 'रीसेट' : 'Reset'}</span>
+          </button>
         </div>
       </div>
 
@@ -298,7 +383,10 @@ export default function DocumentsPage() {
         totalPages={totalPages}
         totalCount={totalCount}
         limit={limit}
+        pageSize={limit}
         onPageChange={handlePageChange}
+        onPageSizeChange={handlePageSizeChange}
+        pageSizeOptions={[25, 50, 100, 'all']}
       />
 
       {/* Upload Modal */}

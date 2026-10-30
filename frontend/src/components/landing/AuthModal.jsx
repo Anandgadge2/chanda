@@ -285,7 +285,7 @@ export default function AuthModal({ isOpen, onClose }) {
               </div>
 
               {/* Hierarchy List: Responsive Horizontal scroll on mobile, sleek vertical list on desktop */}
-              <div className="flex md:flex-col overflow-x-auto md:overflow-x-visible gap-1.5 md:gap-0 md:space-y-1 pb-1 md:pb-0">
+              <div className="flex md:flex-col overflow-x-auto md:overflow-x-visible gap-1.5 md:gap-0 md:space-y-1 pb-1 md:pb-0 touch-scroll no-scrollbar">
                 {HIERARCHY_OFFICERS.map((officer) => {
                   const isSelected = selectedRole === officer.role;
 

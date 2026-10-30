@@ -204,7 +204,7 @@ export default function LandingHero({ onOpenAuth }) {
           onKeyDown={handleKeyDown}
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
-          className="relative w-full h-[360px] xs:h-[390px] sm:h-[430px] md:h-[470px] lg:h-[500px] xl:h-[520px] rounded-2xl sm:rounded-3xl overflow-hidden border border-slate-200/90 shadow-xl shadow-slate-900/10 bg-slate-950 focus:outline-hidden focus:ring-2 focus:ring-amber-400 group"
+          className="relative w-full h-[390px] xs:h-[415px] sm:h-[440px] md:h-[470px] lg:h-[500px] xl:h-[520px] rounded-2xl sm:rounded-3xl overflow-hidden border border-slate-200/90 shadow-xl shadow-slate-900/10 bg-slate-950 focus:outline-hidden focus:ring-2 focus:ring-amber-400 group"
         >
           {/* Official Indian Tricolor National Accent Micro-Bar */}
           <div
@@ -238,7 +238,7 @@ export default function LandingHero({ onOpenAuth }) {
           })}
 
           {/* Top Controls Overlay: Official Floating Badges & Navigation Controller */}
-          <div className="absolute top-4 sm:top-5 left-4 sm:left-7 right-4 sm:right-7 flex items-center justify-between gap-3 z-20">
+          <div className="absolute top-3 sm:top-5 left-3 sm:left-7 right-3 sm:right-7 flex items-center justify-between gap-2 z-20">
             {/* Left: Official Government Badges */}
             <div className="flex items-center gap-2">
               <span className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-amber-400 text-slate-950 shadow-md">

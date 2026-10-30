@@ -1,0 +1,4129 @@
+{
+  "totalVillages": 672,
+  "totalParcels": 133908,
+  "durationSeconds": 216.83,
+  "talukas": {
+    "Ballarpur": {
+      "villageCount": 35,
+      "parcelCount": 12499,
+      "villages": [
+        {
+          "villageName": "दहेली",
+          "villageCode": "BAL-001",
+          "file": "01_Daheli   1त45 7.12 च तपसण.xlsx",
+          "parcelCount": 299
+        },
+        {
+          "villageName": "दुधोली",
+          "villageCode": "BAL-002",
+          "file": "02_dudholi.xlsx",
+          "parcelCount": 136
+        },
+        {
+          "villageName": "केम रीठ",
+          "villageCode": "BAL-003",
+          "file": "03_Kemrith.xlsx",
+          "parcelCount": 116
+        },
+        {
+          "villageName": "आमडी",
+          "villageCode": "BAL-004",
+          "file": "04_आमड  1 त 45 मदद.xlsx",
+          "parcelCount": 385
+        },
+        {
+          "villageName": "आष्टी",
+          "villageCode": "BAL-005",
+          "file": "05_आषट  १ त ४५ मदध.xlsx",
+          "parcelCount": 130
+        },
+        {
+          "villageName": "आसेगाव",
+          "villageCode": "BAL-006",
+          "file": "06_आसगव 1 त 45 मदद.xlsx",
+          "parcelCount": 457
+        },
+        {
+          "villageName": "इटोली चक नं 1",
+          "villageCode": "BAL-007",
+          "file": "07_इटल चक न 1   1 त45 7.12 च तपसण.xlsx",
+          "parcelCount": 300
+        },
+        {
+          "villageName": "इटोली चक नं 2",
+          "villageCode": "BAL-008",
+          "file": "08_इटल चक न 2     1 त 45 मदद.xlsx",
+          "parcelCount": 373
+        },
+        {
+          "villageName": "कळमना",
+          "villageCode": "BAL-009",
+          "file": "09_कळमन 1 त 45 मदद  महसल अधकर अभलख सतबर च तपसण.xlsx",
+          "parcelCount": 234
+        },
+        {
+          "villageName": "कवडजई",
+          "villageCode": "BAL-010",
+          "file": "10_कवडजई  1 त 45 7.12 च तपसण.xlsx",
+          "parcelCount": 896
+        },
+        {
+          "villageName": "काटवली",
+          "villageCode": "BAL-011",
+          "file": "11_कटवल 1 त 45 मदद.xlsx",
+          "parcelCount": 457
+        },
+        {
+          "villageName": "किन्ही",
+          "villageCode": "BAL-012",
+          "file": "12_कनह  1त45 7.12 च तपसण.xlsx",
+          "parcelCount": 759
+        },
+        {
+          "villageName": "केम तुकुम",
+          "villageCode": "BAL-013",
+          "file": "13_कतकम -1 त 45 7.12 च तपसण.xlsx",
+          "parcelCount": 176
+        },
+        {
+          "villageName": "कोठारी",
+          "villageCode": "BAL-014",
+          "file": "14_कठर  1 त 45 7.12 च तपसण.xlsx",
+          "parcelCount": 647
+        },
+        {
+          "villageName": "कोर्टी तुकूम",
+          "villageCode": "BAL-015",
+          "file": "15_करट तकम अधकर सच  १ त ४५ मदध.xlsx",
+          "parcelCount": 131
+        },
+        {
+          "villageName": "कोर्टीमक्ता",
+          "villageCode": "BAL-016",
+          "file": "16_करटमकत 1 त 45 मदद  महसल अधकर अभलख सतबर च तपसण.xlsx",
+          "parcelCount": 350
+        },
+        {
+          "villageName": "खामतुरली रिठ",
+          "villageCode": "BAL-017",
+          "file": "17_खमतरल रठ 1 त 45 मदद.xlsx",
+          "parcelCount": 457
+        },
+        {
+          "villageName": "गिलबिली",
+          "villageCode": "BAL-018",
+          "file": "18_गलबल 1 त 45 मदद.xlsx",
+          "parcelCount": 281
+        },
+        {
+          "villageName": "चारवट",
+          "villageCode": "BAL-019",
+          "file": "19_चरवट 1 त 45 मदद.xlsx",
+          "parcelCount": 251
+        },
+        {
+          "villageName": "जोगापूर",
+          "villageCode": "BAL-020",
+          "file": "20_जगपर.xlsx",
+          "parcelCount": 116
+        },
+        {
+          "villageName": "धर्मशाळा तुकूम",
+          "villageCode": "BAL-021",
+          "file": "21_धरमशळ तकम 1 त 45 मदद.xlsx",
+          "parcelCount": 49
+        },
+        {
+          "villageName": "नांदगाव पोडे",
+          "villageCode": "BAL-022",
+          "file": "22_नदगव पड 1 त 45 मदद.xlsx",
+          "parcelCount": 622
+        },
+        {
+          "villageName": "निमगटा चक",
+          "villageCode": "BAL-023",
+          "file": "23_नमगट चक1 त 45 मदद.xlsx",
+          "parcelCount": 457
+        },
+        {
+          "villageName": "निमगाटा मक्ता",
+          "villageCode": "BAL-024",
+          "file": "24_नमगट मकत 1 त 45 मदद.xlsx",
+          "parcelCount": 385
+        },
+        {
+          "villageName": "पळसगाव",
+          "villageCode": "BAL-025",
+          "file": "25_पळसगव 1 त 45 मदद.xlsx",
+          "parcelCount": 673
+        },
+        {
+          "villageName": "बल्लारपूर",
+          "villageCode": "BAL-026",
+          "file": "26_बललरपर.xlsx",
+          "parcelCount": 1149
+        },
+        {
+          "villageName": "बामनी",
+          "villageCode": "BAL-027",
+          "file": "27_बमन 1 त 45 7.12 च तपसण.xlsx",
+          "parcelCount": 425
+        },
+        {
+          "villageName": "बल्लारपूर",
+          "villageCode": "BAL-028",
+          "file": "28_भवकड.xlsx",
+          "parcelCount": 4
+        },
+        {
+          "villageName": "माना",
+          "villageCode": "BAL-029",
+          "file": "29_मन 1 त 45 मदद.xlsx",
+          "parcelCount": 137
+        },
+        {
+          "villageName": "मानोरा",
+          "villageCode": "BAL-030",
+          "file": "30_मनर 1 त 45 मदद.xlsx",
+          "parcelCount": 457
+        },
+        {
+          "villageName": "मोहाडी तुकूम",
+          "villageCode": "BAL-031",
+          "file": "31_महड तकम 1 त 45 मदद.xlsx",
+          "parcelCount": 457
+        },
+        {
+          "villageName": "लावरी",
+          "villageCode": "BAL-032",
+          "file": "32_लवर 1 त 45 7.12 च तपसण.xlsx",
+          "parcelCount": 63
+        },
+        {
+          "villageName": "विसापूर",
+          "villageCode": "BAL-033",
+          "file": "33_वसपर.xlsx",
+          "parcelCount": 5
+        },
+        {
+          "villageName": "हडस्ती",
+          "villageCode": "BAL-034",
+          "file": "34_हडसत 1 त 45 मदद.xlsx",
+          "parcelCount": 281
+        },
+        {
+          "villageName": "हरणपायली रिठ",
+          "villageCode": "BAL-035",
+          "file": "35_हरणपयल रठ  1 त 45 मदद.xlsx",
+          "parcelCount": 384
+        }
+      ]
+    },
+    "Bhadravati": {
+      "villageCount": 58,
+      "parcelCount": 2898,
+      "villages": [
+        {
+          "villageName": "घुटकाळा रे.",
+          "villageCode": "BHA-001",
+          "file": "01_1 त 45 मदयबबत घटकळ र..xlsx",
+          "parcelCount": 102
+        },
+        {
+          "villageName": "रामपुरी रिठ",
+          "villageCode": "BHA-002",
+          "file": "02_1 त 45 मदयबबत रमपर रठ.xlsx",
+          "parcelCount": 23
+        },
+        {
+          "villageName": "रुराड रिठ",
+          "villageCode": "BHA-003",
+          "file": "03_1 त 45 मदयबबत रयड रठ.xlsx",
+          "parcelCount": 116
+        },
+        {
+          "villageName": "कुनाडा टोला",
+          "villageCode": "BHA-004",
+          "file": "04_1 त 46 कनड टल.xlsx",
+          "parcelCount": 39
+        },
+        {
+          "villageName": "तेलवासा",
+          "villageCode": "BHA-005",
+          "file": "05_1 त 46 तलवस.xlsx",
+          "parcelCount": 130
+        },
+        {
+          "villageName": "चक खापरी",
+          "villageCode": "BHA-006",
+          "file": "06_chak khapari 1 to 46.xlsx",
+          "parcelCount": 18
+        },
+        {
+          "villageName": "सुमठाना",
+          "villageCode": "BHA-007",
+          "file": "08_sumthana_1 to 45.xls.xlsx",
+          "parcelCount": 41
+        },
+        {
+          "villageName": "लोणार रिठ",
+          "villageCode": "BHA-008",
+          "file": "09_लणर रठ 1 त 45 मदद महत.xlsx",
+          "parcelCount": 111
+        },
+        {
+          "villageName": "चंदनखेडामक्ता",
+          "villageCode": "BHA-009",
+          "file": "10_चदन खड मकत महसल अधकर अभलख सतबर च तपसण 1.xlsx",
+          "parcelCount": 66
+        },
+        {
+          "villageName": "पाचगाव तुकुम",
+          "villageCode": "BHA-010",
+          "file": "11_पचगव तकम 1 त 45.xlsx",
+          "parcelCount": 27
+        },
+        {
+          "villageName": "पाचगाव (मूसलमान)",
+          "villageCode": "BHA-011",
+          "file": "12_पचगव मसलमन 1 त 45.xlsx",
+          "parcelCount": 4
+        },
+        {
+          "villageName": "बिजोनी",
+          "villageCode": "BHA-012",
+          "file": "13_बजन 1 त 45.xlsx",
+          "parcelCount": 42
+        },
+        {
+          "villageName": "बोरगाव धांडे",
+          "villageCode": "BHA-013",
+          "file": "14_बरगव धड १ त ४५.xlsx",
+          "parcelCount": 23
+        },
+        {
+          "villageName": "महादापूर रिठ",
+          "villageCode": "BHA-014",
+          "file": "15_महदपर रठ महसल अधकर अभलख सतबर च तपसण.xlsx",
+          "parcelCount": 22
+        },
+        {
+          "villageName": "मोरवा",
+          "villageCode": "BHA-015",
+          "file": "16_मरव 1 त 45.xlsx",
+          "parcelCount": 33
+        },
+        {
+          "villageName": "तिरुर",
+          "villageCode": "BHA-016",
+          "file": "17_1त46 मदयच महत तरर 2026.xlsx",
+          "parcelCount": 6
+        },
+        {
+          "villageName": "बोरगाव रिठ",
+          "villageCode": "BHA-017",
+          "file": "18_1त46 मदयच महत बरगव रठ 2026.xlsx",
+          "parcelCount": 3
+        },
+        {
+          "villageName": "सायवन",
+          "villageCode": "BHA-018",
+          "file": "19_1त46 मदयच महत सयवन2026.xlsx",
+          "parcelCount": 5
+        },
+        {
+          "villageName": "थेटेगाव रिठ",
+          "villageCode": "BHA-019",
+          "file": "20_Thetegaon 1 to 45.xlsx",
+          "parcelCount": 20
+        },
+        {
+          "villageName": "कढोली",
+          "villageCode": "BHA-020",
+          "file": "21_कढल सतबर च तपसण 1 त 45 मदद.xlsx",
+          "parcelCount": 25
+        },
+        {
+          "villageName": "किल्होनी",
+          "villageCode": "BHA-021",
+          "file": "22_कलहन सतबर च तपसण 1 त 45 मदद.xlsx",
+          "parcelCount": 22
+        },
+        {
+          "villageName": "चिचोली",
+          "villageCode": "BHA-022",
+          "file": "23_चचल सरकर 1 to 45.xlsx",
+          "parcelCount": 13
+        },
+        {
+          "villageName": "चोरा",
+          "villageCode": "BHA-023",
+          "file": "24_चर 1 त 45..xlsx",
+          "parcelCount": 20
+        },
+        {
+          "villageName": "नवरगाव रीठ",
+          "villageCode": "BHA-024",
+          "file": "25_नवरगव रठ सतबर  च तपसण 1 त 45 मदद.xlsx",
+          "parcelCount": 18
+        },
+        {
+          "villageName": "नांद्रा मक्ता",
+          "villageCode": "BHA-025",
+          "file": "26_नदर मकत १ त 45.xlsx",
+          "parcelCount": 34
+        },
+        {
+          "villageName": "बोनथळा रै",
+          "villageCode": "BHA-026",
+          "file": "27_बनथळ र सतबर च तपसण 1 त 45 मदद.xlsx",
+          "parcelCount": 24
+        },
+        {
+          "villageName": "गोवरदीप रिठ",
+          "villageCode": "BHA-027",
+          "file": "28_महसल अधकर अभल 1 त 45 मदद govardip.xlsx",
+          "parcelCount": 39
+        },
+        {
+          "villageName": "जेना",
+          "villageCode": "BHA-028",
+          "file": "29_महसल अधकर अभलख  1 त 46 मदद jena.xlsx",
+          "parcelCount": 15
+        },
+        {
+          "villageName": "कार्लीसोनेगांव",
+          "villageCode": "BHA-029",
+          "file": "30_महसल अधकर अभलख  करलसनगव  1 त 46.xlsx",
+          "parcelCount": 41
+        },
+        {
+          "villageName": "भटाळी",
+          "villageCode": "BHA-030",
+          "file": "31_महसल अधकर अभलख Bhatali 1 to 45.xlsx",
+          "parcelCount": 32
+        },
+        {
+          "villageName": "आष्टी काकडे",
+          "villageCode": "BHA-031",
+          "file": "32_महसल अधकर अभलख अतम  आषटककड 1 त 46 - Copy.xlsx",
+          "parcelCount": 65
+        },
+        {
+          "villageName": "मांगली रै",
+          "villageCode": "BHA-032",
+          "file": "33_महसल अधकर अभलख अतम मगल र 1 त 46 -.xlsx",
+          "parcelCount": 49
+        },
+        {
+          "villageName": "आष्टी (तुकुम )",
+          "villageCode": "BHA-033",
+          "file": "34_महसल अधकर अभलख अतमआषट तकम 1 त 46.xlsx",
+          "parcelCount": 68
+        },
+        {
+          "villageName": "मासळ विसापूर",
+          "villageCode": "BHA-034",
+          "file": "35_महसल अधकर अभलख मसळ वसपर  1 त 46.xlsx",
+          "parcelCount": 116
+        },
+        {
+          "villageName": "देवाडा",
+          "villageCode": "BHA-035",
+          "file": "36_1 To 45 Dewada.xlsx",
+          "parcelCount": 28
+        },
+        {
+          "villageName": "आंबेझरी रीठ",
+          "villageCode": "BHA-036",
+          "file": "37_1 TO 45 मदयच महत  आबझर रठ.xlsx",
+          "parcelCount": 1
+        },
+        {
+          "villageName": "पारडी रीठ",
+          "villageCode": "BHA-037",
+          "file": "38_1 TO 45 मदयच महत  परड रठ.xlsx",
+          "parcelCount": 1
+        },
+        {
+          "villageName": "बोटेझरी",
+          "villageCode": "BHA-038",
+          "file": "39_1 TO 45 मदयच महत  बटझर.xlsx",
+          "parcelCount": 79
+        },
+        {
+          "villageName": "सितारामपेठ",
+          "villageCode": "BHA-039",
+          "file": "40_1 TO 45 मदयच महत sitarampeth.xls.xlsx",
+          "parcelCount": 15
+        },
+        {
+          "villageName": "खुटवंडा मरार",
+          "villageCode": "BHA-040",
+          "file": "41_1 TO 45 मदयच महत खटवड मरर.xls.xlsx",
+          "parcelCount": 36
+        },
+        {
+          "villageName": "ठाणेगाव (रीठ)",
+          "villageCode": "BHA-041",
+          "file": "42_1 to 45 मदयच महत ठणगव.xlsx",
+          "parcelCount": 84
+        },
+        {
+          "villageName": "मदयच महत.xls bhamdeli र.xls",
+          "villageCode": "BHA-042",
+          "file": "43_1 TO 45 मदयच महत.xls bhamdeli र.xls.xlsx",
+          "parcelCount": 67
+        },
+        {
+          "villageName": "जुनोना",
+          "villageCode": "BHA-043",
+          "file": "44_1 TO 45 मदयच महत.xls JUNONA.xls.xlsx",
+          "parcelCount": 35
+        },
+        {
+          "villageName": "टेकाडी दि .",
+          "villageCode": "BHA-044",
+          "file": "45_1 TO 45 मदयच महत.xls टकड द.xls.xlsx",
+          "parcelCount": 78
+        },
+        {
+          "villageName": "किन्हाळा",
+          "villageCode": "BHA-045",
+          "file": "46_1 त 15  कनहळ महसल अधकर अभलख सतबर च तपसण 1 त 15.xlsx",
+          "parcelCount": 149
+        },
+        {
+          "villageName": "रानतळोधी",
+          "villageCode": "BHA-046",
+          "file": "47_महसल अधकर अभलख सतबर १ त ४५ च तपसण मज रनतळध 1.xlsx",
+          "parcelCount": 93
+        },
+        {
+          "villageName": "कुरोडा",
+          "villageCode": "BHA-047",
+          "file": "48_1 त 45 सतबर तपसण करड.xlsx",
+          "parcelCount": 177
+        },
+        {
+          "villageName": "आष्टी रिठ.",
+          "villageCode": "BHA-048",
+          "file": "49_Ashati Rith 1 te 45.xlsx",
+          "parcelCount": 229
+        },
+        {
+          "villageName": "गोटाळा रि.",
+          "villageCode": "BHA-049",
+          "file": "50_Gothala rith १त ४५.xlsx",
+          "parcelCount": 9
+        },
+        {
+          "villageName": "हरदाळा रिठ.",
+          "villageCode": "BHA-050",
+          "file": "51_Hardala Rith 1 te 45.xlsx",
+          "parcelCount": 5
+        },
+        {
+          "villageName": "खंडाळा रिठ.",
+          "villageCode": "BHA-051",
+          "file": "52_Khandala rith 1 te 45.xlsx",
+          "parcelCount": 6
+        },
+        {
+          "villageName": "पानवडाळा",
+          "villageCode": "BHA-052",
+          "file": "53_Panwadala  1 te 45.xlsx",
+          "parcelCount": 16
+        },
+        {
+          "villageName": "टाकळी",
+          "villageCode": "BHA-053",
+          "file": "54_Takli 1 te 45.xlsx",
+          "parcelCount": 13
+        },
+        {
+          "villageName": "मनगाव",
+          "villageCode": "BHA-054",
+          "file": "55_मनगव_१_त_४५_मदद_महत.xlsx",
+          "parcelCount": 38
+        },
+        {
+          "villageName": "नंदोरी बु.",
+          "villageCode": "BHA-055",
+          "file": "56_महसल अधकर अभलख चपन रठ 1 to 45.xlsx",
+          "parcelCount": 104
+        },
+        {
+          "villageName": "नंदोरी बु.",
+          "villageCode": "BHA-056",
+          "file": "57_महसल अधकर अभलख नदर खरद 1 to 45.xlsx",
+          "parcelCount": 104
+        },
+        {
+          "villageName": "नंदोरी बु.",
+          "villageCode": "BHA-057",
+          "file": "58_महसल अधकर अभलख नदर ब 1 to 45.xlsx",
+          "parcelCount": 104
+        },
+        {
+          "villageName": "राळेगाव रिठ",
+          "villageCode": "BHA-058",
+          "file": "59_रळगव_रठ_१_त_४५_मदद_महत.xlsx",
+          "parcelCount": 15
+        }
+      ]
+    },
+    "Brahmapuri": {
+      "villageCount": 49,
+      "parcelCount": 16743,
+      "villages": [
+        {
+          "villageName": "आकापूर उर्फ रूपाळा",
+          "villageCode": "BRA-001",
+          "file": "01_अकपर.xlsx",
+          "parcelCount": 168
+        },
+        {
+          "villageName": "अड्याळ गावगन्ना",
+          "villageCode": "BRA-002",
+          "file": "02_अडयळ गवगनन.xlsx",
+          "parcelCount": 285
+        },
+        {
+          "villageName": "अड्याळ तुकूम",
+          "villageCode": "BRA-003",
+          "file": "03_अडयळ तकम.xlsx",
+          "parcelCount": 566
+        },
+        {
+          "villageName": "आमला रिठ",
+          "villageCode": "BRA-004",
+          "file": "04_अमल रठ.xlsx",
+          "parcelCount": 95
+        },
+        {
+          "villageName": "अहेर-नवरगाव",
+          "villageCode": "BRA-005",
+          "file": "05_अहर-नवरगव.xlsx",
+          "parcelCount": 1358
+        },
+        {
+          "villageName": "आक्सापूर",
+          "villageCode": "BRA-006",
+          "file": "06_आकसपर.xlsx",
+          "parcelCount": 288
+        },
+        {
+          "villageName": "आवळगाव",
+          "villageCode": "BRA-007",
+          "file": "07_आवळगव.xlsx",
+          "parcelCount": 1074
+        },
+        {
+          "villageName": "उचली चक",
+          "villageCode": "BRA-008",
+          "file": "08_उचल चक.xlsx",
+          "parcelCount": 33
+        },
+        {
+          "villageName": "उचली",
+          "villageCode": "BRA-009",
+          "file": "09_उचल.xlsx",
+          "parcelCount": 149
+        },
+        {
+          "villageName": "उदापूर",
+          "villageCode": "BRA-010",
+          "file": "10_उदपर.xlsx",
+          "parcelCount": 399
+        },
+        {
+          "villageName": "काटलीचक",
+          "villageCode": "BRA-011",
+          "file": "11_कटल चक.xlsx",
+          "parcelCount": 194
+        },
+        {
+          "villageName": "Kanhalgaon",
+          "villageCode": "BRA-012",
+          "file": "12_कनहळगव.xlsx",
+          "parcelCount": 351
+        },
+        {
+          "villageName": "कळमगाव",
+          "villageCode": "BRA-013",
+          "file": "13_कळमगव.xlsx",
+          "parcelCount": 164
+        },
+        {
+          "villageName": "कहाली",
+          "villageCode": "BRA-014",
+          "file": "14_कहल.xlsx",
+          "parcelCount": 432
+        },
+        {
+          "villageName": "कालेता",
+          "villageCode": "BRA-015",
+          "file": "15_कलत.xlsx",
+          "parcelCount": 326
+        },
+        {
+          "villageName": "किन्ही",
+          "villageCode": "BRA-016",
+          "file": "16_कनह.xlsx",
+          "parcelCount": 381
+        },
+        {
+          "villageName": "कुडेसावली",
+          "villageCode": "BRA-017",
+          "file": "17_कडसवल.xlsx",
+          "parcelCount": 370
+        },
+        {
+          "villageName": "कुर्झा",
+          "villageCode": "BRA-018",
+          "file": "18_करझ.xlsx",
+          "parcelCount": 1325
+        },
+        {
+          "villageName": "कोथूळना",
+          "villageCode": "BRA-019",
+          "file": "19_कथळण.xlsx",
+          "parcelCount": 190
+        },
+        {
+          "villageName": "कोरेगाव  रिठ",
+          "villageCode": "BRA-020",
+          "file": "20_करगव रठ.xlsx",
+          "parcelCount": 134
+        },
+        {
+          "villageName": "कोसंबी खडस",
+          "villageCode": "BRA-021",
+          "file": "21_कसब खडस.xlsx",
+          "parcelCount": 496
+        },
+        {
+          "villageName": "कोसंबी चक",
+          "villageCode": "BRA-022",
+          "file": "22_कसब चक.xlsx",
+          "parcelCount": 169
+        },
+        {
+          "villageName": "खंडाळा",
+          "villageCode": "BRA-023",
+          "file": "23_खडळ.xlsx",
+          "parcelCount": 305
+        },
+        {
+          "villageName": "खरकाडा",
+          "villageCode": "BRA-024",
+          "file": "24_खरकड.xlsx",
+          "parcelCount": 671
+        },
+        {
+          "villageName": "खरब",
+          "villageCode": "BRA-025",
+          "file": "25_खरब.xlsx",
+          "parcelCount": 250
+        },
+        {
+          "villageName": "खातगाव",
+          "villageCode": "BRA-026",
+          "file": "26_खतगव.xlsx",
+          "parcelCount": 76
+        },
+        {
+          "villageName": "खांबतळोधी",
+          "villageCode": "BRA-027",
+          "file": "27_खबतळध.xlsx",
+          "parcelCount": 237
+        },
+        {
+          "villageName": "खांबाळा रिठ",
+          "villageCode": "BRA-028",
+          "file": "28_खबळ रठ.xlsx",
+          "parcelCount": 38
+        },
+        {
+          "villageName": "गणेशपूर",
+          "villageCode": "BRA-029",
+          "file": "29_गणशपर.xlsx",
+          "parcelCount": 207
+        },
+        {
+          "villageName": "गवर्लां चक",
+          "villageCode": "BRA-030",
+          "file": "30_गवरल चक.xlsx",
+          "parcelCount": 229
+        },
+        {
+          "villageName": "गांगलवाडी",
+          "villageCode": "BRA-031",
+          "file": "31_गगलवड.xlsx",
+          "parcelCount": 572
+        },
+        {
+          "villageName": "गायडोंगरी",
+          "villageCode": "BRA-032",
+          "file": "32_गयडगर तकम.xlsx",
+          "parcelCount": 162
+        },
+        {
+          "villageName": "गायडोंगरी रिठ",
+          "villageCode": "BRA-033",
+          "file": "33_गयडगर रठ.xlsx",
+          "parcelCount": 33
+        },
+        {
+          "villageName": "गायडोंगरी",
+          "villageCode": "BRA-034",
+          "file": "34_गयडगर.xlsx",
+          "parcelCount": 162
+        },
+        {
+          "villageName": "गोगाव",
+          "villageCode": "BRA-035",
+          "file": "35_गगव.xlsx",
+          "parcelCount": 746
+        },
+        {
+          "villageName": "चकबोथली",
+          "villageCode": "BRA-036",
+          "file": "36_चकबथल.xlsx",
+          "parcelCount": 178
+        },
+        {
+          "villageName": "चांदगाव",
+          "villageCode": "BRA-037",
+          "file": "37_चदगव.xlsx",
+          "parcelCount": 281
+        },
+        {
+          "villageName": "चांदली",
+          "villageCode": "BRA-038",
+          "file": "38_चदल.xlsx",
+          "parcelCount": 416
+        },
+        {
+          "villageName": "चिखलगाव",
+          "villageCode": "BRA-039",
+          "file": "39_चखलगव.xlsx",
+          "parcelCount": 426
+        },
+        {
+          "villageName": "चीचखेडा",
+          "villageCode": "BRA-040",
+          "file": "40_चचखड.xlsx",
+          "parcelCount": 128
+        },
+        {
+          "villageName": "चिचगाव",
+          "villageCode": "BRA-041",
+          "file": "41_चचगव.xlsx",
+          "parcelCount": 494
+        },
+        {
+          "villageName": "सुदाबेदरी रिठ",
+          "villageCode": "BRA-042",
+          "file": "42_चचल भज.xlsx",
+          "parcelCount": 33
+        },
+        {
+          "villageName": "चोरटी",
+          "villageCode": "BRA-043",
+          "file": "43_चरट.xlsx",
+          "parcelCount": 402
+        },
+        {
+          "villageName": "जवराबोडी मेंढा",
+          "villageCode": "BRA-044",
+          "file": "44_जवरबड.xlsx",
+          "parcelCount": 423
+        },
+        {
+          "villageName": "जुगनाळा",
+          "villageCode": "BRA-045",
+          "file": "45_जगनल.xlsx",
+          "parcelCount": 851
+        },
+        {
+          "villageName": "झिलबोडी",
+          "villageCode": "BRA-046",
+          "file": "46_झलबड.xlsx",
+          "parcelCount": 245
+        },
+        {
+          "villageName": "टेकरी री",
+          "villageCode": "BRA-047",
+          "file": "47_टकर रठ.xlsx",
+          "parcelCount": 58
+        },
+        {
+          "villageName": "तुमडी मेंढा",
+          "villageCode": "BRA-048",
+          "file": "49_तमड मढ.xlsx",
+          "parcelCount": 98
+        },
+        {
+          "villageName": "तुलानचक",
+          "villageCode": "BRA-049",
+          "file": "50_तलन चक.xlsx",
+          "parcelCount": 75
+        }
+      ]
+    },
+    "Chandrapur": {
+      "villageCount": 50,
+      "parcelCount": 9844,
+      "villages": [
+        {
+          "villageName": "गोविंदपुर रिठ",
+          "villageCode": "CHA-001",
+          "file": "01_1 to 45. - Govindpur Rith.xlsx",
+          "parcelCount": 135
+        },
+        {
+          "villageName": "बोर रीठ",
+          "villageCode": "CHA-002",
+          "file": "02_1 to 45. - बर रठ.xlsx",
+          "parcelCount": 209
+        },
+        {
+          "villageName": "नकोडा",
+          "villageCode": "CHA-003",
+          "file": "03_1 त 45 मदद महत - नकड 1.xlsx",
+          "parcelCount": 77
+        },
+        {
+          "villageName": "महाकुर्ला",
+          "villageCode": "CHA-004",
+          "file": "04_1 त 46 महकरल.xlsx",
+          "parcelCount": 287
+        },
+        {
+          "villageName": "वढोली",
+          "villageCode": "CHA-005",
+          "file": "05_1 त 54 MAUJA VADHOLI Recovered.xlsx",
+          "parcelCount": 355
+        },
+        {
+          "villageName": "नेरी",
+          "villageCode": "CHA-006",
+          "file": "06_1-45 neri.xlsx",
+          "parcelCount": 49
+        },
+        {
+          "villageName": "देवई गो. तुकूम",
+          "villageCode": "CHA-007",
+          "file": "07_45 मदद महत द. ग. तकम.xlsx",
+          "parcelCount": 42
+        },
+        {
+          "villageName": "कोंडीमाल",
+          "villageCode": "CHA-008",
+          "file": "08_kondimal.xlsx",
+          "parcelCount": 114
+        },
+        {
+          "villageName": "UMRILAL MAN RITH",
+          "villageCode": "CHA-009",
+          "file": "09_UMRILAL MAN RITH.xlsx",
+          "parcelCount": 327
+        },
+        {
+          "villageName": "अडेगाव",
+          "villageCode": "CHA-010",
+          "file": "10_अडगव.xlsx",
+          "parcelCount": 57
+        },
+        {
+          "villageName": "अन्तुर्ला",
+          "villageCode": "CHA-011",
+          "file": "11_अनतरल 1 त 45.xlsx",
+          "parcelCount": 239
+        },
+        {
+          "villageName": "आगरझरी",
+          "villageCode": "CHA-012",
+          "file": "12_आगरझर.xlsx",
+          "parcelCount": 18
+        },
+        {
+          "villageName": "आंबोरा",
+          "villageCode": "CHA-013",
+          "file": "13_आभर 1.xlsx",
+          "parcelCount": 131
+        },
+        {
+          "villageName": "उसगव",
+          "villageCode": "CHA-014",
+          "file": "14_उसगव.xlsx",
+          "parcelCount": 454
+        },
+        {
+          "villageName": "कारवा",
+          "villageCode": "CHA-015",
+          "file": "15_करव.xlsx",
+          "parcelCount": 103
+        },
+        {
+          "villageName": "किटाळी",
+          "villageCode": "CHA-016",
+          "file": "16_कटळ.xlsx",
+          "parcelCount": 220
+        },
+        {
+          "villageName": "कोंडीचक",
+          "villageCode": "CHA-017",
+          "file": "17_कडचक.xlsx",
+          "parcelCount": 41
+        },
+        {
+          "villageName": "कोसारा",
+          "villageCode": "CHA-018",
+          "file": "18_कसर नवन सधरत 1 त ४५.xlsx",
+          "parcelCount": 412
+        },
+        {
+          "villageName": "खंडाळा रीठ",
+          "villageCode": "CHA-019",
+          "file": "19_खडळ रठ.xlsx",
+          "parcelCount": 23
+        },
+        {
+          "villageName": "खुटाळा",
+          "villageCode": "CHA-020",
+          "file": "20_खटळ.xlsx",
+          "parcelCount": 125
+        },
+        {
+          "villageName": "गवराळा रीठ",
+          "villageCode": "CHA-021",
+          "file": "21_गवरळ महसल अधकर अभलख सतबर च तपसण 20-08.xlsx",
+          "parcelCount": 144
+        },
+        {
+          "villageName": "घंटाचौकी",
+          "villageCode": "CHA-022",
+          "file": "22_घटचक.xlsx",
+          "parcelCount": 68
+        },
+        {
+          "villageName": "घुग्घुस",
+          "villageCode": "CHA-023",
+          "file": "23_घगघस.xlsx",
+          "parcelCount": 336
+        },
+        {
+          "villageName": "चक पिंपळखुट",
+          "villageCode": "CHA-024",
+          "file": "24_चक पपळखट.xlsx",
+          "parcelCount": 99
+        },
+        {
+          "villageName": "चक वलनी",
+          "villageCode": "CHA-025",
+          "file": "25_चक वलन.xlsx",
+          "parcelCount": 40
+        },
+        {
+          "villageName": "चक वायगाव नं.2",
+          "villageCode": "CHA-026",
+          "file": "26_चक वयगव 2.xlsx",
+          "parcelCount": 64
+        },
+        {
+          "villageName": "चक वायगाव नं.1",
+          "villageCode": "CHA-027",
+          "file": "27_चक वयगव न 1.xlsx",
+          "parcelCount": 124
+        },
+        {
+          "villageName": "चांदा रै.",
+          "villageCode": "CHA-028",
+          "file": "28_चद र.xlsx",
+          "parcelCount": 809
+        },
+        {
+          "villageName": "चांदुर",
+          "villageCode": "CHA-029",
+          "file": "29_चदर.xlsx",
+          "parcelCount": 189
+        },
+        {
+          "villageName": "चचल",
+          "villageCode": "CHA-030",
+          "file": "30_चचल.xlsx",
+          "parcelCount": 311
+        },
+        {
+          "villageName": "चोराळा",
+          "villageCode": "CHA-031",
+          "file": "31_चरळ.xlsx",
+          "parcelCount": 92
+        },
+        {
+          "villageName": "जांभारला",
+          "villageCode": "CHA-032",
+          "file": "32_जभरल.xlsx",
+          "parcelCount": 131
+        },
+        {
+          "villageName": "जुनोना रे",
+          "villageCode": "CHA-033",
+          "file": "33_जनन.xlsx",
+          "parcelCount": 399
+        },
+        {
+          "villageName": "झरी",
+          "villageCode": "CHA-034",
+          "file": "34_झर.xlsx",
+          "parcelCount": 45
+        },
+        {
+          "villageName": "टेमटा",
+          "villageCode": "CHA-035",
+          "file": "35_टमट.xlsx",
+          "parcelCount": 41
+        },
+        {
+          "villageName": "दाताळा",
+          "villageCode": "CHA-036",
+          "file": "36_दतळ.xlsx",
+          "parcelCount": 632
+        },
+        {
+          "villageName": "देवाडा",
+          "villageCode": "CHA-037",
+          "file": "37_दवड.xlsx",
+          "parcelCount": 240
+        },
+        {
+          "villageName": "नंदगुर",
+          "villageCode": "CHA-038",
+          "file": "38_नदगर.xlsx",
+          "parcelCount": 122
+        },
+        {
+          "villageName": "नागपूर छोटा",
+          "villageCode": "CHA-039",
+          "file": "39_नगपर छट 1.xlsx",
+          "parcelCount": 410
+        },
+        {
+          "villageName": "नागाळा(मं)",
+          "villageCode": "CHA-040",
+          "file": "40_नगळ म.xlsx",
+          "parcelCount": 229
+        },
+        {
+          "villageName": "नागाळा(सि)",
+          "villageCode": "CHA-041",
+          "file": "41_नगळ स  1 त 45.xlsx",
+          "parcelCount": 264
+        },
+        {
+          "villageName": "निलजई",
+          "villageCode": "CHA-042",
+          "file": "42_नलजई.xlsx",
+          "parcelCount": 20
+        },
+        {
+          "villageName": "पडोली",
+          "villageCode": "CHA-043",
+          "file": "43_पडल.xlsx",
+          "parcelCount": 130
+        },
+        {
+          "villageName": "पद्मापूर",
+          "villageCode": "CHA-044",
+          "file": "44_पदमपर.xlsx",
+          "parcelCount": 283
+        },
+        {
+          "villageName": "पहामी",
+          "villageCode": "CHA-045",
+          "file": "45_पहम.xlsx",
+          "parcelCount": 25
+        },
+        {
+          "villageName": "पिपरी",
+          "villageCode": "CHA-046",
+          "file": "46_पपर.xlsx",
+          "parcelCount": 948
+        },
+        {
+          "villageName": "पेठ",
+          "villageCode": "CHA-047",
+          "file": "47_पठ.xlsx",
+          "parcelCount": 22
+        },
+        {
+          "villageName": "मरार सावरी चक",
+          "villageCode": "CHA-048",
+          "file": "48_मरर सवर चक.xlsx",
+          "parcelCount": 82
+        },
+        {
+          "villageName": "मारार सावरी माल",
+          "villageCode": "CHA-049",
+          "file": "49_मरर सवर मल.xlsx",
+          "parcelCount": 38
+        },
+        {
+          "villageName": "म्हसाळा तुकूम",
+          "villageCode": "CHA-050",
+          "file": "50_मसळ तकम.xlsx",
+          "parcelCount": 89
+        }
+      ]
+    },
+    "Chimur": {
+      "villageCount": 48,
+      "parcelCount": 7832,
+      "villages": [
+        {
+          "villageName": "अडयाळी रिठ",
+          "villageCode": "CHI-001",
+          "file": "01_अडयळ रठ.xlsx",
+          "parcelCount": 144
+        },
+        {
+          "villageName": "अडेगाव चक रिठ",
+          "villageCode": "CHI-002",
+          "file": "02_अडगव चक रठ.xlsx",
+          "parcelCount": 85
+        },
+        {
+          "villageName": "आंबेनेरी",
+          "villageCode": "CHI-003",
+          "file": "03_आबनर.xlsx",
+          "parcelCount": 410
+        },
+        {
+          "villageName": "उपरपठ",
+          "villageCode": "CHI-004",
+          "file": "04_उपरपठ.xlsx",
+          "parcelCount": 102
+        },
+        {
+          "villageName": "उमरी बुट्टी",
+          "villageCode": "CHI-005",
+          "file": "05_उमर बटट.xlsx",
+          "parcelCount": 153
+        },
+        {
+          "villageName": "कन्हाळगाव ब्राह्मण",
+          "villageCode": "CHI-006",
+          "file": "06_कनहळगव बरमहण.xlsx",
+          "parcelCount": 17
+        },
+        {
+          "villageName": "कन्हाळगाव",
+          "villageCode": "CHI-007",
+          "file": "07_कनहळगव.xlsx",
+          "parcelCount": 188
+        },
+        {
+          "villageName": "कपर्ला खुर्द",
+          "villageCode": "CHI-008",
+          "file": "08_कपरल खरद.xlsx",
+          "parcelCount": 126
+        },
+        {
+          "villageName": "कपर्ला बुजरूक रिठ",
+          "villageCode": "CHI-009",
+          "file": "09_कपरल बजरक रठ.xlsx",
+          "parcelCount": 192
+        },
+        {
+          "villageName": "कवडशी डाक",
+          "villageCode": "CHI-010",
+          "file": "10_कवडश डक.xlsx",
+          "parcelCount": 170
+        },
+        {
+          "villageName": "कवडसी रोडी",
+          "villageCode": "CHI-011",
+          "file": "11_कवडस रड.xlsx",
+          "parcelCount": 64
+        },
+        {
+          "villageName": "कसबा पिपरी",
+          "villageCode": "CHI-012",
+          "file": "12_कसब पपर.xlsx",
+          "parcelCount": 92
+        },
+        {
+          "villageName": "कसरबोडी",
+          "villageCode": "CHI-013",
+          "file": "13_कसरबड.xlsx",
+          "parcelCount": 123
+        },
+        {
+          "villageName": "कसरबोडी रिठ",
+          "villageCode": "CHI-014",
+          "file": "14_कसरबड रठ.xlsx",
+          "parcelCount": 32
+        },
+        {
+          "villageName": "किताडो मक्ता",
+          "villageCode": "CHI-016",
+          "file": "16_कतड मकत.xlsx",
+          "parcelCount": 381
+        },
+        {
+          "villageName": "केवाडा",
+          "villageCode": "CHI-017",
+          "file": "17_कवड.xlsx",
+          "parcelCount": 434
+        },
+        {
+          "villageName": "कोसंबी रीठ",
+          "villageCode": "CHI-018",
+          "file": "18_कसब रठ.xlsx",
+          "parcelCount": 281
+        },
+        {
+          "villageName": "खापरी टेकेपार",
+          "villageCode": "CHI-019",
+          "file": "19_खपर टकपर.xlsx",
+          "parcelCount": 76
+        },
+        {
+          "villageName": "खैरी",
+          "villageCode": "CHI-020",
+          "file": "20_खर.xlsx",
+          "parcelCount": 275
+        },
+        {
+          "villageName": "गरडापार",
+          "villageCode": "CHI-021",
+          "file": "21_गरडपर.xlsx",
+          "parcelCount": 197
+        },
+        {
+          "villageName": "गोठणगाव",
+          "villageCode": "CHI-022",
+          "file": "22_गठणगव.xlsx",
+          "parcelCount": 102
+        },
+        {
+          "villageName": "गोरवट",
+          "villageCode": "CHI-023",
+          "file": "23_गरवट.xlsx",
+          "parcelCount": 380
+        },
+        {
+          "villageName": "चक करबडा",
+          "villageCode": "CHI-024",
+          "file": "24_चक करबड.xlsx",
+          "parcelCount": 33
+        },
+        {
+          "villageName": "चक गोरवट",
+          "villageCode": "CHI-025",
+          "file": "25_चक गरवट.xlsx",
+          "parcelCount": 98
+        },
+        {
+          "villageName": "चक वाघदरा रिठ",
+          "villageCode": "CHI-026",
+          "file": "26_चक वगदर रठ.xlsx",
+          "parcelCount": 96
+        },
+        {
+          "villageName": "चिखलापार",
+          "villageCode": "CHI-027",
+          "file": "27_चखलपर.xlsx",
+          "parcelCount": 94
+        },
+        {
+          "villageName": "चिखली मोकासा",
+          "villageCode": "CHI-028",
+          "file": "28_चखल मकस.xlsx",
+          "parcelCount": 73
+        },
+        {
+          "villageName": "जाठेपर रिठ",
+          "villageCode": "CHI-029",
+          "file": "29_जठपर.xlsx",
+          "parcelCount": 158
+        },
+        {
+          "villageName": "जमनी",
+          "villageCode": "CHI-031",
+          "file": "31_जमण.xlsx",
+          "parcelCount": 112
+        },
+        {
+          "villageName": "झरी  1",
+          "villageCode": "CHI-032",
+          "file": "32_झर 1.xlsx",
+          "parcelCount": 126
+        },
+        {
+          "villageName": "टाकी रिठ",
+          "villageCode": "CHI-033",
+          "file": "33_टक रठ.xlsx",
+          "parcelCount": 128
+        },
+        {
+          "villageName": "टिटवी",
+          "villageCode": "CHI-034",
+          "file": "34_टटव.xlsx",
+          "parcelCount": 324
+        },
+        {
+          "villageName": "टेकाडी मांडवझरी",
+          "villageCode": "CHI-035",
+          "file": "35_टकड मडवझर.xlsx",
+          "parcelCount": 176
+        },
+        {
+          "villageName": "तळोधी गावगणना",
+          "villageCode": "CHI-036",
+          "file": "36_तळध गवगनन.xlsx",
+          "parcelCount": 222
+        },
+        {
+          "villageName": "तळोधी तुकम",
+          "villageCode": "CHI-037",
+          "file": "37_तळध तकम.xlsx",
+          "parcelCount": 111
+        },
+        {
+          "villageName": "दलदली रिठ",
+          "villageCode": "CHI-038",
+          "file": "38_दलदल रठ.xlsx",
+          "parcelCount": 11
+        },
+        {
+          "villageName": "दहेगाव पांज रिठ",
+          "villageCode": "CHI-039",
+          "file": "39_दहगव पजरपर रठ.xlsx",
+          "parcelCount": 190
+        },
+        {
+          "villageName": "धनबोडी रिठ",
+          "villageCode": "CHI-040",
+          "file": "40_धनबड रठ.xlsx",
+          "parcelCount": 82
+        },
+        {
+          "villageName": "नवेगाव",
+          "villageCode": "CHI-041",
+          "file": "41_नवन नवगव.xlsx",
+          "parcelCount": 118
+        },
+        {
+          "villageName": "परधानहेटी",
+          "villageCode": "CHI-042",
+          "file": "42_परधनहट.xlsx",
+          "parcelCount": 156
+        },
+        {
+          "villageName": "परसोडी",
+          "villageCode": "CHI-043",
+          "file": "43_परसड.xlsx",
+          "parcelCount": 88
+        },
+        {
+          "villageName": "पाचगाव",
+          "villageCode": "CHI-044",
+          "file": "44_पचगव.xlsx",
+          "parcelCount": 354
+        },
+        {
+          "villageName": "पांजरेपार रिठ",
+          "villageCode": "CHI-045",
+          "file": "45_पजरपर रठ.xlsx",
+          "parcelCount": 150
+        },
+        {
+          "villageName": "पांढरपौनी",
+          "villageCode": "CHI-046",
+          "file": "46_पढरपन.xlsx",
+          "parcelCount": 43
+        },
+        {
+          "villageName": "पांढरवाणी",
+          "villageCode": "CHI-047",
+          "file": "47_पढरवण.xlsx",
+          "parcelCount": 230
+        },
+        {
+          "villageName": "पारडपार",
+          "villageCode": "CHI-048",
+          "file": "48_परडपर.xlsx",
+          "parcelCount": 289
+        },
+        {
+          "villageName": "सरकार",
+          "villageCode": "CHI-049",
+          "file": "49_पपळगव.xlsx",
+          "parcelCount": 253
+        },
+        {
+          "villageName": "पेंढरी तुकुम रिठ",
+          "villageCode": "CHI-050",
+          "file": "50_पढर तकम रठ.xlsx",
+          "parcelCount": 93
+        }
+      ]
+    },
+    "Jivati": {
+      "villageCount": 50,
+      "parcelCount": 7605,
+      "villages": [
+        {
+          "villageName": "भारी",
+          "villageCode": "JIV-001",
+          "file": "01_1 त  46  भर.xlsx",
+          "parcelCount": 271
+        },
+        {
+          "villageName": "शेडवाही",
+          "villageCode": "JIV-002",
+          "file": "02_1 त  46 शड वह babapur.xlsx",
+          "parcelCount": 107
+        },
+        {
+          "villageName": "आंबेझरी",
+          "villageCode": "JIV-003",
+          "file": "03_आबझर मरकगद पलझर पट-1 सधरत.xlsx",
+          "parcelCount": 308
+        },
+        {
+          "villageName": "आसापूर",
+          "villageCode": "JIV-004",
+          "file": "04_आसपर.xlsx",
+          "parcelCount": 81
+        },
+        {
+          "villageName": "करणकोंडी",
+          "villageCode": "JIV-005",
+          "file": "05_करणकड.xlsx",
+          "parcelCount": 16
+        },
+        {
+          "villageName": "काकबन",
+          "villageCode": "JIV-006",
+          "file": "06_ककबन.xlsx",
+          "parcelCount": 14
+        },
+        {
+          "villageName": "कारगाव खुर्द",
+          "villageCode": "JIV-007",
+          "file": "07_करगव खरद.xlsx",
+          "parcelCount": 72
+        },
+        {
+          "villageName": "कुंभेझरी",
+          "villageCode": "JIV-008",
+          "file": "08_कमभझर.xlsx",
+          "parcelCount": 247
+        },
+        {
+          "villageName": "कुसुंबी",
+          "villageCode": "JIV-009",
+          "file": "09_कसब.xlsx",
+          "parcelCount": 27
+        },
+        {
+          "villageName": "केकेझरी",
+          "villageCode": "JIV-010",
+          "file": "10_ककझर.xlsx",
+          "parcelCount": 532
+        },
+        {
+          "villageName": "कोदेपूर",
+          "villageCode": "JIV-011",
+          "file": "11_कदपर.xlsx",
+          "parcelCount": 40
+        },
+        {
+          "villageName": "खडकी रायपुर",
+          "villageCode": "JIV-012",
+          "file": "12_खडक रयपर.xlsx",
+          "parcelCount": 86
+        },
+        {
+          "villageName": "खडकी हिरापूर",
+          "villageCode": "JIV-013",
+          "file": "13_खडक हरपर.xlsx",
+          "parcelCount": 285
+        },
+        {
+          "villageName": "गडपांढरवाणी",
+          "villageCode": "JIV-014",
+          "file": "14_गडपढरवण.xlsx",
+          "parcelCount": 50
+        },
+        {
+          "villageName": "गुडसेला",
+          "villageCode": "JIV-015",
+          "file": "15_गडसल 1 त 46सधरत.xlsx",
+          "parcelCount": 111
+        },
+        {
+          "villageName": "घारपणा",
+          "villageCode": "JIV-016",
+          "file": "16_घरपन.xlsx",
+          "parcelCount": 29
+        },
+        {
+          "villageName": "पालडोहो",
+          "villageCode": "JIV-017",
+          "file": "17_चखल पलडह  पटगड नवन दरसतसह.xlsx",
+          "parcelCount": 181
+        },
+        {
+          "villageName": "चिखली बुज",
+          "villageCode": "JIV-018",
+          "file": "18_चखल ब जनकपर डगरगव पटण गवदपर.xlsx",
+          "parcelCount": 183
+        },
+        {
+          "villageName": "जांबूळधरा",
+          "villageCode": "JIV-019",
+          "file": "19_जभळधर.xlsx",
+          "parcelCount": 37
+        },
+        {
+          "villageName": "जिवती",
+          "villageCode": "JIV-020",
+          "file": "20_जवत दवलगड ललडह एकतरत.xlsx",
+          "parcelCount": 291
+        },
+        {
+          "villageName": "टाटाकोहाड",
+          "villageCode": "JIV-021",
+          "file": "21_टटकहड.xlsx",
+          "parcelCount": 150
+        },
+        {
+          "villageName": "टिटवी",
+          "villageCode": "JIV-022",
+          "file": "22_टटव.xlsx",
+          "parcelCount": 90
+        },
+        {
+          "villageName": "टेकाअर्जुनी",
+          "villageCode": "JIV-023",
+          "file": "23_टकअरजन.xlsx",
+          "parcelCount": 110
+        },
+        {
+          "villageName": "दमपूर मोहदा",
+          "villageCode": "JIV-024",
+          "file": "24_दमपर महद.xlsx",
+          "parcelCount": 196
+        },
+        {
+          "villageName": "धनकदेवी",
+          "villageCode": "JIV-025",
+          "file": "25_धनकदव.xlsx",
+          "parcelCount": 60
+        },
+        {
+          "villageName": "धोंडाअर्जुनी",
+          "villageCode": "JIV-026",
+          "file": "26_धडअरजन.xlsx",
+          "parcelCount": 61
+        },
+        {
+          "villageName": "धोंडामांडवा",
+          "villageCode": "JIV-027",
+          "file": "27_धडमडव.xlsx",
+          "parcelCount": 202
+        },
+        {
+          "villageName": "नगराळा",
+          "villageCode": "JIV-028",
+          "file": "28_नगरळ.xlsx",
+          "parcelCount": 235
+        },
+        {
+          "villageName": "भोक्सापूर",
+          "villageCode": "JIV-029",
+          "file": "29_नदपप पट-2 बलगवधरमरम भकसपर पनगड भईपठर गणर.xlsx",
+          "parcelCount": 249
+        },
+        {
+          "villageName": "नागापूर",
+          "villageCode": "JIV-030",
+          "file": "30_नगपर.xlsx",
+          "parcelCount": 69
+        },
+        {
+          "villageName": "नारपठार",
+          "villageCode": "JIV-031",
+          "file": "31_नरपठर.xlsx",
+          "parcelCount": 107
+        },
+        {
+          "villageName": "पुडियाल मोहदा",
+          "villageCode": "JIV-032",
+          "file": "32_पडयल महद.xlsx",
+          "parcelCount": 192
+        },
+        {
+          "villageName": "बाबापूर",
+          "villageCode": "JIV-033",
+          "file": "33_बबपर.xlsx",
+          "parcelCount": 61
+        },
+        {
+          "villageName": "भोक्सापूर",
+          "villageCode": "JIV-034",
+          "file": "34_भकसपर.xlsx",
+          "parcelCount": 249
+        },
+        {
+          "villageName": "मरकलमेटा",
+          "villageCode": "JIV-035",
+          "file": "35_मरकलमट.xlsx",
+          "parcelCount": 334
+        },
+        {
+          "villageName": "मरकागोंदी",
+          "villageCode": "JIV-036",
+          "file": "36_मरकगद धनक.xlsx",
+          "parcelCount": 54
+        },
+        {
+          "villageName": "पांढरवणी",
+          "villageCode": "JIV-037",
+          "file": "37_महपढरवण.xlsx",
+          "parcelCount": 101
+        },
+        {
+          "villageName": "माराईपाटण",
+          "villageCode": "JIV-038",
+          "file": "38_मरईपटण.xlsx",
+          "parcelCount": 217
+        },
+        {
+          "villageName": "कमलापूर",
+          "villageCode": "JIV-039",
+          "file": "39_मज कमलपर.xlsx",
+          "parcelCount": 82
+        },
+        {
+          "villageName": "येल्लापूर",
+          "villageCode": "JIV-040",
+          "file": "40_मज यललपर.xlsx",
+          "parcelCount": 316
+        },
+        {
+          "villageName": "लांबोरी",
+          "villageCode": "JIV-041",
+          "file": "41_मज लबर.xlsx",
+          "parcelCount": 197
+        },
+        {
+          "villageName": "शेडवाही 2",
+          "villageCode": "JIV-042",
+          "file": "42_मज शडवह लबर.xlsx",
+          "parcelCount": 239
+        },
+        {
+          "villageName": "सिंगारपठार",
+          "villageCode": "JIV-043",
+          "file": "43_मज सगरपठर नवन.xlsx",
+          "parcelCount": 20
+        },
+        {
+          "villageName": "टेकामांडवा",
+          "villageCode": "JIV-044",
+          "file": "44_मज- टकमडव.xlsx",
+          "parcelCount": 388
+        },
+        {
+          "villageName": "येरमीयेसापूर",
+          "villageCode": "JIV-045",
+          "file": "45_यरम यसपर.xlsx",
+          "parcelCount": 60
+        },
+        {
+          "villageName": "राह्पली खुर्द",
+          "villageCode": "JIV-046",
+          "file": "46_रहपलल खरद.xlsx",
+          "parcelCount": 159
+        },
+        {
+          "villageName": "राह्पल्ली बूज",
+          "villageCode": "JIV-047",
+          "file": "47_रहपलल बज.xlsx",
+          "parcelCount": 78
+        },
+        {
+          "villageName": "लभानगुडा",
+          "villageCode": "JIV-048",
+          "file": "48_लभणगड.xlsx",
+          "parcelCount": 105
+        },
+        {
+          "villageName": "वणी खुर्द",
+          "villageCode": "JIV-049",
+          "file": "49_वण खरद.xlsx",
+          "parcelCount": 200
+        },
+        {
+          "villageName": "वणी बूज",
+          "villageCode": "JIV-050",
+          "file": "50_वण बज.xlsx",
+          "parcelCount": 56
+        }
+      ]
+    },
+    "Korpana": {
+      "villageCount": 49,
+      "parcelCount": 11280,
+      "villages": [
+        {
+          "villageName": "पिपरी",
+          "villageCode": "KOR-001",
+          "file": "01_pipari.xlsx",
+          "parcelCount": 204
+        },
+        {
+          "villageName": "अंतरगाव बु.",
+          "villageCode": "KOR-002",
+          "file": "02_45 मददयच महत अतरगव ब..xlsx",
+          "parcelCount": 1167
+        },
+        {
+          "villageName": "कढोली खु.",
+          "villageCode": "KOR-003",
+          "file": "03_45 मददयच महत कढल ख..xlsx",
+          "parcelCount": 326
+        },
+        {
+          "villageName": "चिचनवेगाव",
+          "villageCode": "KOR-004",
+          "file": "04_45 मददयच महत चचनवगव.xlsx",
+          "parcelCount": 77
+        },
+        {
+          "villageName": "बोरीनवेगाव",
+          "villageCode": "KOR-005",
+          "file": "05_45 मददयच महत बरनवगव.xlsx",
+          "parcelCount": 111
+        },
+        {
+          "villageName": "asan buj 45 mudde updated",
+          "villageCode": "KOR-006",
+          "file": "06_asan buj 45 mudde updated.xlsx",
+          "parcelCount": 89
+        },
+        {
+          "villageName": "बाखर्डी",
+          "villageCode": "KOR-007",
+          "file": "07_bakhradi 45 मदद.xlsx",
+          "parcelCount": 598
+        },
+        {
+          "villageName": "बोरगाव बुज",
+          "villageCode": "KOR-008",
+          "file": "08_borgoan buj.xlsx",
+          "parcelCount": 68
+        },
+        {
+          "villageName": "बोरगाव खुर्द",
+          "villageCode": "KOR-009",
+          "file": "09_borgoan khurd.xlsx",
+          "parcelCount": 173
+        },
+        {
+          "villageName": "धामणगाव",
+          "villageCode": "KOR-010",
+          "file": "10_Dhamangav.xlsx",
+          "parcelCount": 194
+        },
+        {
+          "villageName": "हिरापुर",
+          "villageCode": "KOR-011",
+          "file": "11_Hirapur.xlsx",
+          "parcelCount": 376
+        },
+        {
+          "villageName": "कारवाई",
+          "villageCode": "KOR-012",
+          "file": "12_Karwai महसल अधकर अभलख सतबर च तपसण.xlsx",
+          "parcelCount": 110
+        },
+        {
+          "villageName": "कविठगाव",
+          "villageCode": "KOR-013",
+          "file": "13_Kavithgav.xlsx",
+          "parcelCount": 301
+        },
+        {
+          "villageName": "नांदा",
+          "villageCode": "KOR-014",
+          "file": "14_nanda.xlsx",
+          "parcelCount": 518
+        },
+        {
+          "villageName": "नवेगाव",
+          "villageCode": "KOR-015",
+          "file": "15_Navegav 45 मदद.xlsx",
+          "parcelCount": 154
+        },
+        {
+          "villageName": "निमणी",
+          "villageCode": "KOR-016",
+          "file": "16_Nimani 45 मदद.xlsx",
+          "parcelCount": 390
+        },
+        {
+          "villageName": "पालगाव",
+          "villageCode": "KOR-017",
+          "file": "17_Palgav.xlsx",
+          "parcelCount": 253
+        },
+        {
+          "villageName": "पल्लेझरी",
+          "villageCode": "KOR-018",
+          "file": "18_pallezari.xlsx",
+          "parcelCount": 55
+        },
+        {
+          "villageName": "सांगोडा",
+          "villageCode": "KOR-019",
+          "file": "19_Sangoda महसल अधकर अभलख सतबर च तपसण.xlsx",
+          "parcelCount": 181
+        },
+        {
+          "villageName": "शेरज ( खुर्द )",
+          "villageCode": "KOR-020",
+          "file": "20_sheraj khurd 1 त 45 मदद.xlsx",
+          "parcelCount": 138
+        },
+        {
+          "villageName": "सोनुर्ली (गाडे)",
+          "villageCode": "KOR-021",
+          "file": "21_sonurli gadegaon.xlsx",
+          "parcelCount": 139
+        },
+        {
+          "villageName": "तळोधी",
+          "villageCode": "KOR-022",
+          "file": "22_Talodhi 45 मदद.xlsx",
+          "parcelCount": 441
+        },
+        {
+          "villageName": "tangalakerambodijambhuldhara",
+          "villageCode": "KOR-023",
+          "file": "23_tangalakerambodijambhuldhara.xlsx",
+          "parcelCount": 230
+        },
+        {
+          "villageName": "झोटिंग",
+          "villageCode": "KOR-024",
+          "file": "24_zoting महसल अधकर अभलख सतबर च तपसण - Copy.xlsx",
+          "parcelCount": 186
+        },
+        {
+          "villageName": "झूलबर्डी",
+          "villageCode": "KOR-025",
+          "file": "25_zulbardi final 45 .1.xlsx",
+          "parcelCount": 20
+        },
+        {
+          "villageName": "कन्हाळगाव",
+          "villageCode": "KOR-026",
+          "file": "26_अकलकतलबड.xlsx",
+          "parcelCount": 189
+        },
+        {
+          "villageName": "इरई",
+          "villageCode": "KOR-027",
+          "file": "27_इरई 1-46 मदद.xlsx",
+          "parcelCount": 213
+        },
+        {
+          "villageName": "उपरावाही",
+          "villageCode": "KOR-028",
+          "file": "28_उपरवह.xlsx",
+          "parcelCount": 551
+        },
+        {
+          "villageName": "उमरहिरा",
+          "villageCode": "KOR-029",
+          "file": "29_उमरहर सज परड.xlsx",
+          "parcelCount": 58
+        },
+        {
+          "villageName": "कुकुडसात",
+          "villageCode": "KOR-030",
+          "file": "30_ककडसत.xlsx",
+          "parcelCount": 203
+        },
+        {
+          "villageName": "कुसळ",
+          "villageCode": "KOR-031",
+          "file": "31_कसळ 1-46 मदद.xlsx",
+          "parcelCount": 144
+        },
+        {
+          "villageName": "कोराडी",
+          "villageCode": "KOR-032",
+          "file": "32_करड.xlsx",
+          "parcelCount": 145
+        },
+        {
+          "villageName": "खडकी",
+          "villageCode": "KOR-033",
+          "file": "33_खडक सज परड.xlsx",
+          "parcelCount": 75
+        },
+        {
+          "villageName": "खिर्डी",
+          "villageCode": "KOR-034",
+          "file": "34_खरड.xlsx",
+          "parcelCount": 266
+        },
+        {
+          "villageName": "दहेगाव",
+          "villageCode": "KOR-035",
+          "file": "35_चचखड  दहगव 1 त 46.xlsx",
+          "parcelCount": 72
+        },
+        {
+          "villageName": "भोयगाव",
+          "villageCode": "KOR-036",
+          "file": "36_जवर रठ.xlsx",
+          "parcelCount": 370
+        },
+        {
+          "villageName": "तामसी",
+          "villageCode": "KOR-037",
+          "file": "37_तमस 1-46 मदद.xlsx",
+          "parcelCount": 41
+        },
+        {
+          "villageName": "थुटरा",
+          "villageCode": "KOR-038",
+          "file": "38_थटर.xlsx",
+          "parcelCount": 660
+        },
+        {
+          "villageName": "दानोदा(रिठ)",
+          "villageCode": "KOR-039",
+          "file": "39_दनद रठ 1 त 45.xlsx",
+          "parcelCount": 168
+        },
+        {
+          "villageName": "धुनकी",
+          "villageCode": "KOR-040",
+          "file": "40_धनक.xlsx",
+          "parcelCount": 61
+        },
+        {
+          "villageName": "धुनकी",
+          "villageCode": "KOR-041",
+          "file": "41_धनक 54  final.xlsx",
+          "parcelCount": 61
+        },
+        {
+          "villageName": "नोकारी",
+          "villageCode": "KOR-042",
+          "file": "42_नकर new सज महसल अधकर अभलख सतबर च तपसण 1-1.xlsx",
+          "parcelCount": 166
+        },
+        {
+          "villageName": "नोकारी",
+          "villageCode": "KOR-043",
+          "file": "43_नकर.xlsx",
+          "parcelCount": 166
+        },
+        {
+          "villageName": "पारंबा",
+          "villageCode": "KOR-044",
+          "file": "44_परब 1-46 मदद.xlsx",
+          "parcelCount": 68
+        },
+        {
+          "villageName": "पिंपळगाव",
+          "villageCode": "KOR-045",
+          "file": "45_पपळगव.xlsx",
+          "parcelCount": 264
+        },
+        {
+          "villageName": "बिबी",
+          "villageCode": "KOR-046",
+          "file": "46_बब.xlsx",
+          "parcelCount": 397
+        },
+        {
+          "villageName": "बोरगाव",
+          "villageCode": "KOR-047",
+          "file": "47_बरगव 1-46 मदद.xlsx",
+          "parcelCount": 130
+        },
+        {
+          "villageName": "भारोसा",
+          "villageCode": "KOR-048",
+          "file": "48_भरस 1-46 मदद.xlsx",
+          "parcelCount": 228
+        },
+        {
+          "villageName": "मेहन्दी",
+          "villageCode": "KOR-049",
+          "file": "50_रयपर.xlsx",
+          "parcelCount": 85
+        }
+      ]
+    },
+    "Mul": {
+      "villageCount": 49,
+      "parcelCount": 11243,
+      "villages": [
+        {
+          "villageName": "फुलझरी",
+          "villageCode": "MUL-001",
+          "file": "01_1 त 45 मदद   फलझर -.xlsx",
+          "parcelCount": 45
+        },
+        {
+          "villageName": "दहेगाव माल",
+          "villageCode": "MUL-002",
+          "file": "02_1 त 45 मदद  Dahegoan Mal.xlsx",
+          "parcelCount": 73
+        },
+        {
+          "villageName": "जानाळा",
+          "villageCode": "MUL-003",
+          "file": "03_1 त 45 मदद  janla.xlsx",
+          "parcelCount": 144
+        },
+        {
+          "villageName": "तोटेवाही",
+          "villageCode": "MUL-004",
+          "file": "04_1 त 45 मदद  tolewahi.xlsx",
+          "parcelCount": 213
+        },
+        {
+          "villageName": "कांतापेठ रै",
+          "villageCode": "MUL-005",
+          "file": "05_1 त 45 मदद  कतपठ.xlsx",
+          "parcelCount": 241
+        },
+        {
+          "villageName": "खालवसपेठ",
+          "villageCode": "MUL-006",
+          "file": "06_1 त 45 मदद  खलवसपठ.xlsx",
+          "parcelCount": 142
+        },
+        {
+          "villageName": "चक कन्हाळगांव",
+          "villageCode": "MUL-007",
+          "file": "07_1 त 45 मदद  चक कनहळगव.xlsx",
+          "parcelCount": 206
+        },
+        {
+          "villageName": "चक चिरोली",
+          "villageCode": "MUL-008",
+          "file": "08_1 त 45 मदद  चक चरल.xlsx",
+          "parcelCount": 47
+        },
+        {
+          "villageName": "डोनी",
+          "villageCode": "MUL-009",
+          "file": "09_1 त 45 मदद  डण.xlsx",
+          "parcelCount": 121
+        },
+        {
+          "villageName": "दाबगाव तुकूम",
+          "villageCode": "MUL-010",
+          "file": "10_1 त 45 मदद  दबगव तकम.xlsx",
+          "parcelCount": 111
+        },
+        {
+          "villageName": "भगवानपुर (पूर्न)",
+          "villageCode": "MUL-011",
+          "file": "11_1 त 45 मदद  भगवनपर.xlsx",
+          "parcelCount": 376
+        },
+        {
+          "villageName": "म्हसबोडन",
+          "villageCode": "MUL-012",
+          "file": "12_1 त 45 मदद  महसबडन.xlsx",
+          "parcelCount": 67
+        },
+        {
+          "villageName": "सारजखेडा माल",
+          "villageCode": "MUL-013",
+          "file": "13_1 त 45 मदद  सरजखड मल.xlsx",
+          "parcelCount": 9
+        },
+        {
+          "villageName": "आगडी",
+          "villageCode": "MUL-014",
+          "file": "14_1 त 45 मदद आगड.xlsx",
+          "parcelCount": 208
+        },
+        {
+          "villageName": "चक सारजखेडा",
+          "villageCode": "MUL-015",
+          "file": "15_1 त 45 मदद चक सरजखड.xlsx",
+          "parcelCount": 186
+        },
+        {
+          "villageName": "मंदातुकुम",
+          "villageCode": "MUL-016",
+          "file": "16_1 त 45 मदद मदतकम.xlsx",
+          "parcelCount": 129
+        },
+        {
+          "villageName": "सांडाळा रिठ",
+          "villageCode": "MUL-017",
+          "file": "17_1 त 45 मदद सडळ रठ.xlsx",
+          "parcelCount": 206
+        },
+        {
+          "villageName": "आकापूर",
+          "villageCode": "MUL-018",
+          "file": "18_AAKAAPUR.xlsx",
+          "parcelCount": 270
+        },
+        {
+          "villageName": "अंतरगाव पारडवाही",
+          "villageCode": "MUL-019",
+          "file": "19_Antergaov Pardwahi.xlsx",
+          "parcelCount": 379
+        },
+        {
+          "villageName": "चक दगडतला",
+          "villageCode": "MUL-020",
+          "file": "20_Chak Dagaltala.xlsx",
+          "parcelCount": 228
+        },
+        {
+          "villageName": "चक काटवन",
+          "villageCode": "MUL-021",
+          "file": "21_Chak Katvan.xlsx",
+          "parcelCount": 92
+        },
+        {
+          "villageName": "चक कोसंबी",
+          "villageCode": "MUL-022",
+          "file": "22_Chak Kosambi.xlsx",
+          "parcelCount": 148
+        },
+        {
+          "villageName": "चांदापुर",
+          "villageCode": "MUL-023",
+          "file": "23_CHANDAPUR.xlsx",
+          "parcelCount": 850
+        },
+        {
+          "villageName": "चिचोली",
+          "villageCode": "MUL-024",
+          "file": "24_Chicholi.xlsx",
+          "parcelCount": 119
+        },
+        {
+          "villageName": "चितेगाव",
+          "villageCode": "MUL-025",
+          "file": "25_CHITEGAON.xlsx",
+          "parcelCount": 500
+        },
+        {
+          "villageName": "चुरूळ तुकूम",
+          "villageCode": "MUL-026",
+          "file": "26_CHURUL TUKUM.xlsx",
+          "parcelCount": 578
+        },
+        {
+          "villageName": "गोंडी विहीरगाव",
+          "villageCode": "MUL-027",
+          "file": "27_Gondivihirgaov.xlsx",
+          "parcelCount": 162
+        },
+        {
+          "villageName": "हळदी तुकुम",
+          "villageCode": "MUL-028",
+          "file": "28_Haldi Tukum.xlsx",
+          "parcelCount": 92
+        },
+        {
+          "villageName": "काटवन माल",
+          "villageCode": "MUL-029",
+          "file": "29_Katwan Mal.xlsx",
+          "parcelCount": 71
+        },
+        {
+          "villageName": "मानकापूर",
+          "villageCode": "MUL-030",
+          "file": "30_Mankapur 1 to 45.xlsx",
+          "parcelCount": 77
+        },
+        {
+          "villageName": "मरेगाव",
+          "villageCode": "MUL-031",
+          "file": "31_MAREGAAV.xlsx",
+          "parcelCount": 454
+        },
+        {
+          "villageName": "ताडाला  रिठ",
+          "villageCode": "MUL-032",
+          "file": "32_Tadala rith.xlsx",
+          "parcelCount": 165
+        },
+        {
+          "villageName": "ताडाळा  तुकूम",
+          "villageCode": "MUL-033",
+          "file": "33_Tadala Tukum.xlsx",
+          "parcelCount": 610
+        },
+        {
+          "villageName": "आकापुर ईंदपवार",
+          "villageCode": "MUL-034",
+          "file": "34_आकपर इदपवर 1 त 45 मदद तपसण.xlsx",
+          "parcelCount": 64
+        },
+        {
+          "villageName": "कवडपेठ माल",
+          "villageCode": "MUL-036",
+          "file": "36_कवडपठ मल 1 त 45 Worksheet 3.xlsx",
+          "parcelCount": 94
+        },
+        {
+          "villageName": "कोंबडवाही रिठ",
+          "villageCode": "MUL-037",
+          "file": "37_कबडवह रट.xlsx",
+          "parcelCount": 207
+        },
+        {
+          "villageName": "कोरंबी",
+          "villageCode": "MUL-038",
+          "file": "38_करब.xlsx",
+          "parcelCount": 296
+        },
+        {
+          "villageName": "गांगलवाडी",
+          "villageCode": "MUL-039",
+          "file": "39_गगलवड.xlsx",
+          "parcelCount": 171
+        },
+        {
+          "villageName": "गोठणगाव रिठ",
+          "villageCode": "MUL-040",
+          "file": "40_गठणगव 1 त 45 Worksheet 3.xlsx",
+          "parcelCount": 319
+        },
+        {
+          "villageName": "गोलाभुज",
+          "villageCode": "MUL-041",
+          "file": "41_गलभज.xlsx",
+          "parcelCount": 106
+        },
+        {
+          "villageName": "चक कवडपेठ",
+          "villageCode": "MUL-042",
+          "file": "42_चक कवडपठ 1 त 45 Worksheet 3.xlsx",
+          "parcelCount": 173
+        },
+        {
+          "villageName": "चक घोसरी",
+          "villageCode": "MUL-043",
+          "file": "43_चक घसर.xlsx",
+          "parcelCount": 242
+        },
+        {
+          "villageName": "बेंबाळ चक",
+          "villageCode": "MUL-044",
+          "file": "44_चक बबळ.xlsx",
+          "parcelCount": 334
+        },
+        {
+          "villageName": "भोग वर्ग -1",
+          "villageCode": "MUL-045",
+          "file": "45_चखल नबर-2.xlsx",
+          "parcelCount": 175
+        },
+        {
+          "villageName": "डोंगरगाव",
+          "villageCode": "MUL-046",
+          "file": "46_डगरगव.xlsx",
+          "parcelCount": 1221
+        },
+        {
+          "villageName": "ताडभूज",
+          "villageCode": "MUL-047",
+          "file": "47_तडभज.xlsx",
+          "parcelCount": 160
+        },
+        {
+          "villageName": "दाबगांव मक्ता",
+          "villageCode": "MUL-048",
+          "file": "48_दबगव मकत 1 त 45 मदद.xlsx",
+          "parcelCount": 263
+        },
+        {
+          "villageName": "भोग वर्ग -1",
+          "villageCode": "MUL-049",
+          "file": "49_नवन कळस.xlsx",
+          "parcelCount": 84
+        },
+        {
+          "villageName": "चुकीने वर्ग 1 झालेले एकूण सर्वे क्रमांक",
+          "villageCode": "MUL-050",
+          "file": "50_नवगव भजल.xlsx",
+          "parcelCount": 15
+        }
+      ]
+    },
+    "Nagbhid": {
+      "villageCount": 55,
+      "parcelCount": 10996,
+      "villages": [
+        {
+          "villageName": "किरमिती",
+          "villageCode": "NAG-001",
+          "file": "01_Kirmiti.xlsx",
+          "parcelCount": 314
+        },
+        {
+          "villageName": "पान्होळी",
+          "villageCode": "NAG-002",
+          "file": "02_Panholi.xlsx",
+          "parcelCount": 155
+        },
+        {
+          "villageName": "पारडी",
+          "villageCode": "NAG-003",
+          "file": "03_Pardi.xlsx",
+          "parcelCount": 344
+        },
+        {
+          "villageName": "रान परसोडी",
+          "villageCode": "NAG-004",
+          "file": "04_Ranparsodi.xlsx",
+          "parcelCount": 302
+        },
+        {
+          "villageName": "तेलीमेंढा",
+          "villageCode": "NAG-005",
+          "file": "05_Telimendha.xlsx",
+          "parcelCount": 396
+        },
+        {
+          "villageName": "खैरी बुजरुक रिठ",
+          "villageCode": "NAG-006",
+          "file": "06_खर बजरक रठ.xlsx",
+          "parcelCount": 142
+        },
+        {
+          "villageName": "चिकमारा",
+          "villageCode": "NAG-007",
+          "file": "07_चकमर.xlsx",
+          "parcelCount": 336
+        },
+        {
+          "villageName": "चिखलपरसोडी",
+          "villageCode": "NAG-008",
+          "file": "08_चखलपरसड.xlsx",
+          "parcelCount": 381
+        },
+        {
+          "villageName": "देवटक",
+          "villageCode": "NAG-009",
+          "file": "09_दवटक.xlsx",
+          "parcelCount": 181
+        },
+        {
+          "villageName": "पांजरेपार",
+          "villageCode": "NAG-010",
+          "file": "10_पजरपर.xlsx",
+          "parcelCount": 189
+        },
+        {
+          "villageName": "पान्होळी मेंढा",
+          "villageCode": "NAG-011",
+          "file": "11_पनहळ मढ.xlsx",
+          "parcelCount": 121
+        },
+        {
+          "villageName": "मौशी चक",
+          "villageCode": "NAG-012",
+          "file": "12_मश चक.xlsx",
+          "parcelCount": 84
+        },
+        {
+          "villageName": "साखरा चक",
+          "villageCode": "NAG-013",
+          "file": "13_सखर चक.xlsx",
+          "parcelCount": 29
+        },
+        {
+          "villageName": "साखरा रिठ",
+          "villageCode": "NAG-014",
+          "file": "14_सखर रठ.xlsx",
+          "parcelCount": 53
+        },
+        {
+          "villageName": "कच्चेपार",
+          "villageCode": "NAG-015",
+          "file": "15_कचचपर.xlsx",
+          "parcelCount": 158
+        },
+        {
+          "villageName": "झाडबोरी",
+          "villageCode": "NAG-016",
+          "file": "16_झडबर.xlsx",
+          "parcelCount": 313
+        },
+        {
+          "villageName": "कामथचक रिठ",
+          "villageCode": "NAG-017",
+          "file": "17_1 त 45 मदद महत  कमथचक रठ.xlsx",
+          "parcelCount": 23
+        },
+        {
+          "villageName": "सोनापूर तुकूम",
+          "villageCode": "NAG-018",
+          "file": "18_1 त 45 सनपर त..xlsx",
+          "parcelCount": 131
+        },
+        {
+          "villageName": "कुनघाडा चक",
+          "villageCode": "NAG-019",
+          "file": "19_कनघड चक.xlsx",
+          "parcelCount": 110
+        },
+        {
+          "villageName": "कुनघाडा रीठ",
+          "villageCode": "NAG-020",
+          "file": "20_कनघड रठ.xlsx",
+          "parcelCount": 70
+        },
+        {
+          "villageName": "कोरंबी",
+          "villageCode": "NAG-021",
+          "file": "21_करब.xlsx",
+          "parcelCount": 43
+        },
+        {
+          "villageName": "खैरी खुर्द",
+          "villageCode": "NAG-022",
+          "file": "22_खर खरद.xlsx",
+          "parcelCount": 151
+        },
+        {
+          "villageName": "खैरीचक पारखी",
+          "villageCode": "NAG-023",
+          "file": "23_खर चक परख.xlsx",
+          "parcelCount": 250
+        },
+        {
+          "villageName": "चिचोली खुर्द",
+          "villageCode": "NAG-024",
+          "file": "24_चचल खरद.xlsx",
+          "parcelCount": 19
+        },
+        {
+          "villageName": "डोंगरगाव खुर्द",
+          "villageCode": "NAG-025",
+          "file": "25_डगरगव खरद.xlsx",
+          "parcelCount": 167
+        },
+        {
+          "villageName": "डोंगरगाव बुज",
+          "villageCode": "NAG-026",
+          "file": "26_डगरगव बज.xlsx",
+          "parcelCount": 393
+        },
+        {
+          "villageName": "तिवर्ला गावगन्ना",
+          "villageCode": "NAG-027",
+          "file": "27_तवरल गवगनन.xlsx",
+          "parcelCount": 270
+        },
+        {
+          "villageName": "नवखळा",
+          "villageCode": "NAG-028",
+          "file": "28_नवखळ.xlsx",
+          "parcelCount": 966
+        },
+        {
+          "villageName": "नागभीड",
+          "villageCode": "NAG-029",
+          "file": "29_नगभड.xlsx",
+          "parcelCount": 476
+        },
+        {
+          "villageName": "पेंढरी बरड",
+          "villageCode": "NAG-030",
+          "file": "30_पढर बरड.xlsx",
+          "parcelCount": 143
+        },
+        {
+          "villageName": "बनवाही चक",
+          "villageCode": "NAG-031",
+          "file": "31_बनवह चक.xlsx",
+          "parcelCount": 129
+        },
+        {
+          "villageName": "बनवाही माल",
+          "villageCode": "NAG-032",
+          "file": "32_बनवह मल.xlsx",
+          "parcelCount": 153
+        },
+        {
+          "villageName": "बाम्हणी (मो)",
+          "villageCode": "NAG-033",
+          "file": "33_बमहण मकस.xlsx",
+          "parcelCount": 341
+        },
+        {
+          "villageName": "बिकली",
+          "villageCode": "NAG-034",
+          "file": "34_बकल.xlsx",
+          "parcelCount": 411
+        },
+        {
+          "villageName": "बोथली",
+          "villageCode": "NAG-035",
+          "file": "35_बथल.xlsx",
+          "parcelCount": 283
+        },
+        {
+          "villageName": "मांगली अ.",
+          "villageCode": "NAG-036",
+          "file": "36_मगल अरब.xlsx",
+          "parcelCount": 290
+        },
+        {
+          "villageName": "रेंगातूर",
+          "villageCode": "NAG-037",
+          "file": "37_रगतर.xlsx",
+          "parcelCount": 176
+        },
+        {
+          "villageName": "सालेभट्टी चक",
+          "villageCode": "NAG-038",
+          "file": "38_सलभटट चक.xlsx",
+          "parcelCount": 38
+        },
+        {
+          "villageName": "सालेभट्टी रीठ",
+          "villageCode": "NAG-039",
+          "file": "39_सलभटट रठ.xlsx",
+          "parcelCount": 42
+        },
+        {
+          "villageName": "किटाळी मेंढा",
+          "villageCode": "NAG-040",
+          "file": "40_कटळ मढ.xlsx",
+          "parcelCount": 110
+        },
+        {
+          "villageName": "मिंडाळा",
+          "villageCode": "NAG-041",
+          "file": "41_कटळ रठ.xlsx",
+          "parcelCount": 191
+        },
+        {
+          "villageName": "कोठलपार",
+          "villageCode": "NAG-042",
+          "file": "42_कटलपर  महसल अधकर अभलख सतबर च तपसण.xlsx",
+          "parcelCount": 46
+        },
+        {
+          "villageName": "कोदेपार",
+          "villageCode": "NAG-043",
+          "file": "43_कदपर.xlsx",
+          "parcelCount": 106
+        },
+        {
+          "villageName": "कोसंबी गवळी",
+          "villageCode": "NAG-044",
+          "file": "44_कसब गवळ.xlsx",
+          "parcelCount": 312
+        },
+        {
+          "villageName": "कोसंबी चक 2",
+          "villageCode": "NAG-045",
+          "file": "45_कसब चक -2.xlsx",
+          "parcelCount": 35
+        },
+        {
+          "villageName": "कोसंबी चक 1",
+          "villageCode": "NAG-046",
+          "file": "46_कसब चक-1.xlsx",
+          "parcelCount": 18
+        },
+        {
+          "villageName": "खडकी तुकूम",
+          "villageCode": "NAG-047",
+          "file": "47_खडक तकम.xlsx",
+          "parcelCount": 173
+        },
+        {
+          "villageName": "गोवारपेठ",
+          "villageCode": "NAG-048",
+          "file": "48_गवरपठ.xlsx",
+          "parcelCount": 210
+        },
+        {
+          "villageName": "तेलनडोंगरी चक",
+          "villageCode": "NAG-049",
+          "file": "49_तलनडगर चक.xlsx",
+          "parcelCount": 73
+        },
+        {
+          "villageName": "नवेगाव माल",
+          "villageCode": "NAG-050",
+          "file": "50_नवगव मल.xlsx",
+          "parcelCount": 73
+        },
+        {
+          "villageName": "नवेगाव हुंडेश्वरी",
+          "villageCode": "NAG-051",
+          "file": "51_नवगव हड.xlsx",
+          "parcelCount": 384
+        },
+        {
+          "villageName": "मिंडाळा",
+          "villageCode": "NAG-052",
+          "file": "52_मडळ.xlsx",
+          "parcelCount": 191
+        },
+        {
+          "villageName": "मोहदर रिठ",
+          "villageCode": "NAG-053",
+          "file": "53_महदर रठ   महसल अधकर अभलख सतबर च तपसण.xlsx",
+          "parcelCount": 68
+        },
+        {
+          "villageName": "वासाळा मक्ता",
+          "villageCode": "NAG-054",
+          "file": "54_वसळ मकत.xlsx",
+          "parcelCount": 238
+        },
+        {
+          "villageName": "वासाळा मेंढा",
+          "villageCode": "NAG-055",
+          "file": "55_वसळ मढ.xlsx",
+          "parcelCount": 195
+        }
+      ]
+    },
+    "Pombhurna": {
+      "villageCount": 34,
+      "parcelCount": 5363,
+      "villages": [
+        {
+          "villageName": "जामतुकूम",
+          "villageCode": "POM-001",
+          "file": "01_1 TO 46 जमतकम.xlsx",
+          "parcelCount": 7
+        },
+        {
+          "villageName": "जामतुकूम रै",
+          "villageCode": "POM-002",
+          "file": "02_1 TO 46 जम तकम र.xlsx",
+          "parcelCount": 7
+        },
+        {
+          "villageName": "जाम खुर्द",
+          "villageCode": "POM-003",
+          "file": "03_1 TO 46 जमखरद.xlsx",
+          "parcelCount": 262
+        },
+        {
+          "villageName": "रामपूर झाडीकर",
+          "villageCode": "POM-004",
+          "file": "04_1 TO 46 रमपर झडकर.xlsx",
+          "parcelCount": 116
+        },
+        {
+          "villageName": "रामपूर दिक्षित",
+          "villageCode": "POM-005",
+          "file": "05_1 TO 46 रमपर दकषत.xlsx",
+          "parcelCount": 318
+        },
+        {
+          "villageName": "चक नवेगाव",
+          "villageCode": "POM-006",
+          "file": "06_1 त 45 मदद  महसल अधकर अभलख सतबर च तपसण-चक नवगव-3.xlsx",
+          "parcelCount": 181
+        },
+        {
+          "villageName": "लोणी रिठ",
+          "villageCode": "POM-007",
+          "file": "07_1 त 45 मदद  महसल अधकर अभलख सतबर च तपसण-लण रठ.xlsx",
+          "parcelCount": 2
+        },
+        {
+          "villageName": "फुटाना  मोकासा",
+          "villageCode": "POM-008",
+          "file": "08_1त 46 मदद फटन.xlsx",
+          "parcelCount": 602
+        },
+        {
+          "villageName": "आंबेधानोरा रिठ",
+          "villageCode": "POM-009",
+          "file": "09_आबधनर रठ 1 त 45 मदद  महसल अधकर अभलख सतबर च तपसण.xlsx",
+          "parcelCount": 63
+        },
+        {
+          "villageName": "उमरी तुकुम",
+          "villageCode": "POM-010",
+          "file": "10_उमर तकम 1 त 45 मदद  महसल अधकर अभलख सतबर च तपसण 1.xlsx",
+          "parcelCount": 75
+        },
+        {
+          "villageName": "चक फुटाणा",
+          "villageCode": "POM-011",
+          "file": "11_चक फटण FINAL1 त 45 मदद  महसल अधकर अभलख सतबर 1.xlsx",
+          "parcelCount": 261
+        },
+        {
+          "villageName": "बोरगाव रिठ",
+          "villageCode": "POM-012",
+          "file": "12_बरगव रठ  1 त 45 मदद  महसल अधकर अभलख सतबर च तपसण.xlsx",
+          "parcelCount": 143
+        },
+        {
+          "villageName": "गंगापुर चक",
+          "villageCode": "POM-013",
+          "file": "13_1 TO 45 GANGAPUR CHAK.xlsx",
+          "parcelCount": 59
+        },
+        {
+          "villageName": "टोक",
+          "villageCode": "POM-014",
+          "file": "14_1 TO 45 TOK.xlsx",
+          "parcelCount": 40
+        },
+        {
+          "villageName": "जामतुकूम",
+          "villageCode": "POM-015",
+          "file": "15_1 TO 46 जमतकम.xlsx",
+          "parcelCount": 7
+        },
+        {
+          "villageName": "जामतुकूम रै",
+          "villageCode": "POM-016",
+          "file": "16_1 TO 46 जम तकम र.xlsx",
+          "parcelCount": 7
+        },
+        {
+          "villageName": "जाम खुर्द",
+          "villageCode": "POM-017",
+          "file": "17_1 TO 46 जमखरद.xlsx",
+          "parcelCount": 262
+        },
+        {
+          "villageName": "रामपूर झाडीकर",
+          "villageCode": "POM-018",
+          "file": "18_1 TO 46 रमपर झडकर.xlsx",
+          "parcelCount": 116
+        },
+        {
+          "villageName": "रामपूर दिक्षित",
+          "villageCode": "POM-019",
+          "file": "19_1 TO 46 रमपर दकषत.xlsx",
+          "parcelCount": 318
+        },
+        {
+          "villageName": "भिमणी",
+          "villageCode": "POM-020",
+          "file": "20_1 त 45 मदद  महसल अधकर अभलख सतबर च तपसण 2 भमन.xlsx",
+          "parcelCount": 366
+        },
+        {
+          "villageName": "चक खापरी",
+          "villageCode": "POM-021",
+          "file": "21_1 त 45 मदद  महसल अधकर अभलख सतबर च तपसण चक खपर.xlsx",
+          "parcelCount": 217
+        },
+        {
+          "villageName": "चक बाम्हणी",
+          "villageCode": "POM-022",
+          "file": "22_1 त 45 मदद  महसल अधकर अभलख सतबर च तपसण चक बमहण sudhrit 1 1.xlsx",
+          "parcelCount": 191
+        },
+        {
+          "villageName": "चक नवेगाव",
+          "villageCode": "POM-023",
+          "file": "23_1 त 45 मदद  महसल अधकर अभलख सतबर च तपसण-चक नवगव-3.xlsx",
+          "parcelCount": 181
+        },
+        {
+          "villageName": "लोणी रिठ",
+          "villageCode": "POM-024",
+          "file": "24_1 त 45 मदद  महसल अधकर अभलख सतबर च तपसण-लण रठ.xlsx",
+          "parcelCount": 2
+        },
+        {
+          "villageName": "1 त 45 मदद",
+          "villageCode": "POM-025",
+          "file": "25_1 त 45 मदद.xlsx",
+          "parcelCount": 33
+        },
+        {
+          "villageName": "फुटाना  मोकासा",
+          "villageCode": "POM-026",
+          "file": "26_1त 46 मदद फटन.xlsx",
+          "parcelCount": 602
+        },
+        {
+          "villageName": "नवीन लाडोली",
+          "villageCode": "POM-027",
+          "file": "27_NAVI LADOLI 1-45 FINAL.xlsx",
+          "parcelCount": 33
+        },
+        {
+          "villageName": "अंबाई तुकूम",
+          "villageCode": "POM-028",
+          "file": "28_अबई तकम 1 त 45 मदद  महसल अधकर अभलख सतबर च तपसण.xlsx",
+          "parcelCount": 71
+        },
+        {
+          "villageName": "आंबेधानोरा रिठ",
+          "villageCode": "POM-029",
+          "file": "29_आबधनर रठ 1 त 45 मदद  महसल अधकर अभलख सतबर च तपसण.xlsx",
+          "parcelCount": 63
+        },
+        {
+          "villageName": "उमरी तुकुम",
+          "villageCode": "POM-030",
+          "file": "30_उमर तकम 1 त 45 मदद  महसल अधकर अभलख सतबर च तपसण 1.xlsx",
+          "parcelCount": 75
+        },
+        {
+          "villageName": "चक फुटाणा",
+          "villageCode": "POM-031",
+          "file": "31_चक फटण FINAL1 त 45 मदद  महसल अधकर अभलख सतबर.xlsx",
+          "parcelCount": 261
+        },
+        {
+          "villageName": "चेक आंबेधानोरा",
+          "villageCode": "POM-032",
+          "file": "32_चक आबधनर  1 त 45 मदद  महसल अधकर अभलख सतबर च तपसण.xlsx",
+          "parcelCount": 242
+        },
+        {
+          "villageName": "जुनी लाडोली",
+          "villageCode": "POM-033",
+          "file": "33_जन लडल 1-45 २ FINAL.xlsx",
+          "parcelCount": 37
+        },
+        {
+          "villageName": "बोरगाव रिठ",
+          "villageCode": "POM-034",
+          "file": "34_बरगव रठ  1 त 45 मदद  महसल अधकर अभलख सतबर च तपसण.xlsx",
+          "parcelCount": 143
+        }
+      ]
+    },
+    "Rajura": {
+      "villageCount": 48,
+      "parcelCount": 9872,
+      "villages": [
+        {
+          "villageName": "नलफडी",
+          "villageCode": "RAJ-001",
+          "file": "01_1 त 45 तपसण  मदद  मज नलफड.xlsx",
+          "parcelCount": 296
+        },
+        {
+          "villageName": "कुर्ली",
+          "villageCode": "RAJ-002",
+          "file": "02_1 त 45 तपसण मदद करल.xlsx",
+          "parcelCount": 206
+        },
+        {
+          "villageName": "चीचबोडी",
+          "villageCode": "RAJ-003",
+          "file": "03_1 त 45 तपसण मदद चचबड.xlsx",
+          "parcelCount": 102
+        },
+        {
+          "villageName": "मानोली बु.",
+          "villageCode": "RAJ-004",
+          "file": "05_1 त 45 मदद च तपसण - मनल बज.xlsx",
+          "parcelCount": 252
+        },
+        {
+          "villageName": "बोटगाव",
+          "villageCode": "RAJ-005",
+          "file": "06_1 त 45 मदद तपसण बटगव.xlsx",
+          "parcelCount": 169
+        },
+        {
+          "villageName": "हरदोना बु",
+          "villageCode": "RAJ-006",
+          "file": "07_1 त 45 मदद तपसण हरदन ब..xlsx",
+          "parcelCount": 308
+        },
+        {
+          "villageName": "निर्ली",
+          "villageCode": "RAJ-007",
+          "file": "08_1 त 45 मदद तपण नरल.xlsx",
+          "parcelCount": 410
+        },
+        {
+          "villageName": "अंतरगाव खुर्द",
+          "villageCode": "RAJ-008",
+          "file": "09_1 त 45 मदद तपसण अतरगव खरद.xlsx",
+          "parcelCount": 342
+        },
+        {
+          "villageName": "अन्नुर",
+          "villageCode": "RAJ-009",
+          "file": "10_1 त 45 मदद तपसण अननर.xlsx",
+          "parcelCount": 137
+        },
+        {
+          "villageName": "आर्वी",
+          "villageCode": "RAJ-010",
+          "file": "11_1 त 45 मदद तपसण आरव.xlsx",
+          "parcelCount": 336
+        },
+        {
+          "villageName": "उमरझरा",
+          "villageCode": "RAJ-011",
+          "file": "12_1 त 45 मदद तपसण उमरझर.xlsx",
+          "parcelCount": 85
+        },
+        {
+          "villageName": "कढोली बु.",
+          "villageCode": "RAJ-012",
+          "file": "13_1 त 45 मदद तपसण कढल ब..xlsx",
+          "parcelCount": 596
+        },
+        {
+          "villageName": "कापणगाव",
+          "villageCode": "RAJ-013",
+          "file": "14_1 त 45 मदद तपसण कपनगव.xlsx",
+          "parcelCount": 181
+        },
+        {
+          "villageName": "कावडगोंदी",
+          "villageCode": "RAJ-014",
+          "file": "15_1 त 45 मदद तपसण कवडगद.xlsx",
+          "parcelCount": 71
+        },
+        {
+          "villageName": "किनेबोडी",
+          "villageCode": "RAJ-015",
+          "file": "16_1 त 45 मदद तपसण कनहबड.xlsx",
+          "parcelCount": 182
+        },
+        {
+          "villageName": "केळझर",
+          "villageCode": "RAJ-016",
+          "file": "17_1 त 45 मदद तपसण कळझर.xlsx",
+          "parcelCount": 234
+        },
+        {
+          "villageName": "खिर्डी",
+          "villageCode": "RAJ-017",
+          "file": "18_1 त 45 मदद तपसण खरड.xlsx",
+          "parcelCount": 198
+        },
+        {
+          "villageName": "खैरगाव रिठ",
+          "villageCode": "RAJ-018",
+          "file": "19_1 त 45 मदद तपसण खरगव रठ.xlsx",
+          "parcelCount": 131
+        },
+        {
+          "villageName": "गोयेगाव",
+          "villageCode": "RAJ-019",
+          "file": "20_1 त 45 मदद तपसण गयगव.xlsx",
+          "parcelCount": 512
+        },
+        {
+          "villageName": "चिरुड रिठ",
+          "villageCode": "RAJ-020",
+          "file": "21_1 त 45 मदद तपसण चरड रठ.xlsx",
+          "parcelCount": 35
+        },
+        {
+          "villageName": "जामणी",
+          "villageCode": "RAJ-021",
+          "file": "22_1 त 45 मदद तपसण जमण.xlsx",
+          "parcelCount": 106
+        },
+        {
+          "villageName": "तुलाना",
+          "villageCode": "RAJ-022",
+          "file": "23_1 त 45 मदद तपसण तलन.xlsx",
+          "parcelCount": 211
+        },
+        {
+          "villageName": "धीडशी",
+          "villageCode": "RAJ-023",
+          "file": "24_1 त 45 मदद तपसण धडश.xlsx",
+          "parcelCount": 178
+        },
+        {
+          "villageName": "धोपताला",
+          "villageCode": "RAJ-024",
+          "file": "25_1 त 45 मदद तपसण धपटळ.xlsx",
+          "parcelCount": 200
+        },
+        {
+          "villageName": "नवेगाव",
+          "villageCode": "RAJ-025",
+          "file": "26_1 त 45 मदद तपसण नवगव.xlsx",
+          "parcelCount": 119
+        },
+        {
+          "villageName": "नोकारी खुर्द",
+          "villageCode": "RAJ-026",
+          "file": "27_1 त 45 मदद तपसण नकर ख..xlsx",
+          "parcelCount": 79
+        },
+        {
+          "villageName": "नोकारी बूज",
+          "villageCode": "RAJ-027",
+          "file": "28_1 त 45 मदद तपसण नकर ब..xlsx",
+          "parcelCount": 58
+        },
+        {
+          "villageName": "पवनी",
+          "villageCode": "RAJ-028",
+          "file": "29_1 त 45 मदद तपसण पवन.xlsx",
+          "parcelCount": 320
+        },
+        {
+          "villageName": "पेंढरी(रिठ)",
+          "villageCode": "RAJ-029",
+          "file": "30_1 त 45 मदद तपसण पढर रठ.xlsx",
+          "parcelCount": 19
+        },
+        {
+          "villageName": "बाम्बेझरी",
+          "villageCode": "RAJ-030",
+          "file": "31_1 त 45 मदद तपसण बमबझर.xlsx",
+          "parcelCount": 59
+        },
+        {
+          "villageName": "भुरकुंडा खु",
+          "villageCode": "RAJ-031",
+          "file": "32_1 त 45 मदद तपसण भरकड ख..xlsx",
+          "parcelCount": 229
+        },
+        {
+          "villageName": "भेंडाळा",
+          "villageCode": "RAJ-032",
+          "file": "33_1 त 45 मदद तपसण भडळ.xlsx",
+          "parcelCount": 356
+        },
+        {
+          "villageName": "मंगी खु",
+          "villageCode": "RAJ-033",
+          "file": "34_1 त 45 मदद तपसण मग ख..xlsx",
+          "parcelCount": 345
+        },
+        {
+          "villageName": "मंगी बु",
+          "villageCode": "RAJ-034",
+          "file": "35_1 त 45 मदद तपसण मग ब..xlsx",
+          "parcelCount": 281
+        },
+        {
+          "villageName": "मानगाव रिठ",
+          "villageCode": "RAJ-035",
+          "file": "36_1 त 45 मदद तपसण मनगव.xlsx",
+          "parcelCount": 150
+        },
+        {
+          "villageName": "खांबाडा",
+          "villageCode": "RAJ-036",
+          "file": "37_1 त 45 मदद तपसण मज खबड.xlsx",
+          "parcelCount": 98
+        },
+        {
+          "villageName": "बाबापूर",
+          "villageCode": "RAJ-037",
+          "file": "38_1 त 45 मदद तपसण मज बबपर.xlsx",
+          "parcelCount": 294
+        },
+        {
+          "villageName": "रानवेली",
+          "villageCode": "RAJ-038",
+          "file": "39_1 त 45 मदद तपसण रनवल.xlsx",
+          "parcelCount": 195
+        },
+        {
+          "villageName": "रामपुर",
+          "villageCode": "RAJ-039",
+          "file": "40_1 त 45 मदद तपसण रमपर.xlsx",
+          "parcelCount": 163
+        },
+        {
+          "villageName": "रुयाड रिठ",
+          "villageCode": "RAJ-040",
+          "file": "41_1 त 45 मदद तपसण रयड रठ.xlsx",
+          "parcelCount": 134
+        },
+        {
+          "villageName": "वांगी रिठ",
+          "villageCode": "RAJ-041",
+          "file": "42_1 त 45 मदद तपसण वग रठ.xlsx",
+          "parcelCount": 68
+        },
+        {
+          "villageName": "सास्ती",
+          "villageCode": "RAJ-042",
+          "file": "43_1 त 45 मदद तपसण ससत.xlsx",
+          "parcelCount": 486
+        },
+        {
+          "villageName": "सिर्सी",
+          "villageCode": "RAJ-043",
+          "file": "44_1 त 45 मदद तपसण सरस.xlsx",
+          "parcelCount": 168
+        },
+        {
+          "villageName": "सोनापूर",
+          "villageCode": "RAJ-044",
+          "file": "45_1 त 45 मदद तपसण सनपर.xlsx",
+          "parcelCount": 299
+        },
+        {
+          "villageName": "हिरापूर",
+          "villageCode": "RAJ-045",
+          "file": "47_1 त 45 मदद तपसण हरपर.xlsx",
+          "parcelCount": 27
+        },
+        {
+          "villageName": "गोरज रिठ",
+          "villageCode": "RAJ-046",
+          "file": "48_1 त 45 मदद तपसण गरज रठ.xlsx",
+          "parcelCount": 22
+        },
+        {
+          "villageName": "सातरी",
+          "villageCode": "RAJ-047",
+          "file": "49_1 त 46 मद तपसण सतर.xlsx",
+          "parcelCount": 275
+        },
+        {
+          "villageName": "मानगाव रिठ",
+          "villageCode": "RAJ-048",
+          "file": "50_1 त 46 मद मनगव रठ.xlsx",
+          "parcelCount": 150
+        }
+      ]
+    },
+    "Saoli": {
+      "villageCount": 48,
+      "parcelCount": 17110,
+      "villages": [
+        {
+          "villageName": "व्याहाड चक नं.1",
+          "villageCode": "SAO-001",
+          "file": "01_1  त 46 वयहड चक न.1 ok.xlsx",
+          "parcelCount": 98
+        },
+        {
+          "villageName": "पालेबारसा",
+          "villageCode": "SAO-002",
+          "file": "02_1 to 46 पलबरस.xlsx",
+          "parcelCount": 426
+        },
+        {
+          "villageName": "साखरी चक",
+          "villageCode": "SAO-004",
+          "file": "04_1 त 45 सखर चक ok.xlsx",
+          "parcelCount": 70
+        },
+        {
+          "villageName": "आकापूर उर्फ बिजापूर",
+          "villageCode": "SAO-006",
+          "file": "06_1 त 46 आकपर उरफ  बजपर ok.xlsx",
+          "parcelCount": 171
+        },
+        {
+          "villageName": "आंभोरा",
+          "villageCode": "SAO-007",
+          "file": "07_1 त 46 आभर ok.xlsx",
+          "parcelCount": 144
+        },
+        {
+          "villageName": "आसोला चक",
+          "villageCode": "SAO-008",
+          "file": "08_1 त 46 आसल चक ok.xlsx",
+          "parcelCount": 123
+        },
+        {
+          "villageName": "उपरी",
+          "villageCode": "SAO-009",
+          "file": "09_1 त 46 उपर.xlsx",
+          "parcelCount": 531
+        },
+        {
+          "villageName": "उमरी",
+          "villageCode": "SAO-010",
+          "file": "10_1 त 46 उमर ok.xlsx",
+          "parcelCount": 366
+        },
+        {
+          "villageName": "उसरपार तुकुम",
+          "villageCode": "SAO-011",
+          "file": "11_1 त 46 उसरपर तकम.xlsx",
+          "parcelCount": 218
+        },
+        {
+          "villageName": "कढोली",
+          "villageCode": "SAO-012",
+          "file": "12_1 त 46 कढल ok.xlsx",
+          "parcelCount": 447
+        },
+        {
+          "villageName": "करगाव चक",
+          "villageCode": "SAO-013",
+          "file": "13_1 त 46 करगव चक  ok.xlsx",
+          "parcelCount": 441
+        },
+        {
+          "villageName": "करोली",
+          "villageCode": "SAO-014",
+          "file": "14_1 त 46 करल ok.xlsx",
+          "parcelCount": 443
+        },
+        {
+          "villageName": "कसरगावं",
+          "villageCode": "SAO-015",
+          "file": "15_1 त 46 कसरगव ok.xlsx",
+          "parcelCount": 296
+        },
+        {
+          "villageName": "काजळवाही चक",
+          "villageCode": "SAO-016",
+          "file": "16_1 त 46 कजळवह चक ok.xlsx",
+          "parcelCount": 176
+        },
+        {
+          "villageName": "किसाननगर",
+          "villageCode": "SAO-017",
+          "file": "17_1 त 46 कसननगर ok.xlsx",
+          "parcelCount": 394
+        },
+        {
+          "villageName": "केरोडा",
+          "villageCode": "SAO-018",
+          "file": "18_1 त 46 करड ok.xlsx",
+          "parcelCount": 556
+        },
+        {
+          "villageName": "कोंडेखल उर्फ घोडेवाही चक",
+          "villageCode": "SAO-019",
+          "file": "19_1 त 46 कडखल उरफ घडवह चक ok.xlsx",
+          "parcelCount": 692
+        },
+        {
+          "villageName": "कोंडेखल माल",
+          "villageCode": "SAO-020",
+          "file": "20_1 त 46 कडखल मल ok.xlsx",
+          "parcelCount": 62
+        },
+        {
+          "villageName": "खानाबाद",
+          "villageCode": "SAO-021",
+          "file": "21_1 त 46 खनबद चक ok.xlsx",
+          "parcelCount": 198
+        },
+        {
+          "villageName": "गायडोंगरी",
+          "villageCode": "SAO-022",
+          "file": "22_1 त 46 गयडगर ok.xlsx",
+          "parcelCount": 343
+        },
+        {
+          "villageName": "गेवरा चक",
+          "villageCode": "SAO-023",
+          "file": "23_1 त 46 गवर चक ok.xlsx",
+          "parcelCount": 2
+        },
+        {
+          "villageName": "चक मानकापूर",
+          "villageCode": "SAO-024",
+          "file": "24_1 त 46 चक मनकपर ok.xlsx",
+          "parcelCount": 46
+        },
+        {
+          "villageName": "चक विरखल टोला",
+          "villageCode": "SAO-025",
+          "file": "25_1 त 46 चक वरखल टल ok.xlsx",
+          "parcelCount": 262
+        },
+        {
+          "villageName": "चकपिरंजी",
+          "villageCode": "SAO-026",
+          "file": "26_1 त 46 चकपरज ok.xlsx",
+          "parcelCount": 716
+        },
+        {
+          "villageName": "चारगाव",
+          "villageCode": "SAO-027",
+          "file": "27_1 त 46 चरगव.xlsx",
+          "parcelCount": 422
+        },
+        {
+          "villageName": "चिखली",
+          "villageCode": "SAO-028",
+          "file": "28_1 त 46 चखल ok.xlsx",
+          "parcelCount": 374
+        },
+        {
+          "villageName": "चिचबोडी",
+          "villageCode": "SAO-029",
+          "file": "29_1 त 46 चचबड ok.xlsx",
+          "parcelCount": 739
+        },
+        {
+          "villageName": "चोरखल रिठ",
+          "villageCode": "SAO-030",
+          "file": "30_1 त 46 चरखल रठ ok.xlsx",
+          "parcelCount": 158
+        },
+        {
+          "villageName": "जनकापूर रिठ",
+          "villageCode": "SAO-031",
+          "file": "31_1 त 46 जनकपर रठ.xlsx",
+          "parcelCount": 147
+        },
+        {
+          "villageName": "जाम-केरोडा-रै.",
+          "villageCode": "SAO-032",
+          "file": "32_1 त 46 जब करड र.xlsx",
+          "parcelCount": 456
+        },
+        {
+          "villageName": "जाम-बुज",
+          "villageCode": "SAO-033",
+          "file": "33_1 त 46 जम बज ok.xlsx",
+          "parcelCount": 295
+        },
+        {
+          "villageName": "डोंगरगाव मस्के",
+          "villageCode": "SAO-034",
+          "file": "34_1 त 46 डगरगव मसक ok.xlsx",
+          "parcelCount": 516
+        },
+        {
+          "villageName": "डोनाळा चक",
+          "villageCode": "SAO-035",
+          "file": "35_1 त 46 डनळ चक ok.xlsx",
+          "parcelCount": 311
+        },
+        {
+          "villageName": "डोनाळा माल",
+          "villageCode": "SAO-036",
+          "file": "36_1 त 46 डनळ मल ok.xlsx",
+          "parcelCount": 251
+        },
+        {
+          "villageName": "थेरगाव",
+          "villageCode": "SAO-037",
+          "file": "37_1 त 46 थरगव ok.xlsx",
+          "parcelCount": 415
+        },
+        {
+          "villageName": "दाबगाव",
+          "villageCode": "SAO-038",
+          "file": "38_1 त 46 दबगव ok.xlsx",
+          "parcelCount": 617
+        },
+        {
+          "villageName": "नवेगाव तुकुम",
+          "villageCode": "SAO-039",
+          "file": "39_1 त 46 नवगव तकम ok.xlsx",
+          "parcelCount": 328
+        },
+        {
+          "villageName": "निफंद्रा",
+          "villageCode": "SAO-040",
+          "file": "40_1 त 46 नफदर.xlsx",
+          "parcelCount": 806
+        },
+        {
+          "villageName": "निमगाव",
+          "villageCode": "SAO-041",
+          "file": "41_1 त 46 नमगव.xlsx",
+          "parcelCount": 889
+        },
+        {
+          "villageName": "पांढरसराड माल",
+          "villageCode": "SAO-042",
+          "file": "42_1 त 46 पढरसरड  मल ok.xlsx",
+          "parcelCount": 111
+        },
+        {
+          "villageName": "पांढरसराड चक",
+          "villageCode": "SAO-043",
+          "file": "43_1 त 46 पढरसरड चक ok.xlsx",
+          "parcelCount": 113
+        },
+        {
+          "villageName": "पाथरी",
+          "villageCode": "SAO-044",
+          "file": "44_1 त 46 पथर.xlsx",
+          "parcelCount": 845
+        },
+        {
+          "villageName": "पारडी",
+          "villageCode": "SAO-045",
+          "file": "45_1 त 46 परड.xlsx",
+          "parcelCount": 704
+        },
+        {
+          "villageName": "पिरंजीमाल",
+          "villageCode": "SAO-046",
+          "file": "46_1 त 46 परज मल ok.xlsx",
+          "parcelCount": 354
+        },
+        {
+          "villageName": "पेटगाव माल",
+          "villageCode": "SAO-047",
+          "file": "47_1 त 46 पटगव मल.xlsx",
+          "parcelCount": 465
+        },
+        {
+          "villageName": "पेटगाव रै.",
+          "villageCode": "SAO-048",
+          "file": "48_1 त 46 पटगव र ok.xlsx",
+          "parcelCount": 342
+        },
+        {
+          "villageName": "पेंढरी चक",
+          "villageCode": "SAO-049",
+          "file": "49_1 त 46 पढर चक ok.xlsx",
+          "parcelCount": 70
+        },
+        {
+          "villageName": "बारसागड",
+          "villageCode": "SAO-050",
+          "file": "50_1 त 46 बरसगड ok.xlsx",
+          "parcelCount": 161
+        }
+      ]
+    },
+    "Sindewahi": {
+      "villageCount": 48,
+      "parcelCount": 7159,
+      "villages": [
+        {
+          "villageName": "उटीमाल",
+          "villageCode": "SIN-001",
+          "file": "01_उटमल.xlsx",
+          "parcelCount": 176
+        },
+        {
+          "villageName": "उमरवाही",
+          "villageCode": "SIN-002",
+          "file": "02_ककस रठ.xlsx",
+          "parcelCount": 289
+        },
+        {
+          "villageName": "गडबोरी",
+          "villageCode": "SIN-003",
+          "file": "03_गडबर.xlsx",
+          "parcelCount": 227
+        },
+        {
+          "villageName": "टेकरी उर्फ अंतरगाव",
+          "villageCode": "SIN-004",
+          "file": "04_टकर उरफ अतरगव.xlsx",
+          "parcelCount": 84
+        },
+        {
+          "villageName": "वाघोली रिठ",
+          "villageCode": "SIN-006",
+          "file": "06_वघल रठ.xlsx",
+          "parcelCount": 80
+        },
+        {
+          "villageName": "सरांडी",
+          "villageCode": "SIN-007",
+          "file": "07_सरड.xlsx",
+          "parcelCount": 173
+        },
+        {
+          "villageName": "इटोली",
+          "villageCode": "SIN-008",
+          "file": "08_इटल.xlsx",
+          "parcelCount": 139
+        },
+        {
+          "villageName": "कटंगधर",
+          "villageCode": "SIN-009",
+          "file": "09_कटगधर.xlsx",
+          "parcelCount": 61
+        },
+        {
+          "villageName": "कारवा",
+          "villageCode": "SIN-010",
+          "file": "10_करव.xlsx",
+          "parcelCount": 128
+        },
+        {
+          "villageName": "कुकडहेटी चक",
+          "villageCode": "SIN-011",
+          "file": "11_ककडहट चक.xlsx",
+          "parcelCount": 23
+        },
+        {
+          "villageName": "खातेरामाल",
+          "villageCode": "SIN-012",
+          "file": "12_खतर मल.xlsx",
+          "parcelCount": 129
+        },
+        {
+          "villageName": "खातेराचक",
+          "villageCode": "SIN-013",
+          "file": "13_खतरचक.xlsx",
+          "parcelCount": 59
+        },
+        {
+          "villageName": "चक सखारामपूर",
+          "villageCode": "SIN-014",
+          "file": "14_चक सखरमपर.xlsx",
+          "parcelCount": 66
+        },
+        {
+          "villageName": "चक सरडपार",
+          "villageCode": "SIN-015",
+          "file": "15_चक सरडपर.xlsx",
+          "parcelCount": 35
+        },
+        {
+          "villageName": "चिटकी",
+          "villageCode": "SIN-016",
+          "file": "16_चटक.xlsx",
+          "parcelCount": 106
+        },
+        {
+          "villageName": "टेंभूर्न्बोडी",
+          "villageCode": "SIN-017",
+          "file": "17_टभरणबड.xlsx",
+          "parcelCount": 64
+        },
+        {
+          "villageName": "पांगडी",
+          "villageCode": "SIN-018",
+          "file": "18_पगड.xlsx",
+          "parcelCount": 29
+        },
+        {
+          "villageName": "पांढरवाणी",
+          "villageCode": "SIN-019",
+          "file": "19_पढरवड.xlsx",
+          "parcelCount": 86
+        },
+        {
+          "villageName": "पिपरहेती",
+          "villageCode": "SIN-020",
+          "file": "20_पपरहट.xlsx",
+          "parcelCount": 69
+        },
+        {
+          "villageName": "मुरमाडी",
+          "villageCode": "SIN-021",
+          "file": "21_मरमड.xlsx",
+          "parcelCount": 446
+        },
+        {
+          "villageName": "कच्चेपार",
+          "villageCode": "SIN-022",
+          "file": "22_कचचपर.xlsx",
+          "parcelCount": 302
+        },
+        {
+          "villageName": "कारगाटा",
+          "villageCode": "SIN-023",
+          "file": "23_करगट.xlsx",
+          "parcelCount": 99
+        },
+        {
+          "villageName": "गडमौशी",
+          "villageCode": "SIN-024",
+          "file": "24_गडमश.xlsx",
+          "parcelCount": 391
+        },
+        {
+          "villageName": "जाटलापूर",
+          "villageCode": "SIN-025",
+          "file": "25_जटलपर.xlsx",
+          "parcelCount": 171
+        },
+        {
+          "villageName": "देवाडा",
+          "villageCode": "SIN-026",
+          "file": "26_दवड.xlsx",
+          "parcelCount": 180
+        },
+        {
+          "villageName": "भेंडाळा",
+          "villageCode": "SIN-027",
+          "file": "27_भडळ.xlsx",
+          "parcelCount": 174
+        },
+        {
+          "villageName": "मेंढा चक",
+          "villageCode": "SIN-028",
+          "file": "28_मढ चक.xlsx",
+          "parcelCount": 196
+        },
+        {
+          "villageName": "रामाळा",
+          "villageCode": "SIN-029",
+          "file": "29_रमळ.xlsx",
+          "parcelCount": 191
+        },
+        {
+          "villageName": "शंकरपूर रीठ",
+          "villageCode": "SIN-030",
+          "file": "30_शकरपर रठ.xlsx",
+          "parcelCount": 77
+        },
+        {
+          "villageName": "हजारी चक",
+          "villageCode": "SIN-031",
+          "file": "31_हजर चक.xlsx",
+          "parcelCount": 59
+        },
+        {
+          "villageName": "कन्हाळगाव",
+          "villageCode": "SIN-032",
+          "file": "32_कनहळगव.xlsx",
+          "parcelCount": 173
+        },
+        {
+          "villageName": "खैरी गोलकर",
+          "villageCode": "SIN-033",
+          "file": "33_खर गलकर.xlsx",
+          "parcelCount": 82
+        },
+        {
+          "villageName": "गुंजेवाही कोठा",
+          "villageCode": "SIN-034",
+          "file": "34_गजवह कठ 1-45 सधरत.xlsx",
+          "parcelCount": 122
+        },
+        {
+          "villageName": "गुंजेवाही मा.नं. 1",
+          "villageCode": "SIN-035",
+          "file": "35_गजवह मल न. 1.xlsx",
+          "parcelCount": 444
+        },
+        {
+          "villageName": "गुंजेवाही मा.नं. 2",
+          "villageCode": "SIN-036",
+          "file": "36_गजवह मल न. 2.xlsx",
+          "parcelCount": 187
+        },
+        {
+          "villageName": "गोविंदपूर चक",
+          "villageCode": "SIN-037",
+          "file": "37_गवदपर चक.xlsx",
+          "parcelCount": 126
+        },
+        {
+          "villageName": "टेकरी तुकूम",
+          "villageCode": "SIN-038",
+          "file": "38_टकर तकम.xlsx",
+          "parcelCount": 366
+        },
+        {
+          "villageName": "तयागोंदी",
+          "villageCode": "SIN-039",
+          "file": "39_तयगद.xlsx",
+          "parcelCount": 52
+        },
+        {
+          "villageName": "धानोरा",
+          "villageCode": "SIN-040",
+          "file": "40_धनर.xlsx",
+          "parcelCount": 96
+        },
+        {
+          "villageName": "नवेगाव चक",
+          "villageCode": "SIN-041",
+          "file": "41_नवगव चक.xlsx",
+          "parcelCount": 118
+        },
+        {
+          "villageName": "पवनपार",
+          "villageCode": "SIN-042",
+          "file": "42_पवनपर.xlsx",
+          "parcelCount": 396
+        },
+        {
+          "villageName": "पिंपरदंड चक",
+          "villageCode": "SIN-043",
+          "file": "43_पपरदड चक.xlsx",
+          "parcelCount": 41
+        },
+        {
+          "villageName": "मरेगाव चक",
+          "villageCode": "SIN-044",
+          "file": "44_मरगव चक amp धनर.xlsx",
+          "parcelCount": 64
+        },
+        {
+          "villageName": "मरेगाव तुकूम",
+          "villageCode": "SIN-045",
+          "file": "45_मरगव तकम.xlsx",
+          "parcelCount": 113
+        },
+        {
+          "villageName": "लोनखैरी पाणबुडा",
+          "villageCode": "SIN-046",
+          "file": "46_लनखर पणबड.xlsx",
+          "parcelCount": 99
+        },
+        {
+          "villageName": "सरडपार रिठ",
+          "villageCode": "SIN-047",
+          "file": "47_सरडपर रठ.xlsx",
+          "parcelCount": 19
+        },
+        {
+          "villageName": "सामदा खुर्द",
+          "villageCode": "SIN-048",
+          "file": "48_समद खरद.xlsx",
+          "parcelCount": 207
+        },
+        {
+          "villageName": "सावरगाटा",
+          "villageCode": "SIN-049",
+          "file": "49_सवरगट चक.xlsx",
+          "parcelCount": 145
+        }
+      ]
+    },
+    "Warora": {
+      "villageCount": 36,
+      "parcelCount": 1773,
+      "villages": [
+        {
+          "villageName": "कोसरसार",
+          "villageCode": "WAR-001",
+          "file": "01_कसरसर १ त ४५.xlsx",
+          "parcelCount": 117
+        },
+        {
+          "villageName": "गुऱ्हाड रिठ",
+          "villageCode": "WAR-002",
+          "file": "02_गरहड रठ १ त ४५.xlsx",
+          "parcelCount": 22
+        },
+        {
+          "villageName": "टाकळी रिठ",
+          "villageCode": "WAR-003",
+          "file": "03_टकळ रठ १ त ४५.xlsx",
+          "parcelCount": 39
+        },
+        {
+          "villageName": "बोडखा",
+          "villageCode": "WAR-004",
+          "file": "04_बडख म १ त ४५.xlsx",
+          "parcelCount": 82
+        },
+        {
+          "villageName": "वाठोडा",
+          "villageCode": "WAR-005",
+          "file": "05_वठड १ त ४५.xlsx",
+          "parcelCount": 119
+        },
+        {
+          "villageName": "चरूरखटी",
+          "villageCode": "WAR-006",
+          "file": "06_चररखट १ त ४५.xlsx",
+          "parcelCount": 50
+        },
+        {
+          "villageName": "जामखुळा",
+          "villageCode": "WAR-007",
+          "file": "07_जमखल १ त ४५.xlsx",
+          "parcelCount": 11
+        },
+        {
+          "villageName": "दहेगाव",
+          "villageCode": "WAR-008",
+          "file": "08_दहगव १ त ४५.xlsx",
+          "parcelCount": 46
+        },
+        {
+          "villageName": "नायदेव",
+          "villageCode": "WAR-009",
+          "file": "09_नयदव १ त ४५.xlsx",
+          "parcelCount": 95
+        },
+        {
+          "villageName": "महाडोळी",
+          "villageCode": "WAR-010",
+          "file": "10_महडळ १ त ४५.xlsx",
+          "parcelCount": 36
+        },
+        {
+          "villageName": "शेगाव खु",
+          "villageCode": "WAR-011",
+          "file": "11_शगव ख १ त ४५.xlsx",
+          "parcelCount": 34
+        },
+        {
+          "villageName": "जामगाव बु",
+          "villageCode": "WAR-012",
+          "file": "12_जमगव ब १ त ४५.xlsx",
+          "parcelCount": 45
+        },
+        {
+          "villageName": "दिन्दोडा खु",
+          "villageCode": "WAR-013",
+          "file": "13_दनदड ख १ त ४५.xlsx",
+          "parcelCount": 59
+        },
+        {
+          "villageName": "परसोडा",
+          "villageCode": "WAR-014",
+          "file": "14_परसड १ त ४५.xlsx",
+          "parcelCount": 76
+        },
+        {
+          "villageName": "सुर्ला",
+          "villageCode": "WAR-015",
+          "file": "15_सरल १ त ४५.xlsx",
+          "parcelCount": 21
+        },
+        {
+          "villageName": "केम",
+          "villageCode": "WAR-016",
+          "file": "16_कम १ त ४५.xlsx",
+          "parcelCount": 13
+        },
+        {
+          "villageName": "पाचगाव ठाकरे",
+          "villageCode": "WAR-017",
+          "file": "17_पचगव ठ १ त ४५.xlsx",
+          "parcelCount": 50
+        },
+        {
+          "villageName": "पांढरतळा",
+          "villageCode": "WAR-018",
+          "file": "18_पढरतळ १ त ४५.xlsx",
+          "parcelCount": 63
+        },
+        {
+          "villageName": "आमडी",
+          "villageCode": "WAR-019",
+          "file": "19_आमड १ त ४५.xlsx",
+          "parcelCount": 108
+        },
+        {
+          "villageName": "जळका",
+          "villageCode": "WAR-020",
+          "file": "20_जळक १ त ४५.xlsx",
+          "parcelCount": 45
+        },
+        {
+          "villageName": "निलजई",
+          "villageCode": "WAR-021",
+          "file": "21_नलजई १ त ४५.xlsx",
+          "parcelCount": 18
+        },
+        {
+          "villageName": "पौणी",
+          "villageCode": "WAR-022",
+          "file": "22_पन १ त ४५.xlsx",
+          "parcelCount": 110
+        },
+        {
+          "villageName": "वडगाव",
+          "villageCode": "WAR-023",
+          "file": "23_वडगव १ त ४५.xlsx",
+          "parcelCount": 41
+        },
+        {
+          "villageName": "वानेरी रिठ",
+          "villageCode": "WAR-024",
+          "file": "24_वनर रठ १ त ४५.xlsx",
+          "parcelCount": 11
+        },
+        {
+          "villageName": "वालधुर रिठ",
+          "villageCode": "WAR-025",
+          "file": "25_वलधर रठ १ त ४५.xlsx",
+          "parcelCount": 21
+        },
+        {
+          "villageName": "करंजी",
+          "villageCode": "WAR-026",
+          "file": "26_करज १ त ४५.xlsx",
+          "parcelCount": 51
+        },
+        {
+          "villageName": "शेंबळ",
+          "villageCode": "WAR-027",
+          "file": "27_शमबळ १ त ४५.xlsx",
+          "parcelCount": 201
+        },
+        {
+          "villageName": "चारगाव खुर्द",
+          "villageCode": "WAR-028",
+          "file": "28_चरगव ख १ त ४५.xlsx",
+          "parcelCount": 33
+        },
+        {
+          "villageName": "दादापूर",
+          "villageCode": "WAR-029",
+          "file": "29_ददपर १ त ४५.xlsx",
+          "parcelCount": 24
+        },
+        {
+          "villageName": "धानोली",
+          "villageCode": "WAR-030",
+          "file": "30_धनल १ त ४५.xlsx",
+          "parcelCount": 7
+        },
+        {
+          "villageName": "नवरगाव रिठ",
+          "villageCode": "WAR-031",
+          "file": "31_नवरगव रठ १ त ४५.xlsx",
+          "parcelCount": 30
+        },
+        {
+          "villageName": "अंतापुर रिठ",
+          "villageCode": "WAR-032",
+          "file": "32_अतपर रठ १ त ४५.xlsx",
+          "parcelCount": 7
+        },
+        {
+          "villageName": "कवडसी बो",
+          "villageCode": "WAR-033",
+          "file": "33_कवडश बरगव १ त ४५.xlsx",
+          "parcelCount": 30
+        },
+        {
+          "villageName": "केकापुर रिठ",
+          "villageCode": "WAR-034",
+          "file": "34_ककपर रठ १ त ४५.xlsx",
+          "parcelCount": 22
+        },
+        {
+          "villageName": "गुंजाळा",
+          "villageCode": "WAR-035",
+          "file": "35_गजळ १ त ४५.xlsx",
+          "parcelCount": 20
+        },
+        {
+          "villageName": "सोनेगाव",
+          "villageCode": "WAR-036",
+          "file": "36_सनगव १ त ४५.xlsx",
+          "parcelCount": 16
+        }
+      ]
+    },
+    "Gondpipri": {
+      "villageCount": 15,
+      "parcelCount": 1691,
+      "villages": [
+        {
+          "villageName": "उंदिरगाव कां",
+          "villageCode": "GON-001",
+          "file": "01_उदरगव क - सज चकपरगव.xlsx",
+          "parcelCount": 51
+        },
+        {
+          "villageName": "उंदिरगाव रै",
+          "villageCode": "GON-002",
+          "file": "02_उदरगव र. सज - चकपरगव.xlsx",
+          "parcelCount": 48
+        },
+        {
+          "villageName": "किरमीरी",
+          "villageCode": "GON-003",
+          "file": "03_करमर सज- चकदरर.xlsx",
+          "parcelCount": 164
+        },
+        {
+          "villageName": "गुजरी",
+          "villageCode": "GON-004",
+          "file": "04_गजर सज - हवर.xlsx",
+          "parcelCount": 102
+        },
+        {
+          "villageName": "चक डोंगरगाव",
+          "villageCode": "GON-005",
+          "file": "05_चकडगरगव-  सज धब.xlsx",
+          "parcelCount": 43
+        },
+        {
+          "villageName": "चक पारगाव",
+          "villageCode": "GON-006",
+          "file": "06_चकपरगव - सज चकपरगव.xlsx",
+          "parcelCount": 270
+        },
+        {
+          "villageName": "चक व्यंकटपूर",
+          "villageCode": "GON-007",
+          "file": "07_चकवयकटपर - सज धनपर.xlsx",
+          "parcelCount": 90
+        },
+        {
+          "villageName": "चिवंढा",
+          "villageCode": "GON-008",
+          "file": "08_चवढ - सज गजल म..xlsx",
+          "parcelCount": 145
+        },
+        {
+          "villageName": "चेक गोजोली",
+          "villageCode": "GON-009",
+          "file": "09_चकगजल - सज गजल म..xlsx",
+          "parcelCount": 30
+        },
+        {
+          "villageName": "चेक घडोली",
+          "villageCode": "GON-010",
+          "file": "10_चकघडल सज - चकघडल.xlsx",
+          "parcelCount": 155
+        },
+        {
+          "villageName": "चेकतारडा",
+          "villageCode": "GON-011",
+          "file": "11_चकतरड सज- वढल.xlsx",
+          "parcelCount": 47
+        },
+        {
+          "villageName": "टेकोडा",
+          "villageCode": "GON-012",
+          "file": "12_टकड- सज वडकल.xlsx",
+          "parcelCount": 19
+        },
+        {
+          "villageName": "मंगलपेठ",
+          "villageCode": "GON-013",
+          "file": "13_मगलपठ- सज धब.xlsx",
+          "parcelCount": 116
+        },
+        {
+          "villageName": "राळापेठ",
+          "villageCode": "GON-014",
+          "file": "14_रळपठ सज तरसखरद.xlsx",
+          "parcelCount": 298
+        },
+        {
+          "villageName": "शीर्षी देऊळवार",
+          "villageCode": "GON-015",
+          "file": "15_शरष दऊलवर सज आकसपर.xlsx",
+          "parcelCount": 113
+        }
+      ]
+    }
+  }
+}

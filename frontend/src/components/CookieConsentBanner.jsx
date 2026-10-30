@@ -47,7 +47,7 @@ export default function CookieConsentBanner() {
     <aside
       role="region"
       aria-label={isMarathi ? 'कुकी आणि डेटा गोपनीयता संमती सूचना (Cookie & Data Privacy Notice)' : 'Cookie & Data Privacy Notice'}
-      className="fixed bottom-3 sm:bottom-6 inset-x-3 sm:inset-x-6 max-w-5xl mx-auto z-50 transition-all duration-300 animate-in fade-in slide-in-from-bottom-5"
+      className="fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom,0px))] sm:bottom-6 inset-x-2.5 sm:inset-x-6 max-w-5xl mx-auto z-50 transition-all duration-300 animate-in fade-in slide-in-from-bottom-5"
     >
       <div className="bg-white/95 backdrop-blur-xl border border-slate-200/90 shadow-[0_20px_60px_-15px_rgba(15,23,42,0.2)] rounded-2xl sm:rounded-3xl overflow-hidden">
         <div className="relative p-4 sm:p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 sm:gap-6">

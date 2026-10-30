@@ -174,7 +174,8 @@ export default function TalukaMountainChart({ data = [], selectedTaluka = '' }) 
       </div>
 
       {/* Chart Canvas */}
-      <div className="relative pt-2 pb-1 h-56 w-full" aria-label="Taluka comparison visualizer">
+      <div className="relative pt-2 pb-1 h-56 w-full overflow-x-auto touch-scroll no-scrollbar" aria-label="Taluka comparison visualizer">
+        <div className="h-full min-w-[500px] sm:min-w-full">
         {chartData.length === 0 ? (
           <div className="h-full flex items-center justify-center text-xs text-slate-400 font-medium">
             {isMarathi ? 'नोंदी उपलब्ध नाहीत.' : 'No records available.'}
@@ -307,10 +308,11 @@ export default function TalukaMountainChart({ data = [], selectedTaluka = '' }) 
             </AreaChart>
           </ResponsiveContainer>
         )}
+        </div>
       </div>
 
       {/* Footer Taluka Chips */}
-      <div className="flex flex-wrap items-center gap-1.5 pt-2.5 mt-1 border-t border-slate-100 text-xs text-slate-600">
+      <div className="flex items-center sm:flex-wrap overflow-x-auto no-scrollbar gap-1.5 pt-2.5 mt-1 border-t border-slate-100 text-xs text-slate-600 touch-scroll">
         <span className="font-semibold text-slate-700 text-[11px]">
           {isMarathi ? 'नोंदणीकृत तालुके:' : 'Registered Talukas:'}
         </span>

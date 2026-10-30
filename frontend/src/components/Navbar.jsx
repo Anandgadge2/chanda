@@ -119,7 +119,7 @@ export default function Navbar({
               </div>
               <div className="min-w-0">
                 <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
-                  <span className="font-extrabold text-slate-950 text-xs sm:text-sm lg:text-base tracking-tight group-hover:text-blue-900 transition truncate">
+                  <span className="font-extrabold text-slate-950 text-xs sm:text-sm lg:text-base tracking-tight group-hover:text-blue-900 transition truncate max-w-[140px] xs:max-w-[200px] sm:max-w-none">
                     {t('portal.title')}
                   </span>
                   <span className="hidden sm:inline-block text-[10px] font-bold bg-amber-100 text-amber-950 px-2 py-0.2 rounded-full border border-amber-300 flex-shrink-0 shadow-2xs">
@@ -203,7 +203,7 @@ export default function Navbar({
                 {/* Profile Tray Dropdown */}
                 {profileTrayOpen && (
                   <div
-                    className="absolute right-0 mt-2 w-72 sm:w-80 bg-white rounded-2xl shadow-xl border border-slate-200/90 p-3 space-y-3 z-50 text-xs animate-in fade-in slide-in-from-top-2 duration-150"
+                    className="absolute right-0 mt-2 w-72 sm:w-80 max-w-[calc(100vw-1.5rem)] bg-white rounded-2xl shadow-xl border border-slate-200/90 p-3 space-y-3 z-50 text-xs animate-in fade-in slide-in-from-top-2 duration-150"
                     role="menu"
                   >
                     <div className="pb-2.5 border-b border-slate-100 flex items-center gap-3">

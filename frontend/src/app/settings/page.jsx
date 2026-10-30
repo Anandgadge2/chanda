@@ -237,7 +237,7 @@ export default function SettingsPage() {
       </div>
 
       {/* Modern Segmented Settings Navigation Tabs */}
-      <div className="inline-flex p-1 rounded-2xl bg-slate-200/60 backdrop-blur-md border border-slate-300/60 gap-1.5 shadow-2xs overflow-x-auto max-w-full">
+      <div className="inline-flex p-1 rounded-2xl bg-slate-200/60 backdrop-blur-md border border-slate-300/60 gap-1.5 shadow-2xs overflow-x-auto max-w-full touch-scroll no-scrollbar">
         <button
           type="button"
           onClick={() => setActiveTab('profile')}

@@ -1,3 +1,4 @@
+import ExcelJS from 'exceljs';
 import fs from 'fs';
 import path from 'path';
 import { exec, execFile } from 'child_process';
@@ -54,7 +55,22 @@ const TALUKA_ALIASES = {
   mul: 'Mul',
   korpana: 'Korpana',
   rajura: 'Rajura',
-  jivati: 'Jivati'
+  jivati: 'Jivati',
+  'चंद्रपूर': 'Chandrapur',
+  'बल्लारपूर': 'Ballarpur',
+  'वरोरा': 'Warora',
+  'भद्रावती': 'Bhadravati',
+  'राजुरा': 'Rajura',
+  'कोरपना': 'Korpana',
+  'जिवती': 'Jivati',
+  'मूल': 'Mul',
+  'सावली': 'Saoli',
+  'पोंभुर्णा': 'Pombhurna',
+  'ब्रह्मपुरी': 'Brahmapuri',
+  'नागभीड': 'Nagbhid',
+  'सिंदेवाही': 'Sindewahi',
+  'चिमूर': 'Chimur',
+  'गोंडपिपरी': 'Gondpipri'
 };
 
 export const TALUKA_EN_TO_MR = {
@@ -1963,6 +1979,157 @@ const TALUKA_MR_NAMES = {
  * GET /api/prapatra/renumbering-parcha/data
  * Fetch initial or village-specific data for the editable Renumbering Parcha
  */
+
+const rawVillageSheetPathCache = new Map();
+
+function matchVillageName(rawVal, target) {
+  if (!rawVal || !target) return false;
+  const norm = s => String(s).trim().replace(/[\s\.\,\-_\(\)]+/g, '').toLowerCase();
+  const nRaw = norm(rawVal);
+  const nTarget = norm(target);
+  if (nRaw === nTarget) return true;
+  const baseTarget = nTarget.replace(/(रिठ|बु|खु|मो|ठा|क|चक)$/, '');
+  const baseRaw = nRaw.replace(/(रिठ|बु|खु|मो|ठा|क|चक)$/, '');
+  if (baseTarget.length >= 3 && baseRaw === baseTarget) return true;
+  return false;
+}
+
+async function findRawVillageSheetPath(targetTaluka, cleanVillage, origVillage) {
+  const cacheKey = `${(targetTaluka || '').toLowerCase()}__${(cleanVillage || '').toLowerCase()}`;
+  if (rawVillageSheetPathCache.has(cacheKey)) {
+    const cached = rawVillageSheetPathCache.get(cacheKey);
+    if (fs.existsSync(cached)) return cached;
+  }
+
+  const baseDir = path.resolve(process.cwd(), '../data/all_talukas_raw');
+  const altBaseDir = path.resolve(process.cwd(), 'data/all_talukas_raw');
+  const actualBase = fs.existsSync(baseDir) ? baseDir : (fs.existsSync(altBaseDir) ? altBaseDir : null);
+  if (!actualBase) return null;
+
+  const talukaDirs = fs.readdirSync(actualBase);
+  const matchedDir = talukaDirs.find(d => 
+    d.toLowerCase() === targetTaluka.toLowerCase() ||
+    (targetTaluka.toLowerCase().includes('brahmapuri') && d.toLowerCase() === 'bramhapuri') ||
+    (targetTaluka.toLowerCase().includes('bramhapuri') && d.toLowerCase() === 'bramhapuri') ||
+    (targetTaluka.toLowerCase().includes('saoli') && d.toLowerCase() === 'saoli')
+  );
+  if (!matchedDir) return null;
+
+  const tPath = path.join(actualBase, matchedDir);
+  const files = fs.readdirSync(tPath).filter(f => f.endsWith('.xlsx'));
+
+  // 1. Filename match
+  for (const f of files) {
+    if (matchVillageName(f, cleanVillage) || (origVillage && matchVillageName(f, origVillage))) {
+      const fullPath = path.join(tPath, f);
+      rawVillageSheetPathCache.set(cacheKey, fullPath);
+      return fullPath;
+    }
+  }
+
+  // 2. Sheet name or cell match
+  for (const f of files) {
+    const fp = path.join(tPath, f);
+    try {
+      const wb = new ExcelJS.Workbook();
+      await wb.xlsx.readFile(fp);
+      let found = false;
+      for (const ws of wb.worksheets) {
+        if (matchVillageName(ws.name, cleanVillage) || (origVillage && matchVillageName(ws.name, origVillage))) {
+          found = true;
+          break;
+        }
+        for (let r = 5; r <= Math.min(10, ws.rowCount); r++) {
+          const v = ws.getRow(r).getCell(2).value;
+          if (matchVillageName(v, cleanVillage) || (origVillage && matchVillageName(v, origVillage))) {
+            found = true;
+            break;
+          }
+        }
+        if (found) break;
+      }
+      if (found) {
+        rawVillageSheetPathCache.set(cacheKey, fp);
+        return fp;
+      }
+    } catch (e) {}
+  }
+
+  return null;
+}
+
+async function syncRawVillageRenumberingToDb(targetTaluka, cleanVillage, parsedParcels) {
+  try {
+    const existingParcels = await prisma.landParcel.findMany({
+      where: {
+        taluka: { equals: targetTaluka, mode: 'insensitive' },
+        villageName: { contains: cleanVillage, mode: 'insensitive' }
+      },
+      include: { backwardHistories: true }
+    });
+    if (!existingParcels || existingParcels.length === 0) return;
+
+    const parcelMap = new Map();
+    for (const ep of existingParcels) {
+      parcelMap.set(String(ep.gatNumber).trim(), ep);
+    }
+
+    const backwardToCreate = [];
+    const historiesToUpdate = [];
+
+    for (const p of parsedParcels) {
+      const dbP = parcelMap.get(String(p.gatNumber).trim());
+      if (!dbP) continue;
+
+      const rawEk = p.backward?.ekatrikaran1972?.no || p.auditPoints?.point_4;
+      if (rawEk && !['निरंक', 'नाही', 'उपलब्ध नाही', '-', 'None', 'null'].includes(rawEk)) {
+        const has1972 = dbP.backwardHistories.some(b => b.epochYear === 1972);
+        if (!has1972) {
+          backwardToCreate.push({
+            parcelId: dbP.id,
+            epochYear: 1972,
+            recordDate: new Date('1972-04-01'),
+            ferfarNumber: `F-EK-${String(rawEk).slice(0, 30)}`,
+            ownerName: p.backward?.ekatrikaran1972?.owner ? String(p.backward.ekatrikaran1972.owner).slice(0, 240) : (dbP.metadata?.ownerName || 'खातेदार'),
+            khataNumber: `K-EK-${String(rawEk).slice(0, 30)}`,
+            areaHa: dbP.totalAreaHa,
+            tenureClass: dbP.tenureClass,
+            wasGovtLand: false,
+            mutationType: 'एकत्रिकरण योजना नोंद',
+            remarks: 'जमीन एकत्रिकरण व पुनर्रचना नोंद (Consolidation Scheme)'
+          });
+        }
+      }
+
+      // Fix legacy 'F-04' 1950 record if present
+      const b1950 = dbP.backwardHistories.find(b => b.epochYear === 1950);
+      if (b1950 && b1950.ferfarNumber === 'F-04') {
+        const rawB = p.backward?.settlement1950?.no || p.auditPoints?.point_1;
+        const realB = (rawB && !['निरंक', 'नाही', 'उपलब्ध नाही', 'None', 'null'].includes(rawB) && !rawB.includes('वनग्राम'))
+          ? `F-1950-${String(rawB).slice(0, 30)}`
+          : 'F-1950-वनग्राम';
+        historiesToUpdate.push({ id: b1950.id, ferfarNumber: realB });
+      }
+    }
+
+    if (backwardToCreate.length > 0) {
+      await prisma.backwardHistory.createMany({
+        data: backwardToCreate,
+        skipDuplicates: true
+      });
+    }
+
+    for (const h of historiesToUpdate) {
+      await prisma.backwardHistory.update({
+        where: { id: h.id },
+        data: { ferfarNumber: h.ferfarNumber }
+      }).catch(() => {});
+    }
+  } catch (e) {
+    console.warn('syncRawVillageRenumberingToDb error:', e.message);
+  }
+}
+
 export const getRenumberingParchaData = async (req, res) => {
   try {
     const { taluka = '', village = '' } = req.query;
@@ -2042,11 +2209,18 @@ export const getRenumberingParchaData = async (req, res) => {
       };
 
       parcels = await prisma.landParcel.findMany({
-        where: whereCondition,
+        where: {
+          ...whereCondition,
+          NOT: [
+            { gatNumber: { equals: cleanVillage } },
+            { gatNumber: { equals: village } }
+          ]
+        },
+        orderBy: { updatedAt: 'desc' },
         include: {
           backwardHistories: true
         },
-        take: 1500
+        take: 3000
       });
     } catch (e) {
       console.warn('Could not query parcels for renumbering parcha:', e.message);
@@ -2058,6 +2232,71 @@ export const getRenumberingParchaData = async (req, res) => {
       subDivision: subDiv,
       district: 'चंद्रपूर'
     };
+
+    // 1. First, attempt to load live records directly from the raw Excel spreadsheet (Google Drive sync folder)
+    const rawFilePath = await findRawVillageSheetPath(targetTaluka, cleanVillage, village);
+    if (rawFilePath) {
+      try {
+        const buf = fs.readFileSync(rawFilePath);
+        const parsed = await parsePrapatraBuffer(buf, path.basename(rawFilePath), targetTaluka);
+        if (parsed && Array.isArray(parsed.parcels) && parsed.parcels.length > 0) {
+          const cleanCellVal = (v) => {
+            if (!v) return '-';
+            const s = String(v).trim();
+            if (['निरंक', 'नाही', 'उपलब्ध नाही', 'None', 'null', '_'].includes(s)) return '-';
+            if (s.includes('वनग्राम') || s.includes('नोंद उपलब्ध नाही')) return '-';
+            return s;
+          };
+
+          const rawRows = parsed.parcels.map((p, idx) => {
+            const chalu = cleanCellVal(p.gatNumber);
+            const rawB = p.backward?.settlement1950?.no || p.auditPoints?.point_1;
+            const bNo = cleanCellVal(rawB);
+            const rawEk = p.backward?.ekatrikaran1972?.no || p.auditPoints?.point_4;
+            const ekNo = cleanCellVal(rawEk);
+            const rawP = p.backward?.resurvey1995?.no || p.auditPoints?.point_7 || chalu;
+            const pNo = cleanCellVal(rawP);
+
+            return {
+              id: p.id || String(idx + 1),
+              chaluSurveyNo: chalu,
+              bandobastNo: bNo,
+              ekatrikaranNo: ekNo,
+              punarmajaniNo: pNo
+            };
+          });
+
+          // Natural ascending numerical sort
+          rawRows.sort((a, b) => {
+            const parseNum = (str) => {
+              if (!str) return [Number.MAX_SAFE_INTEGER, 0];
+              const match = String(str).match(/^(\d+)(?:\/(\d+))?/);
+              if (!match) return [Number.MAX_SAFE_INTEGER, 0];
+              return [parseInt(match[1], 10), match[2] ? parseInt(match[2], 10) : 0];
+            };
+            const [mainA, subA] = parseNum(a.chaluSurveyNo || a.punarmajaniNo);
+            const [mainB, subB] = parseNum(b.chaluSurveyNo || b.punarmajaniNo);
+            if (mainA !== mainB) return mainA - mainB;
+            if (subA !== subB) return subA - subB;
+            return String(a.chaluSurveyNo).localeCompare(String(b.chaluSurveyNo), undefined, { numeric: true });
+          });
+
+          // Asynchronously sync 1972 Consolidation records to PostgreSQL in background
+          syncRawVillageRenumberingToDb(targetTaluka, cleanVillage, parsed.parcels).catch(e => {
+            console.warn('Background sync renumbering error:', e.message);
+          });
+
+          return res.status(200).json({
+            success: true,
+            header,
+            rows: rawRows
+          });
+        }
+      } catch (err) {
+        console.warn('Could not extract raw village renumbering, falling back to DB:', err.message);
+      }
+    }
+
 
     const cleanVal = (v) => {
       if (!v) return '';
@@ -2076,27 +2315,82 @@ export const getRenumberingParchaData = async (req, res) => {
     let rows = [];
     if (parcels.length > 0) {
       rows = parcels.map((p, idx) => {
-        const pts = resolveParcel46Points(p);
-        const bNo = cleanVal(p.oldSurveyNo || pts[1]);
-        const eNo = cleanVal(pts[4] && pts[4] !== (p.oldSurveyNo || pts[1]) ? pts[4] : '');
-        const pNo = cleanVal(p.gatNumber || pts[7]);
+        const b1950 = p.backwardHistories?.find(b => b.epochYear === 1950);
+        const b1972 = p.backwardHistories?.find(b => b.epochYear === 1972);
+        const b1995 = p.backwardHistories?.find(b => b.epochYear >= 1990);
+
+        // 1. चालू सर्व्हे क्रमांक (Current 7/12 Survey / Gat No)
+        const chalu = cleanVal(p.gatNumber);
+
+        // 2. बंदोबस्त नंबर (1950 Settlement No)
+        let bNo = cleanVal(p.oldSurveyNo);
+        if (bNo && (bNo === '04' || bNo === 'F-04' || bNo.includes('वनग्राम') || bNo === 'उपलब्ध नाही')) {
+          bNo = '-';
+        }
+        if (!bNo && b1950?.ferfarNumber) {
+          const rawF = cleanVal(b1950.ferfarNumber.replace(/^[FK]-(1950-)?/, ''));
+          if (rawF && /[0-9]/.test(rawF)) {
+            bNo = rawF;
+          }
+        }
+        if (!bNo) {
+          const pts = resolveParcel46Points(p);
+          const p1 = cleanVal(pts[1]);
+          if (p1 && p1 !== 'उपलब्ध नाही' && p1 !== '-' && /[0-9]/.test(p1)) {
+            bNo = p1;
+          }
+        }
+
+        // 3. एकत्रीकरण नंबर (1972 Consolidation No)
+        let ekNo = '';
+        if (b1972?.ferfarNumber) {
+          const rawEk = cleanVal(b1972.ferfarNumber.replace(/^[FK]-(EK-)?/, ''));
+          if (rawEk && !['निरंक', 'नाही', 'उपलब्ध नाही', '-'].includes(rawEk)) {
+            ekNo = rawEk;
+          }
+        }
+        if (!ekNo) {
+          const pts = resolveParcel46Points(p);
+          const p4 = cleanVal(pts[4]);
+          if (p4 && !['निरंक', 'नाही', 'उपलब्ध नाही', '-', bNo, chalu].includes(p4) && /[0-9]/.test(p4)) {
+            ekNo = p4;
+          }
+        }
+
+        // 4. पुनर्मोजणी नंबर (Resurvey No)
+        let punarNo = '';
+        if (b1995?.ferfarNumber) {
+          const rawRes = cleanVal(b1995.ferfarNumber.replace(/^[FK]-(RES-)?/, ''));
+          if (rawRes && !['निरंक', 'नाही', 'उपलब्ध नाही', '-'].includes(rawRes)) {
+            punarNo = rawRes;
+          }
+        }
+        if (!punarNo) {
+          punarNo = chalu;
+        }
 
         return {
           id: p.id || String(idx + 1),
-          bandobastNo: bNo,
-          col2: '',
-          ekatrikaranNo: eNo,
-          col4: '',
-          punarmajaniNo: pNo
+          chaluSurveyNo: chalu,
+          bandobastNo: bNo || '',
+          ekatrikaranNo: ekNo || '',
+          punarmajaniNo: punarNo || ''
         };
       });
 
-      // Natural ascending numerical sort by punarmajaniNo (Gat number)
+      // Natural ascending numerical sort by chaluSurveyNo / punarmajaniNo
       rows.sort((a, b) => {
-        const numA = parseFloat(a.punarmajaniNo) || 0;
-        const numB = parseFloat(b.punarmajaniNo) || 0;
-        if (numA !== numB) return numA - numB;
-        return String(a.punarmajaniNo).localeCompare(String(b.punarmajaniNo), undefined, { numeric: true });
+        const parseNum = (str) => {
+          if (!str) return [Number.MAX_SAFE_INTEGER, 0];
+          const match = String(str).match(/^(\d+)(?:\/(\d+))?/);
+          if (!match) return [Number.MAX_SAFE_INTEGER, 0];
+          return [parseInt(match[1], 10), match[2] ? parseInt(match[2], 10) : 0];
+        };
+        const [mainA, subA] = parseNum(a.chaluSurveyNo || a.punarmajaniNo);
+        const [mainB, subB] = parseNum(b.chaluSurveyNo || b.punarmajaniNo);
+        if (mainA !== mainB) return mainA - mainB;
+        if (subA !== subB) return subA - subB;
+        return String(a.chaluSurveyNo).localeCompare(String(b.chaluSurveyNo), undefined, { numeric: true });
       });
     }
 

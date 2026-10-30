@@ -402,13 +402,20 @@ export const getParcels = async (req, res) => {
       bookletCategory,
       prapatraCategory,
       booklet,
+      sortBy,
+      sortOrder = 'asc',
       page = 1,
-      limit = 20,
+      limit = 25,
     } = req.query;
 
-    const pageNum = Math.max(1, parseInt(page, 10));
-    const take = Math.min(100, Math.max(1, parseInt(limit, 10)));
-    const skip = (pageNum - 1) * take;
+    const isAll = limit === 'all' || limit === 'ALL';
+    const parsedLimit = parseInt(limit, 10);
+    // When limit is 'all', fetch up to 2000 records safely without running out of memory or timing out
+    const take = isAll
+      ? 2000
+      : (isNaN(parsedLimit) ? 25 : Math.min(500, Math.max(1, parsedLimit)));
+    const pageNum = isAll ? 1 : Math.max(1, parseInt(page, 10) || 1);
+    const skip = isAll ? 0 : (pageNum - 1) * take;
 
     const where = {};
 
@@ -451,7 +458,29 @@ export const getParcels = async (req, res) => {
       where.AND = andClauses;
     }
 
-    const cacheKey = JSON.stringify({ taluka, villageCode, villageName: targetVillage, tenureClass, hasActiveDispute, targetBooklet, search, pageNum, take });
+    const orderDir = String(sortOrder || 'asc').toLowerCase() === 'desc' ? 'desc' : 'asc';
+    let orderBy = [{ taluka: 'asc' }, { villageName: 'asc' }, { gatNumber: 'asc' }];
+
+    if (sortBy === 'mutationCount' || sortBy === 'mutations' || sortBy === 'backwardHistories') {
+      orderBy = [
+        { backwardHistories: { _count: orderDir } },
+        { taluka: 'asc' },
+        { villageName: 'asc' },
+        { gatNumber: 'asc' },
+      ];
+    } else if (sortBy === 'totalAreaHa' || sortBy === 'area') {
+      orderBy = [{ totalAreaHa: orderDir }, { gatNumber: 'asc' }];
+    } else if (sortBy === 'upi') {
+      orderBy = [{ upi: orderDir }];
+    } else if (sortBy === 'villageName') {
+      orderBy = [{ villageName: orderDir }, { gatNumber: 'asc' }];
+    } else if (sortBy === 'tenureClass') {
+      orderBy = [{ tenureClass: orderDir }, { gatNumber: 'asc' }];
+    } else if (sortBy === 'gatNumber') {
+      orderBy = [{ taluka: 'asc' }, { villageName: 'asc' }, { gatNumber: orderDir }];
+    }
+
+    const cacheKey = JSON.stringify({ taluka, villageCode, villageName: targetVillage, tenureClass, hasActiveDispute, targetBooklet, search, sortBy, orderDir, pageNum, take, isAll });
     let pending = inFlightParcelLists.get(cacheKey);
 
     if (!pending) {
@@ -460,7 +489,7 @@ export const getParcels = async (req, res) => {
           where,
           skip,
           take,
-          orderBy: [{ taluka: 'asc' }, { villageName: 'asc' }, { gatNumber: 'asc' }],
+          orderBy,
           include: {
             _count: {
               select: {
@@ -495,8 +524,8 @@ export const getParcels = async (req, res) => {
       pagination: {
         total: totalCount,
         page: pageNum,
-        limit: take,
-        totalPages: Math.ceil(totalCount / take),
+        limit: isAll ? totalCount : take,
+        totalPages: isAll ? 1 : Math.ceil(totalCount / take),
       },
     });
   } catch (err) {
