@@ -2235,7 +2235,113 @@ export const getRenumberingParchaData = async (req, res) => {
       district: 'चंद्रपूर'
     };
 
-    // 1. First, attempt to load live records directly from the raw Excel spreadsheet (Google Drive sync folder)
+    const cleanVal = (v) => {
+      if (!v) return '';
+      const str = String(v).trim();
+      if (/^\d{4}-\d{2}-\d{2}/.test(str)) {
+        const parts = str.split(' ')[0].split('-');
+        if (parts.length === 3) {
+          const d = parseInt(parts[2], 10);
+          const m = parseInt(parts[1], 10);
+          return `${d}/${m}`;
+        }
+      }
+      return str;
+    };
+
+    // 1. FAST PATH: Return authentic database records directly (sub-20ms)
+    if (parcels && parcels.length > 0) {
+      const rows = parcels.map((p, idx) => {
+        const b1950 = p.backwardHistories?.find(b => b.epochYear === 1950);
+        const b1972 = p.backwardHistories?.find(b => b.epochYear === 1972);
+        const b1995 = p.backwardHistories?.find(b => b.epochYear >= 1990);
+
+        // 1. चालू सर्व्हे क्रमांक (Current 7/12 Survey / Gat No)
+        const chalu = cleanVal(p.gatNumber);
+
+        // 2. बंदोबस्त नंबर (1950 Settlement No)
+        let bNo = cleanVal(p.oldSurveyNo);
+        if (bNo && (bNo === '04' || bNo === 'F-04' || bNo.includes('वनग्राम') || bNo === 'उपलब्ध नाही')) {
+          bNo = '-';
+        }
+        if ((!bNo || bNo === '-') && b1950?.ferfarNumber) {
+          const rawF = cleanVal(b1950.ferfarNumber.replace(/^[FK]-(1950-)?/, ''));
+          if (rawF && !rawF.includes('वनग्राम') && !['निरंक', 'नाही', 'उपलब्ध नाही', 'None', 'null', '04', 'F-04'].includes(rawF) && /[0-9]/.test(rawF)) {
+            bNo = rawF;
+          } else if (rawF && rawF.includes('वनग्राम')) {
+            bNo = '-';
+          }
+        }
+        if (!bNo) {
+          const pts = resolveParcel46Points(p);
+          const p1 = cleanVal(pts[1]);
+          if (p1 && p1 !== 'उपलब्ध नाही' && p1 !== '-' && !p1.includes('वनग्राम') && /[0-9]/.test(p1) && p1 !== '04') {
+            bNo = p1;
+          } else {
+            bNo = '-';
+          }
+        }
+
+        // 3. एकत्रीकरण नंबर (1972 Consolidation No)
+        let ekNo = '';
+        if (b1972?.ferfarNumber) {
+          const rawEk = cleanVal(b1972.ferfarNumber.replace(/^[FK]-(EK-)?/, ''));
+          if (rawEk && !['निरंक', 'नाही', 'उपलब्ध नाही', '-', 'None', 'null'].includes(rawEk)) {
+            ekNo = rawEk;
+          }
+        }
+        if (!ekNo) {
+          const pts = resolveParcel46Points(p);
+          const p4 = cleanVal(pts[4]);
+          if (p4 && !['निरंक', 'नाही', 'उपलब्ध नाही', '-', 'None', 'null', bNo, chalu].includes(p4) && /[0-9]/.test(p4)) {
+            ekNo = p4;
+          }
+        }
+
+        // 4. पुनर्मोजणी नंबर (Resurvey No)
+        let punarNo = '';
+        if (b1995?.ferfarNumber) {
+          const rawRes = cleanVal(b1995.ferfarNumber.replace(/^[FK]-(RES-)?/, ''));
+          if (rawRes && !['निरंक', 'नाही', 'उपलब्ध नाही', '-', 'None', 'null'].includes(rawRes)) {
+            punarNo = rawRes;
+          }
+        }
+        if (!punarNo) {
+          punarNo = chalu;
+        }
+
+        return {
+          id: p.id || String(idx + 1),
+          chaluSurveyNo: chalu,
+          bandobastNo: bNo || '-',
+          ekatrikaranNo: ekNo || '-',
+          punarmajaniNo: punarNo || chalu
+        };
+      });
+
+      // Natural ascending numerical sort by chaluSurveyNo / punarmajaniNo
+      rows.sort((a, b) => {
+        const parseNum = (str) => {
+          if (!str) return [Number.MAX_SAFE_INTEGER, 0];
+          const match = String(str).match(/^(\d+)(?:\/(\d+))?/);
+          if (!match) return [Number.MAX_SAFE_INTEGER, 0];
+          return [parseInt(match[1], 10), match[2] ? parseInt(match[2], 10) : 0];
+        };
+        const [mainA, subA] = parseNum(a.chaluSurveyNo || a.punarmajaniNo);
+        const [mainB, subB] = parseNum(b.chaluSurveyNo || b.punarmajaniNo);
+        if (mainA !== mainB) return mainA - mainB;
+        if (subA !== subB) return subA - subB;
+        return String(a.chaluSurveyNo).localeCompare(String(b.chaluSurveyNo), undefined, { numeric: true });
+      });
+
+      return res.status(200).json({
+        success: true,
+        header,
+        rows
+      });
+    }
+
+    // 2. FALLBACK: Read raw Excel spreadsheet only if PostgreSQL returned 0 rows
     const rawFilePath = await findRawVillageSheetPath(targetTaluka, cleanVillage, village);
     if (rawFilePath) {
       try {
@@ -2268,7 +2374,6 @@ export const getRenumberingParchaData = async (req, res) => {
             };
           });
 
-          // Natural ascending numerical sort
           rawRows.sort((a, b) => {
             const parseNum = (str) => {
               if (!str) return [Number.MAX_SAFE_INTEGER, 0];
@@ -2283,11 +2388,6 @@ export const getRenumberingParchaData = async (req, res) => {
             return String(a.chaluSurveyNo).localeCompare(String(b.chaluSurveyNo), undefined, { numeric: true });
           });
 
-          // Asynchronously sync 1972 Consolidation records to PostgreSQL in background
-          syncRawVillageRenumberingToDb(targetTaluka, cleanVillage, parsed.parcels).catch(e => {
-            console.warn('Background sync renumbering error:', e.message);
-          });
-
           return res.status(200).json({
             success: true,
             header,
@@ -2295,111 +2395,14 @@ export const getRenumberingParchaData = async (req, res) => {
           });
         }
       } catch (err) {
-        console.warn('Could not extract raw village renumbering, falling back to DB:', err.message);
+        console.warn('Could not extract raw village renumbering:', err.message);
       }
-    }
-
-
-    const cleanVal = (v) => {
-      if (!v) return '';
-      const str = String(v).trim();
-      if (/^\d{4}-\d{2}-\d{2}/.test(str)) {
-        const parts = str.split(' ')[0].split('-');
-        if (parts.length === 3) {
-          const d = parseInt(parts[2], 10);
-          const m = parseInt(parts[1], 10);
-          return `${d}/${m}`;
-        }
-      }
-      return str;
-    };
-
-    let rows = [];
-    if (parcels.length > 0) {
-      rows = parcels.map((p, idx) => {
-        const b1950 = p.backwardHistories?.find(b => b.epochYear === 1950);
-        const b1972 = p.backwardHistories?.find(b => b.epochYear === 1972);
-        const b1995 = p.backwardHistories?.find(b => b.epochYear >= 1990);
-
-        // 1. चालू सर्व्हे क्रमांक (Current 7/12 Survey / Gat No)
-        const chalu = cleanVal(p.gatNumber);
-
-        // 2. बंदोबस्त नंबर (1950 Settlement No)
-        let bNo = cleanVal(p.oldSurveyNo);
-        if (bNo && (bNo === '04' || bNo === 'F-04' || bNo.includes('वनग्राम') || bNo === 'उपलब्ध नाही')) {
-          bNo = '-';
-        }
-        if (!bNo && b1950?.ferfarNumber) {
-          const rawF = cleanVal(b1950.ferfarNumber.replace(/^[FK]-(1950-)?/, ''));
-          if (rawF && /[0-9]/.test(rawF)) {
-            bNo = rawF;
-          }
-        }
-        if (!bNo) {
-          const pts = resolveParcel46Points(p);
-          const p1 = cleanVal(pts[1]);
-          if (p1 && p1 !== 'उपलब्ध नाही' && p1 !== '-' && /[0-9]/.test(p1)) {
-            bNo = p1;
-          }
-        }
-
-        // 3. एकत्रीकरण नंबर (1972 Consolidation No)
-        let ekNo = '';
-        if (b1972?.ferfarNumber) {
-          const rawEk = cleanVal(b1972.ferfarNumber.replace(/^[FK]-(EK-)?/, ''));
-          if (rawEk && !['निरंक', 'नाही', 'उपलब्ध नाही', '-'].includes(rawEk)) {
-            ekNo = rawEk;
-          }
-        }
-        if (!ekNo) {
-          const pts = resolveParcel46Points(p);
-          const p4 = cleanVal(pts[4]);
-          if (p4 && !['निरंक', 'नाही', 'उपलब्ध नाही', '-', bNo, chalu].includes(p4) && /[0-9]/.test(p4)) {
-            ekNo = p4;
-          }
-        }
-
-        // 4. पुनर्मोजणी नंबर (Resurvey No)
-        let punarNo = '';
-        if (b1995?.ferfarNumber) {
-          const rawRes = cleanVal(b1995.ferfarNumber.replace(/^[FK]-(RES-)?/, ''));
-          if (rawRes && !['निरंक', 'नाही', 'उपलब्ध नाही', '-'].includes(rawRes)) {
-            punarNo = rawRes;
-          }
-        }
-        if (!punarNo) {
-          punarNo = chalu;
-        }
-
-        return {
-          id: p.id || String(idx + 1),
-          chaluSurveyNo: chalu,
-          bandobastNo: bNo || '',
-          ekatrikaranNo: ekNo || '',
-          punarmajaniNo: punarNo || ''
-        };
-      });
-
-      // Natural ascending numerical sort by chaluSurveyNo / punarmajaniNo
-      rows.sort((a, b) => {
-        const parseNum = (str) => {
-          if (!str) return [Number.MAX_SAFE_INTEGER, 0];
-          const match = String(str).match(/^(\d+)(?:\/(\d+))?/);
-          if (!match) return [Number.MAX_SAFE_INTEGER, 0];
-          return [parseInt(match[1], 10), match[2] ? parseInt(match[2], 10) : 0];
-        };
-        const [mainA, subA] = parseNum(a.chaluSurveyNo || a.punarmajaniNo);
-        const [mainB, subB] = parseNum(b.chaluSurveyNo || b.punarmajaniNo);
-        if (mainA !== mainB) return mainA - mainB;
-        if (subA !== subB) return subA - subB;
-        return String(a.chaluSurveyNo).localeCompare(String(b.chaluSurveyNo), undefined, { numeric: true });
-      });
     }
 
     return res.status(200).json({
       success: true,
       header,
-      rows
+      rows: []
     });
   } catch (err) {
     console.error('getRenumberingParchaData error:', err);
