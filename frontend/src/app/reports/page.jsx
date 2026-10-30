@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import {
   FileSpreadsheet,
@@ -181,6 +181,35 @@ export default function ReportsPage() {
   const [toastMessage, setToastMessage] = useState(null);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(25);
+  const [selectedKpiFilter, setSelectedKpiFilter] = useState('all'); // 'all', 'area', 'class2', 'violations'
+  const [tableHighlight, setTableHighlight] = useState(false);
+  const tableSectionRef = useRef(null);
+
+  // Interactive KPI Card click handler with smooth auto-scroll to table section
+  const handleKpiCardClick = (kpiKey) => {
+    const nextFilter = selectedKpiFilter === kpiKey && kpiKey !== 'all' ? 'all' : kpiKey;
+    setSelectedKpiFilter(nextFilter);
+    setPage(1);
+
+    // If user is on Goshwara or Renumbering tabs where individual 7/12 records are hidden,
+    // automatically switch to Checklist tab so they can see the records properly
+    if (activeTab === 'goshwara' || activeTab === 'renumbering') {
+      setActiveTab('checklist');
+    }
+
+    // Trigger visual pulse/highlight on the table container
+    setTableHighlight(true);
+    setTimeout(() => setTableHighlight(false), 1400);
+
+    // Smooth scroll down to table section with proper clearance below sticky navbar
+    setTimeout(() => {
+      if (tableSectionRef.current) {
+        const yOffset = -90; // clear sticky navbar with margin
+        const y = tableSectionRef.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
+        window.scrollTo({ top: y, behavior: 'smooth' });
+      }
+    }, 70);
+  };
 
   // Data states
   const [loading, setLoading] = useState(true);
@@ -215,6 +244,40 @@ export default function ReportsPage() {
       document.body.style.overflow = '';
     }
   }, [inspectedParcel]);
+
+  // Read URL query params on mount
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const qTab = urlParams.get('tab');
+      const qPrapatra = urlParams.get('prapatra');
+      const qCat = urlParams.get('category') || urlParams.get('cat');
+      const qTaluka = urlParams.get('taluka');
+      const qVillage = urlParams.get('village');
+      const qTenure = urlParams.get('tenure');
+      const qViolation = urlParams.get('violation');
+
+      if (qTab) setActiveTab(qTab);
+      if (qPrapatra) setSelectedPrapatraId(parseInt(qPrapatra, 10) || 1);
+      if (qCat) setSelectedCatId(parseInt(qCat, 10) || 1);
+      if (qTaluka) {
+        setDraftTaluka(qTaluka);
+        setAppliedFilters((prev) => ({ ...prev, taluka: qTaluka }));
+      }
+      if (qVillage) {
+        setDraftVillage(qVillage);
+        setAppliedFilters((prev) => ({ ...prev, village: qVillage }));
+      }
+      if (qTenure) {
+        setDraftTenure(qTenure);
+        setAppliedFilters((prev) => ({ ...prev, tenure: qTenure }));
+      }
+      if (qViolation) {
+        setDraftViolation(qViolation);
+        setAppliedFilters((prev) => ({ ...prev, violation: qViolation }));
+      }
+    }
+  }, []);
 
   // Ghoshwara editable overrides state & persistence
   const [goshwaraEdits, setGoshwaraEdits] = useState({});
@@ -334,6 +397,11 @@ export default function ReportsPage() {
     loadData();
   }, [loadData]);
 
+
+  // Reset KPI filter on tab or category switch
+  useEffect(() => {
+    setSelectedKpiFilter('all');
+  }, [activeTab, selectedCatId, selectedPrapatraId]);
   // Current category details
   const currentCategory = useMemo(() => {
     return STATUTORY_CATEGORIES.find(c => c.id === selectedCatId) || STATUTORY_CATEGORIES[0];
@@ -343,6 +411,61 @@ export default function ReportsPage() {
   const currentPrapatra5 = useMemo(() => {
     return OFFICIAL_5_PRAPATRAS.find(p => p.id === selectedPrapatraId) || OFFICIAL_5_PRAPATRAS[0];
   }, [selectedPrapatraId]);
+
+  // Class 2 / Government Land matching predicate
+  const isClass2Parcel = useCallback((p) => {
+    if (!p) return false;
+    const tc = String(p.tenureClass || '').toUpperCase();
+    const td = String(p.tenureDisplay || '');
+    const pts = p.points || {};
+    return Boolean(
+      tc === 'BHOGVATDAR_CLASS_2' ||
+      tc === 'SARKAR_SHASAN' ||
+      td.includes('वर्ग-२') ||
+      td.includes('वर्ग २') ||
+      td.includes('शासकीय') ||
+      td.includes('सरकार') ||
+      pts[3]?.includes('वर्ग-२') ||
+      pts[6]?.includes('वर्ग-२') ||
+      pts[9]?.includes('वर्ग-२') ||
+      pts[3]?.includes('शासकीय') ||
+      pts[6]?.includes('शासकीय') ||
+      pts[9]?.includes('शासकीय') ||
+      pts[10]?.includes('सरकार') ||
+      pts[10]?.includes('शासन')
+    );
+  }, []);
+
+  // Condition Breach / Suspicious / Flagged Issues matching predicate
+  const isViolationParcel = useCallback((p) => {
+    if (!p) return false;
+    const sf = String(p.statusFinding || '');
+    const pts = p.points || {};
+    const or = String(p.otherRights || p.remarks || '');
+    return Boolean(
+      sf.includes('शर्तभंग') ||
+      sf.includes('अवैध') ||
+      sf.includes('रूपांतर') ||
+      sf.includes('अतिक्रमण') ||
+      sf.includes('चौकशी') ||
+      sf.includes('वगळण्यास शिल्लक') ||
+      sf.includes('संशयित') ||
+      pts[18] === 'होय' ||
+      pts[19] === 'होय' ||
+      pts[35] === 'होय' ||
+      pts[36] === 'होय' ||
+      pts[37] === 'होय' ||
+      pts[38] === 'होय' ||
+      pts[40] === 'होय' ||
+      pts[45] === 'होय' ||
+      or.includes('शर्तभंग') ||
+      or.includes('अवैध') ||
+      or.includes('रूपांतर') ||
+      p.metadata?.flags?.isShartbhang === true ||
+      p.metadata?.flags?.isIllegalDeletion === true ||
+      p.metadata?.flags?.isEncroached === true
+    );
+  }, []);
 
   // Compute aggregate metrics
   const stats = useMemo(() => {
@@ -363,17 +486,10 @@ export default function ReportsPage() {
     parcels.forEach(p => {
       const area = parseFloat(p.totalAreaHa) || 0;
       totalArea += area;
-      if (p.tenureClass === 'BHOGVATDAR_CLASS_2' || p.tenureDisplay?.includes('वर्ग-२')) {
+      if (isClass2Parcel(p)) {
         class2Count++;
       }
-      if (
-        p.statusFinding?.includes('शर्तभंग') ||
-        p.statusFinding?.includes('अवैध') ||
-        p.statusFinding?.includes('रूपांतर') ||
-        p.points?.[35] === 'होय' ||
-        p.points?.[36] === 'होय' ||
-        p.points?.[37] === 'होय'
-      ) {
+      if (isViolationParcel(p)) {
         shartbhangCount++;
       }
     });
@@ -384,7 +500,7 @@ export default function ReportsPage() {
       class2Count,
       shartbhangCount
     };
-  }, [serverRollup, parcels, appliedFilters]);
+  }, [serverRollup, parcels, appliedFilters, isClass2Parcel, isViolationParcel]);
 
   // Dynamic rollup computed from filtered parcels for 100% mathematical accuracy across all views
   const dynamicRollup = useMemo(() => {
@@ -512,17 +628,40 @@ export default function ReportsPage() {
     };
   }, [parcels, isMarathi]);
 
+  // Filtered parcels based on interactive KPI card selection
+  const kpiFilteredParcels = useMemo(() => {
+    if (!parcels || parcels.length === 0) return [];
+    if (selectedKpiFilter === 'all') return parcels;
+
+    if (selectedKpiFilter === 'area') {
+      // Filter parcels with area > 0 and sort descending by acreage (largest first)
+      return [...parcels]
+        .filter((p) => (parseFloat(p.totalAreaHa) || 0) > 0)
+        .sort((a, b) => (parseFloat(b.totalAreaHa) || 0) - (parseFloat(a.totalAreaHa) || 0));
+    }
+
+    if (selectedKpiFilter === 'class2') {
+      return parcels.filter(isClass2Parcel);
+    }
+
+    if (selectedKpiFilter === 'violations') {
+      return parcels.filter(isViolationParcel);
+    }
+
+    return parcels;
+  }, [parcels, selectedKpiFilter, isClass2Parcel, isViolationParcel]);
+
   const isAllRows = pageSize === 'all';
-  const effectivePageSize = isAllRows ? (parcels.length || 1) : (Number(pageSize) || 25);
-  const totalPages = isAllRows ? 1 : Math.max(1, Math.ceil(parcels.length / effectivePageSize));
+  const effectivePageSize = isAllRows ? (kpiFilteredParcels.length || 1) : (Number(pageSize) || 25);
+  const totalPages = isAllRows ? 1 : Math.max(1, Math.ceil(kpiFilteredParcels.length / effectivePageSize));
 
   // Paginated parcel items
   const paginatedParcels = useMemo(() => {
-    if (pageSize === 'all') return parcels;
+    if (pageSize === 'all') return kpiFilteredParcels;
     const size = Number(pageSize) || 25;
     const start = (page - 1) * size;
-    return parcels.slice(start, start + size);
-  }, [parcels, page, pageSize]);
+    return kpiFilteredParcels.slice(start, start + size);
+  }, [kpiFilteredParcels, page, pageSize]);
 
   // Download URLs
   const currentReportId = (activeTab === 'checklist' || activeTab === 'goshwara') 
@@ -530,12 +669,15 @@ export default function ReportsPage() {
     : (activeTab === 'prapatra5' ? selectedPrapatraId : selectedCatId);
   const isBookletMode = activeTab === 'categories';
 
+  const effectiveTenureExport = selectedKpiFilter === 'class2' ? 'BHOGVATDAR_CLASS_2' : tenureFilter;
+  const effectiveViolationExport = selectedKpiFilter === 'violations' ? 'shartbhang' : violationFilter;
+
   const excelDownloadUrl = api.getPrapatraExcelUrl(currentReportId, {
     taluka,
     village,
     search: debouncedSearch,
-    tenure: tenureFilter,
-    violation: violationFilter,
+    tenure: effectiveTenureExport,
+    violation: effectiveViolationExport,
     booklet: isBookletMode ? 'true' : 'false',
     view: activeTab === 'checklist' ? activeView : (activeTab === 'goshwara' ? 'summary' : undefined)
   });
@@ -543,8 +685,8 @@ export default function ReportsPage() {
     taluka,
     village,
     search: debouncedSearch,
-    tenure: tenureFilter,
-    violation: violationFilter,
+    tenure: effectiveTenureExport,
+    violation: effectiveViolationExport,
     booklet: isBookletMode ? 'true' : 'false',
     view: activeTab === 'checklist' ? activeView : (activeTab === 'goshwara' ? 'summary' : undefined)
   });
@@ -870,6 +1012,7 @@ export default function ReportsPage() {
       violation: draftViolation,
       search: draftSearch.trim(),
     });
+    setSelectedKpiFilter('all');
     if (draftVillage !== 'all') {
       setGoshwaraTier('village');
     } else if (draftTaluka !== 'all') {
@@ -883,6 +1026,7 @@ export default function ReportsPage() {
     setDraftTenure('all');
     setDraftViolation('all');
     setDraftSearch('');
+    setSelectedKpiFilter('all');
     setAppliedFilters({
       taluka: 'all',
       village: 'all',
@@ -1912,47 +2056,131 @@ export default function ReportsPage() {
         {/* =========================================================
             METRICS KPI STRIP (Hidden in Goshwara View & Prapatra 1 to 5)
         ========================================================= */}
-        {activeTab !== 'renumbering' && !isGoshwaraView && activeTab !== 'prapatra5' && (
+        {activeTab !== 'renumbering' && !isGoshwaraView && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <div className="bg-white border border-slate-200/80 rounded-2xl p-3.5 shadow-xs">
-            <span className="text-[11px] font-bold text-slate-400">
-              {isMarathi ? 'एकूण सर्व्हे / गट संख्या' : 'Total Survey / Gat Parcels'}
-            </span>
-            <div className="text-xl font-black text-slate-900 mt-0.5">{stats.totalCount}</div>
-            <span className="text-[10px] text-slate-500 font-medium">
-              {isMarathi ? 'तपासणी केलेले ७/१२' : 'Audited 7/12 Records'}
-            </span>
-          </div>
+          {/* Card 1: Total Parcels */}
+          <button
+            type="button"
+            onClick={() => handleKpiCardClick('all')}
+            className={`text-left rounded-2xl p-3.5 transition-all duration-200 border cursor-pointer select-none group relative focus:outline-none focus:ring-2 focus:ring-blue-500/50 ${
+              selectedKpiFilter === 'all'
+                ? 'bg-blue-50/80 border-blue-500 shadow-sm ring-2 ring-blue-400/40'
+                : 'bg-white border-slate-200/80 shadow-xs hover:border-blue-300 hover:shadow-md hover:-translate-y-0.5'
+            }`}
+          >
+            <div className="flex items-center justify-between gap-1">
+              <span className={`text-[11px] font-bold transition ${selectedKpiFilter === 'all' ? 'text-blue-900 font-extrabold' : 'text-slate-500 group-hover:text-blue-800'}`}>
+                {isMarathi ? 'एकूण सर्व्हे / गट संख्या' : 'Total Survey / Gat Parcels'}
+              </span>
+              {selectedKpiFilter === 'all' && (
+                <span className="text-[9px] font-extrabold px-1.5 py-0.2 bg-blue-600 text-white rounded-md tracking-wider shadow-2xs">
+                  {isMarathi ? 'सर्व' : 'ALL'}
+                </span>
+              )}
+            </div>
+            <div className="text-xl font-black text-slate-900 mt-1">{stats.totalCount}</div>
+            <div className="flex items-center justify-between text-[10px] mt-0.5">
+              <span className="text-slate-500 font-medium">
+                {isMarathi ? 'तपासणी केलेले ७/१२' : 'Audited 7/12 Records'}
+              </span>
+              <span className={`text-[9px] font-bold transition flex items-center gap-0.5 ${selectedKpiFilter === 'all' ? 'text-blue-700' : 'text-slate-400 group-hover:text-blue-600'}`}>
+                {selectedKpiFilter === 'all' ? (isMarathi ? '● सक्रिय' : '● Active') : (isMarathi ? 'सर्व पहा ↴' : 'View all ↴')}
+              </span>
+            </div>
+          </button>
 
-          <div className="bg-white border border-slate-200/80 rounded-2xl p-3.5 shadow-xs">
-            <span className="text-[11px] font-bold text-slate-400">
-              {isMarathi ? 'एकूण क्षेत्र (हेक्टर)' : 'Total Area (Ha)'}
-            </span>
-            <div className="text-xl font-black text-slate-900 mt-0.5">{stats.totalAreaHa}</div>
-            <span className="text-[10px] text-slate-500 font-medium">
-              {isMarathi ? 'हेक्टर आर क्षेत्र' : 'Hectare-Are Area'}
-            </span>
-          </div>
+          {/* Card 2: Total Area */}
+          <button
+            type="button"
+            onClick={() => handleKpiCardClick('area')}
+            className={`text-left rounded-2xl p-3.5 transition-all duration-200 border cursor-pointer select-none group relative focus:outline-none focus:ring-2 focus:ring-emerald-500/50 ${
+              selectedKpiFilter === 'area'
+                ? 'bg-emerald-50/80 border-emerald-500 shadow-sm ring-2 ring-emerald-400/40'
+                : 'bg-white border-slate-200/80 shadow-xs hover:border-emerald-300 hover:shadow-md hover:-translate-y-0.5'
+            }`}
+          >
+            <div className="flex items-center justify-between gap-1">
+              <span className={`text-[11px] font-bold transition ${selectedKpiFilter === 'area' ? 'text-emerald-950 font-extrabold' : 'text-slate-500 group-hover:text-emerald-800'}`}>
+                {isMarathi ? 'एकूण क्षेत्र (हेक्टर)' : 'Total Area (Ha)'}
+              </span>
+              {selectedKpiFilter === 'area' && (
+                <span className="text-[9px] font-extrabold px-1.5 py-0.2 bg-emerald-600 text-white rounded-md tracking-wider shadow-2xs">
+                  {isMarathi ? 'सक्रिय' : 'ACTIVE'}
+                </span>
+              )}
+            </div>
+            <div className="text-xl font-black text-emerald-800 mt-1">{stats.totalAreaHa}</div>
+            <div className="flex items-center justify-between text-[10px] mt-0.5">
+              <span className="text-slate-500 font-medium">
+                {isMarathi ? 'हेक्टर आर क्षेत्र' : 'Hectare-Are Area'}
+              </span>
+              <span className={`text-[9px] font-bold transition flex items-center gap-0.5 ${selectedKpiFilter === 'area' ? 'text-emerald-700' : 'text-slate-400 group-hover:text-emerald-600'}`}>
+                {selectedKpiFilter === 'area' ? (isMarathi ? '● सक्रिय (उतरता क्रम)' : '● Ranked') : (isMarathi ? 'क्षेत्रनिहाय पहा ↴' : 'By area ↴')}
+              </span>
+            </div>
+          </button>
 
-          <div className="bg-white border border-slate-200/80 rounded-2xl p-3.5 shadow-xs">
-            <span className="text-[11px] font-bold text-slate-400">
-              {isMarathi ? 'भोगवटादार वर्ग २ / शासकीय' : 'Class-2 / Govt Land'}
-            </span>
-            <div className="text-xl font-black text-amber-600 mt-0.5">{stats.class2Count}</div>
-            <span className="text-[10px] text-slate-500 font-medium">
-              {isMarathi ? 'अविभाज्य शर्तीवरील जमिनी' : 'Restricted Tenure Holdings'}
-            </span>
-          </div>
+          {/* Card 3: Class 2 / Govt */}
+          <button
+            type="button"
+            onClick={() => handleKpiCardClick('class2')}
+            className={`text-left rounded-2xl p-3.5 transition-all duration-200 border cursor-pointer select-none group relative focus:outline-none focus:ring-2 focus:ring-amber-500/50 ${
+              selectedKpiFilter === 'class2'
+                ? 'bg-amber-50/80 border-amber-500 shadow-sm ring-2 ring-amber-400/40'
+                : 'bg-white border-slate-200/80 shadow-xs hover:border-amber-300 hover:shadow-md hover:-translate-y-0.5'
+            }`}
+          >
+            <div className="flex items-center justify-between gap-1">
+              <span className={`text-[11px] font-bold transition ${selectedKpiFilter === 'class2' ? 'text-amber-950 font-extrabold' : 'text-slate-500 group-hover:text-amber-800'}`}>
+                {isMarathi ? 'भोगवटादार वर्ग २ / शासकीय' : 'Class-2 / Govt Land'}
+              </span>
+              {selectedKpiFilter === 'class2' && (
+                <span className="text-[9px] font-extrabold px-1.5 py-0.2 bg-amber-600 text-white rounded-md tracking-wider shadow-2xs">
+                  {isMarathi ? 'सक्रिय' : 'ACTIVE'}
+                </span>
+              )}
+            </div>
+            <div className="text-xl font-black text-amber-600 mt-1">{stats.class2Count}</div>
+            <div className="flex items-center justify-between text-[10px] mt-0.5">
+              <span className="text-slate-500 font-medium">
+                {isMarathi ? 'अविभाज्य शर्तीवरील जमिनी' : 'Restricted Tenure Holdings'}
+              </span>
+              <span className={`text-[9px] font-bold transition flex items-center gap-0.5 ${selectedKpiFilter === 'class2' ? 'text-amber-700' : 'text-slate-400 group-hover:text-amber-600'}`}>
+                {selectedKpiFilter === 'class2' ? (isMarathi ? '● दाखवत आहे' : '● Filtered') : (isMarathi ? 'फिल्टर करा ↴' : 'Filter ↴')}
+              </span>
+            </div>
+          </button>
 
-          <div className="bg-white border border-slate-200/80 rounded-2xl p-3.5 shadow-xs">
-            <span className="text-[11px] font-bold text-slate-400">
-              {isMarathi ? 'शर्तभंग / संशयित बाबी' : 'Breaches / Flagged Issues'}
-            </span>
-            <div className="text-xl font-black text-rose-600 mt-0.5">{stats.shartbhangCount}</div>
-            <span className="text-[10px] text-slate-500 font-medium">
-              {isMarathi ? 'विशेष चौकशी आवश्यक' : 'Inquiry Required'}
-            </span>
-          </div>
+          {/* Card 4: Breaches / Violations */}
+          <button
+            type="button"
+            onClick={() => handleKpiCardClick('violations')}
+            className={`text-left rounded-2xl p-3.5 transition-all duration-200 border cursor-pointer select-none group relative focus:outline-none focus:ring-2 focus:ring-rose-500/50 ${
+              selectedKpiFilter === 'violations'
+                ? 'bg-rose-50/80 border-rose-500 shadow-sm ring-2 ring-rose-400/40'
+                : 'bg-white border-slate-200/80 shadow-xs hover:border-rose-300 hover:shadow-md hover:-translate-y-0.5'
+            }`}
+          >
+            <div className="flex items-center justify-between gap-1">
+              <span className={`text-[11px] font-bold transition ${selectedKpiFilter === 'violations' ? 'text-rose-950 font-extrabold' : 'text-slate-500 group-hover:text-rose-800'}`}>
+                {isMarathi ? 'शर्तभंग / संशयित बाबी' : 'Breaches / Flagged Issues'}
+              </span>
+              {selectedKpiFilter === 'violations' && (
+                <span className="text-[9px] font-extrabold px-1.5 py-0.2 bg-rose-600 text-white rounded-md tracking-wider shadow-2xs">
+                  {isMarathi ? 'सक्रिय' : 'ACTIVE'}
+                </span>
+              )}
+            </div>
+            <div className="text-xl font-black text-rose-600 mt-1">{stats.shartbhangCount}</div>
+            <div className="flex items-center justify-between text-[10px] mt-0.5">
+              <span className="text-slate-500 font-medium">
+                {isMarathi ? 'विशेष चौकशी आवश्यक' : 'Inquiry Required'}
+              </span>
+              <span className={`text-[9px] font-bold transition flex items-center gap-0.5 ${selectedKpiFilter === 'violations' ? 'text-rose-700' : 'text-slate-400 group-hover:text-rose-600'}`}>
+                {selectedKpiFilter === 'violations' ? (isMarathi ? '● दाखवत आहे' : '● Filtered') : (isMarathi ? 'फिल्टर करा ↴' : 'Filter ↴')}
+              </span>
+            </div>
+          </button>
         </div>
         )}
 
@@ -1966,7 +2194,21 @@ export default function ReportsPage() {
             onRegisterExportHandlers={setRenumberingExportHandlers}
           />
         ) : (
-        <div className="bg-white border border-slate-200/80 rounded-2xl shadow-xs overflow-hidden">
+        <div
+          ref={tableSectionRef}
+          id="records-table-section"
+          className={`bg-white border rounded-2xl shadow-xs overflow-hidden scroll-mt-24 transition-all duration-300 ${
+            tableHighlight
+              ? selectedKpiFilter === 'violations'
+                ? 'border-rose-500 ring-4 ring-rose-400/40 shadow-lg'
+                : selectedKpiFilter === 'class2'
+                ? 'border-amber-500 ring-4 ring-amber-400/40 shadow-lg'
+                : selectedKpiFilter === 'area'
+                ? 'border-emerald-500 ring-4 ring-emerald-400/40 shadow-lg'
+                : 'border-blue-500 ring-4 ring-blue-400/40 shadow-lg'
+              : 'border-slate-200/80'
+          }`}
+        >
           
           {/* Card Sub-Header & Table View Toggle */}
           <div className="p-3.5 sm:p-4 border-b border-slate-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-slate-50/50">
@@ -2000,6 +2242,8 @@ export default function ReportsPage() {
                       ? `${processedVillageRows.length + processedTalukaRows.length + processedDistrictRows.length} ${isMarathi ? 'गोषवारा नोंदी' : 'Summary Records'}`
                       : activeTab === 'categories' && activeView === 'categorySummary'
                       ? `${categoryRollupRows.length} ${isMarathi ? 'गोषवारा नोंदी' : 'Summary Records'}`
+                      : selectedKpiFilter !== 'all'
+                      ? `${kpiFilteredParcels.length} / ${parcels.length} ${isMarathi ? 'अभिलेख (फिल्टर)' : 'Records (Filtered)'}`
                       : `${serverRollup?.districtTotal?.total712Count ?? parcels.length} ${isMarathi ? 'अभिलेख' : 'Records'}`
                   )}
                 </span>
@@ -2053,7 +2297,7 @@ export default function ReportsPage() {
                   <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-300" />
                   <span>{isMarathi ? 'सविस्तर ७/१२ डेटा यादी' : 'Detailed 7/12 Records'}</span>
                   <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-emerald-950/60 text-white font-mono font-bold">
-                    {parcels.length}
+                    {selectedKpiFilter !== 'all' ? `${kpiFilteredParcels.length} / ${parcels.length}` : parcels.length}
                   </span>
                 </div>
               )}
@@ -2063,12 +2307,67 @@ export default function ReportsPage() {
                   <FileSpreadsheet className="w-3.5 h-3.5 text-indigo-300" />
                   <span>{isMarathi ? 'सविस्तर ७/१२ डेटा यादी' : 'Detailed 7/12 Records'}</span>
                   <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-indigo-950/60 text-white font-mono font-bold">
-                    {serverRollup?.districtTotal?.total712Count ?? parcels.length}
+                    {selectedKpiFilter !== 'all' ? `${kpiFilteredParcels.length} / ${parcels.length}` : (serverRollup?.districtTotal?.total712Count ?? parcels.length)}
                   </span>
                 </div>
               )}
             </div>
           </div>
+
+          {/* =========================================================
+              ACTIVE KPI FILTER NOTIFICATION BANNER
+          ========================================================= */}
+          {selectedKpiFilter !== 'all' && (
+            <div className={`p-3 px-4 border-b flex flex-wrap items-center justify-between gap-2.5 text-xs transition-all duration-300 animate-in fade-in ${
+              selectedKpiFilter === 'violations'
+                ? 'bg-rose-50/90 border-rose-200 text-rose-950'
+                : selectedKpiFilter === 'class2'
+                ? 'bg-amber-50/90 border-amber-200 text-amber-950'
+                : 'bg-emerald-50/90 border-emerald-200 text-emerald-950'
+            }`}>
+              <div className="flex items-center gap-2.5 flex-wrap">
+                <span className={`w-2.5 h-2.5 rounded-full ${
+                  selectedKpiFilter === 'violations' ? 'bg-rose-600 animate-ping' : selectedKpiFilter === 'class2' ? 'bg-amber-600 animate-ping' : 'bg-emerald-600 animate-ping'
+                }`} />
+                <span className="font-bold text-slate-800">
+                  {isMarathi ? 'सक्रिय KPI फिल्टर:' : 'Active KPI Filter:'}
+                </span>
+                <span className={`px-2.5 py-1 rounded-lg font-bold text-xs shadow-2xs border inline-flex items-center gap-1.5 ${
+                  selectedKpiFilter === 'violations'
+                    ? 'bg-rose-100 text-rose-900 border-rose-300'
+                    : selectedKpiFilter === 'class2'
+                    ? 'bg-amber-100 text-amber-900 border-amber-300'
+                    : 'bg-emerald-100 text-emerald-900 border-emerald-300'
+                }`}>
+                  {selectedKpiFilter === 'violations'
+                    ? (isMarathi ? '⚠️ शर्तभंग / संशयित बाबी' : '⚠️ Breaches / Flagged Issues')
+                    : selectedKpiFilter === 'class2'
+                    ? (isMarathi ? '🏛️ भोगवटादार वर्ग २ / शासकीय' : '🏛️ Class-2 / Govt Land')
+                    : (isMarathi ? '📐 एकूण क्षेत्रनिहाय (उतरत्या क्रमाने)' : '📐 Total Area (Ranked Highest First)')}
+                </span>
+                <span className="font-semibold text-slate-700">
+                  {isMarathi
+                    ? `(एकूण ${parcels.length} पैकी ${kpiFilteredParcels.length} अभिलेख दाखवत आहे)`
+                    : `(Showing ${kpiFilteredParcels.length} of ${parcels.length} records)`}
+                </span>
+                <span className="text-[11px] text-slate-500 italic hidden sm:inline">
+                  {selectedKpiFilter === 'violations'
+                    ? (isMarathi ? '— विशेष चौकशी व शर्तभंग शेरा असलेले अभिलेख' : '— Condition breach & flagged inquiry records')
+                    : selectedKpiFilter === 'class2'
+                    ? (isMarathi ? '— वर्ग-२ व शासकीय सत्ताप्रकारातील जमिनी' : '— Restricted tenure & Govt land holdings')
+                    : (isMarathi ? '— सर्वोच्च क्षेत्रफळ असलेले गट क्रमांक सर्वप्रथम' : '— Largest land parcel acreage first')}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => { setSelectedKpiFilter('all'); setPage(1); }}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white text-slate-700 hover:text-blue-900 hover:bg-slate-100 border border-slate-300 text-xs font-bold transition shadow-2xs cursor-pointer active:scale-95"
+              >
+                <RotateCcw className="w-3.5 h-3.5 text-slate-500" />
+                <span>{isMarathi ? 'सर्व अभिलेख दाखवा (फिल्टर रद्द)' : 'Show All Records (Clear)'}</span>
+              </button>
+            </div>
+          )}
 
           {/* =========================================================
               VIEW LOGIC: PRAPATRA 1 TO 5 VS CATEGORIES VS MASTER CHECKLIST
@@ -2095,8 +2394,8 @@ export default function ReportsPage() {
                   </h3>
                   <p className="text-xs text-slate-500 mt-1">
                     {isMarathi
-                      ? `कार्यक्षेत्र: ${formatScopeText(activeScope, true)} | एकूण अभिलेख: ${serverRollup?.districtTotal?.total712Count ?? parcels.length} (डाऊनलोड एक्सेल बुकलेट - शीट १ नमुना)`
-                      : `Scope: ${formatScopeText(activeScope, false)} | Total Records: ${serverRollup?.districtTotal?.total712Count ?? parcels.length} (Downloaded Booklet Sheet 1 Format)`}
+                      ? `कार्यक्षेत्र: ${formatScopeText(activeScope, true)} | एकूण अभिलेख: ${selectedKpiFilter !== 'all' ? `${kpiFilteredParcels.length} (एकूण ${parcels.length} पैकी)` : (serverRollup?.districtTotal?.total712Count ?? parcels.length)} (डाऊनलोड एक्सेल बुकलेट - शीट १ नमुना)`
+                      : `Scope: ${formatScopeText(activeScope, false)} | Total Records: ${selectedKpiFilter !== 'all' ? `${kpiFilteredParcels.length} (of ${parcels.length})` : (serverRollup?.districtTotal?.total712Count ?? parcels.length)} (Downloaded Booklet Sheet 1 Format)`}
                   </p>
                 </div>
 
@@ -2110,15 +2409,15 @@ export default function ReportsPage() {
                         <th className="py-2.5 px-3 border-r border-slate-200 text-left min-w-[130px]">{isMarathi ? 'गाव' : 'Village'}</th>
                         <th className="py-2.5 px-2 border-r border-slate-200 w-24">{isMarathi ? 'गट क्र.' : 'Gat No.'}</th>
                         <th className="py-2.5 px-2 border-r border-slate-200 w-24">{isMarathi ? 'जुना स.नं.' : 'Old Survey'}</th>
-                        <th className="py-2.5 px-2 border-r border-slate-200 w-24 text-right">{isMarathi ? 'क्षेत्र (हे.)' : 'Area (Ha)'}</th>
+                        <th className={`py-2.5 px-2 border-r border-slate-200 w-24 text-right transition ${selectedKpiFilter === 'area' ? 'bg-emerald-100/90 text-emerald-950 font-black ring-1 ring-emerald-400' : ''}`}>{isMarathi ? 'क्षेत्र (हे.)' : 'Area (Ha)'}</th>
                         <th className="py-2.5 px-3 border-r border-slate-200 text-left min-w-[220px] bg-blue-50/60 text-blue-950 font-black">
                           {isMarathi ? 'सध्याचे खातेदार / भोगवटादाराचे नाव' : 'Current Khatedar / Occupant'}
                         </th>
                         <th className="py-2.5 px-3 border-r border-slate-200 text-left min-w-[180px] bg-amber-50/50 text-amber-950">
                           {isMarathi ? 'सन १९५० मधील मूळ नोंद / मालक' : '1950 Baseline Owner'}
                         </th>
-                        <th className="py-2.5 px-2 border-r border-slate-200 w-28 text-center">{isMarathi ? 'धारणा प्रकार' : 'Tenure'}</th>
-                        <th className="py-2.5 px-3 border-r border-slate-200 text-left min-w-[180px]">{isMarathi ? 'तपासणी निष्कर्ष / सद्यस्थिती' : 'Audit Finding'}</th>
+                        <th className={`py-2.5 px-2 border-r border-slate-200 w-28 text-center transition ${selectedKpiFilter === 'class2' ? 'bg-amber-100/90 text-amber-950 font-black ring-1 ring-amber-400' : ''}`}>{isMarathi ? 'धारणा प्रकार' : 'Tenure'}</th>
+                        <th className={`py-2.5 px-3 border-r border-slate-200 text-left min-w-[180px] transition ${selectedKpiFilter === 'violations' ? 'bg-rose-100/90 text-rose-950 font-black ring-1 ring-rose-400' : ''}`}>{isMarathi ? 'तपासणी निष्कर्ष / सद्यस्थिती' : 'Audit Finding'}</th>
                         <th className="py-2.5 px-3 border-r border-slate-200 text-left min-w-[130px] font-mono">{isMarathi ? 'फेरफार / आदेश' : 'Order Ref'}</th>
                         <th className="py-2.5 px-3 border-r border-slate-200 text-left min-w-[140px]">{isMarathi ? 'शेरा व इतर हक्क' : 'Remarks'}</th>
                         <th className="py-2.5 px-2 w-16 text-center">{isMarathi ? 'तपशील' : 'Details'}</th>
@@ -2160,9 +2459,42 @@ export default function ReportsPage() {
                         ))
                       ) : paginatedParcels.length === 0 ? (
                         <tr>
-                          <td colSpan={13} className="py-16 text-center text-slate-400">
-                            <Info className="w-8 h-8 mx-auto mb-2 text-slate-300" />
-                            <span className="text-sm font-semibold">{isMarathi ? 'सदर प्रपत्राकरिता कोणतेही ७/१२ अभिलेख आढळले नाहीत.' : 'No records found for this Prapatra.'}</span>
+                          <td colSpan={13} className="py-14 text-center">
+                            <div className="max-w-md mx-auto flex flex-col items-center">
+                              <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-3 shadow-2xs border ${
+                                selectedKpiFilter === 'violations'
+                                  ? 'bg-rose-50 text-rose-600 border-rose-200'
+                                  : selectedKpiFilter === 'class2'
+                                  ? 'bg-amber-50 text-amber-600 border-amber-200'
+                                  : 'bg-slate-100 text-slate-500 border-slate-200'
+                              }`}>
+                                <Filter className="w-6 h-6" />
+                              </div>
+                              <h4 className="text-sm font-bold text-slate-800 mb-1">
+                                {selectedKpiFilter !== 'all'
+                                  ? (isMarathi
+                                      ? `${selectedKpiFilter === 'class2' ? 'भोगवटादार वर्ग २ / शासकीय' : selectedKpiFilter === 'violations' ? 'शर्तभंग / संशयित बाबी' : 'निवडलेल्या'} निकषात एकही नोंद नाही.`
+                                      : 'No records match this KPI filter in current selection.')
+                                  : (isMarathi ? 'सदर प्रपत्राकरिता कोणतेही ७/१२ अभिलेख आढळले नाहीत.' : 'No records found for this Prapatra.')}
+                              </h4>
+                              <p className="text-xs text-slate-500 mb-3.5">
+                                {selectedKpiFilter !== 'all'
+                                  ? (isMarathi
+                                      ? 'निवडलेल्या गावात या विशिष्ट श्रेणीतील अभिलेख निरंक (०) आहेत.'
+                                      : 'There are 0 matching records for this KPI filter.')
+                                  : (isMarathi ? 'कृपया इतर गाव किंवा तालुका निवडून तपासा.' : 'Please try selecting a different scope.')}
+                              </p>
+                              {selectedKpiFilter !== 'all' && (
+                                <button
+                                  type="button"
+                                  onClick={() => { setSelectedKpiFilter('all'); setPage(1); }}
+                                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-blue-900 text-white rounded-xl text-xs font-bold hover:bg-blue-800 transition shadow-2xs cursor-pointer active:scale-95"
+                                >
+                                  <RotateCcw className="w-3.5 h-3.5" />
+                                  <span>{isMarathi ? 'सर्व अभिलेख दाखवा' : 'Show All Records'}</span>
+                                </button>
+                              )}
+                            </div>
                           </td>
                         </tr>
                       ) : (
@@ -2244,11 +2576,11 @@ export default function ReportsPage() {
                 </div>
 
                 {/* Pagination */}
-                {parcels.length > 0 && (
+                {kpiFilteredParcels.length > 0 && (
                   <div className={`p-3.5 border-t border-slate-200 bg-slate-50/60 ${loading ? 'opacity-50 pointer-events-none' : ''}`}>
                     <Pagination
                       currentPage={page}
-                      totalCount={parcels.length}
+                      totalCount={kpiFilteredParcels.length}
                       pageSize={pageSize}
                       totalPages={totalPages}
                       onPageChange={setPage}
@@ -2424,8 +2756,8 @@ export default function ReportsPage() {
                   </h3>
                   <p className="text-xs text-slate-500 mt-1">
                     {isMarathi
-                      ? `कार्यक्षेत्र: ${formatScopeText(activeScope, true)} | एकूण अभिलेख: ${serverRollup?.districtTotal?.total712Count ?? parcels.length} (डाऊनलोड एक्सेल बुकलेट - शीट १ नमुना)`
-                      : `Scope: ${formatScopeText(activeScope, false)} | Total Records: ${serverRollup?.districtTotal?.total712Count ?? parcels.length} (Downloaded Booklet Sheet 1 Format)`}
+                      ? `कार्यक्षेत्र: ${formatScopeText(activeScope, true)} | एकूण अभिलेख: ${selectedKpiFilter !== 'all' ? `${kpiFilteredParcels.length} (एकूण ${parcels.length} पैकी)` : (serverRollup?.districtTotal?.total712Count ?? parcels.length)} (डाऊनलोड एक्सेल बुकलेट - शीट १ नमुना)`
+                      : `Scope: ${formatScopeText(activeScope, false)} | Total Records: ${selectedKpiFilter !== 'all' ? `${kpiFilteredParcels.length} (of ${parcels.length})` : (serverRollup?.districtTotal?.total712Count ?? parcels.length)} (Downloaded Booklet Sheet 1 Format)`}
                   </p>
                 </div>
 
@@ -2438,15 +2770,15 @@ export default function ReportsPage() {
                         <th className="py-2.5 px-3 border-r border-slate-200 text-left min-w-[130px]">{isMarathi ? 'गाव' : 'Village'}</th>
                         <th className="py-2.5 px-2 border-r border-slate-200 w-24">{isMarathi ? 'गट क्र.' : 'Gat No.'}</th>
                         <th className="py-2.5 px-2 border-r border-slate-200 w-24">{isMarathi ? 'जुना स.नं.' : 'Old Survey'}</th>
-                        <th className="py-2.5 px-2 border-r border-slate-200 w-24 text-right">{isMarathi ? 'क्षेत्र (हे.)' : 'Area (Ha)'}</th>
+                        <th className={`py-2.5 px-2 border-r border-slate-200 w-24 text-right transition ${selectedKpiFilter === 'area' ? 'bg-emerald-100/90 text-emerald-950 font-black ring-1 ring-emerald-400' : ''}`}>{isMarathi ? 'क्षेत्र (हे.)' : 'Area (Ha)'}</th>
                         <th className="py-2.5 px-3 border-r border-slate-200 text-left min-w-[220px] bg-blue-50/60 text-blue-950 font-black">
                           {isMarathi ? 'सध्याचे खातेदार / भोगवटादाराचे नाव' : 'Current Khatedar / Occupant'}
                         </th>
                         <th className="py-2.5 px-3 border-r border-slate-200 text-left min-w-[180px] bg-amber-50/50 text-amber-950">
                           {isMarathi ? 'सन १९५० मधील मूळ नोंद / मालक' : '1950 Baseline Owner'}
                         </th>
-                        <th className="py-2.5 px-2 border-r border-slate-200 w-28 text-center">{isMarathi ? 'धारणा प्रकार' : 'Tenure'}</th>
-                        <th className="py-2.5 px-3 border-r border-slate-200 text-left min-w-[180px]">{isMarathi ? 'तपासणी निष्कर्ष / सद्यस्थिती' : 'Audit Finding'}</th>
+                        <th className={`py-2.5 px-2 border-r border-slate-200 w-28 text-center transition ${selectedKpiFilter === 'class2' ? 'bg-amber-100/90 text-amber-950 font-black ring-1 ring-amber-400' : ''}`}>{isMarathi ? 'धारणा प्रकार' : 'Tenure'}</th>
+                        <th className={`py-2.5 px-3 border-r border-slate-200 text-left min-w-[180px] transition ${selectedKpiFilter === 'violations' ? 'bg-rose-100/90 text-rose-950 font-black ring-1 ring-rose-400' : ''}`}>{isMarathi ? 'तपासणी निष्कर्ष / सद्यस्थिती' : 'Audit Finding'}</th>
                         <th className="py-2.5 px-3 border-r border-slate-200 text-left min-w-[130px] font-mono">{isMarathi ? 'फेरफार / आदेश' : 'Order Ref'}</th>
                         <th className="py-2.5 px-3 border-r border-slate-200 text-left min-w-[140px]">{isMarathi ? 'शेरा व इतर हक्क' : 'Remarks'}</th>
                         <th className="py-2.5 px-2 w-16 text-center">{isMarathi ? 'तपशील' : 'Details'}</th>
@@ -2488,9 +2820,42 @@ export default function ReportsPage() {
                         ))
                       ) : paginatedParcels.length === 0 ? (
                         <tr>
-                          <td colSpan={13} className="py-16 text-center text-slate-400">
-                            <Info className="w-8 h-8 mx-auto mb-2 text-slate-300" />
-                            <span className="text-sm font-semibold">{isMarathi ? 'सदर विषयाकरिता कोणतेही ७/१२ अभिलेख आढळले नाहीत.' : 'No records found for this category.'}</span>
+                          <td colSpan={13} className="py-14 text-center">
+                            <div className="max-w-md mx-auto flex flex-col items-center">
+                              <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-3 shadow-2xs border ${
+                                selectedKpiFilter === 'violations'
+                                  ? 'bg-rose-50 text-rose-600 border-rose-200'
+                                  : selectedKpiFilter === 'class2'
+                                  ? 'bg-amber-50 text-amber-600 border-amber-200'
+                                  : 'bg-slate-100 text-slate-500 border-slate-200'
+                              }`}>
+                                <Filter className="w-6 h-6" />
+                              </div>
+                              <h4 className="text-sm font-bold text-slate-800 mb-1">
+                                {selectedKpiFilter !== 'all'
+                                  ? (isMarathi
+                                      ? `${selectedKpiFilter === 'class2' ? 'भोगवटादार वर्ग २ / शासकीय' : selectedKpiFilter === 'violations' ? 'शर्तभंग / संशयित बाबी' : 'निवडलेल्या'} निकषात एकही नोंद नाही.`
+                                      : 'No records match this KPI filter in current selection.')
+                                  : (isMarathi ? 'सदर विषयाकरिता कोणतेही ७/१२ अभिलेख आढळले नाहीत.' : 'No records found for this category.')}
+                              </h4>
+                              <p className="text-xs text-slate-500 mb-3.5">
+                                {selectedKpiFilter !== 'all'
+                                  ? (isMarathi
+                                      ? 'निवडलेल्या गावात या विशिष्ट श्रेणीतील अभिलेख निरंक (०) आहेत.'
+                                      : 'There are 0 matching records for this KPI filter.')
+                                  : (isMarathi ? 'कृपया इतर गाव किंवा तालुका निवडून तपासा.' : 'Please try selecting a different scope.')}
+                              </p>
+                              {selectedKpiFilter !== 'all' && (
+                                <button
+                                  type="button"
+                                  onClick={() => { setSelectedKpiFilter('all'); setPage(1); }}
+                                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-blue-900 text-white rounded-xl text-xs font-bold hover:bg-blue-800 transition shadow-2xs cursor-pointer active:scale-95"
+                                >
+                                  <RotateCcw className="w-3.5 h-3.5" />
+                                  <span>{isMarathi ? 'सर्व अभिलेख दाखवा' : 'Show All Records'}</span>
+                                </button>
+                              )}
+                            </div>
                           </td>
                         </tr>
                       ) : (
@@ -2505,15 +2870,15 @@ export default function ReportsPage() {
                               <td className="py-2 px-3 border-r border-slate-200 font-medium text-slate-900">{formatVillageName(p.villageName, isMarathi)}</td>
                               <td className="py-2 px-2 text-center border-r border-slate-200 font-mono font-bold text-slate-800">{p.gatNumber || '-'}</td>
                               <td className="py-2 px-2 text-center border-r border-slate-200 font-mono text-slate-600">{p.oldSurveyNo || '-'}</td>
-                              <td className="py-2 px-2 text-right border-r border-slate-200 font-mono font-bold text-slate-900">{Number(p.totalAreaHa || 0).toFixed(4)}</td>
+                              <td className={`py-2 px-2 text-right border-r border-slate-200 font-mono font-bold transition ${selectedKpiFilter === 'area' ? 'bg-emerald-50 text-emerald-950 font-black ring-1 ring-inset ring-emerald-300' : 'text-slate-900'}`}>{Number(p.totalAreaHa || 0).toFixed(4)}</td>
                               <td className="py-2 px-3 border-r border-slate-200 bg-blue-50/20 font-bold text-blue-950">{p.currentOwner || (isMarathi ? 'नोंद उपलब्ध नाही' : 'No record available')}</td>
                               <td className="py-2 px-3 border-r border-slate-200 bg-amber-50/20 text-slate-700 font-medium">{p.baselineOwner1950 || '-'}</td>
-                              <td className="py-2 px-2 text-center border-r border-slate-200">
+                              <td className={`py-2 px-2 text-center border-r border-slate-200 transition ${selectedKpiFilter === 'class2' ? 'bg-amber-50/80 ring-1 ring-inset ring-amber-300' : ''}`}>
                                 <span className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-bold ${
                                   p.tenureClass === 'BHOGVATDAR_CLASS_1'
                                     ? 'bg-emerald-100 text-emerald-800'
                                     : p.tenureClass === 'BHOGVATDAR_CLASS_2'
-                                    ? 'bg-amber-100 text-amber-900'
+                                    ? 'bg-amber-100 text-amber-900 font-black'
                                     : p.tenureClass === 'SARKAR_SHASAN'
                                     ? 'bg-rose-100 text-rose-800'
                                     : 'bg-slate-100 text-slate-700'
@@ -2521,9 +2886,9 @@ export default function ReportsPage() {
                                   {p.tenureDisplay || p.tenureClass || '-'}
                                 </span>
                               </td>
-                              <td className="py-2 px-3 border-r border-slate-200">
+                              <td className={`py-2 px-3 border-r border-slate-200 transition ${selectedKpiFilter === 'violations' ? 'bg-rose-50/80 ring-1 ring-inset ring-rose-300' : ''}`}>
                                 <span className={`inline-block px-2 py-0.5 rounded-md text-[11px] font-semibold ${
-                                  hasAlert ? 'bg-rose-100 text-rose-800 font-bold' : 'bg-slate-100 text-slate-700'
+                                  hasAlert ? 'bg-rose-100 text-rose-800 font-bold shadow-2xs' : 'bg-slate-100 text-slate-700'
                                 }`}>
                                   {p.statusFinding || (isMarathi ? 'प्रमाणित' : 'Verified')}
                                 </span>
@@ -2547,11 +2912,11 @@ export default function ReportsPage() {
                   </table>
                 </div>
 
-                {parcels.length > 0 && (
+                {kpiFilteredParcels.length > 0 && (
                   <div className={`p-3.5 border-t border-slate-200 bg-slate-50/60 ${loading ? 'opacity-50 pointer-events-none' : ''}`}>
                     <Pagination
                       currentPage={page}
-                      totalCount={parcels.length}
+                      totalCount={kpiFilteredParcels.length}
                       pageSize={pageSize}
                       totalPages={totalPages}
                       onPageChange={setPage}
@@ -2718,8 +3083,14 @@ export default function ReportsPage() {
                       <th className="py-2 px-2 border-r border-slate-300 w-12 bg-slate-100">{isMarathi ? 'अ.क्र.' : 'Sr.'}</th>
                       <th className="py-2 px-3 border-r border-slate-300 text-left min-w-[120px] bg-slate-100">{isMarathi ? 'गावाचे नाव' : 'Village Name'}</th>
                       <th className="py-2 px-2 border-r border-slate-300 w-24 bg-slate-100">{isMarathi ? 'सर्व्हे क्रमांक' : 'Survey No.'}</th>
-                      <th className="py-2 px-2 border-r border-slate-300 w-20 text-right bg-slate-100">{isMarathi ? 'क्षेत्र' : 'Area'}</th>
-                      <th className="py-2 px-2 border-r border-slate-300 w-28 bg-slate-100">
+                      <th className={`py-2 px-2 border-r border-slate-300 w-20 text-right transition-colors ${
+                        selectedKpiFilter === 'area' ? 'bg-emerald-200 text-emerald-950 font-black ring-1 ring-emerald-500' : 'bg-slate-100'
+                      }`}>
+                        {isMarathi ? 'क्षेत्र' : 'Area'}
+                      </th>
+                      <th className={`py-2 px-2 border-r border-slate-300 w-28 transition-colors ${
+                        selectedKpiFilter === 'class2' ? 'bg-amber-200 text-amber-950 font-black ring-1 ring-amber-500' : 'bg-slate-100'
+                      }`}>
                         {isMarathi ? (
                           <>भोगवटदार वर्ग<br /><span className="text-[9px] font-normal text-slate-500">(भूधारणा नुसार)</span></>
                         ) : (
@@ -2790,9 +3161,42 @@ export default function ReportsPage() {
                       </tr>
                     ) : paginatedParcels.length === 0 ? (
                       <tr>
-                        <td colSpan={54} className="py-20 text-center text-slate-400">
-                          <Info className="w-8 h-8 mx-auto mb-2 text-slate-300" />
-                          <span className="text-sm font-semibold">{isMarathi ? 'निवडलेल्या निकषांनुसार कोणतेही अभिलेख आढळले नाहीत.' : 'No records found matching selected criteria.'}</span>
+                        <td colSpan={54} className="py-16 text-center">
+                          <div className="max-w-md mx-auto flex flex-col items-center">
+                            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-3 shadow-2xs border ${
+                              selectedKpiFilter === 'violations'
+                                ? 'bg-rose-50 text-rose-600 border-rose-200'
+                                : selectedKpiFilter === 'class2'
+                                ? 'bg-amber-50 text-amber-600 border-amber-200'
+                                : 'bg-slate-100 text-slate-500 border-slate-200'
+                            }`}>
+                              <Filter className="w-6 h-6" />
+                            </div>
+                            <h4 className="text-sm font-bold text-slate-800 mb-1">
+                              {selectedKpiFilter !== 'all'
+                                ? (isMarathi
+                                    ? `${selectedKpiFilter === 'class2' ? 'भोगवटादार वर्ग २ / शासकीय' : selectedKpiFilter === 'violations' ? 'शर्तभंग / संशयित बाबी' : 'निवडलेल्या'} निकषात एकही नोंद नाही.`
+                                    : 'No records match this KPI filter in current selection.')
+                                : (isMarathi ? 'निवडलेल्या निकषांनुसार कोणतेही अभिलेख आढळले नाहीत.' : 'No records found matching selected criteria.')}
+                            </h4>
+                            <p className="text-xs text-slate-500 mb-3.5">
+                              {selectedKpiFilter !== 'all'
+                                ? (isMarathi
+                                    ? 'निवडलेल्या गावात या विशिष्ट श्रेणीतील अभिलेख निरंक (०) आहेत.'
+                                    : 'There are 0 matching records for this KPI filter.')
+                                : (isMarathi ? 'कृपया इतर निकष निवडून तपासा.' : 'Please try different filter options.')}
+                            </p>
+                            {selectedKpiFilter !== 'all' && (
+                              <button
+                                type="button"
+                                onClick={() => { setSelectedKpiFilter('all'); setPage(1); }}
+                                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-blue-900 text-white rounded-xl text-xs font-bold hover:bg-blue-800 transition shadow-2xs cursor-pointer active:scale-95"
+                              >
+                                <RotateCcw className="w-3.5 h-3.5" />
+                                <span>{isMarathi ? 'सर्व अभिलेख दाखवा' : 'Show All Records'}</span>
+                              </button>
+                            )}
+                          </div>
                         </td>
                       </tr>
                     ) : (
@@ -2821,16 +3225,16 @@ export default function ReportsPage() {
                             <td className="py-2 px-2 text-center border-r border-slate-200 font-mono font-bold text-slate-800">
                               {p.gatNumber || p.oldSurveyNo || '-'}
                             </td>
-                            <td className="py-2 px-2 text-right border-r border-slate-200 font-mono font-medium">
+                            <td className={`py-2 px-2 text-right border-r border-slate-200 font-mono font-bold transition ${selectedKpiFilter === 'area' ? 'bg-emerald-50 text-emerald-950 font-black ring-1 ring-inset ring-emerald-300' : 'font-medium'}`}>
                               {p.totalAreaHa}
                             </td>
-                            <td className="py-2 px-2 text-center border-r border-slate-200">
+                            <td className={`py-2 px-2 text-center border-r border-slate-200 transition ${selectedKpiFilter === 'class2' ? 'bg-amber-50/80 ring-1 ring-inset ring-amber-300' : ''}`}>
                               <span
                                 className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-bold ${
                                   p.tenureClass === 'BHOGVATDAR_CLASS_1'
                                     ? 'bg-emerald-100 text-emerald-800'
                                     : p.tenureClass === 'BHOGVATDAR_CLASS_2'
-                                    ? 'bg-amber-100 text-amber-900'
+                                    ? 'bg-amber-100 text-amber-900 font-black'
                                     : p.tenureClass === 'SARKAR_SHASAN'
                                     ? 'bg-rose-100 text-rose-800'
                                     : 'bg-slate-100 text-slate-700'
@@ -2907,11 +3311,11 @@ export default function ReportsPage() {
             </div>
 
               {/* Pagination */}
-              {parcels.length > 0 && (
+              {kpiFilteredParcels.length > 0 && (
                 <div className={`p-3.5 border-t border-slate-200 bg-slate-50/60 ${loading ? 'opacity-50 pointer-events-none' : ''}`}>
                   <Pagination
                     currentPage={page}
-                    totalCount={parcels.length}
+                    totalCount={kpiFilteredParcels.length}
                     pageSize={pageSize}
                     totalPages={totalPages}
                     onPageChange={setPage}
@@ -2935,13 +3339,23 @@ export default function ReportsPage() {
                       <th className="py-2.5 px-3 border-r border-slate-200 w-12">{isMarathi ? 'अ.क्र.' : 'Sr.'}</th>
                       <th className="py-2.5 px-3 border-r border-slate-200 text-left min-w-[120px]">{isMarathi ? 'गावाचे नाव' : 'Village Name'}</th>
                       <th className="py-2.5 px-3 border-r border-slate-200 w-24">{isMarathi ? 'सर्व्हे / गट क्र.' : 'Survey / Gat No.'}</th>
-                      <th className="py-2.5 px-3 border-r border-slate-200 w-24 text-right">{isMarathi ? 'क्षेत्र (हे.आर.)' : 'Area (Ha.R)'}</th>
+                      <th className={`py-2.5 px-3 border-r border-slate-200 w-24 text-right transition-colors ${
+                        selectedKpiFilter === 'area' ? 'bg-emerald-100 text-emerald-950 font-black border-emerald-300 ring-1 ring-emerald-400' : ''
+                      }`}>
+                        {isMarathi ? 'क्षेत्र (हे.आर.)' : 'Area (Ha.R)'}
+                      </th>
                       <th className="py-2.5 px-3 border-r border-slate-200 text-left min-w-[220px] bg-blue-50/40 text-blue-950">
                         {isMarathi ? 'सध्याचे खातेदार / भोगवटादार नाव' : 'Current Khatedar / Occupant Name'}
                       </th>
-                      <th className="py-2.5 px-3 border-r border-slate-200 w-28">{isMarathi ? 'धारणा प्रकार' : 'Tenure Class'}</th>
+                      <th className={`py-2.5 px-3 border-r border-slate-200 w-28 transition-colors ${
+                        selectedKpiFilter === 'class2' ? 'bg-amber-100 text-amber-950 font-black border-amber-300 ring-1 ring-amber-400' : ''
+                      }`}>
+                        {isMarathi ? 'धारणा प्रकार' : 'Tenure Class'}
+                      </th>
                       <th className="py-2.5 px-3 border-r border-slate-200 text-left min-w-[150px]">{isMarathi ? '१९५० मूळ नोंद' : '1950 Baseline Entry'}</th>
-                      <th className="py-2.5 px-3 border-r border-slate-200 text-left min-w-[180px]">
+                      <th className={`py-2.5 px-3 border-r border-slate-200 text-left min-w-[180px] transition-colors ${
+                        selectedKpiFilter === 'violations' ? 'bg-rose-100 text-rose-950 font-black border-rose-300 ring-1 ring-rose-400' : ''
+                      }`}>
                         {isMarathi ? 'तपासणी निष्कर्ष / सद्यस्थिती' : 'Inspection Finding / Status'}
                       </th>
                       <th className="py-2.5 px-3 text-left min-w-[140px]">{isMarathi ? 'शेरा व इतर हक्क' : 'Remarks & Other Rights'}</th>
@@ -2967,9 +3381,42 @@ export default function ReportsPage() {
                       </tr>
                     ) : paginatedParcels.length === 0 ? (
                       <tr>
-                        <td colSpan={10} className="py-16 text-center text-slate-400">
-                          <Info className="w-6 h-6 mx-auto mb-2 text-slate-300" />
-                          <span>{isMarathi ? 'निवडलेल्या निकषांनुसार कोणतेही अभिलेख आढळले नाहीत.' : 'No records found matching selected criteria.'}</span>
+                        <td colSpan={10} className="py-14 text-center">
+                          <div className="max-w-md mx-auto flex flex-col items-center">
+                            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-3 shadow-2xs border ${
+                              selectedKpiFilter === 'violations'
+                                ? 'bg-rose-50 text-rose-600 border-rose-200'
+                                : selectedKpiFilter === 'class2'
+                                ? 'bg-amber-50 text-amber-600 border-amber-200'
+                                : 'bg-slate-100 text-slate-500 border-slate-200'
+                            }`}>
+                              <Filter className="w-6 h-6" />
+                            </div>
+                            <h4 className="text-sm font-bold text-slate-800 mb-1">
+                              {selectedKpiFilter !== 'all'
+                                ? (isMarathi
+                                    ? `${selectedKpiFilter === 'class2' ? 'भोगवटादार वर्ग २ / शासकीय' : selectedKpiFilter === 'violations' ? 'शर्तभंग / संशयित बाबी' : 'निवडलेल्या'} निकषात एकही नोंद नाही.`
+                                    : 'No records match this KPI filter in current selection.')
+                                : (isMarathi ? 'निवडलेल्या निकषांनुसार कोणतेही अभिलेख आढळले नाहीत.' : 'No records found matching selected criteria.')}
+                            </h4>
+                            <p className="text-xs text-slate-500 mb-3.5">
+                              {selectedKpiFilter !== 'all'
+                                ? (isMarathi
+                                    ? 'निवडलेल्या गावात या विशिष्ट श्रेणीतील अभिलेख निरंक (०) आहेत.'
+                                    : 'There are 0 matching records for this KPI filter.')
+                                : (isMarathi ? 'कृपया इतर निकष निवडून तपासा.' : 'Please try different filter options.')}
+                            </p>
+                            {selectedKpiFilter !== 'all' && (
+                              <button
+                                type="button"
+                                onClick={() => { setSelectedKpiFilter('all'); setPage(1); }}
+                                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-blue-900 text-white rounded-xl text-xs font-bold hover:bg-blue-800 transition shadow-2xs cursor-pointer active:scale-95"
+                              >
+                                <RotateCcw className="w-3.5 h-3.5" />
+                                <span>{isMarathi ? 'सर्व अभिलेख दाखवा' : 'Show All Records'}</span>
+                              </button>
+                            )}
+                          </div>
                         </td>
                       </tr>
                     ) : (
@@ -2988,16 +3435,22 @@ export default function ReportsPage() {
                               <span className="block text-[10px] text-slate-400">{isMarathi ? 'जुना:' : 'Old:'} {p.oldSurveyNo}</span>
                             )}
                           </td>
-                          <td className="py-2.5 px-3 text-right border-r border-slate-100 font-mono font-medium">
+                          <td className={`py-2.5 px-3 text-right border-r border-slate-100 font-mono transition-colors ${
+                            selectedKpiFilter === 'area' ? 'bg-emerald-50/80 font-black text-emerald-950 ring-1 ring-inset ring-emerald-300' : 'font-medium'
+                          }`}>
                             {p.totalAreaHa}
                           </td>
                           <td className="py-2.5 px-3 border-r border-slate-100 bg-blue-50/20 font-bold text-blue-900">
                             {p.currentOwner || (isMarathi ? 'नोंद उपलब्ध नाही' : 'No record available')}
                           </td>
-                          <td className="py-2.5 px-3 text-center border-r border-slate-100">
+                          <td className={`py-2.5 px-3 text-center border-r border-slate-100 transition-colors ${
+                            selectedKpiFilter === 'class2' ? 'bg-amber-50/80 ring-1 ring-inset ring-amber-300' : ''
+                          }`}>
                             <span
                               className={`inline-block px-2 py-0.5 rounded-md text-[10px] font-bold ${
-                                p.tenureClass === 'BHOGVATDAR_CLASS_1'
+                                selectedKpiFilter === 'class2'
+                                  ? 'bg-amber-200 text-amber-950 ring-1 ring-amber-400 font-black'
+                                  : p.tenureClass === 'BHOGVATDAR_CLASS_1'
                                   ? 'bg-emerald-100 text-emerald-800'
                                   : p.tenureClass === 'BHOGVATDAR_CLASS_2'
                                   ? 'bg-amber-100 text-amber-900'
@@ -3012,10 +3465,14 @@ export default function ReportsPage() {
                           <td className="py-2.5 px-3 border-r border-slate-100 text-slate-600 text-[11px]">
                             {p.baselineOwner1950 || '-'}
                           </td>
-                          <td className="py-2.5 px-3 border-r border-slate-100 text-[11px]">
+                          <td className={`py-2.5 px-3 border-r border-slate-100 text-[11px] transition-colors ${
+                            selectedKpiFilter === 'violations' ? 'bg-rose-50/80 ring-1 ring-inset ring-rose-300' : ''
+                          }`}>
                             <span
                               className={`inline-block px-2 py-0.5 rounded-md ${
-                                p.statusFinding?.includes('शर्तभंग') || p.statusFinding?.includes('अवैध')
+                                selectedKpiFilter === 'violations'
+                                  ? 'bg-rose-200 text-rose-950 ring-1 ring-rose-400 font-black'
+                                  : p.statusFinding?.includes('शर्तभंग') || p.statusFinding?.includes('अवैध')
                                   ? 'bg-rose-100 text-rose-800 font-bold'
                                   : 'bg-slate-100 text-slate-700'
                               }`}
@@ -3050,11 +3507,11 @@ export default function ReportsPage() {
             </div>
 
               {/* Pagination */}
-              {parcels.length > 0 && (
+              {kpiFilteredParcels.length > 0 && (
                 <div className={`p-3.5 border-t border-slate-200 bg-slate-50/60 ${loading ? 'opacity-50 pointer-events-none' : ''}`}>
                   <Pagination
                     currentPage={page}
-                    totalCount={parcels.length}
+                    totalCount={kpiFilteredParcels.length}
                     pageSize={pageSize}
                     totalPages={totalPages}
                     onPageChange={setPage}

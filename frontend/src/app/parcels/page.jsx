@@ -143,14 +143,25 @@ export default function ParcelsPage() {
       const qTaluka = urlParams.get('taluka') || '';
       const qVillage = urlParams.get('village') || '';
       const qBooklet = urlParams.get('booklet') || urlParams.get('category') || '';
+      const qTenureClass = urlParams.get('tenureClass') || urlParams.get('tenure') || '';
+      const qDispute = urlParams.get('hasActiveDispute') || urlParams.get('dispute') || '';
+      const qSearch = urlParams.get('search') || '';
+
       if (qTaluka) setTaluka(qTaluka);
       if (qVillage) setVillage(qVillage);
       if (qBooklet) setBookletCategory(qBooklet);
+      if (qTenureClass) setTenureClass(qTenureClass);
+      if (qDispute) setHasActiveDispute(qDispute);
+      if (qSearch) setSearch(qSearch);
+
       initialFilters = {
         ...initialFilters,
         taluka: qTaluka,
         village: qVillage,
         bookletCategory: qBooklet,
+        tenureClass: qTenureClass,
+        hasActiveDispute: qDispute,
+        search: qSearch,
       };
     }
     setAppliedFilters(initialFilters);
@@ -746,7 +757,29 @@ export default function ParcelsPage() {
                   </span>
                 </>
               )}
-              {stats.class2Count > 0 && (
+              {appliedFilters.tenureClass && (
+                <>
+                  <span className="text-slate-300">•</span>
+                  <span className="inline-flex items-center gap-1 text-[11px] font-bold bg-amber-50 text-amber-900 border border-amber-200/80 px-2 py-0.5 rounded-full">
+                    <Layers className="w-3 h-3 text-amber-600" />
+                    <span>
+                      {TENURE_CLASSES[appliedFilters.tenureClass]
+                        ? (isMarathi ? TENURE_CLASSES[appliedFilters.tenureClass].labelMr : TENURE_CLASSES[appliedFilters.tenureClass].labelEn)
+                        : appliedFilters.tenureClass}
+                    </span>
+                  </span>
+                </>
+              )}
+              {appliedFilters.hasActiveDispute === 'true' && (
+                <>
+                  <span className="text-slate-300">•</span>
+                  <span className="inline-flex items-center gap-1 text-[11px] font-bold bg-rose-50 text-rose-900 border border-rose-200 px-2 py-0.5 rounded-full">
+                    <AlertTriangle className="w-3 h-3 text-rose-600" />
+                    <span>{isMarathi ? 'सक्रिय शर्तभंग / वाद' : 'Active Breach / Dispute'}</span>
+                  </span>
+                </>
+              )}
+              {stats.class2Count > 0 && !appliedFilters.tenureClass && (
                 <>
                   <span className="text-slate-300">•</span>
                   <span className="text-xs text-amber-700 font-medium">

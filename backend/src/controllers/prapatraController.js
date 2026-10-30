@@ -1257,9 +1257,10 @@ export const getPrapatraReport = async (req, res) => {
 
       if (isChecklist) {
         if (view === 'summary') {
+          const effectiveTier = req.query.tier || (village && village !== 'all' ? 'village' : (targetTaluka && targetTaluka !== 'all' ? 'taluka' : 'all'));
           res.setHeader('Content-Disposition', `attachment; filename=Checklist_Goshwara_Rollup_${safeScope}_${timestamp}.xlsx`);
           return await generateChecklistSummaryExcel({
-            tier: req.query.tier || 'all',
+            tier: effectiveTier,
             districtRows: dynamicRollupData.districtTotal ? [dynamicRollupData.districtTotal] : [],
             talukaRows: dynamicRollupData.byTaluka || [],
             villageRows: dynamicRollupData.byVillage || []
@@ -1290,9 +1291,10 @@ export const getPrapatraReport = async (req, res) => {
 
       if (isChecklist) {
         if (view === 'summary') {
+          const effectiveTier = req.query.tier || (village && village !== 'all' ? 'village' : (targetTaluka && targetTaluka !== 'all' ? 'taluka' : 'all'));
           res.setHeader('Content-Disposition', `attachment; filename=Checklist_Goshwara_Rollup_${safeScope}_${timestamp}.pdf`);
           return await generateChecklistSummaryPdf({
-            tier: req.query.tier || 'all',
+            tier: effectiveTier,
             districtRows: dynamicRollupData.districtTotal ? [dynamicRollupData.districtTotal] : [],
             talukaRows: dynamicRollupData.byTaluka || [],
             villageRows: dynamicRollupData.byVillage || []

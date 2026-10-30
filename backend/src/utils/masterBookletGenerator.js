@@ -885,6 +885,9 @@ export async function generateChecklistParcelsPdf(parcels, scopeName, res) {
  * Strictly matches the 14-column official statutory layout with super and sub headers
  */
 function createGoshwaraWorksheet(wb, sheetName, titleText, nameHeader, rows) {
+  wb.calcProperties = wb.calcProperties || {};
+  wb.calcProperties.fullCalcOnLoad = true;
+
   const ws = wb.addWorksheet(sheetName, {
     views: [{ showGridLines: true }]
   });
@@ -944,33 +947,58 @@ function createGoshwaraWorksheet(wb, sheetName, titleText, nameHeader, rows) {
     });
   });
 
-  const startDataRow = 4;
-  rows.forEach((row, idx) => {
-    const isDistrictTotal = row.villageName === 'संपूर्ण जिल्हा (१५ तालुके गोषवारा)' || row.villageName === 'Whole District Rollup' || row.isDistrictTotal;
-    const isTalukaTotal = row.villageName === 'संपूर्ण तालुका (All Villages)' || row.villageName === 'एकूण' || row.isTotal;
-    const isTotal = isDistrictTotal || isTalukaTotal;
+  const cleanRows = (rows || []).filter(r => {
+    if (!r) return false;
+    if (r.isTotal) return false;
+    if (r.name === 'एकूण' || r.villageName === 'एकूण' || r.name === 'Total') return false;
+    if (r.id === 'total' || r.id === 'grand-total') return false;
+    return true;
+  });
 
-    const displayName = row.name || (isDistrictTotal
+  let sumTot = 0, sumArea = 0;
+  let sumC1 = 0, sumC1A = 0;
+  let sumC2 = 0, sumC2A = 0;
+  let sumConv = 0, sumConvA = 0;
+  let sumNo = 0, sumNoA = 0;
+  let sumDel = 0, sumDelA = 0;
+
+  const startDataRow = 4;
+  cleanRows.forEach((row, idx) => {
+    const isDistrictName = row.villageName === 'संपूर्ण जिल्हा (१५ तालुके गोषवारा)' || row.villageName === 'Whole District Rollup';
+    const displayName = row.name || (isDistrictName
       ? 'चंद्रपूर जिल्हा'
-      : isTalukaTotal
-      ? (row.taluka ? `${formatTalukaMr(row.taluka)}` : 'सर्व तालुके')
+      : (row.taluka && (row.villageName === 'संपूर्ण तालुका (All Villages)' || !row.villageName))
+      ? `${formatTalukaMr(row.taluka)}`
       : cleanVillageName(row.villageName || row.taluka || '-'));
 
     const totalSurveys = Number(row.totalSurveys ?? row.total712Count ?? row.totalGovtLandCount ?? 0);
-    const totalAreaVal = parseFloat(row.totalArea ?? row.totalAreaHa ?? 0);
+    const totalAreaVal = parseFloat(row.totalArea ?? row.totalAreaHa ?? 0) || 0;
     const c1Count = Number(row.c1Surveys ?? row.c1Count ?? row.govtFound1950Count ?? 0);
-    const c1Area = parseFloat(row.c1Area ?? 0);
+    const c1Area = parseFloat(row.c1Area ?? 0) || 0;
     const c2Count = Number(row.c2Surveys ?? row.c2Count ?? row.pendingRectifyCount ?? 0);
-    const c2Area = parseFloat(row.c2Area ?? 0);
+    const c2Area = parseFloat(row.c2Area ?? 0) || 0;
     const convCount = Number(row.convSurveys ?? row.convCount ?? row.illegalDeletionsCount ?? 0);
-    const convArea = parseFloat(row.convArea ?? 0);
+    const convArea = parseFloat(row.convArea ?? 0) || 0;
     const noOtherCount = Number(row.noOtherSurveys ?? row.noOtherCount ?? row.pokalistPendingCount ?? 0);
-    const noOtherArea = parseFloat(row.noOtherArea ?? 0);
+    const noOtherArea = parseFloat(row.noOtherArea ?? 0) || 0;
     const delCount = Number(row.delSurveys ?? row.delCount ?? row.illegalReductionCount ?? row.shartCount ?? 0);
-    const delArea = parseFloat(row.delArea ?? row.illegalReductionArea ?? row.shartArea ?? 0);
+    const delArea = parseFloat(row.delArea ?? row.illegalReductionArea ?? row.shartArea ?? 0) || 0;
+
+    sumTot += totalSurveys;
+    sumArea += totalAreaVal;
+    sumC1 += c1Count;
+    sumC1A += c1Area;
+    sumC2 += c2Count;
+    sumC2A += c2Area;
+    sumConv += convCount;
+    sumConvA += convArea;
+    sumNo += noOtherCount;
+    sumNoA += noOtherArea;
+    sumDel += delCount;
+    sumDelA += delArea;
 
     const r = ws.addRow([
-      isTotal ? 'एकूण' : (idx + 1),
+      idx + 1,
       displayName,
       totalSurveys,
       totalAreaVal,
@@ -988,11 +1016,9 @@ function createGoshwaraWorksheet(wb, sheetName, titleText, nameHeader, rows) {
 
     r.height = 20;
     r.eachCell((cell, colIdx) => {
-      cell.font = { name: 'Arial', size: 9, bold: isTotal };
+      cell.font = { name: 'Arial', size: 9 };
       cell.border = thinBorder;
-      if (isTotal) {
-        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFDBEAFE' } };
-      } else if (idx % 2 === 1) {
+      if (idx % 2 === 1) {
         cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: ZEBRA_BG } };
       }
 
@@ -1009,36 +1035,36 @@ function createGoshwaraWorksheet(wb, sheetName, titleText, nameHeader, rows) {
   });
 
   const endDataRow = ws.rowCount;
-  if (endDataRow >= startDataRow && rows.length > 0) {
+  if (endDataRow >= startDataRow && cleanRows.length > 0) {
     const totalRow = ws.addRow([
       'एकूण',
       '-',
-      { formula: `SUM(C${startDataRow}:C${endDataRow})` },
-      { formula: `SUM(D${startDataRow}:D${endDataRow})` },
-      { formula: `SUM(E${startDataRow}:E${endDataRow})` },
-      { formula: `SUM(F${startDataRow}:F${endDataRow})` },
-      { formula: `SUM(G${startDataRow}:G${endDataRow})` },
-      { formula: `SUM(H${startDataRow}:H${endDataRow})` },
-      { formula: `SUM(I${startDataRow}:I${endDataRow})` },
-      { formula: `SUM(J${startDataRow}:J${endDataRow})` },
-      { formula: `SUM(K${startDataRow}:K${endDataRow})` },
-      { formula: `SUM(L${startDataRow}:L${endDataRow})` },
-      { formula: `SUM(M${startDataRow}:M${endDataRow})` },
-      { formula: `SUM(N${startDataRow}:N${endDataRow})` }
+      { formula: `SUM(C${startDataRow}:C${endDataRow})`, result: sumTot },
+      { formula: `SUM(D${startDataRow}:D${endDataRow})`, result: Number(sumArea.toFixed(2)) },
+      { formula: `SUM(E${startDataRow}:E${endDataRow})`, result: sumC1 },
+      { formula: `SUM(F${startDataRow}:F${endDataRow})`, result: Number(sumC1A.toFixed(2)) },
+      { formula: `SUM(G${startDataRow}:G${endDataRow})`, result: sumC2 },
+      { formula: `SUM(H${startDataRow}:H${endDataRow})`, result: Number(sumC2A.toFixed(2)) },
+      { formula: `SUM(I${startDataRow}:I${endDataRow})`, result: sumConv },
+      { formula: `SUM(J${startDataRow}:J${endDataRow})`, result: Number(sumConvA.toFixed(2)) },
+      { formula: `SUM(K${startDataRow}:K${endDataRow})`, result: sumNo },
+      { formula: `SUM(L${startDataRow}:L${endDataRow})`, result: Number(sumNoA.toFixed(2)) },
+      { formula: `SUM(M${startDataRow}:M${endDataRow})`, result: sumDel },
+      { formula: `SUM(N${startDataRow}:N${endDataRow})`, result: Number(sumDelA.toFixed(2)) }
     ]);
     totalRow.height = 24;
     totalRow.eachCell((cell, colIdx) => {
       cell.font = { name: 'Arial', size: 9.5, bold: true, color: { argb: 'FF0F172A' } };
       cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE2E8F0' } };
       cell.border = thinBorder;
-      if (colIdx === 2) {
+      if (colIdx === 1 || colIdx === 2) {
         cell.alignment = { horizontal: 'center', vertical: 'middle' };
       } else if ([4, 6, 8, 10, 12, 14].includes(colIdx)) {
         cell.alignment = { horizontal: 'right', vertical: 'middle' };
         cell.numFmt = '#,##0.00';
       } else {
         cell.alignment = { horizontal: 'center', vertical: 'middle' };
-        if (colIdx > 2) cell.numFmt = '#,##0';
+        cell.numFmt = '#,##0';
       }
     });
   }
@@ -1127,6 +1153,14 @@ export async function generateChecklistSummaryPdf(summaryData, scopeName, res) {
       ]
     ];
 
+    const cleanRows = (rows || []).filter(r => {
+      if (!r) return false;
+      if (r.isTotal) return false;
+      if (r.name === 'एकूण' || r.villageName === 'एकूण' || r.name === 'Total') return false;
+      if (r.id === 'total' || r.id === 'grand-total') return false;
+      return true;
+    });
+
     let sumTot = 0, sumArea = 0;
     let sumC1 = 0, sumC1A = 0;
     let sumC2 = 0, sumC2A = 0;
@@ -1134,29 +1168,26 @@ export async function generateChecklistSummaryPdf(summaryData, scopeName, res) {
     let sumNo = 0, sumNoA = 0;
     let sumDel = 0, sumDelA = 0;
 
-    rows.forEach((r, idx) => {
-      const isDistrictTotal = r.villageName === 'संपूर्ण जिल्हा (१५ तालुके गोषवारा)' || r.villageName === 'Whole District Rollup' || r.isDistrictTotal;
-      const isTalukaTotal = r.villageName === 'संपूर्ण तालुका (All Villages)' || r.villageName === 'एकूण' || r.isTotal;
-      const isTotal = isDistrictTotal || isTalukaTotal;
-
-      const displayName = r.name || (isDistrictTotal
+    cleanRows.forEach((r, idx) => {
+      const isDistrictName = r.villageName === 'संपूर्ण जिल्हा (१५ तालुके गोषवारा)' || r.villageName === 'Whole District Rollup';
+      const displayName = r.name || (isDistrictName
         ? 'चंद्रपूर जिल्हा'
-        : isTalukaTotal
-        ? (r.taluka ? `${formatTalukaMr(r.taluka)}` : 'सर्व तालुके')
+        : (r.taluka && (r.villageName === 'संपूर्ण तालुका (All Villages)' || !r.villageName))
+        ? `${formatTalukaMr(r.taluka)}`
         : cleanVillageName(r.villageName || r.taluka || '-'));
 
       const cnt = Number(r.totalSurveys ?? r.total712Count ?? r.totalGovtLandCount ?? 0);
-      const area = parseFloat(r.totalArea ?? r.totalAreaHa ?? 0);
+      const area = parseFloat(r.totalArea ?? r.totalAreaHa ?? 0) || 0;
       const c1 = Number(r.c1Surveys ?? r.c1Count ?? r.govtFound1950Count ?? 0);
-      const c1A = parseFloat(r.c1Area ?? 0);
+      const c1A = parseFloat(r.c1Area ?? 0) || 0;
       const c2 = Number(r.c2Surveys ?? r.c2Count ?? r.pendingRectifyCount ?? 0);
-      const c2A = parseFloat(r.c2Area ?? 0);
+      const c2A = parseFloat(r.c2Area ?? 0) || 0;
       const conv = Number(r.convSurveys ?? r.convCount ?? r.illegalDeletionsCount ?? 0);
-      const convA = parseFloat(r.convArea ?? 0);
+      const convA = parseFloat(r.convArea ?? 0) || 0;
       const noOther = Number(r.noOtherSurveys ?? r.noOtherCount ?? r.pokalistPendingCount ?? 0);
-      const noOtherA = parseFloat(r.noOtherArea ?? 0);
+      const noOtherA = parseFloat(r.noOtherArea ?? 0) || 0;
       const del = Number(r.delSurveys ?? r.delCount ?? r.illegalReductionCount ?? r.shartCount ?? 0);
-      const delA = parseFloat(r.delArea ?? r.illegalReductionArea ?? r.shartArea ?? 0);
+      const delA = parseFloat(r.delArea ?? r.illegalReductionArea ?? r.shartArea ?? 0) || 0;
 
       sumTot += cnt; sumArea += area;
       sumC1 += c1; sumC1A += c1A;
@@ -1166,7 +1197,7 @@ export async function generateChecklistSummaryPdf(summaryData, scopeName, res) {
       sumDel += del; sumDelA += delA;
 
       tableBody.push([
-        { text: isTotal ? 'एकूण' : String(idx + 1), style: 'tdCenter' },
+        { text: String(idx + 1), style: 'tdCenter' },
         { text: displayName, style: 'td' },
         { text: String(cnt), style: 'tdCenter' },
         { text: area.toFixed(2), style: 'tdRight' },
@@ -1206,7 +1237,7 @@ export async function generateChecklistSummaryPdf(summaryData, scopeName, res) {
       {
         table: {
           headerRows: 2,
-          widths: [18, 92, 45, 48, 42, 48, 42, 48, 48, 48, 48, 48, 52, 52],
+          widths: [30, 92, 48, 50, 44, 48, 44, 48, 48, 48, 48, 48, 50, 50],
           body: tableBody
         },
         layout: {
@@ -1226,18 +1257,49 @@ export async function generateChecklistSummaryPdf(summaryData, scopeName, res) {
 
   const content = [];
   if (tier === 'village') {
-    content.push(...buildPdfTable('गावाचा गोषवारा', 'गावाचे नाव', villageRows));
+    if (villageRows.length > 0) {
+      content.push(...buildPdfTable('गावाचा गोषवारा', 'गावाचे नाव', villageRows));
+    }
   } else if (tier === 'taluka') {
-    content.push(...buildPdfTable('तालुक्याचा गोषवारा', 'तालुक्याचे नाव', talukaRows));
+    let hasPrevious = false;
+    if (talukaRows.length > 0) {
+      content.push(...buildPdfTable('तालुक्याचा गोषवारा', 'तालुक्याचे नाव', talukaRows));
+      hasPrevious = true;
+    }
+    if (villageRows.length > 0) {
+      if (hasPrevious) content.push({ text: '', pageBreak: 'after' });
+      content.push(...buildPdfTable('गावाचा गोषवारा', 'गावाचे नाव', villageRows));
+    }
   } else if (tier === 'district') {
-    content.push(...buildPdfTable('जिल्हाचा गोषवारा', 'जिल्हाचे नाव', districtRows));
+    let hasPrevious = false;
+    if (districtRows.length > 0) {
+      content.push(...buildPdfTable('जिल्हाचा गोषवारा', 'जिल्हाचे नाव', districtRows));
+      hasPrevious = true;
+    }
+    if (talukaRows.length > 0) {
+      if (hasPrevious) content.push({ text: '', pageBreak: 'after' });
+      content.push(...buildPdfTable('तालुक्याचा गोषवारा', 'तालुक्याचे नाव', talukaRows));
+    }
   } else {
     // All tiers: Show District, Taluka, and Village
-    content.push(...buildPdfTable('जिल्हाचा गोषवारा', 'जिल्हाचे नाव', districtRows));
-    content.push({ text: '', pageBreak: 'after' });
-    content.push(...buildPdfTable('तालुक्याचा गोषवारा', 'तालुक्याचे नाव', talukaRows));
-    content.push({ text: '', pageBreak: 'after' });
-    content.push(...buildPdfTable('गावाचा गोषवारा', 'गावाचे नाव', villageRows));
+    let hasPrevious = false;
+    if (districtRows.length > 0) {
+      content.push(...buildPdfTable('जिल्हाचा गोषवारा', 'जिल्हाचे नाव', districtRows));
+      hasPrevious = true;
+    }
+    if (talukaRows.length > 0) {
+      if (hasPrevious) content.push({ text: '', pageBreak: 'after' });
+      content.push(...buildPdfTable('तालुक्याचा गोषवारा', 'तालुक्याचे नाव', talukaRows));
+      hasPrevious = true;
+    }
+    if (villageRows.length > 0) {
+      if (hasPrevious) content.push({ text: '', pageBreak: 'after' });
+      content.push(...buildPdfTable('गावाचा गोषवारा', 'गावाचे नाव', villageRows));
+    }
+  }
+
+  if (content.length === 0) {
+    content.push(...buildPdfTable('गोषवारा', 'नाव', []));
   }
 
   const docDefinition = {
@@ -1318,16 +1380,38 @@ export async function generateChecklistSummaryExcel(summaryData, scopeName, res)
   }
 
   if (tier === 'village') {
-    createGoshwaraWorksheet(wb, 'गावाचा गोषवारा', 'गावाचा गोषवारा', 'गावाचे नाव', villageRows);
+    if (villageRows.length > 0) {
+      createGoshwaraWorksheet(wb, 'गावाचा गोषवारा', 'गावाचा गोषवारा', 'गावाचे नाव', villageRows);
+    }
   } else if (tier === 'taluka') {
-    createGoshwaraWorksheet(wb, 'तालुक्याचा गोषवारा', 'तालुक्याचा गोषवारा', 'तालुक्याचे नाव', talukaRows);
+    if (talukaRows.length > 0) {
+      createGoshwaraWorksheet(wb, 'तालुक्याचा गोषवारा', 'तालुक्याचा गोषवारा', 'तालुक्याचे नाव', talukaRows);
+    }
+    if (villageRows.length > 0) {
+      createGoshwaraWorksheet(wb, 'गावाचा गोषवारा', 'गावाचा गोषवारा', 'गावाचे नाव', villageRows);
+    }
   } else if (tier === 'district') {
-    createGoshwaraWorksheet(wb, 'जिल्हाचा गोषवारा', 'जिल्हाचा गोषवारा', 'जिल्हाचे नाव', districtRows);
+    if (districtRows.length > 0) {
+      createGoshwaraWorksheet(wb, 'जिल्हाचा गोषवारा', 'जिल्हाचा गोषवारा', 'जिल्हाचे नाव', districtRows);
+    }
+    if (talukaRows.length > 0) {
+      createGoshwaraWorksheet(wb, 'तालुक्याचा गोषवारा', 'तालुक्याचा गोषवारा', 'तालुक्याचे नाव', talukaRows);
+    }
   } else {
     // All tiers: 3 separate sheets matching the exact requirements
-    createGoshwaraWorksheet(wb, 'गावाचा गोषवारा', 'गावाचा गोषवारा', 'गावाचे नाव', villageRows);
-    createGoshwaraWorksheet(wb, 'तालुक्याचा गोषवारा', 'तालुक्याचा गोषवारा', 'तालुक्याचे नाव', talukaRows);
-    createGoshwaraWorksheet(wb, 'जिल्हाचा गोषवारा', 'जिल्हाचा गोषवारा', 'जिल्हाचे नाव', districtRows);
+    if (districtRows.length > 0) {
+      createGoshwaraWorksheet(wb, 'जिल्हाचा गोषवारा', 'जिल्हाचा गोषवारा', 'जिल्हाचे नाव', districtRows);
+    }
+    if (talukaRows.length > 0) {
+      createGoshwaraWorksheet(wb, 'तालुक्याचा गोषवारा', 'तालुक्याचा गोषवारा', 'तालुक्याचे नाव', talukaRows);
+    }
+    if (villageRows.length > 0) {
+      createGoshwaraWorksheet(wb, 'गावाचा गोषवारा', 'गावाचा गोषवारा', 'गावाचे नाव', villageRows);
+    }
+  }
+
+  if (wb.worksheets.length === 0) {
+    createGoshwaraWorksheet(wb, 'गोषवारा', 'गोषवारा', 'नाव', []);
   }
 
   if (res) {

@@ -114,6 +114,11 @@ export default function CasesPage() {
       const urlParams = new URLSearchParams(window.location.search);
       const qTaluka = urlParams.get('taluka') || '';
       const qVillage = urlParams.get('village') || '';
+      const qViolation = urlParams.get('violationType') || urlParams.get('violation') || '';
+      const qStatus = urlParams.get('status') || '';
+      const qRepossessed = urlParams.get('isRepossessedToGovt') || urlParams.get('repossessed') || '';
+      const qSearch = urlParams.get('search') || '';
+
       if (qTaluka) {
         setDraftTaluka(qTaluka);
         initialFilters.taluka = qTaluka;
@@ -121,6 +126,22 @@ export default function CasesPage() {
       if (qVillage) {
         setDraftVillage(qVillage);
         initialFilters.village = qVillage;
+      }
+      if (qViolation) {
+        setDraftViolationType(qViolation);
+        initialFilters.violationType = qViolation;
+      }
+      if (qStatus) {
+        setDraftStatus(qStatus);
+        initialFilters.status = qStatus;
+      }
+      if (qRepossessed) {
+        setDraftIsRepossessedToGovt(qRepossessed);
+        initialFilters.isRepossessedToGovt = qRepossessed;
+      }
+      if (qSearch) {
+        setDraftSearch(qSearch);
+        initialFilters.search = qSearch;
       }
     }
     setAppliedFilters(initialFilters);
