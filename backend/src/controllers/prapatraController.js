@@ -292,47 +292,40 @@ export async function calculateDynamicGoshwaraRollup(filters = {}) {
   const isAllTalukas = !taluka || taluka === 'all' || taluka === 'सर्व तालुके' || taluka === 'सर्व तालुके (१५)';
   const isAllVillages = !village || village === 'all' || village === 'सर्व गावे';
 
-  const whereClauses = [];
-  const params = [];
+  const baseWhereClauses = [];
+  const baseParams = [];
 
   // 1. Taluka
   if (!isAllTalukas) {
-    params.push(targetTaluka);
-    whereClauses.push(`taluka ILIKE $${params.length}`);
+    baseParams.push(targetTaluka);
+    baseWhereClauses.push(`taluka ILIKE $${baseParams.length}`);
   }
 
-  // 2. Village
-  if (!isAllVillages) {
-    const cleanV = cleanVillageName(village);
-    params.push(`%${cleanV}%`);
-    whereClauses.push(`village_name ILIKE $${params.length}`);
-  }
-
-  // 3. Tenure
+  // 2. Tenure
   if (tenure && tenure !== 'all') {
-    params.push(tenure);
-    whereClauses.push(`tenure_class::text = $${params.length}`);
+    baseParams.push(tenure);
+    baseWhereClauses.push(`tenure_class::text = $${baseParams.length}`);
   }
 
-  // 4. Area Range
+  // 3. Area Range
   if (areaRange && areaRange !== 'all') {
     if (areaRange === 'under1') {
-      whereClauses.push(`total_area_ha <= 1.0`);
+      baseWhereClauses.push(`total_area_ha <= 1.0`);
     } else if (areaRange === '1to5') {
-      whereClauses.push(`total_area_ha > 1.0 AND total_area_ha <= 5.0`);
+      baseWhereClauses.push(`total_area_ha > 1.0 AND total_area_ha <= 5.0`);
     } else if (areaRange === '5to10') {
-      whereClauses.push(`total_area_ha > 5.0 AND total_area_ha <= 10.0`);
+      baseWhereClauses.push(`total_area_ha > 5.0 AND total_area_ha <= 10.0`);
     } else if (areaRange === 'above10') {
-      whereClauses.push(`total_area_ha > 10.0`);
+      baseWhereClauses.push(`total_area_ha > 10.0`);
     }
   }
 
-  // 5. Search
+  // 4. Search
   if (search && search.trim()) {
     const s = `%${search.trim()}%`;
-    params.push(s);
-    const pIdx = params.length;
-    whereClauses.push(`(
+    baseParams.push(s);
+    const pIdx = baseParams.length;
+    baseWhereClauses.push(`(
       village_name ILIKE $${pIdx} OR 
       gat_number ILIKE $${pIdx} OR 
       old_survey_no ILIKE $${pIdx} OR 
@@ -342,127 +335,142 @@ export async function calculateDynamicGoshwaraRollup(filters = {}) {
     )`);
   }
 
-  // 6. Violation
+  // 5. Violation
   if (violation && violation !== 'all') {
     if (violation === 'shartbhang') {
-      whereClauses.push(`(metadata->'flags'->>'isShartbhang' = 'true')`);
+      baseWhereClauses.push(`(metadata->'flags'->>'isShartbhang' = 'true')`);
     } else if (violation === 'illegalConversion') {
-      whereClauses.push(`(
+      baseWhereClauses.push(`(
         (metadata->'flags'->>'isShartbhang' = 'true' AND tenure_class = 'BHOGVATDAR_CLASS_1') OR
         metadata->>'otherRights' LIKE '%रूपांतर%'
       )`);
     } else if (violation === 'illegalDeletion') {
-      whereClauses.push(`(metadata->'flags'->>'isIllegalDeletion' = 'true')`);
+      baseWhereClauses.push(`(metadata->'flags'->>'isIllegalDeletion' = 'true')`);
     } else if (violation === 'pokalist') {
-      whereClauses.push(`(metadata->'flags'->>'isPokalist' = 'true' OR metadata->>'otherRights' LIKE '%बु.ग.दे%')`);
+      baseWhereClauses.push(`(metadata->'flags'->>'isPokalist' = 'true' OR metadata->>'otherRights' LIKE '%बु.ग.दे%')`);
     } else if (violation === 'tribalViolation') {
-      whereClauses.push(`(metadata->'flags'->>'isTribal' = 'true' OR metadata->>'otherRights' LIKE '%आदिवासी%')`);
+      baseWhereClauses.push(`(metadata->'flags'->>'isTribal' = 'true' OR metadata->>'otherRights' LIKE '%आदिवासी%')`);
     } else if (violation === 'encroachment') {
-      whereClauses.push(`(metadata->'flags'->>'isEncroached' = 'true')`);
+      baseWhereClauses.push(`(metadata->'flags'->>'isEncroached' = 'true')`);
     }
   }
 
-  // 7. Prapatra / Booklet specific conditions if prapatraNum > 0
+  // 6. Prapatra / Booklet specific conditions if prapatraNum > 0
   if (prapatraNum > 0) {
     if (booklet === 'true') {
       if (prapatraNum === 1) {
-        whereClauses.push(`(tenure_class = 'SARKAR_SHASAN' OR metadata->'flags'->>'isGovt' = 'true' OR metadata->>'otherRights' LIKE '%गायरान%' OR metadata->>'otherRights' LIKE '%पहाड%')`);
+        baseWhereClauses.push(`(tenure_class = 'SARKAR_SHASAN' OR metadata->'flags'->>'isGovt' = 'true' OR metadata->>'otherRights' LIKE '%गायरान%' OR metadata->>'otherRights' LIKE '%पहाड%')`);
       } else if (prapatraNum === 2) {
-        whereClauses.push(`(metadata->>'otherRights' LIKE '%कुळ%' OR metadata->>'otherRights' LIKE '%शेतजमीन%' OR metadata->'auditPoints'->>'point_20' = 'होय')`);
+        baseWhereClauses.push(`(metadata->>'otherRights' LIKE '%कुळ%' OR metadata->>'otherRights' LIKE '%शेतजमीन%' OR metadata->'auditPoints'->>'point_20' = 'होय')`);
       } else if (prapatraNum === 3) {
-        whereClauses.push(`(tenure_class = 'DEVASTHAN_INAM' OR metadata->>'otherRights' LIKE '%इनाम%' OR metadata->>'otherRights' LIKE '%वतन%' OR metadata->'auditPoints'->>'point_21' = 'होय')`);
+        baseWhereClauses.push(`(tenure_class = 'DEVASTHAN_INAM' OR metadata->>'otherRights' LIKE '%इनाम%' OR metadata->>'otherRights' LIKE '%वतन%' OR metadata->'auditPoints'->>'point_21' = 'होय')`);
       } else if (prapatraNum === 4) {
-        whereClauses.push(`(metadata->>'otherRights' LIKE '%भूमिहीन%' OR metadata->>'otherRights' LIKE '%शेतमजूर%' OR metadata->>'otherRights' LIKE '%स्वातंत्र्य%' OR metadata->'auditPoints'->>'point_22' = 'होय')`);
+        baseWhereClauses.push(`(metadata->>'otherRights' LIKE '%भूमिहीन%' OR metadata->>'otherRights' LIKE '%शेतमजूर%' OR metadata->>'otherRights' LIKE '%स्वातंत्र्य%' OR metadata->'auditPoints'->>'point_22' = 'होय')`);
       } else if (prapatraNum === 5) {
-        whereClauses.push(`(metadata->'flags'->>'isCorpAllot' = 'true' OR metadata->>'otherRights' LIKE '%संस्था%' OR metadata->>'otherRights' LIKE '%उद्योग%' OR metadata->>'otherRights' LIKE '%प्रकल्प%' OR metadata->'auditPoints'->>'point_23' = 'होय')`);
+        baseWhereClauses.push(`(metadata->'flags'->>'isCorpAllot' = 'true' OR metadata->>'otherRights' LIKE '%संस्था%' OR metadata->>'otherRights' LIKE '%उद्योग%' OR metadata->>'otherRights' LIKE '%प्रकल्प%' OR metadata->'auditPoints'->>'point_23' = 'होय')`);
       } else if (prapatraNum === 6) {
-        whereClauses.push(`(metadata->>'otherRights' LIKE '%कमाल%' OR metadata->>'otherRights' LIKE '%सिलिंग%' OR metadata->>'otherRights' LIKE '%सीलिंग%' OR metadata->'auditPoints'->>'point_24' = 'होय')`);
+        baseWhereClauses.push(`(metadata->>'otherRights' LIKE '%कमाल%' OR metadata->>'otherRights' LIKE '%सिलिंग%' OR metadata->>'otherRights' LIKE '%सीलिंग%' OR metadata->'auditPoints'->>'point_24' = 'होय')`);
       } else if (prapatraNum === 7) {
-        whereClauses.push(`(metadata->>'otherRights' LIKE '%गुरचरण%' OR metadata->>'otherRights' LIKE '%चराई%' OR metadata->>'otherRights' LIKE '%विकास%' OR metadata->'auditPoints'->>'point_25' = 'होय')`);
+        baseWhereClauses.push(`(metadata->>'otherRights' LIKE '%गुरचरण%' OR metadata->>'otherRights' LIKE '%चराई%' OR metadata->>'otherRights' LIKE '%विकास%' OR metadata->'auditPoints'->>'point_25' = 'होय')`);
       } else if (prapatraNum === 8) {
-        whereClauses.push(`(tenure_class = 'DEVASTHAN_INAM' OR metadata->>'otherRights' LIKE '%देवस्थान%' OR metadata->'auditPoints'->>'point_26' = 'होय')`);
+        baseWhereClauses.push(`(tenure_class = 'DEVASTHAN_INAM' OR metadata->>'otherRights' LIKE '%देवस्थान%' OR metadata->'auditPoints'->>'point_26' = 'होय')`);
       } else if (prapatraNum === 9) {
-        whereClauses.push(`(metadata->'flags'->>'isTribal' = 'true' OR metadata->>'otherRights' LIKE '%आदिवासी%' OR metadata->'auditPoints'->>'point_27' = 'होय')`);
+        baseWhereClauses.push(`(metadata->'flags'->>'isTribal' = 'true' OR metadata->>'otherRights' LIKE '%आदिवासी%' OR metadata->'auditPoints'->>'point_27' = 'होय')`);
       } else if (prapatraNum === 10) {
-        whereClauses.push(`(metadata->>'otherRights' LIKE '%पुनर्वसन%' OR metadata->>'otherRights' LIKE '%प्रकल्पग्रस्त%' OR metadata->'auditPoints'->>'point_28' = 'होय')`);
+        baseWhereClauses.push(`(metadata->>'otherRights' LIKE '%पुनर्वसन%' OR metadata->>'otherRights' LIKE '%प्रकल्पग्रस्त%' OR metadata->'auditPoints'->>'point_28' = 'होय')`);
       } else if (prapatraNum === 11) {
-        whereClauses.push(`(metadata->>'otherRights' LIKE '%भाडेपट्टा%' OR metadata->>'otherRights' LIKE '%लीज%' OR metadata->'auditPoints'->>'point_29' = 'होय')`);
+        baseWhereClauses.push(`(metadata->>'otherRights' LIKE '%भाडेपट्टा%' OR metadata->>'otherRights' LIKE '%लीज%' OR metadata->'auditPoints'->>'point_29' = 'होय')`);
       } else if (prapatraNum === 12) {
-        whereClauses.push(`(metadata->>'otherRights' LIKE '%भूदान%' OR metadata->>'otherRights' LIKE '%ग्रामदान%' OR metadata->'auditPoints'->>'point_30' = 'होय')`);
+        baseWhereClauses.push(`(metadata->>'otherRights' LIKE '%भूदान%' OR metadata->>'otherRights' LIKE '%ग्रामदान%' OR metadata->'auditPoints'->>'point_30' = 'होय')`);
       } else if (prapatraNum === 13) {
-        whereClauses.push(`(tenure_class = 'FOREST_JANGAL' OR metadata->>'otherRights' LIKE '%खाजगी वन%' OR metadata->>'otherRights' LIKE '%वन जमीन%' OR metadata->'auditPoints'->>'point_31' = 'होय')`);
+        baseWhereClauses.push(`(tenure_class = 'FOREST_JANGAL' OR metadata->>'otherRights' LIKE '%खाजगी वन%' OR metadata->>'otherRights' LIKE '%वन जमीन%' OR metadata->'auditPoints'->>'point_31' = 'होय')`);
       } else if (prapatraNum === 14) {
-        whereClauses.push(`(metadata->>'otherRights' LIKE '%भूमीधारी%' OR metadata->>'otherRights' LIKE '%भूमिधारी%' OR metadata->'auditPoints'->>'point_32' = 'होय' OR EXISTS (SELECT 1 FROM backward_histories bh WHERE bh.parcel_id = land_parcels.id AND (bh.owner_name LIKE '%भूमीधारी%' OR bh.owner_name LIKE '%भूमिधारी%')))`);
+        baseWhereClauses.push(`(metadata->>'otherRights' LIKE '%भूमीधारी%' OR metadata->>'otherRights' LIKE '%भूमिधारी%' OR metadata->'auditPoints'->>'point_32' = 'होय' OR EXISTS (SELECT 1 FROM backward_histories bh WHERE bh.parcel_id = land_parcels.id AND (bh.owner_name LIKE '%भूमीधारी%' OR bh.owner_name LIKE '%भूमिधारी%')))`);
       } else if (prapatraNum === 15) {
-        whereClauses.push(`(metadata->>'otherRights' LIKE '%सूट%' OR metadata->>'otherRights' LIKE '%सुट%' OR metadata->>'otherRights' LIKE '%कमाल मर्यादा%' OR metadata->>'otherRights' LIKE '%विशेष सूट%' OR metadata->'auditPoints'->>'point_33' = 'होय' OR (metadata->>'otherRights' LIKE '%सिलिंग%' AND metadata->>'otherRights' LIKE '%अतिरिक्त%'))`);
+        baseWhereClauses.push(`(metadata->>'otherRights' LIKE '%सूट%' OR metadata->>'otherRights' LIKE '%सुट%' OR metadata->>'otherRights' LIKE '%कमाल मर्यादा%' OR metadata->>'otherRights' LIKE '%विशेष सूट%' OR metadata->'auditPoints'->>'point_33' = 'होय' OR (metadata->>'otherRights' LIKE '%सिलिंग%' AND metadata->>'otherRights' LIKE '%अतिरिक्त%'))`);
       } else if (prapatraNum === 16) {
-        whereClauses.push(`(metadata->>'otherRights' LIKE '%वक्फ%' OR metadata->>'otherRights' LIKE '%कब्रस्तान%' OR metadata->>'otherRights' LIKE '%इदगाह%' OR metadata->>'otherRights' LIKE '%मस्जिद%' OR metadata->'auditPoints'->>'point_34' = 'होय')`);
+        baseWhereClauses.push(`(metadata->>'otherRights' LIKE '%वक्फ%' OR metadata->>'otherRights' LIKE '%कब्रस्तान%' OR metadata->>'otherRights' LIKE '%इदगाह%' OR metadata->>'otherRights' LIKE '%मस्जिद%' OR metadata->'auditPoints'->>'point_34' = 'होय')`);
       } else if (prapatraNum === 17) {
-        whereClauses.push(`(metadata->>'otherRights' LIKE '%भूसंपादन%' OR metadata->>'otherRights' LIKE '%अधिग्रहित%' OR metadata->>'otherRights' LIKE '%राखीव%' OR metadata->>'otherRights' LIKE '%राष्ट्रीय महामार्ग%' OR metadata->'auditPoints'->>'point_35' = 'होय')`);
+        baseWhereClauses.push(`(metadata->>'otherRights' LIKE '%भूसंपादन%' OR metadata->>'otherRights' LIKE '%अधिग्रहित%' OR metadata->>'otherRights' LIKE '%राखीव%' OR metadata->>'otherRights' LIKE '%राष्ट्रीय महामार्ग%' OR metadata->'auditPoints'->>'point_35' = 'होय')`);
       } else if (prapatraNum === 18) {
-        whereClauses.push(`(metadata->>'otherRights' LIKE '%89%' OR metadata->>'otherRights' LIKE '%47%' OR metadata->>'otherRights' LIKE '%कंपनी%' OR metadata->>'subTypeCategory' LIKE '%89%' OR metadata->>'subTypeCategory' LIKE '%कंपनी%' OR metadata->'auditPoints'->>'point_41' = 'होय' OR metadata->'auditPoints'->>'point_42' = 'होय' OR EXISTS (SELECT 1 FROM tenancy89a_records tr WHERE tr.parcel_id = land_parcels.id))`);
+        baseWhereClauses.push(`(metadata->>'otherRights' LIKE '%89%' OR metadata->>'otherRights' LIKE '%47%' OR metadata->>'otherRights' LIKE '%कंपनी%' OR metadata->>'subTypeCategory' LIKE '%89%' OR metadata->>'subTypeCategory' LIKE '%कंपनी%' OR metadata->'auditPoints'->>'point_41' = 'होय' OR metadata->'auditPoints'->>'point_42' = 'होय' OR EXISTS (SELECT 1 FROM tenancy89a_records tr WHERE tr.parcel_id = land_parcels.id))`);
       }
     } else {
       if (prapatraNum === 1) {
-        whereClauses.push(`(tenure_class = 'SARKAR_SHASAN' OR metadata->'flags'->>'isGovt' = 'true' OR metadata->'flags'->>'isIllegalDeletion' = 'true')`);
+        baseWhereClauses.push(`(tenure_class = 'SARKAR_SHASAN' OR metadata->'flags'->>'isGovt' = 'true' OR metadata->'flags'->>'isIllegalDeletion' = 'true')`);
       } else if (prapatraNum === 2) {
-        whereClauses.push(`(metadata->'flags'->>'isPokalist' = 'true' OR metadata->>'otherRights' LIKE '%बु.ग.दे%' OR metadata->>'otherRights' LIKE '%ता.ग.दे%')`);
+        baseWhereClauses.push(`(metadata->'flags'->>'isPokalist' = 'true' OR metadata->>'otherRights' LIKE '%बु.ग.दे%' OR metadata->>'otherRights' LIKE '%ता.ग.दे%')`);
       } else if (prapatraNum === 3) {
-        whereClauses.push(`(metadata->'flags'->>'isCorpAllot' = 'true')`);
+        baseWhereClauses.push(`(metadata->'flags'->>'isCorpAllot' = 'true')`);
       } else if (prapatraNum === 4) {
-        whereClauses.push(`(metadata->'flags'->>'isPrivateAllot' = 'true')`);
+        baseWhereClauses.push(`(metadata->'flags'->>'isPrivateAllot' = 'true')`);
       } else if (prapatraNum === 5) {
-        whereClauses.push(`(tenure_class = 'SARKAR_SHASAN' OR metadata->'flags'->>'isGovt' = 'true' OR metadata->'flags'->>'isEncroached' = 'true')`);
+        baseWhereClauses.push(`(tenure_class = 'SARKAR_SHASAN' OR metadata->'flags'->>'isGovt' = 'true' OR metadata->'flags'->>'isEncroached' = 'true')`);
       }
     }
   }
 
-  const whereSql = whereClauses.length > 0 ? `WHERE ${whereClauses.join(' AND ')}` : '';
+  // Common aggregation metrics for both Village and Taluka levels
+  const metricColumnsSql = `
+    COUNT(*)::int as "total712Count",
+    COALESCE(SUM(total_area_ha), 0)::float as "totalAreaHa",
+    COUNT(CASE WHEN tenure_class = 'BHOGVATDAR_CLASS_1' THEN 1 END)::int as "c1Count",
+    COALESCE(SUM(CASE WHEN tenure_class = 'BHOGVATDAR_CLASS_1' THEN total_area_ha ELSE 0 END), 0)::float as "c1Area",
+    COUNT(CASE WHEN tenure_class = 'BHOGVATDAR_CLASS_2' THEN 1 END)::int as "c2Count",
+    COALESCE(SUM(CASE WHEN tenure_class = 'BHOGVATDAR_CLASS_2' THEN total_area_ha ELSE 0 END), 0)::float as "c2Area",
+    COUNT(CASE WHEN tenure_class = 'SARKAR_SHASAN' THEN 1 END)::int as "sarkarCount",
+    COALESCE(SUM(CASE WHEN tenure_class = 'SARKAR_SHASAN' THEN total_area_ha ELSE 0 END), 0)::float as "sarkarArea",
+    COUNT(CASE WHEN tenure_class = 'DEVASTHAN_INAM' THEN 1 END)::int as "inamCount",
+    COALESCE(SUM(CASE WHEN tenure_class = 'DEVASTHAN_INAM' THEN total_area_ha ELSE 0 END), 0)::float as "inamArea",
+    COUNT(CASE WHEN tenure_class = 'FOREST_JANGAL' THEN 1 END)::int as "forestCount",
+    COALESCE(SUM(CASE WHEN tenure_class = 'FOREST_JANGAL' THEN total_area_ha ELSE 0 END), 0)::float as "forestArea",
+    COUNT(CASE WHEN (metadata->'flags'->>'isShartbhang' = 'true' AND tenure_class = 'BHOGVATDAR_CLASS_1') OR (metadata->>'otherRights' LIKE '%रूपांतर%') THEN 1 END)::int as "convCount",
+    COALESCE(SUM(CASE WHEN (metadata->'flags'->>'isShartbhang' = 'true' AND tenure_class = 'BHOGVATDAR_CLASS_1') OR (metadata->>'otherRights' LIKE '%रूपांतर%') THEN total_area_ha ELSE 0 END), 0)::float as "convArea",
+    COUNT(CASE WHEN metadata->>'otherRights' IS NULL OR metadata->>'otherRights' = '' OR metadata->>'otherRights' = '-' OR metadata->>'otherRights' = '....' THEN 1 END)::int as "noOtherCount",
+    COALESCE(SUM(CASE WHEN metadata->>'otherRights' IS NULL OR metadata->>'otherRights' = '' OR metadata->>'otherRights' = '-' OR metadata->>'otherRights' = '....' THEN total_area_ha ELSE 0 END), 0)::float as "noOtherArea",
+    COUNT(CASE WHEN metadata->'flags'->>'isIllegalDeletion' = 'true' OR metadata->'auditPoints'->>'point_40' = 'होय' OR metadata->'flags'->>'isShartbhang' = 'true' THEN 1 END)::int as "delCount",
+    COALESCE(SUM(CASE WHEN metadata->'flags'->>'isIllegalDeletion' = 'true' OR metadata->'auditPoints'->>'point_40' = 'होय' OR metadata->'flags'->>'isShartbhang' = 'true' THEN total_area_ha ELSE 0 END), 0)::float as "delArea",
+    COUNT(CASE WHEN metadata->'flags'->>'isShartbhang' = 'true' OR metadata->'flags'->>'isIllegalDeletion' = 'true' THEN 1 END)::int as "shartCount",
+    COALESCE(SUM(CASE WHEN metadata->'flags'->>'isShartbhang' = 'true' OR metadata->'flags'->>'isIllegalDeletion' = 'true' THEN total_area_ha ELSE 0 END), 0)::float as "shartArea",
+    -- Category 18 metrics
+    COUNT(CASE WHEN metadata->'auditPoints'->>'point_41' = 'होय' OR EXISTS (SELECT 1 FROM tenancy89a_records tr WHERE tr.parcel_id = land_parcels.id AND tr.is_genuine_industrial_use = true) THEN 1 END)::int as "companyPermittedCount",
+    COALESCE(SUM(CASE WHEN metadata->'auditPoints'->>'point_41' = 'होय' OR EXISTS (SELECT 1 FROM tenancy89a_records tr WHERE tr.parcel_id = land_parcels.id AND tr.is_genuine_industrial_use = true) THEN total_area_ha ELSE 0 END), 0)::float as "companyPermittedArea",
+    COUNT(CASE WHEN metadata->'auditPoints'->>'point_41' = 'नाही' OR (metadata->>'otherRights' LIKE '%कंपनी%' AND (metadata->'auditPoints'->>'point_41' IS NULL OR metadata->'auditPoints'->>'point_41' = 'नाही')) THEN 1 END)::int as "companyUnpermittedCount",
+    COALESCE(SUM(CASE WHEN metadata->'auditPoints'->>'point_41' = 'नाही' OR (metadata->>'otherRights' LIKE '%कंपनी%' AND (metadata->'auditPoints'->>'point_41' IS NULL OR metadata->'auditPoints'->>'point_41' = 'नाही')) THEN total_area_ha ELSE 0 END), 0)::float as "companyUnpermittedArea",
+    COUNT(CASE WHEN metadata->'auditPoints'->>'point_44' = 'नाही' OR metadata->'auditPoints'->>'point_45_usage' = 'होय' OR metadata->'flags'->>'isUsageBreach' = 'true' THEN 1 END)::int as "usageBreachCount",
+    COALESCE(SUM(CASE WHEN metadata->'auditPoints'->>'point_44' = 'नाही' OR metadata->'auditPoints'->>'point_45_usage' = 'होय' OR metadata->'flags'->>'isUsageBreach' = 'true' THEN total_area_ha ELSE 0 END), 0)::float as "usageBreachArea",
+    COUNT(CASE WHEN metadata->'auditPoints'->>'point_45_transfer' = 'होय' OR metadata->'flags'->>'isTransferBreach' = 'true' OR metadata->'flags'->>'isShartbhang' = 'true' THEN 1 END)::int as "transferBreachCount",
+    COALESCE(SUM(CASE WHEN metadata->'auditPoints'->>'point_45_transfer' = 'होय' OR metadata->'flags'->>'isTransferBreach' = 'true' OR metadata->'flags'->>'isShartbhang' = 'true' THEN total_area_ha ELSE 0 END), 0)::float as "transferBreachArea",
+    COUNT(CASE WHEN metadata->'auditPoints'->>'point_39' = 'होय' OR (metadata->>'otherRights' IS NOT NULL AND metadata->>'otherRights' != '' AND metadata->>'otherRights' != '-' AND metadata->>'otherRights' != '....') THEN 1 END)::int as "otherRightsCount",
+    COALESCE(SUM(CASE WHEN metadata->'auditPoints'->>'point_39' = 'होय' OR (metadata->>'otherRights' IS NOT NULL AND metadata->>'otherRights' != '' AND metadata->>'otherRights' != '-' AND metadata->>'otherRights' != '....') THEN total_area_ha ELSE 0 END), 0)::float as "otherRightsArea"
+  `;
+
+  // 1. byVillage Query
+  const villageWhereClauses = [...baseWhereClauses];
+  const villageParams = [...baseParams];
+
+  if (!isAllVillages) {
+    const cleanV = cleanVillageName(village);
+    villageParams.push(`%${cleanV}%`);
+    villageWhereClauses.push(`village_name ILIKE $${villageParams.length}`);
+  }
+
+  const villageWhereSql = villageWhereClauses.length > 0 ? `WHERE ${villageWhereClauses.join(' AND ')}` : '';
 
   const sql = `
     SELECT 
       taluka,
       COALESCE(village_name, '') as "villageName",
-      COUNT(*)::int as "total712Count",
-      COALESCE(SUM(total_area_ha), 0)::float as "totalAreaHa",
-      COUNT(CASE WHEN tenure_class = 'BHOGVATDAR_CLASS_1' THEN 1 END)::int as "c1Count",
-      COALESCE(SUM(CASE WHEN tenure_class = 'BHOGVATDAR_CLASS_1' THEN total_area_ha ELSE 0 END), 0)::float as "c1Area",
-      COUNT(CASE WHEN tenure_class = 'BHOGVATDAR_CLASS_2' THEN 1 END)::int as "c2Count",
-      COALESCE(SUM(CASE WHEN tenure_class = 'BHOGVATDAR_CLASS_2' THEN total_area_ha ELSE 0 END), 0)::float as "c2Area",
-      COUNT(CASE WHEN tenure_class = 'SARKAR_SHASAN' THEN 1 END)::int as "sarkarCount",
-      COALESCE(SUM(CASE WHEN tenure_class = 'SARKAR_SHASAN' THEN total_area_ha ELSE 0 END), 0)::float as "sarkarArea",
-      COUNT(CASE WHEN tenure_class = 'DEVASTHAN_INAM' THEN 1 END)::int as "inamCount",
-      COALESCE(SUM(CASE WHEN tenure_class = 'DEVASTHAN_INAM' THEN total_area_ha ELSE 0 END), 0)::float as "inamArea",
-      COUNT(CASE WHEN tenure_class = 'FOREST_JANGAL' THEN 1 END)::int as "forestCount",
-      COALESCE(SUM(CASE WHEN tenure_class = 'FOREST_JANGAL' THEN total_area_ha ELSE 0 END), 0)::float as "forestArea",
-      COUNT(CASE WHEN (metadata->'flags'->>'isShartbhang' = 'true' AND tenure_class = 'BHOGVATDAR_CLASS_1') OR (metadata->>'otherRights' LIKE '%रूपांतर%') THEN 1 END)::int as "convCount",
-      COALESCE(SUM(CASE WHEN (metadata->'flags'->>'isShartbhang' = 'true' AND tenure_class = 'BHOGVATDAR_CLASS_1') OR (metadata->>'otherRights' LIKE '%रूपांतर%') THEN total_area_ha ELSE 0 END), 0)::float as "convArea",
-      COUNT(CASE WHEN metadata->>'otherRights' IS NULL OR metadata->>'otherRights' = '' OR metadata->>'otherRights' = '-' OR metadata->>'otherRights' = '....' THEN 1 END)::int as "noOtherCount",
-      COALESCE(SUM(CASE WHEN metadata->>'otherRights' IS NULL OR metadata->>'otherRights' = '' OR metadata->>'otherRights' = '-' OR metadata->>'otherRights' = '....' THEN total_area_ha ELSE 0 END), 0)::float as "noOtherArea",
-      COUNT(CASE WHEN metadata->'flags'->>'isIllegalDeletion' = 'true' OR metadata->'auditPoints'->>'point_40' = 'होय' OR metadata->'flags'->>'isShartbhang' = 'true' THEN 1 END)::int as "delCount",
-      COALESCE(SUM(CASE WHEN metadata->'flags'->>'isIllegalDeletion' = 'true' OR metadata->'auditPoints'->>'point_40' = 'होय' OR metadata->'flags'->>'isShartbhang' = 'true' THEN total_area_ha ELSE 0 END), 0)::float as "delArea",
-      COUNT(CASE WHEN metadata->'flags'->>'isShartbhang' = 'true' OR metadata->'flags'->>'isIllegalDeletion' = 'true' THEN 1 END)::int as "shartCount",
-      COALESCE(SUM(CASE WHEN metadata->'flags'->>'isShartbhang' = 'true' OR metadata->'flags'->>'isIllegalDeletion' = 'true' THEN total_area_ha ELSE 0 END), 0)::float as "shartArea",
-      -- Category 18 metrics
-      COUNT(CASE WHEN metadata->'auditPoints'->>'point_41' = 'होय' OR EXISTS (SELECT 1 FROM tenancy89a_records tr WHERE tr.parcel_id = land_parcels.id AND tr.is_genuine_industrial_use = true) THEN 1 END)::int as "companyPermittedCount",
-      COALESCE(SUM(CASE WHEN metadata->'auditPoints'->>'point_41' = 'होय' OR EXISTS (SELECT 1 FROM tenancy89a_records tr WHERE tr.parcel_id = land_parcels.id AND tr.is_genuine_industrial_use = true) THEN total_area_ha ELSE 0 END), 0)::float as "companyPermittedArea",
-      COUNT(CASE WHEN metadata->'auditPoints'->>'point_41' = 'नाही' OR (metadata->>'otherRights' LIKE '%कंपनी%' AND (metadata->'auditPoints'->>'point_41' IS NULL OR metadata->'auditPoints'->>'point_41' = 'नाही')) THEN 1 END)::int as "companyUnpermittedCount",
-      COALESCE(SUM(CASE WHEN metadata->'auditPoints'->>'point_41' = 'नाही' OR (metadata->>'otherRights' LIKE '%कंपनी%' AND (metadata->'auditPoints'->>'point_41' IS NULL OR metadata->'auditPoints'->>'point_41' = 'नाही')) THEN total_area_ha ELSE 0 END), 0)::float as "companyUnpermittedArea",
-      COUNT(CASE WHEN metadata->'auditPoints'->>'point_44' = 'नाही' OR metadata->'auditPoints'->>'point_45_usage' = 'होय' OR metadata->'flags'->>'isUsageBreach' = 'true' THEN 1 END)::int as "usageBreachCount",
-      COALESCE(SUM(CASE WHEN metadata->'auditPoints'->>'point_44' = 'नाही' OR metadata->'auditPoints'->>'point_45_usage' = 'होय' OR metadata->'flags'->>'isUsageBreach' = 'true' THEN total_area_ha ELSE 0 END), 0)::float as "usageBreachArea",
-      COUNT(CASE WHEN metadata->'auditPoints'->>'point_45_transfer' = 'होय' OR metadata->'flags'->>'isTransferBreach' = 'true' OR metadata->'flags'->>'isShartbhang' = 'true' THEN 1 END)::int as "transferBreachCount",
-      COALESCE(SUM(CASE WHEN metadata->'auditPoints'->>'point_45_transfer' = 'होय' OR metadata->'flags'->>'isTransferBreach' = 'true' OR metadata->'flags'->>'isShartbhang' = 'true' THEN total_area_ha ELSE 0 END), 0)::float as "transferBreachArea",
-      COUNT(CASE WHEN metadata->'auditPoints'->>'point_39' = 'होय' OR (metadata->>'otherRights' IS NOT NULL AND metadata->>'otherRights' != '' AND metadata->>'otherRights' != '-' AND metadata->>'otherRights' != '....') THEN 1 END)::int as "otherRightsCount",
-      COALESCE(SUM(CASE WHEN metadata->'auditPoints'->>'point_39' = 'होय' OR (metadata->>'otherRights' IS NOT NULL AND metadata->>'otherRights' != '' AND metadata->>'otherRights' != '-' AND metadata->>'otherRights' != '....') THEN total_area_ha ELSE 0 END), 0)::float as "otherRightsArea"
+      ${metricColumnsSql}
     FROM land_parcels
-    ${whereSql}
+    ${villageWhereSql}
     GROUP BY taluka, village_name
     ORDER BY taluka, village_name
   `;
 
   let rows = [];
   try {
-    rows = await prisma.$queryRawUnsafe(sql, ...params);
+    rows = await prisma.$queryRawUnsafe(sql, ...villageParams);
   } catch (err) {
     console.error('calculateDynamicGoshwaraRollup SQL error:', err);
   }
@@ -507,98 +515,161 @@ export async function calculateDynamicGoshwaraRollup(filters = {}) {
   })).sort((a, b) => a.villageName.localeCompare(b.villageName, 'mr'));
 
   // 2. byTaluka
-  const talukaMap = new Map();
-  rows.forEach(r => {
-    if (!talukaMap.has(r.taluka)) {
-      talukaMap.set(r.taluka, {
-        id: `t-${r.taluka}`,
-        district: 'Chandrapur',
-        taluka: r.taluka,
-        villageName: 'संपूर्ण तालुका (All Villages)',
-        total712Count: 0,
-        totalAreaHa: 0,
-        c1Count: 0,
-        c1Area: 0,
-        c2Count: 0,
-        c2Area: 0,
-        sarkarCount: 0,
-        sarkarArea: 0,
-        inamCount: 0,
-        inamArea: 0,
-        forestCount: 0,
-        forestArea: 0,
-        convCount: 0,
-        convArea: 0,
-        noOtherCount: 0,
-        noOtherArea: 0,
-        delCount: 0,
-        delArea: 0,
-        shartCount: 0,
-        shartArea: 0,
-        companyPermittedCount: 0,
-        companyPermittedArea: 0,
-        companyUnpermittedCount: 0,
-        companyUnpermittedArea: 0,
-        usageBreachCount: 0,
-        usageBreachArea: 0,
-        transferBreachCount: 0,
-        transferBreachArea: 0,
-        otherRightsCount: 0,
-        otherRightsArea: 0,
-        remarks: `${TALUKA_EN_TO_MR[r.taluka] || r.taluka} तालुका एकत्रित`
-      });
-    }
-    const t = talukaMap.get(r.taluka);
-    t.total712Count += r.total712Count;
-    t.totalAreaHa += r.totalAreaHa;
-    t.c1Count += r.c1Count;
-    t.c1Area += r.c1Area;
-    t.c2Count += r.c2Count;
-    t.c2Area += r.c2Area;
-    t.sarkarCount += (r.sarkarCount || 0);
-    t.sarkarArea += (r.sarkarArea || 0);
-    t.inamCount += (r.inamCount || 0);
-    t.inamArea += (r.inamArea || 0);
-    t.forestCount += (r.forestCount || 0);
-    t.forestArea += (r.forestArea || 0);
-    t.convCount += r.convCount;
-    t.convArea += r.convArea;
-    t.noOtherCount += r.noOtherCount;
-    t.noOtherArea += r.noOtherArea;
-    t.delCount += (r.delCount ?? r.shartCount ?? 0);
-    t.delArea += (r.delArea ?? r.shartArea ?? 0);
-    t.shartCount += r.shartCount;
-    t.shartArea += r.shartArea;
-    t.companyPermittedCount += (r.companyPermittedCount || 0);
-    t.companyPermittedArea += (r.companyPermittedArea || 0);
-    t.companyUnpermittedCount += (r.companyUnpermittedCount || 0);
-    t.companyUnpermittedArea += (r.companyUnpermittedArea || 0);
-    t.usageBreachCount += (r.usageBreachCount || 0);
-    t.usageBreachArea += (r.usageBreachArea || 0);
-    t.transferBreachCount += (r.transferBreachCount || 0);
-    t.transferBreachArea += (r.transferBreachArea || 0);
-    t.otherRightsCount += (r.otherRightsCount || 0);
-    t.otherRightsArea += (r.otherRightsArea || 0);
-  });
+  // When all villages are selected, rows contains all villages for the taluka/district, so aggregate directly.
+  // When a specific village is filtered, query the true parent taluka(s) total across all villages.
+  let byTaluka = [];
 
-  const byTaluka = Array.from(talukaMap.values()).map(t => ({
-    ...t,
-    totalArea: t.totalAreaHa.toFixed(2),
-    c1Area: t.c1Area.toFixed(2),
-    c2Area: t.c2Area.toFixed(2),
-    sarkarArea: t.sarkarArea.toFixed(2),
-    inamArea: t.inamArea.toFixed(2),
-    forestArea: t.forestArea.toFixed(2),
-    convArea: t.convArea.toFixed(2),
-    noOtherArea: t.noOtherArea.toFixed(2),
-    delArea: t.delArea.toFixed(2),
-    shartArea: t.shartArea.toFixed(2),
-    companyPermittedArea: t.companyPermittedArea,
-    companyUnpermittedArea: t.companyUnpermittedArea,
-    usageBreachArea: t.usageBreachArea,
-    transferBreachArea: t.transferBreachArea,
-    otherRightsArea: t.otherRightsArea
-  })).sort((a, b) => a.taluka.localeCompare(b.taluka));
+  if (isAllVillages) {
+    const talukaMap = new Map();
+    rows.forEach(r => {
+      if (!talukaMap.has(r.taluka)) {
+        talukaMap.set(r.taluka, {
+          id: `t-${r.taluka}`,
+          district: 'Chandrapur',
+          taluka: r.taluka,
+          villageName: 'संपूर्ण तालुका (All Villages)',
+          total712Count: 0,
+          totalAreaHa: 0,
+          c1Count: 0,
+          c1Area: 0,
+          c2Count: 0,
+          c2Area: 0,
+          sarkarCount: 0,
+          sarkarArea: 0,
+          inamCount: 0,
+          inamArea: 0,
+          forestCount: 0,
+          forestArea: 0,
+          convCount: 0,
+          convArea: 0,
+          noOtherCount: 0,
+          noOtherArea: 0,
+          delCount: 0,
+          delArea: 0,
+          shartCount: 0,
+          shartArea: 0,
+          companyPermittedCount: 0,
+          companyPermittedArea: 0,
+          companyUnpermittedCount: 0,
+          companyUnpermittedArea: 0,
+          usageBreachCount: 0,
+          usageBreachArea: 0,
+          transferBreachCount: 0,
+          transferBreachArea: 0,
+          otherRightsCount: 0,
+          otherRightsArea: 0,
+          remarks: `${TALUKA_EN_TO_MR[r.taluka] || r.taluka} तालुका एकत्रित`
+        });
+      }
+      const t = talukaMap.get(r.taluka);
+      t.total712Count += r.total712Count;
+      t.totalAreaHa += r.totalAreaHa;
+      t.c1Count += r.c1Count;
+      t.c1Area += r.c1Area;
+      t.c2Count += r.c2Count;
+      t.c2Area += r.c2Area;
+      t.sarkarCount += (r.sarkarCount || 0);
+      t.sarkarArea += (r.sarkarArea || 0);
+      t.inamCount += (r.inamCount || 0);
+      t.inamArea += (r.inamArea || 0);
+      t.forestCount += (r.forestCount || 0);
+      t.forestArea += (r.forestArea || 0);
+      t.convCount += r.convCount;
+      t.convArea += r.convArea;
+      t.noOtherCount += r.noOtherCount;
+      t.noOtherArea += r.noOtherArea;
+      t.delCount += (r.delCount ?? r.shartCount ?? 0);
+      t.delArea += (r.delArea ?? r.shartArea ?? 0);
+      t.shartCount += r.shartCount;
+      t.shartArea += r.shartArea;
+      t.companyPermittedCount += (r.companyPermittedCount || 0);
+      t.companyPermittedArea += (r.companyPermittedArea || 0);
+      t.companyUnpermittedCount += (r.companyUnpermittedCount || 0);
+      t.companyUnpermittedArea += (r.companyUnpermittedArea || 0);
+      t.usageBreachCount += (r.usageBreachCount || 0);
+      t.usageBreachArea += (r.usageBreachArea || 0);
+      t.transferBreachCount += (r.transferBreachCount || 0);
+      t.transferBreachArea += (r.transferBreachArea || 0);
+      t.otherRightsCount += (r.otherRightsCount || 0);
+      t.otherRightsArea += (r.otherRightsArea || 0);
+    });
+
+    byTaluka = Array.from(talukaMap.values()).map(t => ({
+      ...t,
+      totalArea: t.totalAreaHa.toFixed(2),
+      c1Area: t.c1Area.toFixed(2),
+      c2Area: t.c2Area.toFixed(2),
+      sarkarArea: t.sarkarArea.toFixed(2),
+      inamArea: t.inamArea.toFixed(2),
+      forestArea: t.forestArea.toFixed(2),
+      convArea: t.convArea.toFixed(2),
+      noOtherArea: t.noOtherArea.toFixed(2),
+      delArea: t.delArea.toFixed(2),
+      shartArea: t.shartArea.toFixed(2),
+      companyPermittedArea: t.companyPermittedArea,
+      companyUnpermittedArea: t.companyUnpermittedArea,
+      usageBreachArea: t.usageBreachArea,
+      transferBreachArea: t.transferBreachArea,
+      otherRightsArea: t.otherRightsArea
+    })).sort((a, b) => a.taluka.localeCompare(b.taluka));
+  } else {
+    // A specific village is filtered: query parent taluka total across all villages matching the base criteria
+    const talukaWhereSql = baseWhereClauses.length > 0 ? `WHERE ${baseWhereClauses.join(' AND ')}` : '';
+    const talukaSql = `
+      SELECT 
+        taluka,
+        ${metricColumnsSql}
+      FROM land_parcels
+      ${talukaWhereSql}
+      GROUP BY taluka
+      ORDER BY taluka
+    `;
+    let talukaRows = [];
+    try {
+      talukaRows = await prisma.$queryRawUnsafe(talukaSql, ...baseParams);
+    } catch (err) {
+      console.error('calculateDynamicGoshwaraRollup talukaSql error:', err);
+    }
+
+    byTaluka = talukaRows.map(r => ({
+      id: `t-${r.taluka}`,
+      district: 'Chandrapur',
+      taluka: r.taluka,
+      villageName: 'संपूर्ण तालुका (All Villages)',
+      total712Count: r.total712Count,
+      totalAreaHa: r.totalAreaHa,
+      totalArea: r.totalAreaHa.toFixed(2),
+      c1Count: r.c1Count,
+      c1Area: r.c1Area.toFixed(2),
+      c2Count: r.c2Count,
+      c2Area: r.c2Area.toFixed(2),
+      sarkarCount: r.sarkarCount || 0,
+      sarkarArea: (r.sarkarArea || 0).toFixed(2),
+      inamCount: r.inamCount || 0,
+      inamArea: (r.inamArea || 0).toFixed(2),
+      forestCount: r.forestCount || 0,
+      forestArea: (r.forestArea || 0).toFixed(2),
+      convCount: r.convCount,
+      convArea: r.convArea.toFixed(2),
+      noOtherCount: r.noOtherCount,
+      noOtherArea: r.noOtherArea.toFixed(2),
+      delCount: r.delCount ?? r.shartCount ?? 0,
+      delArea: (r.delArea ?? r.shartArea ?? 0).toFixed(2),
+      shartCount: r.shartCount,
+      shartArea: r.shartArea.toFixed(2),
+      companyPermittedCount: r.companyPermittedCount || 0,
+      companyPermittedArea: Number(r.companyPermittedArea || 0),
+      companyUnpermittedCount: r.companyUnpermittedCount || 0,
+      companyUnpermittedArea: Number(r.companyUnpermittedArea || 0),
+      usageBreachCount: r.usageBreachCount || 0,
+      usageBreachArea: Number(r.usageBreachArea || 0),
+      transferBreachCount: r.transferBreachCount || 0,
+      transferBreachArea: Number(r.transferBreachArea || 0),
+      otherRightsCount: r.otherRightsCount || 0,
+      otherRightsArea: Number(r.otherRightsArea || 0),
+      remarks: `${TALUKA_EN_TO_MR[r.taluka] || r.taluka} तालुका एकत्रित`
+    })).sort((a, b) => a.taluka.localeCompare(b.taluka));
+  }
 
   // 3. districtTotal
   let distTotal = null;

@@ -1688,7 +1688,11 @@ export default function ReportsPage() {
                         ? (taluka !== 'all' ? `चंद्रपूर जिल्हा (केवळ निवडलेला ${talukaDisplay} तालुका)` : 'चंद्रपूर जिल्हा (एकत्रित गोषवारा)') 
                         : (taluka !== 'all' ? `Chandrapur District (Only ${talukaDisplay} Taluka)` : 'Chandrapur District (All 15 Talukas)'))
                     : isTaluka
-                    ? (row.taluka ? `${talukaDisplay} (तालुका)` : (isMarathi ? 'तालुका' : 'Taluka'))
+                    ? (row.taluka 
+                        ? (village && village !== 'all' && village !== 'सर्व गावे'
+                            ? (isMarathi ? `${talukaDisplay} (संपूर्ण तालुका - सर्व गावे एकत्रित)` : `${talukaDisplay} Taluka (Consolidated - All Villages)`)
+                            : (isMarathi ? `${talukaDisplay} (तालुका)` : 'Taluka'))
+                        : (isMarathi ? 'तालुका' : 'Taluka'))
                     : formatVillageName(row.villageName || row.taluka, isMarathi);
 
                   return (
@@ -1904,7 +1908,11 @@ export default function ReportsPage() {
                         ? (taluka !== 'all' ? `चंद्रपूर जिल्हा (केवळ निवडलेला ${talukaDisplay} तालुका)` : 'चंद्रपूर जिल्हा (एकत्रित गोषवारा)') 
                         : (taluka !== 'all' ? `Chandrapur District (Only ${talukaDisplay} Taluka)` : 'Chandrapur District (All 15 Talukas)'))
                     : isTaluka
-                    ? (row.taluka ? `${talukaDisplay} (तालुका)` : (isMarathi ? 'सर्व तालुके' : 'All Talukas'))
+                    ? (row.taluka 
+                        ? (village && village !== 'all' && village !== 'सर्व गावे'
+                            ? (isMarathi ? `${talukaDisplay} (संपूर्ण तालुका - सर्व गावे एकत्रित)` : `${talukaDisplay} Taluka (Consolidated - All Villages)`)
+                            : (isMarathi ? `${talukaDisplay} (तालुका)` : `${talukaDisplay} Taluka`))
+                        : (isMarathi ? 'सर्व तालुके' : 'All Talukas'))
                     : formatVillageName(row.villageName || row.taluka, isMarathi);
 
                   return (
