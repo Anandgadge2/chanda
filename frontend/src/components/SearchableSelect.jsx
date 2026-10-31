@@ -277,7 +277,7 @@ export default function SearchableSelect({
           isOpen ? 'ring-2 ring-[#242b6b]/15 bg-white border-[#242b6b] shadow-xs' : 'focus:ring-2 focus:ring-[#242b6b]/15 focus:border-[#242b6b]'
         } ${buttonClassName}`}
       >
-        <div className="flex items-center gap-1.5 min-w-0 truncate">
+        <div className="flex-1 flex items-center gap-1.5 min-w-0 overflow-hidden">
           {Icon && (
             <Icon
               className={`w-3.5 h-3.5 shrink-0 ${
@@ -286,7 +286,7 @@ export default function SearchableSelect({
             />
           )}
           <span
-            className={`truncate text-left ${
+            className={`truncate text-left flex-1 ${
               isFiltered ? 'text-[#242b6b] font-bold' : 'text-slate-900 font-semibold'
             }`}
             title={displayText}

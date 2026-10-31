@@ -399,6 +399,8 @@ export async function calculateDynamicGoshwaraRollup(filters = {}) {
         whereClauses.push(`(metadata->>'otherRights' LIKE '%वक्फ%' OR metadata->>'otherRights' LIKE '%कब्रस्तान%' OR metadata->>'otherRights' LIKE '%इदगाह%' OR metadata->>'otherRights' LIKE '%मस्जिद%' OR metadata->'auditPoints'->>'point_34' = 'होय')`);
       } else if (prapatraNum === 17) {
         whereClauses.push(`(metadata->>'otherRights' LIKE '%भूसंपादन%' OR metadata->>'otherRights' LIKE '%अधिग्रहित%' OR metadata->>'otherRights' LIKE '%राखीव%' OR metadata->>'otherRights' LIKE '%राष्ट्रीय महामार्ग%' OR metadata->'auditPoints'->>'point_35' = 'होय')`);
+      } else if (prapatraNum === 18) {
+        whereClauses.push(`(metadata->>'otherRights' LIKE '%89%' OR metadata->>'otherRights' LIKE '%47%' OR metadata->>'otherRights' LIKE '%कंपनी%' OR metadata->>'subTypeCategory' LIKE '%89%' OR metadata->>'subTypeCategory' LIKE '%कंपनी%' OR metadata->'auditPoints'->>'point_41' = 'होय' OR metadata->'auditPoints'->>'point_42' = 'होय' OR EXISTS (SELECT 1 FROM tenancy89a_records tr WHERE tr.parcel_id = land_parcels.id))`);
       }
     } else {
       if (prapatraNum === 1) {
@@ -440,7 +442,18 @@ export async function calculateDynamicGoshwaraRollup(filters = {}) {
       COUNT(CASE WHEN metadata->'flags'->>'isIllegalDeletion' = 'true' OR metadata->'auditPoints'->>'point_40' = 'होय' OR metadata->'flags'->>'isShartbhang' = 'true' THEN 1 END)::int as "delCount",
       COALESCE(SUM(CASE WHEN metadata->'flags'->>'isIllegalDeletion' = 'true' OR metadata->'auditPoints'->>'point_40' = 'होय' OR metadata->'flags'->>'isShartbhang' = 'true' THEN total_area_ha ELSE 0 END), 0)::float as "delArea",
       COUNT(CASE WHEN metadata->'flags'->>'isShartbhang' = 'true' OR metadata->'flags'->>'isIllegalDeletion' = 'true' THEN 1 END)::int as "shartCount",
-      COALESCE(SUM(CASE WHEN metadata->'flags'->>'isShartbhang' = 'true' OR metadata->'flags'->>'isIllegalDeletion' = 'true' THEN total_area_ha ELSE 0 END), 0)::float as "shartArea"
+      COALESCE(SUM(CASE WHEN metadata->'flags'->>'isShartbhang' = 'true' OR metadata->'flags'->>'isIllegalDeletion' = 'true' THEN total_area_ha ELSE 0 END), 0)::float as "shartArea",
+      -- Category 18 metrics
+      COUNT(CASE WHEN metadata->'auditPoints'->>'point_41' = 'होय' OR EXISTS (SELECT 1 FROM tenancy89a_records tr WHERE tr.parcel_id = land_parcels.id AND tr.is_genuine_industrial_use = true) THEN 1 END)::int as "companyPermittedCount",
+      COALESCE(SUM(CASE WHEN metadata->'auditPoints'->>'point_41' = 'होय' OR EXISTS (SELECT 1 FROM tenancy89a_records tr WHERE tr.parcel_id = land_parcels.id AND tr.is_genuine_industrial_use = true) THEN total_area_ha ELSE 0 END), 0)::float as "companyPermittedArea",
+      COUNT(CASE WHEN metadata->'auditPoints'->>'point_41' = 'नाही' OR (metadata->>'otherRights' LIKE '%कंपनी%' AND (metadata->'auditPoints'->>'point_41' IS NULL OR metadata->'auditPoints'->>'point_41' = 'नाही')) THEN 1 END)::int as "companyUnpermittedCount",
+      COALESCE(SUM(CASE WHEN metadata->'auditPoints'->>'point_41' = 'नाही' OR (metadata->>'otherRights' LIKE '%कंपनी%' AND (metadata->'auditPoints'->>'point_41' IS NULL OR metadata->'auditPoints'->>'point_41' = 'नाही')) THEN total_area_ha ELSE 0 END), 0)::float as "companyUnpermittedArea",
+      COUNT(CASE WHEN metadata->'auditPoints'->>'point_44' = 'नाही' OR metadata->'auditPoints'->>'point_45_usage' = 'होय' OR metadata->'flags'->>'isUsageBreach' = 'true' THEN 1 END)::int as "usageBreachCount",
+      COALESCE(SUM(CASE WHEN metadata->'auditPoints'->>'point_44' = 'नाही' OR metadata->'auditPoints'->>'point_45_usage' = 'होय' OR metadata->'flags'->>'isUsageBreach' = 'true' THEN total_area_ha ELSE 0 END), 0)::float as "usageBreachArea",
+      COUNT(CASE WHEN metadata->'auditPoints'->>'point_45_transfer' = 'होय' OR metadata->'flags'->>'isTransferBreach' = 'true' OR metadata->'flags'->>'isShartbhang' = 'true' THEN 1 END)::int as "transferBreachCount",
+      COALESCE(SUM(CASE WHEN metadata->'auditPoints'->>'point_45_transfer' = 'होय' OR metadata->'flags'->>'isTransferBreach' = 'true' OR metadata->'flags'->>'isShartbhang' = 'true' THEN total_area_ha ELSE 0 END), 0)::float as "transferBreachArea",
+      COUNT(CASE WHEN metadata->'auditPoints'->>'point_39' = 'होय' OR (metadata->>'otherRights' IS NOT NULL AND metadata->>'otherRights' != '' AND metadata->>'otherRights' != '-' AND metadata->>'otherRights' != '....') THEN 1 END)::int as "otherRightsCount",
+      COALESCE(SUM(CASE WHEN metadata->'auditPoints'->>'point_39' = 'होय' OR (metadata->>'otherRights' IS NOT NULL AND metadata->>'otherRights' != '' AND metadata->>'otherRights' != '-' AND metadata->>'otherRights' != '....') THEN total_area_ha ELSE 0 END), 0)::float as "otherRightsArea"
     FROM land_parcels
     ${whereSql}
     GROUP BY taluka, village_name
@@ -480,6 +493,16 @@ export async function calculateDynamicGoshwaraRollup(filters = {}) {
     delArea: (r.delArea ?? r.shartArea ?? 0).toFixed(2),
     shartCount: r.shartCount,
     shartArea: r.shartArea.toFixed(2),
+    companyPermittedCount: r.companyPermittedCount || 0,
+    companyPermittedArea: Number(r.companyPermittedArea || 0),
+    companyUnpermittedCount: r.companyUnpermittedCount || 0,
+    companyUnpermittedArea: Number(r.companyUnpermittedArea || 0),
+    usageBreachCount: r.usageBreachCount || 0,
+    usageBreachArea: Number(r.usageBreachArea || 0),
+    transferBreachCount: r.transferBreachCount || 0,
+    transferBreachArea: Number(r.transferBreachArea || 0),
+    otherRightsCount: r.otherRightsCount || 0,
+    otherRightsArea: Number(r.otherRightsArea || 0),
     remarks: r.shartCount > 0 ? 'शर्तभंग / अनधिकृत हस्तांतरण' : 'तपासणी प्रमाणित'
   })).sort((a, b) => a.villageName.localeCompare(b.villageName, 'mr'));
 
@@ -512,6 +535,16 @@ export async function calculateDynamicGoshwaraRollup(filters = {}) {
         delArea: 0,
         shartCount: 0,
         shartArea: 0,
+        companyPermittedCount: 0,
+        companyPermittedArea: 0,
+        companyUnpermittedCount: 0,
+        companyUnpermittedArea: 0,
+        usageBreachCount: 0,
+        usageBreachArea: 0,
+        transferBreachCount: 0,
+        transferBreachArea: 0,
+        otherRightsCount: 0,
+        otherRightsArea: 0,
         remarks: `${TALUKA_EN_TO_MR[r.taluka] || r.taluka} तालुका एकत्रित`
       });
     }
@@ -536,6 +569,16 @@ export async function calculateDynamicGoshwaraRollup(filters = {}) {
     t.delArea += (r.delArea ?? r.shartArea ?? 0);
     t.shartCount += r.shartCount;
     t.shartArea += r.shartArea;
+    t.companyPermittedCount += (r.companyPermittedCount || 0);
+    t.companyPermittedArea += (r.companyPermittedArea || 0);
+    t.companyUnpermittedCount += (r.companyUnpermittedCount || 0);
+    t.companyUnpermittedArea += (r.companyUnpermittedArea || 0);
+    t.usageBreachCount += (r.usageBreachCount || 0);
+    t.usageBreachArea += (r.usageBreachArea || 0);
+    t.transferBreachCount += (r.transferBreachCount || 0);
+    t.transferBreachArea += (r.transferBreachArea || 0);
+    t.otherRightsCount += (r.otherRightsCount || 0);
+    t.otherRightsArea += (r.otherRightsArea || 0);
   });
 
   const byTaluka = Array.from(talukaMap.values()).map(t => ({
@@ -549,7 +592,12 @@ export async function calculateDynamicGoshwaraRollup(filters = {}) {
     convArea: t.convArea.toFixed(2),
     noOtherArea: t.noOtherArea.toFixed(2),
     delArea: t.delArea.toFixed(2),
-    shartArea: t.shartArea.toFixed(2)
+    shartArea: t.shartArea.toFixed(2),
+    companyPermittedArea: t.companyPermittedArea,
+    companyUnpermittedArea: t.companyUnpermittedArea,
+    usageBreachArea: t.usageBreachArea,
+    transferBreachArea: t.transferBreachArea,
+    otherRightsArea: t.otherRightsArea
   })).sort((a, b) => a.taluka.localeCompare(b.taluka));
 
   // 3. districtTotal
@@ -580,6 +628,16 @@ export async function calculateDynamicGoshwaraRollup(filters = {}) {
       delArea: 0,
       shartCount: 0,
       shartArea: 0,
+      companyPermittedCount: 0,
+      companyPermittedArea: 0,
+      companyUnpermittedCount: 0,
+      companyUnpermittedArea: 0,
+      usageBreachCount: 0,
+      usageBreachArea: 0,
+      transferBreachCount: 0,
+      transferBreachArea: 0,
+      otherRightsCount: 0,
+      otherRightsArea: 0,
       remarks: isAllTalukas ? 'जिल्हास्तरीय एकत्रित गोषवारा' : `${TALUKA_EN_TO_MR[targetTaluka] || targetTaluka} तालुकास्तरीय गोषवारा`
     };
 
@@ -604,6 +662,16 @@ export async function calculateDynamicGoshwaraRollup(filters = {}) {
       rawDist.delArea += parseFloat(t.delArea) || 0;
       rawDist.shartCount += t.shartCount;
       rawDist.shartArea += parseFloat(t.shartArea) || 0;
+      rawDist.companyPermittedCount += (t.companyPermittedCount || 0);
+      rawDist.companyPermittedArea += (t.companyPermittedArea || 0);
+      rawDist.companyUnpermittedCount += (t.companyUnpermittedCount || 0);
+      rawDist.companyUnpermittedArea += (t.companyUnpermittedArea || 0);
+      rawDist.usageBreachCount += (t.usageBreachCount || 0);
+      rawDist.usageBreachArea += (t.usageBreachArea || 0);
+      rawDist.transferBreachCount += (t.transferBreachCount || 0);
+      rawDist.transferBreachArea += (t.transferBreachArea || 0);
+      rawDist.otherRightsCount += (t.otherRightsCount || 0);
+      rawDist.otherRightsArea += (t.otherRightsArea || 0);
     });
 
     distTotal = {
@@ -674,8 +742,8 @@ export const getPrapatraReport = async (req, res) => {
     const isChecklist = id === 'checklist' || id === 'master' || id === '46';
     const prapatraNum = isChecklist ? 0 : parseInt(id, 10);
 
-    if (!isChecklist && (isNaN(prapatraNum) || prapatraNum < 1 || prapatraNum > 17)) {
-      return res.status(400).json({ success: false, error: 'अवैध प्रपत्र क्रमांक (१ ते १७ किंवा checklist)' });
+    if (!isChecklist && (isNaN(prapatraNum) || prapatraNum < 1 || prapatraNum > 18)) {
+      return res.status(400).json({ success: false, error: 'अवैध प्रपत्र क्रमांक (१ ते १८ किंवा checklist)' });
     }
 
     const targetTaluka = TALUKA_ALIASES[taluka?.toLowerCase()] || taluka;
@@ -1055,6 +1123,17 @@ export const getPrapatraReport = async (req, res) => {
           { metadata: { path: ['otherRights'], string_contains: 'राष्ट्रीय महामार्ग' } },
           { metadata: { path: ['auditPoints', 'point_35'], equals: 'होय' } }
         ];
+      } else if (prapatraNum === 18) {
+        prapatraParcelConditions = [
+          { tenancy89ARecords: { some: {} } },
+          { metadata: { path: ['otherRights'], string_contains: '89' } },
+          { metadata: { path: ['otherRights'], string_contains: '47' } },
+          { metadata: { path: ['otherRights'], string_contains: 'कंपनी' } },
+          { metadata: { path: ['subTypeCategory'], string_contains: '89' } },
+          { metadata: { path: ['subTypeCategory'], string_contains: 'कंपनी' } },
+          { metadata: { path: ['auditPoints', 'point_41'], equals: 'होय' } },
+          { metadata: { path: ['auditPoints', 'point_42'], equals: 'होय' } }
+        ];
       }
     }
 
@@ -1272,15 +1351,15 @@ export const getPrapatraReport = async (req, res) => {
 
       if (prapatraNum > 5 || booklet === 'true') {
         res.setHeader('Content-Disposition', `attachment; filename=Category-${prapatraNum}_Booklet_${safeScope}_${timestamp}.xlsx`);
-        return await generateCategoryBookletExcel(prapatraNum, records, formattedParcels, scopeName, res);
+        return await generateCategoryBookletExcel(prapatraNum, summaryExportRows, formattedParcels, scopeName, res);
       }
 
       res.setHeader('Content-Disposition', `attachment; filename=Prapatra-${prapatraNum}_Chandrapur_${safeScope}_${timestamp}.xlsx`);
-      if (prapatraNum === 1) return await generatePrapatra1Excel(records, formattedParcels, scopeName, res);
-      if (prapatraNum === 2) return await generatePrapatra2Excel(records, formattedParcels, scopeName, res);
-      if (prapatraNum === 3) return await generatePrapatra3Excel(records, formattedParcels, scopeName, res);
-      if (prapatraNum === 4) return await generatePrapatra4Excel(records, formattedParcels, scopeName, res);
-      if (prapatraNum === 5) return await generatePrapatra5Excel(records, formattedParcels, scopeName, res);
+      if (prapatraNum === 1) return await generatePrapatra1Excel(summaryExportRows, formattedParcels, scopeName, res);
+      if (prapatraNum === 2) return await generatePrapatra2Excel(summaryExportRows, formattedParcels, scopeName, res);
+      if (prapatraNum === 3) return await generatePrapatra3Excel(summaryExportRows, formattedParcels, scopeName, res);
+      if (prapatraNum === 4) return await generatePrapatra4Excel(summaryExportRows, formattedParcels, scopeName, res);
+      if (prapatraNum === 5) return await generatePrapatra5Excel(summaryExportRows, formattedParcels, scopeName, res);
     }
 
     // If PDF export requested
@@ -1310,12 +1389,14 @@ export const getPrapatraReport = async (req, res) => {
       }
 
       if (prapatraNum > 5 || booklet === 'true') {
-        res.setHeader('Content-Disposition', `attachment; filename=Category-${prapatraNum}_Booklet_${safeScope}_${timestamp}.pdf`);
-        return await generateCategoryBookletPdf(prapatraNum, records, formattedParcels, scopeName, res);
+        const isGoshwaraOnly = view === 'categorySummary' || view === 'summary';
+        const filePrefix = isGoshwaraOnly ? `Category-${prapatraNum}_Goshwara` : `Category-${prapatraNum}_Booklet`;
+        res.setHeader('Content-Disposition', `attachment; filename=${filePrefix}_${safeScope}_${timestamp}.pdf`);
+        return await generateCategoryBookletPdf(prapatraNum, summaryExportRows, formattedParcels, scopeName, res, { view });
       }
 
       res.setHeader('Content-Disposition', `attachment; filename=Prapatra-${prapatraNum}_Chandrapur_${safeScope}_${timestamp}.pdf`);
-      return await generatePrapatraPdf(prapatraNum, records, formattedParcels, scopeName, res);
+      return await generatePrapatraPdf(prapatraNum, summaryExportRows, formattedParcels, scopeName, res);
     }
 
     // Default JSON response
@@ -1330,8 +1411,8 @@ export const getPrapatraReport = async (req, res) => {
       village,
       filterType,
       search,
-      count: records.length,
-      data: records,
+      count: summaryExportRows.length,
+      data: summaryExportRows,
       parcels: formattedParcels,
       totalParcelsCount: formattedParcels.length,
       rollup: dynamicRollupData,

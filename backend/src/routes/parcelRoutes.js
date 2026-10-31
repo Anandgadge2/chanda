@@ -4,6 +4,7 @@ import {
   getSampleTemplate,
   getParcels,
   getParcelTrace,
+  exportParcelDossierPdf,
   createParcel,
   updateParcel,
 } from '../controllers/parcelController.js';
@@ -25,8 +26,8 @@ router.get('/villages', getTalukaVillages);
 router.get('/', authenticate, getParcels);
 router.post('/', authenticate, authorize('COLLECTOR', 'SDO', 'TEHSILDAR', 'NAIB_TEHSILDAR', 'TALATHI'), createParcel);
 router.get('/:upi/trace', authenticate, getParcelTrace);
+router.get('/:upi/export-pdf', authenticate, exportParcelDossierPdf);
 router.patch('/:upi', authenticate, authorize('SUPERADMIN', 'COLLECTOR', 'SUB_COLLECTOR', 'SDO', 'TEHSILDAR', 'NAIB_TEHSILDAR', 'CIRCLE_OFFICER', 'TALATHI'), updateParcel);
 router.put('/:upi', authenticate, authorize('SUPERADMIN', 'COLLECTOR', 'SUB_COLLECTOR', 'SDO', 'TEHSILDAR', 'NAIB_TEHSILDAR', 'CIRCLE_OFFICER', 'TALATHI'), updateParcel);
-
 
 export default router;

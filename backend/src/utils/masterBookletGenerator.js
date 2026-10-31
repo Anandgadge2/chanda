@@ -198,6 +198,14 @@ export const BOOKLET_CATEGORIES = [
     nameEn: 'Land Acquisition Reserved Lands',
     desc: 'प्रकल्प/रस्ते/कालव्यांसाठी भूसंपादित किंवा राखीव जमिनींची महसूल अभिलेख तपासणी',
     color: 'border-red-600 text-red-950 bg-red-50/60'
+  },
+  {
+    id: 18,
+    key: 'tenancy_sec89_47',
+    nameMr: 'कुळ कायद्याचे कलम 89 व 89-अ/47 व 47 प्रमाणे धारण केलेली जमीन',
+    nameEn: 'Tenancy Act Sec 89 & 89-A / 47 & 47 Company Holdings',
+    desc: 'कंपनीने जमीन धारण करताना परवानगी, वापराबाबत व हस्तांतरणाबाबत शर्तभंग, इतर अधिकारात नोंद तपासणी',
+    color: 'border-amber-600 text-amber-900 bg-amber-50/60'
   }
 ];
 
@@ -1458,7 +1466,19 @@ export async function generateCategoryBookletExcel(catId, summaryData, parcels, 
   wsParcels.getRow(2).height = 24;
 
   // Headers
-  const catHeaders = [
+  const isCat18 = category.id === 18;
+  const catHeaders = isCat18 ? [
+    'अ.क्र.',
+    'गावाचे नाव',
+    'सर्व्हे क्रमांक',
+    'क्षेत्र (हे.आर.)',
+    'भोगवटदाराचे नाव',
+    'भोगवटदार वर्ग',
+    'कंपनीने धारण करताना परवानगी घेतलेली आहे काय?',
+    'वापराबाबत शर्तभंग झालेला आहे काय?',
+    'हस्तांतरणाबाबत शर्तभंग आहे काय?',
+    'इतर अधिकारात नोंद घेतलेली आहे काय?'
+  ] : [
     'अ.क्र.',
     'गावाचे नाव',
     'सर्व्हे / गट क्रमांक',
@@ -1493,7 +1513,23 @@ export async function generateCategoryBookletExcel(catId, summaryData, parcels, 
     const isEven = idx % 2 === 0;
     const pt = resolveParcel46Points(p);
 
-    const r = wsParcels.addRow([
+    const hasPermit = pt[41] === 'होय' || p.tenancy89ARecords?.[0]?.isGenuineIndustrialUse || p.metadata?.auditPoints?.point_41 === 'होय' ? 'होय' : 'नाही';
+    const usageBreach = p.metadata?.auditPoints?.point_44 === 'नाही' || p.metadata?.auditPoints?.point_45_usage === 'होय' || (p.forwardCases?.some(fc => fc.violationType === 'UNAUTHORIZED_NA_CONVERSION')) ? 'होय' : 'नाही';
+    const transferBreach = p.metadata?.auditPoints?.point_45_transfer === 'होय' || p.tenancy89ARecords?.[0]?.unauthorizedTransfer || (p.forwardCases?.some(fc => fc.violationType === 'SHARTBHANG' || fc.violationType === 'TRIBAL_LAND_VIOLATION')) ? 'होय' : 'नाही';
+    const otherRightsNoted = pt[39] === 'होय' || (p.metadata?.otherRights && p.metadata?.otherRights !== '-' && p.metadata?.otherRights !== '....') ? 'होय' : 'नाही';
+
+    const rowValues = isCat18 ? [
+      idx + 1,
+      cleanVillageName(p.villageName),
+      p.gatNumber || p.oldSurveyNo || '-',
+      Number(p.totalAreaHa || 0),
+      p.currentOwner || p.metadata?.ownerName || 'नोंद उपलब्ध नाही',
+      p.tenureDisplay || (p.tenureClass === 'BHOGVATDAR_CLASS_1' ? 'भोग वर्ग - १' : 'भोग वर्ग - २'),
+      hasPermit,
+      usageBreach,
+      transferBreach,
+      otherRightsNoted
+    ] : [
       idx + 1,
       cleanVillageName(p.villageName),
       p.gatNumber || p.oldSurveyNo || '-',
@@ -1504,7 +1540,9 @@ export async function generateCategoryBookletExcel(catId, summaryData, parcels, 
       pt[36], // Class 2 to 1 illegal
       pt[40], // Other rights noted
       pt[41]  // Illegally removed
-    ]);
+    ];
+
+    const r = wsParcels.addRow(rowValues);
     r.height = 24;
     r.eachCell((c, colIdx) => {
       c.font = { name: 'Arial', size: 9 };
@@ -1573,23 +1611,159 @@ export async function generateCategoryBookletExcel(catId, summaryData, parcels, 
     views: [{ showGridLines: true }]
   });
 
-  wsSummary.mergeCells('A1:P1');
+  const lastSummaryCol = isCat18 ? 'N' : 'P';
+  wsSummary.mergeCells(`A1:${lastSummaryCol}1`);
   const st1 = wsSummary.getCell('A1');
-  st1.value = `महाराष्ट्र शासन - महसूल व वन विभाग | १ ते ४५ मुद्द्यांचा गोषवारा - ${category.id}) ${category.nameMr}`;
+  st1.value = isCat18
+    ? `महाराष्ट्र शासन - महसूल व वन विभाग | १८) कुळ कायद्याचे कलम 89 व 89-अ/47 व 47 प्रमाणे धारण केलेली जमीन`
+    : `महाराष्ट्र शासन - महसूल व वन विभाग | १ ते ४५ मुद्द्यांचा गोषवारा - ${category.id}) ${category.nameMr}`;
   st1.font = { name: 'Arial', size: 12, bold: true, color: { argb: 'FFFFFFFF' } };
   st1.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: GOV_NAVY } };
   st1.alignment = { horizontal: 'center', vertical: 'middle' };
   wsSummary.getRow(1).height = 36;
 
-  wsSummary.mergeCells('A2:P2');
+  wsSummary.mergeCells(`A2:${lastSummaryCol}2`);
   wsSummary.getCell('A2').value = `जिल्हा: चंद्रपूर | कार्यक्षेत्र: ${scopeName} | दिनांक: ${new Date().toLocaleDateString('mr-IN')}`;
   wsSummary.getCell('A2').alignment = { horizontal: 'center' };
   wsSummary.getCell('A2').font = { name: 'Arial', size: 10, italic: true };
   wsSummary.getRow(2).height = 22;
 
   // Separate summary data into Village rows, Taluka rows, and District Total
-  const talukaRows = summaryData.filter(r => r.villageName === 'संपूर्ण तालुका (All Villages)');
-  const villageRows = summaryData.filter(r => r.villageName && r.villageName !== 'संपूर्ण तालुका (All Villages)');
+  const talukaRows = summaryData.filter(r => r.villageName === 'संपूर्ण तालुका (All Villages)' || r.id?.startsWith('t-'));
+  const villageRows = summaryData.filter(r => r.villageName && !r.villageName.includes('संपूर्ण तालुका') && !r.villageName.includes('संपूर्ण जिल्हा') && !r.id?.startsWith('t-') && r.id !== 'district-chandrapur-grand-total');
+
+  // Helper to render Category 18 Goshwara Block (Exact match to official image)
+  function renderCategory18GoshwaraBlock(title, rows, isDistrict = false) {
+    wsSummary.addRow([]);
+    const bannerRow = wsSummary.addRow([title]);
+    wsSummary.mergeCells(`A${bannerRow.number}:N${bannerRow.number}`);
+    bannerRow.font = { name: 'Arial', size: 11, bold: true, color: { argb: 'FFFFFFFF' } };
+    bannerRow.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: isDistrict ? 'FF0F766E' : GOV_NAVY } };
+    bannerRow.alignment = { horizontal: 'center', vertical: 'middle' };
+    bannerRow.height = 28;
+
+    const r1 = wsSummary.addRow([
+      'अ.क्र.',
+      isDistrict ? 'जिल्ह्याचे नाव' : (rows === talukaRows ? 'तालुक्याचे नाव' : 'गावाचे नाव'),
+      'एकूण सर्व्हे क्रमांक',
+      'एकूण क्षेत्र (हे.आर.)',
+      'कंपनीने जमीन धारण करताना परवानगी घेतलेल्या जमिनी', '',
+      'कंपनीने जमीन धारण करताना परवानगी न घेतलेल्या जमिनी', '',
+      'वापराबाबत शर्तभंग झालेल्या जमिनी', '',
+      'हस्तांतरणाबाबत शर्तभंग जमिनी', '',
+      'इतर अधिकारात नोंद घेतलेल्या जमिनी', ''
+    ]);
+    r1.height = 28;
+
+    const rowNum1 = r1.number;
+    const rowNum2 = rowNum1 + 1;
+
+    const r2 = wsSummary.addRow([
+      '', '', '', '',
+      'एकूण सर्व्हे क्रमांक', 'एकूण क्षेत्र(हे.आर.)',
+      'एकूण सर्व्हे क्रमांक', 'एकूण क्षेत्र(हे.आर.)',
+      'एकूण सर्व्हे क्रमांक', 'एकूण क्षेत्र(हे.आर.)',
+      'एकूण सर्व्हे क्रमांक', 'एकूण क्षेत्र(हे.आर.)',
+      'एकूण सर्व्हे क्रमांक', 'एकूण क्षेत्र(हे.आर.)'
+    ]);
+    r2.height = 24;
+
+    wsSummary.mergeCells(`A${rowNum1}:A${rowNum2}`);
+    wsSummary.mergeCells(`B${rowNum1}:B${rowNum2}`);
+    wsSummary.mergeCells(`C${rowNum1}:C${rowNum2}`);
+    wsSummary.mergeCells(`D${rowNum1}:D${rowNum2}`);
+    wsSummary.mergeCells(`E${rowNum1}:F${rowNum1}`);
+    wsSummary.mergeCells(`G${rowNum1}:H${rowNum1}`);
+    wsSummary.mergeCells(`I${rowNum1}:J${rowNum1}`);
+    wsSummary.mergeCells(`K${rowNum1}:L${rowNum1}`);
+    wsSummary.mergeCells(`M${rowNum1}:N${rowNum1}`);
+
+    [r1, r2].forEach(r => {
+      r.eachCell(c => {
+        c.font = { name: 'Arial', size: 8.5, bold: true, color: { argb: 'FF0F172A' } };
+        c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: HEADER_BG } };
+        c.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
+        c.border = thinBorder;
+      });
+    });
+
+    const rNums = wsSummary.addRow([
+      '१', '२', '३', '४', '५', '६', '७', '८', '९', '१०', '११', '१२', '१३', '१४'
+    ]);
+    rNums.height = 18;
+    rNums.eachCell(c => {
+      c.font = { size: 7.5, italic: true };
+      c.alignment = { horizontal: 'center' };
+      c.border = thinBorder;
+      c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF8FAFC' } };
+    });
+
+    if (isDistrict) {
+      const distRow = summaryData.find(r => r.id === 'district-chandrapur-grand-total' || r.villageName?.includes('संपूर्ण जिल्हा'));
+      const talukaSubset = summaryData.filter(r => r.villageName === 'संपूर्ण तालुका (All Villages)' || r.id?.startsWith('t-'));
+      const totalCount = distRow ? distRow.total712Count : (talukaSubset.length > 0 ? talukaSubset : summaryData).reduce((acc, r) => acc + (r.total712Count || 0), 0);
+      const totalArea = distRow ? Number(distRow.totalArea || distRow.totalAreaHa || 0) : (talukaSubset.length > 0 ? talukaSubset : summaryData).reduce((acc, r) => acc + Number(r.totalAreaHa || 0), 0);
+      const pCount = distRow ? distRow.companyPermittedCount : (talukaSubset.length > 0 ? talukaSubset : summaryData).reduce((acc, r) => acc + (r.companyPermittedCount || 0), 0);
+      const pArea = distRow ? Number(distRow.companyPermittedArea || 0) : (talukaSubset.length > 0 ? talukaSubset : summaryData).reduce((acc, r) => acc + Number(r.companyPermittedArea || 0), 0);
+      const unpCount = distRow ? distRow.companyUnpermittedCount : (talukaSubset.length > 0 ? talukaSubset : summaryData).reduce((acc, r) => acc + (r.companyUnpermittedCount || 0), 0);
+      const unpArea = distRow ? Number(distRow.companyUnpermittedArea || 0) : (talukaSubset.length > 0 ? talukaSubset : summaryData).reduce((acc, r) => acc + Number(r.companyUnpermittedArea || 0), 0);
+      const useCount = distRow ? distRow.usageBreachCount : (talukaSubset.length > 0 ? talukaSubset : summaryData).reduce((acc, r) => acc + (r.usageBreachCount || 0), 0);
+      const useArea = distRow ? Number(distRow.usageBreachArea || 0) : (talukaSubset.length > 0 ? talukaSubset : summaryData).reduce((acc, r) => acc + Number(r.usageBreachArea || 0), 0);
+      const trCount = distRow ? distRow.transferBreachCount : (talukaSubset.length > 0 ? talukaSubset : summaryData).reduce((acc, r) => acc + (r.transferBreachCount || 0), 0);
+      const trArea = distRow ? Number(distRow.transferBreachArea || 0) : (talukaSubset.length > 0 ? talukaSubset : summaryData).reduce((acc, r) => acc + Number(r.transferBreachArea || 0), 0);
+      const othCount = distRow ? distRow.otherRightsCount : (talukaSubset.length > 0 ? talukaSubset : summaryData).reduce((acc, r) => acc + (r.otherRightsCount || 0), 0);
+      const othArea = distRow ? Number(distRow.otherRightsArea || 0) : (talukaSubset.length > 0 ? talukaSubset : summaryData).reduce((acc, r) => acc + Number(r.otherRightsArea || 0), 0);
+
+      const dRow = wsSummary.addRow([
+        1,
+        'चंद्रपूर जिल्हा',
+        totalCount,
+        Number(totalArea.toFixed(4)),
+        pCount, Number(pArea.toFixed(4)),
+        unpCount, Number(unpArea.toFixed(4)),
+        useCount, Number(useArea.toFixed(4)),
+        trCount, Number(trArea.toFixed(4)),
+        othCount, Number(othArea.toFixed(4))
+      ]);
+      dRow.height = 26;
+      dRow.eachCell((c, colIdx) => {
+        c.font = { name: 'Arial', size: 9, bold: true, color: { argb: 'FF1E3A8A' } };
+        c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF1F5F9' } };
+        c.border = thinBorder;
+        c.alignment = { horizontal: colIdx === 2 ? 'left' : 'center', vertical: 'middle' };
+      });
+    } else {
+      const dataRows = rows.length > 0 ? rows : summaryData;
+      dataRows.forEach((row, idx) => {
+        const isTot = row.villageName === 'संपूर्ण तालुका (All Villages)';
+        const nameVal = isTot ? `${formatTalukaMr(row.taluka)} (संपूर्ण तालुका)` : cleanVillageName(row.villageName || row.taluka || 'गाव');
+        const count712 = row.total712Count || 0;
+        const areaHa = Number(row.totalAreaHa || 0);
+
+        const dr = wsSummary.addRow([
+          idx + 1,
+          nameVal,
+          count712,
+          Number(areaHa.toFixed(4)),
+          row.companyPermittedCount || 0, Number(Number(row.companyPermittedArea || 0).toFixed(4)),
+          row.companyUnpermittedCount || 0, Number(Number(row.companyUnpermittedArea || 0).toFixed(4)),
+          row.usageBreachCount || 0, Number(Number(row.usageBreachArea || 0).toFixed(4)),
+          row.transferBreachCount || 0, Number(Number(row.transferBreachArea || 0).toFixed(4)),
+          row.otherRightsCount || 0, Number(Number(row.otherRightsArea || 0).toFixed(4))
+        ]);
+        dr.height = 22;
+        dr.eachCell((c, colIdx) => {
+          c.border = thinBorder;
+          c.font = { name: 'Arial', size: 8.5 };
+          if (isTot) {
+            c.font = { name: 'Arial', size: 8.5, bold: true, color: { argb: 'FF1E3A8A' } };
+            c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF8FAFC' } };
+          }
+          c.alignment = { horizontal: colIdx === 2 ? 'left' : 'center', vertical: 'middle' };
+        });
+      });
+    }
+  }
 
   // Helper to render a 16-column Goshwara Table Block (Sheet 2 format)
   function renderGoshwaraBlock(title, rows, isDistrict = false) {
@@ -1736,47 +1910,74 @@ export async function generateCategoryBookletExcel(catId, summaryData, parcels, 
     }
   }
 
-  // 1. जिल्हाचा गोषवारा (District Goshwara)
-  renderGoshwaraBlock('१. जिल्हाचा गोषवारा (District Level Summary)', [], true);
+  if (isCat18) {
+    // 1. गावाचा गोषवारा (Village Goshwara)
+    if (villageRows.length > 0) {
+      renderCategory18GoshwaraBlock('गावाचा गोषवारा', villageRows, false);
+    } else if (talukaRows.length === 0) {
+      renderCategory18GoshwaraBlock('गावाचा गोषवारा', summaryData, false);
+    }
 
-  // 2. तालुक्याचा गोषवारा (Taluka Goshwara)
-  if (talukaRows.length > 0) {
-    renderGoshwaraBlock('२. तालुक्याचा गोषवारा (Taluka Level Rollup - All 15 Talukas)', talukaRows, false);
+    // 2. तालुक्याचा गोषवारा (Taluka Goshwara)
+    if (talukaRows.length > 0) {
+      renderCategory18GoshwaraBlock('तालुक्याचा गोषवारा', talukaRows, false);
+    }
+
+    // 3. जिल्ह्याचा गोषवारा (District Goshwara)
+    renderCategory18GoshwaraBlock('जिल्ह्याचा गोषवारा', [], true);
+
+    wsSummary.columns = [
+      { width: 6 },   // अ.क्र.
+      { width: 26 },  // गाव / तालुका / जिल्हा
+      { width: 14 },  // एकूण सर्व्हे क्र.
+      { width: 14 },  // एकूण क्षेत्र
+      { width: 14 },  // परवानगी घेतलेली क्र.
+      { width: 14 },  // परवानगी घेतलेली क्षेत्र
+      { width: 14 },  // परवानगी न घेतलेली क्र.
+      { width: 14 },  // परवानगी न घेतलेली क्षेत्र
+      { width: 14 },  // वापराबाबत शर्तभंग क्र.
+      { width: 14 },  // वापराबाबत शर्तभंग क्षेत्र
+      { width: 14 },  // हस्तांतरण शर्तभंग क्र.
+      { width: 14 },  // हस्तांतरण शर्तभंग क्षेत्र
+      { width: 14 },  // इतर अधिकार नोंद क्र.
+      { width: 14 }   // इतर अधिकार नोंद क्षेत्र
+    ];
+  } else {
+    // 1. जिल्हाचा गोषवारा (District Goshwara)
+    renderGoshwaraBlock('१. जिल्हाचा गोषवारा (District Level Summary)', [], true);
+
+    // 2. तालुक्याचा गोषवारा (Taluka Goshwara)
+    if (talukaRows.length > 0) {
+      renderGoshwaraBlock('२. तालुक्याचा गोषवारा (Taluka Level Rollup - All 15 Talukas)', talukaRows, false);
+    }
+
+    // 3. गावाचा गोषवारा (Village Goshwara)
+    if (villageRows.length > 0) {
+      renderGoshwaraBlock('३. गावाचा गोषवारा (Village Level Rollup - Ground Records)', villageRows, false);
+    } else if (talukaRows.length === 0) {
+      // If specific taluka was queried, summaryData has village rows directly
+      renderGoshwaraBlock('३. गावाचा गोषवारा (Village Level Rollup - Ground Records)', summaryData, false);
+    }
+
+    wsSummary.columns = [
+      { width: 6 },   // अ.क्र.
+      { width: 28 },  // गाव / तालुका / जिल्हा
+      { width: 14 },  // एकूण सर्व्हे क्र.
+      { width: 14 },  // एकूण क्षेत्र
+      { width: 13 },  // वर्ग १ क्र.
+      { width: 13 },  // वर्ग १ क्षेत्र
+      { width: 13 },  // वर्ग २ क्र.
+      { width: 13 },  // वर्ग २ क्षेत्र
+      { width: 14 },  // अवैध रूपांतरण क्र.
+      { width: 14 },  // अवैध रूपांतरण क्षेत्र
+      { width: 14 },  // इतर हक्क नोंद नाही क्र.
+      { width: 14 },  // इतर हक्क नोंद नाही क्षेत्र
+      { width: 14 },  // अवैध कमी क्र.
+      { width: 14 },  // अवैध कमी क्षेत्र
+      { width: 13 },  // शर्तभंग क्र.
+      { width: 13 }   // शर्तभंग क्षेत्र
+    ];
   }
-
-  // 3. गावाचा गोषवारा (Village Goshwara)
-  if (villageRows.length > 0) {
-    renderGoshwaraBlock('३. गावाचा गोषवारा (Village Level Rollup - Ground Records)', villageRows, false);
-  } else if (talukaRows.length === 0) {
-    // If specific taluka was queried, summaryData has village rows directly
-    renderGoshwaraBlock('३. गावाचा गोषवारा (Village Level Rollup - Ground Records)', summaryData, false);
-  }
-
-  // Footer Signatures
-  wsSummary.addRow([]);
-  wsSummary.addRow([]);
-  const sigRow1 = wsSummary.addRow(['माहिती तयार करणाऱ्याचे नाव व पदनाम (तलाठी)', '', '', '', '', 'माहिती तपासणी करणाऱ्या अधिकाऱ्याचे नाव व पदनाम (मंडळ अधिकारी)', '', '', '', '', 'माहिती अचूक असल्याबाबत तहसिलदार यांचेव्दारा प्रमाणन', '', '', '', '']);
-  sigRow1.font = { name: 'Arial', size: 9.5, bold: true };
-  wsSummary.addRow(['दिनांक: ____________   स्वाक्षरी: ____________', '', '', '', '', 'दिनांक: ____________   स्वाक्षरी: ____________', '', '', '', '', 'तहसिलदार: ____________________   स्वाक्षरी: ____________', '', '', '', '']);
-
-  wsSummary.columns = [
-    { width: 6 },   // अ.क्र.
-    { width: 28 },  // गाव / तालुका / जिल्हा
-    { width: 14 },  // एकूण सर्व्हे क्र.
-    { width: 14 },  // एकूण क्षेत्र
-    { width: 13 },  // वर्ग १ क्र.
-    { width: 13 },  // वर्ग १ क्षेत्र
-    { width: 13 },  // वर्ग २ क्र.
-    { width: 13 },  // वर्ग २ क्षेत्र
-    { width: 14 },  // अवैध रूपांतरण क्र.
-    { width: 14 },  // अवैध रूपांतरण क्षेत्र
-    { width: 14 },  // इतर हक्क नोंद नाही क्र.
-    { width: 14 },  // इतर हक्क नोंद नाही क्षेत्र
-    { width: 14 },  // अवैध कमी क्र.
-    { width: 14 },  // अवैध कमी क्षेत्र
-    { width: 13 },  // शर्तभंग क्र.
-    { width: 13 }   // शर्तभंग क्षेत्र
-  ];
 
   await wb.xlsx.write(res);
 }
@@ -1784,11 +1985,25 @@ export async function generateCategoryBookletExcel(catId, summaryData, parcels, 
 /**
  * GENERATE 17 STATUTORY CATEGORY BOOKLET PDF
  */
-export async function generateCategoryBookletPdf(catId, summaryData, parcels, scopeName, res) {
+export async function generateCategoryBookletPdf(catId, summaryData, parcels, scopeName, res, options = {}) {
   const category = BOOKLET_CATEGORIES.find(c => c.id === parseInt(catId, 10)) || BOOKLET_CATEGORIES[0];
+  const isOnlySummary = options.view === 'categorySummary' || options.view === 'summary';
 
   // 1. Build Summary Goshwara Body (Sheet 2 format)
-  const summaryBody = [
+  const isCat18 = category.id === 18;
+  const summaryBody = isCat18 ? [
+    [
+      { text: 'अ.क्र.', style: 'th' },
+      { text: 'गाव / तालुका / जिल्हा', style: 'th' },
+      { text: 'एकूण सर्व्हे', style: 'th' },
+      { text: 'एकूण क्षेत्र (हे.)', style: 'th' },
+      { text: 'कंपनी परवानगी घेतलेली (क्र./हे.)', style: 'th' },
+      { text: 'कंपनी परवानगी न घेतलेली (क्र./हे.)', style: 'th' },
+      { text: 'वापर शर्तभंग (क्र./हे.)', style: 'th' },
+      { text: 'हस्तांतरण शर्तभंग (क्र./हे.)', style: 'th' },
+      { text: 'इतर अधिकार नोंद (क्र./हे.)', style: 'th' }
+    ]
+  ] : [
     [
       { text: 'अ.क्र.', style: 'th' },
       { text: 'गाव / तालुका / जिल्हा', style: 'th' },
@@ -1802,31 +2017,79 @@ export async function generateCategoryBookletPdf(catId, summaryData, parcels, sc
     ]
   ];
 
-  summaryData.slice(0, 35).forEach((r, idx) => {
-    const isTot = r.villageName === 'संपूर्ण तालुका (All Villages)';
-    const nameVal = isTot ? `${formatTalukaMr(r.taluka)} (संपूर्ण तालुका)` : cleanVillageName(r.villageName || r.taluka || 'गाव');
-    const cnt = r.total712Count || 0;
-    const c1 = r.govtFound1950Count || Math.floor(cnt * 0.4);
-    const c2 = r.pendingRectifyCount || Math.floor(cnt * 0.6);
-    const conv = r.illegalDeletionsCount || 0;
-    const noOther = r.pokalistPendingCount || 0;
-    const shart = (r.govtDeptsShartbhang || 0) + (r.privateShartbhang || 0);
+  // Separate into District, Taluka, Village rows for a structured Goshwara
+  const districtRows = summaryData.filter(r => r.id === 'district-chandrapur-grand-total' || r.villageName?.includes('संपूर्ण जिल्हा') || r.villageName === 'Whole District Rollup');
+  const talukaRows = summaryData.filter(r => r.villageName === 'संपूर्ण तालुका (All Villages)' || r.id?.startsWith('t-'));
+  const villageRows = summaryData.filter(r => r.villageName && !r.villageName.includes('संपूर्ण तालुका') && !r.villageName.includes('संपूर्ण जिल्हा') && !r.id?.startsWith('t-') && r.id !== 'district-chandrapur-grand-total');
 
-    summaryBody.push([
-      { text: String(idx + 1), style: 'tdCenter' },
-      { text: nameVal, style: isTot ? 'tdBold' : 'td' },
-      { text: String(cnt), style: 'tdCenter' },
-      { text: (cnt * 1.65).toFixed(2), style: 'tdRight' },
-      { text: String(c1), style: 'tdCenter' },
-      { text: String(c2), style: 'tdCenter' },
-      { text: String(conv), style: 'tdCenter' },
-      { text: String(noOther), style: 'tdCenter' },
-      { text: String(shart), style: 'tdCenter' }
-    ]);
+  const orderedSummaryRows = [
+    ...districtRows,
+    ...talukaRows,
+    ...villageRows.slice(0, 45)
+  ];
+
+  const targetSummaryList = orderedSummaryRows.length > 0 ? orderedSummaryRows : summaryData.slice(0, 45);
+
+  targetSummaryList.forEach((r, idx) => {
+    const isDist = r.id === 'district-chandrapur-grand-total' || r.villageName?.includes('संपूर्ण जिल्हा') || r.villageName === 'Whole District Rollup';
+    const isTot = isDist || r.villageName === 'संपूर्ण तालुका (All Villages)' || r.id?.startsWith('t-');
+    const nameVal = isDist
+      ? 'चंद्रपूर जिल्हा (एकत्रित गोषवारा)'
+      : (r.villageName === 'संपूर्ण तालुका (All Villages)' || r.id?.startsWith('t-'))
+      ? `${formatTalukaMr(r.taluka)} (संपूर्ण तालुका)`
+      : cleanVillageName(r.villageName || r.taluka || 'गाव');
+    const cnt = r.total712Count || 0;
+    const areaVal = Number(r.totalArea || r.totalAreaHa || (cnt * 1.65)).toFixed(2);
+    const rowStyle = isDist || isTot ? 'tdBold' : 'td';
+
+    if (isCat18) {
+      summaryBody.push([
+        { text: String(idx + 1), style: 'tdCenter' },
+        { text: nameVal, style: rowStyle },
+        { text: String(cnt), style: isTot ? 'tdBold' : 'tdCenter' },
+        { text: areaVal, style: isTot ? 'tdBold' : 'tdRight' },
+        { text: `${r.companyPermittedCount || 0} (${Number(r.companyPermittedArea || 0).toFixed(2)})`, style: 'tdCenter' },
+        { text: `${r.companyUnpermittedCount || 0} (${Number(r.companyUnpermittedArea || 0).toFixed(2)})`, style: 'tdCenter' },
+        { text: `${r.usageBreachCount || 0} (${Number(r.usageBreachArea || 0).toFixed(2)})`, style: 'tdCenter' },
+        { text: `${r.transferBreachCount || 0} (${Number(r.transferBreachArea || 0).toFixed(2)})`, style: 'tdCenter' },
+        { text: `${r.otherRightsCount || 0} (${Number(r.otherRightsArea || 0).toFixed(2)})`, style: 'tdCenter' }
+      ]);
+    } else {
+      const c1 = r.govtFound1950Count || Math.floor(cnt * 0.4);
+      const c2 = r.pendingRectifyCount || Math.floor(cnt * 0.6);
+      const conv = r.illegalDeletionsCount || 0;
+      const noOther = r.pokalistPendingCount || 0;
+      const shart = (r.govtDeptsShartbhang || 0) + (r.privateShartbhang || 0);
+
+      summaryBody.push([
+        { text: String(idx + 1), style: 'tdCenter' },
+        { text: nameVal, style: rowStyle },
+        { text: String(cnt), style: isTot ? 'tdBold' : 'tdCenter' },
+        { text: areaVal, style: isTot ? 'tdBold' : 'tdRight' },
+        { text: String(c1), style: 'tdCenter' },
+        { text: String(c2), style: 'tdCenter' },
+        { text: String(conv), style: 'tdCenter' },
+        { text: String(noOther), style: 'tdCenter' },
+        { text: String(shart), style: 'tdCenter' }
+      ]);
+    }
   });
 
   // 2. Build Detailed Parcels Body (Sheet 1 format)
-  const parcelBody = [
+  const parcelBody = isCat18 ? [
+    [
+      { text: 'अ.क्र.', style: 'th' },
+      { text: 'गाव', style: 'th' },
+      { text: 'सर्व्हे/गट क्र.', style: 'th' },
+      { text: 'क्षेत्र (हे.)', style: 'th' },
+      { text: 'भोगवटदाराचे नाव', style: 'th' },
+      { text: 'भोगवटदार वर्ग', style: 'th' },
+      { text: 'कंपनी परवानगी', style: 'th' },
+      { text: 'वापर शर्तभंग', style: 'th' },
+      { text: 'हस्तांतरण शर्तभंग', style: 'th' },
+      { text: 'इतर अधिकार नोंद', style: 'th' }
+    ]
+  ] : [
     [
       { text: 'अ.क्र.', style: 'th' },
       { text: 'गाव', style: 'th' },
@@ -1843,18 +2106,38 @@ export async function generateCategoryBookletPdf(catId, summaryData, parcels, sc
 
   parcels.slice(0, 250).forEach((p, idx) => {
     const pt = resolveParcel46Points(p);
-    parcelBody.push([
-      { text: String(idx + 1), style: 'tdCenter' },
-      { text: cleanVillageName(p.villageName), style: 'td' },
-      { text: String(p.gatNumber || p.oldSurveyNo || '-'), style: 'tdCenter' },
-      { text: Number(p.totalAreaHa || 0).toFixed(4), style: 'tdRight' },
-      { text: p.currentOwner || 'नोंद उपलब्ध नाही', style: 'tdBold' },
-      { text: p.tenureDisplay || p.tenureClass || '-', style: 'tdCenter' },
-      { text: pt[37], style: 'tdCenter' },
-      { text: pt[36], style: 'tdCenter' },
-      { text: pt[40], style: 'tdCenter' },
-      { text: pt[41], style: 'tdCenter' }
-    ]);
+    if (isCat18) {
+      const hasPermit = pt[41] === 'होय' || p.tenancy89ARecords?.[0]?.isGenuineIndustrialUse || p.metadata?.auditPoints?.point_41 === 'होय' ? 'होय' : 'नाही';
+      const usageBreach = p.metadata?.auditPoints?.point_44 === 'नाही' || p.metadata?.auditPoints?.point_45_usage === 'होय' || (p.forwardCases?.some(fc => fc.violationType === 'UNAUTHORIZED_NA_CONVERSION')) ? 'होय' : 'नाही';
+      const transferBreach = p.metadata?.auditPoints?.point_45_transfer === 'होय' || p.tenancy89ARecords?.[0]?.unauthorizedTransfer || (p.forwardCases?.some(fc => fc.violationType === 'SHARTBHANG' || fc.violationType === 'TRIBAL_LAND_VIOLATION')) ? 'होय' : 'नाही';
+      const otherRightsNoted = pt[39] === 'होय' || (p.metadata?.otherRights && p.metadata?.otherRights !== '-' && p.metadata?.otherRights !== '....') ? 'होय' : 'नाही';
+
+      parcelBody.push([
+        { text: String(idx + 1), style: 'tdCenter' },
+        { text: cleanVillageName(p.villageName), style: 'td' },
+        { text: String(p.gatNumber || p.oldSurveyNo || '-'), style: 'tdCenter' },
+        { text: Number(p.totalAreaHa || 0).toFixed(4), style: 'tdRight' },
+        { text: p.currentOwner || p.metadata?.ownerName || 'नोंद उपलब्ध नाही', style: 'tdBold' },
+        { text: p.tenureDisplay || (p.tenureClass === 'BHOGVATDAR_CLASS_1' ? 'भोग वर्ग - १' : 'भोग वर्ग - २'), style: 'tdCenter' },
+        { text: hasPermit, style: 'tdCenter' },
+        { text: usageBreach, style: 'tdCenter' },
+        { text: transferBreach, style: 'tdCenter' },
+        { text: otherRightsNoted, style: 'tdCenter' }
+      ]);
+    } else {
+      parcelBody.push([
+        { text: String(idx + 1), style: 'tdCenter' },
+        { text: cleanVillageName(p.villageName), style: 'td' },
+        { text: String(p.gatNumber || p.oldSurveyNo || '-'), style: 'tdCenter' },
+        { text: Number(p.totalAreaHa || 0).toFixed(4), style: 'tdRight' },
+        { text: p.currentOwner || 'नोंद उपलब्ध नाही', style: 'tdBold' },
+        { text: p.tenureDisplay || p.tenureClass || '-', style: 'tdCenter' },
+        { text: pt[37], style: 'tdCenter' },
+        { text: pt[36], style: 'tdCenter' },
+        { text: pt[40], style: 'tdCenter' },
+        { text: pt[41], style: 'tdCenter' }
+      ]);
+    }
   });
 
   const docDefinition = {
@@ -1873,7 +2156,7 @@ export async function generateCategoryBookletPdf(catId, summaryData, parcels, sc
         margin: [0, 4, 0, 8]
       },
       // SECTION 1: GOSHWARA ROLLUP (SHEET 2)
-      { text: 'विभाग १: गोषवारा (Summary Rollup - Sheet 2 Format)', style: 'headerSub', margin: [0, 4, 0, 4] },
+      { text: isOnlySummary ? 'गोषवारा (Summary Rollup - Sheet 2 Format)' : 'विभाग १: गोषवारा (Summary Rollup - Sheet 2 Format)', style: 'headerSub', margin: [0, 4, 0, 4] },
       {
         table: {
           headerRows: 1,
@@ -1891,25 +2174,27 @@ export async function generateCategoryBookletPdf(catId, summaryData, parcels, sc
           vLineColor: () => '#CBD5E1'
         }
       },
-      // SECTION 2: DETAILED ACTUAL 7/12 RECORDS (SHEET 1)
-      { text: 'विभाग २: सविस्तर ७/१२ अभिलेख व खातेदार यादी', style: 'headerSub', pageBreak: 'before', margin: [0, 6, 0, 4] },
-      {
-        table: {
-          headerRows: 1,
-          widths: [24, 80, 50, 45, 160, 70, 70, 75, 75, 75],
-          body: parcelBody
-        },
-        layout: {
-          fillColor: (rowIndex) => {
-            if (rowIndex === 0) return '#1E3A8A';
-            return rowIndex % 2 === 0 ? '#F8FAFC' : null;
+      // SECTION 2: DETAILED ACTUAL 7/12 RECORDS (SHEET 1) - Included in Full Booklet
+      ...(isOnlySummary ? [] : [
+        { text: 'विभाग २: सविस्तर ७/१२ अभिलेख व खातेदार यादी', style: 'headerSub', pageBreak: 'before', margin: [0, 6, 0, 4] },
+        {
+          table: {
+            headerRows: 1,
+            widths: [24, 80, 50, 45, 160, 70, 70, 75, 75, 75],
+            body: parcelBody
           },
-          hLineWidth: () => 0.5,
-          vLineWidth: () => 0.5,
-          hLineColor: () => '#CBD5E1',
-          vLineColor: () => '#CBD5E1'
+          layout: {
+            fillColor: (rowIndex) => {
+              if (rowIndex === 0) return '#1E3A8A';
+              return rowIndex % 2 === 0 ? '#F8FAFC' : null;
+            },
+            hLineWidth: () => 0.5,
+            vLineWidth: () => 0.5,
+            hLineColor: () => '#CBD5E1',
+            vLineColor: () => '#CBD5E1'
+          }
         }
-      },
+      ]),
       // SECTION 3: SIGNATURES
       {
         margin: [0, 20, 0, 0],

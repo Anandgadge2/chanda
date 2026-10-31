@@ -26,6 +26,7 @@ import {
   Printer,
   Archive,
   Edit3,
+  Loader2,
 } from 'lucide-react';
 import EditParcelModal from './EditParcelModal';
 import { api } from '../lib/api';
@@ -73,6 +74,22 @@ export default function ParcelTraceDrawer({ upi, onClose, onRefresh }) {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [glossaryModalOpen, setGlossaryModalOpen] = useState(false);
   const [glossaryInitialQuery, setGlossaryInitialQuery] = useState('');
+  const [downloadingPdf, setDownloadingPdf] = useState(false);
+
+  // Handle Download / Print Dossier PDF
+  const handlePrintDossier = async () => {
+    if (!upi || downloadingPdf) return;
+    try {
+      setDownloadingPdf(true);
+      await api.downloadParcelDossierPdf(upi);
+    } catch (err) {
+      console.error('Failed to download dossier PDF:', err);
+      // Fallback: window.print() if network or backend fails
+      window.print();
+    } finally {
+      setDownloadingPdf(false);
+    }
+  };
 
   // Open Document Handler: switches to Right-Side Split View and loads document
   const handleOpenDocument = (epochOrItem, type = 'backward') => {
@@ -236,15 +253,20 @@ export default function ParcelTraceDrawer({ upi, onClose, onRefresh }) {
               <span className="hidden xs:inline">{isMarathi ? 'दुरुस्ती' : 'Edit'}</span>
             </button>
 
-            {/* Print / Export - Desktop/Tablet */}
+            {/* Print / Export Dossier PDF */}
             <button
               type="button"
-              onClick={() => window.print()}
-              className="hidden sm:flex px-2.5 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 border border-slate-200/80 transition items-center gap-1.5 cursor-pointer"
-              title={isMarathi ? 'अहवाल प्रिंट करा (Print Dossier)' : 'Print Dossier'}
+              disabled={downloadingPdf}
+              onClick={handlePrintDossier}
+              className="flex px-2 sm:px-2.5 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 border border-slate-200/80 transition items-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-2xs active:scale-95"
+              title={isMarathi ? 'अहवाल पीडीएफ डाऊनलोड करा (Download Dossier PDF)' : 'Download Dossier PDF'}
             >
-              <Printer className="w-3.5 h-3.5 text-slate-500" />
-              <span>{isMarathi ? 'प्रिंट' : 'Print'}</span>
+              {downloadingPdf ? (
+                <Loader2 className="w-3.5 h-3.5 text-blue-600 animate-spin" />
+              ) : (
+                <Printer className="w-3.5 h-3.5 text-slate-500" />
+              )}
+              <span>{downloadingPdf ? (isMarathi ? 'डाऊनलोड होत आहे...' : 'Downloading...') : (isMarathi ? 'प्रिंट' : 'Print')}</span>
             </button>
 
             {/* Split View Toggle */}

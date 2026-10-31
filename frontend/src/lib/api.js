@@ -203,6 +203,28 @@ export const api = {
     return res.json();
   },
 
+  downloadParcelDossierPdf: async (upi) => {
+    const res = await fetch(`${BASE_URL}/api/parcels/${encodeURIComponent(upi)}/export-pdf`, {
+      headers: {
+        ...getAuthHeaders(),
+      },
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ error: 'दस्तऐवज अहवाल पीडीएफ डाऊनलोड अयशस्वी झाले.' }));
+      throw new Error(err.error || 'दस्तऐवज अहवाल पीडीएफ डाऊनलोड अयशस्वी झाले.');
+    }
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    const safeUpi = upi.replace(/[^a-zA-Z0-9_-]/g, '_');
+    a.download = `Parcel_Dossier_${safeUpi}_${new Date().toISOString().slice(0, 10)}.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
+  },
+
   uploadVillageExcel: async (formData) => {
     const res = await fetch(`${BASE_URL}/api/parcels/bulk-upload`, {
       method: 'POST',

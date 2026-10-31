@@ -95,7 +95,8 @@ export const STATUTORY_SUB_TYPES = [
   { id: 14, nameMr: '१४. कमाल मर्यादेपेक्षा अधिक जमीन धारण करण्यास विशेष सूट दिलेल्या जमिनी' },
   { id: 15, nameMr: '१५. वक्फ बोर्डाचे मालकीची जमीन' },
   { id: 16, nameMr: '१६. भूसंपादन कायद्यांतर्गत अधिग्रहित / राखीव जमीन' },
-  { id: 17, nameMr: '१७. सामान्य / इतर खाजगी कृषक जमीन' }
+  { id: 17, nameMr: '१७. सामान्य / इतर खाजगी कृषक जमीन' },
+  { id: 18, nameMr: '१८. कुळ कायद्याचे कलम 89 व 89-अ/47 व 47 प्रमाणे धारण केलेली जमीन' }
 ];
 
 const EPOCH_OPTIONS = [
@@ -677,8 +678,8 @@ export default function EditParcelModal({ isOpen, onClose, parcel, onUpdateSucce
                   </select>
                   <p className="text-[11px] text-indigo-800 leading-normal">
                     {isMarathi
-                      ? 'हा उपप्रकार निवडल्यास हा सर्व्हे नंबर आपोआप संबंधित वैधानिक पुस्तकात (Booklet 1-17) आणि प्रपत्रात वर्गीकृत होईल.'
-                      : 'Selecting this sub-type categorizes this parcel into the appropriate statutory booklet and Prapatra report.'}
+                      ? 'हा उपप्रकार निवडल्यास हा सर्व्हे नंबर आपोआप संबंधित वैधानिक पुस्तकात (Booklet 1-18) आणि प्रपत्रात वर्गीकृत होईल.'
+                      : 'Selecting this sub-type categorizes this parcel into the appropriate statutory booklet (Booklet 1-18) and Prapatra report.'}
                   </p>
                 </div>
 

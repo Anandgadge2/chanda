@@ -4,6 +4,7 @@ import { generateSampleVillageTemplate } from '../utils/excelGenerator.js';
 import { invalidateAnalyticsCache } from './analyticsController.js';
 import { syncTalukaTotalRollup, recalculateVillageRollup, uploadPrapatraExcel } from './prapatraController.js';
 import { logAudit } from '../middleware/auditMiddleware.js';
+import { generateParcelDossierPdf } from '../utils/parcelDossierGenerator.js';
 
 /**
  * Bulk Ingest Village Excel Records
@@ -227,11 +228,11 @@ export const invalidateParcelCache = () => {
  */
 
 /**
- * Maps 1 to 17 Statutory Subject Booklets to Prisma filtering criteria
+ * Maps 1 to 18 Statutory Subject Booklets to Prisma filtering criteria
  */
 export function getBookletParcelConditions(category) {
   const num = parseInt(category, 10);
-  if (isNaN(num) || num < 1 || num > 17) return null;
+  if (isNaN(num) || num < 1 || num > 18) return null;
 
   switch (num) {
     case 1:
@@ -383,6 +384,17 @@ export function getBookletParcelConditions(category) {
         { metadata: { path: ['subTypeCategory'], string_contains: 'भूसंपादन' } },
         { metadata: { path: ['auditPoints', 'point_34'], equals: 'होय' } },
         { metadata: { path: ['auditPoints', 'point_35'], equals: 'होय' } }
+      ];
+    case 18:
+      return [
+        { tenancy89ARecords: { some: {} } },
+        { metadata: { path: ['otherRights'], string_contains: '89' } },
+        { metadata: { path: ['otherRights'], string_contains: '47' } },
+        { metadata: { path: ['otherRights'], string_contains: 'कंपनी' } },
+        { metadata: { path: ['subTypeCategory'], string_contains: '89' } },
+        { metadata: { path: ['subTypeCategory'], string_contains: 'कंपनी' } },
+        { metadata: { path: ['auditPoints', 'point_41'], equals: 'होय' } },
+        { metadata: { path: ['auditPoints', 'point_42'], equals: 'होय' } }
       ];
     default:
       return null;
@@ -621,6 +633,74 @@ export const getParcelTrace = async (req, res) => {
   } catch (err) {
     console.error('Parcel trace error:', err);
     res.status(500).json({ success: false, error: err.message });
+  }
+};
+
+/**
+ * Export 360-Degree Parcel Provenance Dossier as PDF
+ * GET /api/parcels/:upi/export-pdf
+ */
+export const exportParcelDossierPdf = async (req, res) => {
+  try {
+    const { upi } = req.params;
+
+    const parcel = await prisma.landParcel.findUnique({
+      where: { upi },
+      include: {
+        backwardHistories: {
+          orderBy: { epochYear: 'asc' },
+          include: {
+            documents: true,
+          },
+        },
+        forwardCases: {
+          orderBy: { createdAt: 'desc' },
+          include: {
+            hearings: {
+              orderBy: { hearingDate: 'desc' },
+            },
+            documents: true,
+          },
+        },
+        documents: {
+          orderBy: { uploadedAt: 'desc' },
+        },
+      },
+    });
+
+    if (!parcel) {
+      return res.status(404).json({ success: false, error: `Parcel with UPI ${upi} not found` });
+    }
+
+    const baseline1950 = parcel.backwardHistories.find((b) => b.epochYear === 1950);
+    const hasGovtHistoricalRoot = parcel.backwardHistories.some((b) => b.wasGovtLand || b.tenureClass === 'SARKAR_SHASAN');
+    const isCurrentlyPrivate = parcel.tenureClass === 'BHOGVATDAR_CLASS_1' || parcel.tenureClass === 'BHOGVATDAR_CLASS_2';
+    const potentialIllegalAlienation = hasGovtHistoricalRoot && isCurrentlyPrivate && parcel.forwardCases.length === 0;
+
+    const traceData = {
+      parcel,
+      intelligenceSummary: {
+        baseline1950Epoch: baseline1950 || null,
+        historicalEpochsCount: parcel.backwardHistories.length,
+        activeViolationsCount: parcel.forwardCases.filter((c) => c.status !== 'DISMISSED' && c.status !== 'RECTIFIED_7_12').length,
+        isRepossessedToGovt: parcel.forwardCases.some((c) => c.isRepossessedToGovt),
+        potentialIllegalAlienation,
+        totalDocumentsCount: parcel.documents.length,
+      },
+    };
+
+    const safeUpi = (parcel.upi || upi).replace(/[^a-zA-Z0-9_-]/g, '_');
+    const filename = `Parcel_Dossier_${safeUpi}_${Date.now()}.pdf`;
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+
+    await generateParcelDossierPdf(traceData, res);
+  } catch (err) {
+    console.error('Export parcel dossier PDF error:', err);
+    if (!res.headersSent) {
+      res.status(500).json({ success: false, error: err.message });
+    }
   }
 };
 

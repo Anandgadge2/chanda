@@ -55,8 +55,11 @@ export const BOOKLET_17_CATEGORIES = [
   { id: 14, nameMr: '१४. भूमीधारी हक्क प्राप्त जमिनी', nameEn: '14. Bhumidhari Rights Lands', shortMr: '१४. भूमीधारी हक्क', shortEn: '14. Bhumidhari' },
   { id: 15, nameMr: '१५. कमाल जमीन धारणा सूट जमीन', nameEn: '15. Ceiling Exemption Holdings', shortMr: '१५. कमाल धारणा सूट', shortEn: '15. Ceiling Exemption' },
   { id: 16, nameMr: '१६. वक्फ बोर्डाचे मालकीची जमीन', nameEn: '16. Waqf Board Registered Lands', shortMr: '१६. वक्फ बोर्ड जमीन', shortEn: '16. Waqf Board' },
-  { id: 17, nameMr: '१७. भूसंपादन अधिग्रहित / राखीव जमीन', nameEn: '17. Land Acquisition Reserved Lands', shortMr: '१७. भूसंपादन / राखीव', shortEn: '17. Land Acquisition' }
+  { id: 17, nameMr: '१७. भूसंपादन अधिग्रहित / राखीव जमीन', nameEn: '17. Land Acquisition Reserved Lands', shortMr: '१७. भूसंपादन / राखीव', shortEn: '17. Land Acquisition' },
+  { id: 18, nameMr: '१८. कुळ कायद्याचे कलम 89 व 89-अ/47 व 47 प्रमाणे धारण केलेली जमीन', nameEn: '18. Tenancy Act Sec 89/89-A/47 Holdings', shortMr: '१८. कलम ८९ व ४७ जमीन', shortEn: '18. Sec 89/47 Holdings' }
 ];
+
+export const BOOKLET_18_CATEGORIES = BOOKLET_17_CATEGORIES;
 
 export default function ParcelsPage() {
   const { isMarathi } = useTranslation();
@@ -400,8 +403,8 @@ export default function ParcelsPage() {
   const bookletSelectOptions = useMemo(() => [
     {
       value: '',
-      label: isMarathi ? 'सर्व प्रपत्र / विषय (१-१७)' : 'All Booklets (1-17)',
-      subtext: isMarathi ? '१७ वैधानिक विषय पुस्तिका' : '17 Statutory Booklets'
+      label: isMarathi ? 'सर्व प्रपत्र / विषय (१-१८)' : 'All Booklets (1-18)',
+      subtext: isMarathi ? '१८ वैधानिक विषय पुस्तिका' : '18 Statutory Booklets'
     },
     ...BOOKLET_17_CATEGORIES.map((cat) => ({
       value: String(cat.id),
@@ -654,7 +657,7 @@ export default function ParcelsPage() {
               options={bookletSelectOptions}
               value={bookletCategory}
               onChange={(val) => setBookletCategory(val)}
-              placeholder={isMarathi ? 'सर्व प्रपत्र / विषय' : 'All Booklets (1-17)'}
+              placeholder={isMarathi ? 'सर्व प्रपत्र / विषय (१-१८)' : 'All Booklets (1-18)'}
               searchPlaceholder={isMarathi ? 'प्रपत्र / विषय शोधा...' : 'Search booklets...'}
               icon={BookOpen}
               showCount={false}
