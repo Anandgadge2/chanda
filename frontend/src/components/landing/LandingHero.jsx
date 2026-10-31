@@ -37,12 +37,29 @@ const CHANDRAPUR_BANNERS = [
     primaryHref: '/parcels',
   },
   {
+    id: 'collectorate-bhavan',
+    image: '/images/chandrapur_collectorate_bhavan.jpg',
+    shortLabelMr: 'प्रशासकीय संकुल',
+    shortLabelEn: 'Collectorate Campus',
+    numeralMr: '०२',
+    numeralEn: '02',
+    badgeMr: 'जिल्हाधिकारी कार्यालय • मुख्य संकुल',
+    badgeEn: 'Collectorate Campus • Main Bhavan',
+    titleMr: 'जिल्हाधिकारी कार्यालय, चंद्रपूर • मुख्य प्रशासकीय संकुल',
+    titleEn: 'District Collectorate Office, Chandrapur • Administrative Campus',
+    descMr: 'चंद्रपूर जिल्ह्याचे सर्वोच्च महसूल व प्रशासकीय केंद्र, जिल्हादंडाधिकारी, अपर जिल्हाधिकारी व भूमी अभिलेख समन्वय मुख्यालय.',
+    descEn: 'Apex administrative and revenue headquarters of Chandrapur district, coordinating revenue administration, magisterial oversight and land records governance.',
+    primaryCtaMr: 'प्रशासकीय रचना व डॅशबोर्ड',
+    primaryCtaEn: 'View Revenue Dashboard',
+    primaryHref: '/dashboard',
+  },
+  {
     id: 'fort',
     image: '/images/chandrapur_fort.jpg',
     shortLabelMr: 'चांदा किल्ला',
     shortLabelEn: 'Chanda Fort',
-    numeralMr: '०२',
-    numeralEn: '02',
+    numeralMr: '०३',
+    numeralEn: '03',
     badgeMr: 'ऐतिहासिक वारसा • गोंड साम्राज्य',
     badgeEn: 'Historic Heritage • Gond Dynasty',
     titleMr: 'चांदा किल्ला व ऐतिहासिक तटबंदी',
@@ -58,8 +75,8 @@ const CHANDRAPUR_BANNERS = [
     image: '/images/tadoba_reserve.jpg',
     shortLabelMr: 'ताडोबा वनसंपदा',
     shortLabelEn: 'Tadoba Reserve',
-    numeralMr: '०३',
-    numeralEn: '03',
+    numeralMr: '०४',
+    numeralEn: '04',
     badgeMr: 'वनजमीन व पर्यावरण संवर्धन',
     badgeEn: 'Forest Land & Conservation',
     titleMr: 'ताडोबा-अंधारी वनसंपदा व इरई खोरे',
@@ -75,8 +92,8 @@ const CHANDRAPUR_BANNERS = [
     image: '/images/mahakali_temple.jpg',
     shortLabelMr: 'महाकाली मंदिर',
     shortLabelEn: 'Mahakali Temple',
-    numeralMr: '०४',
-    numeralEn: '04',
+    numeralMr: '०५',
+    numeralEn: '05',
     badgeMr: 'धार्मिक व देवस्थान इनाम जमीन',
     badgeEn: 'Religious & Devasthan Inam Land',
     titleMr: 'श्री महाकाली देवी मंदिर देवस्थान',
@@ -92,8 +109,8 @@ const CHANDRAPUR_BANNERS = [
     image: '/images/ballarpur_industrial.jpg',
     shortLabelMr: 'बल्लारपूर औद्योगिक',
     shortLabelEn: 'Ballarpur Industrial',
-    numeralMr: '०५',
-    numeralEn: '05',
+    numeralMr: '०६',
+    numeralEn: '06',
     badgeMr: 'खनिज व औद्योगिक विकास',
     badgeEn: 'Mining & Industrial Zone',
     titleMr: 'बल्लारपूर कोळसा व औद्योगिक क्षेत्र',
@@ -109,8 +126,8 @@ const CHANDRAPUR_BANNERS = [
     image: '/images/anandwan_warora.jpg',
     shortLabelMr: 'आनंदवन वरोरा',
     shortLabelEn: 'Anandwan Warora',
-    numeralMr: '०६',
-    numeralEn: '06',
+    numeralMr: '०७',
+    numeralEn: '07',
     badgeMr: 'समाजसेवा भूमी वारसा',
     badgeEn: 'Humanitarian Land Heritage',
     titleMr: 'आनंदवन, वरोरा • सामाजिक संस्था',
@@ -265,7 +282,9 @@ export default function LandingHero({ onOpenAuth }) {
               <span className="px-2 text-[10px] sm:text-xs font-mono font-bold text-amber-300 tracking-wider">
                 {isMarathi ? activeBanner.numeralMr : activeBanner.numeralEn}
                 <span className="text-white/40 font-normal mx-0.5">/</span>
-                {isMarathi ? '०६' : '06'}
+                {isMarathi
+                  ? String(CHANDRAPUR_BANNERS.length).replace(/\d/g, (d) => '०१२३४५६७८९'[d]).padStart(2, '०')
+                  : String(CHANDRAPUR_BANNERS.length).padStart(2, '0')}
               </span>
 
               <button
@@ -322,10 +341,13 @@ export default function LandingHero({ onOpenAuth }) {
               </div>
             </div>
 
-            {/* Seamless 6-Landmark Progress Tabs */}
+            {/* Seamless Landmark Progress Tabs */}
             <div className="pt-1 border-t border-white/15">
               {/* Desktop / Tablet Segments */}
-              <div className="hidden sm:grid grid-cols-6 gap-2 sm:gap-3">
+              <div
+                className="hidden sm:grid gap-2 sm:gap-3"
+                style={{ gridTemplateColumns: `repeat(${CHANDRAPUR_BANNERS.length}, minmax(0, 1fr))` }}
+              >
                 {CHANDRAPUR_BANNERS.map((banner, index) => {
                   const isActive = index === currentSlide;
                   return (
@@ -377,10 +399,15 @@ export default function LandingHero({ onOpenAuth }) {
                 <div className="flex items-center justify-between text-[11px] font-semibold text-white">
                   <span className="text-amber-300 font-bold">{isMarathi ? activeBanner.shortLabelMr : activeBanner.shortLabelEn}</span>
                   <span className="text-white/60 text-[10px]">
-                    {isMarathi ? activeBanner.numeralMr : activeBanner.numeralEn} / {isMarathi ? '०६' : '06'}
+                    {isMarathi ? activeBanner.numeralMr : activeBanner.numeralEn} / {isMarathi
+                      ? String(CHANDRAPUR_BANNERS.length).replace(/\d/g, (d) => '०१२३४५६७८९'[d]).padStart(2, '०')
+                      : String(CHANDRAPUR_BANNERS.length).padStart(2, '0')}
                   </span>
                 </div>
-                <div className="grid grid-cols-6 gap-1.5">
+                <div
+                  className="grid gap-1.5"
+                  style={{ gridTemplateColumns: `repeat(${CHANDRAPUR_BANNERS.length}, minmax(0, 1fr))` }}
+                >
                   {CHANDRAPUR_BANNERS.map((banner, index) => {
                     const isActive = index === currentSlide;
                     return (
