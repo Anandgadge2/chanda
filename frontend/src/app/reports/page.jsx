@@ -2021,6 +2021,15 @@ export default function ReportsPage() {
     );
   };
 
+  const renderTableLoadingOverlay = () => (
+    <div className="absolute inset-0 bg-white/75 backdrop-blur-[2px] z-30 flex flex-col items-center justify-center p-6 min-h-[220px] select-none">
+      <div className="w-8 h-8 border-2 border-blue-900 border-t-amber-500 rounded-full animate-spin mb-2.5" />
+      <p className="text-xs font-bold text-slate-700">
+        {isMarathi ? 'अहवाल व तपासणी डेटा लोड होत आहे...' : 'Loading report and inspection data...'}
+      </p>
+    </div>
+  );
+
   return (
     <div className="space-y-3 sm:space-y-4 font-sans text-slate-800">
       <div className="w-full space-y-3 sm:space-y-4">
@@ -2361,12 +2370,12 @@ export default function ReportsPage() {
                   {loading ? (
                     <>
                       <RefreshCw className="w-3.5 h-3.5 animate-spin text-blue-200 shrink-0" />
-                      <span>{isMarathi ? 'लागू करत आहे...' : 'Applying...'}</span>
+                      <span className="whitespace-nowrap">{isMarathi ? 'लागू करा' : 'Apply'}</span>
                     </>
                   ) : (
                     <>
                       <Filter className="w-3.5 h-3.5 shrink-0" />
-                      <span>{isMarathi ? 'लागू करा' : 'Apply'}</span>
+                      <span className="whitespace-nowrap">{isMarathi ? 'लागू करा' : 'Apply'}</span>
                     </>
                   )}
                 </button>
@@ -2418,10 +2427,10 @@ export default function ReportsPage() {
               showMobileFilters
                 ? ((isGoshwaraView || activeTab === 'prapatra5')
                     ? 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 max-w-4xl pt-1'
-                    : 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 pt-1')
+                    : 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6 pt-1')
                 : ((isGoshwaraView || activeTab === 'prapatra5')
                     ? 'hidden md:grid md:grid-cols-3 max-w-4xl'
-                    : 'hidden md:grid md:grid-cols-3 lg:grid-cols-6')
+                    : 'hidden md:grid md:grid-cols-3 xl:grid-cols-6')
             )}
           >
             {/* 1. Taluka Dropdown */}
@@ -2552,7 +2561,7 @@ export default function ReportsPage() {
                   onClick={handleApplyFilters}
                   disabled={loading}
                   className={clsx(
-                    'flex-1 text-xs font-bold py-1.5 px-3 rounded-xl shadow-xs transition-all flex items-center justify-center gap-1.5 active:scale-95 h-[36px]',
+                    'flex-1 text-xs font-bold py-1.5 px-3 rounded-xl shadow-xs transition-all flex items-center justify-center gap-1.5 active:scale-95 h-[36px] whitespace-nowrap min-w-[80px]',
                     loading
                       ? 'bg-blue-800 text-white cursor-wait opacity-90 shadow-inner'
                       : isFilterPending
@@ -2564,12 +2573,12 @@ export default function ReportsPage() {
                   {loading ? (
                     <>
                       <RefreshCw className="w-3.5 h-3.5 shrink-0 animate-spin text-blue-200" />
-                      <span>{isMarathi ? 'लागू करत आहे...' : 'Applying...'}</span>
+                      <span className="whitespace-nowrap">{isMarathi ? 'लागू करा' : 'Apply'}</span>
                     </>
                   ) : (
                     <>
                       <Filter className="w-3.5 h-3.5 shrink-0" />
-                      <span>{isMarathi ? 'लागू करा' : 'Apply'}</span>
+                      <span className="whitespace-nowrap">{isMarathi ? 'लागू करा' : 'Apply'}</span>
                       {isFilterPending && (
                         <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse shrink-0" />
                       )}
@@ -2581,11 +2590,11 @@ export default function ReportsPage() {
                   type="button"
                   onClick={handleResetFilters}
                   disabled={loading}
-                  className="inline-flex items-center justify-center gap-1 px-3 py-1.5 bg-slate-100 hover:bg-rose-50 text-slate-700 hover:text-rose-700 border border-slate-300 hover:border-rose-300 rounded-xl font-bold text-xs transition-all active:scale-95 shadow-2xs cursor-pointer shrink-0 h-[36px]"
+                  className="inline-flex items-center justify-center gap-1 px-2.5 py-1.5 bg-slate-100 hover:bg-rose-50 text-slate-700 hover:text-rose-700 border border-slate-300 hover:border-rose-300 rounded-xl font-bold text-xs transition-all active:scale-95 shadow-2xs cursor-pointer shrink-0 h-[36px] whitespace-nowrap"
                   title={isMarathi ? 'सर्व फिल्टर्स रीसेट करा' : 'Reset all filters'}
                 >
                   <RotateCcw className="w-3.5 h-3.5 text-rose-600 shrink-0" />
-                  <span>{isMarathi ? 'रीसेट' : 'Reset'}</span>
+                  <span className="whitespace-nowrap">{isMarathi ? 'रीसेट' : 'Reset'}</span>
                 </button>
 
                 <button
@@ -2611,32 +2620,40 @@ export default function ReportsPage() {
         <div className={`grid grid-cols-2 sm:grid-cols-4 gap-3 transition-all duration-300 relative ${
           loading ? 'opacity-55 pointer-events-none select-none filter contrast-95' : 'opacity-100'
         }`}>
-          {/* Card 1: Total Parcels */}
+          {/* Card 1: Total Parcels (Sky / Blue - Master Inventory) */}
           <button
             type="button"
             onClick={() => handleKpiCardClick('all')}
-            className={`text-left rounded-2xl p-3.5 transition-all duration-200 border cursor-pointer select-none group relative focus:outline-none focus:ring-2 focus:ring-blue-500/50 ${
+            className={`text-left rounded-2xl p-3.5 transition-all duration-200 border cursor-pointer select-none group relative overflow-hidden focus:outline-none focus:ring-2 focus:ring-sky-500/50 ${
               selectedKpiFilter === 'all'
-                ? 'bg-blue-50/80 border-blue-500 shadow-sm ring-2 ring-blue-400/40'
-                : 'bg-white border-slate-200/80 shadow-xs hover:border-blue-300 hover:shadow-md hover:-translate-y-0.5'
+                ? 'bg-gradient-to-br from-sky-100/90 via-blue-50/70 to-white border-sky-500 shadow-md ring-2 ring-sky-500/30'
+                : 'bg-gradient-to-br from-sky-50/90 via-blue-50/40 to-white/95 border-sky-200/80 shadow-2xs hover:border-sky-300 hover:shadow-md hover:-translate-y-0.5'
             }`}
           >
-            <div className="flex items-center justify-between gap-1">
-              <span className={`text-[11px] font-bold transition ${selectedKpiFilter === 'all' ? 'text-blue-900 font-extrabold' : 'text-slate-500 group-hover:text-blue-800'}`}>
+            {/* Top Gradient Accent Stripe */}
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-sky-500 via-blue-600 to-indigo-600" />
+            <div className="flex items-center justify-between gap-1 pt-0.5">
+              <span className={`text-[11px] font-bold transition ${selectedKpiFilter === 'all' ? 'text-sky-950 font-black' : 'text-slate-700 group-hover:text-sky-950'}`}>
                 {isMarathi ? 'एकूण सर्व्हे / गट संख्या' : 'Total Survey / Gat Parcels'}
               </span>
               {selectedKpiFilter === 'all' && (
-                <span className="text-[9px] font-extrabold px-1.5 py-0.2 bg-blue-600 text-white rounded-md tracking-wider shadow-2xs">
+                <span className="text-[9px] font-extrabold px-1.5 py-0.5 bg-sky-600 text-white rounded-md tracking-wider shadow-2xs">
                   {isMarathi ? 'सर्व' : 'ALL'}
                 </span>
               )}
             </div>
-            <div className="text-xl font-black text-slate-900 mt-1">{stats.totalCount}</div>
+            {loading ? (
+              <div className="h-7 w-20 bg-sky-100/70 animate-pulse rounded-lg mt-1 flex items-center">
+                <span className="text-[10px] text-sky-700 font-bold px-2">{isMarathi ? 'लोड होत आहे...' : 'Loading...'}</span>
+              </div>
+            ) : (
+              <div className="text-xl font-black text-slate-900 group-hover:text-sky-950 mt-1 font-mono">{stats.totalCount}</div>
+            )}
             <div className="flex items-center justify-between text-[10px] mt-0.5">
               <span className="text-slate-500 font-medium">
                 {isMarathi ? 'तपासणी केलेले ७/१२' : 'Audited 7/12 Records'}
               </span>
-              <span className={`text-[9px] font-bold transition flex items-center gap-0.5 ${loading ? 'text-blue-600 animate-pulse' : selectedKpiFilter === 'all' ? 'text-blue-700' : 'text-slate-400 group-hover:text-blue-600'}`}>
+              <span className={`text-[9px] font-bold transition flex items-center gap-0.5 ${loading ? 'text-sky-600 animate-pulse' : selectedKpiFilter === 'all' ? 'text-sky-700' : 'text-slate-400 group-hover:text-sky-600'}`}>
                 {loading
                   ? (isMarathi ? '● अद्ययावत...' : '● Updating...')
                   : selectedKpiFilter === 'all'
@@ -2646,29 +2663,37 @@ export default function ReportsPage() {
             </div>
           </button>
 
-          {/* Card 2: Total Area */}
+          {/* Card 2: Total Area (Emerald / Mint - Land Acreage) */}
           <button
             type="button"
             onClick={() => handleKpiCardClick('area')}
-            className={`text-left rounded-2xl p-3.5 transition-all duration-200 border cursor-pointer select-none group relative focus:outline-none focus:ring-2 focus:ring-emerald-500/50 ${
+            className={`text-left rounded-2xl p-3.5 transition-all duration-200 border cursor-pointer select-none group relative overflow-hidden focus:outline-none focus:ring-2 focus:ring-emerald-500/50 ${
               selectedKpiFilter === 'area'
-                ? 'bg-emerald-50/80 border-emerald-500 shadow-sm ring-2 ring-emerald-400/40'
-                : 'bg-white border-slate-200/80 shadow-xs hover:border-emerald-300 hover:shadow-md hover:-translate-y-0.5'
+                ? 'bg-gradient-to-br from-emerald-100/90 via-teal-50/70 to-white border-emerald-500 shadow-md ring-2 ring-emerald-500/30'
+                : 'bg-gradient-to-br from-emerald-50/90 via-teal-50/40 to-white/95 border-emerald-200/80 shadow-2xs hover:border-emerald-300 hover:shadow-md hover:-translate-y-0.5'
             }`}
           >
-            <div className="flex items-center justify-between gap-1">
-              <span className={`text-[11px] font-bold transition ${selectedKpiFilter === 'area' ? 'text-emerald-950 font-extrabold' : 'text-slate-500 group-hover:text-emerald-800'}`}>
+            {/* Top Gradient Accent Stripe */}
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600" />
+            <div className="flex items-center justify-between gap-1 pt-0.5">
+              <span className={`text-[11px] font-bold transition ${selectedKpiFilter === 'area' ? 'text-emerald-950 font-black' : 'text-slate-700 group-hover:text-emerald-950'}`}>
                 {isMarathi ? 'एकूण क्षेत्र (हेक्टर)' : 'Total Area (Ha)'}
               </span>
               {selectedKpiFilter === 'area' && (
-                <span className="text-[9px] font-extrabold px-1.5 py-0.2 bg-emerald-600 text-white rounded-md tracking-wider shadow-2xs">
+                <span className="text-[9px] font-extrabold px-1.5 py-0.5 bg-emerald-600 text-white rounded-md tracking-wider shadow-2xs">
                   {isMarathi ? 'सक्रिय' : 'ACTIVE'}
                 </span>
               )}
             </div>
-            <div className="text-xl font-black text-emerald-800 mt-1">{stats.totalAreaHa}</div>
+            {loading ? (
+              <div className="h-7 w-24 bg-emerald-100 animate-pulse rounded-lg mt-1 flex items-center">
+                <span className="text-[10px] text-emerald-700 font-bold px-2">{isMarathi ? 'गणना सुरू...' : 'Calculating...'}</span>
+              </div>
+            ) : (
+              <div className="text-xl font-black text-emerald-950 mt-1 font-mono">{stats.totalAreaHa}</div>
+            )}
             <div className="flex items-center justify-between text-[10px] mt-0.5">
-              <span className="text-slate-500 font-medium">
+              <span className="text-emerald-800/80 font-medium">
                 {isMarathi ? 'हेक्टर आर क्षेत्र' : 'Hectare-Are Area'}
               </span>
               <span className={`text-[9px] font-bold transition flex items-center gap-0.5 ${loading ? 'text-emerald-600 animate-pulse' : selectedKpiFilter === 'area' ? 'text-emerald-700' : 'text-slate-400 group-hover:text-emerald-600'}`}>
@@ -2681,32 +2706,40 @@ export default function ReportsPage() {
             </div>
           </button>
 
-          {/* Card 3: Class 2 / Govt */}
+          {/* Card 3: Class 2 / Govt (Indigo / Violet - Restricted Tenure) */}
           <button
             type="button"
             onClick={() => handleKpiCardClick('class2')}
-            className={`text-left rounded-2xl p-3.5 transition-all duration-200 border cursor-pointer select-none group relative focus:outline-none focus:ring-2 focus:ring-amber-500/50 ${
+            className={`text-left rounded-2xl p-3.5 transition-all duration-200 border cursor-pointer select-none group relative overflow-hidden focus:outline-none focus:ring-2 focus:ring-indigo-500/50 ${
               selectedKpiFilter === 'class2'
-                ? 'bg-amber-50/80 border-amber-500 shadow-sm ring-2 ring-amber-400/40'
-                : 'bg-white border-slate-200/80 shadow-xs hover:border-amber-300 hover:shadow-md hover:-translate-y-0.5'
+                ? 'bg-gradient-to-br from-indigo-100/90 via-violet-50/70 to-white border-indigo-500 shadow-md ring-2 ring-indigo-500/30'
+                : 'bg-gradient-to-br from-indigo-50/90 via-violet-50/40 to-white/95 border-indigo-200/80 shadow-2xs hover:border-indigo-300 hover:shadow-md hover:-translate-y-0.5'
             }`}
           >
-            <div className="flex items-center justify-between gap-1">
-              <span className={`text-[11px] font-bold transition ${selectedKpiFilter === 'class2' ? 'text-amber-950 font-extrabold' : 'text-slate-500 group-hover:text-amber-800'}`}>
+            {/* Top Gradient Accent Stripe */}
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500 via-violet-600 to-purple-600" />
+            <div className="flex items-center justify-between gap-1 pt-0.5">
+              <span className={`text-[11px] font-bold transition ${selectedKpiFilter === 'class2' ? 'text-indigo-950 font-black' : 'text-slate-700 group-hover:text-indigo-950'}`}>
                 {isMarathi ? 'भोगवटादार वर्ग २ / शासकीय' : 'Class-2 / Govt Land'}
               </span>
               {selectedKpiFilter === 'class2' && (
-                <span className="text-[9px] font-extrabold px-1.5 py-0.2 bg-amber-600 text-white rounded-md tracking-wider shadow-2xs">
+                <span className="text-[9px] font-extrabold px-1.5 py-0.5 bg-indigo-600 text-white rounded-md tracking-wider shadow-2xs">
                   {isMarathi ? 'सक्रिय' : 'ACTIVE'}
                 </span>
               )}
             </div>
-            <div className="text-xl font-black text-amber-600 mt-1">{stats.class2Count}</div>
+            {loading ? (
+              <div className="h-7 w-20 bg-indigo-100 animate-pulse rounded-lg mt-1 flex items-center">
+                <span className="text-[10px] text-indigo-700 font-bold px-2">{isMarathi ? 'लोड होत आहे...' : 'Loading...'}</span>
+              </div>
+            ) : (
+              <div className="text-xl font-black text-indigo-950 mt-1 font-mono">{stats.class2Count}</div>
+            )}
             <div className="flex items-center justify-between text-[10px] mt-0.5">
               <span className="text-slate-500 font-medium">
                 {isMarathi ? 'अविभाज्य शर्तीवरील जमिनी' : 'Restricted Tenure Holdings'}
               </span>
-              <span className={`text-[9px] font-bold transition flex items-center gap-0.5 ${loading ? 'text-amber-600 animate-pulse' : selectedKpiFilter === 'class2' ? 'text-amber-700' : 'text-slate-400 group-hover:text-amber-600'}`}>
+              <span className={`text-[9px] font-bold transition flex items-center gap-0.5 ${loading ? 'text-indigo-600 animate-pulse' : selectedKpiFilter === 'class2' ? 'text-indigo-700' : 'text-slate-400 group-hover:text-indigo-600'}`}>
                 {loading
                   ? (isMarathi ? '● अद्ययावत...' : '● Updating...')
                   : selectedKpiFilter === 'class2'
@@ -2716,32 +2749,40 @@ export default function ReportsPage() {
             </div>
           </button>
 
-          {/* Card 4: Breaches / Violations */}
+          {/* Card 4: Breaches / Violations (Amber / Warm Coral - Compliance Caution) */}
           <button
             type="button"
             onClick={() => handleKpiCardClick('violations')}
-            className={`text-left rounded-2xl p-3.5 transition-all duration-200 border cursor-pointer select-none group relative focus:outline-none focus:ring-2 focus:ring-rose-500/50 ${
+            className={`text-left rounded-2xl p-3.5 transition-all duration-200 border cursor-pointer select-none group relative overflow-hidden focus:outline-none focus:ring-2 focus:ring-amber-500/50 ${
               selectedKpiFilter === 'violations'
-                ? 'bg-rose-50/80 border-rose-500 shadow-sm ring-2 ring-rose-400/40'
-                : 'bg-white border-slate-200/80 shadow-xs hover:border-rose-300 hover:shadow-md hover:-translate-y-0.5'
+                ? 'bg-gradient-to-br from-amber-100/90 via-orange-50/70 to-white border-amber-500 shadow-md ring-2 ring-amber-500/30'
+                : 'bg-gradient-to-br from-amber-50/90 via-orange-50/40 to-white/95 border-amber-200/80 shadow-2xs hover:border-amber-300 hover:shadow-md hover:-translate-y-0.5'
             }`}
           >
-            <div className="flex items-center justify-between gap-1">
-              <span className={`text-[11px] font-bold transition ${selectedKpiFilter === 'violations' ? 'text-rose-950 font-extrabold' : 'text-slate-500 group-hover:text-rose-800'}`}>
+            {/* Top Gradient Accent Stripe */}
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600" />
+            <div className="flex items-center justify-between gap-1 pt-0.5">
+              <span className={`text-[11px] font-bold transition ${selectedKpiFilter === 'violations' ? 'text-amber-950 font-black' : 'text-slate-700 group-hover:text-amber-950'}`}>
                 {isMarathi ? 'शर्तभंग / संशयित बाबी' : 'Breaches / Flagged Issues'}
               </span>
               {selectedKpiFilter === 'violations' && (
-                <span className="text-[9px] font-extrabold px-1.5 py-0.2 bg-rose-600 text-white rounded-md tracking-wider shadow-2xs">
+                <span className="text-[9px] font-extrabold px-1.5 py-0.5 bg-amber-600 text-white rounded-md tracking-wider shadow-2xs">
                   {isMarathi ? 'सक्रिय' : 'ACTIVE'}
                 </span>
               )}
             </div>
-            <div className="text-xl font-black text-rose-600 mt-1">{stats.shartbhangCount}</div>
+            {loading ? (
+              <div className="h-7 w-20 bg-amber-100 animate-pulse rounded-lg mt-1 flex items-center">
+                <span className="text-[10px] text-amber-700 font-bold px-2">{isMarathi ? 'तपासणी सुरू...' : 'Auditing...'}</span>
+              </div>
+            ) : (
+              <div className="text-xl font-black text-amber-950 mt-1 font-mono">{stats.shartbhangCount}</div>
+            )}
             <div className="flex items-center justify-between text-[10px] mt-0.5">
-              <span className="text-slate-500 font-medium">
+              <span className="text-amber-800/80 font-medium">
                 {isMarathi ? 'विशेष चौकशी आवश्यक' : 'Inquiry Required'}
               </span>
-              <span className={`text-[9px] font-bold transition flex items-center gap-0.5 ${loading ? 'text-rose-600 animate-pulse' : selectedKpiFilter === 'violations' ? 'text-rose-700' : 'text-slate-400 group-hover:text-rose-600'}`}>
+              <span className={`text-[9px] font-bold transition flex items-center gap-0.5 ${loading ? 'text-amber-600 animate-pulse' : selectedKpiFilter === 'violations' ? 'text-amber-700' : 'text-slate-400 group-hover:text-amber-600'}`}>
                 {loading
                   ? (isMarathi ? '● अद्ययावत...' : '● Updating...')
                   : selectedKpiFilter === 'violations'
@@ -2778,9 +2819,9 @@ export default function ReportsPage() {
               : 'border-slate-200/80'
           }`}
         >
-          {/* Top Sleek Accent Indeterminate Progress Line */}
+          {/* Top Progress Line */}
           <div className={`h-1 w-full bg-slate-100 overflow-hidden transition-opacity duration-200 ${loading ? 'opacity-100' : 'opacity-0'}`}>
-            <div className="h-full bg-gradient-to-r from-blue-500 via-indigo-600 to-blue-500 w-full animate-pulse" />
+            <div className="h-full bg-blue-600 w-full animate-pulse" />
           </div>
           
           {/* Card Sub-Header & Table View Toggle */}
@@ -3170,14 +3211,7 @@ export default function ReportsPage() {
                     </tbody>
                   </table>
 
-                  {loading && paginatedParcels.length > 0 && (
-                    <div className="absolute inset-0 bg-white/30 backdrop-blur-[0.5px] z-30 flex items-center justify-center pointer-events-none animate-in fade-in duration-150">
-                      <div className="inline-flex items-center gap-2.5 px-4 py-2 bg-slate-900/90 text-white text-xs font-bold rounded-2xl shadow-xl border border-white/20 backdrop-blur-md">
-                        <RefreshCw className="w-4 h-4 text-blue-400 animate-spin" />
-                        <span>{isMarathi ? 'नवीन डेटा अद्ययावत होत आहे...' : 'Updating records...'}</span>
-                      </div>
-                    </div>
-                  )}
+                  {loading && renderTableLoadingOverlay()}
                 </div>
 
                 {/* Pagination */}
@@ -3204,7 +3238,8 @@ export default function ReportsPage() {
               /* =========================================================
                   17 CATEGORY SUBJECT SUMMARY TABLE
               ========================================================= */
-              <div className="space-y-4 p-3.5 sm:p-4">
+              <div className="space-y-4 p-3.5 sm:p-4 relative">
+                {loading && renderTableLoadingOverlay()}
                 <div className="p-3 sm:p-4 bg-gradient-to-r from-indigo-50 via-blue-50/50 to-white border border-indigo-200/90 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-2xs">
                   <div className="flex items-center gap-2.5">
                     <div className="w-9 h-9 rounded-xl bg-indigo-800 text-white flex items-center justify-center shrink-0 shadow-2xs">
@@ -3727,14 +3762,7 @@ export default function ReportsPage() {
                   </table>
                   )}
 
-                  {loading && paginatedParcels.length > 0 && (
-                    <div className="absolute inset-0 bg-white/30 backdrop-blur-[0.5px] z-30 flex items-center justify-center pointer-events-none animate-in fade-in duration-150">
-                      <div className="inline-flex items-center gap-2.5 px-4 py-2 bg-slate-900/90 text-white text-xs font-bold rounded-2xl shadow-xl border border-white/20 backdrop-blur-md">
-                        <RefreshCw className="w-4 h-4 text-blue-400 animate-spin" />
-                        <span>{isMarathi ? 'नवीन डेटा अद्ययावत होत आहे...' : 'Updating records...'}</span>
-                      </div>
-                    </div>
-                  )}
+                  {loading && renderTableLoadingOverlay()}
                 </div>
 
                 {kpiFilteredParcels.length > 0 && (
@@ -3930,12 +3958,23 @@ export default function ReportsPage() {
 
                   <tbody className={`divide-y divide-slate-100 font-sans transition-opacity duration-200 ${loading ? 'opacity-40 pointer-events-none select-none' : 'opacity-100'}`}>
                     {loading && paginatedParcels.length === 0 ? (
-                      <tr>
-                        <td colSpan={54} className="py-20 text-center">
-                          <div className="w-8 h-8 border-[3px] border-slate-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-2" />
-                          <span className="text-xs text-slate-500 font-semibold">{isMarathi ? 'डेटा लोड होत आहे...' : 'Loading data...'}</span>
-                        </td>
-                      </tr>
+                      Array.from({ length: 8 }).map((_, sIdx) => (
+                        <tr key={`skel-timeline-${sIdx}`} className="animate-pulse border-b border-slate-100 bg-white">
+                          <td className="py-2.5 px-2 text-center border-r border-slate-100"><div className="h-4 w-6 bg-slate-200 rounded mx-auto" /></td>
+                          <td className="py-2.5 px-3 border-r border-slate-100"><div className="h-4 w-24 bg-slate-200 rounded" /></td>
+                          <td className="py-2.5 px-2 text-center border-r border-slate-100"><div className="h-4 w-12 bg-slate-200 rounded mx-auto" /></td>
+                          <td className="py-2.5 px-2 text-right border-r border-slate-100"><div className="h-4 w-10 bg-slate-200 rounded ml-auto" /></td>
+                          <td className="py-2.5 px-2 text-center border-r border-slate-100"><div className="h-5 w-16 bg-slate-200 rounded mx-auto" /></td>
+                          <td className="py-2.5 px-3 border-r border-slate-100"><div className="h-4 w-32 bg-slate-200 rounded" /></td>
+                          <td className="py-2.5 px-3 border-r border-slate-100"><div className="h-4 w-28 bg-slate-200 rounded" /></td>
+                          {CHECKLIST_46_COLUMNS.map((col) => (
+                            <td key={col.num} className="py-2.5 px-2 border-r border-slate-100">
+                              <div className="h-4 w-16 bg-slate-100 rounded" />
+                            </td>
+                          ))}
+                          <td className="py-2.5 px-2 text-center"><div className="h-4 w-8 bg-slate-200 rounded mx-auto" /></td>
+                        </tr>
+                      ))
                     ) : paginatedParcels.length === 0 ? (
                       <tr>
                         <td colSpan={54} className="py-16 text-center">
@@ -4080,14 +4119,7 @@ export default function ReportsPage() {
                 </table>
               </div>
 
-              {loading && paginatedParcels.length > 0 && (
-                <div className="absolute inset-0 bg-white/30 backdrop-blur-[0.5px] z-30 flex items-center justify-center pointer-events-none animate-in fade-in duration-150">
-                  <div className="inline-flex items-center gap-2.5 px-4 py-2 bg-slate-900/90 text-white text-xs font-bold rounded-2xl shadow-xl border border-white/20 backdrop-blur-md">
-                    <RefreshCw className="w-4 h-4 text-blue-400 animate-spin" />
-                    <span>{isMarathi ? 'नवीन डेटा अद्ययावत होत आहे...' : 'Updating records...'}</span>
-                  </div>
-                </div>
-              )}
+              {loading && renderTableLoadingOverlay()}
             </div>
 
               {/* Pagination */}
@@ -4290,14 +4322,7 @@ export default function ReportsPage() {
                 </table>
               </div>
 
-              {loading && paginatedParcels.length > 0 && (
-                <div className="absolute inset-0 bg-white/30 backdrop-blur-[0.5px] z-30 flex items-center justify-center pointer-events-none animate-in fade-in duration-150">
-                  <div className="inline-flex items-center gap-2.5 px-4 py-2 bg-slate-900/90 text-white text-xs font-bold rounded-2xl shadow-xl border border-white/20 backdrop-blur-md">
-                    <RefreshCw className="w-4 h-4 text-blue-400 animate-spin" />
-                    <span>{isMarathi ? 'नवीन डेटा अद्ययावत होत आहे...' : 'Updating records...'}</span>
-                  </div>
-                </div>
-              )}
+              {loading && renderTableLoadingOverlay()}
             </div>
 
               {/* Pagination */}

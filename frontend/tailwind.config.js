@@ -40,8 +40,8 @@ module.exports = {
         }
       },
       fontFamily: {
-        sans: ['Poppins', '"Noto Sans Devanagari"', '"Nirmala UI"', 'system-ui', '-apple-system', 'sans-serif'],
-        heading: ['Poppins', '"Noto Sans Devanagari"', 'system-ui', '-apple-system', 'sans-serif'],
+        sans: ['var(--font-poppins)', 'var(--font-noto-devanagari)', 'system-ui', '-apple-system', 'sans-serif'],
+        heading: ['var(--font-poppins)', 'var(--font-noto-devanagari)', 'system-ui', '-apple-system', 'sans-serif'],
       },
     },
   },

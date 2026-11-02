@@ -25,11 +25,14 @@ import {
   ChevronDown,
   LayoutGrid,
 } from 'lucide-react';
+import dynamic from 'next/dynamic';
 import { api } from '../../lib/api';
 import { CHANDRAPUR_TALUKAS, TENURE_CLASSES } from '../../lib/constants';
-import ParcelTraceDrawer from '../../components/ParcelTraceDrawer';
-import DocUploadModal from '../../components/DocUploadModal';
-import RevenueShortcutGuideModal from '../../components/RevenueShortcutGuideModal';
+
+const ParcelTraceDrawer = dynamic(() => import('../../components/ParcelTraceDrawer'), { ssr: false });
+const DocUploadModal = dynamic(() => import('../../components/DocUploadModal'), { ssr: false });
+const RevenueShortcutGuideModal = dynamic(() => import('../../components/RevenueShortcutGuideModal'), { ssr: false });
+
 import Pagination from '../../components/Pagination';
 import SearchableSelect from '../../components/SearchableSelect';
 import { useTranslation } from '../../components/LanguageContext';

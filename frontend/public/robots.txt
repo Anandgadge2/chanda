@@ -1,0 +1,18 @@
+# Government of Maharashtra - Chandrapur District Land Governance & Revenue Portal
+User-agent: *
+Allow: /
+Allow: /glossary
+Allow: /accessibility-statement
+Allow: /privacy-policy
+Allow: /terms
+Allow: /dpdpa
+Disallow: /dashboard
+Disallow: /cases
+Disallow: /parcels
+Disallow: /reports
+Disallow: /documents
+Disallow: /bulk-upload
+Disallow: /settings
+Disallow: /api/
+
+Sitemap: https://chanda-eta.vercel.app/sitemap.xml

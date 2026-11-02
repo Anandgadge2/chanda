@@ -34,11 +34,14 @@ import {
   VIOLATION_TYPES,
   ENFORCEMENT_STATUSES,
 } from '../../lib/constants';
-import AddHearingModal from '../../components/AddHearingModal';
-import DocUploadModal from '../../components/DocUploadModal';
-import ParcelTraceDrawer from '../../components/ParcelTraceDrawer';
-import ShasanJamaModal from '../../components/ShasanJamaModal';
-import RevenueShortcutGuideModal from '../../components/RevenueShortcutGuideModal';
+import dynamic from 'next/dynamic';
+
+const AddHearingModal = dynamic(() => import('../../components/AddHearingModal'), { ssr: false });
+const DocUploadModal = dynamic(() => import('../../components/DocUploadModal'), { ssr: false });
+const ParcelTraceDrawer = dynamic(() => import('../../components/ParcelTraceDrawer'), { ssr: false });
+const ShasanJamaModal = dynamic(() => import('../../components/ShasanJamaModal'), { ssr: false });
+const RevenueShortcutGuideModal = dynamic(() => import('../../components/RevenueShortcutGuideModal'), { ssr: false });
+
 import Pagination from '../../components/Pagination';
 import { useAuth } from '../../components/AuthContext';
 import { useTranslation } from '../../components/LanguageContext';
@@ -415,24 +418,24 @@ export default function CasesPage() {
         </div>
       </div>
 
-      {/* 5 Dedicated Executive KPI Cards with Compact Pro Styling */}
+      {/* 5 Dedicated Executive KPI Cards with Compact Pro Styling & Semantic Light Colors */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-2.5">
-        {/* Metric 1: Total Cases */}
+        {/* Metric 1: Total Cases (Blue - Baseline Inventory) */}
         <button
           type="button"
           onClick={() => handleMetricCardFilter('', '')}
           className={`p-2.5 sm:p-3 rounded-xl border text-left transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xs active:scale-98 relative overflow-hidden group cursor-pointer ${
             appliedFilters.status === '' && appliedFilters.isRepossessedToGovt === ''
-              ? 'bg-blue-50/90 border-blue-500 shadow-xs ring-1 ring-blue-500/30'
-              : 'bg-white/95 backdrop-blur-md border-slate-200/90 hover:border-slate-300 shadow-2xs'
+              ? 'bg-gradient-to-br from-sky-100/95 via-blue-50/80 to-white border-blue-500 shadow-xs ring-2 ring-blue-500/30'
+              : 'bg-gradient-to-br from-sky-50/80 via-blue-50/40 to-white/95 border-sky-200/80 hover:border-sky-300 shadow-2xs'
           }`}
         >
-          <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-600 to-indigo-600" />
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-600 to-indigo-600" />
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-slate-600 group-hover:text-slate-900 transition-colors">
+            <span className="text-[11px] font-bold text-slate-700 group-hover:text-blue-950 transition-colors">
               {isMarathi ? 'एकूण प्रकरणे' : 'Total Cases'}
             </span>
-            <div className="w-6 h-6 rounded-lg bg-blue-100/80 border border-blue-200 flex items-center justify-center text-blue-900 transition-transform group-hover:scale-105">
+            <div className="w-6 h-6 rounded-lg bg-sky-100/90 border border-sky-200 flex items-center justify-center text-blue-900 transition-transform group-hover:scale-105">
               <Scale className="w-3.5 h-3.5" />
             </div>
           </div>
@@ -444,22 +447,22 @@ export default function CasesPage() {
           </p>
         </button>
 
-        {/* Metric 2: Active Hearings */}
+        {/* Metric 2: Active Hearings (Indigo - Judicial Schedule) */}
         <button
           type="button"
           onClick={() => handleMetricCardFilter('HEARING_SCHEDULED', '')}
           className={`p-2.5 sm:p-3 rounded-xl border text-left transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xs active:scale-98 relative overflow-hidden group cursor-pointer ${
             appliedFilters.status === 'HEARING_SCHEDULED'
-              ? 'bg-indigo-50/90 border-indigo-500 shadow-xs ring-1 ring-indigo-500/30'
-              : 'bg-white/95 backdrop-blur-md border-slate-200/90 hover:border-slate-300 shadow-2xs'
+              ? 'bg-gradient-to-br from-indigo-100/95 via-violet-50/80 to-white border-indigo-500 shadow-xs ring-2 ring-indigo-500/30'
+              : 'bg-gradient-to-br from-indigo-50/80 via-violet-50/40 to-white/95 border-indigo-200/80 hover:border-indigo-300 shadow-2xs'
           }`}
         >
-          <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-indigo-600 to-purple-600" />
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-600 to-purple-600" />
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-indigo-900 group-hover:text-indigo-950 transition-colors">
+            <span className="text-[11px] font-bold text-slate-700 group-hover:text-indigo-950 transition-colors">
               {isMarathi ? 'सक्रिय सुनावण्या' : 'Active Hearings'}
             </span>
-            <div className="w-6 h-6 rounded-lg bg-indigo-100/80 border border-indigo-200 flex items-center justify-center text-indigo-700 transition-transform group-hover:scale-105">
+            <div className="w-6 h-6 rounded-lg bg-indigo-100/90 border border-indigo-200 flex items-center justify-center text-indigo-700 transition-transform group-hover:scale-105">
               <Calendar className="w-3.5 h-3.5" />
             </div>
           </div>
@@ -471,22 +474,22 @@ export default function CasesPage() {
           </p>
         </button>
 
-        {/* Metric 3: Show Cause Notices */}
+        {/* Metric 3: Show Cause Notices (Amber - Caution / Vigilance) */}
         <button
           type="button"
           onClick={() => handleMetricCardFilter('NOTICE_ISSUED', '')}
           className={`p-2.5 sm:p-3 rounded-xl border text-left transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xs active:scale-98 relative overflow-hidden group cursor-pointer ${
             appliedFilters.status === 'NOTICE_ISSUED'
-              ? 'bg-amber-50/90 border-amber-500 shadow-xs ring-1 ring-amber-500/30'
-              : 'bg-white/95 backdrop-blur-md border-slate-200/90 hover:border-slate-300 shadow-2xs'
+              ? 'bg-gradient-to-br from-amber-100/95 via-orange-50/80 to-white border-amber-500 shadow-xs ring-2 ring-amber-500/30'
+              : 'bg-gradient-to-br from-amber-50/80 via-orange-50/40 to-white/95 border-amber-200/80 hover:border-amber-300 shadow-2xs'
           }`}
         >
-          <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-amber-500 to-orange-500" />
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 to-orange-500" />
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-amber-900 group-hover:text-amber-950 transition-colors">
+            <span className="text-[11px] font-bold text-slate-700 group-hover:text-amber-950 transition-colors">
               {isMarathi ? 'कारणे दाखवा नोटीस' : 'Show Cause Notices'}
             </span>
-            <div className="w-6 h-6 rounded-lg bg-amber-100/80 border border-amber-200 flex items-center justify-center text-amber-700 transition-transform group-hover:scale-105">
+            <div className="w-6 h-6 rounded-lg bg-amber-100/90 border border-amber-200 flex items-center justify-center text-amber-700 transition-transform group-hover:scale-105">
               <AlertTriangle className="w-3.5 h-3.5" />
             </div>
           </div>
@@ -498,22 +501,22 @@ export default function CasesPage() {
           </p>
         </button>
 
-        {/* Metric 4: Shasan Jama */}
+        {/* Metric 4: Shasan Jama (Emerald - Successful State Repossession) */}
         <button
           type="button"
           onClick={() => handleMetricCardFilter('', 'true')}
           className={`p-2.5 sm:p-3 rounded-xl border text-left transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xs active:scale-98 relative overflow-hidden group cursor-pointer ${
             appliedFilters.isRepossessedToGovt === 'true'
-              ? 'bg-emerald-50/90 border-emerald-500 shadow-xs ring-1 ring-emerald-500/30'
-              : 'bg-white/95 backdrop-blur-md border-slate-200/90 hover:border-slate-300 shadow-2xs'
+              ? 'bg-gradient-to-br from-emerald-100/95 via-teal-50/80 to-white border-emerald-500 shadow-xs ring-2 ring-emerald-500/30'
+              : 'bg-gradient-to-br from-emerald-50/80 via-teal-50/40 to-white/95 border-emerald-200/80 hover:border-emerald-300 shadow-2xs'
           }`}
         >
-          <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-emerald-500 to-teal-600" />
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-600" />
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-emerald-900 group-hover:text-emerald-950 transition-colors">
+            <span className="text-[11px] font-bold text-slate-700 group-hover:text-emerald-950 transition-colors">
               {isMarathi ? 'शासन जमा आदेश' : 'Govt Repossessed'}
             </span>
-            <div className="w-6 h-6 rounded-lg bg-emerald-100/80 border border-emerald-200 flex items-center justify-center text-emerald-700 transition-transform group-hover:scale-105">
+            <div className="w-6 h-6 rounded-lg bg-emerald-100/90 border border-emerald-200 flex items-center justify-center text-emerald-700 transition-transform group-hover:scale-105">
               <ShieldCheck className="w-3.5 h-3.5" />
             </div>
           </div>
@@ -525,22 +528,22 @@ export default function CasesPage() {
           </p>
         </button>
 
-        {/* Metric 5: Total Disputed Area */}
-        <div className="p-2.5 sm:p-3 rounded-xl border border-slate-200/90 bg-white/95 backdrop-blur-md shadow-2xs col-span-2 sm:col-span-1 relative overflow-hidden hover:shadow-xs transition-all duration-200 hover:-translate-y-0.5 group">
-          <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-rose-500 to-pink-600" />
+        {/* Metric 5: Total Disputed Area (Rose - Risk Exposure / Area at Stake) */}
+        <div className="p-2.5 sm:p-3 rounded-xl border border-rose-200/80 bg-gradient-to-br from-rose-50/80 via-pink-50/40 to-white/95 shadow-2xs col-span-2 sm:col-span-1 relative overflow-hidden hover:shadow-xs transition-all duration-200 hover:-translate-y-0.5 group">
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-rose-500 to-pink-600" />
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-slate-700 group-hover:text-slate-900 transition-colors">
+            <span className="text-[11px] font-bold text-slate-700 group-hover:text-rose-950 transition-colors">
               {isMarathi ? 'एकूण शर्तभंग क्षेत्र' : 'Total Breach Area'}
             </span>
-            <div className="w-6 h-6 rounded-lg bg-rose-50 border border-rose-200 flex items-center justify-center text-rose-700 transition-transform group-hover:scale-105">
+            <div className="w-6 h-6 rounded-lg bg-rose-100/90 border border-rose-200 flex items-center justify-center text-rose-700 transition-transform group-hover:scale-105">
               <Landmark className="w-3.5 h-3.5" />
             </div>
           </div>
-          <p className="text-xl sm:text-2xl font-black text-slate-900 mt-1 tracking-tight font-mono">
+          <p className="text-xl sm:text-2xl font-black text-rose-950 mt-1 tracking-tight font-mono">
             {Number(stats.totalDisputedAreaHa || 0).toFixed(2)}{' '}
-            <span className="text-xs font-bold text-slate-500">{isMarathi ? 'हेक्टर' : 'Ha'}</span>
+            <span className="text-xs font-bold text-rose-600">{isMarathi ? 'हेक्टर' : 'Ha'}</span>
           </p>
-          <p className="text-[10px] text-slate-500 mt-0.5 font-medium truncate">
+          <p className="text-[10px] text-rose-600 mt-0.5 font-medium truncate">
             {isMarathi ? 'अतिक्रमित / वादग्रस्त क्षेत्र' : 'Encroached / disputed area'}
           </p>
         </div>

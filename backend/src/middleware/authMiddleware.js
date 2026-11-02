@@ -2,6 +2,19 @@ import jwt from 'jsonwebtoken';
 import prisma from '../config/prisma.js';
 const JWT_SECRET = process.env.JWT_SECRET || 'chandrapur-collectorate-secure-jwt-secret-key-2026';
 
+// High-performance in-memory verified user cache (30-second TTL)
+// Eliminates redundant DB queries when frontend fires parallel API requests
+const userCache = new Map();
+const USER_CACHE_TTL_MS = 30 * 1000;
+
+export const invalidateUserCache = (userId) => {
+  if (userId) {
+    userCache.delete(userId);
+  } else {
+    userCache.clear();
+  }
+};
+
 /**
  * Middleware: Verify JWT Bearer token and attach user to req.user
  */
@@ -24,19 +37,34 @@ export const authenticate = async (req, res, next) => {
 
     const decoded = jwt.verify(token, JWT_SECRET);
 
-    const user = await prisma.user.findUnique({
-      where: { id: decoded.id },
-      select: {
-        id: true,
-        fullName: true,
-        email: true,
-        mobile: true,
-        role: true,
-        taluka: true,
-        designation: true,
-        isActive: true,
-      },
-    });
+    // Check in-memory cache first
+    const cached = userCache.get(decoded.id);
+    let user = null;
+
+    if (cached && Date.now() - cached.timestamp < USER_CACHE_TTL_MS) {
+      user = cached.user;
+    } else {
+      user = await prisma.user.findUnique({
+        where: { id: decoded.id },
+        select: {
+          id: true,
+          fullName: true,
+          email: true,
+          mobile: true,
+          role: true,
+          taluka: true,
+          designation: true,
+          isActive: true,
+        },
+      });
+
+      if (user && user.isActive) {
+        userCache.set(decoded.id, {
+          user,
+          timestamp: Date.now(),
+        });
+      }
+    }
 
     if (!user || !user.isActive) {
       return res.status(401).json({

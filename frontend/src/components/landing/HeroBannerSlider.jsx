@@ -185,9 +185,9 @@ export default function HeroBannerSlider() {
               className="p-1.5 rounded-lg bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 shadow-2xs transition"
               aria-label="Previous Slide"
             >
-              <ChevronLeft className="w-4 h-4" />
+              <ChevronLeft className="w-4 h-4" aria-hidden="true" />
             </button>
-            <span className="text-xs font-mono font-bold text-slate-600 px-1">
+            <span className="text-xs font-mono font-bold text-slate-700 px-1">
               0{current + 1} / 0{SLIDES.length}
             </span>
             <button
@@ -195,7 +195,7 @@ export default function HeroBannerSlider() {
               className="p-1.5 rounded-lg bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 shadow-2xs transition"
               aria-label="Next Slide"
             >
-              <ChevronRight className="w-4 h-4" />
+              <ChevronRight className="w-4 h-4" aria-hidden="true" />
             </button>
           </div>
         </div>
@@ -205,8 +205,8 @@ export default function HeroBannerSlider() {
           className={`relative rounded-2xl sm:rounded-3xl p-4 sm:p-6 border bg-gradient-to-br ${slide.accentColor} shadow-sm transition-all duration-500 min-h-[250px] sm:min-h-[280px] flex flex-col justify-between overflow-hidden`}
         >
           {/* Subtle watermark background icon */}
-          <div className="absolute -right-8 -bottom-8 opacity-5 pointer-events-none">
-            <Icon className="w-64 h-64 text-slate-900" />
+          <div className="absolute -right-8 -bottom-8 opacity-5 pointer-events-none" aria-hidden="true">
+            <Icon className="w-64 h-64 text-slate-900" aria-hidden="true" />
           </div>
 
           <div className="relative z-10 max-w-3xl space-y-2.5">
@@ -215,10 +215,10 @@ export default function HeroBannerSlider() {
               <span
                 className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${slide.badgeColor}`}
               >
-                <Icon className={`w-3.5 h-3.5 ${slide.iconColor}`} />
+                <Icon className={`w-3.5 h-3.5 ${slide.iconColor}`} aria-hidden="true" />
                 <span>{isMarathi ? slide.badge : slide.badgeEn}</span>
               </span>
-              <span className="text-xs font-mono text-slate-500 font-bold">
+              <span className="text-xs font-mono text-slate-600 font-bold">
                 {isMarathi ? slide.stat : slide.statEn}
               </span>
             </div>
@@ -237,7 +237,7 @@ export default function HeroBannerSlider() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
               {(isMarathi ? slide.points : (slide.pointsEn || slide.points)).map((pt, idx) => (
                 <div key={idx} className="flex items-start gap-1.5 text-xs text-slate-800 font-medium">
-                  <CheckCircle2 className={`w-3.5 h-3.5 mt-0.5 flex-shrink-0 ${slide.iconColor}`} />
+                  <CheckCircle2 className={`w-3.5 h-3.5 mt-0.5 flex-shrink-0 ${slide.iconColor}`} aria-hidden="true" />
                   <span>{pt}</span>
                 </div>
               ))}
@@ -249,7 +249,7 @@ export default function HeroBannerSlider() {
           
 
             {/* Indicator Dots */}
-            <div className="flex items-center justify-center gap-1.5 py-0.5">
+            <div className="flex items-center justify-center gap-1.5 py-0.5" role="tablist" aria-label="Slider pagination">
               {SLIDES.map((s, idx) => (
                 <button
                   key={s.id}
@@ -258,6 +258,8 @@ export default function HeroBannerSlider() {
                     idx === current ? 'w-6 bg-blue-900' : 'w-2 bg-slate-300 hover:bg-slate-400'
                   }`}
                   aria-label={`Go to slide ${idx + 1}`}
+                  aria-selected={idx === current}
+                  role="tab"
                 />
               ))}
             </div>

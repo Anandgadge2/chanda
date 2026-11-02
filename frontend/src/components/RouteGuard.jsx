@@ -20,7 +20,7 @@ export default function RouteGuard({ children, allowedRoles = [] }) {
   if (loading) {
     return (
       <div className="min-h-[50vh] flex flex-col items-center justify-center p-8">
-        <div className="w-12 h-12 rounded-full border-3 border-blue-900 border-t-transparent animate-spin mb-4" />
+        <div className="w-10 h-10 rounded-full border-[3px] border-blue-900 border-t-amber-500 animate-spin mb-3" />
         <p className="text-sm font-bold text-slate-700">{isMarathi ? 'सत्र पडताळणी सुरू आहे...' : 'Verifying user session...'}</p>
       </div>
     );

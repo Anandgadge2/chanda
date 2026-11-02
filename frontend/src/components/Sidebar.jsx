@@ -111,66 +111,71 @@ export default function Sidebar({
   return (
     <>
       {/* ─────────────────────────────────────────────────────────────
-          1. DESKTOP FLOATING PILL SIDEBAR (lg and up)
-          - Sleek 58px slender capsule width (collapsed)
-          - 240px card with rounded-[28px] (expanded)
-          - overflow-visible when collapsed (zero scrollbars, floating tooltips)
-          - overflow-hidden when expanded (zero horizontal scrollbars)
+          1. DESKTOP FLOATING PILL DOCK (lg and up)
+          - Sleek 56px symmetrical floating dock (collapsed)
+          - 264px floating glass card (expanded)
+          - Zero scrollbars, frosted backdrop blur, tactile shadow
+          - Symmetrical vertical padding (no bottom dead space)
          ───────────────────────────────────────────────────────────── */}
       <aside
         className={clsx(
-          'hidden lg:flex flex-col bg-white border border-slate-200/90 shadow-sm transition-[width,padding] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] sticky top-[76px] self-start shrink-0 select-none z-40',
+          'hidden lg:flex flex-col bg-white/90 backdrop-blur-xl border border-slate-200/80 shadow-[0_8px_30px_rgb(0,0,0,0.06),0_1px_2px_rgba(0,0,0,0.03)] ring-1 ring-slate-900/[0.03] transition-[width,padding] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] sticky top-[80px] self-start shrink-0 select-none z-40',
           collapsed
-            ? 'w-[58px] py-3.5 px-1.5 rounded-[32px] items-center overflow-visible'
-            : 'w-72 p-3.5 rounded-[28px] overflow-hidden'
+            ? 'w-[56px] py-2.5 px-1.5 rounded-[28px] items-center overflow-visible'
+            : 'w-64 p-3 rounded-[24px] overflow-hidden'
         )}
         style={{
-          height: collapsed ? 'auto' : 'fit-content',
-          minHeight: collapsed ? '520px' : 'auto',
+          height: 'fit-content',
         }}
         aria-label={isMarathi ? 'मुख्य नेव्हिगेशन साइडबार' : 'Main Navigation Sidebar'}
       >
-        <div className="flex flex-col h-full w-full justify-between items-center overflow-visible">
+        <div className="flex flex-col w-full items-center overflow-visible">
           {/* Top Toggle Button */}
-          <div className="flex items-center justify-center shrink-0 mb-2.5 w-full overflow-visible">
+          <div className="flex items-center justify-center shrink-0 mb-1.5 w-full overflow-visible">
             {collapsed ? (
               <button
                 type="button"
                 onClick={onToggleCollapse}
-                className="w-9 h-9 rounded-xl text-blue-900 hover:bg-slate-100/80 active:scale-95 transition-all flex items-center justify-center cursor-pointer border border-transparent hover:border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 group relative"
+                className="w-10 h-10 rounded-2xl text-slate-400 hover:text-slate-700 hover:bg-slate-100/80 active:scale-95 transition-all flex items-center justify-center cursor-pointer border border-transparent hover:border-slate-200/60 focus:outline-none focus:ring-2 focus:ring-blue-500/50 group relative"
                 aria-label={isMarathi ? 'साइडबार विस्तृत करा' : 'Expand Sidebar'}
                 title={isMarathi ? 'साइडबार विस्तृत करा' : 'Expand Sidebar'}
               >
-                <PanelLeftOpen className="w-[20px] h-[20px] text-blue-900 stroke-[2]" />
+                <PanelLeftOpen className="w-[19px] h-[19px] stroke-[1.8]" />
                 {/* Floating Tooltip */}
-                <div className="absolute left-full ml-3 top-1/2 -translate-y-1/2 px-3 py-1.5 bg-[#0f172a] text-white rounded-xl shadow-xl z-[100] whitespace-nowrap text-xs font-bold border border-slate-800 opacity-0 pointer-events-none group-hover:opacity-100 transition-all duration-150 -translate-x-1 group-hover:translate-x-0 drop-shadow-xl flex items-center">
-                  <div className="absolute top-1/2 -translate-y-1/2 -left-1 w-2 h-2 bg-[#0f172a] border-l border-b border-slate-800 rotate-45" />
+                <div
+                  role="tooltip"
+                  className="absolute left-full ml-3 top-1/2 -translate-y-1/2 px-2.5 py-1 bg-slate-900/95 backdrop-blur-sm text-slate-100 rounded-lg shadow-xl z-[100] whitespace-nowrap text-xs font-semibold border border-slate-800/80 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:translate-x-0 -translate-x-1 transition-all duration-150 flex items-center"
+                >
+                  <div className="absolute top-1/2 -translate-y-1/2 -left-1 w-2 h-2 bg-slate-900/95 border-l border-b border-slate-800/80 rotate-45" />
                   <span>{isMarathi ? 'साइडबार विस्तृत करा' : 'Expand Sidebar'}</span>
                 </div>
               </button>
             ) : (
-              <div className="w-full flex items-center justify-between px-1">
-                <span className="text-[12px] font-bold text-slate-400 uppercase tracking-wider">
+              <div className="w-full flex items-center justify-between px-1.5 pb-1">
+                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
                   {isMarathi ? 'मुख्य विभाग' : 'Main Modules'}
                 </span>
                 <button
                   type="button"
                   onClick={onToggleCollapse}
-                  className="w-7 h-7 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-100 active:scale-95 transition-all flex items-center justify-center cursor-pointer border border-transparent hover:border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-7 h-7 rounded-lg text-slate-400 hover:text-slate-800 hover:bg-slate-100 active:scale-95 transition-all flex items-center justify-center cursor-pointer border border-transparent hover:border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
                   aria-label={isMarathi ? 'साइडबार संकुचित करा' : 'Collapse Sidebar'}
                   title={isMarathi ? 'साइडबार संकुचित करा' : 'Collapse Sidebar'}
                 >
-                  <PanelLeftClose className="w-4 h-4 text-slate-600" />
+                  <PanelLeftClose className="w-4 h-4 text-slate-500" />
                 </button>
               </div>
             )}
           </div>
 
-          {/* Navigation Links (Zero overflow, zero scrollbar, pure floating layout) */}
+          {/* Micro Divider */}
+          <div className={clsx('bg-slate-200/70 my-1 shrink-0', collapsed ? 'w-5 h-[1px]' : 'w-full h-[1px]')} />
+
+          {/* Navigation Links (Zero overflow, zero scrollbar, pure floating dock) */}
           <nav
             className={clsx(
-              'flex flex-col justify-center overflow-visible select-none',
-              collapsed ? 'space-y-2.5 items-center w-full' : 'space-y-1 w-full flex-1'
+              'flex flex-col justify-center overflow-visible select-none my-1',
+              collapsed ? 'space-y-1.5 items-center w-full' : 'space-y-1 w-full flex-1'
             )}
           >
             {navItems.map((item) => {
@@ -188,25 +193,25 @@ export default function Sidebar({
                   aria-label={label}
                   aria-current={isActive ? 'page' : undefined}
                   className={clsx(
-                    'group relative flex items-center transition-all duration-150 select-none overflow-visible',
+                    'group relative flex items-center transition-all duration-200 select-none overflow-visible cursor-pointer',
                     collapsed
-                      ? 'w-[42px] h-[42px] rounded-[16px] justify-center'
-                      : 'w-full px-3.5 py-2.5 rounded-2xl justify-start',
+                      ? 'w-10 h-10 rounded-2xl justify-center active:scale-95'
+                      : 'w-full px-3 py-2.5 rounded-2xl justify-start',
                     isActive
                       ? collapsed
-                        ? 'bg-[#242b6b] text-amber-400 shadow-md ring-2 ring-blue-500/25'
-                        : 'bg-[#242b6b] text-white shadow-sm font-bold'
-                      : 'text-slate-700 hover:text-slate-900 hover:bg-slate-50 font-bold'
+                        ? 'bg-gradient-to-b from-[#1b2559] to-[#12193b] text-amber-300 shadow-[0_4px_14px_-2px_rgba(27,37,89,0.35)] ring-1 ring-white/20 scale-[1.02]'
+                        : 'bg-gradient-to-r from-[#1b2559] to-[#13193a] text-white shadow-sm font-semibold'
+                      : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100/75 font-medium'
                   )}
                 >
                   {/* Icon */}
                   <div className="w-5 h-5 flex items-center justify-center shrink-0">
                     <Icon
                       className={clsx(
-                        'w-5 h-5 transition-transform duration-150 shrink-0',
+                        'w-[19px] h-[19px] transition-transform duration-200 shrink-0',
                         isActive
-                          ? 'text-amber-400 stroke-[2.2]'
-                          : 'text-slate-400 group-hover:text-slate-600 stroke-[1.9]'
+                          ? 'text-amber-300 stroke-[2.1]'
+                          : 'text-slate-400 group-hover:text-slate-700 stroke-[1.8]'
                       )}
                     />
                   </div>
@@ -216,26 +221,25 @@ export default function Sidebar({
                     <>
                       <span
                         className={clsx(
-                          'ml-3 text-[13px] font-bold tracking-tight whitespace-nowrap flex-1 leading-tight',
-                          isActive ? 'text-white' : 'text-slate-700 group-hover:text-slate-900'
+                          'ml-3 text-[13px] tracking-tight whitespace-nowrap flex-1 leading-tight',
+                          isActive ? 'text-white font-semibold' : 'text-slate-700 group-hover:text-slate-900 font-medium'
                         )}
                       >
                         {label}
                       </span>
                       {isActive && (
-                        <ChevronRight className="w-4 h-4 text-amber-400 shrink-0 ml-auto" />
+                        <ChevronRight className="w-4 h-4 text-amber-300 shrink-0 ml-auto" />
                       )}
                     </>
                   )}
 
-                  {/* Dark Floating Tooltip (Collapsed Mode) - Floating to the right with triangle pointer */}
+                  {/* Dark Glass Floating Tooltip (Collapsed Mode) */}
                   {collapsed && (
                     <div
                       role="tooltip"
-                      className="absolute left-full ml-3 top-1/2 -translate-y-1/2 px-3 py-1.5 bg-[#0f172a] text-white rounded-xl shadow-2xl z-[100] whitespace-nowrap text-xs font-bold border border-slate-800 opacity-0 pointer-events-none group-hover:opacity-100 transition-all duration-150 -translate-x-1 group-hover:translate-x-0 drop-shadow-xl flex items-center"
+                      className="absolute left-full ml-3 top-1/2 -translate-y-1/2 px-2.5 py-1 bg-slate-900/95 backdrop-blur-sm text-slate-100 rounded-lg shadow-xl z-[100] whitespace-nowrap text-xs font-semibold border border-slate-800/80 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:translate-x-0 -translate-x-1 transition-all duration-150 flex items-center"
                     >
-                      {/* Left-pointing arrow caret */}
-                      <div className="absolute top-1/2 -translate-y-1/2 -left-1 w-2 h-2 bg-[#0f172a] border-l border-b border-slate-800 rotate-45" />
+                      <div className="absolute top-1/2 -translate-y-1/2 -left-1 w-2 h-2 bg-slate-900/95 border-l border-b border-slate-800/80 rotate-45" />
                       <span>{label}</span>
                     </div>
                   )}
@@ -244,14 +248,49 @@ export default function Sidebar({
             })}
           </nav>
 
-          {/* Bottom Area: Slender Horizontal Capsule Track + Green Status Dot (Only in collapsed mode) */}
-          {collapsed && (
-            <div className="pt-3 mt-3 shrink-0 flex flex-col items-center justify-center w-full">
-              <div className="w-6 h-1 bg-slate-200/90 rounded-full mb-2" />
+          {/* Bottom Area: Status Indicator Pill */}
+          {collapsed ? (
+            <div className="mt-1 pt-1 shrink-0 flex flex-col items-center justify-center w-full">
+              <div className="w-5 h-[1px] bg-slate-200/70 mb-1.5" />
               <div
-                className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shadow-xs"
-                title={isMarathi ? '१५ तालुके संनियंत्रण सक्रिय' : '15 Talukas Active'}
-              />
+                className="group relative flex items-center justify-center w-8 h-8 rounded-full hover:bg-emerald-50/80 transition-colors cursor-help"
+                aria-label={isMarathi ? '१५ तालुके संनियंत्रण सक्रिय' : '15 Talukas Active'}
+              >
+                <span className="relative flex h-2.5 w-2.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500 shadow-xs" />
+                </span>
+
+                {/* Status Tooltip */}
+                <div
+                  role="tooltip"
+                  className="absolute left-full ml-3 top-1/2 -translate-y-1/2 px-2.5 py-1 bg-slate-900/95 backdrop-blur-sm text-slate-100 rounded-lg shadow-xl z-[100] whitespace-nowrap text-xs font-medium border border-slate-800/80 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:translate-x-0 -translate-x-1 transition-all duration-150 flex items-center"
+                >
+                  <div className="absolute top-1/2 -translate-y-1/2 -left-1 w-2 h-2 bg-slate-900/95 border-l border-b border-slate-800/80 rotate-45" />
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block" />
+                    {isMarathi ? '१५ तालुके संनियंत्रण सक्रिय' : '15 Talukas Active'}
+                  </span>
+                </div>
+              </div>
+            </div>
+          ) : (
+            /* Expanded Mode Footer Status */
+            <div className="w-full mt-3 pt-2.5 border-t border-slate-100">
+              <div className="p-2.5 bg-slate-50/80 border border-slate-200/60 rounded-xl flex items-center justify-between">
+                <div>
+                  <span className="block text-[11px] font-bold text-slate-800 leading-tight">
+                    {isMarathi ? '१५ तालुके संनियंत्रण' : '15 Talukas Active'}
+                  </span>
+                  <span className="text-[10px] text-slate-500">
+                    {isMarathi ? 'प्रणाली सक्रिय' : 'Live System'}
+                  </span>
+                </div>
+                <span className="relative flex h-2.5 w-2.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500 shadow-xs" />
+                </span>
+              </div>
             </div>
           )}
         </div>
@@ -263,7 +302,7 @@ export default function Sidebar({
          ───────────────────────────────────────────────────────────── */}
       <nav
         aria-label={isMarathi ? 'मोबाईल जलद नेव्हिगेशन' : 'Mobile Quick Navigation'}
-        className="lg:hidden fixed bottom-[calc(0.75rem+env(safe-area-inset-bottom,0px))] inset-x-3 max-w-[350px] mx-auto z-40 bg-white/95 backdrop-blur-md border border-slate-200/90 rounded-full shadow-xl shadow-slate-900/15 px-3 py-1.5 flex items-center justify-between"
+        className="lg:hidden fixed bottom-[calc(0.75rem+env(safe-area-inset-bottom,0px))] inset-x-3 max-w-[340px] mx-auto z-40 bg-white/90 backdrop-blur-xl border border-slate-200/80 rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.08)] px-3 py-1.5 flex items-center justify-between"
       >
         {mobileQuickItems.filter(Boolean).map((item) => {
           if (!item || !item.icon) return null;
@@ -281,11 +320,11 @@ export default function Sidebar({
               className={clsx(
                 'w-10 h-10 rounded-full flex items-center justify-center transition-all cursor-pointer active:scale-95',
                 isActive
-                  ? 'bg-gradient-to-b from-[#1b2559] to-[#13193a] text-amber-400 shadow-md ring-2 ring-blue-500/25 scale-105'
-                  : 'text-slate-500 hover:text-blue-900 hover:bg-slate-100/60'
+                  ? 'bg-gradient-to-b from-[#1b2559] to-[#12193b] text-amber-300 shadow-[0_4px_12px_rgba(27,37,89,0.3)] scale-105'
+                  : 'text-slate-400 hover:text-slate-800 hover:bg-slate-100/70'
               )}
             >
-              <Icon className={clsx('w-5 h-5', isActive ? 'text-amber-400 stroke-[2]' : 'text-slate-500 stroke-[1.8]')} />
+              <Icon className={clsx('w-5 h-5', isActive ? 'text-amber-300 stroke-[2.1]' : 'text-slate-400 stroke-[1.8]')} />
             </Link>
           );
         })}
@@ -294,11 +333,11 @@ export default function Sidebar({
         <button
           type="button"
           onClick={onOpenMobile}
-          className="w-10 h-10 rounded-full flex items-center justify-center text-slate-600 hover:text-blue-900 hover:bg-slate-100 active:scale-95 transition-all cursor-pointer"
+          className="w-10 h-10 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-800 hover:bg-slate-100 active:scale-95 transition-all cursor-pointer"
           aria-label={isMarathi ? 'सर्व विभाग मेनू उघडा' : 'Open All Modules Menu'}
           title={isMarathi ? 'सर्व विभाग मेनू उघडा' : 'Open All Modules Menu'}
         >
-          <Menu className="w-5 h-5" />
+          <Menu className="w-5 h-5 stroke-[1.8]" />
         </button>
       </nav>
 

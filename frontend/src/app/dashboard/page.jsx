@@ -22,12 +22,31 @@ import {
   FileText,
   Sparkles,
 } from 'lucide-react';
+import dynamic from 'next/dynamic';
 import clsx from 'clsx';
 import MetricCard from '../../components/MetricCard';
-import LandTypeDonutChart from '../../components/charts/LandTypeDonutChart';
-import EnforcementDisposalDonut from '../../components/charts/EnforcementDisposalDonut';
-import HistoricalProvenanceTrendChart from '../../components/charts/HistoricalProvenanceTrendChart';
-import TalukaMountainChart from '../../components/charts/TalukaMountainChart';
+import ChartSkeleton from '../../components/charts/ChartSkeleton';
+
+const LandTypeDonutChart = dynamic(
+  () => import('../../components/charts/LandTypeDonutChart'),
+  { ssr: false, loading: () => <ChartSkeleton height="h-[340px]" /> }
+);
+
+const EnforcementDisposalDonut = dynamic(
+  () => import('../../components/charts/EnforcementDisposalDonut'),
+  { ssr: false, loading: () => <ChartSkeleton height="h-[340px]" /> }
+);
+
+const HistoricalProvenanceTrendChart = dynamic(
+  () => import('../../components/charts/HistoricalProvenanceTrendChart'),
+  { ssr: false, loading: () => <ChartSkeleton height="h-[340px]" /> }
+);
+
+const TalukaMountainChart = dynamic(
+  () => import('../../components/charts/TalukaMountainChart'),
+  { ssr: false, loading: () => <ChartSkeleton height="h-[340px]" /> }
+);
+
 import { api } from '../../lib/api';
 import { CHANDRAPUR_TALUKAS } from '../../lib/constants';
 import SearchableSelect from '../../components/SearchableSelect';
@@ -238,15 +257,13 @@ export default function DashboardPage() {
       {/* Interactive Analytical Metric Cards (Click to Filter in-place or Jump to Register) */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-2.5 w-full max-w-full min-w-0">
         <MetricCard
+          variant="blue"
           titleMr="नोंदणीकृत भूखंड"
           titleEn="Registered Land"
           value={analytics.totalParcels.toLocaleString(isMarathi ? 'mr-IN' : 'en-IN')}
           subtext="गट क्र. • चंद्रपूर"
           subtextEn="Gat No. • Chandrapur"
           icon={Landmark}
-          badgeColor="bg-blue-50 border-blue-200"
-          iconColor="text-blue-700"
-          textColor="text-slate-900"
           isActive={activeKpi === 'parcels'}
           onClick={() => handleKpiToggle('parcels')}
           actionHref={parcelsUrl}
@@ -255,15 +272,13 @@ export default function DashboardPage() {
         />
 
         <MetricCard
+          variant="amber"
           titleMr="शर्तभंग व चौकशी"
           titleEn="Breaches & Inquiries"
           value={analytics.totalViolations.toLocaleString(isMarathi ? 'mr-IN' : 'en-IN')}
           subtext="कलम ३६, ५०-५४"
           subtextEn="Sec 36, 50-54"
           icon={AlertTriangle}
-          badgeColor="bg-amber-50 border-amber-200"
-          iconColor="text-amber-600"
-          textColor="text-amber-600"
           isActive={activeKpi === 'violations'}
           onClick={() => handleKpiToggle('violations')}
           actionHref={casesUrl}
@@ -272,6 +287,7 @@ export default function DashboardPage() {
         />
 
         <MetricCard
+          variant="indigo"
           titleMr="समाविष्ट महसूल गावे"
           titleEn="Covered Villages"
           value={analytics.totalVillages.toLocaleString(isMarathi ? 'mr-IN' : 'en-IN')}
@@ -286,9 +302,6 @@ export default function DashboardPage() {
               : '15 Talukas'
           }
           icon={MapPin}
-          badgeColor="bg-indigo-50 border-indigo-200"
-          iconColor="text-indigo-600"
-          textColor="text-indigo-600"
           isActive={activeKpi === 'villages'}
           onClick={() => handleKpiToggle('villages')}
           actionHref={villagesReportUrl}
@@ -297,15 +310,13 @@ export default function DashboardPage() {
         />
 
         <MetricCard
+          variant="emerald"
           titleMr="वर्ग २ ते वर्ग १ रूपांतर"
           titleEn="Class 2 to Class 1 Conversion"
           value={(analytics.totalClass2To1Conversions || 0).toLocaleString(isMarathi ? 'mr-IN' : 'en-IN')}
           subtext={`${Number(analytics.totalClass2To1AreaHa || 0).toFixed(2)} Ha रूपांतरित`}
           subtextEn={`${Number(analytics.totalClass2To1AreaHa || 0).toFixed(2)} Ha Converted`}
           icon={ArrowRightLeft}
-          badgeColor="bg-emerald-50 border-emerald-200"
-          iconColor="text-emerald-600"
-          textColor="text-emerald-600"
           isActive={activeKpi === 'conversions'}
           onClick={() => handleKpiToggle('conversions')}
           actionHref={conversionsUrl}
@@ -318,19 +329,41 @@ export default function DashboardPage() {
       {activeKpi && (
         <div
           id="dashboard-focused-section"
-          className="bg-gradient-to-r from-[#111c38] via-[#1a2850] to-[#121c38] text-white rounded-2xl p-3.5 sm:p-4 shadow-md border border-blue-500/40 transition-all duration-300"
+          className={clsx(
+            'text-white rounded-2xl p-3.5 sm:p-4 shadow-md border transition-all duration-300',
+            activeKpi === 'parcels' && 'bg-gradient-to-r from-[#0d1b3e] via-[#12285a] to-[#0d1b3e] border-sky-400/50 shadow-sky-950/30',
+            activeKpi === 'violations' && 'bg-gradient-to-r from-[#2a1708] via-[#3a200a] to-[#201205] border-amber-400/50 shadow-amber-950/30',
+            activeKpi === 'villages' && 'bg-gradient-to-r from-[#171138] via-[#241a54] to-[#140e32] border-indigo-400/50 shadow-indigo-950/30',
+            activeKpi === 'conversions' && 'bg-gradient-to-r from-[#0a2318] via-[#0f3524] to-[#092016] border-emerald-400/50 shadow-emerald-950/30'
+          )}
         >
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex items-start gap-3 min-w-0">
-              <div className="w-10 h-10 rounded-xl bg-blue-600/30 border border-blue-400/40 flex items-center justify-center shrink-0 text-amber-400 shadow-2xs mt-0.5">
-                {activeKpi === 'parcels' && <Landmark className="w-5 h-5 text-blue-300" />}
+              <div
+                className={clsx(
+                  'w-10 h-10 rounded-xl border flex items-center justify-center shrink-0 shadow-2xs mt-0.5',
+                  activeKpi === 'parcels' && 'bg-sky-500/20 border-sky-400/40 text-sky-300',
+                  activeKpi === 'violations' && 'bg-amber-500/20 border-amber-400/40 text-amber-300',
+                  activeKpi === 'villages' && 'bg-indigo-500/20 border-indigo-400/40 text-indigo-300',
+                  activeKpi === 'conversions' && 'bg-emerald-500/20 border-emerald-400/40 text-emerald-300'
+                )}
+              >
+                {activeKpi === 'parcels' && <Landmark className="w-5 h-5 text-sky-300" />}
                 {activeKpi === 'violations' && <AlertTriangle className="w-5 h-5 text-amber-400" />}
                 {activeKpi === 'villages' && <MapPin className="w-5 h-5 text-indigo-300" />}
                 {activeKpi === 'conversions' && <ArrowRightLeft className="w-5 h-5 text-emerald-300" />}
               </div>
               <div className="min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 shadow-2xs">
+                  <span
+                    className={clsx(
+                      'text-[10px] font-black uppercase px-2 py-0.5 rounded-full shadow-2xs',
+                      activeKpi === 'parcels' && 'bg-sky-400 text-slate-950',
+                      activeKpi === 'violations' && 'bg-amber-400 text-slate-950',
+                      activeKpi === 'villages' && 'bg-indigo-400 text-white',
+                      activeKpi === 'conversions' && 'bg-emerald-400 text-slate-950'
+                    )}
+                  >
                     {isMarathi ? 'सक्रिय फोकस दृश्य' : 'Active Focus View'}
                   </span>
                   <h2 className="text-sm sm:text-base font-black text-white tracking-tight truncate">
@@ -340,7 +373,7 @@ export default function DashboardPage() {
                     {activeKpi === 'conversions' && (isMarathi ? 'भोगवटादार वर्ग २ ते वर्ग १ रूपांतरण विश्लेषण (१९,५२६ भूखंड)' : 'Class 2 to Class 1 Conversion Analytics')}
                   </h2>
                 </div>
-                <p className="text-xs text-blue-100/80 font-normal mt-0.5 leading-snug">
+                <p className="text-xs text-slate-200 font-normal mt-0.5 leading-snug">
                   {activeKpi === 'parcels' && (isMarathi ? 'जिल्ह्यातील सर्व गट क्रमांकांचे MLRC वर्गनिहाय (वर्ग १, वर्ग २, शासकीय, वन, देवस्थान) क्षेत्र व धारणाधिकार माहिती दर्शविली आहे.' : 'Class-wise (Class-1, Class-2, Govt, Forest, Devasthan) land tenure and parcel distribution.')}
                   {activeKpi === 'violations' && (isMarathi ? 'MLRC कलम ३६, ३६अ (आदिवासी जमीन संरक्षण), कलम ५०-५४ (शासकीय जमीन अतिक्रमण) व भोगवटादार वर्ग-२ शर्तभंग चौकशी विश्लेषण.' : 'MLRC Sec 36, 36A (Tribal land protection), Sec 50-54 (Govt land encroachment) & Class-2 condition breach inquiries.')}
                   {activeKpi === 'villages' && (isMarathi ? 'चंद्रपूर जिल्ह्यातील १५ तालुक्यांमधील समाविष्ट महसूल गावांची व्याप्ती, भूखंड घनता व तपासणी अहवाल.' : 'Coverage of 870 revenue villages across 15 talukas with baseline inspection status.')}

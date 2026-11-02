@@ -77,7 +77,7 @@ export default function PortalLayout({ children }) {
     return (
       <div className="min-h-screen flex flex-col text-slate-900 font-sans">
         <div className="flex-1 flex flex-col items-center justify-center">
-          <div className="w-10 h-10 rounded-full border-3 border-blue-900 border-t-transparent animate-spin mb-3" />
+          <div className="w-10 h-10 rounded-full border-[3px] border-blue-900 border-t-amber-500 animate-spin mb-3" />
           <p className="text-xs font-bold text-slate-700">{t('common.sessionCheck')}</p>
         </div>
       </div>

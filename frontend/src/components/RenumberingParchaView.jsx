@@ -364,7 +364,14 @@ export default function RenumberingParchaView({
             </div>
 
             {/* Data Rows */}
-            {rows.length === 0 ? (
+            {loading ? (
+              <div className="py-14 px-4 text-center select-none">
+                <div className="w-8 h-8 border-2 border-blue-900 border-t-amber-500 rounded-full animate-spin mx-auto mb-2.5" />
+                <p className="text-xs font-bold text-slate-700">
+                  रिनंबरिंग पर्चा नोंदवही डेटा लोड होत आहे, कृपया प्रतीक्षा करा...
+                </p>
+              </div>
+            ) : rows.length === 0 ? (
               <div className="py-12 px-4 text-center text-slate-400 text-xs sm:text-sm">
                 {hasVillageSelected ? (
                   <span>या गावासाठी रिनंबरिंग अभिलेख उपलब्ध नाहीत.</span>

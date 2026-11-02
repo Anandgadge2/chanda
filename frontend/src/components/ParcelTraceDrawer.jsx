@@ -312,9 +312,9 @@ export default function ParcelTraceDrawer({ upi, onClose, onRefresh }) {
         {/* Main Content Area */}
         <div className="flex-1 overflow-hidden flex flex-col min-h-0 bg-white">
           {loading ? (
-            <div className="py-24 text-center space-y-3 my-auto">
-              <div className="w-8 h-8 border-2 border-slate-300 border-t-blue-600 rounded-full animate-spin mx-auto" />
-              <p className="text-xs text-slate-500 font-medium">
+            <div className="py-24 text-center my-auto select-none">
+              <div className="w-8 h-8 border-2 border-blue-900 border-t-amber-500 rounded-full animate-spin mx-auto mb-2.5" />
+              <p className="text-xs font-bold text-slate-700">
                 {isMarathi ? 'अभिलेख इतिहास व दस्तऐवज लोड होत आहेत...' : 'Loading records history & documents...'}
               </p>
             </div>

@@ -1,8 +1,23 @@
+import { Poppins, Noto_Sans_Devanagari } from 'next/font/google';
 import './globals.css';
 import PortalLayout from '../components/PortalLayout';
 import { AuthProvider } from '../components/AuthContext';
 import { LanguageProvider } from '../components/LanguageContext';
 import ErrorBoundary from '../components/ErrorBoundary';
+
+const poppins = Poppins({
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '600', '700'],
+  display: 'swap',
+  variable: '--font-poppins',
+});
+
+const notoSansDevanagari = Noto_Sans_Devanagari({
+  subsets: ['devanagari', 'latin'],
+  weight: ['400', '500', '600', '700', '800'],
+  display: 'swap',
+  variable: '--font-noto-devanagari',
+});
 
 export const viewport = {
   width: 'device-width',
@@ -21,21 +36,21 @@ export const metadata = {
   },
   icons: {
     icon: [
-      { url: '/images/chandrapur_seal.png', sizes: 'any' },
+      { url: '/favicon.ico', sizes: '32x32' },
       { url: '/icon.svg', type: 'image/svg+xml' },
     ],
-    shortcut: '/images/chandrapur_seal.png',
+    shortcut: '/favicon.ico',
     apple: '/images/chandrapur_seal.png',
   },
 };
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="mr" translate="no" className="notranslate">
+    <html lang="mr" translate="no" className={`${poppins.variable} ${notoSansDevanagari.variable} notranslate`}>
       <head>
         <meta name="google" content="notranslate" />
       </head>
-      <body className="bg-slate-50 text-slate-900 antialiased min-h-screen flex flex-col notranslate">
+      <body className="bg-slate-50 text-slate-900 antialiased min-h-screen flex flex-col notranslate font-sans">
         <ErrorBoundary>
           <LanguageProvider>
             <AuthProvider>
