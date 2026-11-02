@@ -232,24 +232,95 @@ export function cleanVillageName(name) {
   }
 
   let raw = String(name);
-  raw = raw.replace(/[1१]\s*[-तते]\s*[4४][56५६]/gi, '');
-  raw = raw.replace(/[4४][56५६]\s*[-तते]\s*[1१]/gi, '');
-  raw = raw.replace(/[1१]\s*[-तते]\s*[1-9१-९]+/gi, '');
-  raw = raw.replace(/[1-9१-९]+\s*[-तते]\s*[1-9१-९]+/gi, '');
-  raw = raw.replace(/1-46|१-४६|1-45|१-४५/gi, '');
+
+  // Standardize known aliases / abbreviations
+  const aliases = {
+    'अकोला': 'अकोला, कातलाबोडी',
+    'अकोला, कातलाबोडी': 'अकोला, कातलाबोडी',
+    'अकोला,कातलाबोडी)': 'अकोला, कातलाबोडी',
+    'अंतरगाव बु.': 'अंतरगाव बु',
+    'कढोली खु.': 'कढोली खु',
+    'शेरज ( खुर्द )': 'शेराज खुर्द',
+    'सोनुर्ली (गाडे)': 'सोनुर्ली गाडेगाव',
+    'दानोदा(रिठ)': 'दानोदा रिठ',
+    'उपरावाही': 'उपरवाही',
+    'निमणी': 'निमाणी',
+    'asan buj 45 mudde updated': 'आसन बु',
+    'tangalakerambodijambhuldhara': 'टांगाळा, केरामबोडी, जांभुळधरा',
+    'केरामबोडी': 'टांगाळा, केरामबोडी, जांभुळधरा',
+    'हिरापुर': 'हिरापूर',
+    'हिरापूर': 'हिरापूर',
+    'उमरहिरा साजा पारडी': 'उमरहिरा',
+    'उमरहिरा': 'उमरहिरा',
+    'खडकी साजा पारडी': 'खडकी',
+    'खडकी': 'खडकी',
+    'बोरगाव बुज': 'बोरगाव बु',
+    'बोरगाव बु': 'बोरगाव बु',
+    'जेवरा रीठ': 'जेवरा रिठ',
+    'जेवरा रिठ': 'जेवरा रिठ',
+    'सोनापुर': 'सोनापूर',
+    'सोनापूर': 'सोनापूर',
+    'बल्लारपुर': 'बल्लारपूर',
+    'बल्लारपूर': 'बल्लारपूर',
+    'विसापुर': 'विसापूर',
+    'विसापूर': 'विसापूर'
+  };
+  if (aliases[raw]) raw = aliases[raw];
+
+  raw = raw.replace(/[1१]\s*[-ततेtoTO]\s*[4५][56५६]/gi, '');
+  raw = raw.replace(/[4५][56५६]\s*[-ततेtoTO]\s*[1१]/gi, '');
+  raw = raw.replace(/[1१]\s*[-ततेtoTO]\s*[1-9१-९]+/gi, '');
+  raw = raw.replace(/[1-9१-९]+\s*[-ततेtoTO]\s*[1-9१-९]+/gi, '');
+  raw = raw.replace(/1-46|१-४६|1-45|१-४५|1\s*to\s*4[56]/gi, '');
   raw = raw.replace(/१ त ४५|१ ते ४६|1 to 46|1 to 45/gi, '');
-  raw = raw.replace(/[4४][56५६]\s*मद[दत]?/gi, '');
+  raw = raw.replace(/[4५][56५६]\s*मद[दत]?/gi, '');
   raw = raw.replace(/मद[दत]?\s+/gi, '');
   raw = raw.replace(/मदयच/gi, '');
   raw = raw.replace(/महसल\s*अधकर\s*अभलख/gi, '');
   raw = raw.replace(/महिती|महत/gi, '');
   raw = raw.replace(/तपसण[ी]?\s*सतर/gi, '');
   raw = raw.replace(/तपसण[ी]?/gi, '');
+  raw = raw.replace(/सातबारा|७\/१२/gi, '');
   raw = raw.replace(/Worksheet\s*\d*/gi, '');
   raw = raw.replace(/सधरत/gi, '');
   raw = raw.replace(/2026/g, '');
   raw = raw.replace(/^मंडळ\s*/i, '');
-  raw = raw.trim().replace(/\s+/g, ' ');
+  raw = raw.replace(/Microsoft Excel.*$/i, '');
+  raw = raw.replace(/\.xlsx?$/i, '');
+
+  // Normalize Marathi abbreviations with dot (e.g. बु. -> बु, खु. -> खु)
+  raw = raw.replace(/बु\./g, 'बु');
+  raw = raw.replace(/खु\./g, 'खु');
+  raw = raw.replace(/रै\./g, 'रै');
+  raw = raw.replace(/रे\./g, 'रे');
+  raw = raw.replace(/नं\./g, 'नं');
+  raw = raw.replace(/रीठ\./g, 'रीठ');
+  raw = raw.replace(/रिठ\./g, 'रिठ');
+  raw = raw.replace(/मं\./g, 'मं');
+  raw = raw.replace(/सि\./g, 'सि');
+  raw = raw.replace(/ता\./g, 'ता');
+
+  // Normalize standard morphological revenue village suffixes
+  raw = raw.replace(/पुर(?=[\s,]|$)/g, 'पूर');
+  raw = raw.replace(/रीठ(?=[\s,]|$)/g, 'रिठ');
+  raw = raw.replace(/तुकुम(?=[\s,]|$)/g, 'तुकूम');
+
+  // Strip leading numbers/punctuation
+  raw = raw.replace(/^[0-9१-९]+[\s._\-–—]+/, '');
+
+  // Strip unmatched closing parens or trailing punctuation
+  if (!raw.includes('(')) {
+    raw = raw.replace(/[.,_)\-–—\s]+$/, '');
+  } else {
+    raw = raw.replace(/[.,_\-–—\s]+$/, '');
+  }
+  raw = raw.replace(/^[.,_(\-–—\s]+/, '');
+
+  // Normalize parentheses and punctuation spacing
+  raw = raw.replace(/\s*\(\s*/g, ' (').replace(/\s*\)\s*/g, ')');
+  raw = raw.replace(/\s*,\s*/g, ', ');
+  raw = raw.replace(/\s+/g, ' ').trim();
+
   return raw || name;
 }
 

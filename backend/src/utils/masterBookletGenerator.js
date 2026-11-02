@@ -267,6 +267,23 @@ export const CHECKLIST_46_POINTS = [
 export function resolveParcel46Points(p) {
   const points = {};
   const metaPoints = p.metadata?.auditPoints || {};
+
+  // If raw auditPoints are present in metadata (parsed directly from Excel), use them 100% faithfully
+  let hasAuditPoints = false;
+  for (let pt = 1; pt <= 46; pt++) {
+    const val = metaPoints[`point_${pt}`];
+    if (val !== undefined && val !== null) {
+      hasAuditPoints = true;
+      points[pt] = String(val).trim();
+    } else {
+      points[pt] = '';
+    }
+  }
+
+  if (hasAuditPoints) {
+    return points;
+  }
+
   const flags = p.metadata?.flags || {};
   const b1950 = p.backwardHistories?.find(b => b.epochYear === 1950) || {};
   const b1972 = p.backwardHistories?.find(b => b.epochYear === 1972) || {};

@@ -313,53 +313,74 @@ export const reconcileAndSeedVillage = async ({
     }));
   }
 
-  // 3b. Backfill missing forward cases and backward histories for UNCHANGED parcels
-  for (const u of diffResult.unchangedRows) {
-    const incoming = parcels[u.rowNumber - 1];
-    if (!incoming) continue;
+  // 3b. Backfill missing forward cases and backward histories, and sync metadata.auditPoints for UNCHANGED parcels
+  const UNCH_CHUNK_SIZE = 25;
+  for (let c = 0; c < diffResult.unchangedRows.length; c += UNCH_CHUNK_SIZE) {
+    const chunk = diffResult.unchangedRows.slice(c, c + UNCH_CHUNK_SIZE);
+    await Promise.all(chunk.map(async (u) => {
+      const incoming = parcels[u.rowNumber - 1];
+      if (!incoming) return;
 
-    if ((incoming.flags?.isShartbhang || incoming.flags?.isEncroached || incoming.flags?.isTribal || incoming.flags?.isPokalist) && !existingCaseParcelIds.has(u.parcelId)) {
-      const safeGatDash = String(u.gatNumber).replace(/[\/\\ ]/g, '-');
-      const vType = incoming.flags?.isEncroached ? 'ENCROACHMENT' :
-                    incoming.flags?.isTribal ? 'TRIBAL_LAND_VIOLATION' :
-                    incoming.flags?.isShartbhang ? 'SHARTBHANG' : 'POKALIST_NONDI';
-      pendingForwardCases.push({
-        parcelId: u.parcelId,
-        caseNumber: `${vType.slice(0, 3)}/${talukaPrefix}/${villageCode}/${safeGatDash}-${Date.now().toString().slice(-4)}${pendingForwardCases.length}`,
-        violationType: vType,
-        status: incoming.flags?.isTribal ? 'NOTICE_ISSUED' : 'FLAGGED_IN_AUDIT',
-        encroachedAreaHa: incoming.totalAreaHa,
-        occupantName: incoming.ownerName || 'नोंदविलेला खातेदार',
-        prapatraCategory: incoming.flags?.isTribal ? 'प्रपत्र ८ (आदिवासी जमीन)' :
-                          incoming.flags?.isEncroached ? 'प्रपत्र ५ (अतिक्रमण)' :
-                          incoming.flags?.isShartbhang ? 'प्रपत्र ६/७ (शर्तभंग)' : 'प्रपत्र ९ (पोकळीस्त नोंदी)',
-        investigatingOfficer: incoming.flags?.isTribal ? `उपविभागीय अधिकारी (SDO) ${targetTaluka}` : `तहसीलदार ${targetTaluka}`
+      // Always ensure metadata and auditPoints match the newly parsed Excel sheet 1:1
+      await prisma.landParcel.update({
+        where: { id: u.parcelId },
+        data: {
+          metadata: {
+            ownerName: incoming.ownerName,
+            otherRights: incoming.otherRights,
+            agriAreaHa: incoming.agriAreaHa || incoming.totalAreaHa,
+            naAreaSqM: incoming.naAreaSqM || 0,
+            subTypeCategory: incoming.subTypeCategory || null,
+            auditPoints: incoming.auditPoints || {},
+            flags: incoming.flags,
+            lastReconciledAt: new Date().toISOString()
+          }
+        }
       });
-      existingCaseParcelIds.add(u.parcelId);
-    }
 
-    if (!existingBackwardParcelIds.has(u.parcelId)) {
-      const bk = incoming.backward || {};
-      const set1950 = bk.settlement1950 || {};
-      const b1950Owner = set1950.owner || (incoming.flags?.isGovt ? 'शासकीय जमीन (Sarkar)' : (incoming.ownerName || 'मूळ खातेदार'));
-      const b1950Tenure = mapTenureToEnum(set1950.tenure, incoming.flags?.isGovt ? 'SARKAR_SHASAN' : (incoming.tenureClass || 'BHOGVATDAR_CLASS_1'));
-      const b1950No = set1950.no || u.gatNumber || '1';
+      if ((incoming.flags?.isShartbhang || incoming.flags?.isEncroached || incoming.flags?.isTribal || incoming.flags?.isPokalist) && !existingCaseParcelIds.has(u.parcelId)) {
+        const safeGatDash = String(u.gatNumber).replace(/[\/\\ ]/g, '-');
+        const vType = incoming.flags?.isEncroached ? 'ENCROACHMENT' :
+                      incoming.flags?.isTribal ? 'TRIBAL_LAND_VIOLATION' :
+                      incoming.flags?.isShartbhang ? 'SHARTBHANG' : 'POKALIST_NONDI';
+        pendingForwardCases.push({
+          parcelId: u.parcelId,
+          caseNumber: `${vType.slice(0, 3)}/${talukaPrefix}/${villageCode}/${safeGatDash}-${Date.now().toString().slice(-4)}${pendingForwardCases.length}`,
+          violationType: vType,
+          status: incoming.flags?.isTribal ? 'NOTICE_ISSUED' : 'FLAGGED_IN_AUDIT',
+          encroachedAreaHa: incoming.totalAreaHa,
+          occupantName: incoming.ownerName || 'नोंदविलेला खातेदार',
+          prapatraCategory: incoming.flags?.isTribal ? 'प्रपत्र ८ (आदिवासी जमीन)' :
+                            incoming.flags?.isEncroached ? 'प्रपत्र ५ (अतिक्रमण)' :
+                            incoming.flags?.isShartbhang ? 'प्रपत्र ६/७ (शर्तभंग)' : 'प्रपत्र ९ (पोकळीस्त नोंदी)',
+          investigatingOfficer: incoming.flags?.isTribal ? `उपविभागीय अधिकारी (SDO) ${targetTaluka}` : `तहसीलदार ${targetTaluka}`
+        });
+        existingCaseParcelIds.add(u.parcelId);
+      }
 
-      pendingBackwardHistories.push({
-        parcelId: u.parcelId,
-        epochYear: 1950,
-        recordDate: new Date('1950-06-15'),
-        ferfarNumber: `F-1950-${String(b1950No).slice(0, 30)}`,
-        ownerName: String(b1950Owner).slice(0, 240),
-        khataNumber: `K-${String(b1950No).slice(0, 30)}`,
-        areaHa: u.totalAreaHa,
-        tenureClass: b1950Tenure,
-        wasGovtLand: Boolean(incoming.flags?.isGovt || incoming.flags?.isIllegalDeletion || b1950Tenure === 'SARKAR_SHASAN'),
-        mutationType: incoming.flags?.isGovt ? 'शासन जमा नोंद' : 'मूळ बंदोबस्त नोंद',
-        remarks: 'स्वातंत्र्योत्तर बंदोबस्त अभिलेख नोंद (Baseline Record)'
-      });
-      existingBackwardParcelIds.add(u.parcelId);
-    }
+      if (!existingBackwardParcelIds.has(u.parcelId)) {
+        const bk = incoming.backward || {};
+        const set1950 = bk.settlement1950 || {};
+        const b1950Owner = set1950.owner || (incoming.flags?.isGovt ? 'शासकीय जमीन (Sarkar)' : (incoming.ownerName || 'मूळ खातेदार'));
+        const b1950Tenure = mapTenureToEnum(set1950.tenure, incoming.flags?.isGovt ? 'SARKAR_SHASAN' : (incoming.tenureClass || 'BHOGVATDAR_CLASS_1'));
+        const b1950No = set1950.no || u.gatNumber || '1';
+
+        pendingBackwardHistories.push({
+          parcelId: u.parcelId,
+          epochYear: 1950,
+          recordDate: new Date('1950-06-15'),
+          ferfarNumber: `F-1950-${String(b1950No).slice(0, 30)}`,
+          ownerName: String(b1950Owner).slice(0, 240),
+          khataNumber: `K-${String(b1950No).slice(0, 30)}`,
+          areaHa: u.totalAreaHa,
+          tenureClass: b1950Tenure,
+          wasGovtLand: Boolean(incoming.flags?.isGovt || incoming.flags?.isIllegalDeletion || b1950Tenure === 'SARKAR_SHASAN'),
+          mutationType: incoming.flags?.isGovt ? 'शासन जमा नोंद' : 'मूळ बंदोबस्त नोंद',
+          remarks: 'स्वातंत्र्योत्तर बंदोबस्त अभिलेख नोंद (Baseline Record)'
+        });
+        existingBackwardParcelIds.add(u.parcelId);
+      }
+    }));
   }
 
   // Insert any pending forward cases in batch

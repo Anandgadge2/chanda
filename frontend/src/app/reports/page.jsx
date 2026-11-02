@@ -4068,7 +4068,8 @@ export default function ReportsPage() {
 
                             {/* Checklist 1 to 46 values */}
                             {CHECKLIST_46_COLUMNS.map(col => {
-                              const val = pts[col.num] || '-';
+                              const rawPt = pts[col.num];
+                              const val = (rawPt !== undefined && rawPt !== null) ? String(rawPt).trim() : '';
                               const isPositiveAlert =
                                 val === 'होय' ||
                                 val === 'आहे' ||
@@ -4092,6 +4093,8 @@ export default function ReportsPage() {
                                     </span>
                                   ) : val === 'नाही' ? (
                                     <span className="text-slate-400">{val}</span>
+                                  ) : val === '' ? (
+                                    <span className="text-slate-300"></span>
                                   ) : (
                                     <span className="text-slate-700" title={val}>
                                       {val}

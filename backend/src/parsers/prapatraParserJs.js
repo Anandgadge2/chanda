@@ -1,3 +1,4 @@
+import { cleanVillageName as canonicalClean } from '../utils/prapatraGenerator.js';
 import ExcelJS from 'exceljs';
 import path from 'path';
 
@@ -73,26 +74,13 @@ export function normalizeTenure(val, otherRights = '', bandobastTenure = '', own
 
 export function cleanVillageName(fname, sampleVillage) {
   if (sampleVillage && String(sampleVillage).trim().length > 2) {
-    let cleanV = String(sampleVillage).trim().replace(/^[0-9.\-_ \t]+/, '');
-    if (cleanV.length > 2 && !['-', '_', 'None', 'गावाचे नाव', '1', '2', 'नाही'].includes(cleanV)) {
+    let cleanV = canonicalClean(sampleVillage);
+    if (cleanV.length > 2 && !['-', '_', 'None', 'गावाचे नाव', '1', '2', 'नाही', 'अज्ञात गाव'].includes(cleanV)) {
       return cleanV.slice(0, 80);
     }
   }
-  let v = fname || 'गाव';
-  const prefixes = [
-    '45 मुद्द्याची माहिती', '1 ते 45 तपासणी  मुद्दे  मौजा', '1 ते 45 तपासणी मुददे',
-    '1 ते 45 मुददे ची तपासणी -', '1 ते 45 मुद्दे', '1 to 45.', '1 to 46',
-    '1 ते 46', '1  ते 46', '1 ते 54', '1 TO 45', '1 TO 46', '1ते45'
-  ];
-  for (const p of prefixes) {
-    v = v.replace(p, '');
-  }
-  v = v.replace(/^\d+[\s_.-]*/, '');
-  v = v.replace(/[\s_.-]*ok.*$/i, '');
-  v = v.replace(/\.xlsx$/i, '');
-  v = v.replace(/Microsoft Excel.*$/i, '');
-  v = v.trim();
-  return v.length > 1 ? v.slice(0, 40) : (fname ? fname.replace('.xlsx', '').slice(0, 40) : 'गाव');
+  let v = canonicalClean(fname || 'गाव');
+  return v.length > 1 ? v.slice(0, 60) : (fname ? canonicalClean(fname).slice(0, 60) : 'गाव');
 }
 
 const FOOTER_STOP_KEYWORDS = [
@@ -192,54 +180,80 @@ export async function parsePrapatraBuffer(input, talukaOverride = '', originalFn
     };
   }
 
-  // Locate Header Row (typically rows 1 to 8)
-  let headerRowIdx = 2; // Default to row 3 (0-indexed 2)
+  // 1. Locate Checkpoint Numbers Header Row (contains numbers 1, 2, 3... in columns >= 5)
+  let numHeaderRowIdx = -1;
+  let maxNumCount = 0;
   for (let rIdx = 0; rIdx < Math.min(8, rawRows.length); rIdx++) {
-    const lineStr = rawRows[rIdx].slice(0, 15).map(x => String(x || '').trim()).join(' ');
-    if (['सर्व्हे', 'स.नं', 'गट क्रमांक'].some(k => lineStr.includes(k)) && ['क्षेत्र', 'गाव'].some(k => lineStr.includes(k))) {
-      headerRowIdx = rIdx;
-      break;
+    let count = 0;
+    for (let c = 5; c < 60; c++) {
+      const val = String(rawRows[rIdx][c] || '').trim().replace('.0', '');
+      if (/^\d+$/.test(val) && parseInt(val, 10) >= 1 && parseInt(val, 10) <= 46) {
+        count++;
+      }
+    }
+    if (count > maxNumCount && count >= 5) {
+      maxNumCount = count;
+      numHeaderRowIdx = rIdx;
     }
   }
 
-  const headerVals = rawRows[headerRowIdx].map(x => String(x || '').trim());
-
-  // 1. Landmark Column Anchoring
-  let colVillage = headerVals.findIndex(c => c.includes('गावाचे नाव') || c === 'गाव');
-  if (colVillage === -1) colVillage = 1;
-
-  let colSurvey = headerVals.findIndex(c => ['सर्व्हे क्रमांक', 'स.नं', 'गट क्रमांक', 'गट क्र'].some(k => c.includes(k)));
-  if (colSurvey === -1) colSurvey = 2;
-
-  let colTenure = headerVals.findIndex(c => ['भोगवटदार वर्ग', 'भूधारणा', 'कब्जेदार सदरी'].some(k => c.includes(k)));
-  let colOwner = headerVals.findIndex(c => ['भोगवटदाराचे नाव', 'खातेदाराचे नाव'].some(k => c.includes(k)));
-  let colRights = headerVals.findIndex(c => c.includes('इतर अधिकार'));
-
-  // 2. Determine point 1 start index (Checkpoint 1 begins after Other Rights)
-  let colPointStart = -1;
-  for (let cIdx = 0; cIdx < headerVals.length; cIdx++) {
-    if (cIdx > colSurvey && headerVals[cIdx] === '1') {
-      colPointStart = cIdx;
-      break;
-    }
-  }
-
-  if (colPointStart === -1 && headerRowIdx + 1 < rawRows.length) {
-    const subVals = rawRows[headerRowIdx + 1].map(x => String(x || '').trim());
-    for (let cIdx = 0; cIdx < subVals.length; cIdx++) {
-      if (subVals[cIdx].includes('बंदोबस्त')) {
-        colPointStart = cIdx;
-        break;
+  // 2. Map Checkpoints 1..46 to exact column indices
+  const pointColMap = new Map();
+  if (numHeaderRowIdx !== -1) {
+    for (let c = 5; c < 60; c++) {
+      const val = String(rawRows[numHeaderRowIdx][c] || '').trim().replace('.0', '');
+      if (/^\d+$/.test(val)) {
+        const pt = parseInt(val, 10);
+        if (pt >= 1 && pt <= 46 && !pointColMap.has(pt)) {
+          pointColMap.set(pt, c);
+        }
       }
     }
   }
 
+  // 3. Data start index (first row after headers where row is an actual parcel)
+  let dataStartIdx = -1;
+  const searchStart = numHeaderRowIdx !== -1 ? numHeaderRowIdx + 1 : 2;
+  for (let idx = searchStart; idx < Math.min(searchStart + 8, rawRows.length); idx++) {
+    const firstC = String(rawRows[idx][0] || '').trim().replace('.0', '');
+    if (/^\d+$/.test(firstC) && parseInt(firstC, 10) === 1) {
+      dataStartIdx = idx;
+      break;
+    }
+    for (const colS of [1, 2, 3]) {
+      const sVal = String(rawRows[idx][colS] || '').trim();
+      if (['1', '1/1', '1.0'].includes(sVal)) {
+        dataStartIdx = idx;
+        break;
+      }
+    }
+    if (dataStartIdx !== -1) break;
+  }
+  if (dataStartIdx === -1) dataStartIdx = searchStart + 1;
+
+  // 4. Landmark Column Anchoring across all rows before dataStartIdx
+  let colVillage = -1;
+  let colSurvey = -1;
+  let colTenure = -1;
+  let colOwner = -1;
+  let colRights = -1;
+
+  for (let c = 0; c < Math.min(15, rawRows[0].length); c++) {
+    const h = rawRows.slice(0, dataStartIdx).map(row => String(row[c] || '').trim()).join(' ');
+    if (colVillage === -1 && (h.includes('गावाचे नाव') || h.includes('गाव'))) colVillage = c;
+    if (colSurvey === -1 && ['सर्व्हे क्रमांक', 'स.नं', 'गट क्रमांक', 'गट क्र'].some(k => h.includes(k))) colSurvey = c;
+    if (colTenure === -1 && ['भोगवटदार वर्ग', 'भूधारणा नुसार'].some(k => h.includes(k)) && !['बंदोबस्त', 'एकत्रिकरण', '7/12', '७/१२'].some(k => h.includes(k))) colTenure = c;
+    if (colOwner === -1 && ['भोगवटदाराचे नाव', 'खातेदाराचे नाव'].some(k => h.includes(k)) && !['बंदोबस्त', 'एकत्रिकरण', '7/12', '७/१२', 'सध्यस्थितीतील'].some(k => h.includes(k))) colOwner = c;
+    if (colRights === -1 && h.includes('इतर अधिकार') && !h.includes('अधिकार अभिलेख')) colRights = c;
+  }
+
+  if (colVillage === -1) colVillage = 1;
+  if (colSurvey === -1) colSurvey = 2;
   if (colTenure === -1) colTenure = colSurvey + 2;
   if (colOwner === -1) colOwner = colTenure + 1;
   if (colRights === -1) colRights = colOwner + 1;
-  if (colPointStart === -1) colPointStart = colRights + 1;
 
-  // 3. Dynamic Area Columns Identification
+  // 5. Dynamic Area Columns Identification
   const areaColIndices = [];
   for (let c = colSurvey + 1; c < colTenure; c++) {
     areaColIndices.push(c);
@@ -250,7 +264,7 @@ export async function parsePrapatraBuffer(input, talukaOverride = '', originalFn
   let colPot = -1;
   let colSingleArea = -1;
 
-  for (let subR = headerRowIdx + 1; subR < Math.min(headerRowIdx + 4, rawRows.length); subR++) {
+  for (let subR = 0; subR < dataStartIdx; subR++) {
     const subRowVals = rawRows[subR].map(x => String(x || '').trim());
     for (const cIdx of areaColIndices) {
       if (cIdx < subRowVals.length) {
@@ -279,16 +293,6 @@ export async function parsePrapatraBuffer(input, talukaOverride = '', originalFn
 
   const hasDualArea = (colAgri !== -1 && colNa !== -1);
 
-  // 4. Data Rows Start Index (Look for 1 in first column)
-  let dataStartIdx = headerRowIdx + 2;
-  for (let idx = headerRowIdx + 1; idx < Math.min(headerRowIdx + 10, rawRows.length); idx++) {
-    const firstC = rawRows[idx] ? String(rawRows[idx][0] || '').trim() : '';
-    if (/^[0-9]+(\.0)?$/.test(firstC) || ['१', '1'].includes(firstC)) {
-      dataStartIdx = idx;
-      break;
-    }
-  }
-
   // 5. Extract Sample Village
   let sampleVillage = null;
   for (let r = dataStartIdx; r < Math.min(dataStartIdx + 15, rawRows.length); r++) {
@@ -311,7 +315,6 @@ export async function parsePrapatraBuffer(input, talukaOverride = '', originalFn
 
   const vStats = getEmptyStats();
   const parcels = [];
-  const pOffset = colPointStart;
 
   for (let rIdx = dataStartIdx; rIdx < rawRows.length; rIdx++) {
     const r = rawRows[rIdx];
@@ -359,14 +362,17 @@ export async function parsePrapatraBuffer(input, talukaOverride = '', originalFn
     const ownerClean = String(ownerRaw || 'अज्ञात खातेदार').trim().slice(0, 240);
     const rightsClean = String(rightsRaw || 'नाही').trim();
 
-    // Helper for audit points
+    // Helper for audit points: 100% exact to Excel cell value
     const getRawPt = (ptNum) => {
-      const idx = pOffset + (ptNum - 1);
-      if (r.length > idx && r[idx] !== null && r[idx] !== undefined) {
-        const val = String(r[idx]).trim();
-        return val !== 'None' && val !== 'null' ? val : '';
+      const cIdx = pointColMap.get(ptNum);
+      if (cIdx === undefined || cIdx === null || cIdx < 0 || cIdx >= r.length) {
+        return '';
       }
-      return '';
+      const val = r[cIdx];
+      if (val === null || val === undefined) return '';
+      if (typeof val === 'number') return String(val);
+      const s = String(val).trim();
+      return (s === 'None' || s === 'null') ? '' : s;
     };
 
     const auditPoints = {};

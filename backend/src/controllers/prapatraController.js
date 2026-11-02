@@ -1252,6 +1252,26 @@ export const getPrapatraReport = async (req, res) => {
       });
     }
 
+    // Defensive in-memory deduplication by (taluka + canonical villageName + gatNumber)
+    const dedupMap = new Map();
+    for (const p of rawParcels) {
+      const key = `${p.taluka?.toLowerCase()}__${cleanVillageName(p.villageName)}__${String(p.gatNumber || '').trim()}`;
+      if (!dedupMap.has(key)) {
+        dedupMap.set(key, p);
+      } else {
+        const existing = dedupMap.get(key);
+        const existingPoints = Object.keys(existing.metadata?.auditPoints || {}).length;
+        const currentPoints = Object.keys(p.metadata?.auditPoints || {}).length;
+        const existingBk = existing.backwardHistories?.length || 0;
+        const currentBk = p.backwardHistories?.length || 0;
+
+        if (currentPoints > existingPoints || (currentPoints === existingPoints && currentBk > existingBk)) {
+          dedupMap.set(key, p);
+        }
+      }
+    }
+    rawParcels = Array.from(dedupMap.values());
+
     const tenureLabels = {
       BHOGVATDAR_CLASS_1: 'भोगवटादार वर्ग-१',
       BHOGVATDAR_CLASS_2: 'भोगवटादार वर्ग-२',
@@ -1550,26 +1570,35 @@ export const getTalukaVillages = async (req, res) => {
       })
     ]);
 
-    // Clean village names and deduplicate
-    const seen = new Set();
-    const cleanVillages = [];
-
+    // Clean village names and deduplicate using robust normalized map
+    const cleanVillagesMap = new Map();
     const allRecords = [...parcelRecords, ...rollupRecords];
+
     for (const r of allRecords) {
       if (!r.villageName || r.villageName === 'Unspecified') continue;
       const cName = cleanVillageName(r.villageName);
-      if (cName && cName !== 'अज्ञात गाव' && !seen.has(cName.toLowerCase())) {
-        seen.add(cName.toLowerCase());
-        cleanVillages.push({
-          id: r.id || `${r.taluka}-${cName}`,
-          taluka: r.taluka || targetTaluka,
+      if (!cName || cName === 'अज्ञात गाव') continue;
+
+      const recordTaluka = r.taluka || targetTaluka;
+      const normKey = `${recordTaluka.toLowerCase()}:::${cName.toLowerCase().replace(/[.,_)\-–—\s]/g, '')}`;
+
+      if (!cleanVillagesMap.has(normKey)) {
+        cleanVillagesMap.set(normKey, {
+          id: r.id || `${recordTaluka}-${cName}`,
+          taluka: recordTaluka,
           villageName: cName,
           originalVillageName: r.villageName,
           total712Count: r.total712Count || 0
         });
+      } else {
+        const item = cleanVillagesMap.get(normKey);
+        if (r.total712Count && r.total712Count > item.total712Count) {
+          item.total712Count = r.total712Count;
+        }
       }
     }
 
+    const cleanVillages = Array.from(cleanVillagesMap.values());
     // Sort Marathi village names alphabetically
     cleanVillages.sort((a, b) => a.villageName.localeCompare(b.villageName, 'mr'));
 

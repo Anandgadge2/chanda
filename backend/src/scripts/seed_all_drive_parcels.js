@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import prisma from '../config/prisma.js';
+import { cleanVillageName } from '../utils/prapatraGenerator.js';
 
 const SEEDED_DIR = path.resolve('..', 'data', 'seeded_talukas');
 
@@ -22,7 +23,8 @@ export function normalizeGat(gat) {
 
 export function normalizeVillage(name) {
   if (!name) return '';
-  return String(name).trim().replace(/\s+/g, '').replace(/[\u200B-\u200D\uFEFF]/g, '');
+  const cleaned = cleanVillageName(name);
+  return String(cleaned).trim().replace(/\s+/g, '').replace(/[\u200B-\u200D\uFEFF]/g, '');
 }
 
 const escapeSql = (s) => String(s || '').replace(/'/g, "''");
