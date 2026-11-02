@@ -70,6 +70,20 @@ h1, h2, h3, h4, h5, h6, .font-heading {
   letter-spacing: -0.02em;
 }
 
+/* Devanagari & Marathi Typography Protections */
+/* Prevent clipping of top matras, velantis, and anusvaras in Devanagari script */
+:lang(mr), [lang="mr"], .font-devanagari {
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Ensure any line-clamped boxes have sufficient vertical padding so ascenders (matras/rafars) are never cut off */
+[class*="line-clamp-"] {
+  padding-top: 0.125rem;
+  padding-bottom: 0.125rem;
+}
+
 /* Strict Mobile Viewport Overflow Boundary */
 @media (max-width: 1023px) {
   html, body {

@@ -32,6 +32,7 @@ import {
   ChevronDown,
   Edit3,
   Check,
+  Copy,
   RotateCcw,
   Save
 } from 'lucide-react';
@@ -226,6 +227,44 @@ export default function ReportsPage() {
   const [inspectedParcel, setInspectedParcel] = useState(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+
+  // Interactive Cell Selection State for spreadsheet-like grid navigation
+  const [selectedCell, setSelectedCell] = useState(null);
+  const [copiedCell, setCopiedCell] = useState(false);
+
+  const handleCopyCellText = useCallback((text) => {
+    if (text === undefined || text === null) return;
+    const str = String(text).trim();
+    if (!str) return;
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(str).then(() => {
+        setCopiedCell(true);
+        setTimeout(() => setCopiedCell(false), 2000);
+        setToastMessage({
+          type: 'success',
+          text: isMarathi ? `रकाना प्रत केला: "${str.slice(0, 32)}${str.length > 32 ? '...' : ''}"` : `Copied cell: "${str.slice(0, 32)}${str.length > 32 ? '...' : ''}"`
+        });
+        setTimeout(() => setToastMessage(null), 3000);
+      }).catch(() => {});
+    }
+  }, [isMarathi]);
+
+  const handleSelectCell = useCallback((view, rowIndex, colKey, colIndex, colTitle, rowTitle, cellValue, parcel) => {
+    setSelectedCell({
+      view,
+      rowIndex,
+      colKey,
+      colIndex,
+      colTitle,
+      rowTitle,
+      cellValue: (cellValue !== undefined && cellValue !== null) ? String(cellValue).trim() : '',
+      parcel
+    });
+  }, []);
+
+  const isCellSelected = useCallback((view, rowIdx, colKey) => {
+    return selectedCell?.view === view && selectedCell?.rowIndex === rowIdx && selectedCell?.colKey === colKey;
+  }, [selectedCell]);
 
   useEffect(() => {
     setMounted(true);
@@ -674,6 +713,173 @@ export default function ReportsPage() {
     const start = (page - 1) * size;
     return kpiFilteredParcels.slice(start, start + size);
   }, [kpiFilteredParcels, page, pageSize]);
+
+  // Checklist 1 to 46 Timeline Table Columns Map for Navigation & Info Bar
+  const TIMELINE_COLUMNS = useMemo(() => [
+    { key: 'srNo', titleMr: 'अ.क्र.', titleEn: 'Sr.', getValue: (p, idx) => String(p.excelSrNo || p.srNo || ((page - 1) * effectivePageSize + idx + 1)) },
+    { key: 'village', titleMr: 'गावाचे नाव', titleEn: 'Village Name', getValue: (p) => `${formatVillageName(p.villageName, isMarathi)} (${formatTalukaName(p.taluka, isMarathi)})` },
+    { key: 'gatNumber', titleMr: 'सर्व्हे क्रमांक', titleEn: 'Survey No.', getValue: (p) => String(p.gatNumber || p.oldSurveyNo || '-') },
+    { key: 'area', titleMr: 'क्षेत्र', titleEn: 'Area', getValue: (p) => String(p.totalAreaHa || '-') },
+    { key: 'tenure', titleMr: 'भोगवटदार वर्ग', titleEn: 'Tenure Class', getValue: (p) => String(p.tenureDisplay || p.tenureClass || '-') },
+    { key: 'owner', titleMr: 'भोगवटदाराचे नाव', titleEn: 'Occupant Name', getValue: (p) => String(p.currentOwner || '-') },
+    { key: 'otherRights', titleMr: 'इतर अधिकारातील नोंद', titleEn: 'Other Rights Entry', getValue: (p) => String((p.points && p.points[40]) || p.otherRights || '-') },
+    ...CHECKLIST_46_COLUMNS.map(col => ({
+      key: `point_${col.num}`,
+      num: col.num,
+      titleMr: col.title,
+      titleEn: col.titleEn || col.title,
+      getValue: (p) => {
+        const val = p.points ? p.points[col.num] : '';
+        return (val !== undefined && val !== null) ? String(val).trim() : '';
+      }
+    }))
+  ], [page, effectivePageSize, isMarathi]);
+
+  // Compact 7/12 Table Columns Map for Navigation & Info Bar
+  const COMPACT_COLUMNS = useMemo(() => [
+    { key: 'srNo', titleMr: 'अ.क्र.', titleEn: 'Sr.', getValue: (p, idx) => String(p.excelSrNo || p.srNo || ((page - 1) * effectivePageSize + idx + 1)) },
+    { key: 'village', titleMr: 'गावाचे नाव', titleEn: 'Village Name', getValue: (p) => `${formatVillageName(p.villageName, isMarathi)} (${formatTalukaName(p.taluka, isMarathi)})` },
+    { key: 'gatNumber', titleMr: 'सर्व्हे / गट क्र.', titleEn: 'Survey / Gat No.', getValue: (p) => String(p.gatNumber || p.oldSurveyNo || '-') },
+    { key: 'area', titleMr: 'क्षेत्र (हे.आर.)', titleEn: 'Area (Ha.R)', getValue: (p) => String(p.totalAreaHa || '-') },
+    { key: 'owner', titleMr: 'सध्याचे खातेदार / भोगवटादार नाव', titleEn: 'Current Khatedar / Occupant Name', getValue: (p) => String(p.currentOwner || '-') },
+    { key: 'tenure', titleMr: 'धारणा प्रकार', titleEn: 'Tenure Class', getValue: (p) => String(p.tenureDisplay || p.tenureClass || '-') },
+    { key: 'baselineOwner', titleMr: '१९५० मूळ नोंद', titleEn: '1950 Baseline Entry', getValue: (p) => String(p.baselineOwner1950 || '-') },
+    { key: 'statusFinding', titleMr: 'तपासणी निष्कर्ष / सद्यस्थिती', titleEn: 'Inspection Finding / Status', getValue: (p) => String(p.statusFinding || '-') },
+    { key: 'remarks', titleMr: 'शेरा व इतर हक्क', titleEn: 'Remarks & Other Rights', getValue: (p) => String(p.remarks || p.otherRights || '-') }
+  ], [page, effectivePageSize, isMarathi]);
+
+  // Reset cell selection whenever filter criteria, view, or pagination shifts
+  useEffect(() => {
+    setSelectedCell(null);
+  }, [activeTab, activeView, page, pageSize, taluka, village, selectedKpiFilter]);
+
+  // Global Keyboard Navigation for Active Table Grid
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (!selectedCell) return;
+
+      const tag = e.target?.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+
+      if (e.key === 'Escape') {
+        setSelectedCell(null);
+        return;
+      }
+
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'c') {
+        if (selectedCell.cellValue) {
+          handleCopyCellText(selectedCell.cellValue);
+        }
+        return;
+      }
+
+      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+        e.preventDefault();
+        const currentList = paginatedParcels;
+        if (!currentList || currentList.length === 0) return;
+
+        const cols = selectedCell.view === 'timeline'
+          ? TIMELINE_COLUMNS
+          : (selectedCell.view === 'parcels' ? COMPACT_COLUMNS : null);
+
+        if (!cols || cols.length === 0) return;
+
+        let nextRowIdx = selectedCell.rowIndex;
+        let nextColIdx = selectedCell.colIndex;
+
+        if (e.key === 'ArrowUp') nextRowIdx = Math.max(0, nextRowIdx - 1);
+        else if (e.key === 'ArrowDown') nextRowIdx = Math.min(currentList.length - 1, nextRowIdx + 1);
+        else if (e.key === 'ArrowLeft') nextColIdx = Math.max(0, nextColIdx - 1);
+        else if (e.key === 'ArrowRight') nextColIdx = Math.min(cols.length - 1, nextColIdx + 1);
+
+        const nextParcel = currentList[nextRowIdx];
+        const nextCol = cols[nextColIdx];
+        if (nextParcel && nextCol) {
+          const val = nextCol.getValue(nextParcel, nextRowIdx);
+          setSelectedCell({
+            view: selectedCell.view,
+            rowIndex: nextRowIdx,
+            colKey: nextCol.key,
+            colIndex: nextColIdx,
+            colTitle: isMarathi ? nextCol.titleMr : nextCol.titleEn,
+            rowTitle: `${isMarathi ? 'गट क्र.' : 'Gat No.'} ${nextParcel.gatNumber || nextParcel.oldSurveyNo || '-'} — ${formatVillageName(nextParcel.villageName, isMarathi)}`,
+            cellValue: (val !== undefined && val !== null) ? String(val).trim() : '',
+            parcel: nextParcel
+          });
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selectedCell, paginatedParcels, TIMELINE_COLUMNS, COMPACT_COLUMNS, isMarathi, handleCopyCellText]);
+
+  // Excel-style Corner Selection Handle
+  const renderCellHandle = () => (
+    <span className="absolute -bottom-1 -right-1 w-2.5 h-2.5 bg-blue-600 rounded-[1px] border border-white shadow-2xs pointer-events-none z-30" />
+  );
+
+  // Floating / Docked Active Cell Formula & Action Inspector Bar
+  const renderActiveCellBar = (viewName) => {
+    if (!selectedCell || selectedCell.view !== viewName) return null;
+    return (
+      <div className="sticky top-0 z-40 bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 text-white px-4 py-2 flex items-center justify-between gap-3 shadow-md border-b border-blue-500/60 animate-in fade-in duration-150 select-none">
+        <div className="flex items-center gap-2.5 overflow-hidden min-w-0">
+          <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-blue-500/30 border border-blue-400/40 text-[11px] font-mono font-black tracking-wide shrink-0">
+            <TableProperties className="w-3.5 h-3.5 text-blue-300" />
+            <span>R{selectedCell.rowIndex + 1} : C{selectedCell.colIndex + 1}</span>
+          </div>
+          <div className="flex items-center gap-1.5 text-xs font-bold text-blue-100 shrink-0">
+            <span className="text-white">{selectedCell.colTitle}</span>
+            <span className="text-blue-400">|</span>
+            <span className="text-slate-300 font-normal">{selectedCell.rowTitle}</span>
+            <span className="text-blue-400">:</span>
+          </div>
+          <div
+            className="font-mono text-xs bg-black/40 border border-white/20 rounded px-2.5 py-1 text-amber-200 font-bold truncate max-w-xl select-all"
+            title={selectedCell.cellValue}
+          >
+            {selectedCell.cellValue || <span className="text-slate-400 italic font-sans font-normal">{isMarathi ? '(रिकामे / निरंक)' : '(Empty)'}</span>}
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 shrink-0">
+          <button
+            type="button"
+            onClick={() => handleCopyCellText(selectedCell.cellValue)}
+            className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white/10 hover:bg-white/20 border border-white/25 rounded-lg text-xs font-bold transition cursor-pointer active:scale-95 shadow-2xs"
+            title={isMarathi ? 'मजकूर कॉपी करा (Ctrl+C)' : 'Copy cell text (Ctrl+C)'}
+          >
+            {copiedCell ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5 text-blue-200" />}
+            <span className={copiedCell ? 'text-emerald-300' : 'text-white'}>
+              {copiedCell ? (isMarathi ? 'कॉपी केले!' : 'Copied!') : (isMarathi ? 'कॉपी करा' : 'Copy')}
+            </span>
+          </button>
+
+          {selectedCell.parcel && (
+            <button
+              type="button"
+              onClick={() => setInspectedParcel(selectedCell.parcel)}
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-blue-600 hover:bg-blue-500 rounded-lg text-xs font-bold transition cursor-pointer active:scale-95 shadow-xs"
+              title={isMarathi ? 'संपूर्ण ऐतिहासिक कालक्रम उघडा' : 'View full historical timeline'}
+            >
+              <History className="w-3.5 h-3.5 text-blue-100" />
+              <span className="hidden sm:inline">{isMarathi ? 'कालक्रम' : 'Timeline'}</span>
+            </button>
+          )}
+
+          <button
+            type="button"
+            onClick={() => setSelectedCell(null)}
+            className="p-1 rounded-md text-slate-300 hover:text-white hover:bg-white/10 transition cursor-pointer"
+            title={isMarathi ? 'निवड रद्द करा (Esc)' : 'Deselect (Esc)'}
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+    );
+  };
 
   // Download URLs
   const currentReportId = activeTab === 'checklist' 
@@ -1158,19 +1364,41 @@ export default function ReportsPage() {
 
   const villageSelectOptions = useMemo(() => {
     const opts = [{ value: 'all', label: isMarathi ? 'सर्व गावे' : 'All Villages' }];
+    const seen = new Map();
+
     villageOptions.forEach(v => {
       const vName = typeof v === 'object' ? (v.villageName || v.name) : v;
-      const vVal = typeof v === 'object' ? (v.villageName || v.originalVillageName || v.name) : v;
       const cleanV = cleanVillageName(vName);
       if (!cleanV || cleanV === 'अज्ञात गाव') return;
-      opts.push({
-        value: vVal,
-        label: formatVillageName(cleanV, isMarathi),
-        count: v.total712Count ? `${v.total712Count}` : undefined
-      });
+
+      const count = Number((typeof v === 'object' ? v.total712Count : 0) || 0);
+      const formattedLabel = formatVillageName(cleanV, isMarathi);
+      const dedupeKey = formattedLabel.toLowerCase().trim();
+
+      if (!seen.has(dedupeKey)) {
+        const entry = {
+          value: cleanV,
+          label: formattedLabel,
+          count: count > 0 ? `${count}` : undefined,
+          _rawCount: count
+        };
+        seen.set(dedupeKey, entry);
+        opts.push(entry);
+      } else {
+        const existing = seen.get(dedupeKey);
+        if (count > existing._rawCount) {
+          existing._rawCount = count;
+          existing.count = `${count}`;
+        }
+      }
     });
+
     return opts;
   }, [villageOptions, isMarathi]);
+
+  const uniqueVillageCount = useMemo(() => {
+    return Math.max(0, villageSelectOptions.length - 1);
+  }, [villageSelectOptions]);
 
   const tenureSelectOptions = useMemo(() => [
     { value: 'all', label: isMarathi ? 'सर्व धारणा प्रकार' : 'All Tenure Types' },
@@ -2325,7 +2553,7 @@ export default function ReportsPage() {
               <div className="flex-1 space-y-1">
                 <label className="text-[11px] font-bold text-slate-700 flex items-center gap-1">
                   <LandPlot className="w-3.5 h-3.5 text-amber-600" />
-                  <span>{isMarathi ? `गाव निवडा ${villageOptions.length > 0 ? `(${villageOptions.length})` : ''}` : 'Select Village'}</span>
+                  <span>{isMarathi ? `गाव निवडा ${uniqueVillageCount > 0 ? `(${uniqueVillageCount})` : ''}` : 'Select Village'}</span>
                 </label>
                 <SearchableSelect
                   options={villageSelectOptions}
@@ -2456,7 +2684,7 @@ export default function ReportsPage() {
             {/* 2. Village Dropdown (Searchable, disabled if no Taluka selected) */}
             <div className="space-y-1">
               <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
-                {isMarathi ? `गाव ${villageOptions.length > 0 ? `(${villageOptions.length})` : ''}` : `Village ${villageOptions.length > 0 ? `(${villageOptions.length})` : ''}`}
+                {isMarathi ? `गाव ${uniqueVillageCount > 0 ? `(${uniqueVillageCount})` : ''}` : `Village ${uniqueVillageCount > 0 ? `(${uniqueVillageCount})` : ''}`}
               </label>
               <SearchableSelect
                 options={villageSelectOptions}
@@ -3837,15 +4065,24 @@ export default function ReportsPage() {
 
               {/* Horizontal Scroll Table */}
               <div className="relative">
+                {renderActiveCellBar('timeline')}
                 <div className="overflow-x-auto max-h-[70vh] border-b border-slate-300 bg-white">
                 <table className="w-full text-left border-collapse text-[11px] whitespace-nowrap">
                   <thead className="sticky top-0 z-30 bg-white shadow-md isolate">
                     {/* Level 1: Major Group Headers */}
                     <tr className="bg-slate-200 text-slate-800 font-bold border-b border-slate-300 text-center">
-                      <th colSpan={7} className="py-2.5 px-2 border-r border-slate-300 bg-slate-200 text-slate-900 font-black">
+                      <th colSpan={7} className={`py-2.5 px-2 border-r border-slate-300 text-slate-900 font-black transition ${
+                        selectedCell?.view === 'timeline' && ['srNo', 'village', 'gatNumber', 'area', 'tenure', 'owner', 'otherRights'].includes(selectedCell?.colKey)
+                          ? 'bg-blue-200/90 ring-1 ring-inset ring-blue-400'
+                          : 'bg-slate-200'
+                      }`}>
                         {isMarathi ? 'मूलभूत ७/१२ तपशील' : 'Baseline 7/12 Details'}
                       </th>
-                      <th colSpan={3} className="py-2.5 px-2 border-r border-amber-300 bg-amber-200 text-amber-950 font-black text-center shadow-xs">
+                      <th colSpan={3} className={`py-2.5 px-2 border-r border-amber-300 text-amber-950 font-black text-center shadow-xs transition ${
+                        selectedCell?.view === 'timeline' && ['point_1', 'point_2', 'point_3'].includes(selectedCell?.colKey)
+                          ? 'bg-amber-300 ring-2 ring-inset ring-amber-500'
+                          : 'bg-amber-200'
+                      }`}>
                         <div className="text-xs font-black tracking-wide">
                           {isMarathi ? '१. बंदोबस्त नोंद (१९५०)' : '1. Settlement Record (1950)'}
                         </div>
@@ -3853,7 +4090,11 @@ export default function ReportsPage() {
                           {isMarathi ? 'सदर गट क्रमांकाचा रिनंबरींग पर्चाप्रमाणे' : 'Renumbering Slip Sequence'}
                         </div>
                       </th>
-                      <th colSpan={3} className="py-2.5 px-2 border-r border-amber-300 bg-amber-100 text-amber-950 font-black text-center shadow-xs">
+                      <th colSpan={3} className={`py-2.5 px-2 border-r border-amber-300 text-amber-950 font-black text-center shadow-xs transition ${
+                        selectedCell?.view === 'timeline' && ['point_4', 'point_5', 'point_6'].includes(selectedCell?.colKey)
+                          ? 'bg-amber-200 ring-2 ring-inset ring-amber-500'
+                          : 'bg-amber-100'
+                      }`}>
                         <div className="text-xs font-black tracking-wide">
                           {isMarathi ? '२. एकत्रिकरण नोंद (१९७२)' : '2. Consolidation Record (1972)'}
                         </div>
@@ -3861,7 +4102,11 @@ export default function ReportsPage() {
                           {isMarathi ? 'सदर गट क्रमांकाचा रिनंबरींग पर्चाप्रमाणे' : 'Renumbering Slip Sequence'}
                         </div>
                       </th>
-                      <th colSpan={3} className="py-2.5 px-2 border-r border-amber-300 bg-amber-50 text-amber-950 font-black text-center shadow-xs">
+                      <th colSpan={3} className={`py-2.5 px-2 border-r border-amber-300 text-amber-950 font-black text-center shadow-xs transition ${
+                        selectedCell?.view === 'timeline' && ['point_7', 'point_8', 'point_9'].includes(selectedCell?.colKey)
+                          ? 'bg-amber-200 ring-2 ring-inset ring-amber-500'
+                          : 'bg-amber-50'
+                      }`}>
                         <div className="text-xs font-black tracking-wide">
                           {isMarathi ? '३. पुनर्मोजणी नोंद (१९९५)' : '3. Resurvey 7/12 Record (1995)'}
                         </div>
@@ -3869,10 +4114,18 @@ export default function ReportsPage() {
                           {isMarathi ? 'सदर गट क्रमांकाचा रिनंबरींग पर्चाप्रमाणे' : 'Renumbering Slip Sequence'}
                         </div>
                       </th>
-                      <th colSpan={10} className="py-2.5 px-2 border-r border-rose-300 bg-rose-100 text-rose-950 font-black">
+                      <th colSpan={10} className={`py-2.5 px-2 border-r border-rose-300 text-rose-950 font-black transition ${
+                        selectedCell?.view === 'timeline' && [10,11,12,13,14,15,16,17,18,19].some(n => selectedCell?.colKey === `point_${n}`)
+                          ? 'bg-rose-200 ring-2 ring-inset ring-rose-500'
+                          : 'bg-rose-100'
+                      }`}>
                         {isMarathi ? 'भोगवटदार सरकार / महाराष्ट्र शासन असल्यास' : 'Occupant: Government / Maharashtra State'}
                       </th>
-                      <th colSpan={27} className="py-2.5 px-2 border-r border-blue-300 bg-blue-100 text-blue-950 font-black">
+                      <th colSpan={27} className={`py-2.5 px-2 border-r border-blue-300 text-blue-950 font-black transition ${
+                        selectedCell?.view === 'timeline' && Array.from({ length: 27 }, (_, i) => i + 20).some(n => selectedCell?.colKey === `point_${n}`)
+                          ? 'bg-blue-200 ring-2 ring-inset ring-blue-500'
+                          : 'bg-blue-100'
+                      }`}>
                         {isMarathi
                           ? 'वैधानिक कायदे व पडताळणी रकाने (कुळ, वतन, आदिवासी, कमाल मर्यादा व इतर)'
                           : 'Statutory Acts & Verification (Tenancy, Inam, Tribal, Ceiling, etc.)'}
@@ -3882,16 +4135,32 @@ export default function ReportsPage() {
 
                     {/* Level 2: Specific Column Titles */}
                     <tr className="bg-slate-100 text-slate-800 font-bold border-b border-slate-300 text-center">
-                      <th className="py-2 px-2 border-r border-slate-300 w-12 bg-slate-100">{isMarathi ? 'अ.क्र.' : 'Sr.'}</th>
-                      <th className="py-2 px-3 border-r border-slate-300 text-left min-w-[120px] bg-slate-100">{isMarathi ? 'गावाचे नाव' : 'Village Name'}</th>
-                      <th className="py-2 px-2 border-r border-slate-300 w-24 bg-slate-100">{isMarathi ? 'सर्व्हे क्रमांक' : 'Survey No.'}</th>
-                      <th className={`py-2 px-2 border-r border-slate-300 w-20 text-right transition-colors ${
-                        selectedKpiFilter === 'area' ? 'bg-emerald-200 text-emerald-950 font-black ring-1 ring-emerald-500' : 'bg-slate-100'
+                      <th className={`py-2.5 px-2 border-r border-slate-300 w-12 leading-normal transition ${
+                        selectedCell?.view === 'timeline' && selectedCell?.colKey === 'srNo'
+                          ? 'bg-blue-200 text-blue-950 font-black ring-2 ring-inset ring-blue-500'
+                          : 'bg-slate-100'
+                      }`}>{isMarathi ? 'अ.क्र.' : 'Sr.'}</th>
+                      <th className={`py-2.5 px-3 border-r border-slate-300 text-left min-w-[120px] leading-normal transition ${
+                        selectedCell?.view === 'timeline' && selectedCell?.colKey === 'village'
+                          ? 'bg-blue-200 text-blue-950 font-black ring-2 ring-inset ring-blue-500'
+                          : 'bg-slate-100'
+                      }`}>{isMarathi ? 'गावाचे नाव' : 'Village Name'}</th>
+                      <th className={`py-2.5 px-2 border-r border-slate-300 w-24 leading-normal transition ${
+                        selectedCell?.view === 'timeline' && selectedCell?.colKey === 'gatNumber'
+                          ? 'bg-blue-200 text-blue-950 font-black ring-2 ring-inset ring-blue-500'
+                          : 'bg-slate-100'
+                      }`}>{isMarathi ? 'सर्व्हे क्रमांक' : 'Survey No.'}</th>
+                      <th className={`py-2.5 px-2 border-r border-slate-300 w-20 text-right leading-normal transition-colors ${
+                        selectedCell?.view === 'timeline' && selectedCell?.colKey === 'area'
+                          ? 'bg-blue-200 text-blue-950 font-black ring-2 ring-inset ring-blue-500'
+                          : selectedKpiFilter === 'area' ? 'bg-emerald-200 text-emerald-950 font-black ring-1 ring-emerald-500' : 'bg-slate-100'
                       }`}>
                         {isMarathi ? 'क्षेत्र' : 'Area'}
                       </th>
-                      <th className={`py-2 px-2 border-r border-slate-300 w-28 transition-colors ${
-                        selectedKpiFilter === 'class2' ? 'bg-amber-200 text-amber-950 font-black ring-1 ring-amber-500' : 'bg-slate-100'
+                      <th className={`py-2.5 px-2 border-r border-slate-300 w-28 leading-normal transition-colors ${
+                        selectedCell?.view === 'timeline' && selectedCell?.colKey === 'tenure'
+                          ? 'bg-blue-200 text-blue-950 font-black ring-2 ring-inset ring-blue-500'
+                          : selectedKpiFilter === 'class2' ? 'bg-amber-200 text-amber-950 font-black ring-1 ring-amber-500' : 'bg-slate-100'
                       }`}>
                         {isMarathi ? (
                           <>भोगवटदार वर्ग<br /><span className="text-[9px] font-normal text-slate-500">(भूधारणा नुसार)</span></>
@@ -3899,10 +4168,18 @@ export default function ReportsPage() {
                           <>Tenure Class<br /><span className="text-[9px] font-normal text-slate-500">(By Holding)</span></>
                         )}
                       </th>
-                      <th className="py-2 px-3 border-r border-slate-300 text-left min-w-[180px] bg-blue-100 text-blue-950 font-black">
+                      <th className={`py-2.5 px-3 border-r border-slate-300 text-left min-w-[180px] leading-normal transition ${
+                        selectedCell?.view === 'timeline' && selectedCell?.colKey === 'owner'
+                          ? 'bg-blue-300 text-blue-950 font-black ring-2 ring-inset ring-blue-600'
+                          : 'bg-blue-100 text-blue-950 font-black'
+                      }`}>
                         {isMarathi ? 'भोगवटदाराचे नाव' : 'Occupant Name'}
                       </th>
-                      <th className="py-2 px-3 border-r border-slate-300 text-left min-w-[180px] bg-slate-100">
+                      <th className={`py-2.5 px-3 border-r border-slate-300 text-left min-w-[180px] leading-normal transition ${
+                        selectedCell?.view === 'timeline' && selectedCell?.colKey === 'otherRights'
+                          ? 'bg-blue-200 text-blue-950 font-black ring-2 ring-inset ring-blue-500'
+                          : 'bg-slate-100'
+                      }`}>
                         {isMarathi ? (
                           <>इतर अधिकारातील नोंद <br /><span className="text-[9px] font-normal text-slate-500">(जी नोंद सदर 7/12 चे इतर अधिकारात असेल, तीच नोंद इथे नमूद करावी. उदा.आदिवासी/कुळ इ.)</span></>
                         ) : (
@@ -3911,47 +4188,59 @@ export default function ReportsPage() {
                       </th>
 
                       {/* 1 to 46 Columns */}
-                      {CHECKLIST_46_COLUMNS.map(col => (
-                        <th
-                          key={col.num}
-                          className={`py-2 px-2.5 border-r border-slate-200 ${col.minW} text-left text-[10px] leading-tight font-bold ${
-                            col.group === 'renumbering'
-                              ? 'bg-amber-50 text-amber-950'
-                              : col.group === 'govt'
-                              ? 'bg-rose-50 text-rose-950'
-                              : 'bg-slate-50 text-slate-800'
-                          }`}
-                          title={isMarathi ? col.title : (col.titleEn || col.title)}
-                        >
-                          <div className="line-clamp-2">{isMarathi ? col.title : (col.titleEn || col.title)}</div>
-                        </th>
-                      ))}
-                      <th className="py-2 px-2 w-16 text-center bg-slate-100 text-slate-800 font-bold">{isMarathi ? 'तपशील' : 'Details'}</th>
+                      {CHECKLIST_46_COLUMNS.map(col => {
+                        const isColActive = selectedCell?.view === 'timeline' && selectedCell?.colKey === `point_${col.num}`;
+                        return (
+                          <th
+                            key={col.num}
+                            className={`py-2.5 px-3 border-r border-slate-200 ${col.minW} text-left text-[11px] font-bold align-middle transition ${
+                              isColActive
+                                ? 'bg-blue-200 text-blue-950 font-black ring-2 ring-inset ring-blue-500'
+                                : col.group === 'renumbering'
+                                ? 'bg-amber-50 text-amber-950'
+                                : col.group === 'govt'
+                                ? 'bg-rose-50 text-rose-950'
+                                : 'bg-slate-50 text-slate-800'
+                            }`}
+                            title={isMarathi ? col.title : (col.titleEn || col.title)}
+                          >
+                            <div className="pt-1 pb-1 leading-relaxed overflow-visible">
+                              {isMarathi ? col.title : (col.titleEn || col.title)}
+                            </div>
+                          </th>
+                        );
+                      })}
+                      <th className="py-2.5 px-2 w-16 text-center bg-slate-100 text-slate-800 font-bold leading-normal">{isMarathi ? 'तपशील' : 'Details'}</th>
                     </tr>
 
                     {/* Level 3: Official Row Numbering */}
                     <tr className="bg-slate-200 text-[10px] text-slate-600 text-center border-b-2 border-slate-400 font-mono shadow-[0_2px_4px_rgba(0,0,0,0.06)]">
-                      <th className="py-1 border-r border-slate-300 bg-slate-200">{isMarathi ? 'अ.क्र.' : 'Sr.'}</th>
-                      <th className="py-1 border-r border-slate-300 bg-slate-200">{isMarathi ? 'गाव' : 'Village'}</th>
-                      <th className="py-1 border-r border-slate-300 bg-slate-200">{isMarathi ? 'सर्व्हे' : 'Survey'}</th>
-                      <th className="py-1 border-r border-slate-300 bg-slate-200">{isMarathi ? 'क्षेत्र' : 'Area'}</th>
-                      <th className="py-1 border-r border-slate-300 bg-slate-200">{isMarathi ? 'वर्ग' : 'Class'}</th>
-                      <th className="py-1 border-r border-slate-300 bg-slate-200">{isMarathi ? 'नाव' : 'Name'}</th>
-                      <th className="py-1 border-r border-slate-300 bg-slate-200">{isMarathi ? 'इतर हक्क' : 'Other'}</th>
-                      {CHECKLIST_46_COLUMNS.map(col => (
-                        <th
-                          key={col.num}
-                          className={`py-1 border-r border-slate-200 ${
-                            col.group === 'renumbering'
-                              ? 'bg-amber-200 text-amber-950 font-bold'
-                              : col.group === 'govt'
-                              ? 'bg-rose-200 text-rose-950 font-bold'
-                              : 'bg-slate-200 text-slate-700'
-                          }`}
-                        >
-                          {col.num}
-                        </th>
-                      ))}
+                      <th className={`py-1 border-r border-slate-300 transition ${selectedCell?.view === 'timeline' && selectedCell?.colKey === 'srNo' ? 'bg-blue-600 text-white font-black' : 'bg-slate-200'}`}>{isMarathi ? 'अ.क्र.' : 'Sr.'}</th>
+                      <th className={`py-1 border-r border-slate-300 transition ${selectedCell?.view === 'timeline' && selectedCell?.colKey === 'village' ? 'bg-blue-600 text-white font-black' : 'bg-slate-200'}`}>{isMarathi ? 'गाव' : 'Village'}</th>
+                      <th className={`py-1 border-r border-slate-300 transition ${selectedCell?.view === 'timeline' && selectedCell?.colKey === 'gatNumber' ? 'bg-blue-600 text-white font-black' : 'bg-slate-200'}`}>{isMarathi ? 'सर्व्हे' : 'Survey'}</th>
+                      <th className={`py-1 border-r border-slate-300 transition ${selectedCell?.view === 'timeline' && selectedCell?.colKey === 'area' ? 'bg-blue-600 text-white font-black' : 'bg-slate-200'}`}>{isMarathi ? 'क्षेत्र' : 'Area'}</th>
+                      <th className={`py-1 border-r border-slate-300 transition ${selectedCell?.view === 'timeline' && selectedCell?.colKey === 'tenure' ? 'bg-blue-600 text-white font-black' : 'bg-slate-200'}`}>{isMarathi ? 'वर्ग' : 'Class'}</th>
+                      <th className={`py-1 border-r border-slate-300 transition ${selectedCell?.view === 'timeline' && selectedCell?.colKey === 'owner' ? 'bg-blue-600 text-white font-black' : 'bg-slate-200'}`}>{isMarathi ? 'नाव' : 'Name'}</th>
+                      <th className={`py-1 border-r border-slate-300 transition ${selectedCell?.view === 'timeline' && selectedCell?.colKey === 'otherRights' ? 'bg-blue-600 text-white font-black' : 'bg-slate-200'}`}>{isMarathi ? 'इतर हक्क' : 'Other'}</th>
+                      {CHECKLIST_46_COLUMNS.map(col => {
+                        const isColActive = selectedCell?.view === 'timeline' && selectedCell?.colKey === `point_${col.num}`;
+                        return (
+                          <th
+                            key={col.num}
+                            className={`py-1 border-r border-slate-200 transition ${
+                              isColActive
+                                ? 'bg-blue-600 text-white font-black'
+                                : col.group === 'renumbering'
+                                ? 'bg-amber-200 text-amber-950 font-bold'
+                                : col.group === 'govt'
+                                ? 'bg-rose-200 text-rose-950 font-bold'
+                                : 'bg-slate-200 text-slate-700'
+                            }`}
+                          >
+                            {col.num}
+                          </th>
+                        );
+                      })}
                       <th className="py-1 bg-slate-200 text-slate-500">-</th>
                     </tr>
                   </thead>
@@ -4024,27 +4313,105 @@ export default function ReportsPage() {
                           pts[36]?.includes('होय') ||
                           pts[37] === 'होय';
 
+                        const isRowActive = selectedCell?.view === 'timeline' && selectedCell?.rowIndex === idx;
+                        const targetLabel = `${isMarathi ? 'गट क्र.' : 'Gat No.'} ${p.gatNumber || p.oldSurveyNo || '-'} — ${formatVillageName(p.villageName, isMarathi)}`;
+                        const srVal = String(p.excelSrNo || p.srNo || ((page - 1) * effectivePageSize + idx + 1));
+                        const villageVal = `${formatVillageName(p.villageName, isMarathi)} (${formatTalukaName(p.taluka, isMarathi)})`;
+                        const surveyVal = String(p.gatNumber || p.oldSurveyNo || '-');
+                        const areaVal = String(p.totalAreaHa || '-');
+                        const tenureVal = String(p.tenureDisplay || p.tenureClass || '-');
+                        const ownerVal = String(p.currentOwner || (isMarathi ? 'नोंद उपलब्ध नाही' : 'No record available'));
+                        const otherRightsVal = String(pts[40] || p.otherRights || '-');
+
                         return (
                           <tr
                             key={p.id || idx}
-                            className={`hover:bg-blue-50/30 transition ${
-                              hasViolation ? 'bg-rose-50/20' : ''
+                            className={`transition ${
+                              isRowActive
+                                ? 'bg-blue-50/50 shadow-2xs'
+                                : hasViolation
+                                ? 'bg-rose-50/20 hover:bg-rose-50/40'
+                                : 'hover:bg-blue-50/30'
                             }`}
                           >
-                            <td className="py-2 px-2 text-center border-r border-slate-200 font-mono text-slate-700 font-medium" title={`Excel Sr: ${p.excelSrNo || p.srNo}`}>
-                              {p.excelSrNo || p.srNo || ((page - 1) * effectivePageSize + idx + 1)}
+                            {/* 0. Sr. No. */}
+                            <td
+                              onClick={() => handleSelectCell('timeline', idx, 'srNo', 0, isMarathi ? 'अ.क्र.' : 'Sr.', targetLabel, srVal, p)}
+                              onDoubleClick={() => handleCopyCellText(srVal)}
+                              className={`py-2 px-2 text-center border-r border-slate-200 font-mono text-slate-700 font-medium cursor-pointer transition select-text ${
+                                isCellSelected('timeline', idx, 'srNo')
+                                  ? 'ring-2 ring-blue-600 ring-inset bg-blue-100/90 font-bold text-blue-950 relative z-20 shadow-xs'
+                                  : 'hover:bg-blue-50/50'
+                              }`}
+                              title={`Excel Sr: ${p.excelSrNo || p.srNo}`}
+                            >
+                              {isRowActive ? (
+                                <span className="inline-block px-1.5 py-0.5 rounded bg-blue-600 text-white font-mono text-[10px] font-black">
+                                  {srVal}
+                                </span>
+                              ) : (
+                                srVal
+                              )}
+                              {isCellSelected('timeline', idx, 'srNo') && renderCellHandle()}
                             </td>
-                            <td className="py-2 px-3 border-r border-slate-200 font-medium text-slate-900">
+
+                            {/* 1. Village Name */}
+                            <td
+                              onClick={() => handleSelectCell('timeline', idx, 'village', 1, isMarathi ? 'गावाचे नाव' : 'Village Name', targetLabel, villageVal, p)}
+                              onDoubleClick={() => handleCopyCellText(villageVal)}
+                              className={`py-2 px-3 border-r border-slate-200 font-medium text-slate-900 cursor-pointer transition select-text ${
+                                isCellSelected('timeline', idx, 'village')
+                                  ? 'ring-2 ring-blue-600 ring-inset bg-blue-100/90 font-bold text-blue-950 relative z-20 shadow-xs'
+                                  : 'hover:bg-blue-50/50'
+                              }`}
+                            >
                               {formatVillageName(p.villageName, isMarathi)}
                               <span className="block text-[9px] text-slate-400">{formatTalukaName(p.taluka, isMarathi)}</span>
+                              {isCellSelected('timeline', idx, 'village') && renderCellHandle()}
                             </td>
-                            <td className="py-2 px-2 text-center border-r border-slate-200 font-mono font-bold text-slate-800">
+
+                            {/* 2. Survey No. */}
+                            <td
+                              onClick={() => handleSelectCell('timeline', idx, 'gatNumber', 2, isMarathi ? 'सर्व्हे क्रमांक' : 'Survey No.', targetLabel, surveyVal, p)}
+                              onDoubleClick={() => handleCopyCellText(surveyVal)}
+                              className={`py-2 px-2 text-center border-r border-slate-200 font-mono font-bold text-slate-800 cursor-pointer transition select-text ${
+                                isCellSelected('timeline', idx, 'gatNumber')
+                                  ? 'ring-2 ring-blue-600 ring-inset bg-blue-100/90 font-bold text-blue-950 relative z-20 shadow-xs'
+                                  : 'hover:bg-blue-50/50'
+                              }`}
+                            >
                               {p.gatNumber || p.oldSurveyNo || '-'}
+                              {isCellSelected('timeline', idx, 'gatNumber') && renderCellHandle()}
                             </td>
-                            <td className={`py-2 px-2 text-right border-r border-slate-200 font-mono font-bold transition ${selectedKpiFilter === 'area' ? 'bg-emerald-50 text-emerald-950 font-black ring-1 ring-inset ring-emerald-300' : 'font-medium'}`}>
+
+                            {/* 3. Area */}
+                            <td
+                              onClick={() => handleSelectCell('timeline', idx, 'area', 3, isMarathi ? 'क्षेत्र' : 'Area', targetLabel, areaVal, p)}
+                              onDoubleClick={() => handleCopyCellText(areaVal)}
+                              className={`py-2 px-2 text-right border-r border-slate-200 font-mono cursor-pointer transition select-text ${
+                                isCellSelected('timeline', idx, 'area')
+                                  ? 'ring-2 ring-blue-600 ring-inset bg-blue-100/90 font-black text-blue-950 relative z-20 shadow-xs'
+                                  : selectedKpiFilter === 'area'
+                                  ? 'bg-emerald-50 text-emerald-950 font-black ring-1 ring-inset ring-emerald-300'
+                                  : 'font-medium hover:bg-blue-50/50'
+                              }`}
+                            >
                               {p.totalAreaHa}
+                              {isCellSelected('timeline', idx, 'area') && renderCellHandle()}
                             </td>
-                            <td className={`py-2 px-2 text-center border-r border-slate-200 transition ${selectedKpiFilter === 'class2' ? 'bg-amber-50/80 ring-1 ring-inset ring-amber-300' : ''}`}>
+
+                            {/* 4. Tenure Class */}
+                            <td
+                              onClick={() => handleSelectCell('timeline', idx, 'tenure', 4, isMarathi ? 'भोगवटदार वर्ग' : 'Tenure Class', targetLabel, tenureVal, p)}
+                              onDoubleClick={() => handleCopyCellText(tenureVal)}
+                              className={`py-2 px-2 text-center border-r border-slate-200 cursor-pointer transition select-text ${
+                                isCellSelected('timeline', idx, 'tenure')
+                                  ? 'ring-2 ring-blue-600 ring-inset bg-blue-100/90 font-bold text-blue-950 relative z-20 shadow-xs'
+                                  : selectedKpiFilter === 'class2'
+                                  ? 'bg-amber-50/80 ring-1 ring-inset ring-amber-300'
+                                  : 'hover:bg-blue-50/50'
+                              }`}
+                            >
                               <span
                                 className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-bold ${
                                   p.tenureClass === 'BHOGVATDAR_CLASS_1'
@@ -4058,16 +4425,42 @@ export default function ReportsPage() {
                               >
                                 {p.tenureDisplay || p.tenureClass || '-'}
                               </span>
-                            </td>
-                            <td className="py-2 px-3 border-r border-slate-200 bg-blue-50/20 font-bold text-blue-950">
-                              {p.currentOwner || (isMarathi ? 'नोंद उपलब्ध नाही' : 'No record available')}
-                            </td>
-                            <td className="py-2 px-3 border-r border-slate-200 text-slate-600 text-[10px] max-w-[200px]" title={pts[40] || p.otherRights}>
-                              {pts[40] || p.otherRights || '-'}
+                              {isCellSelected('timeline', idx, 'tenure') && renderCellHandle()}
                             </td>
 
-                            {/* Checklist 1 to 46 values */}
-                            {CHECKLIST_46_COLUMNS.map(col => {
+                            {/* 5. Occupant / Owner Name */}
+                            <td
+                              onClick={() => handleSelectCell('timeline', idx, 'owner', 5, isMarathi ? 'भोगवटदाराचे नाव' : 'Occupant Name', targetLabel, ownerVal, p)}
+                              onDoubleClick={() => handleCopyCellText(ownerVal)}
+                              className={`py-2 px-3 border-r border-slate-200 font-bold cursor-pointer transition select-text ${
+                                isCellSelected('timeline', idx, 'owner')
+                                  ? 'ring-2 ring-blue-600 ring-inset bg-blue-100/90 font-black text-blue-950 relative z-20 shadow-xs'
+                                  : 'bg-blue-50/20 text-blue-950 hover:bg-blue-100/40'
+                              }`}
+                            >
+                              {p.currentOwner || (isMarathi ? 'नोंद उपलब्ध नाही' : 'No record available')}
+                              {isCellSelected('timeline', idx, 'owner') && renderCellHandle()}
+                            </td>
+
+                            {/* 6. Other Rights */}
+                            <td
+                              onClick={() => handleSelectCell('timeline', idx, 'otherRights', 6, isMarathi ? 'इतर अधिकारातील नोंद' : 'Other Rights Entry', targetLabel, otherRightsVal, p)}
+                              onDoubleClick={() => handleCopyCellText(otherRightsVal)}
+                              className={`py-2 px-3 border-r border-slate-200 text-slate-600 text-[10px] max-w-[200px] cursor-pointer transition select-text ${
+                                isCellSelected('timeline', idx, 'otherRights')
+                                  ? 'ring-2 ring-blue-600 ring-inset bg-blue-100/90 font-bold text-blue-950 relative z-20 shadow-xs'
+                                  : 'hover:bg-blue-50/50'
+                              }`}
+                              title={pts[40] || p.otherRights}
+                            >
+                              {pts[40] || p.otherRights || '-'}
+                              {isCellSelected('timeline', idx, 'otherRights') && renderCellHandle()}
+                            </td>
+
+                            {/* 7 to 52: Checklist 1 to 46 values */}
+                            {CHECKLIST_46_COLUMNS.map((col, cIdx) => {
+                              const colIdx = 7 + cIdx;
+                              const colKey = `point_${col.num}`;
                               const rawPt = pts[col.num];
                               const val = (rawPt !== undefined && rawPt !== null) ? String(rawPt).trim() : '';
                               const isPositiveAlert =
@@ -4075,16 +4468,21 @@ export default function ReportsPage() {
                                 val === 'आहे' ||
                                 val.includes('शर्तभंग') ||
                                 val.includes('अवैध');
+                              const isSelected = isCellSelected('timeline', idx, colKey);
 
                               return (
                                 <td
                                   key={col.num}
-                                  className={`py-2 px-2.5 border-r border-slate-100 text-[11px] ${
-                                    col.group === 'renumbering'
-                                      ? 'bg-amber-50/20 font-medium text-slate-800'
+                                  onClick={() => handleSelectCell('timeline', idx, colKey, colIdx, isMarathi ? col.title : (col.titleEn || col.title), targetLabel, val, p)}
+                                  onDoubleClick={() => handleCopyCellText(val)}
+                                  className={`py-2 px-2.5 border-r border-slate-100 text-[11px] cursor-pointer transition select-text ${
+                                    isSelected
+                                      ? 'ring-2 ring-blue-600 ring-inset bg-blue-100/90 font-bold text-blue-950 relative z-20 shadow-xs'
+                                      : col.group === 'renumbering'
+                                      ? 'bg-amber-50/20 font-medium text-slate-800 hover:bg-amber-100/40'
                                       : col.group === 'govt'
-                                      ? 'bg-rose-50/10'
-                                      : ''
+                                      ? 'bg-rose-50/10 hover:bg-rose-100/30'
+                                      : 'hover:bg-blue-50/50'
                                   }`}
                                 >
                                   {isPositiveAlert ? (
@@ -4100,6 +4498,7 @@ export default function ReportsPage() {
                                       {val}
                                     </span>
                                   )}
+                                  {isSelected && renderCellHandle()}
                                 </td>
                               );
                             })}
@@ -4147,45 +4546,56 @@ export default function ReportsPage() {
           ) : (
             <div>
               <div className="relative">
+                {renderActiveCellBar('parcels')}
                 <div className="overflow-x-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
                   <table className="w-full text-left border-collapse text-xs min-w-[840px]">
                   <thead>
                     <tr className="bg-slate-100/80 text-slate-700 font-bold border-b border-slate-200 text-center">
-                      <th className="py-2.5 px-3 border-r border-slate-200 w-12">{isMarathi ? 'अ.क्र.' : 'Sr.'}</th>
-                      <th className="py-2.5 px-3 border-r border-slate-200 text-left min-w-[120px]">{isMarathi ? 'गावाचे नाव' : 'Village Name'}</th>
-                      <th className="py-2.5 px-3 border-r border-slate-200 w-24">{isMarathi ? 'सर्व्हे / गट क्र.' : 'Survey / Gat No.'}</th>
+                      <th className={`py-2.5 px-3 border-r border-slate-200 w-12 transition ${selectedCell?.view === 'parcels' && selectedCell?.colKey === 'srNo' ? 'bg-blue-200 text-blue-950 font-black ring-2 ring-inset ring-blue-500' : ''}`}>{isMarathi ? 'अ.क्र.' : 'Sr.'}</th>
+                      <th className={`py-2.5 px-3 border-r border-slate-200 text-left min-w-[120px] transition ${selectedCell?.view === 'parcels' && selectedCell?.colKey === 'village' ? 'bg-blue-200 text-blue-950 font-black ring-2 ring-inset ring-blue-500' : ''}`}>{isMarathi ? 'गावाचे नाव' : 'Village Name'}</th>
+                      <th className={`py-2.5 px-3 border-r border-slate-200 w-24 transition ${selectedCell?.view === 'parcels' && selectedCell?.colKey === 'gatNumber' ? 'bg-blue-200 text-blue-950 font-black ring-2 ring-inset ring-blue-500' : ''}`}>{isMarathi ? 'सर्व्हे / गट क्र.' : 'Survey / Gat No.'}</th>
                       <th className={`py-2.5 px-3 border-r border-slate-200 w-24 text-right transition-colors ${
-                        selectedKpiFilter === 'area' ? 'bg-emerald-100 text-emerald-950 font-black border-emerald-300 ring-1 ring-emerald-400' : ''
+                        selectedCell?.view === 'parcels' && selectedCell?.colKey === 'area'
+                          ? 'bg-blue-200 text-blue-950 font-black ring-2 ring-inset ring-blue-500'
+                          : selectedKpiFilter === 'area' ? 'bg-emerald-100 text-emerald-950 font-black border-emerald-300 ring-1 ring-emerald-400' : ''
                       }`}>
                         {isMarathi ? 'क्षेत्र (हे.आर.)' : 'Area (Ha.R)'}
                       </th>
-                      <th className="py-2.5 px-3 border-r border-slate-200 text-left min-w-[220px] bg-blue-50/40 text-blue-950">
+                      <th className={`py-2.5 px-3 border-r border-slate-200 text-left min-w-[220px] transition ${
+                        selectedCell?.view === 'parcels' && selectedCell?.colKey === 'owner'
+                          ? 'bg-blue-300 text-blue-950 font-black ring-2 ring-inset ring-blue-600'
+                          : 'bg-blue-50/40 text-blue-950'
+                      }`}>
                         {isMarathi ? 'सध्याचे खातेदार / भोगवटादार नाव' : 'Current Khatedar / Occupant Name'}
                       </th>
                       <th className={`py-2.5 px-3 border-r border-slate-200 w-28 transition-colors ${
-                        selectedKpiFilter === 'class2' ? 'bg-amber-100 text-amber-950 font-black border-amber-300 ring-1 ring-amber-400' : ''
+                        selectedCell?.view === 'parcels' && selectedCell?.colKey === 'tenure'
+                          ? 'bg-blue-200 text-blue-950 font-black ring-2 ring-inset ring-blue-500'
+                          : selectedKpiFilter === 'class2' ? 'bg-amber-100 text-amber-950 font-black border-amber-300 ring-1 ring-amber-400' : ''
                       }`}>
                         {isMarathi ? 'धारणा प्रकार' : 'Tenure Class'}
                       </th>
-                      <th className="py-2.5 px-3 border-r border-slate-200 text-left min-w-[150px]">{isMarathi ? '१९५० मूळ नोंद' : '1950 Baseline Entry'}</th>
+                      <th className={`py-2.5 px-3 border-r border-slate-200 text-left min-w-[150px] transition ${selectedCell?.view === 'parcels' && selectedCell?.colKey === 'baselineOwner' ? 'bg-blue-200 text-blue-950 font-black ring-2 ring-inset ring-blue-500' : ''}`}>{isMarathi ? '१९५० मूळ नोंद' : '1950 Baseline Entry'}</th>
                       <th className={`py-2.5 px-3 border-r border-slate-200 text-left min-w-[180px] transition-colors ${
-                        selectedKpiFilter === 'violations' ? 'bg-rose-100 text-rose-950 font-black border-rose-300 ring-1 ring-rose-400' : ''
+                        selectedCell?.view === 'parcels' && selectedCell?.colKey === 'statusFinding'
+                          ? 'bg-blue-200 text-blue-950 font-black ring-2 ring-inset ring-blue-500'
+                          : selectedKpiFilter === 'violations' ? 'bg-rose-100 text-rose-950 font-black border-rose-300 ring-1 ring-rose-400' : ''
                       }`}>
                         {isMarathi ? 'तपासणी निष्कर्ष / सद्यस्थिती' : 'Inspection Finding / Status'}
                       </th>
-                      <th className="py-2.5 px-3 text-left min-w-[140px]">{isMarathi ? 'शेरा व इतर हक्क' : 'Remarks & Other Rights'}</th>
+                      <th className={`py-2.5 px-3 text-left min-w-[140px] transition ${selectedCell?.view === 'parcels' && selectedCell?.colKey === 'remarks' ? 'bg-blue-200 text-blue-950 font-black ring-2 ring-inset ring-blue-500' : ''}`}>{isMarathi ? 'शेरा व इतर हक्क' : 'Remarks & Other Rights'}</th>
                       <th className="py-2.5 px-3 w-16 text-center">{isMarathi ? 'तपशील' : 'Details'}</th>
                     </tr>
-                    <tr className="bg-slate-50 text-[10px] text-slate-400 text-center border-b border-slate-200">
-                      <th className="py-1 border-r border-slate-200">{isMarathi ? '१' : '1'}</th>
-                      <th className="py-1 border-r border-slate-200">{isMarathi ? '२' : '2'}</th>
-                      <th className="py-1 border-r border-slate-200">{isMarathi ? '३' : '3'}</th>
-                      <th className="py-1 border-r border-slate-200">{isMarathi ? '४' : '4'}</th>
-                      <th className="py-1 border-r border-slate-200">{isMarathi ? '५' : '5'}</th>
-                      <th className="py-1 border-r border-slate-200">{isMarathi ? '६' : '6'}</th>
-                      <th className="py-1 border-r border-slate-200">{isMarathi ? '७' : '7'}</th>
-                      <th className="py-1 border-r border-slate-200">{isMarathi ? '८' : '8'}</th>
-                      <th className="py-1 border-r border-slate-200">{isMarathi ? '९' : '9'}</th>
+                    <tr className="bg-slate-50 text-[10px] text-slate-400 text-center border-b border-slate-200 font-mono">
+                      <th className={`py-1 border-r border-slate-200 transition ${selectedCell?.view === 'parcels' && selectedCell?.colKey === 'srNo' ? 'bg-blue-600 text-white font-bold' : ''}`}>{isMarathi ? '१' : '1'}</th>
+                      <th className={`py-1 border-r border-slate-200 transition ${selectedCell?.view === 'parcels' && selectedCell?.colKey === 'village' ? 'bg-blue-600 text-white font-bold' : ''}`}>{isMarathi ? '२' : '2'}</th>
+                      <th className={`py-1 border-r border-slate-200 transition ${selectedCell?.view === 'parcels' && selectedCell?.colKey === 'gatNumber' ? 'bg-blue-600 text-white font-bold' : ''}`}>{isMarathi ? '३' : '3'}</th>
+                      <th className={`py-1 border-r border-slate-200 transition ${selectedCell?.view === 'parcels' && selectedCell?.colKey === 'area' ? 'bg-blue-600 text-white font-bold' : ''}`}>{isMarathi ? '४' : '4'}</th>
+                      <th className={`py-1 border-r border-slate-200 transition ${selectedCell?.view === 'parcels' && selectedCell?.colKey === 'owner' ? 'bg-blue-600 text-white font-bold' : ''}`}>{isMarathi ? '५' : '5'}</th>
+                      <th className={`py-1 border-r border-slate-200 transition ${selectedCell?.view === 'parcels' && selectedCell?.colKey === 'tenure' ? 'bg-blue-600 text-white font-bold' : ''}`}>{isMarathi ? '६' : '6'}</th>
+                      <th className={`py-1 border-r border-slate-200 transition ${selectedCell?.view === 'parcels' && selectedCell?.colKey === 'baselineOwner' ? 'bg-blue-600 text-white font-bold' : ''}`}>{isMarathi ? '७' : '7'}</th>
+                      <th className={`py-1 border-r border-slate-200 transition ${selectedCell?.view === 'parcels' && selectedCell?.colKey === 'statusFinding' ? 'bg-blue-600 text-white font-bold' : ''}`}>{isMarathi ? '८' : '8'}</th>
+                      <th className={`py-1 border-r border-slate-200 transition ${selectedCell?.view === 'parcels' && selectedCell?.colKey === 'remarks' ? 'bg-blue-600 text-white font-bold' : ''}`}>{isMarathi ? '९' : '9'}</th>
                       <th className="py-1">{isMarathi ? '१०' : '10'}</th>
                     </tr>
                   </thead>
@@ -4246,80 +4656,203 @@ export default function ReportsPage() {
                         </td>
                       </tr>
                     ) : (
-                      paginatedParcels.map((p, idx) => (
-                        <tr key={p.id || idx} className="hover:bg-blue-50/20 transition">
-                          <td className="py-2.5 px-3 text-center border-r border-slate-100 font-mono text-slate-400">
-                            {(page - 1) * effectivePageSize + idx + 1}
-                          </td>
-                          <td className="py-2.5 px-3 border-r border-slate-100 font-medium text-slate-900">
-                            {formatVillageName(p.villageName, isMarathi)}
-                            <span className="block text-[10px] text-slate-400">{formatTalukaName(p.taluka, isMarathi)}</span>
-                          </td>
-                          <td className="py-2.5 px-3 text-center border-r border-slate-100 font-mono font-bold text-slate-800">
-                            {p.gatNumber || p.oldSurveyNo || '-'}
-                            {p.oldSurveyNo && p.gatNumber && p.oldSurveyNo !== p.gatNumber && (
-                              <span className="block text-[10px] text-slate-400">{isMarathi ? 'जुना:' : 'Old:'} {p.oldSurveyNo}</span>
-                            )}
-                          </td>
-                          <td className={`py-2.5 px-3 text-right border-r border-slate-100 font-mono transition-colors ${
-                            selectedKpiFilter === 'area' ? 'bg-emerald-50/80 font-black text-emerald-950 ring-1 ring-inset ring-emerald-300' : 'font-medium'
-                          }`}>
-                            {p.totalAreaHa}
-                          </td>
-                          <td className="py-2.5 px-3 border-r border-slate-100 bg-blue-50/20 font-bold text-blue-900">
-                            {p.currentOwner || (isMarathi ? 'नोंद उपलब्ध नाही' : 'No record available')}
-                          </td>
-                          <td className={`py-2.5 px-3 text-center border-r border-slate-100 transition-colors ${
-                            selectedKpiFilter === 'class2' ? 'bg-amber-50/80 ring-1 ring-inset ring-amber-300' : ''
-                          }`}>
-                            <span
-                              className={`inline-block px-2 py-0.5 rounded-md text-[10px] font-bold ${
-                                selectedKpiFilter === 'class2'
-                                  ? 'bg-amber-200 text-amber-950 ring-1 ring-amber-400 font-black'
-                                  : p.tenureClass === 'BHOGVATDAR_CLASS_1'
-                                  ? 'bg-emerald-100 text-emerald-800'
-                                  : p.tenureClass === 'BHOGVATDAR_CLASS_2'
-                                  ? 'bg-amber-100 text-amber-900'
-                                  : p.tenureClass === 'SARKAR_SHASAN'
-                                  ? 'bg-rose-100 text-rose-800'
-                                  : 'bg-slate-100 text-slate-700'
+                      paginatedParcels.map((p, idx) => {
+                        const isRowActive = selectedCell?.view === 'parcels' && selectedCell?.rowIndex === idx;
+                        const targetLabel = `${isMarathi ? 'गट क्र.' : 'Gat No.'} ${p.gatNumber || p.oldSurveyNo || '-'} — ${formatVillageName(p.villageName, isMarathi)}`;
+                        const srVal = String(p.excelSrNo || p.srNo || ((page - 1) * effectivePageSize + idx + 1));
+                        const villageVal = `${formatVillageName(p.villageName, isMarathi)} (${formatTalukaName(p.taluka, isMarathi)})`;
+                        const surveyVal = String(p.gatNumber || p.oldSurveyNo || '-');
+                        const areaVal = String(p.totalAreaHa || '-');
+                        const ownerVal = String(p.currentOwner || (isMarathi ? 'नोंद उपलब्ध नाही' : 'No record available'));
+                        const tenureVal = String(p.tenureDisplay || p.tenureClass || '-');
+                        const baselineVal = String(p.baselineOwner1950 || '-');
+                        const statusVal = String(p.statusFinding || (isMarathi ? 'प्रमाणित' : 'Verified'));
+                        const remarksVal = String(p.remarks || p.otherRights || '-');
+
+                        return (
+                          <tr
+                            key={p.id || idx}
+                            className={`transition ${
+                              isRowActive
+                                ? 'bg-blue-50/50 shadow-2xs'
+                                : 'hover:bg-blue-50/20'
+                            }`}
+                          >
+                            {/* 0. Sr. No. */}
+                            <td
+                              onClick={() => handleSelectCell('parcels', idx, 'srNo', 0, isMarathi ? 'अ.क्र.' : 'Sr.', targetLabel, srVal, p)}
+                              onDoubleClick={() => handleCopyCellText(srVal)}
+                              className={`py-2.5 px-3 text-center border-r border-slate-100 font-mono text-slate-500 cursor-pointer transition select-text ${
+                                isCellSelected('parcels', idx, 'srNo')
+                                  ? 'ring-2 ring-blue-600 ring-inset bg-blue-100/90 font-bold text-blue-950 relative z-20 shadow-xs'
+                                  : 'hover:bg-blue-50/50'
                               }`}
                             >
-                              {p.tenureDisplay || p.tenureClass || '-'}
-                            </span>
-                          </td>
-                          <td className="py-2.5 px-3 border-r border-slate-100 text-slate-600 text-[11px]">
-                            {p.baselineOwner1950 || '-'}
-                          </td>
-                          <td className={`py-2.5 px-3 border-r border-slate-100 text-[11px] transition-colors ${
-                            selectedKpiFilter === 'violations' ? 'bg-rose-50/80 ring-1 ring-inset ring-rose-300' : ''
-                          }`}>
-                            <span
-                              className={`inline-block px-2 py-0.5 rounded-md ${
-                                selectedKpiFilter === 'violations'
-                                  ? 'bg-rose-200 text-rose-950 ring-1 ring-rose-400 font-black'
-                                  : p.statusFinding?.includes('शर्तभंग') || p.statusFinding?.includes('अवैध')
-                                  ? 'bg-rose-100 text-rose-800 font-bold'
-                                  : 'bg-slate-100 text-slate-700'
+                              {isRowActive ? (
+                                <span className="inline-block px-1.5 py-0.5 rounded bg-blue-600 text-white font-mono text-[10px] font-black">
+                                  {srVal}
+                                </span>
+                              ) : (
+                                srVal
+                              )}
+                              {isCellSelected('parcels', idx, 'srNo') && renderCellHandle()}
+                            </td>
+
+                            {/* 1. Village */}
+                            <td
+                              onClick={() => handleSelectCell('parcels', idx, 'village', 1, isMarathi ? 'गावाचे नाव' : 'Village Name', targetLabel, villageVal, p)}
+                              onDoubleClick={() => handleCopyCellText(villageVal)}
+                              className={`py-2.5 px-3 border-r border-slate-100 font-medium text-slate-900 cursor-pointer transition select-text ${
+                                isCellSelected('parcels', idx, 'village')
+                                  ? 'ring-2 ring-blue-600 ring-inset bg-blue-100/90 font-bold text-blue-950 relative z-20 shadow-xs'
+                                  : 'hover:bg-blue-50/50'
                               }`}
                             >
-                              {p.statusFinding || (isMarathi ? 'प्रमाणित' : 'Verified')}
-                            </span>
-                          </td>
-                          <td className="py-2.5 px-3 text-slate-500 text-[11px]  max-w-[200px]" title={p.remarks}>
-                            {p.remarks || '-'}
-                          </td>
-                          <td className="py-2.5 px-3 text-center">
-                            <button
-                              onClick={() => setInspectedParcel(p)}
-                              className="p-1.5 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded-lg transition cursor-pointer"
-                              title={isMarathi ? '४६ मुद्द्यांची संपूर्ण तपासणी पहा' : 'View full 46-point audit checklist'}
+                              {formatVillageName(p.villageName, isMarathi)}
+                              <span className="block text-[10px] text-slate-400">{formatTalukaName(p.taluka, isMarathi)}</span>
+                              {isCellSelected('parcels', idx, 'village') && renderCellHandle()}
+                            </td>
+
+                            {/* 2. Survey / Gat */}
+                            <td
+                              onClick={() => handleSelectCell('parcels', idx, 'gatNumber', 2, isMarathi ? 'सर्व्हे / गट क्र.' : 'Survey / Gat No.', targetLabel, surveyVal, p)}
+                              onDoubleClick={() => handleCopyCellText(surveyVal)}
+                              className={`py-2.5 px-3 text-center border-r border-slate-100 font-mono font-bold text-slate-800 cursor-pointer transition select-text ${
+                                isCellSelected('parcels', idx, 'gatNumber')
+                                  ? 'ring-2 ring-blue-600 ring-inset bg-blue-100/90 font-bold text-blue-950 relative z-20 shadow-xs'
+                                  : 'hover:bg-blue-50/50'
+                              }`}
                             >
-                              <Eye className="w-4 h-4" />
-                            </button>
-                          </td>
-                        </tr>
-                      ))
+                              {p.gatNumber || p.oldSurveyNo || '-'}
+                              {p.oldSurveyNo && p.gatNumber && p.oldSurveyNo !== p.gatNumber && (
+                                <span className="block text-[10px] text-slate-400 font-normal">{isMarathi ? 'जुना:' : 'Old:'} {p.oldSurveyNo}</span>
+                              )}
+                              {isCellSelected('parcels', idx, 'gatNumber') && renderCellHandle()}
+                            </td>
+
+                            {/* 3. Area */}
+                            <td
+                              onClick={() => handleSelectCell('parcels', idx, 'area', 3, isMarathi ? 'क्षेत्र (हे.आर.)' : 'Area (Ha.R)', targetLabel, areaVal, p)}
+                              onDoubleClick={() => handleCopyCellText(areaVal)}
+                              className={`py-2.5 px-3 text-right border-r border-slate-100 font-mono cursor-pointer transition select-text ${
+                                isCellSelected('parcels', idx, 'area')
+                                  ? 'ring-2 ring-blue-600 ring-inset bg-blue-100/90 font-black text-blue-950 relative z-20 shadow-xs'
+                                  : selectedKpiFilter === 'area' ? 'bg-emerald-50/80 font-black text-emerald-950 ring-1 ring-inset ring-emerald-300' : 'font-medium hover:bg-blue-50/50'
+                              }`}
+                            >
+                              {p.totalAreaHa}
+                              {isCellSelected('parcels', idx, 'area') && renderCellHandle()}
+                            </td>
+
+                            {/* 4. Occupant / Owner Name */}
+                            <td
+                              onClick={() => handleSelectCell('parcels', idx, 'owner', 4, isMarathi ? 'सध्याचे खातेदार / भोगवटादार नाव' : 'Current Khatedar / Occupant Name', targetLabel, ownerVal, p)}
+                              onDoubleClick={() => handleCopyCellText(ownerVal)}
+                              className={`py-2.5 px-3 border-r border-slate-100 font-bold cursor-pointer transition select-text ${
+                                isCellSelected('parcels', idx, 'owner')
+                                  ? 'ring-2 ring-blue-600 ring-inset bg-blue-100/90 font-black text-blue-950 relative z-20 shadow-xs'
+                                  : 'bg-blue-50/20 text-blue-900 hover:bg-blue-100/40'
+                              }`}
+                            >
+                              {p.currentOwner || (isMarathi ? 'नोंद उपलब्ध नाही' : 'No record available')}
+                              {isCellSelected('parcels', idx, 'owner') && renderCellHandle()}
+                            </td>
+
+                            {/* 5. Tenure Class */}
+                            <td
+                              onClick={() => handleSelectCell('parcels', idx, 'tenure', 5, isMarathi ? 'धारणा प्रकार' : 'Tenure Class', targetLabel, tenureVal, p)}
+                              onDoubleClick={() => handleCopyCellText(tenureVal)}
+                              className={`py-2.5 px-3 text-center border-r border-slate-100 cursor-pointer transition select-text ${
+                                isCellSelected('parcels', idx, 'tenure')
+                                  ? 'ring-2 ring-blue-600 ring-inset bg-blue-100/90 font-bold text-blue-950 relative z-20 shadow-xs'
+                                  : selectedKpiFilter === 'class2' ? 'bg-amber-50/80 ring-1 ring-inset ring-amber-300' : 'hover:bg-blue-50/50'
+                              }`}
+                            >
+                              <span
+                                className={`inline-block px-2 py-0.5 rounded-md text-[10px] font-bold ${
+                                  selectedKpiFilter === 'class2'
+                                    ? 'bg-amber-200 text-amber-950 ring-1 ring-amber-400 font-black'
+                                    : p.tenureClass === 'BHOGVATDAR_CLASS_1'
+                                    ? 'bg-emerald-100 text-emerald-800'
+                                    : p.tenureClass === 'BHOGVATDAR_CLASS_2'
+                                    ? 'bg-amber-100 text-amber-900'
+                                    : p.tenureClass === 'SARKAR_SHASAN'
+                                    ? 'bg-rose-100 text-rose-800'
+                                    : 'bg-slate-100 text-slate-700'
+                                }`}
+                              >
+                                {p.tenureDisplay || p.tenureClass || '-'}
+                              </span>
+                              {isCellSelected('parcels', idx, 'tenure') && renderCellHandle()}
+                            </td>
+
+                            {/* 6. 1950 Baseline */}
+                            <td
+                              onClick={() => handleSelectCell('parcels', idx, 'baselineOwner', 6, isMarathi ? '१९५० मूळ नोंद' : '1950 Baseline Entry', targetLabel, baselineVal, p)}
+                              onDoubleClick={() => handleCopyCellText(baselineVal)}
+                              className={`py-2.5 px-3 border-r border-slate-100 text-slate-600 text-[11px] cursor-pointer transition select-text ${
+                                isCellSelected('parcels', idx, 'baselineOwner')
+                                  ? 'ring-2 ring-blue-600 ring-inset bg-blue-100/90 font-bold text-blue-950 relative z-20 shadow-xs'
+                                  : 'hover:bg-blue-50/50'
+                              }`}
+                            >
+                              {p.baselineOwner1950 || '-'}
+                              {isCellSelected('parcels', idx, 'baselineOwner') && renderCellHandle()}
+                            </td>
+
+                            {/* 7. Status Finding */}
+                            <td
+                              onClick={() => handleSelectCell('parcels', idx, 'statusFinding', 7, isMarathi ? 'तपासणी निष्कर्ष / सद्यस्थिती' : 'Inspection Finding / Status', targetLabel, statusVal, p)}
+                              onDoubleClick={() => handleCopyCellText(statusVal)}
+                              className={`py-2.5 px-3 border-r border-slate-100 text-[11px] cursor-pointer transition select-text ${
+                                isCellSelected('parcels', idx, 'statusFinding')
+                                  ? 'ring-2 ring-blue-600 ring-inset bg-blue-100/90 font-bold text-blue-950 relative z-20 shadow-xs'
+                                  : selectedKpiFilter === 'violations' ? 'bg-rose-50/80 ring-1 ring-inset ring-rose-300' : 'hover:bg-blue-50/50'
+                              }`}
+                            >
+                              <span
+                                className={`inline-block px-2 py-0.5 rounded-md ${
+                                  selectedKpiFilter === 'violations'
+                                    ? 'bg-rose-200 text-rose-950 ring-1 ring-rose-400 font-black'
+                                    : p.statusFinding?.includes('शर्तभंग') || p.statusFinding?.includes('अवैध')
+                                    ? 'bg-rose-100 text-rose-800 font-bold'
+                                    : 'bg-slate-100 text-slate-700'
+                                }`}
+                              >
+                                {p.statusFinding || (isMarathi ? 'प्रमाणित' : 'Verified')}
+                              </span>
+                              {isCellSelected('parcels', idx, 'statusFinding') && renderCellHandle()}
+                            </td>
+
+                            {/* 8. Remarks */}
+                            <td
+                              onClick={() => handleSelectCell('parcels', idx, 'remarks', 8, isMarathi ? 'शेरा व इतर हक्क' : 'Remarks & Other Rights', targetLabel, remarksVal, p)}
+                              onDoubleClick={() => handleCopyCellText(remarksVal)}
+                              className={`py-2.5 px-3 text-slate-500 text-[11px] max-w-[200px] cursor-pointer transition select-text ${
+                                isCellSelected('parcels', idx, 'remarks')
+                                  ? 'ring-2 ring-blue-600 ring-inset bg-blue-100/90 font-bold text-blue-950 relative z-20 shadow-xs'
+                                  : 'hover:bg-blue-50/50'
+                              }`}
+                              title={p.remarks}
+                            >
+                              {p.remarks || '-'}
+                              {isCellSelected('parcels', idx, 'remarks') && renderCellHandle()}
+                            </td>
+
+                            {/* Details Button */}
+                            <td className="py-2.5 px-3 text-center">
+                              <button
+                                type="button"
+                                onClick={() => setInspectedParcel(p)}
+                                className="p-1.5 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded-lg transition cursor-pointer"
+                                title={isMarathi ? '४६ मुद्द्यांची संपूर्ण तपासणी पहा' : 'View full 46-point audit checklist'}
+                              >
+                                <Eye className="w-4 h-4" />
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })
                     )}
                   </tbody>
                 </table>
@@ -4506,7 +5039,7 @@ export default function ReportsPage() {
                         </div>
                         <div>
                           <span className="text-[10px] font-semibold text-slate-400 block uppercase tracking-wider">{isMarathi ? 'मूळ भोगवटदार (ii):' : 'Original Holder (ii):'}</span>
-                          <span className="font-semibold text-slate-900 line-clamp-2">{inspectedParcel.points?.[2] || inspectedParcel.baselineOwner1950 || '-'}</span>
+                          <span className="font-semibold text-slate-900 line-clamp-2 pt-0.5 pb-0.5 leading-snug">{inspectedParcel.points?.[2] || inspectedParcel.baselineOwner1950 || '-'}</span>
                         </div>
                         <div>
                           <span className="text-[10px] font-semibold text-slate-400 block uppercase tracking-wider">{isMarathi ? 'मूळ भूधारणा (iii):' : 'Original Tenure (iii):'}</span>
@@ -4530,7 +5063,7 @@ export default function ReportsPage() {
                         </div>
                         <div>
                           <span className="text-[10px] font-semibold text-slate-400 block uppercase tracking-wider">{isMarathi ? 'एकत्रिकरण भोगवटदार (ii):' : 'Consolidation Holder (ii):'}</span>
-                          <span className="font-semibold text-slate-900 line-clamp-2">{inspectedParcel.points?.[5] || '-'}</span>
+                          <span className="font-semibold text-slate-900 line-clamp-2 pt-0.5 pb-0.5 leading-snug">{inspectedParcel.points?.[5] || '-'}</span>
                         </div>
                         <div>
                           <span className="text-[10px] font-semibold text-slate-400 block uppercase tracking-wider">{isMarathi ? 'एकत्रिकरण भूधारणा (iii):' : 'Consolidation Tenure (iii):'}</span>
@@ -4554,7 +5087,7 @@ export default function ReportsPage() {
                         </div>
                         <div>
                           <span className="text-[10px] font-semibold text-slate-400 block uppercase tracking-wider">{isMarathi ? 'पुनर्मोजणी भोगवटदार (ii):' : 'Resurvey Holder (ii):'}</span>
-                          <span className="font-semibold text-slate-900 line-clamp-2">{inspectedParcel.points?.[8] || '-'}</span>
+                          <span className="font-semibold text-slate-900 line-clamp-2 pt-0.5 pb-0.5 leading-snug">{inspectedParcel.points?.[8] || '-'}</span>
                         </div>
                         <div>
                           <span className="text-[10px] font-semibold text-slate-400 block uppercase tracking-wider">{isMarathi ? 'पुनर्मोजणी भूधारणा (iii):' : 'Resurvey Tenure (iii):'}</span>
@@ -4578,7 +5111,7 @@ export default function ReportsPage() {
                         </div>
                         <div>
                           <span className="text-[10px] font-semibold text-slate-400 block uppercase tracking-wider">{isMarathi ? 'सध्याचे खातेदार:' : 'Current Khatedar:'}</span>
-                          <span className="font-bold text-slate-950 line-clamp-2">{inspectedParcel.currentOwner || inspectedParcel.points?.[10] || '-'}</span>
+                          <span className="font-bold text-slate-950 line-clamp-2 pt-0.5 pb-0.5 leading-snug">{inspectedParcel.currentOwner || inspectedParcel.points?.[10] || '-'}</span>
                         </div>
                         <div>
                           <span className="text-[10px] font-semibold text-slate-400 block uppercase tracking-wider">{isMarathi ? 'सध्याची भूधारणा:' : 'Current Tenure:'}</span>

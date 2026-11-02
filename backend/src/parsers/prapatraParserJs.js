@@ -122,7 +122,7 @@ const SUB_TYPE_NAMES = [
  * @param {string} talukaOverride - e.g. "Korpana"
  * @param {string} originalFname - e.g. "हिरापुर साजा हिरापुर .xlsx"
  */
-export async function parsePrapatraBuffer(input, talukaOverride = '', originalFname = '') {
+export async function parsePrapatraBuffer(input, talukaOverride = '', originalFname = '', sheetNameOverride = '') {
   const wb = new ExcelJS.Workbook();
   if (Buffer.isBuffer(input)) {
     await wb.xlsx.load(input);
@@ -136,11 +136,16 @@ export async function parsePrapatraBuffer(input, talukaOverride = '', originalFn
   }
 
   let targetSheet = wb.worksheets[0];
-  for (const s of wb.worksheets) {
-    const sTitle = s.name.trim();
-    if (['7/12', 'तपासणी', 'मुद्दे', '1 to 45', '1 ते 45', 'Booklet', 'Master'].some(k => sTitle.includes(k))) {
-      targetSheet = s;
-      break;
+  if (sheetNameOverride) {
+    const found = wb.worksheets.find(w => w.name.trim() === sheetNameOverride.trim());
+    if (found) targetSheet = found;
+  } else {
+    for (const s of wb.worksheets) {
+      const sTitle = s.name.trim();
+      if (['7/12', 'तपासणी', 'मुद्दे', '1 to 45', '1 ते 45', 'Booklet', 'Master'].some(k => sTitle.includes(k))) {
+        targetSheet = s;
+        break;
+      }
     }
   }
 
