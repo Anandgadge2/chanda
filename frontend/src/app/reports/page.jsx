@@ -2258,6 +2258,163 @@ export default function ReportsPage() {
     </div>
   );
 
+  const renderEmptyState = () => {
+    const isViolationActive = (violationFilter && violationFilter !== 'all') || selectedKpiFilter === 'violations';
+    const isClass2Active = selectedKpiFilter === 'class2';
+    const isSearchActive = Boolean(search && search.trim());
+    const isTenureActive = Boolean(tenureFilter && tenureFilter !== 'all');
+
+    const activeViolationOption = violationSelectOptions.find(o => o.value === violationFilter);
+    const activeViolationLabel = activeViolationOption?.labelMr || (
+      violationFilter === 'shartbhang' ? (isMarathi ? 'शर्तभंग (Breach)' : 'Breach of Condition') :
+      violationFilter === 'illegalDeletion' ? (isMarathi ? 'अवैध वगळणी' : 'Illegal Deletion') :
+      violationFilter === 'pokalist' ? (isMarathi ? 'पोकळीस्त नोंद' : 'Hollow Entry') :
+      violationFilter === 'encroachment' ? (isMarathi ? 'अतिक्रमण' : 'Encroachment') :
+      violationFilter === 'tribalViolation' ? (isMarathi ? 'आदिवासी जमीन उल्लंघन' : 'Tribal Land Violation') :
+      selectedKpiFilter === 'violations' ? (isMarathi ? 'शर्तभंग / संशयित बाबी' : 'Violations / Inquiries') : ''
+    );
+
+    const activeTenureOption = tenureSelectOptions.find(o => o.value === tenureFilter);
+    const activeTenureLabel = activeTenureOption ? (isMarathi ? activeTenureOption.labelMr : activeTenureOption.labelEn) : '';
+
+    const villageDisplay = village && village !== 'all' && village !== 'सर्व गावे' ? formatVillageName(village, isMarathi) : '';
+    const talukaDisplay = taluka && taluka !== 'all' && taluka !== 'सर्व तालुके' ? formatTalukaName(taluka, isMarathi) : '';
+
+    return (
+      <div className="py-14 sm:py-16 px-4 bg-white border-b border-slate-200 text-center flex flex-col items-center justify-center select-none">
+        <div className="max-w-xl mx-auto flex flex-col items-center">
+          {/* Top Status Icon */}
+          <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-3.5 shadow-xs border ${
+            isViolationActive
+              ? 'bg-emerald-50 text-emerald-600 border-emerald-200'
+              : isClass2Active
+              ? 'bg-amber-50 text-amber-600 border-amber-200'
+              : isSearchActive
+              ? 'bg-blue-50 text-blue-600 border-blue-200'
+              : 'bg-slate-100 text-slate-500 border-slate-200'
+          }`}>
+            {isViolationActive ? (
+              <ShieldCheck className="w-7 h-7 text-emerald-600" />
+            ) : isSearchActive ? (
+              <Search className="w-7 h-7 text-blue-600" />
+            ) : (
+              <Filter className="w-7 h-7 text-slate-500" />
+            )}
+          </div>
+
+          {/* Prominent Heading */}
+          <h3 className="text-base sm:text-lg font-black text-slate-900 tracking-tight mb-1.5">
+            {isViolationActive
+              ? (isMarathi
+                  ? 'सदर निकषात एकही नोंद आढळली नाही (निरंक / ० अभिलेख)'
+                  : 'No Records Found Matching Criteria (0 Records)')
+              : isSearchActive
+              ? (isMarathi
+                  ? `"${search}" या शोधाकरिता एकही नोंद आढळली नाही`
+                  : `No records found matching "${search}"`)
+              : isClass2Active
+              ? (isMarathi
+                  ? 'भोगवटादार वर्ग २ / शासकीय निकषात एकही नोंद नाही (० अभिलेख)'
+                  : 'No Class-2 / Govt records found (0 Records)')
+              : (isMarathi
+                  ? 'निवडलेल्या निकषांनुसार कोणतेही अभिलेख आढळले नाहीत (० अभिलेख)'
+                  : 'No 7/12 land records found matching selected criteria')}
+          </h3>
+
+          {/* Subtext Description with Context */}
+          <p className="text-xs text-slate-600 leading-relaxed max-w-lg mb-4">
+            {isViolationActive && villageDisplay
+              ? (isMarathi
+                  ? `${talukaDisplay ? `${talukaDisplay} तालुक्यातील ` : ''}${villageDisplay} गावामध्ये '${activeViolationLabel || 'शर्तभंग'}' या तपासणी निष्कर्षातील कोणतेही ७/१२ अभिलेख आढळलेले नाहीत. सर्व नोंदी नियमित आहेत.`
+                  : `No breach / violation records found in ${villageDisplay}. All land records are compliant.`)
+              : isViolationActive
+              ? (isMarathi
+                  ? `निवडलेल्या कार्यक्षेत्रात '${activeViolationLabel || 'शर्तभंग'}' निष्कर्ष असलेले कोणतेही ७/१२ अभिलेख आढळलेले नाहीत.`
+                  : 'No violation records found in the selected scope.')
+              : isSearchActive
+              ? (isMarathi
+                  ? 'कृपया गट क्रमांक, सर्व्हे क्रमांक किंवा खातेदाराचे नाव तपासून पुन्हा प्रयत्न करा.'
+                  : 'Please check the Gat No, Survey No, or Khatedar name and try again.')
+              : (isMarathi
+                  ? 'निवडलेल्या कार्यक्षेत्रात या विशिष्ट श्रेणीतील अभिलेख निरंक (०) आहेत. कृपया इतर निकष निवडून तपासा.'
+                  : 'There are 0 matching records for this filter selection. Please try selecting different criteria.')}
+          </p>
+
+          {/* Active Filter Badges */}
+          <div className="flex flex-wrap items-center justify-center gap-1.5 mb-5 text-[11px]">
+            {talukaDisplay && (
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-slate-100 border border-slate-200 text-slate-700 rounded-lg font-medium">
+                <span className="text-slate-400 font-bold">{isMarathi ? 'तालुका:' : 'Taluka:'}</span>
+                <span className="font-bold">{talukaDisplay}</span>
+              </span>
+            )}
+            {villageDisplay && (
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-slate-100 border border-slate-200 text-slate-700 rounded-lg font-medium">
+                <span className="text-slate-400 font-bold">{isMarathi ? 'गाव:' : 'Village:'}</span>
+                <span className="font-bold">{villageDisplay}</span>
+              </span>
+            )}
+            {activeViolationLabel && (
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-rose-50 border border-rose-200 text-rose-800 rounded-lg font-bold">
+                <AlertTriangle className="w-3.5 h-3.5 text-rose-600 shrink-0" />
+                <span>{activeViolationLabel}</span>
+                <span className="bg-rose-200 text-rose-900 px-1.5 py-0.5 rounded text-[10px] font-mono font-black">०</span>
+              </span>
+            )}
+            {activeTenureLabel && (
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-amber-50 border border-amber-200 text-amber-800 rounded-lg font-medium">
+                <span className="text-amber-500 font-bold">{isMarathi ? 'धारणा:' : 'Tenure:'}</span>
+                <span className="font-bold">{activeTenureLabel}</span>
+              </span>
+            )}
+            {isSearchActive && (
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-blue-50 border border-blue-200 text-blue-800 rounded-lg font-medium">
+                <Search className="w-3 h-3 text-blue-500 shrink-0" />
+                <span className="font-bold">{search}</span>
+              </span>
+            )}
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                setDraftTenure('all');
+                setDraftViolation('all');
+                setDraftSearch('');
+                setSelectedKpiFilter('all');
+                setAppliedFilters(prev => ({
+                  ...prev,
+                  tenure: 'all',
+                  violation: 'all',
+                  search: '',
+                }));
+              }}
+              className="inline-flex items-center gap-1.5 px-4 py-2 bg-blue-900 text-white rounded-xl text-xs font-bold hover:bg-blue-800 transition active:scale-95 shadow-xs cursor-pointer"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+              <span>
+                {villageDisplay
+                  ? (isMarathi ? `${villageDisplay} गावातील सर्व ७/१२ अभिलेख दाखवा` : `Show All Records for ${villageDisplay}`)
+                  : (isMarathi ? 'सर्व ७/१२ अभिलेख दाखवा (फिल्टर साफ करा)' : 'Show All Records (Clear Filter)')}
+              </span>
+            </button>
+            {(villageDisplay || talukaDisplay) && (
+              <button
+                type="button"
+                onClick={handleResetFilters}
+                className="inline-flex items-center gap-1 px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold border border-slate-300 transition active:scale-95 shadow-2xs cursor-pointer"
+              >
+                <span>{isMarathi ? 'सर्व तालुके व गावे पूर्ववत करा' : 'Reset All Talukas & Villages'}</span>
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="space-y-3 sm:space-y-4 font-sans text-slate-800">
       <div className="w-full space-y-3 sm:space-y-4">
@@ -3091,8 +3248,8 @@ export default function ReportsPage() {
                       ? `${processedVillageRows.length + processedTalukaRows.length + processedDistrictRows.length} ${isMarathi ? 'गोषवारा नोंदी' : 'Summary Records'}`
                       : activeTab === 'categories' && activeView === 'categorySummary'
                       ? `${activeCategoryRollupCount} ${isMarathi ? 'गोषवारा नोंदी' : 'Summary Records'}`
-                      : selectedKpiFilter !== 'all'
-                      ? `${kpiFilteredParcels.length} / ${parcels.length} ${isMarathi ? 'अभिलेख (फिल्टर)' : 'Records (Filtered)'}`
+                      : (selectedKpiFilter !== 'all' || (violationFilter && violationFilter !== 'all') || (tenureFilter && tenureFilter !== 'all') || (search && search.trim()))
+                      ? `${kpiFilteredParcels.length} ${isMarathi ? 'अभिलेख (फिल्टर)' : 'Records (Filtered)'}`
                       : `${serverRollup?.districtTotal?.total712Count ?? parcels.length} ${isMarathi ? 'अभिलेख' : 'Records'}`
                   )}
                 </span>
@@ -3267,8 +3424,11 @@ export default function ReportsPage() {
                   </p>
                 </div>
 
-                {/* Table */}
-                <div className="overflow-x-auto border-b border-slate-200 bg-white relative" style={{ WebkitOverflowScrolling: 'touch' }}>
+                {/* Table or Empty State */}
+                {!loading && paginatedParcels.length === 0 ? (
+                  renderEmptyState()
+                ) : (
+                  <div className="overflow-x-auto border-b border-slate-200 bg-white relative" style={{ WebkitOverflowScrolling: 'touch' }}>
                   <table className="w-full text-left border-collapse text-xs min-w-[1000px]">
                     <thead>
                       <tr className="bg-slate-100/90 text-slate-800 font-bold border-b border-slate-300 text-center">
@@ -3444,6 +3604,7 @@ export default function ReportsPage() {
 
                   {loading && renderTableLoadingOverlay()}
                 </div>
+                )}
 
                 {/* Pagination */}
                 {kpiFilteredParcels.length > 0 && (
@@ -3712,8 +3873,11 @@ export default function ReportsPage() {
                   </p>
                 </div>
 
-                <div className="overflow-x-auto border-b border-slate-200 bg-white relative" style={{ WebkitOverflowScrolling: 'touch' }}>
-                  {isTenancyCategory ? (
+                {!loading && paginatedParcels.length === 0 ? (
+                  renderEmptyState()
+                ) : (
+                  <div className="overflow-x-auto border-b border-slate-200 bg-white relative" style={{ WebkitOverflowScrolling: 'touch' }}>
+                    {isTenancyCategory ? (
                     <table className="w-full text-left border-collapse text-xs min-w-[1050px]">
                       <thead>
                         <tr className="bg-slate-100/90 text-slate-800 font-bold border-b border-slate-300 text-center">
@@ -3995,6 +4159,7 @@ export default function ReportsPage() {
 
                   {loading && renderTableLoadingOverlay()}
                 </div>
+                )}
 
                 {kpiFilteredParcels.length > 0 && (
                   <div className={`p-3.5 border-t border-slate-200 bg-slate-50/60 ${loading ? 'opacity-50 pointer-events-none' : ''}`}>
@@ -4066,10 +4231,14 @@ export default function ReportsPage() {
             
               </div>
 
-              {/* Horizontal Scroll Table */}
+              {/* Horizontal Scroll Table or Empty State */}
               <div className="relative">
-                {renderActiveCellBar('timeline')}
-                <div className="overflow-x-auto max-h-[70vh] border-b border-slate-300 bg-white">
+                {!loading && paginatedParcels.length === 0 ? (
+                  renderEmptyState()
+                ) : (
+                  <>
+                    {renderActiveCellBar('timeline')}
+                    <div className="overflow-x-auto max-h-[70vh] border-b border-slate-300 bg-white">
                 <table className="w-full text-left border-collapse text-[11px] whitespace-nowrap">
                   <thead className="sticky top-0 z-30 bg-white shadow-md isolate">
                     {/* Level 1: Major Group Headers */}
@@ -4525,7 +4694,9 @@ export default function ReportsPage() {
               </div>
 
               {loading && renderTableLoadingOverlay()}
-            </div>
+            </>
+          )}
+        </div>
 
               {/* Pagination */}
               {kpiFilteredParcels.length > 0 && (
@@ -4549,8 +4720,12 @@ export default function ReportsPage() {
           ) : (
             <div>
               <div className="relative">
-                {renderActiveCellBar('parcels')}
-                <div className="overflow-x-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
+                {!loading && paginatedParcels.length === 0 ? (
+                  renderEmptyState()
+                ) : (
+                  <>
+                    {renderActiveCellBar('parcels')}
+                    <div className="overflow-x-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
                   <table className="w-full text-left border-collapse text-xs min-w-[840px]">
                   <thead>
                     <tr className="bg-slate-100/80 text-slate-700 font-bold border-b border-slate-200 text-center">
@@ -4862,7 +5037,9 @@ export default function ReportsPage() {
               </div>
 
               {loading && renderTableLoadingOverlay()}
-            </div>
+            </>
+          )}
+        </div>
 
               {/* Pagination */}
               {kpiFilteredParcels.length > 0 && (
