@@ -31,10 +31,8 @@ export function cleanSurveyNo(val) {
   if (s.endsWith('.0')) {
     s = s.slice(0, -2);
   }
-  // Remove trailing period if present e.g. "1/2." -> "1/2"
-  if (s.endsWith('.') && s.length > 1) {
-    s = s.slice(0, -1);
-  }
+  // Remove trailing periods e.g. "1/2." -> "1/2" or "1/1.." -> "1/1"
+  s = s.replace(/\.+$/, '').trim();
   const invalidWords = [
     'सक्षम', 'बंदी', 'आदिवासी', 'हस्तांतरण', 'परवानगी', 'जमीन', 'नियम',
     'तहसिलदार', 'माहिती', 'गोषवारा', 'स्वाक्षरी', 'दिनांक', 'प्रमाणन', 'अ.क्र'
@@ -54,20 +52,20 @@ export function normalizeTenure(val, otherRights = '', bandobastTenure = '', own
   if (['महाराष्ट्र शासन', 'सरकार', 'शासन', 'कालवा', 'तलाव', 'गायरान', 'सार्वजनिक', 'राखीव'].some(k => ownerStr.includes(k))) {
     return 'SARKAR_SHASAN';
   }
-  if (s.includes('वन') || ownerStr.includes('वन')) {
+  if (['वन विभाग', 'वनविभाग', 'वन जमीन', 'वन खाते', 'सामाजिक वनीकरण'].some(k => ownerStr.includes(k) || s.includes(k))) {
     return 'FOREST_JANGAL';
   }
-  if (s.includes('देवस्थान') || s.includes('इनाम')) {
+  if (s.includes('देवस्थान') || s.includes('इनाम') || ownerStr.includes('देवस्थान') || ownerStr.includes('मंदिर')) {
     return 'DEVASTHAN_INAM';
   }
   if (s.includes('2') || s.includes('२')) {
     return 'BHOGVATDAR_CLASS_2';
   }
-  if (['आदिवासी', 'आदीवासी', '36', '३६', 'शर्तभंग', 'सक्षम प्राधिकारी'].some(k => rightsStr.includes(k))) {
-    return 'BHOGVATDAR_CLASS_2';
-  }
   if (s.includes('1') || s.includes('१') || bTenure.includes('भूमिधारी') || bTenure.includes('भूमिस्वामी')) {
     return 'BHOGVATDAR_CLASS_1';
+  }
+  if (['आदिवासी', 'आदीवासी', '36', '३६', 'शर्तभंग', 'सक्षम प्राधिकारी'].some(k => rightsStr.includes(k))) {
+    return 'BHOGVATDAR_CLASS_2';
   }
   return 'BHOGVATDAR_CLASS_1';
 }
@@ -255,8 +253,14 @@ export async function parsePrapatraBuffer(input, talukaOverride = '', originalFn
   let colOwner = -1;
   let colRights = -1;
 
+  // Filter out merged title banners (e.g. rows containing top-level instructions / banner headers)
+  const headerRows = rawRows.slice(0, dataStartIdx).filter(row => {
+    const rowText = row.map(cell => String(cell || '').trim()).join(' ');
+    return !(rowText.includes('तपासणी सुची') || rowText.includes('ते आजपर्यतच्या') || rowText.includes('माहिती भरावी') || rowText.includes('महसूल अधिकार'));
+  });
+
   for (let c = 0; c < Math.min(15, rawRows[0].length); c++) {
-    const h = rawRows.slice(0, dataStartIdx).map(row => String(row[c] || '').trim()).join(' ');
+    const h = headerRows.map(row => String(row[c] || '').trim()).join(' ');
     if (colVillage === -1 && (h.includes('गावाचे नाव') || h.includes('गाव'))) colVillage = c;
     if (colSurvey === -1 && ['सर्व्हे क्रमांक', 'स.नं', 'गट क्रमांक', 'गट क्र'].some(k => h.includes(k))) colSurvey = c;
     if (colTenure === -1 && ['भोगवटदार वर्ग', 'भूधारणा', 'भुधारणा'].some(k => h.includes(k)) && !['बंदोबस्त', 'एकत्रिकरण', '7/12', '७/१२'].some(k => h.includes(k))) colTenure = c;
@@ -264,11 +268,12 @@ export async function parsePrapatraBuffer(input, talukaOverride = '', originalFn
     if (colRights === -1 && h.includes('इतर अधिकार') && !h.includes('अधिकार अभिलेख')) colRights = c;
   }
 
+  // Defensive defaults matching standard Prapatra format (Col B=1, Col C=2, Col F=5, Col G=6, Col H=7)
   if (colVillage === -1) colVillage = 1;
   if (colSurvey === -1) colSurvey = 2;
-  if (colTenure === -1) colTenure = colSurvey + 2;
-  if (colOwner === -1) colOwner = colTenure + 1;
-  if (colRights === -1) colRights = colOwner + 1;
+  if (colTenure === -1) colTenure = 5;
+  if (colOwner === -1) colOwner = 6;
+  if (colRights === -1) colRights = 7;
 
   // 5. Dynamic Area Columns Identification
   const areaColIndices = [];
@@ -376,7 +381,7 @@ export async function parsePrapatraBuffer(input, talukaOverride = '', originalFn
     }
 
     const surveyFinal = surveyClean || `S-${parcels.length + 1}`;
-    const ownerClean = String(ownerRaw || 'अज्ञात खातेदार').trim().slice(0, 240);
+    const ownerClean = String(ownerRaw || 'अज्ञात खातेदार').trim();
     const rightsClean = String(rightsRaw || 'नाही').trim();
 
     // Helper for audit points: 100% exact to Excel cell value
@@ -471,15 +476,19 @@ export async function parsePrapatraBuffer(input, talukaOverride = '', originalFn
 
     const talukaCode = (talukaOverride || 'CHA').slice(0, 3).toUpperCase();
     const upi = `MH-CHA-${talukaCode}-UPL-${String(parcels.length + 1).padStart(4, '0')}-01`;
+    const excelSrNo = isNumericSr ? parseInt(srVal, 10) : (parcels.length + 1);
 
     parcels.push({
       upi,
+      excelSrNo,
+      srNo: excelSrNo,
       gatNumber: surveyFinal,
       oldSurveyNo: bNo || null,
       agriAreaHa: agriClean,
       naAreaSqM: naClean,
       totalAreaHa: totalAreaClean,
       tenureClass: tenureEnum,
+      tenureCategory: tenureRaw ? String(tenureRaw).trim() : (tenureEnum === 'BHOGVATDAR_CLASS_2' ? 'भो.व-2' : 'भो.व-1'),
       ownerName: ownerClean,
       otherRights: rightsClean,
       subTypeCategory: null,

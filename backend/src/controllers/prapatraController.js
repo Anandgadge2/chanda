@@ -1252,11 +1252,22 @@ export const getPrapatraReport = async (req, res) => {
       });
     }
 
-    // Defensive in-memory deduplication by (taluka + canonical villageName + normalized gatNumber + totalAreaHa)
+    // Defensive in-memory deduplication by (taluka + canonical villageName + normalized gatNumber + totalAreaHa + distinct owner/rights/srNo)
+    // Preserves legitimate co-sharer parcels that have distinct owners or rights
     const dedupMap = new Map();
     for (const p of rawParcels) {
-      const normGat = String(p.gatNumber || '').trim().replace(/\.$/, '').replace(/\s+/g, '');
-      const key = `${p.taluka?.toLowerCase()}__${cleanVillageName(p.villageName)}__${normGat}__${Number(p.totalAreaHa || 0).toFixed(2)}`;
+      const normGat = String(p.gatNumber || '').trim().replace(/\.+$/, '').replace(/\s+/g, '');
+      const metaOwner = String(p.metadata?.ownerName || '').trim();
+      const otherRights = String(p.metadata?.otherRights || '').trim();
+      const srNo = p.metadata?.srNo !== undefined && p.metadata?.srNo !== null ? String(p.metadata.srNo) : '';
+
+      const ownerSig = metaOwner.toLowerCase().replace(/[\s\.\,]/g, '');
+      const rightsSig = otherRights.slice(0, 40).toLowerCase().replace(/[\s\.\,]/g, '');
+
+      const key = srNo
+        ? `${p.taluka?.toLowerCase()}__${cleanVillageName(p.villageName)}__${normGat}__${srNo}`
+        : `${p.taluka?.toLowerCase()}__${cleanVillageName(p.villageName)}__${normGat}__${Number(p.totalAreaHa || 0).toFixed(2)}__${ownerSig}__${rightsSig}`;
+
       if (!dedupMap.has(key)) {
         dedupMap.set(key, p);
       } else {
@@ -1266,7 +1277,7 @@ export const getPrapatraReport = async (req, res) => {
         const existingBk = existing.backwardHistories?.length || 0;
         const currentBk = p.backwardHistories?.length || 0;
 
-        if (currentPoints > existingPoints || (currentPoints === existingPoints && currentBk > existingBk)) {
+        if (currentPoints > existingPoints || (currentPoints === existingPoints && currentBk > existingBk) || (currentPoints === existingPoints && currentBk === existingBk && new Date(p.createdAt || 0) > new Date(existing.createdAt || 0))) {
           dedupMap.set(key, p);
         }
       }
@@ -1281,6 +1292,12 @@ export const getPrapatraReport = async (req, res) => {
       FOREST_JANGAL: 'वन जमीन'
     };
 
+    const isTenureCode = (str) => {
+      if (!str) return false;
+      const s = String(str).trim();
+      return /^भो[\.\s]*व[\.\s]*[-–—]?\s*[12१२]/i.test(s) || /^(वर्ग|भोगवटदार|शासकीय|शासन)\b/i.test(s);
+    };
+
     const formattedParcels = rawParcels.map((p, idx) => {
       const metaOwner = p.metadata?.ownerName;
       const caseOccupant = p.forwardCases?.[0]?.occupantName;
@@ -1290,9 +1307,9 @@ export const getPrapatraReport = async (req, res) => {
 
       // Extract current owner
       let currentOwner = 'नोंद उपलब्ध नाही';
-      if (metaOwner && metaOwner !== 'नाही' && metaOwner !== '-' && metaOwner !== 'भो वर्ग 2') {
+      if (metaOwner && !isTenureCode(metaOwner) && metaOwner !== 'नाही' && metaOwner !== '-') {
         currentOwner = metaOwner;
-      } else if (otherRights && otherRights !== '-' && otherRights !== '....' && otherRights.length > 2 && !otherRights.includes('रूपांतर')) {
+      } else if (otherRights && otherRights !== '-' && otherRights !== '....' && otherRights.length > 2 && !otherRights.includes('रूपांतर') && !otherRights.includes('सक्षम प्राधिकार्यांच्या') && !otherRights.includes('हस्तांतरास बंदी')) {
         currentOwner = otherRights;
       } else if (caseOccupant && caseOccupant !== 'नाही') {
         currentOwner = caseOccupant;
@@ -1352,26 +1369,34 @@ export const getPrapatraReport = async (req, res) => {
       const getSeq = (item) => {
         if (item.metadata?.srNo !== undefined && item.metadata?.srNo !== null) {
           const s = parseInt(item.metadata.srNo, 10);
-          if (!isNaN(s)) return s;
+          if (!isNaN(s) && s > 0) return s;
         }
         if (item.metadata?.auditPoints?.srNo !== undefined && item.metadata?.auditPoints?.srNo !== null) {
           const s = parseInt(item.metadata.auditPoints.srNo, 10);
-          if (!isNaN(s)) return s;
+          if (!isNaN(s) && s > 0) return s;
         }
-        if (item.upi) {
-          const parts = item.upi.split('-');
-          const lastPart = parts[parts.length - 1];
-          const num = parseInt(lastPart, 10);
-          if (!isNaN(num)) return num;
+        if (item.excelSrNo !== undefined && item.excelSrNo !== null) {
+          const s = parseInt(item.excelSrNo, 10);
+          if (!isNaN(s) && s > 0) return s;
         }
-        const m = String(item.gatNumber || '').match(/^(\d+)(?:\/(\d+))?/);
+        const normGat = String(item.gatNumber || '').trim().replace(/\.+$/, '');
+        if (normGat === '1/1') return 1;
+        if (normGat === '1/2') return 2;
+        const m = normGat.match(/^(\d+)(?:\/(\d+))?/);
         if (m) {
-          return parseInt(m[1], 10) * 1000 + (m[2] ? parseInt(m[2], 10) : 0);
+          const main = parseInt(m[1], 10);
+          const sub = m[2] ? parseInt(m[2], 10) : 0;
+          return main * 1000 + sub;
         }
         return 999999;
       };
 
       const excelSrNo = getSeq(p);
+      const rawTenureCat = p.metadata?.tenureCategory || (isTenureCode(metaOwner) ? metaOwner : null);
+      const tenureDisplay = tenureLabels[p.tenureClass] || rawTenureCat || p.tenureClass || '-';
+      const resolvedOtherRights = (isTenureCode(metaOwner) && !p.metadata?.otherRights?.includes('सक्षम') && !p.metadata?.otherRights?.includes('बंदी'))
+        ? '-'
+        : (p.metadata?.otherRights || (otherRights && otherRights !== '....' && otherRights !== '-' ? otherRights : '-'));
 
       return {
         id: p.id,
@@ -1387,11 +1412,11 @@ export const getPrapatraReport = async (req, res) => {
         currentOwner,
         baselineOwner1950,
         tenureClass: p.tenureClass,
-        tenureDisplay: tenureLabels[p.tenureClass] || p.tenureClass || '-',
+        tenureDisplay,
         statusFinding,
         orderRef: c?.caseNumber || b1950?.ferfarNumber || '-',
-        remarks: (otherRights && otherRights !== '....' && otherRights !== '-') ? otherRights : (b1950?.mutationType || '-'),
-        otherRights: p.metadata?.otherRights || (otherRights && otherRights !== '....' && otherRights !== '-' ? otherRights : '-'),
+        remarks: (resolvedOtherRights && resolvedOtherRights !== '....' && resolvedOtherRights !== '-') ? resolvedOtherRights : (b1950?.mutationType || '-'),
+        otherRights: resolvedOtherRights,
         points: resolveParcel46Points(p)
       };
     });
@@ -1400,14 +1425,22 @@ export const getPrapatraReport = async (req, res) => {
     // If a single village is selected: Sort strictly by original Excel sequence (excelSrNo)
     // If all villages/talukas: Sort hierarchically (Taluka -> Village -> Excel sequence)
     if (!isAllVillages) {
-      formattedParcels.sort((a, b) => (a.excelSrNo || 0) - (b.excelSrNo || 0));
+      formattedParcels.sort((a, b) => {
+        const srA = a.excelSrNo || 0;
+        const srB = b.excelSrNo || 0;
+        if (srA !== srB) return srA - srB;
+        return String(a.gatNumber || '').localeCompare(String(b.gatNumber || ''), undefined, { numeric: true });
+      });
     } else {
       formattedParcels.sort((a, b) => {
         const talukaCmp = (a.taluka || '').localeCompare(b.taluka || '');
         if (talukaCmp !== 0) return talukaCmp;
         const villageCmp = (a.villageName || '').localeCompare(b.villageName || '', 'mr');
         if (villageCmp !== 0) return villageCmp;
-        return (a.excelSrNo || 0) - (b.excelSrNo || 0);
+        const srA = a.excelSrNo || 0;
+        const srB = b.excelSrNo || 0;
+        if (srA !== srB) return srA - srB;
+        return String(a.gatNumber || '').localeCompare(String(b.gatNumber || ''), undefined, { numeric: true });
       });
     }
 

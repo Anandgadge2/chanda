@@ -84,4 +84,10 @@ data/all_talukas_parcels.json
 data/gondpipri_cleaned_payload.json
 
 
+# ==========================================
+# Agent & Temporary Workspace Artifacts
+# ==========================================
 .agent
+.agents/
+.tmp_chrome*/
+tests/e2e/screenshots/

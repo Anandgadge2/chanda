@@ -5,8 +5,8 @@ import prisma from '../config/prisma.js';
  * e.g. " 14 / 2 " -> "14/2", "042" -> "42"
  */
 export const normalizeGatKey = (gat, hissa) => {
-  const g = String(gat || '').trim().replace(/\s+/g, '');
-  const h = String(hissa || '').trim().replace(/\s+/g, '');
+  let g = String(gat || '').trim().replace(/\s+/g, '').replace(/[\.\,\;\:]+$/, '');
+  let h = String(hissa || '').trim().replace(/\s+/g, '').replace(/[\.\,\;\:]+$/, '');
   if (!g) return '';
   // Guard against Excel-converted date strings
   if (/^(mon|tue|wed|thu|fri|sat|sun)/i.test(g) || g.includes('GMT') || g.includes('00:00:00')) {
@@ -271,6 +271,8 @@ export const reconcileAndSeedVillage = async ({
         incoming.flags?.isPokalist
       );
 
+      const targetSrNo = incoming.excelSrNo ?? incoming.srNo ?? incoming.auditPoints?.srNo ?? m.rowNumber;
+
       await prisma.landParcel.update({
         where: { id: m.parcelId },
         data: {
@@ -278,6 +280,8 @@ export const reconcileAndSeedVillage = async ({
           tenureClass: incoming.tenureClass,
           hasActiveDispute: hasDispute,
           metadata: {
+            srNo: targetSrNo,
+            tenureCategory: incoming.tenureCategory || null,
             ownerName: incoming.ownerName,
             otherRights: incoming.otherRights,
             agriAreaHa: incoming.agriAreaHa || incoming.totalAreaHa,
@@ -321,11 +325,15 @@ export const reconcileAndSeedVillage = async ({
       const incoming = parcels[u.rowNumber - 1];
       if (!incoming) return;
 
+      const targetSrNo = incoming.excelSrNo ?? incoming.srNo ?? incoming.auditPoints?.srNo ?? u.rowNumber;
+
       // Always ensure metadata and auditPoints match the newly parsed Excel sheet 1:1
       await prisma.landParcel.update({
         where: { id: u.parcelId },
         data: {
           metadata: {
+            srNo: targetSrNo,
+            tenureCategory: incoming.tenureCategory || null,
             ownerName: incoming.ownerName,
             otherRights: incoming.otherRights,
             agriAreaHa: incoming.agriAreaHa || incoming.totalAreaHa,
@@ -427,6 +435,8 @@ export const reconcileAndSeedVillage = async ({
       const safeHissa = String(p.hissaNumber || '00').replace(/[^0-9a-zA-Z]/g, '-').slice(0, 8);
       const upi = `MH-CHA-${talukaPrefix}-${villageCode}-${safeGat}-${safeHissa}-${Date.now().toString().slice(-4)}${i + 1}`.slice(0, 64);
 
+      const targetSrNo = p.excelSrNo ?? p.srNo ?? p.auditPoints?.srNo ?? (i + 1);
+
       netNewParcelData.push({
         upi,
         district: 'Chandrapur',
@@ -441,6 +451,8 @@ export const reconcileAndSeedVillage = async ({
         tenureClass: p.tenureClass,
         hasActiveDispute: Boolean(p.flags?.isShartbhang || p.flags?.isEncroached || p.flags?.isTribal || p.flags?.isPokalist),
         metadata: {
+          srNo: targetSrNo,
+          tenureCategory: p.tenureCategory || null,
           ownerName: p.ownerName,
           otherRights: p.otherRights,
           agriAreaHa: p.agriAreaHa || p.totalAreaHa,

@@ -4340,14 +4340,14 @@ export default function ReportsPage() {
                           <>Tenure Class<br /><span className="text-[9px] font-normal text-slate-500">(By Holding)</span></>
                         )}
                       </th>
-                      <th className={`py-2.5 px-3 border-r border-slate-300 text-left min-w-[180px] leading-normal transition ${
+                      <th className={`py-2.5 px-3 border-r border-slate-300 text-left min-w-[180px] whitespace-normal break-words leading-normal transition ${
                         selectedCell?.view === 'timeline' && selectedCell?.colKey === 'owner'
                           ? 'bg-blue-300 text-blue-950 font-black ring-2 ring-inset ring-blue-600'
                           : 'bg-blue-100 text-blue-950 font-black'
                       }`}>
                         {isMarathi ? 'भोगवटदाराचे नाव' : 'Occupant Name'}
                       </th>
-                      <th className={`py-2.5 px-3 border-r border-slate-300 text-left min-w-[180px] leading-normal transition ${
+                      <th className={`py-2.5 px-3 border-r border-slate-300 text-left w-[240px] min-w-[200px] max-w-[280px] whitespace-normal break-words leading-normal transition ${
                         selectedCell?.view === 'timeline' && selectedCell?.colKey === 'otherRights'
                           ? 'bg-blue-200 text-blue-950 font-black ring-2 ring-inset ring-blue-500'
                           : 'bg-slate-100'
@@ -4604,7 +4604,7 @@ export default function ReportsPage() {
                             <td
                               onClick={() => handleSelectCell('timeline', idx, 'owner', 5, isMarathi ? 'भोगवटदाराचे नाव' : 'Occupant Name', targetLabel, ownerVal, p)}
                               onDoubleClick={() => handleCopyCellText(ownerVal)}
-                              className={`py-2 px-3 border-r border-slate-200 font-bold cursor-pointer transition select-text ${
+                              className={`py-2 px-3 border-r border-slate-200 font-bold cursor-pointer transition select-text whitespace-normal break-words ${
                                 isCellSelected('timeline', idx, 'owner')
                                   ? 'ring-2 ring-blue-600 ring-inset bg-blue-100/90 font-black text-blue-950 relative z-20 shadow-xs'
                                   : 'bg-blue-50/20 text-blue-950 hover:bg-blue-100/40'
@@ -4618,14 +4618,16 @@ export default function ReportsPage() {
                             <td
                               onClick={() => handleSelectCell('timeline', idx, 'otherRights', 6, isMarathi ? 'इतर अधिकारातील नोंद' : 'Other Rights Entry', targetLabel, otherRightsVal, p)}
                               onDoubleClick={() => handleCopyCellText(otherRightsVal)}
-                              className={`py-2 px-3 border-r border-slate-200 text-slate-600 text-[10px] max-w-[200px] cursor-pointer transition select-text ${
+                              className={`py-2 px-3 border-r border-slate-200 text-slate-600 text-[10px] w-[240px] min-w-[200px] max-w-[280px] whitespace-normal break-words align-top cursor-pointer transition select-text ${
                                 isCellSelected('timeline', idx, 'otherRights')
                                   ? 'ring-2 ring-blue-600 ring-inset bg-blue-100/90 font-bold text-blue-950 relative z-20 shadow-xs'
                                   : 'hover:bg-blue-50/50'
                               }`}
                               title={p.otherRights || p.remarks || '-'}
                             >
-                              {p.otherRights || p.remarks || '-'}
+                              <div className="whitespace-normal break-words leading-snug line-clamp-3 hover:line-clamp-none transition-all select-text">
+                                {p.otherRights || p.remarks || '-'}
+                              </div>
                               {isCellSelected('timeline', idx, 'otherRights') && renderCellHandle()}
                             </td>
 
