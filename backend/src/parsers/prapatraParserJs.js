@@ -155,9 +155,21 @@ export async function parsePrapatraBuffer(input, talukaOverride = '', originalFn
     // row.values is 1-based (row.values[1] is col A)
     const rowVals = [];
     for (let c = 1; c <= 60; c++) {
-      let cellVal = row.getCell(c).value;
+      const cell = row.getCell(c);
+      let cellVal = cell.value;
       if (cellVal && typeof cellVal === 'object') {
-        if (cellVal.richText) {
+        if (cellVal instanceof Date) {
+          const m = cellVal.getMonth() + 1;
+          const d = cellVal.getDate();
+          const numFmt = String(cell.numFmt || '').toLowerCase();
+          if (numFmt.includes('m/d')) {
+            cellVal = `${m}/${d}`;
+          } else if (numFmt.includes('d/m')) {
+            cellVal = `${d}/${m}`;
+          } else {
+            cellVal = (m <= 12 && d <= 31) ? `${m}/${d}` : `${d}/${m}`;
+          }
+        } else if (cellVal.richText) {
           cellVal = cellVal.richText.map(t => t.text).join('');
         } else if (cellVal.result !== undefined) {
           cellVal = cellVal.result;
@@ -247,7 +259,7 @@ export async function parsePrapatraBuffer(input, talukaOverride = '', originalFn
     const h = rawRows.slice(0, dataStartIdx).map(row => String(row[c] || '').trim()).join(' ');
     if (colVillage === -1 && (h.includes('गावाचे नाव') || h.includes('गाव'))) colVillage = c;
     if (colSurvey === -1 && ['सर्व्हे क्रमांक', 'स.नं', 'गट क्रमांक', 'गट क्र'].some(k => h.includes(k))) colSurvey = c;
-    if (colTenure === -1 && ['भोगवटदार वर्ग', 'भूधारणा नुसार'].some(k => h.includes(k)) && !['बंदोबस्त', 'एकत्रिकरण', '7/12', '७/१२'].some(k => h.includes(k))) colTenure = c;
+    if (colTenure === -1 && ['भोगवटदार वर्ग', 'भूधारणा', 'भुधारणा'].some(k => h.includes(k)) && !['बंदोबस्त', 'एकत्रिकरण', '7/12', '७/१२'].some(k => h.includes(k))) colTenure = c;
     if (colOwner === -1 && ['भोगवटदाराचे नाव', 'खातेदाराचे नाव'].some(k => h.includes(k)) && !['बंदोबस्त', 'एकत्रिकरण', '7/12', '७/१२', 'सध्यस्थितीतील'].some(k => h.includes(k))) colOwner = c;
     if (colRights === -1 && h.includes('इतर अधिकार') && !h.includes('अधिकार अभिलेख')) colRights = c;
   }
@@ -380,7 +392,9 @@ export async function parsePrapatraBuffer(input, talukaOverride = '', originalFn
       return (s === 'None' || s === 'null') ? '' : s;
     };
 
-    const auditPoints = {};
+    const auditPoints = {
+      srNo: isNumericSr ? parseInt(srVal, 10) : (parcels.length + 1)
+    };
     for (let pt = 1; pt <= 46; pt++) {
       auditPoints[`point_${pt}`] = getRawPt(pt);
     }

@@ -112,7 +112,7 @@ def normalize_tenure(val, rights, bandobast_tenure, owner):
         return 'BHOGVATDAR_CLASS_1'
     return 'BHOGVATDAR_CLASS_1'
 
-def process_single_file(fp, taluka_name, file_idx):
+def process_single_file(fp, taluka_name, file_idx, circle_name=None):
     wb = openpyxl.load_workbook(fp, read_only=True, data_only=True)
     target_sheet = None
     
@@ -159,7 +159,7 @@ def process_single_file(fp, taluka_name, file_idx):
             col_village = i
         elif any(k in c for k in ['सर्व्हे क्रमांक', 'स.नं', 'गट क्रमांक', 'गट क्र']) and col_survey == -1:
             col_survey = i
-        elif any(k in c for k in ['भोगवटदार वर्ग', 'भूधारणा', 'कब्जेदार सदरी']) and col_tenure == -1:
+        elif any(k in c for k in ['भोगवटदार वर्ग', 'भूधारणा', 'भुधारणा', 'कब्जेदार सदरी']) and col_tenure == -1:
             col_tenure = i
         elif any(k in c for k in ['भोगवटदाराचे नाव', 'खातेदाराचे नाव']) and col_owner == -1:
             col_owner = i
@@ -279,15 +279,25 @@ def process_single_file(fp, taluka_name, file_idx):
         owner_clean = str(owner_raw or "अज्ञात खातेदार").strip()[:240]
         rights_clean = str(rights_raw or "नाही").strip()
 
+        def format_cell_val(c_val):
+            if c_val is None:
+                return ''
+            import datetime
+            if isinstance(c_val, (datetime.datetime, datetime.date)):
+                return f"{c_val.month}/{c_val.day}" if c_val.month <= 12 and c_val.day <= 31 else str(c_val)
+            s = str(c_val).strip()
+            if s.endswith('.0'):
+                s = s[:-2]
+            return '' if s in ['None', 'null'] else s
+
         # Audit points 1 to 46
-        audit_points = {}
+        sr_int = int(float(sr_val)) if re.match(r'^\d+(\.0)?$', sr_val) else (len(parcels) + 1)
+        audit_points = {'srNo': sr_int}
         for pt in range(1, 47):
             idx = col_point1 + (pt - 1)
             val = ''
             if len(r) > idx and r[idx] is not None:
-                s_val = str(r[idx]).strip()
-                if s_val not in ['None', 'null']:
-                    val = s_val
+                val = format_cell_val(r[idx])
             audit_points[f"point_{pt}"] = val
 
         # Milestone 1950 Bandobast
@@ -340,7 +350,7 @@ def process_single_file(fp, taluka_name, file_idx):
             'upi': upi,
             'district': 'Chandrapur',
             'taluka': taluka_name,
-            'revenueCircle': f"मंडळ {final_village_name[:20]}",
+            'revenueCircle': circle_name.strip() if circle_name else f"मंडळ {final_village_name[:20]}",
             'villageCode': village_code,
             'villageName': final_village_name,
             'gatNumber': survey_final,
@@ -402,6 +412,33 @@ def main():
     total_villages_all = 0
     taluka_summaries = {}
 
+    master_filelist = {}
+    master_fp = r"d:\chanda\data\all_talukas_master_filelist.json"
+    if os.path.exists(master_fp):
+        try:
+            with open(master_fp, "r", encoding="utf-8") as f:
+                master_filelist = json.load(f)
+        except Exception as e:
+            print("Could not load master_filelist:", e)
+
+    REV_TALUKA_MAP = {
+        "Ballarpur": "बल्लारपूर",
+        "Bhadravati": "भद्रावती",
+        "Brahmapuri": "ब्रम्हपुरी",
+        "Chandrapur": "चंद्रपूर",
+        "Chimur": "चिमूर",
+        "Jivati": "जिवती",
+        "Korpana": "कोरपना",
+        "Mul": "मुल",
+        "Nagbhid": "नागभीड",
+        "Pombhurna": "पोमभुर्णा",
+        "Rajura": "राजुरा",
+        "Saoli": "सावली",
+        "Sindewahi": "सिंदेवाही",
+        "Warora": "वरोरा",
+        "Gondpipri": "गोंडपिपरी"
+    }
+
     for folder, t_name in TALUKA_FOLDERS:
         if not os.path.exists(folder):
             print(f"Skipping {folder} (does not exist)")
@@ -415,10 +452,21 @@ def main():
         taluka_parcels = []
         taluka_villages = []
 
+        mr_t = REV_TALUKA_MAP.get(t_name, '')
+        t_master_items = master_filelist.get(mr_t, [])
+
         for f_idx, fname in enumerate(files, 1):
             fp = os.path.join(folder, fname)
+            circle = None
+            m = re.match(r'^(\d+)_', fname)
+            file_num = int(m.group(1)) if m else f_idx
+            if 1 <= file_num <= len(t_master_items):
+                circle = t_master_items[file_num - 1].get('circle')
+            elif f_idx <= len(t_master_items):
+                circle = t_master_items[f_idx - 1].get('circle')
+
             try:
-                res = process_single_file(fp, t_name, f_idx)
+                res = process_single_file(fp, t_name, f_idx, circle_name=circle)
                 if res and res['parcels']:
                     taluka_parcels.extend(res['parcels'])
                     taluka_villages.append({

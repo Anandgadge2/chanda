@@ -1252,10 +1252,11 @@ export const getPrapatraReport = async (req, res) => {
       });
     }
 
-    // Defensive in-memory deduplication by (taluka + canonical villageName + gatNumber)
+    // Defensive in-memory deduplication by (taluka + canonical villageName + normalized gatNumber + totalAreaHa)
     const dedupMap = new Map();
     for (const p of rawParcels) {
-      const key = `${p.taluka?.toLowerCase()}__${cleanVillageName(p.villageName)}__${String(p.gatNumber || '').trim()}`;
+      const normGat = String(p.gatNumber || '').trim().replace(/\.$/, '').replace(/\s+/g, '');
+      const key = `${p.taluka?.toLowerCase()}__${cleanVillageName(p.villageName)}__${normGat}__${Number(p.totalAreaHa || 0).toFixed(2)}`;
       if (!dedupMap.has(key)) {
         dedupMap.set(key, p);
       } else {
@@ -1349,6 +1350,14 @@ export const getPrapatraReport = async (req, res) => {
       }
 
       const getSeq = (item) => {
+        if (item.metadata?.srNo !== undefined && item.metadata?.srNo !== null) {
+          const s = parseInt(item.metadata.srNo, 10);
+          if (!isNaN(s)) return s;
+        }
+        if (item.metadata?.auditPoints?.srNo !== undefined && item.metadata?.auditPoints?.srNo !== null) {
+          const s = parseInt(item.metadata.auditPoints.srNo, 10);
+          if (!isNaN(s)) return s;
+        }
         if (item.upi) {
           const parts = item.upi.split('-');
           const lastPart = parts[parts.length - 1];
@@ -1382,6 +1391,7 @@ export const getPrapatraReport = async (req, res) => {
         statusFinding,
         orderRef: c?.caseNumber || b1950?.ferfarNumber || '-',
         remarks: (otherRights && otherRights !== '....' && otherRights !== '-') ? otherRights : (b1950?.mutationType || '-'),
+        otherRights: p.metadata?.otherRights || (otherRights && otherRights !== '....' && otherRights !== '-' ? otherRights : '-'),
         points: resolveParcel46Points(p)
       };
     });

@@ -4321,7 +4321,7 @@ export default function ReportsPage() {
                         const areaVal = String(p.totalAreaHa || '-');
                         const tenureVal = String(p.tenureDisplay || p.tenureClass || '-');
                         const ownerVal = String(p.currentOwner || (isMarathi ? 'नोंद उपलब्ध नाही' : 'No record available'));
-                        const otherRightsVal = String(pts[40] || p.otherRights || '-');
+                        const otherRightsVal = String(p.otherRights || p.remarks || '-');
 
                         return (
                           <tr
@@ -4451,9 +4451,9 @@ export default function ReportsPage() {
                                   ? 'ring-2 ring-blue-600 ring-inset bg-blue-100/90 font-bold text-blue-950 relative z-20 shadow-xs'
                                   : 'hover:bg-blue-50/50'
                               }`}
-                              title={pts[40] || p.otherRights}
+                              title={p.otherRights || p.remarks || '-'}
                             >
-                              {pts[40] || p.otherRights || '-'}
+                              {p.otherRights || p.remarks || '-'}
                               {isCellSelected('timeline', idx, 'otherRights') && renderCellHandle()}
                             </td>
 

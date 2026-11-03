@@ -18,7 +18,7 @@ export function mapTenureToEnum(tenureRaw, fallback = 'BHOGVATDAR_CLASS_1') {
 
 export function normalizeGat(gat) {
   if (!gat) return '';
-  return String(gat).trim().replace(/\s+/g, '').replace(/[\u200B-\u200D\uFEFF]/g, '');
+  return String(gat).trim().replace(/\s+/g, '').replace(/\.$/, '').replace(/[\u200B-\u200D\uFEFF]/g, '');
 }
 
 export function normalizeVillage(name) {
@@ -55,7 +55,11 @@ async function seedTaluka(talukaName, parcels) {
 
   for (const p of dbParcels) {
     if (p.upi) upiMap.set(p.upi, p);
+    const keyWithArea = `${normalizeVillage(p.villageName)}__${normalizeGat(p.gatNumber)}__${Number(p.totalAreaHa || 0).toFixed(2)}`;
     const key = `${normalizeVillage(p.villageName)}__${normalizeGat(p.gatNumber)}`;
+    if (!vgMap.has(keyWithArea)) {
+      vgMap.set(keyWithArea, p);
+    }
     if (!vgMap.has(key)) {
       vgMap.set(key, p);
     }
@@ -106,8 +110,9 @@ async function seedTaluka(talukaName, parcels) {
       rStat.inspected1950++;
     }
 
+    const keyWithArea = `${normalizeVillage(inP.villageName)}__${normalizeGat(inP.gatNumber)}__${Number(inP.totalAreaHa || 0).toFixed(2)}`;
     const key = `${normalizeVillage(inP.villageName)}__${normalizeGat(inP.gatNumber)}`;
-    const matched = vgMap.get(key) || upiMap.get(inP.upi);
+    const matched = vgMap.get(keyWithArea) || vgMap.get(key) || upiMap.get(inP.upi);
 
     if (matched) {
       updates.push({ id: matched.id, inP, matched });
@@ -191,6 +196,7 @@ async function seedTaluka(talukaName, parcels) {
         const metaJson = JSON.stringify({
           ownerName: inP.ownerName,
           otherRights: inP.otherRights,
+          srNo: inP.auditPoints?.srNo,
           agriAreaHa: inP.agriAreaHa || inP.totalAreaHa,
           naAreaSqM: inP.naAreaSqM || 0,
           auditPoints: inP.auditPoints || {},
@@ -240,6 +246,7 @@ async function seedTaluka(talukaName, parcels) {
           metadata: {
             ownerName: p.ownerName,
             otherRights: p.otherRights,
+            srNo: p.auditPoints?.srNo,
             agriAreaHa: p.agriAreaHa || p.totalAreaHa,
             naAreaSqM: p.naAreaSqM || 0,
             auditPoints: p.auditPoints || {},
