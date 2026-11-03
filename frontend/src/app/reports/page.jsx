@@ -2578,7 +2578,7 @@ export default function ReportsPage() {
                   onClick={handleApplyFilters}
                   disabled={!isDraftTalukaSelected || !isDraftVillageSelected || loading}
                   className={clsx(
-                    "inline-flex items-center justify-center gap-1.5 px-4 py-2.5 font-bold text-xs rounded-xl shadow-xs transition",
+                    "inline-flex items-center justify-center gap-1.5 px-4 h-[36px] font-bold text-xs rounded-xl shadow-xs transition shrink-0 whitespace-nowrap select-none",
                     loading
                       ? "bg-blue-800 text-white cursor-wait opacity-90 shadow-inner"
                       : (!isDraftTalukaSelected || !isDraftVillageSelected)
@@ -2613,7 +2613,7 @@ export default function ReportsPage() {
                   onClick={handleResetFilters}
                   disabled={loading}
                   className={clsx(
-                    "inline-flex items-center justify-center gap-1 px-3 py-2.5 font-bold text-xs rounded-xl border border-slate-300 shadow-2xs transition",
+                    "inline-flex items-center justify-center gap-1 px-3 h-[36px] font-bold text-xs rounded-xl border border-slate-300 shadow-2xs transition shrink-0 whitespace-nowrap select-none",
                     loading
                       ? "bg-slate-100 text-slate-400 cursor-not-allowed opacity-60 pointer-events-none"
                       : "bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-700 cursor-pointer"
@@ -2655,10 +2655,10 @@ export default function ReportsPage() {
               showMobileFilters
                 ? ((isGoshwaraView || activeTab === 'prapatra5')
                     ? 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 max-w-4xl pt-1'
-                    : 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6 pt-1')
+                    : 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-[repeat(4,minmax(0,1fr))_minmax(0,1.15fr)_auto] pt-1')
                 : ((isGoshwaraView || activeTab === 'prapatra5')
                     ? 'hidden md:grid md:grid-cols-3 max-w-4xl'
-                    : 'hidden md:grid md:grid-cols-3 xl:grid-cols-6')
+                    : 'hidden md:grid md:grid-cols-3 xl:grid-cols-[repeat(4,minmax(0,1fr))_minmax(0,1.15fr)_auto]')
             )}
           >
             {/* 1. Taluka Dropdown */}
@@ -2779,22 +2779,22 @@ export default function ReportsPage() {
             )}
 
             {/* 6. Action Controls: Apply & Reset Buttons */}
-            <div className="space-y-1">
+            <div className="space-y-1 shrink-0">
               <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
                 {isMarathi ? 'फिल्टर कृती' : 'Action'}
               </label>
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1.5 shrink-0">
                 <button
                   type="button"
                   onClick={handleApplyFilters}
                   disabled={loading}
                   className={clsx(
-                    'flex-1 text-xs font-bold py-1.5 px-3 rounded-xl shadow-xs transition-all flex items-center justify-center gap-1.5 active:scale-95 h-[36px] whitespace-nowrap min-w-[80px]',
+                    'h-[36px] px-3.5 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95 shrink-0 shadow-xs cursor-pointer select-none whitespace-nowrap',
                     loading
                       ? 'bg-blue-800 text-white cursor-wait opacity-90 shadow-inner'
                       : isFilterPending
-                      ? 'bg-gradient-to-r from-blue-700 to-indigo-700 hover:from-blue-800 hover:to-indigo-800 text-white ring-2 ring-blue-500/30 cursor-pointer'
-                      : 'bg-blue-900 hover:bg-blue-950 text-white cursor-pointer'
+                      ? 'bg-gradient-to-r from-blue-700 to-indigo-700 hover:from-blue-800 hover:to-indigo-800 text-white ring-2 ring-blue-500/30'
+                      : 'bg-blue-900 hover:bg-blue-950 text-white'
                   )}
                   title={loading ? (isMarathi ? 'डेटा लागू होत आहे...' : 'Applying filters...') : (isMarathi ? 'फिल्टर्स लागू करा (Enter)' : 'Apply Filters (Enter)')}
                 >
@@ -2808,7 +2808,10 @@ export default function ReportsPage() {
                       <Filter className="w-3.5 h-3.5 shrink-0" />
                       <span className="whitespace-nowrap">{isMarathi ? 'लागू करा' : 'Apply'}</span>
                       {isFilterPending && (
-                        <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse shrink-0" />
+                        <span className="relative flex h-2 w-2 shrink-0 ml-0.5">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-300 opacity-75"></span>
+                          <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-400"></span>
+                        </span>
                       )}
                     </>
                   )}
@@ -2818,7 +2821,7 @@ export default function ReportsPage() {
                   type="button"
                   onClick={handleResetFilters}
                   disabled={loading}
-                  className="inline-flex items-center justify-center gap-1 px-2.5 py-1.5 bg-slate-100 hover:bg-rose-50 text-slate-700 hover:text-rose-700 border border-slate-300 hover:border-rose-300 rounded-xl font-bold text-xs transition-all active:scale-95 shadow-2xs cursor-pointer shrink-0 h-[36px] whitespace-nowrap"
+                  className="h-[36px] px-2.5 bg-slate-100 hover:bg-rose-50 text-slate-700 hover:text-rose-700 border border-slate-300 hover:border-rose-300 rounded-xl font-bold text-xs transition-all active:scale-95 shadow-2xs cursor-pointer shrink-0 flex items-center justify-center gap-1 whitespace-nowrap"
                   title={isMarathi ? 'सर्व फिल्टर्स रीसेट करा' : 'Reset all filters'}
                 >
                   <RotateCcw className="w-3.5 h-3.5 text-rose-600 shrink-0" />
@@ -2833,7 +2836,7 @@ export default function ReportsPage() {
                   title={isMarathi ? 'डेटा रिफ्रेश करा' : 'Refresh data'}
                   aria-label={isMarathi ? 'डेटा रिफ्रेश करा' : 'Refresh data'}
                 >
-                  <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-blue-600' : 'text-slate-700'}`} />
+                  <RefreshCw className={`w-3.5 h-3.5 shrink-0 ${loading ? 'animate-spin text-blue-600' : 'text-slate-700'}`} />
                 </button>
               </div>
             </div>
