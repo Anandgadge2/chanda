@@ -210,9 +210,9 @@ export default function BulkUploadPage() {
   return (
     <div className="space-y-2.5 sm:space-y-3">
       {/* Executive Command Hero Header - Pro Compact */}
-      <div className="bg-gradient-to-r from-emerald-50/80 via-teal-50/40 to-white text-slate-900 rounded-xl px-3.5 py-2 sm:py-2.5 shadow-2xs border border-emerald-200/80 flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+      <div className="bg-[#FFFFFF] text-[#252B36] rounded-xl px-4 py-3 border border-[#E8E4DA] shadow-[0_1px_2px_rgba(0,0,0,0.03)] flex flex-col sm:flex-row justify-between sm:items-center gap-2">
         <div className="flex items-center gap-2.5 min-w-0">
-          <div className="w-8 h-8 rounded-lg bg-emerald-600 flex items-center justify-center shrink-0 text-white shadow-2xs">
+          <div className="w-8 h-8 rounded-lg bg-[#4169E1] flex items-center justify-center shrink-0 text-white">
             <FileSpreadsheet className="w-4 h-4" />
           </div>
           <div className="min-w-0">
@@ -242,7 +242,7 @@ export default function BulkUploadPage() {
             <a
               href={api.getSampleTemplateUrl()}
               download="गाव_नमुना_नोंदणी.xlsx"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold transition shadow-2xs active:scale-95 cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#4169E1] hover:bg-[#3454B4] text-white rounded-lg text-xs font-bold transition shadow-2xs active:scale-95 cursor-pointer"
               title={isMarathi ? 'नमुना एक्सेल डाऊनलोड' : 'Download Sample Excel'}
             >
               <Download className="w-3.5 h-3.5" />

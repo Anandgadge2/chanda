@@ -11,7 +11,7 @@ export default function AccessibilityContent() {
   return (
     <div className="min-h-screen bg-slate-50 py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto bg-white rounded-2xl sm:rounded-3xl border border-slate-200 shadow-xl overflow-hidden">
-        <div className="p-6 sm:p-10 border-b border-slate-200 bg-gradient-to-r from-emerald-50/60 to-slate-50">
+        <div className="p-6 sm:p-10 border-b border-[#E8E4DA] bg-[#FFFFFF]">
           <div className="flex items-center justify-between gap-4 mb-4">
             <Link
               href="/"

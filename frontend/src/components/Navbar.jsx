@@ -94,9 +94,9 @@ export default function Navbar({
     : (user?.fullNameEn ? user.fullNameEn.charAt(0) : (officerDisplayName ? officerDisplayName.charAt(0) : 'D'));
 
   return (
-    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200/90 shadow-2xs">
-      {/* National Tricolor Micro Accent Line */}
-      <div className="h-[2px] w-full bg-gradient-to-r from-amber-500 via-white to-emerald-600 shadow-2xs" />
+    <header className="sticky top-0 z-50 bg-[#FFFFFF] border-b border-[#E8E4DA] shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
+      {/* Sleek Royal Blue Top Accent */}
+      <div className="h-[2px] w-full bg-[#4169E1]" />
 
       <div className="w-full px-3 sm:px-5 lg:px-6">
         <div className="flex justify-between h-13 sm:h-14 items-center gap-2 sm:gap-3">
@@ -106,7 +106,7 @@ export default function Navbar({
               <button
                 type="button"
                 onClick={onToggleMobileSidebar}
-                className="lg:hidden p-1.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition cursor-pointer"
+                className="lg:hidden p-1.5 rounded-lg text-[#64748B] hover:text-[#252B36] hover:bg-[#F0EDE5] transition cursor-pointer"
                 aria-label="Toggle menu"
               >
                 <Menu className="w-5 h-5" />
@@ -114,19 +114,19 @@ export default function Navbar({
             )}
 
             <Link href={user ? '/dashboard' : '/'} className="flex items-center gap-2 sm:gap-2.5 group min-w-0">
-              <div className="p-0.5 bg-white border border-slate-200/90 rounded-lg shadow-2xs group-hover:scale-105 transition-transform flex-shrink-0">
+              <div className="p-0.5 bg-[#FFFFFF] border border-[#E8E4DA] rounded-lg group-hover:border-[#4169E1] transition flex-shrink-0">
                 <ChandrapurDistrictLogo className="w-7 h-7 sm:w-8 sm:h-8" />
               </div>
               <div className="min-w-0">
                 <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
-                  <span className="font-extrabold text-slate-950 text-xs sm:text-sm lg:text-base tracking-tight group-hover:text-blue-900 transition truncate max-w-[140px] xs:max-w-[200px] sm:max-w-none">
+                  <span className="font-bold text-[#252B36] text-xs sm:text-sm lg:text-base tracking-tight group-hover:text-[#4169E1] transition truncate max-w-[140px] xs:max-w-[200px] sm:max-w-none">
                     {t('portal.title')}
                   </span>
-                  <span className="hidden sm:inline-block text-[10px] font-bold bg-amber-100 text-amber-950 px-2 py-0.2 rounded-full border border-amber-300 flex-shrink-0 shadow-2xs">
+                  <span className="hidden sm:inline-block text-[10px] font-semibold bg-[#F0EDE5] text-[#252B36] px-2 py-0.5 rounded-md border border-[#E8E4DA] flex-shrink-0">
                     {t('portal.mlrcBadge')}
                   </span>
                 </div>
-                <p className="text-[11px] text-slate-500 font-medium hidden md:block truncate leading-tight">
+                <p className="text-[11px] text-[#64748B] font-medium hidden md:block truncate leading-tight">
                   {t('portal.officialTagline')}
                 </p>
               </div>
@@ -135,17 +135,17 @@ export default function Navbar({
 
           {/* Right: Language Switcher, Public Portal Link & Executive Profile Tray */}
           <div className="flex items-center gap-2 sm:gap-2.5 flex-shrink-0">
-            {/* Bilingual Switcher - Desktop / Tablet navbar (On mobile, housed in sidebar drawer footer) */}
+            {/* Bilingual Switcher */}
             <div className="hidden sm:inline-flex items-center">
               <LanguageSwitcher variant="pill" />
             </div>
 
             <Link
               href="/"
-              className="inline-flex items-center gap-1.5 text-xs font-bold px-2.5 py-1.5 rounded-lg border border-slate-200/90 text-slate-700 hover:text-blue-900 hover:bg-blue-50/60 transition shadow-2xs"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-lg border border-[#E8E4DA] text-[#252B36] hover:text-[#4169E1] hover:bg-[#F0EDE5] transition"
               title={t('nav.publicPortal')}
             >
-              <ExternalLink className="w-3.5 h-3.5 text-slate-500" />
+              <ExternalLink className="w-3.5 h-3.5 text-[#64748B]" />
               <span className="hidden md:inline">{t('nav.publicPortal')}</span>
             </Link>
 
@@ -155,10 +155,10 @@ export default function Navbar({
                 <button
                   type="button"
                   onClick={() => setProfileTrayOpen((prev) => !prev)}
-                  className={`flex items-center gap-2 py-1 px-1.5 sm:px-2 rounded-xl transition border text-left cursor-pointer shadow-2xs ${
+                  className={`flex items-center gap-2 py-1 px-1.5 sm:px-2 rounded-xl transition border text-left cursor-pointer ${
                     profileTrayOpen
-                      ? 'bg-slate-100 border-slate-300 shadow-xs'
-                      : 'bg-white hover:bg-slate-50 border-slate-200/90 hover:border-slate-300'
+                      ? 'bg-[#F0EDE5] border-[#E8E4DA]'
+                      : 'bg-[#FFFFFF] hover:bg-[#F0EDE5] border-[#E8E4DA]'
                   }`}
                   aria-expanded={profileTrayOpen}
                   aria-haspopup="true"
@@ -166,11 +166,11 @@ export default function Navbar({
                 >
                   {/* Officer Avatar with Online Indicator */}
                   <div className="relative flex-shrink-0">
-                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-gradient-to-br from-blue-950 via-blue-900 to-indigo-900 text-white font-black text-xs flex items-center justify-center shadow-2xs">
+                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-[#4169E1] text-[#FFFFFF] font-bold text-xs flex items-center justify-center">
                       {officerInitial}
                     </div>
                     <span
-                      className="absolute -bottom-0.5 -right-0.5 w-2 h-2 bg-emerald-500 border border-white rounded-full"
+                      className="absolute -bottom-0.5 -right-0.5 w-2 h-2 bg-[#16A34A] border border-white rounded-full"
                       title={t('common.active')}
                     />
                   </div>
@@ -178,24 +178,24 @@ export default function Navbar({
                   {/* Officer Name & Designation */}
                   <div className="text-left hidden sm:flex flex-col justify-center min-w-0">
                     <div className="flex items-center gap-1 leading-tight">
-                      <span className="text-xs font-bold text-slate-900 tracking-tight block max-w-[150px] lg:max-w-[190px] truncate">
+                      <span className="text-xs font-bold text-[#252B36] tracking-tight block max-w-[150px] lg:max-w-[190px] truncate">
                         {displayOfficerName()}
                       </span>
                       <ChevronDown
-                        className={`w-3.5 h-3.5 text-slate-500 transition-transform duration-200 ${
-                          profileTrayOpen ? 'rotate-180 text-blue-950' : ''
+                        className={`w-3.5 h-3.5 text-[#64748B] transition-transform duration-200 ${
+                          profileTrayOpen ? 'rotate-180 text-[#4169E1]' : ''
                         }`}
                       />
                     </div>
-                    <span className="text-[10px] font-bold text-blue-900 block leading-tight mt-0.5 truncate max-w-[150px] lg:max-w-[190px]">
+                    <span className="text-[10px] font-semibold text-[#4169E1] block leading-tight mt-0.5 truncate max-w-[150px] lg:max-w-[190px]">
                       {displayDesignation()}
                     </span>
                   </div>
 
                   {/* Mobile-only Chevron */}
                   <ChevronDown
-                    className={`w-3.5 h-3.5 text-slate-500 sm:hidden transition-transform duration-200 ${
-                      profileTrayOpen ? 'rotate-180 text-blue-950' : ''
+                    className={`w-3.5 h-3.5 text-[#64748B] sm:hidden transition-transform duration-200 ${
+                      profileTrayOpen ? 'rotate-180 text-[#4169E1]' : ''
                     }`}
                   />
                 </button>
@@ -203,18 +203,18 @@ export default function Navbar({
                 {/* Profile Tray Dropdown */}
                 {profileTrayOpen && (
                   <div
-                    className="absolute right-0 mt-2 w-72 sm:w-80 max-w-[calc(100vw-1.5rem)] bg-white rounded-2xl shadow-xl border border-slate-200/90 p-3 space-y-3 z-50 text-xs animate-in fade-in slide-in-from-top-2 duration-150"
+                    className="absolute right-0 mt-2 w-72 sm:w-80 max-w-[calc(100vw-1.5rem)] bg-[#FFFFFF] rounded-xl shadow-lg border border-[#E8E4DA] p-3 space-y-3 z-50 text-xs animate-in fade-in duration-150"
                     role="menu"
                   >
-                    <div className="pb-2.5 border-b border-slate-100 flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-950 to-indigo-900 text-white font-black text-sm flex items-center justify-center shadow-2xs">
+                    <div className="pb-2.5 border-b border-[#E8E4DA] flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-[#4169E1] text-[#FFFFFF] font-bold text-sm flex items-center justify-center">
                         {officerInitial}
                       </div>
                       <div className="min-w-0">
-                        <p className="font-bold text-slate-950 text-sm truncate">
+                        <p className="font-bold text-[#252B36] text-sm truncate">
                           {displayOfficerName()}
                         </p>
-                        <p className="text-[11px] font-semibold text-blue-900 truncate">
+                        <p className="text-[11px] font-medium text-[#64748B] truncate">
                           {user.email || user.username}
                         </p>
                       </div>
@@ -224,24 +224,24 @@ export default function Navbar({
                       <Link
                         href="/settings"
                         onClick={() => setProfileTrayOpen(false)}
-                        className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-700 hover:text-slate-950 hover:bg-slate-100 font-semibold transition cursor-pointer"
+                        className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-[#252B36] hover:text-[#4169E1] hover:bg-[#F0EDE5] font-semibold transition cursor-pointer"
                       >
-                        <Settings className="w-4 h-4 text-slate-500" />
+                        <Settings className="w-4 h-4 text-[#64748B]" />
                         <span>{t('nav.settings')}</span>
                       </Link>
                     </div>
 
                     {/* Logout Action */}
-                    <div className="pt-1 border-t border-slate-100">
+                    <div className="pt-1 border-t border-[#E8E4DA]">
                       <button
                         type="button"
                         onClick={() => {
                           setProfileTrayOpen(false);
                           logout();
                         }}
-                        className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-rose-600 hover:text-rose-700 hover:bg-rose-50 font-bold transition cursor-pointer text-left"
+                        className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[#DC2626] hover:bg-[#DC2626]/10 font-bold transition cursor-pointer text-left"
                       >
-                        <LogOut className="w-4 h-4 text-rose-600" />
+                        <LogOut className="w-4 h-4 text-[#DC2626]" />
                         <span>{t('nav.logout')}</span>
                       </button>
                     </div>
@@ -256,13 +256,13 @@ export default function Navbar({
                 />
               </div>
             ) : (
-              /* Unauthenticated: Show Clean Officer Login Action */
+              /* Unauthenticated: Clean Royal Blue Officer Login Action */
               <button
                 type="button"
                 onClick={openLoginModal}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-blue-950 bg-amber-400 hover:bg-amber-300 border border-amber-500/60 shadow-xs hover:shadow-md transition active:scale-95 cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold text-white bg-[#4169E1] hover:bg-[#3454B4] transition active:scale-95 cursor-pointer shadow-xs"
               >
-                <Lock className="w-3.5 h-3.5 text-blue-950" />
+                <Lock className="w-3.5 h-3.5 text-white" />
                 <span>{t('nav.officerLogin')}</span>
               </button>
             )}

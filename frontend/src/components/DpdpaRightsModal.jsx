@@ -103,9 +103,9 @@ export default function DpdpaRightsModal({ isOpen, onClose, user }) {
         className="w-full max-w-2xl bg-white rounded-2xl sm:rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-200"
       >
         {/* Modal Header */}
-        <div className="p-4 sm:p-6 border-b border-slate-100 flex items-start justify-between gap-3 bg-gradient-to-r from-slate-50 via-blue-50/40 to-slate-50 shrink-0">
+        <div className="p-4 sm:p-6 border-b border-slate-100 flex items-start justify-between gap-3 bg-[#FFFFFF] shrink-0">
           <div className="flex items-start gap-3">
-            <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-blue-700 via-blue-800 to-indigo-900 text-white shadow-md shadow-blue-900/20 flex items-center justify-center shrink-0 ring-4 ring-blue-50 mt-0.5">
+            <div className="w-11 h-11 rounded-2xl bg-[#4169E1] text-white flex items-center justify-center shrink-0 mt-0.5">
               <ShieldCheck className="w-6 h-6 text-white" aria-hidden="true" />
             </div>
             <div>
@@ -226,7 +226,7 @@ export default function DpdpaRightsModal({ isOpen, onClose, user }) {
                   type="button"
                   onClick={handleExport}
                   disabled={exportLoading}
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-white bg-gradient-to-r from-blue-700 via-blue-800 to-indigo-900 hover:from-blue-800 hover:to-indigo-950 active:scale-[0.98] shadow-md shadow-blue-900/20 transition disabled:opacity-50"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-white bg-[#4169E1] hover:bg-[#3454B4] active:scale-[0.98] shadow-xs transition disabled:opacity-50"
                 >
                   {exportLoading ? (
                     <>

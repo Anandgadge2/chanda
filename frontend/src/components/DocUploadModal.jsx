@@ -111,7 +111,7 @@ export default function DocUploadModal({ isOpen, onClose, parcelId, caseId, onUp
         className="bg-white rounded-3xl shadow-[0_25px_60px_-15px_rgba(15,23,42,0.3)] border border-slate-100 max-w-lg w-full max-h-[90vh] flex flex-col overflow-hidden my-auto relative animate-in zoom-in-95 duration-150"
       >
         {/* Top Gradient Accent Strip */}
-        <div className="h-1.5 bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 shrink-0" />
+        <div className="h-1 bg-[#4169E1] shrink-0" />
 
         {/* Modal Header */}
         <div className="px-5 sm:px-6 py-4 bg-white border-b border-slate-100 flex justify-between items-center shrink-0">

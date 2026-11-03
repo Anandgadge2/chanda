@@ -823,7 +823,7 @@ export default function ReportsPage() {
   const renderActiveCellBar = (viewName) => {
     if (!selectedCell || selectedCell.view !== viewName) return null;
     return (
-      <div className="sticky top-0 z-40 bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 text-white px-4 py-2 flex items-center justify-between gap-3 shadow-md border-b border-blue-500/60 animate-in fade-in duration-150 select-none">
+      <div className="sticky top-0 z-40 bg-[#252B36] text-white px-4 py-2 flex items-center justify-between gap-3 shadow-xs border-b border-[#E8E4DA] animate-in fade-in duration-150 select-none">
         <div className="flex items-center gap-2.5 overflow-hidden min-w-0">
           <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-blue-500/30 border border-blue-400/40 text-[11px] font-mono font-black tracking-wide shrink-0">
             <TableProperties className="w-3.5 h-3.5 text-blue-300" />
@@ -2422,9 +2422,9 @@ export default function ReportsPage() {
         {/* =========================================================
             HEADER & ACTIONS - Pro Compact
         ========================================================= */}
-        <header className="bg-gradient-to-r from-teal-50/80 via-cyan-50/40 to-white text-slate-900 rounded-xl px-3.5 py-2 sm:py-2.5 shadow-2xs border border-teal-200/80 flex flex-col md:flex-row items-start md:items-center justify-between gap-2">
+        <header className="bg-[#FFFFFF] text-[#252B36] rounded-xl px-4 py-3 border border-[#E8E4DA] shadow-[0_1px_2px_rgba(0,0,0,0.03)] flex flex-col md:flex-row items-start md:items-center justify-between gap-2">
           <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-8 h-8 rounded-lg bg-teal-700 text-white flex items-center justify-center shrink-0 shadow-2xs">
+            <div className="w-8 h-8 rounded-lg bg-[#4169E1] text-white flex items-center justify-center shrink-0 shadow-2xs">
               <FileSpreadsheet className="w-4 h-4" />
             </div>
             <div className="min-w-0">
@@ -2449,7 +2449,7 @@ export default function ReportsPage() {
               type="button"
               onClick={() => handleDownload('excel')}
               disabled={downloadingExcel}
-              className="flex-1 md:flex-none inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 disabled:opacity-60 text-white rounded-lg text-xs font-bold shadow-2xs transition active:scale-95 cursor-pointer"
+              className="flex-1 md:flex-none inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-[#4169E1] hover:bg-[#3454B4] disabled:opacity-60 text-white rounded-lg text-xs font-semibold shadow-xs transition active:scale-95 cursor-pointer"
               title={
                 isMarathi
                   ? 'अधिकृत शासकीय एक्सेल बुकलेट डाऊनलोड करा (खातेदारांच्या संपूर्ण यादीसह)'
@@ -2502,7 +2502,7 @@ export default function ReportsPage() {
                 type="button"
                 onClick={() => handleDownload('pdf')}
                 disabled={downloadingPdf}
-                className="flex-1 md:flex-none inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-rose-600 to-rose-700 hover:from-rose-700 hover:to-rose-800 disabled:opacity-60 text-white rounded-lg text-xs font-bold shadow-2xs transition active:scale-95 cursor-pointer"
+                className="flex-1 md:flex-none inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-[#FFFFFF] hover:bg-[#F0EDE5] disabled:opacity-60 text-[#252B36] border border-[#E8E4DA] rounded-lg text-xs font-semibold shadow-xs transition active:scale-95 cursor-pointer"
                 title={
                   isMarathi
                     ? 'स्वाक्षरी व प्रमाणपत्रासह अधिकृत पीडीएफ प्रत डाऊनलोड करा'
@@ -2548,8 +2548,8 @@ export default function ReportsPage() {
             }}
             className={`pb-2.5 pt-1 px-3 sm:px-4 text-xs sm:text-sm font-bold border-b-2 transition flex items-center gap-1.5 cursor-pointer shrink-0 ${
               activeTab === 'checklist'
-                ? 'border-blue-600 text-blue-700'
-                : 'border-transparent text-slate-500 hover:text-slate-800'
+                ? 'border-[#4169E1] text-[#4169E1]'
+                : 'border-transparent text-[#64748B] hover:text-[#252B36]'
             }`}
           >
             <ShieldCheck className="w-4 h-4" />
@@ -2566,8 +2566,8 @@ export default function ReportsPage() {
             }}
             className={`pb-2.5 pt-1 px-3 sm:px-4 text-xs sm:text-sm font-bold border-b-2 transition flex items-center gap-1.5 cursor-pointer shrink-0 ${
               activeTab === 'prapatra5'
-                ? 'border-emerald-600 text-emerald-700'
-                : 'border-transparent text-slate-500 hover:text-slate-800'
+                ? 'border-[#4169E1] text-[#4169E1]'
+                : 'border-transparent text-[#64748B] hover:text-[#252B36]'
             }`}
           >
             <FileText className="w-4 h-4" />
@@ -2582,8 +2582,8 @@ export default function ReportsPage() {
             }}
             className={`pb-2.5 pt-1 px-3 sm:px-4 text-xs sm:text-sm font-bold border-b-2 transition flex items-center gap-1.5 cursor-pointer shrink-0 ${
               activeTab === 'categories'
-                ? 'border-indigo-600 text-indigo-700'
-                : 'border-transparent text-slate-500 hover:text-slate-800'
+                ? 'border-[#4169E1] text-[#4169E1]'
+                : 'border-transparent text-[#64748B] hover:text-[#252B36]'
             }`}
           >
             <Layers className="w-4 h-4" />
@@ -2597,8 +2597,8 @@ export default function ReportsPage() {
             }}
             className={`pb-2.5 pt-1 px-3 sm:px-4 text-xs sm:text-sm font-bold border-b-2 transition flex items-center gap-1.5 cursor-pointer shrink-0 ${
               activeTab === 'renumbering'
-                ? 'border-amber-600 text-amber-700'
-                : 'border-transparent text-slate-500 hover:text-slate-800'
+                ? 'border-[#4169E1] text-[#4169E1]'
+                : 'border-transparent text-[#64748B] hover:text-[#252B36]'
             }`}
           >
             <TableProperties className="w-4 h-4" />
@@ -2950,7 +2950,7 @@ export default function ReportsPage() {
                     loading
                       ? 'bg-blue-800 text-white cursor-wait opacity-90 shadow-inner'
                       : isFilterPending
-                      ? 'bg-gradient-to-r from-blue-700 to-indigo-700 hover:from-blue-800 hover:to-indigo-800 text-white ring-2 ring-blue-500/30'
+                      ? 'bg-[#4169E1] hover:bg-[#3454B4] text-white shadow-xs'
                       : 'bg-blue-900 hover:bg-blue-950 text-white'
                   )}
                   title={loading ? (isMarathi ? 'डेटा लागू होत आहे...' : 'Applying filters...') : (isMarathi ? 'फिल्टर्स लागू करा (Enter)' : 'Apply Filters (Enter)')}
@@ -3014,12 +3014,12 @@ export default function ReportsPage() {
             onClick={() => handleKpiCardClick('all')}
             className={`text-left rounded-2xl p-3.5 transition-all duration-200 border cursor-pointer select-none group relative overflow-hidden focus:outline-none focus:ring-2 focus:ring-sky-500/50 ${
               selectedKpiFilter === 'all'
-                ? 'bg-gradient-to-br from-sky-100/90 via-blue-50/70 to-white border-sky-500 shadow-md ring-2 ring-sky-500/30'
-                : 'bg-gradient-to-br from-sky-50/90 via-blue-50/40 to-white/95 border-sky-200/80 shadow-2xs hover:border-sky-300 hover:shadow-md hover:-translate-y-0.5'
+                ? 'bg-[#FFFFFF] border-[#4169E1] ring-1 ring-[#4169E1]'
+                : 'bg-[#FFFFFF] border-[#E8E4DA] hover:border-[#cbd5e1]'
             }`}
           >
             {/* Top Gradient Accent Stripe */}
-            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-sky-500 via-blue-600 to-indigo-600" />
+            <div className="absolute top-0 left-0 right-0 h-[2px] bg-[#4169E1]" />
             <div className="flex items-center justify-between gap-1 pt-0.5">
               <span className={`text-[11px] font-bold transition ${selectedKpiFilter === 'all' ? 'text-sky-950 font-black' : 'text-slate-700 group-hover:text-sky-950'}`}>
                 {isMarathi ? 'एकूण सर्व्हे / गट संख्या' : 'Total Survey / Gat Parcels'}
@@ -3057,12 +3057,12 @@ export default function ReportsPage() {
             onClick={() => handleKpiCardClick('area')}
             className={`text-left rounded-2xl p-3.5 transition-all duration-200 border cursor-pointer select-none group relative overflow-hidden focus:outline-none focus:ring-2 focus:ring-emerald-500/50 ${
               selectedKpiFilter === 'area'
-                ? 'bg-gradient-to-br from-emerald-100/90 via-teal-50/70 to-white border-emerald-500 shadow-md ring-2 ring-emerald-500/30'
-                : 'bg-gradient-to-br from-emerald-50/90 via-teal-50/40 to-white/95 border-emerald-200/80 shadow-2xs hover:border-emerald-300 hover:shadow-md hover:-translate-y-0.5'
+                ? 'bg-[#FFFFFF] border-[#16A34A] ring-1 ring-[#16A34A]'
+                : 'bg-[#FFFFFF] border-[#E8E4DA] hover:border-[#cbd5e1]'
             }`}
           >
             {/* Top Gradient Accent Stripe */}
-            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600" />
+            <div className="absolute top-0 left-0 right-0 h-[2px] bg-[#16A34A]" />
             <div className="flex items-center justify-between gap-1 pt-0.5">
               <span className={`text-[11px] font-bold transition ${selectedKpiFilter === 'area' ? 'text-emerald-950 font-black' : 'text-slate-700 group-hover:text-emerald-950'}`}>
                 {isMarathi ? 'एकूण क्षेत्र (हेक्टर)' : 'Total Area (Ha)'}
@@ -3100,12 +3100,12 @@ export default function ReportsPage() {
             onClick={() => handleKpiCardClick('class2')}
             className={`text-left rounded-2xl p-3.5 transition-all duration-200 border cursor-pointer select-none group relative overflow-hidden focus:outline-none focus:ring-2 focus:ring-indigo-500/50 ${
               selectedKpiFilter === 'class2'
-                ? 'bg-gradient-to-br from-indigo-100/90 via-violet-50/70 to-white border-indigo-500 shadow-md ring-2 ring-indigo-500/30'
-                : 'bg-gradient-to-br from-indigo-50/90 via-violet-50/40 to-white/95 border-indigo-200/80 shadow-2xs hover:border-indigo-300 hover:shadow-md hover:-translate-y-0.5'
+                ? 'bg-[#FFFFFF] border-[#4169E1] ring-1 ring-[#4169E1]'
+                : 'bg-[#FFFFFF] border-[#E8E4DA] hover:border-[#cbd5e1]'
             }`}
           >
             {/* Top Gradient Accent Stripe */}
-            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500 via-violet-600 to-purple-600" />
+            <div className="absolute top-0 left-0 right-0 h-[2px] bg-[#4169E1]" />
             <div className="flex items-center justify-between gap-1 pt-0.5">
               <span className={`text-[11px] font-bold transition ${selectedKpiFilter === 'class2' ? 'text-indigo-950 font-black' : 'text-slate-700 group-hover:text-indigo-950'}`}>
                 {isMarathi ? 'भोगवटादार वर्ग २ / शासकीय' : 'Class-2 / Govt Land'}
@@ -3143,12 +3143,12 @@ export default function ReportsPage() {
             onClick={() => handleKpiCardClick('violations')}
             className={`text-left rounded-2xl p-3.5 transition-all duration-200 border cursor-pointer select-none group relative overflow-hidden focus:outline-none focus:ring-2 focus:ring-amber-500/50 ${
               selectedKpiFilter === 'violations'
-                ? 'bg-gradient-to-br from-amber-100/90 via-orange-50/70 to-white border-amber-500 shadow-md ring-2 ring-amber-500/30'
-                : 'bg-gradient-to-br from-amber-50/90 via-orange-50/40 to-white/95 border-amber-200/80 shadow-2xs hover:border-amber-300 hover:shadow-md hover:-translate-y-0.5'
+                ? 'bg-[#FFFFFF] border-[#D97706] ring-1 ring-[#D97706]'
+                : 'bg-[#FFFFFF] border-[#E8E4DA] hover:border-[#cbd5e1]'
             }`}
           >
             {/* Top Gradient Accent Stripe */}
-            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600" />
+            <div className="absolute top-0 left-0 right-0 h-[2px] bg-[#D97706]" />
             <div className="flex items-center justify-between gap-1 pt-0.5">
               <span className={`text-[11px] font-bold transition ${selectedKpiFilter === 'violations' ? 'text-amber-950 font-black' : 'text-slate-700 group-hover:text-amber-950'}`}>
                 {isMarathi ? 'शर्तभंग / संशयित बाबी' : 'Breaches / Flagged Issues'}
@@ -3403,7 +3403,7 @@ export default function ReportsPage() {
               ========================================================= */
               <div>
                 {/* Official Government Table Title Header Banner */}
-                <div className="p-3.5 sm:p-4 bg-gradient-to-r from-emerald-50 via-teal-50/50 to-white border-b border-emerald-200/80 flex flex-col items-center text-center">
+                <div className="p-3.5 sm:p-4 bg-[#FFFFFF] border-b border-[#E8E4DA] flex flex-col items-center text-center">
                   <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-100 text-emerald-950 rounded-full text-xs font-bold mb-1 shadow-2xs border border-emerald-200">
                     <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-700" />
                     <span>
@@ -3632,7 +3632,7 @@ export default function ReportsPage() {
               ========================================================= */
               <div className="space-y-4 p-3.5 sm:p-4 relative">
                 {loading && renderTableLoadingOverlay()}
-                <div className="p-3 sm:p-4 bg-gradient-to-r from-indigo-50 via-blue-50/50 to-white border border-indigo-200/90 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-2xs">
+                <div className="p-3 sm:p-4 bg-[#FFFFFF] border border-[#E8E4DA] rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs">
                   <div className="flex items-center gap-2.5">
                     <div className="w-9 h-9 rounded-xl bg-indigo-800 text-white flex items-center justify-center shrink-0 shadow-2xs">
                       <Layers className="w-5 h-5 text-indigo-200" />
@@ -3852,7 +3852,7 @@ export default function ReportsPage() {
                   17 CATEGORY DETAILED PARCELS TABLE
               ========================================================= */
               <div>
-                <div className="p-3.5 sm:p-4 bg-gradient-to-r from-indigo-50 via-blue-50/50 to-white border-b border-indigo-200/80 flex flex-col items-center text-center">
+                <div className="p-3.5 sm:p-4 bg-[#FFFFFF] border-b border-[#E8E4DA] flex flex-col items-center text-center">
                   <div className="inline-flex items-center gap-2 px-3 py-1 bg-indigo-100 text-indigo-950 rounded-full text-xs font-bold mb-1 shadow-2xs border border-indigo-200">
                     <FileSpreadsheet className="w-3.5 h-3.5 text-indigo-700" />
                     <span>
@@ -4187,7 +4187,7 @@ export default function ReportsPage() {
             activeView === 'timeline' ? (
             <div>
               {/* Official Government Table Title Header Banner */}
-              <div className="p-4 bg-gradient-to-r from-amber-50 via-blue-50/50 to-indigo-50 border-b border-slate-200 flex flex-col items-center text-center">
+              <div className="p-4 bg-[#FFFFFF] border-b border-[#E8E4DA] flex flex-col items-center text-center">
                 <div className="inline-flex items-center gap-2 px-3 py-1 bg-amber-100 text-amber-900 rounded-full text-xs font-bold mb-1 shadow-2xs border border-amber-200">
                   <Clock className="w-3.5 h-3.5 text-amber-700" />
                   <span>
@@ -5111,7 +5111,7 @@ export default function ReportsPage() {
             >
               
               {/* National Tricolor Micro Accent Line (Portal Theme) */}
-              <div className="h-1 sm:h-1.5 w-full bg-gradient-to-r from-amber-500 via-white to-emerald-600 shrink-0" />
+              <div className="h-1 w-full bg-[#4169E1] shrink-0" />
 
               {/* Modal Header - Official Light Portal Theme (Zero Collision) */}
               <div className="px-4 sm:px-6 py-3.5 sm:py-4 border-b border-slate-200/90 bg-white shrink-0">

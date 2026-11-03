@@ -105,9 +105,9 @@ export default function DocumentsPage() {
   return (
     <div className="space-y-2.5 sm:space-y-3">
       {/* Executive Command Hero Header - Pro Compact */}
-      <div className="bg-gradient-to-r from-purple-50/80 via-indigo-50/40 to-white text-slate-900 rounded-xl px-3.5 py-2 sm:py-2.5 shadow-2xs border border-purple-200/80 flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+      <div className="bg-[#FFFFFF] text-[#252B36] rounded-xl px-4 py-3 border border-[#E8E4DA] shadow-[0_1px_2px_rgba(0,0,0,0.03)] flex flex-col sm:flex-row justify-between sm:items-center gap-2">
         <div className="flex items-center gap-2.5 min-w-0">
-          <div className="w-8 h-8 rounded-lg bg-purple-600 flex items-center justify-center shrink-0 text-white shadow-2xs">
+          <div className="w-8 h-8 rounded-lg bg-[#4169E1] flex items-center justify-center shrink-0 text-white">
             <FolderArchive className="w-4 h-4" />
           </div>
           <div className="min-w-0">
@@ -135,7 +135,7 @@ export default function DocumentsPage() {
         <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto">
           <button
             onClick={() => setUploadModalOpen(true)}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-900 hover:bg-blue-800 text-white rounded-lg text-xs font-bold transition shadow-2xs active:scale-95 cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#4169E1] hover:bg-[#3454B4] text-white rounded-lg text-xs font-bold transition shadow-2xs active:scale-95 cursor-pointer"
             title={isMarathi ? 'नवीन दस्तऐवज जोडा' : 'Add new document'}
           >
             <Plus className="w-3.5 h-3.5 text-white stroke-[2.5]" />
@@ -215,7 +215,7 @@ export default function DocumentsPage() {
             className={clsx(
               'h-9 px-3.5 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95 shrink-0 shadow-xs cursor-pointer select-none w-full sm:w-auto',
               isFilterPending
-                ? 'bg-purple-600 hover:bg-purple-700 text-white ring-2 ring-purple-400/60 ring-offset-1 shadow-purple-700/20'
+                ? 'bg-[#4169E1] hover:bg-[#3454B4] text-white ring-2 ring-purple-400/60 ring-offset-1 shadow-purple-700/20'
                 : 'bg-purple-900 hover:bg-purple-950 text-white'
             )}
             title={isMarathi ? 'फिल्टर्स लागू करा (Enter)' : 'Apply Filters (Enter)'}

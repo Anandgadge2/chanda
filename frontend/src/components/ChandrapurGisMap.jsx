@@ -604,7 +604,7 @@ export default function ChandrapurGisMap({
 
       {/* Dynamic Contextual Bar for SDO Mode */}
       {viewMode === 'sdo' && (
-        <div className="relative z-10 bg-gradient-to-r from-indigo-50/95 via-white to-blue-50/85 border-b border-indigo-200/90 px-2 sm:px-4 py-1.5 flex items-center gap-2 overflow-x-auto w-full max-w-full min-w-0 text-xs scrollbar-none shadow-2xs" style={{ WebkitOverflowScrolling: 'touch' }}>
+        <div className="relative z-10 bg-[#FFFFFF] border-b border-[#E8E4DA] px-2 sm:px-4 py-1.5 flex items-center gap-2 overflow-x-auto w-full max-w-full min-w-0 text-xs scrollbar-none shadow-2xs" style={{ WebkitOverflowScrolling: 'touch' }}>
           <div className="flex items-center gap-1.5 shrink-0 text-indigo-950 font-bold">
             <Landmark className="w-3.5 h-3.5 text-indigo-700" />
             <span className="text-xs font-black">{isMarathi ? 'उपविभाग (SDO):' : 'Sub-Division (SDO):'}</span>
@@ -659,7 +659,7 @@ export default function ChandrapurGisMap({
 
       {/* Dynamic Contextual Bar for Heatmap Mode */}
       {viewMode === 'risk' && (
-        <div className="relative z-10 bg-gradient-to-r from-rose-50/95 via-white to-amber-50/85 border-b border-rose-200/90 px-2 sm:px-4 py-1.5 flex items-center gap-2 overflow-x-auto w-full max-w-full min-w-0 text-xs scrollbar-none shadow-2xs" style={{ WebkitOverflowScrolling: 'touch' }}>
+        <div className="relative z-10 bg-[#FFFFFF] border-b border-[#E8E4DA] px-2 sm:px-4 py-1.5 flex items-center gap-2 overflow-x-auto w-full max-w-full min-w-0 text-xs scrollbar-none shadow-2xs" style={{ WebkitOverflowScrolling: 'touch' }}>
           <div className="flex items-center gap-1.5 shrink-0 text-rose-950 font-bold">
             <ShieldAlert className="w-3.5 h-3.5 text-rose-600" />
             <span className="text-xs font-black">{isMarathi ? 'शर्तभंग जोखीम स्तर:' : 'Breach Risk Level:'}</span>
@@ -1413,7 +1413,7 @@ export default function ChandrapurGisMap({
               {/* Frosted Glassmorphism Container */}
               <div className="bg-white/95 backdrop-blur-xl text-slate-900 p-2.5 sm:p-3 rounded-xl border border-white/90 shadow-[0_12px_36px_-10px_rgba(15,23,42,0.25)] ring-1 ring-slate-900/10 overflow-y-auto max-h-[inherit]">
                 {/* Header: Taluka Name + SDO */}
-                <div className="bg-gradient-to-r from-blue-500/15 via-indigo-500/10 to-sky-500/15 -mx-2.5 -mt-2.5 sm:-mx-3 sm:-mt-3 p-2.5 sm:p-3 rounded-t-xl border-b border-white/60 backdrop-blur-md mb-2">
+                <div className="bg-[#FFFFFF] -mx-2.5 -mt-2.5 sm:-mx-3 sm:-mt-3 p-2.5 sm:p-3 rounded-t-xl border-b border-[#E8E4DA] mb-2">
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2 min-w-0">
                       <div className="w-6 h-6 rounded-md bg-blue-900 text-white flex items-center justify-center shrink-0 shadow-xs font-bold text-xs">
@@ -1734,7 +1734,7 @@ export default function ChandrapurGisMap({
 
       {/* Selected Taluka Executive Inspector Drawer (Clean Light Card) */}
       {activeTalukaProfile && (
-        <div className="relative z-20 bg-gradient-to-r from-blue-50/90 via-white to-slate-50 border-t border-blue-200 p-3 sm:p-4 text-slate-900">
+        <div className="relative z-20 bg-[#FFFFFF] border-t border-[#E8E4DA] p-3 sm:p-4 text-slate-900">
           <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-3">
             {/* Taluka Title & SDO Information */}
             <div className="space-y-1">
@@ -1837,7 +1837,7 @@ export default function ChandrapurGisMap({
 
       {/* Selected SDO Jurisdiction Inspector Drawer (When SDO is selected and no single taluka selected) */}
       {!activeTalukaProfile && selectedSdoData && (
-        <div className="relative z-20 bg-gradient-to-r from-indigo-50/95 via-white to-slate-50 border-t border-indigo-200 p-3 sm:p-4 text-slate-900">
+        <div className="relative z-20 bg-[#FFFFFF] border-t border-[#E8E4DA] p-3 sm:p-4 text-slate-900">
           <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-3">
             <div className="space-y-1">
               <div className="flex items-center gap-2 flex-wrap">

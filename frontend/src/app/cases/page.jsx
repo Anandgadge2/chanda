@@ -367,7 +367,7 @@ export default function CasesPage() {
   return (
     <div className="space-y-2.5 sm:space-y-3">
       {/* Executive Command Hero Header - Pro Compact */}
-      <div className="bg-gradient-to-r from-amber-50/80 via-orange-50/40 to-white text-slate-900 rounded-xl px-3.5 py-2 sm:py-2.5 shadow-2xs border border-amber-200/80 flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+      <div className="bg-[#FFFFFF] text-[#252B36] rounded-xl px-4 py-3 border border-[#E8E4DA] shadow-[0_1px_2px_rgba(0,0,0,0.03)] flex flex-col sm:flex-row justify-between sm:items-center gap-2">
         <div className="flex items-center gap-2.5 min-w-0">
           <div className="w-8 h-8 rounded-lg bg-amber-500 text-slate-950 flex items-center justify-center shrink-0 shadow-2xs font-bold">
             <Scale className="w-4 h-4" />
@@ -426,11 +426,11 @@ export default function CasesPage() {
           onClick={() => handleMetricCardFilter('', '')}
           className={`p-2.5 sm:p-3 rounded-xl border text-left transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xs active:scale-98 relative overflow-hidden group cursor-pointer ${
             appliedFilters.status === '' && appliedFilters.isRepossessedToGovt === ''
-              ? 'bg-gradient-to-br from-sky-100/95 via-blue-50/80 to-white border-blue-500 shadow-xs ring-2 ring-blue-500/30'
-              : 'bg-gradient-to-br from-sky-50/80 via-blue-50/40 to-white/95 border-sky-200/80 hover:border-sky-300 shadow-2xs'
+              ? 'bg-[#FFFFFF] border-[#4169E1] ring-1 ring-[#4169E1]'
+              : 'bg-[#FFFFFF] border-[#E8E4DA] hover:border-[#cbd5e1]'
           }`}
         >
-          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-600 to-indigo-600" />
+          <div className="absolute top-0 left-0 right-0 h-[2px] bg-[#4169E1]" />
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold text-slate-700 group-hover:text-blue-950 transition-colors">
               {isMarathi ? 'एकूण प्रकरणे' : 'Total Cases'}
@@ -453,11 +453,11 @@ export default function CasesPage() {
           onClick={() => handleMetricCardFilter('HEARING_SCHEDULED', '')}
           className={`p-2.5 sm:p-3 rounded-xl border text-left transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xs active:scale-98 relative overflow-hidden group cursor-pointer ${
             appliedFilters.status === 'HEARING_SCHEDULED'
-              ? 'bg-gradient-to-br from-indigo-100/95 via-violet-50/80 to-white border-indigo-500 shadow-xs ring-2 ring-indigo-500/30'
-              : 'bg-gradient-to-br from-indigo-50/80 via-violet-50/40 to-white/95 border-indigo-200/80 hover:border-indigo-300 shadow-2xs'
+              ? 'bg-[#FFFFFF] border-[#4169E1] ring-1 ring-[#4169E1]'
+              : 'bg-[#FFFFFF] border-[#E8E4DA] hover:border-[#cbd5e1]'
           }`}
         >
-          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-600 to-purple-600" />
+          <div className="absolute top-0 left-0 right-0 h-[2px] bg-[#4169E1]" />
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold text-slate-700 group-hover:text-indigo-950 transition-colors">
               {isMarathi ? 'सक्रिय सुनावण्या' : 'Active Hearings'}
@@ -480,11 +480,11 @@ export default function CasesPage() {
           onClick={() => handleMetricCardFilter('NOTICE_ISSUED', '')}
           className={`p-2.5 sm:p-3 rounded-xl border text-left transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xs active:scale-98 relative overflow-hidden group cursor-pointer ${
             appliedFilters.status === 'NOTICE_ISSUED'
-              ? 'bg-gradient-to-br from-amber-100/95 via-orange-50/80 to-white border-amber-500 shadow-xs ring-2 ring-amber-500/30'
-              : 'bg-gradient-to-br from-amber-50/80 via-orange-50/40 to-white/95 border-amber-200/80 hover:border-amber-300 shadow-2xs'
+              ? 'bg-[#FFFFFF] border-[#D97706] ring-1 ring-[#D97706]'
+              : 'bg-[#FFFFFF] border-[#E8E4DA] hover:border-[#cbd5e1]'
           }`}
         >
-          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 to-orange-500" />
+          <div className="absolute top-0 left-0 right-0 h-[2px] bg-[#D97706]" />
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold text-slate-700 group-hover:text-amber-950 transition-colors">
               {isMarathi ? 'कारणे दाखवा नोटीस' : 'Show Cause Notices'}
@@ -507,11 +507,11 @@ export default function CasesPage() {
           onClick={() => handleMetricCardFilter('', 'true')}
           className={`p-2.5 sm:p-3 rounded-xl border text-left transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xs active:scale-98 relative overflow-hidden group cursor-pointer ${
             appliedFilters.isRepossessedToGovt === 'true'
-              ? 'bg-gradient-to-br from-emerald-100/95 via-teal-50/80 to-white border-emerald-500 shadow-xs ring-2 ring-emerald-500/30'
-              : 'bg-gradient-to-br from-emerald-50/80 via-teal-50/40 to-white/95 border-emerald-200/80 hover:border-emerald-300 shadow-2xs'
+              ? 'bg-[#FFFFFF] border-[#16A34A] ring-1 ring-[#16A34A]'
+              : 'bg-[#FFFFFF] border-[#E8E4DA] hover:border-[#cbd5e1]'
           }`}
         >
-          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-600" />
+          <div className="absolute top-0 left-0 right-0 h-[2px] bg-[#16A34A]" />
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold text-slate-700 group-hover:text-emerald-950 transition-colors">
               {isMarathi ? 'शासन जमा आदेश' : 'Govt Repossessed'}
@@ -529,8 +529,8 @@ export default function CasesPage() {
         </button>
 
         {/* Metric 5: Total Disputed Area (Rose - Risk Exposure / Area at Stake) */}
-        <div className="p-2.5 sm:p-3 rounded-xl border border-rose-200/80 bg-gradient-to-br from-rose-50/80 via-pink-50/40 to-white/95 shadow-2xs col-span-2 sm:col-span-1 relative overflow-hidden hover:shadow-xs transition-all duration-200 hover:-translate-y-0.5 group">
-          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-rose-500 to-pink-600" />
+        <div className="p-2.5 sm:p-3 rounded-xl border border-rose-200/80 bg-[#FFFFFF] border border-[#E8E4DA] hover:border-[#cbd5e1] col-span-2 sm:col-span-1 relative overflow-hidden transition-all group">
+          <div className="absolute top-0 left-0 right-0 h-[2px] bg-[#DC2626]" />
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold text-slate-700 group-hover:text-rose-950 transition-colors">
               {isMarathi ? 'एकूण शर्तभंग क्षेत्र' : 'Total Breach Area'}
@@ -714,7 +714,7 @@ export default function CasesPage() {
       {/* Enhanced Table Card (Modern Executive Grid) */}
       <div className="bg-white rounded-2xl border border-slate-200/90 shadow-sm overflow-hidden">
         {/* Table Top Bar */}
-        <div className="px-4 sm:px-5 py-3.5 bg-gradient-to-r from-slate-50 via-white to-slate-50/80 border-b border-slate-200/80 flex items-center justify-between gap-2.5">
+        <div className="px-4 sm:px-5 py-3.5 bg-[#FFFFFF] border-b border-[#E8E4DA] flex items-center justify-between gap-2.5">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-xl bg-blue-100/80 border border-blue-200/80 flex items-center justify-center text-blue-900 shrink-0 shadow-2xs">
               <FolderArchive className="w-4 h-4" />
@@ -776,7 +776,7 @@ export default function CasesPage() {
               <button
                 type="button"
                 onClick={handleResetFilters}
-                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-blue-900 hover:bg-blue-800 text-white rounded-lg text-xs font-bold transition shadow-xs active:scale-95"
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-[#4169E1] hover:bg-[#3454B4] text-white rounded-lg text-xs font-bold transition shadow-xs active:scale-95"
               >
                 <X className="w-3.5 h-3.5" />
                 <span>{isMarathi ? 'फिल्टर्स साफ करा' : 'Clear filters'}</span>

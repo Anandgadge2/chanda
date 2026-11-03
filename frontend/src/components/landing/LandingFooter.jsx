@@ -56,7 +56,7 @@ export default function LandingFooter() {
       aria-label={isMarathi ? 'शासकीय पादटीप' : 'Official Footer'}
     >
       {/* Top National Tricolor Header Ribbon */}
-      <div className="h-1.5 w-full bg-gradient-to-r from-amber-500 via-white to-emerald-600 shadow-xs" />
+      <div className="h-1 w-full bg-[#4169E1]" />
 
       {/* Top Zone: District Collectorate Leadership & Contact Strip */}
       <div className="relative border-b border-slate-200 bg-white">

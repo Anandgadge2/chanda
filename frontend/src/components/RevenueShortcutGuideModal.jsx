@@ -99,7 +99,7 @@ export default function RevenueShortcutGuideModal({
         className="relative z-10 w-full max-w-4xl max-h-[90vh] bg-white rounded-3xl shadow-[0_25px_60px_-15px_rgba(15,23,42,0.3)] flex flex-col border border-slate-100 overflow-hidden animate-in zoom-in-95 duration-150 my-auto"
       >
         {/* Top Gradient Accent Strip */}
-        <div className="h-1.5 bg-gradient-to-r from-amber-500 via-blue-600 to-indigo-600 shrink-0" />
+        <div className="h-1 bg-[#4169E1] shrink-0" />
 
         {/* Header */}
         <div className="px-5 sm:px-6 py-3.5 bg-white border-b border-slate-100 flex justify-between items-center shrink-0 gap-3">

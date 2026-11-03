@@ -57,7 +57,7 @@ export default function RevenueGlossaryPage() {
   return (
     <div className="w-full space-y-2.5 sm:space-y-3">
       {/* Executive Command Hero Header - Pro Compact */}
-      <div className="bg-gradient-to-r from-sky-50/80 via-blue-50/40 to-white text-slate-900 rounded-xl px-3.5 py-2 sm:py-2.5 shadow-2xs border border-sky-200/80 flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+      <div className="bg-[#FFFFFF] text-[#252B36] rounded-xl px-4 py-3 border border-[#E8E4DA] shadow-[0_1px_2px_rgba(0,0,0,0.03)] flex flex-col sm:flex-row justify-between sm:items-center gap-2">
         <div className="flex items-center gap-2.5 min-w-0">
           <div className="p-1 rounded-lg bg-white border border-slate-200 shadow-2xs shrink-0">
             <ChandrapurDistrictLogo className="w-7 h-7" />
@@ -108,7 +108,7 @@ export default function RevenueGlossaryPage() {
       </div>
 
       {/* Featured Deep-Dive Spotlight Card: 'विनापरवानगी अ.कृ. वापर' */}
-      <div className="bg-gradient-to-br from-amber-500/15 via-amber-50/50 to-orange-500/10 border-2 border-amber-300/80 rounded-2xl p-4 sm:p-6 shadow-xs space-y-3.5">
+      <div className="bg-[#FFFFFF] border border-[#E8E4DA] rounded-xl p-4 sm:p-6 space-y-3.5">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-200 text-amber-950 text-xs font-black border border-amber-300 shadow-2xs">
             <AlertTriangle className="w-4 h-4 text-amber-800 shrink-0" />
@@ -185,7 +185,7 @@ export default function RevenueGlossaryPage() {
       {/* Quick Statistics Bar - Modern Metric Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-4">
         <div className="bg-white/95 backdrop-blur-md border border-slate-200/80 rounded-2xl p-3 sm:p-4 shadow-sm text-center relative overflow-hidden transition-all hover:-translate-y-1 hover:shadow-md group">
-          <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-amber-400 to-amber-600" />
+          <div className="absolute top-0 inset-x-0 h-[2px] bg-[#D97706]" />
           <span className="text-xl sm:text-2xl font-black text-amber-600 font-mono tracking-tight block">
             {REVENUE_SHORTCUTS.length}
           </span>
@@ -194,7 +194,7 @@ export default function RevenueGlossaryPage() {
           </p>
         </div>
         <div className="bg-white/95 backdrop-blur-md border border-slate-200/80 rounded-2xl p-3 sm:p-4 shadow-sm text-center relative overflow-hidden transition-all hover:-translate-y-1 hover:shadow-md group">
-          <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-blue-500 to-indigo-600" />
+          <div className="absolute top-0 inset-x-0 h-[2px] bg-[#4169E1]" />
           <span className="text-xl sm:text-2xl font-black text-blue-900 font-mono tracking-tight block">
             {REVENUE_GLOSSARY_CATEGORIES.length - 1}
           </span>
@@ -203,7 +203,7 @@ export default function RevenueGlossaryPage() {
           </p>
         </div>
         <div className="bg-white/95 backdrop-blur-md border border-slate-200/80 rounded-2xl p-3 sm:p-4 shadow-sm text-center relative overflow-hidden transition-all hover:-translate-y-1 hover:shadow-md group">
-          <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-600" />
+          <div className="absolute top-0 inset-x-0 h-[2px] bg-[#16A34A]" />
           <span className="text-base sm:text-lg font-black text-emerald-700 tracking-tight block">
             MLRC 1966
           </span>
@@ -212,7 +212,7 @@ export default function RevenueGlossaryPage() {
           </p>
         </div>
         <div className="bg-white/95 backdrop-blur-md border border-slate-200/80 rounded-2xl p-3 sm:p-4 shadow-sm text-center relative overflow-hidden transition-all hover:-translate-y-1 hover:shadow-md group">
-          <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-purple-500 to-fuchsia-600" />
+          <div className="absolute top-0 inset-x-0 h-[2px] bg-[#4169E1]" />
           <span className="text-base sm:text-lg font-black text-purple-900 tracking-tight block">
             {isMarathi ? '१५ तालुके' : '15 Talukas'}
           </span>

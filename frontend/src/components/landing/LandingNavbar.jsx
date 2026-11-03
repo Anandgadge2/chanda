@@ -58,7 +58,7 @@ export default function LandingNavbar({ onOpenAuth }) {
     : (user?.fullNameEn ? user.fullNameEn.charAt(0) : (officerDisplayName ? officerDisplayName.charAt(0) : 'D'));
 
   return (
-    <header className="sticky top-0 z-50 bg-white border-b border-slate-200 shadow-2xs">
+    <header className="sticky top-0 z-50 bg-white border-b border-[#E8E4DA] shadow-2xs">
       {/* Main Brand & Officer Actions Header */}
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-1.5 sm:py-2">
         <div className="flex items-center justify-between gap-2">
@@ -92,8 +92,8 @@ export default function LandingNavbar({ onOpenAuth }) {
                 </Link>
 
                 {/* Officer Mini Badge & Instant Logout */}
-                <div className="flex items-center gap-2 pl-2 border-l border-slate-200">
-                  <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-900 to-indigo-900 text-white font-bold text-xs flex items-center justify-center shadow-xs flex-shrink-0">
+                <div className="flex items-center gap-2 pl-2 border-l border-[#E8E4DA]">
+                  <div className="w-7 h-7 rounded-lg bg-[#4169E1] text-white font-bold text-xs flex items-center justify-center shadow-xs flex-shrink-0">
                     {officerInitial}
                   </div>
                   <div className="text-left max-w-[150px]">
@@ -120,7 +120,7 @@ export default function LandingNavbar({ onOpenAuth }) {
                 <button
                   type="button"
                   onClick={() => onOpenAuth('login')}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-blue-950 bg-amber-400 hover:bg-amber-300 border border-amber-500/60 shadow-xs hover:shadow-md transition cursor-pointer"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-white bg-[#4169E1] hover:bg-[#3454B4] shadow-xs transition cursor-pointer"
                 >
                   <Lock className="w-3.5 h-3.5 text-blue-950" />
                   <span>{t('nav.officerLogin')}</span>
@@ -143,14 +143,14 @@ export default function LandingNavbar({ onOpenAuth }) {
             ) : (
               <button
                 onClick={() => onOpenAuth('login')}
-                className="px-2.5 py-1.5 rounded-lg text-[11px] font-bold text-blue-950 bg-amber-400 active:scale-95 transition cursor-pointer"
+                className="px-2.5 py-1.5 rounded-lg text-[11px] font-bold text-white bg-[#4169E1] active:scale-95 transition cursor-pointer"
               >
                 {t('nav.officerLogin')}
               </button>
             )}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="w-9 h-9 flex items-center justify-center rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-100 active:bg-slate-200 transition cursor-pointer"
+              className="w-9 h-9 flex items-center justify-center rounded-xl border border-[#E8E4DA] text-slate-700 hover:bg-slate-100 active:bg-slate-200 transition cursor-pointer"
               aria-label="Toggle menu"
             >
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -161,7 +161,7 @@ export default function LandingNavbar({ onOpenAuth }) {
 
       {/* Mobile Slide-Down Menu */}
       {mobileMenuOpen && (
-        <div className="lg:hidden bg-white border-b border-slate-200 px-4 pt-3 pb-5 space-y-3 shadow-xl">
+        <div className="lg:hidden bg-white border-b border-[#E8E4DA] px-4 pt-3 pb-5 space-y-3 shadow-xl">
           <div className="pb-2 border-b border-slate-100 flex justify-between items-center">
             <span className="text-xs font-bold text-slate-500">{t('accessibility.language')}:</span>
             <LanguageSwitcher variant="pill" />
@@ -234,11 +234,11 @@ export default function LandingNavbar({ onOpenAuth }) {
             </Link>
           </nav>
 
-          <div className="pt-3 border-t border-slate-200 flex flex-col gap-2">
+          <div className="pt-3 border-t border-[#E8E4DA] flex flex-col gap-2">
             {user ? (
               <>
-                <div className="flex items-center gap-2 p-2 bg-slate-50 rounded-xl border border-slate-200">
-                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-900 to-indigo-900 text-white font-bold text-xs flex items-center justify-center shadow-xs flex-shrink-0">
+                <div className="flex items-center gap-2 p-2 bg-slate-50 rounded-xl border border-[#E8E4DA]">
+                  <div className="w-8 h-8 rounded-lg bg-[#4169E1] text-white font-bold text-xs flex items-center justify-center shadow-xs flex-shrink-0">
                     {officerInitial}
                   </div>
                   <div className="min-w-0 flex-1">

@@ -509,9 +509,9 @@ export default function ParcelsPage() {
   return (
     <div className="space-y-2.5 sm:space-y-3">
       {/* Executive Command Header - Pro Compact */}
-      <div className="bg-gradient-to-r from-emerald-50/80 via-teal-50/40 to-white text-slate-900 rounded-xl px-3.5 py-2 sm:py-2.5 shadow-2xs border border-emerald-200/80 flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+      <div className="bg-[#FFFFFF] text-[#252B36] rounded-xl px-4 py-3 border border-[#E8E4DA] shadow-[0_1px_2px_rgba(0,0,0,0.03)] flex flex-col sm:flex-row justify-between sm:items-center gap-2">
         <div className="flex items-center gap-2.5 min-w-0">
-          <div className="w-8 h-8 rounded-lg bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-2xs">
+          <div className="w-8 h-8 rounded-lg bg-[#4169E1] text-white flex items-center justify-center shrink-0">
             <MapPin className="w-4 h-4" />
           </div>
           <div className="min-w-0">
@@ -540,7 +540,7 @@ export default function ParcelsPage() {
           <button
             type="button"
             onClick={() => setGlossaryModalOpen(true)}
-            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white hover:bg-emerald-50 text-emerald-900 border border-emerald-200 text-xs font-bold transition-all active:scale-95 shadow-2xs cursor-pointer"
+            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-[#FFFFFF] hover:bg-[#F0EDE5] text-[#252B36] border border-[#E8E4DA] text-xs font-semibold transition-all active:scale-95 cursor-pointer"
             title={isMarathi ? '७/१२ संक्षिप्त रूपे मदत' : '7/12 Abbreviations Guide'}
           >
             <BookOpen className="w-3.5 h-3.5 text-emerald-700" />
@@ -699,7 +699,7 @@ export default function ParcelsPage() {
             className={clsx(
               'h-9 px-3 sm:px-3.5 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95 shrink-0 shadow-xs cursor-pointer select-none w-full sm:w-auto',
               isFilterPending
-                ? 'bg-emerald-600 hover:bg-emerald-700 text-white ring-2 ring-emerald-400/60 ring-offset-1 shadow-emerald-700/20'
+                ? 'bg-[#4169E1] hover:bg-[#3454B4] text-white ring-2 ring-[#4169E1]/30'
                 : 'bg-[#242b6b] hover:bg-[#1a2053] text-white'
             )}
             title={isMarathi ? 'निवडलेले फिल्टर्स लागू करा (Enter)' : 'Apply Selected Filters (Enter)'}
@@ -874,7 +874,7 @@ export default function ParcelsPage() {
               <button
                 type="button"
                 onClick={handleResetFilters}
-                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-blue-900 hover:bg-blue-800 text-white rounded-lg text-xs font-bold transition shadow-xs active:scale-95"
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-[#4169E1] hover:bg-[#3454B4] text-white rounded-lg text-xs font-bold transition shadow-xs active:scale-95"
               >
                 <X className="w-3.5 h-3.5" />
                 <span>{isMarathi ? 'सर्व फिल्टर्स साफ करा' : 'Clear all filters'}</span>
@@ -1003,7 +1003,7 @@ export default function ParcelsPage() {
                         <button
                           type="button"
                           onClick={() => setSelectedUpi(parcel.upi)}
-                          className="flex-1 py-2 px-3 rounded-xl bg-blue-900 hover:bg-blue-800 active:scale-95 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-2xs transition cursor-pointer"
+                          className="flex-1 py-2 px-3 rounded-xl bg-[#4169E1] hover:bg-[#3454B4] active:scale-95 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-2xs transition cursor-pointer"
                         >
                           <Eye className="w-3.5 h-3.5 text-amber-400" />
                           <span>{isMarathi ? '३६०° साखळी पहा' : 'View 360° Trace'}</span>
@@ -1375,7 +1375,7 @@ export default function ParcelsPage() {
                           <button
                             type="button"
                             onClick={() => setSelectedUpi(parcel.upi)}
-                            className="inline-flex items-center gap-1 text-[11px] font-semibold text-blue-900 bg-blue-50 hover:bg-blue-100 px-2.5 py-1 rounded-md transition active:scale-95 whitespace-nowrap"
+                            className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#4169E1] bg-[#4169E1]/10 hover:bg-[#4169E1]/20 px-2.5 py-1 rounded-md transition active:scale-95 whitespace-nowrap"
                             title={isMarathi ? '१९५० शीर्षक साखळी व संपूर्ण इतिहास पहा' : 'View 1950 title chain and complete history'}
                           >
                             <span>{isMarathi ? '३६०°' : '360°'}</span>

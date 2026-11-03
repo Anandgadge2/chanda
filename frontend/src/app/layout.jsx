@@ -1,15 +1,15 @@
-import { Poppins, Noto_Sans_Devanagari } from 'next/font/google';
+import { Inter, Noto_Sans_Devanagari } from 'next/font/google';
 import './globals.css';
 import PortalLayout from '../components/PortalLayout';
 import { AuthProvider } from '../components/AuthContext';
 import { LanguageProvider } from '../components/LanguageContext';
 import ErrorBoundary from '../components/ErrorBoundary';
 
-const poppins = Poppins({
+const inter = Inter({
   subsets: ['latin'],
   weight: ['300', '400', '500', '600', '700'],
   display: 'swap',
-  variable: '--font-poppins',
+  variable: '--font-inter',
 });
 
 const notoSansDevanagari = Noto_Sans_Devanagari({
@@ -24,7 +24,7 @@ export const viewport = {
   initialScale: 1,
   maximumScale: 5,
   userScalable: true,
-  themeColor: '#0f172a',
+  themeColor: '#4169E1',
 };
 
 export const metadata = {
@@ -46,11 +46,11 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="mr" translate="no" className={`${poppins.variable} ${notoSansDevanagari.variable} notranslate`}>
+    <html lang="mr" translate="no" className={`${inter.variable} ${notoSansDevanagari.variable} notranslate`}>
       <head>
         <meta name="google" content="notranslate" />
       </head>
-      <body className="bg-slate-50 text-slate-900 antialiased min-h-screen flex flex-col notranslate font-sans">
+      <body className="bg-[#F8F6F0] text-[#252B36] antialiased min-h-screen flex flex-col notranslate font-sans">
         <ErrorBoundary>
           <LanguageProvider>
             <AuthProvider>

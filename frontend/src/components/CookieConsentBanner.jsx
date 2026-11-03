@@ -63,7 +63,7 @@ export default function CookieConsentBanner() {
 
           {/* Main Info */}
           <div className="flex items-start gap-3.5 sm:gap-4 flex-1 pr-6 sm:pr-0">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-br from-blue-700 via-blue-800 to-indigo-900 text-white shadow-md shadow-blue-900/20 flex items-center justify-center shrink-0 ring-4 ring-blue-50 mt-0.5">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-[#4169E1] text-white flex items-center justify-center shrink-0 mt-0.5">
               <ShieldCheck className="w-5 h-5 sm:w-6 sm:h-6 text-white" aria-hidden="true" />
             </div>
 
@@ -115,7 +115,7 @@ export default function CookieConsentBanner() {
             <button
               type="button"
               onClick={() => handleAccept('all')}
-              className="flex-1 md:flex-initial px-5 py-2 text-xs sm:text-sm font-bold text-white bg-gradient-to-r from-blue-700 via-blue-800 to-indigo-900 hover:from-blue-800 hover:to-indigo-950 active:scale-[0.98] rounded-xl shadow-md shadow-blue-900/25 hover:shadow-lg transition-all focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
+              className="flex-1 md:flex-initial px-5 py-2 text-xs sm:text-sm font-bold text-white bg-[#4169E1] hover:bg-[#3454B4] active:scale-[0.98] rounded-xl shadow-xs transition-all focus:outline-none focus:ring-2 focus:ring-[#4169E1]"
             >
               {isMarathi ? 'स्वीकारा व पुढे चला (Accept)' : 'Accept & Proceed'}
             </button>

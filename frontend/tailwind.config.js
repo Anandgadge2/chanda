@@ -8,18 +8,42 @@ module.exports = {
   theme: {
     extend: {
       colors: {
+        cream: {
+          DEFAULT: '#F8F6F0',
+          50: '#FDFCF9',
+          100: '#F8F6F0',
+          200: '#F0EDE5',
+        },
+        surface: '#FFFFFF',
+        royal: {
+          DEFAULT: '#4169E1',
+          hover: '#3454B4',
+          light: '#EEF2FF',
+          border: '#C7D2FE',
+          dark: '#2A4391',
+        },
+        charcoal: {
+          DEFAULT: '#252B36',
+          muted: '#64748B',
+          dark: '#1A1E26',
+        },
+        warmgrey: {
+          DEFAULT: '#E8E4DA',
+          light: '#F0EDE5',
+          border: '#E8E4DA',
+        },
         governance: {
-          50: '#f8fafc',
-          100: '#f1f5f9',
-          200: '#e2e8f0',
+          50: '#F8F6F0',
+          100: '#F0EDE5',
+          200: '#E8E4DA',
           300: '#cbd5e1',
           400: '#94a3b8',
-          500: '#64748b',
+          500: '#64748B',
           600: '#475569',
           700: '#334155',
-          800: '#1e293b',
-          900: '#0f172a',
-          950: '#020617',
+          800: '#252B36',
+          900: '#1A1E26',
+          950: '#0F131A',
         },
         saffron: {
           50: '#fff7ed',
@@ -34,14 +58,14 @@ module.exports = {
         emeraldGov: {
           50: '#ecfdf5',
           100: '#d1fae5',
-          500: '#10b981',
+          500: '#16A34A',
           600: '#059669',
           700: '#047857',
-        }
+        },
       },
       fontFamily: {
-        sans: ['var(--font-poppins)', 'var(--font-noto-devanagari)', 'system-ui', '-apple-system', 'sans-serif'],
-        heading: ['var(--font-poppins)', 'var(--font-noto-devanagari)', 'system-ui', '-apple-system', 'sans-serif'],
+        sans: ['var(--font-inter)', 'var(--font-noto-devanagari)', 'system-ui', '-apple-system', 'sans-serif'],
+        heading: ['var(--font-inter)', 'var(--font-noto-devanagari)', 'system-ui', '-apple-system', 'sans-serif'],
       },
     },
   },

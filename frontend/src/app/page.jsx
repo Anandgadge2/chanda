@@ -21,7 +21,7 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 font-sans selection:bg-amber-400 selection:text-slate-950">
+    <div className="min-h-screen flex flex-col bg-[#F8F6F0] text-[#252B36] font-sans selection:bg-[#4169E1]/20 selection:text-[#252B36]">
       {/* Official Government Top Navigation Bar */}
       <LandingNavbar onOpenAuth={handleOpenAuth} />
 
@@ -36,9 +36,6 @@ export default function HomePage() {
 
       {/* 15 Talukas Explorer Carousel */}
       <TalukaSlider />
-
-     
-
 
       {/* Official Multi-Column Government Footer */}
       <LandingFooter />

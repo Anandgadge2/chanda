@@ -208,7 +208,7 @@ export default function LandingHero({ onOpenAuth }) {
   return (
     <section
       id="search-section"
-      className="relative bg-gradient-to-b from-blue-50/40 via-slate-50 to-white text-slate-900 pt-2 sm:pt-3 pb-6 sm:pb-8 border-b border-slate-200"
+      className="relative bg-[#F8F6F0] text-[#252B36] pt-2 sm:pt-3 pb-6 sm:pb-8 border-b border-[#E8E4DA]"
       aria-label={isMarathi ? 'चंद्रपूर जिल्हा प्रशासन मुख्य बॅनर' : 'Chandrapur District Administration Main Banner'}
     >
       {/* Full-width Responsive Showcase Container - Scales Elegantly Across All Zoom Levels */}
@@ -221,11 +221,11 @@ export default function LandingHero({ onOpenAuth }) {
           onKeyDown={handleKeyDown}
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
-          className="relative w-full h-[390px] xs:h-[415px] sm:h-[440px] md:h-[470px] lg:h-[500px] xl:h-[520px] rounded-2xl sm:rounded-3xl overflow-hidden border border-slate-200/90 shadow-xl shadow-slate-900/10 bg-slate-950 focus:outline-hidden focus:ring-2 focus:ring-amber-400 group"
+          className="relative w-full h-[390px] xs:h-[415px] sm:h-[440px] md:h-[470px] lg:h-[500px] xl:h-[520px] rounded-2xl sm:rounded-3xl overflow-hidden border border-[#E8E4DA]/90 shadow-xl shadow-slate-900/10 bg-slate-950 focus:outline-hidden focus:ring-2 focus:ring-amber-400 group"
         >
           {/* Official Indian Tricolor National Accent Micro-Bar */}
           <div
-            className="absolute top-0 left-0 right-0 h-[3.5px] z-30 bg-gradient-to-r from-amber-500 via-white to-emerald-600 shadow-xs"
+            className="absolute top-0 left-0 right-0 h-[3.5px] z-30 bg-[#4169E1]"
             aria-hidden="true"
           />
 
@@ -333,7 +333,7 @@ export default function LandingHero({ onOpenAuth }) {
               <div className="shrink-0">
                 <Link
                   href={activeBanner.primaryHref}
-                  className="inline-flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-bold text-slate-950 bg-gradient-to-r from-amber-400 to-amber-300 hover:from-amber-300 hover:to-amber-200 shadow-lg shadow-amber-950/40 hover:shadow-amber-400/30 transition-all active:scale-95 group/btn cursor-pointer"
+                  className="inline-flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-bold text-white bg-[#4169E1] hover:bg-[#3454B4] shadow-xs transition-all active:scale-95 group/btn cursor-pointer"
                 >
                   <span>{isMarathi ? activeBanner.primaryCtaMr : activeBanner.primaryCtaEn}</span>
                   <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 group-hover/btn:translate-x-1 transition-transform" />
@@ -363,7 +363,7 @@ export default function LandingHero({ onOpenAuth }) {
                         {isActive ? (
                           <div
                             key={`prog-desktop-${progressKey}`}
-                            className={`h-full bg-gradient-to-r from-amber-400 to-amber-300 rounded-full animate-hero-progress ${
+                            className={`h-full bg-[#4169E1] rounded-full animate-hero-progress ${
                               isPaused ? 'animate-hero-progress-paused' : ''
                             }`}
                           />
