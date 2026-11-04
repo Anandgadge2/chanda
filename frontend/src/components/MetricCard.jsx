@@ -120,24 +120,24 @@ export default function MetricCard({
       onClick={isInteractive ? onClick : undefined}
       onKeyDown={handleKeyDown}
       className={clsx(
-        'py-3.5 px-4 sm:py-4 sm:px-5 rounded-xl border transition-all duration-200 flex flex-col justify-between select-none text-left relative overflow-hidden group bg-white shadow-[0_1px_3px_rgba(0,0,0,0.03)]',
+        'py-2 px-3.5 sm:py-2.5 sm:px-4 rounded-xl border transition-all duration-200 flex flex-col justify-between select-none text-left relative overflow-hidden group bg-white shadow-[0_1px_3px_rgba(0,0,0,0.03)]',
         isActive
           ? theme.activeRing
           : 'border-slate-200/90 hover:border-slate-300 hover:shadow-md',
         isInteractive && 'cursor-pointer active:scale-[0.99] focus:outline-none'
       )}
     >
-      {/* 3.5px Solid Top Accent Indicator */}
+      {/* 3px Solid Top Accent Indicator */}
       <div
         className={clsx(
-          'absolute top-0 left-0 right-0 h-[3.5px] transition-opacity duration-200',
+          'absolute top-0 left-0 right-0 h-[3px] transition-opacity duration-200',
           theme.accentBar,
           isActive ? 'opacity-100' : 'opacity-85 group-hover:opacity-100'
         )}
       />
 
       {/* Top Header: Title + Action Icon + Category Icon */}
-      <div className="flex items-center justify-between gap-2 pt-0.5">
+      <div className="flex items-center justify-between gap-1.5">
         <span className="text-xs sm:text-[13px] font-bold text-slate-700 tracking-tight leading-snug truncate">
           {displayTitle}
         </span>
@@ -158,22 +158,22 @@ export default function MetricCard({
           )}
 
           {Icon && (
-            <div className={clsx('w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center shrink-0 shadow-2xs', theme.iconBox)}>
-              <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 stroke-[2]" />
+            <div className={clsx('w-6.5 h-6.5 sm:w-7 sm:h-7 rounded-lg flex items-center justify-center shrink-0 shadow-2xs', theme.iconBox)}>
+              <Icon className="w-3.5 h-3.5 stroke-[2]" />
             </div>
           )}
         </div>
       </div>
 
       {/* Center: Prominent, High-Contrast Metric Number */}
-      <div className="mt-2.5 sm:mt-3">
-        <p className="text-2xl sm:text-3xl lg:text-[32px] font-extrabold tracking-tight font-mono text-[#0F172A] leading-none">
+      <div className="mt-1.5 sm:mt-2">
+        <p className="text-2xl sm:text-[28px] lg:text-[30px] font-extrabold tracking-tight font-mono text-[#0F172A] leading-tight">
           {value}
         </p>
       </div>
 
       {/* Bottom: Context Badge & Filter State */}
-      <div className="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between gap-1 text-[11px]">
+      <div className="mt-2 pt-1.5 border-t border-slate-100 flex items-center justify-between gap-1 text-[11px]">
         {displaySubtext ? (
           <span className={clsx('px-2 py-0.5 rounded-md font-bold font-mono truncate text-[11px]', theme.badge)}>
             {displaySubtext}
