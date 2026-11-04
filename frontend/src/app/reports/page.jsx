@@ -716,7 +716,7 @@ export default function ReportsPage() {
 
   // Checklist 1 to 46 Timeline Table Columns Map for Navigation & Info Bar
   const TIMELINE_COLUMNS = useMemo(() => [
-    { key: 'srNo', titleMr: 'अ.क्र.', titleEn: 'Sr.', getValue: (p, idx) => String(p.excelSrNo || p.srNo || ((page - 1) * effectivePageSize + idx + 1)) },
+    { key: 'srNo', titleMr: 'अ.क्र.', titleEn: 'Sr.', getValue: (p, idx) => String((page - 1) * effectivePageSize + idx + 1) },
     { key: 'village', titleMr: 'गावाचे नाव', titleEn: 'Village Name', getValue: (p) => `${formatVillageName(p.villageName, isMarathi)} (${formatTalukaName(p.taluka, isMarathi)})` },
     { key: 'gatNumber', titleMr: 'सर्व्हे क्रमांक', titleEn: 'Survey No.', getValue: (p) => String(p.gatNumber || p.oldSurveyNo || '-') },
     { key: 'area', titleMr: 'क्षेत्र', titleEn: 'Area', getValue: (p) => String(p.totalAreaHa || '-') },
@@ -737,7 +737,7 @@ export default function ReportsPage() {
 
   // Compact 7/12 Table Columns Map for Navigation & Info Bar
   const COMPACT_COLUMNS = useMemo(() => [
-    { key: 'srNo', titleMr: 'अ.क्र.', titleEn: 'Sr.', getValue: (p, idx) => String(p.excelSrNo || p.srNo || ((page - 1) * effectivePageSize + idx + 1)) },
+    { key: 'srNo', titleMr: 'अ.क्र.', titleEn: 'Sr.', getValue: (p, idx) => String((page - 1) * effectivePageSize + idx + 1) },
     { key: 'village', titleMr: 'गावाचे नाव', titleEn: 'Village Name', getValue: (p) => `${formatVillageName(p.villageName, isMarathi)} (${formatTalukaName(p.taluka, isMarathi)})` },
     { key: 'gatNumber', titleMr: 'सर्व्हे / गट क्र.', titleEn: 'Survey / Gat No.', getValue: (p) => String(p.gatNumber || p.oldSurveyNo || '-') },
     { key: 'area', titleMr: 'क्षेत्र (हे.आर.)', titleEn: 'Area (Ha.R)', getValue: (p) => String(p.totalAreaHa || '-') },
@@ -3531,7 +3531,7 @@ export default function ReportsPage() {
                           return (
                             <tr key={p.id || idx} className={`hover:bg-slate-50/80 transition ${hasAlert ? 'bg-rose-50/20' : ''}`}>
                               <td className="py-2 px-2 text-center border-r border-slate-200 font-mono text-slate-600">
-                                {p.excelSrNo || p.srNo || ((page - 1) * effectivePageSize + idx + 1)}
+                                {(page - 1) * effectivePageSize + idx + 1}
                               </td>
                               <td className="py-2 px-3 border-r border-slate-200 text-slate-700 font-medium">
                                 {formatTalukaName(p.taluka, isMarathi)}
@@ -3950,7 +3950,7 @@ export default function ReportsPage() {
                             return (
                               <tr key={p.id || idx} className={`hover:bg-slate-50/80 transition ${usageBreach || transferBreach ? 'bg-rose-50/25' : ''}`}>
                                 <td className="py-2 px-2 text-center border-r border-slate-200 font-mono text-slate-600">
-                                  {p.excelSrNo || p.srNo || ((page - 1) * effectivePageSize + idx + 1)}
+                                  {(page - 1) * effectivePageSize + idx + 1}
                                 </td>
                                 <td className="py-2 px-3 border-r border-slate-200 font-medium text-slate-900">{formatVillageName(p.villageName, isMarathi)}</td>
                                 <td className="py-2 px-2 text-center border-r border-slate-200 font-mono font-bold text-slate-800">{p.gatNumber || p.oldSurveyNo || '-'}</td>
@@ -4109,7 +4109,7 @@ export default function ReportsPage() {
                           return (
                             <tr key={p.id || idx} className={`hover:bg-slate-50/80 transition ${hasAlert ? 'bg-rose-50/20' : ''}`}>
                               <td className="py-2 px-2 text-center border-r border-slate-200 font-mono text-slate-600">
-                                {p.excelSrNo || p.srNo || ((page - 1) * effectivePageSize + idx + 1)}
+                                {(page - 1) * effectivePageSize + idx + 1}
                               </td>
                               <td className="py-2 px-3 border-r border-slate-200 text-slate-700 font-medium">{formatTalukaName(p.taluka, isMarathi)}</td>
                               <td className="py-2 px-3 border-r border-slate-200 font-medium text-slate-900">{formatVillageName(p.villageName, isMarathi)}</td>
@@ -4487,7 +4487,7 @@ export default function ReportsPage() {
 
                         const isRowActive = selectedCell?.view === 'timeline' && selectedCell?.rowIndex === idx;
                         const targetLabel = `${isMarathi ? 'गट क्र.' : 'Gat No.'} ${p.gatNumber || p.oldSurveyNo || '-'} — ${formatVillageName(p.villageName, isMarathi)}`;
-                        const srVal = String(p.excelSrNo || p.srNo || ((page - 1) * effectivePageSize + idx + 1));
+                        const srVal = String((page - 1) * effectivePageSize + idx + 1);
                         const villageVal = `${formatVillageName(p.villageName, isMarathi)} (${formatTalukaName(p.taluka, isMarathi)})`;
                         const surveyVal = String(p.gatNumber || p.oldSurveyNo || '-');
                         const areaVal = String(p.totalAreaHa || '-');
@@ -4515,7 +4515,7 @@ export default function ReportsPage() {
                                   ? 'ring-2 ring-blue-600 ring-inset bg-blue-100/90 font-bold text-blue-950 relative z-20 shadow-xs'
                                   : 'hover:bg-blue-50/50'
                               }`}
-                              title={`Excel Sr: ${p.excelSrNo || p.srNo}`}
+                              title={p.excelSrNo ? `Excel Sr: ${p.excelSrNo} | Table Sr: ${srVal}` : `Sr. No: ${srVal}`}
                             >
                               {isRowActive ? (
                                 <span className="inline-block px-1.5 py-0.5 rounded bg-blue-600 text-white font-mono text-[10px] font-black">
@@ -4839,7 +4839,7 @@ export default function ReportsPage() {
                       paginatedParcels.map((p, idx) => {
                         const isRowActive = selectedCell?.view === 'parcels' && selectedCell?.rowIndex === idx;
                         const targetLabel = `${isMarathi ? 'गट क्र.' : 'Gat No.'} ${p.gatNumber || p.oldSurveyNo || '-'} — ${formatVillageName(p.villageName, isMarathi)}`;
-                        const srVal = String(p.excelSrNo || p.srNo || ((page - 1) * effectivePageSize + idx + 1));
+                        const srVal = String((page - 1) * effectivePageSize + idx + 1);
                         const villageVal = `${formatVillageName(p.villageName, isMarathi)} (${formatTalukaName(p.taluka, isMarathi)})`;
                         const surveyVal = String(p.gatNumber || p.oldSurveyNo || '-');
                         const areaVal = String(p.totalAreaHa || '-');
@@ -4867,6 +4867,7 @@ export default function ReportsPage() {
                                   ? 'ring-2 ring-blue-600 ring-inset bg-blue-100/90 font-bold text-blue-950 relative z-20 shadow-xs'
                                   : 'hover:bg-blue-50/50'
                               }`}
+                              title={p.excelSrNo ? `Excel Sr: ${p.excelSrNo} | Table Sr: ${srVal}` : `Sr. No: ${srVal}`}
                             >
                               {isRowActive ? (
                                 <span className="inline-block px-1.5 py-0.5 rounded bg-blue-600 text-white font-mono text-[10px] font-black">

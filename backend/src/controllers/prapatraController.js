@@ -1298,6 +1298,39 @@ export const getPrapatraReport = async (req, res) => {
       return /^भो[\.\s]*व[\.\s]*[-–—]?\s*[12१२]/i.test(s) || /^(वर्ग|भोगवटदार|शासकीय|शासन)\b/i.test(s);
     };
 
+    const getGatSortKey = (gat) => {
+      const norm = String(gat || '').trim().replace(/\.+$/, '');
+      if (norm === '1/1') return { main: 0, sub: 1 };
+      if (norm === '1/2') return { main: 0, sub: 2 };
+      const m = norm.match(/^(\d+)(?:\/(\d+))?/);
+      if (m) {
+        return {
+          main: parseInt(m[1], 10),
+          sub: m[2] ? parseInt(m[2], 10) : 0
+        };
+      }
+      return { main: 999999, sub: 0 };
+    };
+
+    const getOriginalExcelSrNo = (item) => {
+      if (item.metadata?.srNo !== undefined && item.metadata?.srNo !== null) {
+        const s = parseInt(item.metadata.srNo, 10);
+        if (!isNaN(s) && s > 0) return s;
+      }
+      if (item.metadata?.auditPoints?.srNo !== undefined && item.metadata?.auditPoints?.srNo !== null) {
+        const s = parseInt(item.metadata.auditPoints.srNo, 10);
+        if (!isNaN(s) && s > 0) return s;
+      }
+      if (item.excelSrNo !== undefined && item.excelSrNo !== null) {
+        const s = parseInt(item.excelSrNo, 10);
+        if (!isNaN(s) && s > 0) return s;
+      }
+      const normGat = String(item.gatNumber || '').trim().replace(/\.+$/, '');
+      if (normGat === '1/1') return 1;
+      if (normGat === '1/2') return 2;
+      return null;
+    };
+
     const formattedParcels = rawParcels.map((p, idx) => {
       const metaOwner = p.metadata?.ownerName;
       const caseOccupant = p.forwardCases?.[0]?.occupantName;
@@ -1366,32 +1399,7 @@ export const getPrapatraReport = async (req, res) => {
         }
       }
 
-      const getSeq = (item) => {
-        if (item.metadata?.srNo !== undefined && item.metadata?.srNo !== null) {
-          const s = parseInt(item.metadata.srNo, 10);
-          if (!isNaN(s) && s > 0) return s;
-        }
-        if (item.metadata?.auditPoints?.srNo !== undefined && item.metadata?.auditPoints?.srNo !== null) {
-          const s = parseInt(item.metadata.auditPoints.srNo, 10);
-          if (!isNaN(s) && s > 0) return s;
-        }
-        if (item.excelSrNo !== undefined && item.excelSrNo !== null) {
-          const s = parseInt(item.excelSrNo, 10);
-          if (!isNaN(s) && s > 0) return s;
-        }
-        const normGat = String(item.gatNumber || '').trim().replace(/\.+$/, '');
-        if (normGat === '1/1') return 1;
-        if (normGat === '1/2') return 2;
-        const m = normGat.match(/^(\d+)(?:\/(\d+))?/);
-        if (m) {
-          const main = parseInt(m[1], 10);
-          const sub = m[2] ? parseInt(m[2], 10) : 0;
-          return main * 1000 + sub;
-        }
-        return 999999;
-      };
-
-      const excelSrNo = getSeq(p);
+      const originalExcelSrNo = getOriginalExcelSrNo(p);
       const rawTenureCat = p.metadata?.tenureCategory || (isTenureCode(metaOwner) ? metaOwner : null);
       const tenureDisplay = tenureLabels[p.tenureClass] || rawTenureCat || p.tenureClass || '-';
       const resolvedOtherRights = (isTenureCode(metaOwner) && !p.metadata?.otherRights?.includes('सक्षम') && !p.metadata?.otherRights?.includes('बंदी'))
@@ -1401,8 +1409,8 @@ export const getPrapatraReport = async (req, res) => {
       return {
         id: p.id,
         upi: p.upi,
-        excelSrNo,
-        srNo: excelSrNo,
+        excelSrNo: originalExcelSrNo,
+        srNo: idx + 1,
         taluka: p.taluka,
         villageName: cleanVillageName(p.villageName),
         gatNumber: p.gatNumber || '-',
@@ -1421,28 +1429,41 @@ export const getPrapatraReport = async (req, res) => {
       };
     });
 
+    const compareParcelsWithinVillage = (a, b) => {
+      // If both parcels have original Excel sequence from an uploaded sheet, respect it
+      if (a.excelSrNo && b.excelSrNo && a.excelSrNo !== b.excelSrNo) {
+        return a.excelSrNo - b.excelSrNo;
+      }
+      // Otherwise sort by cadastral survey/gat number
+      const gatA = getGatSortKey(a.gatNumber);
+      const gatB = getGatSortKey(b.gatNumber);
+      if (gatA.main !== gatB.main) return gatA.main - gatB.main;
+      if (gatA.sub !== gatB.sub) return gatA.sub - gatB.sub;
+      return String(a.gatNumber || '').localeCompare(String(b.gatNumber || ''), undefined, { numeric: true });
+    };
+
     // Intelligent Sorting:
-    // If a single village is selected: Sort strictly by original Excel sequence (excelSrNo)
-    // If all villages/talukas: Sort hierarchically (Taluka -> Village -> Excel sequence)
+    // If a single village is selected: Sort strictly by original Excel sequence or Gat number
+    // If all villages/talukas: Sort hierarchically (Taluka -> Village -> Excel sequence / Gat number)
     if (!isAllVillages) {
-      formattedParcels.sort((a, b) => {
-        const srA = a.excelSrNo || 0;
-        const srB = b.excelSrNo || 0;
-        if (srA !== srB) return srA - srB;
-        return String(a.gatNumber || '').localeCompare(String(b.gatNumber || ''), undefined, { numeric: true });
-      });
+      formattedParcels.sort(compareParcelsWithinVillage);
     } else {
       formattedParcels.sort((a, b) => {
         const talukaCmp = (a.taluka || '').localeCompare(b.taluka || '');
         if (talukaCmp !== 0) return talukaCmp;
         const villageCmp = (a.villageName || '').localeCompare(b.villageName || '', 'mr');
         if (villageCmp !== 0) return villageCmp;
-        const srA = a.excelSrNo || 0;
-        const srB = b.excelSrNo || 0;
-        if (srA !== srB) return srA - srB;
-        return String(a.gatNumber || '').localeCompare(String(b.gatNumber || ''), undefined, { numeric: true });
+        return compareParcelsWithinVillage(a, b);
       });
     }
+
+    // Crucial: assign proper 1-based sequential Sr. No. across the sorted list
+    formattedParcels.forEach((p, index) => {
+      p.srNo = index + 1;
+      if (!p.excelSrNo) {
+        p.excelSrNo = index + 1;
+      }
+    });
 
     // High-precision Rollup Calculation (Sheet 2 format) across all records with active filters
     const dynamicRollupData = await calculateDynamicGoshwaraRollup({
