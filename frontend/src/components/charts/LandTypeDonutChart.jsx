@@ -6,20 +6,12 @@ import { Layers, PieChart as PieIcon } from 'lucide-react';
 import { TENURE_CLASSES } from '../../lib/constants';
 import { useTranslation } from '../LanguageContext';
 
-/**
- * Coordinated Multicolour Palette for Land Classification
- * - Royal Blue: #4169E1 (Sarkar / Shasan)
- * - Orange: #F59E0B (Class-2)
- * - Green: #16A34A (Class-1)
- * - Purple: #7656D6 (Devasthan / Inam)
- * - Teal: #0D9488 (Forest / Jangal)
- */
 const TENURE_PALETTE = {
-  BHOGVATDAR_CLASS_1: { color: '#16A34A', bg: 'bg-[#16A34A]', text: 'text-[#16A34A]', border: 'border-[#16A34A]/30' },
-  BHOGVATDAR_CLASS_2: { color: '#F59E0B', bg: 'bg-[#F59E0B]', text: 'text-[#F59E0B]', border: 'border-[#F59E0B]/30' },
-  SARKAR_SHASAN: { color: '#4169E1', bg: 'bg-[#4169E1]', text: 'text-[#4169E1]', border: 'border-[#4169E1]/30' },
-  DEVASTHAN_INAM: { color: '#7656D6', bg: 'bg-[#7656D6]', text: 'text-[#7656D6]', border: 'border-[#7656D6]/30' },
-  FOREST_JANGAL: { color: '#0D9488', bg: 'bg-[#0D9488]', text: 'text-[#0D9488]', border: 'border-[#0D9488]/30' },
+  BHOGVATDAR_CLASS_1: { color: '#059669', bg: 'bg-emerald-500', text: 'text-emerald-700', border: 'border-emerald-200' },
+  BHOGVATDAR_CLASS_2: { color: '#d97706', bg: 'bg-amber-500', text: 'text-amber-800', border: 'border-amber-200' },
+  SARKAR_SHASAN: { color: '#2563eb', bg: 'bg-blue-600', text: 'text-blue-700', border: 'border-blue-200' },
+  DEVASTHAN_INAM: { color: '#7c3aed', bg: 'bg-purple-600', text: 'text-purple-700', border: 'border-purple-200' },
+  FOREST_JANGAL: { color: '#047857', bg: 'bg-teal-700', text: 'text-teal-800', border: 'border-teal-200' },
 };
 
 export default function LandTypeDonutChart({ data = [] }) {
@@ -27,7 +19,7 @@ export default function LandTypeDonutChart({ data = [] }) {
   const [metricType, setMetricType] = useState('area'); // 'area' | 'count'
   const [activeIndex, setActiveIndex] = useState(null);
 
-  // Transform production database records
+  // Transform real production database records
   const chartData = (data || []).map((item) => {
     const config = TENURE_CLASSES[item.tenure] || {
       labelMr: item.tenure,
@@ -35,7 +27,7 @@ export default function LandTypeDonutChart({ data = [] }) {
       description: '',
     };
     const palette = TENURE_PALETTE[item.tenure] || {
-      color: '#64748B',
+      color: '#64748b',
       bg: 'bg-slate-500',
       text: 'text-slate-700',
       border: 'border-slate-200',
@@ -65,6 +57,7 @@ export default function LandTypeDonutChart({ data = [] }) {
 
   const activeItem = activeIndex !== null && chartData[activeIndex] ? chartData[activeIndex] : null;
 
+  // Ultra-sleek non-intrusive micro tooltip
   const CustomTooltip = ({ active, payload }) => {
     if (active && payload && payload.length) {
       const item = payload[0].payload;
@@ -72,15 +65,11 @@ export default function LandTypeDonutChart({ data = [] }) {
       const displayName = isMarathi ? item.nameMr : (item.nameEn || item.nameMr);
 
       return (
-        <div className="bg-[#252B36] text-white px-3.5 py-2.5 rounded-xl shadow-xl border border-slate-700 text-xs sm:text-sm pointer-events-none whitespace-nowrap z-50">
-          <div className="flex items-center gap-2 font-bold mb-1">
-            <span className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: item.color }} />
+        <div className="bg-slate-950/95 text-white px-2.5 py-1.5 rounded-lg shadow-xl border border-slate-800 text-[11px] pointer-events-none whitespace-nowrap z-50">
+          <div className="flex items-center gap-1.5 font-bold">
+            <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: item.color }} />
             <span>{displayName}</span>
-            <span className="text-[#F59E0B] font-mono font-extrabold">({pct}%)</span>
-          </div>
-          <div className="text-white/80 font-mono text-xs flex items-center justify-between gap-4">
-            <span>{item.count.toLocaleString(isMarathi ? 'mr-IN' : 'en-IN')} {isMarathi ? 'भूखंड' : 'Parcels'}</span>
-            <span>{item.areaHa.toFixed(2)} Ha</span>
+            <span className="text-amber-400 text-[10px] font-mono">({pct}%)</span>
           </div>
         </div>
       );
@@ -89,41 +78,37 @@ export default function LandTypeDonutChart({ data = [] }) {
   };
 
   return (
-    <div className="bg-[#FFFFFF] border border-[#E9E7E1] rounded-2xl p-5 sm:p-6 shadow-sm flex flex-col justify-between hover:shadow-md transition-all">
+    <div className="bg-white border border-slate-200/90 rounded-xl p-4 sm:p-5 shadow-2xs flex flex-col justify-between hover:border-slate-300 transition-all">
       {/* Header with Switcher */}
-      <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3 border-b border-[#E9E7E1] pb-4">
-        <div className="flex items-center gap-3 min-w-0">
-          <div className="w-10 h-10 rounded-xl bg-[#4169E1]/10 border border-[#4169E1]/20 flex items-center justify-center text-[#4169E1] shrink-0 shadow-xs">
-            <Layers className="w-5 h-5" />
+      <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2 border-b border-slate-100 pb-3">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div className="w-8 h-8 rounded-xl bg-emerald-50 border border-emerald-200/80 flex items-center justify-center text-emerald-700 shrink-0 shadow-2xs">
+            <Layers className="w-4 h-4" />
           </div>
           <div className="min-w-0">
-            <h3 className="text-lg sm:text-xl lg:text-[22px] font-bold text-[#252B36] flex items-center gap-2.5 truncate">
+            <h3 className="text-xs sm:text-sm font-bold text-slate-900 flex items-center gap-2 truncate">
               <span>{isMarathi ? 'जमीन प्रकार व धारणाधिकार' : 'Land Classification & Tenure'}</span>
-              <span className="text-xs px-2.5 py-0.5 rounded-full bg-[#F8F7F3] text-[#252B36] border border-[#E9E7E1] font-bold shrink-0">
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200 font-bold shrink-0">
                 {isMarathi ? 'MLRC वर्ग' : 'MLRC Class'}
               </span>
             </h3>
-            <p className="text-sm sm:text-[15px] text-[#64748B] font-medium truncate mt-0.5 leading-snug">
-              {isMarathi
-                ? 'भोगवटादार वर्ग १, वर्ग २ व शासकीय भूमी विश्लेषण'
-                : 'Occupant Class-1, Class-2 & Government Land Analytics'}
-            </p>
+            
           </div>
         </div>
 
         {/* Metric Switcher */}
         <div
-          className="inline-flex p-1 bg-[#F8F7F3] rounded-xl border border-[#E9E7E1] self-start sm:self-auto shrink-0"
+          className="inline-flex p-0.5 bg-slate-100 rounded-lg border border-slate-200/80 self-start sm:self-auto shrink-0"
           role="group"
           aria-label={isMarathi ? 'मापन पद्धती' : 'Metric Switcher'}
         >
           <button
             type="button"
             onClick={() => setMetricType('area')}
-            className={`px-3 py-1.5 text-xs sm:text-sm font-bold rounded-lg transition cursor-pointer ${
+            className={`px-2.5 py-1 text-[11px] font-bold rounded-md transition cursor-pointer ${
               metricType === 'area'
-                ? 'bg-[#4169E1] text-white shadow-xs'
-                : 'text-[#64748B] hover:text-[#252B36]'
+                ? 'bg-white text-slate-900 shadow-2xs'
+                : 'text-slate-600 hover:text-slate-900'
             }`}
             aria-pressed={metricType === 'area'}
           >
@@ -132,10 +117,10 @@ export default function LandTypeDonutChart({ data = [] }) {
           <button
             type="button"
             onClick={() => setMetricType('count')}
-            className={`px-3 py-1.5 text-xs sm:text-sm font-bold rounded-lg transition cursor-pointer ${
+            className={`px-2.5 py-1 text-[11px] font-bold rounded-md transition cursor-pointer ${
               metricType === 'count'
-                ? 'bg-[#4169E1] text-white shadow-xs'
-                : 'text-[#64748B] hover:text-[#252B36]'
+                ? 'bg-white text-slate-900 shadow-2xs'
+                : 'text-slate-600 hover:text-slate-900'
             }`}
             aria-pressed={metricType === 'count'}
           >
@@ -145,13 +130,13 @@ export default function LandTypeDonutChart({ data = [] }) {
       </div>
 
       {/* Side-by-Side Chart & Metric Breakdown */}
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-5 items-center my-3">
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center my-1.5">
         {/* Left: Donut Chart with Dynamic Center KPI */}
-        <div className="md:col-span-6 relative h-64 sm:h-72 lg:h-80 flex items-center justify-center">
+        <div className="md:col-span-6 relative h-52 flex items-center justify-center">
           {chartData.length === 0 ? (
-            <div className="flex flex-col items-center justify-center text-slate-400 py-8">
-              <PieIcon className="w-10 h-10 stroke-[1.5] mb-2 opacity-40" />
-              <p className="text-sm font-semibold">{isMarathi ? 'नोंदी उपलब्ध नाहीत.' : 'No records available.'}</p>
+            <div className="flex flex-col items-center justify-center text-slate-400 py-6">
+              <PieIcon className="w-8 h-8 stroke-[1.5] mb-2 opacity-40" />
+              <p className="text-xs font-semibold">{isMarathi ? 'नोंदी उपलब्ध नाहीत.' : 'No records available.'}</p>
             </div>
           ) : (
             <>
@@ -161,12 +146,12 @@ export default function LandTypeDonutChart({ data = [] }) {
                     data={chartData}
                     cx="50%"
                     cy="50%"
-                    innerRadius={72}
-                    outerRadius={106}
+                    innerRadius={58}
+                    outerRadius={84}
                     paddingAngle={3}
                     dataKey="value"
                     stroke="#ffffff"
-                    strokeWidth={2.5}
+                    strokeWidth={2}
                     onMouseEnter={(_, index) => setActiveIndex(index)}
                     onMouseLeave={() => setActiveIndex(null)}
                   >
@@ -184,11 +169,11 @@ export default function LandTypeDonutChart({ data = [] }) {
               </ResponsiveContainer>
 
               {/* Dynamic Center Hero Inspector */}
-              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none p-2">
+              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none p-1">
                 {activeItem ? (
                   <div className="flex flex-col items-center justify-center text-center">
                     <span
-                      className="text-xs font-bold px-2.5 py-0.5 rounded-full border shadow-2xs mb-1 truncate max-w-[140px]"
+                      className="text-[9px] font-extrabold px-1.5 py-0.2 rounded-full border shadow-2xs mb-0.5 truncate max-w-[110px]"
                       style={{
                         backgroundColor: `${activeItem.color}15`,
                         color: activeItem.color,
@@ -197,30 +182,30 @@ export default function LandTypeDonutChart({ data = [] }) {
                     >
                       {isMarathi ? activeItem.nameMr : (activeItem.nameEn || activeItem.nameMr)}
                     </span>
-                    <span className="text-[24px] sm:text-[27px] font-black text-[#252B36] tracking-tight leading-none my-1 font-mono">
+                    <span className="text-base sm:text-lg font-black text-slate-900 tracking-tight leading-none my-0.5 font-mono">
                       {metricType === 'area'
                         ? `${activeItem.areaHa.toFixed(2)} Ha`
-                        : `${activeItem.count.toLocaleString()} ${isMarathi ? 'गट' : 'Gat'}`}
+                        : `${activeItem.count} ${isMarathi ? 'भूखंड' : 'Parcels'}`}
                     </span>
-                    <span className="text-xs sm:text-[13px] font-bold text-[#64748B] font-mono">
+                    <span className="text-[9px] font-bold text-slate-500 font-mono">
                       {totalValue > 0 ? ((activeItem.value / totalValue) * 100).toFixed(1) : 0}% {isMarathi ? 'वाटा' : 'share'}
                     </span>
                   </div>
                 ) : (
                   <div className="flex flex-col items-center justify-center text-center">
-                    <span className="text-xs uppercase tracking-wider font-bold text-[#64748B]">
+                    <span className="text-[9px] uppercase tracking-wider font-bold text-slate-400">
                       {metricType === 'area'
                         ? (isMarathi ? 'एकूण क्षेत्र' : 'Total Area')
                         : (isMarathi ? 'एकूण भूखंड' : 'Total Parcels')}
                     </span>
-                    <span className="text-[25px] sm:text-[28px] font-black text-[#252B36] tracking-tight leading-none my-1 font-mono">
+                    <span className="text-base sm:text-lg font-black text-slate-900 tracking-tight leading-none my-0.5 font-mono">
                       {metricType === 'area'
                         ? `${totalArea.toFixed(2)} Ha`
-                        : totalParcels.toLocaleString(isMarathi ? 'mr-IN' : 'en-IN')}
+                        : totalParcels.toLocaleString('en-IN')}
                     </span>
-                    <span className="text-xs sm:text-[13px] text-[#64748B] font-semibold font-mono">
+                    <span className="text-[9px] text-slate-500 font-medium font-mono">
                       {metricType === 'area'
-                        ? `${totalParcels.toLocaleString(isMarathi ? 'mr-IN' : 'en-IN')} ${isMarathi ? 'भूखंड' : 'Parcels'}`
+                        ? `${totalParcels.toLocaleString('en-IN')} ${isMarathi ? 'भूखंड' : 'Parcels'}`
                         : `${totalArea.toFixed(2)} Ha`}
                     </span>
                   </div>
@@ -230,8 +215,9 @@ export default function LandTypeDonutChart({ data = [] }) {
           )}
         </div>
 
-        {/* Right: Clean Metric List with Larger Typography (16-17px) */}
-        <div className="md:col-span-6 space-y-2.5">
+        {/* Right: Clean Metric List with Circular Dots & Bold Values */}
+        {/* Strictly single-language: If Marathi is active show ONLY Marathi, if English is active show ONLY English */}
+        <div className="md:col-span-6 space-y-2">
           {chartData.map((item, index) => {
             const pct = totalValue > 0 ? ((item.value / totalValue) * 100).toFixed(1) : 0;
             const isHighlighted = activeIndex === index;
@@ -242,28 +228,28 @@ export default function LandTypeDonutChart({ data = [] }) {
                 key={item.tenure}
                 onMouseEnter={() => setActiveIndex(index)}
                 onMouseLeave={() => setActiveIndex(null)}
-                className={`p-3 rounded-xl border transition-all duration-150 flex items-center justify-between cursor-pointer ${
+                className={`p-2 rounded-xl border transition-all duration-150 flex items-center justify-between cursor-pointer ${
                   isHighlighted
-                    ? 'border-[#4169E1] bg-[#4169E1]/5 shadow-sm'
-                    : 'border-[#E9E7E1] bg-[#F8F7F3] hover:bg-[#FFFFFF]'
+                    ? 'border-blue-300 bg-blue-50/70 shadow-2xs'
+                    : 'border-slate-100 bg-slate-50/50 hover:bg-slate-50'
                 }`}
               >
-                <div className="flex items-center gap-3 min-w-0 pr-2">
-                  <span className="w-3.5 h-3.5 rounded-full shrink-0 shadow-xs" style={{ backgroundColor: item.color }} />
+                <div className="flex items-center gap-2 min-w-0 pr-2">
+                  <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: item.color }} />
                   <div className="min-w-0">
-                    <p className={`text-[16px] sm:text-[17px] truncate leading-snug ${isHighlighted ? 'font-black text-[#4169E1]' : 'font-bold text-[#252B36]'}`}>
+                    <p className={`text-xs truncate ${isHighlighted ? 'font-black text-blue-950' : 'font-bold text-slate-800'}`}>
                       {displayName}
                     </p>
                   </div>
                 </div>
 
                 <div className="text-right shrink-0">
-                  <span className={`text-[16px] sm:text-[17px] font-black block font-mono ${isHighlighted ? 'text-[#4169E1]' : 'text-[#252B36]'}`}>
+                  <span className={`text-xs font-black block font-mono ${isHighlighted ? 'text-blue-900' : 'text-slate-900'}`}>
                     {metricType === 'area'
                       ? `${item.areaHa.toFixed(2)} Ha`
-                      : `${item.count.toLocaleString()} ${isMarathi ? 'गट' : 'Gat'}`}
+                      : `${item.count} ${isMarathi ? 'भूखंड' : 'Parcels'}`}
                   </span>
-                  <span className="text-xs sm:text-[13px] text-[#64748B] font-bold font-mono">{pct}%</span>
+                  <span className="text-[10px] text-slate-500 font-semibold font-mono">{pct}%</span>
                 </div>
               </div>
             );
@@ -271,13 +257,38 @@ export default function LandTypeDonutChart({ data = [] }) {
         </div>
       </div>
 
-      {/* Footer Info Pill */}
-      <div className="pt-3 border-t border-[#E9E7E1] flex items-center justify-between text-xs sm:text-[13px] text-[#64748B]">
-        <span className="font-medium">
-          {isMarathi ? 'महाराष्ट्र जमीन महसूल संहिता (MLRC) कलम २९ अन्वये वर्गीकरण' : 'Classification under MLRC 1966 Section 29'}
+      {/* Screen Reader Accessible Data Table (WCAG 1.1.1) */}
+      <table className="sr-only">
+        <caption>
+          {isMarathi
+            ? 'जमीन धारणा वर्गनिहाय क्षेत्रफळ व भूखंड सारणी'
+            : 'Land Tenure Classification Area and Parcels Table'}
+        </caption>
+        <thead>
+          <tr>
+            <th scope="col">{isMarathi ? 'धारणा प्रकार' : 'Tenure Classification'}</th>
+            <th scope="col">{isMarathi ? 'भूखंड संख्या' : 'Parcel Count'}</th>
+            <th scope="col">{isMarathi ? 'क्षेत्रफळ (हे.)' : 'Area (Ha)'}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {chartData.map((item) => (
+            <tr key={item.tenure}>
+              <td>{isMarathi ? item.nameMr : (item.nameEn || item.nameMr)}</td>
+              <td>{item.count}</td>
+              <td>{item.areaHa}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      {/* Footer Outlay Tag */}
+      <div className="flex items-center justify-between pt-2.5 border-t border-slate-100 text-xs text-slate-600">
+        <span className="text-[11px] font-medium text-slate-500">
+          {isMarathi ? 'एकूण महसूल नोंदणी:' : 'Total Registered Land:'}
         </span>
-        <span className="font-bold text-[#4169E1]">
-          {chartData.length} {isMarathi ? 'प्रवर्ग' : 'Classes'}
+        <span className="font-black text-slate-900 text-[11px] bg-slate-100 px-2.5 py-0.5 rounded-md font-mono">
+          {totalArea.toFixed(2)} Ha • {totalParcels.toLocaleString('en-IN')} {isMarathi ? 'भूखंड' : 'Parcels'}
         </span>
       </div>
     </div>

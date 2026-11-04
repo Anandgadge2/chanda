@@ -62,10 +62,10 @@ export default function Navbar({
     if (!user) return '';
     if (locale === 'en') {
       if (user.role === 'COLLECTOR' || user.fullName?.includes('जिल्हाधिकारी')) {
-        return 'District Collector, Chandrapur';
+        return 'District Collector';
       }
       if (user.role === 'SDO' || user.fullName?.includes('उपविभागीय')) {
-        return 'Sub-Divisional Officer (SDO)';
+        return 'Sub-Divisional Officer';
       }
       if (user.role === 'TAHSILDAR' || user.fullName?.includes('तहसीलदार')) {
         return 'Tahsildar';
@@ -94,108 +94,84 @@ export default function Navbar({
     : (user?.fullNameEn ? user.fullNameEn.charAt(0) : (officerDisplayName ? officerDisplayName.charAt(0) : 'D'));
 
   return (
-    <header className="sticky top-0 z-50 bg-[#FFFFFF] border-b border-[#E9E7E1] shadow-[0_1px_3px_rgba(0,0,0,0.03)]">
-      {/* Sleek Enterprise Royal Blue Accent Line */}
-      <div className="h-[2.5px] w-full bg-[#4169E1]" />
-
-      <div className="w-full px-3.5 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-15 sm:h-16 items-center gap-3">
-          {/* Left: Brand Emblem & District Title */}
-          <div className="flex items-center gap-3 min-w-0">
+    <header className="sticky top-0 z-50 bg-[#FFFFFF] border-b border-slate-200/90 shadow-2xs">
+      <div className="w-full px-3 sm:px-6">
+        <div className="flex justify-between h-14 items-center gap-3">
+          {/* Left: District Administration Brand Identity */}
+          <div className="flex items-center gap-2.5 min-w-0">
             {!hideSidebarToggle && user && (
               <button
                 type="button"
                 onClick={onToggleMobileSidebar}
-                className="lg:hidden p-2 rounded-xl text-[#64748B] hover:text-[#252B36] hover:bg-[#F3F2ED] transition cursor-pointer"
+                className="lg:hidden p-1.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition cursor-pointer"
                 aria-label="Toggle menu"
               >
                 <Menu className="w-5 h-5" />
               </button>
             )}
 
-            <Link href={user ? '/dashboard' : '/'} className="flex items-center gap-2.5 sm:gap-3 group min-w-0">
-              <div className="p-1.5 bg-[#FFFFFF] border border-[#E9E7E1] rounded-xl group-hover:border-[#4169E1] transition flex-shrink-0 shadow-2xs">
-                <ChandrapurDistrictLogo className="w-9 h-9 sm:w-11 sm:h-11" />
-              </div>
+            <Link href={user ? '/dashboard' : '/'} className="flex items-center gap-2.5 group min-w-0">
+              <ChandrapurDistrictLogo className="w-8 h-8 shrink-0" />
               <div className="min-w-0">
-                <div className="flex items-center gap-2.5 flex-wrap sm:flex-nowrap">
-                  <span className="font-extrabold text-[#252B36] text-base sm:text-xl lg:text-[26px] tracking-tight group-hover:text-[#4169E1] transition truncate max-w-[150px] xs:max-w-[220px] sm:max-w-none">
+                <div className="flex items-center gap-2 truncate">
+                  <span className="font-bold text-slate-900 text-sm sm:text-base tracking-tight group-hover:text-blue-700 transition truncate">
                     {t('portal.title')}
                   </span>
-                  <span className="hidden sm:inline-block text-xs sm:text-[14px] lg:text-[15px] font-bold bg-[#4169E1]/10 text-[#4169E1] px-3 py-0.5 rounded-full border border-[#4169E1]/20 flex-shrink-0">
+                  <span className="hidden md:inline-block text-[10px] font-bold bg-blue-50 text-blue-700 px-2 py-0.5 rounded border border-blue-200 shrink-0">
                     {t('portal.mlrcBadge')}
                   </span>
                 </div>
-                <p className="text-xs sm:text-[15px] lg:text-[17px] text-[#64748B] font-medium hidden md:block truncate leading-tight mt-0.5">
-                  {t('portal.officialTagline')}
-                </p>
               </div>
             </Link>
           </div>
 
-          {/* Right: Language Switcher, Public Portal Link & Executive Profile Tray */}
-          <div className="flex items-center gap-2.5 sm:gap-3.5 flex-shrink-0">
-            {/* Bilingual Switcher */}
-            <div className="hidden sm:inline-flex items-center text-[15px] sm:text-[16px]">
+          {/* Right: Language Switcher, Public Portal & Profile */}
+          <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
+            {/* Language Switcher */}
+            <div className="hidden sm:inline-flex items-center">
               <LanguageSwitcher variant="pill" />
             </div>
 
             <Link
               href="/"
-              className="inline-flex items-center gap-2 text-sm sm:text-base lg:text-[17px] font-semibold px-3.5 py-2 sm:py-2.5 rounded-xl border border-[#E9E7E1] text-[#252B36] hover:text-[#4169E1] hover:bg-[#F3F2ED] transition shadow-2xs"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-lg border border-slate-200 text-slate-700 hover:text-blue-700 hover:bg-slate-50 transition"
               title={t('nav.publicPortal')}
             >
-              <ExternalLink className="w-4.5 h-4.5 text-[#64748B]" />
+              <ExternalLink className="w-3.5 h-3.5 text-slate-500" />
               <span className="hidden md:inline">{t('nav.publicPortal')}</span>
             </Link>
 
             {user ? (
-              /* Authenticated Officer Profile Trigger & Dropdown Tray */
+              /* Officer Profile Trigger & Minimal Dropdown */
               <div className="relative" ref={trayRef}>
                 <button
                   type="button"
                   onClick={() => setProfileTrayOpen((prev) => !prev)}
-                  className={`flex items-center gap-3 py-2 px-2.5 sm:px-3.5 rounded-xl transition border text-left cursor-pointer shadow-2xs ${
+                  className={`flex items-center gap-2 py-1 px-2 rounded-lg transition border text-left cursor-pointer ${
                     profileTrayOpen
-                      ? 'bg-[#F3F2ED] border-[#E9E7E1]'
-                      : 'bg-[#FFFFFF] hover:bg-[#F3F2ED] border-[#E9E7E1]'
+                      ? 'bg-slate-100 border-slate-300'
+                      : 'bg-white hover:bg-slate-50 border-slate-200'
                   }`}
                   aria-expanded={profileTrayOpen}
                   aria-haspopup="true"
-                  aria-label="Officer Profile and Settings"
+                  aria-label="Officer Profile"
                 >
-                  {/* Officer Avatar with Online Indicator */}
-                  <div className="relative flex-shrink-0">
-                    <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#4169E1] text-[#FFFFFF] font-extrabold text-base flex items-center justify-center shadow-xs">
-                      {officerInitial}
-                    </div>
-                    <span
-                      className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-[#16A34A] border-2 border-white rounded-full"
-                      title={t('common.active')}
-                    />
+                  <div className="w-7 h-7 rounded-md bg-blue-700 text-white font-bold text-xs flex items-center justify-center shrink-0">
+                    {officerInitial}
                   </div>
 
-                  {/* Officer Name & Designation */}
                   <div className="text-left hidden sm:flex flex-col justify-center min-w-0">
-                    <div className="flex items-center gap-1.5 leading-tight">
-                      <span className="text-base sm:text-lg lg:text-[19px] font-bold text-[#252B36] tracking-tight block max-w-[170px] lg:max-w-[230px] truncate">
-                        {displayOfficerName()}
-                      </span>
-                      <ChevronDown
-                        className={`w-4 h-4 text-[#64748B] transition-transform duration-200 ${
-                          profileTrayOpen ? 'rotate-180 text-[#4169E1]' : ''
-                        }`}
-                      />
-                    </div>
-                    <span className="text-xs sm:text-[15px] lg:text-[16px] font-semibold text-[#4169E1] block leading-tight mt-0.5 truncate max-w-[170px] lg:max-w-[230px]">
+                    <span className="text-xs font-bold text-slate-900 leading-tight block max-w-[140px] truncate">
+                      {displayOfficerName()}
+                    </span>
+                    <span className="text-[10px] font-medium text-slate-500 leading-none truncate max-w-[140px]">
                       {displayDesignation()}
                     </span>
                   </div>
 
-                  {/* Mobile-only Chevron */}
                   <ChevronDown
-                    className={`w-4 h-4 text-[#64748B] sm:hidden transition-transform duration-200 ${
-                      profileTrayOpen ? 'rotate-180 text-[#4169E1]' : ''
+                    className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-150 ${
+                      profileTrayOpen ? 'rotate-180 text-blue-700' : ''
                     }`}
                   />
                 </button>
@@ -203,52 +179,45 @@ export default function Navbar({
                 {/* Profile Tray Dropdown */}
                 {profileTrayOpen && (
                   <div
-                    className="absolute right-0 mt-2 w-76 sm:w-84 max-w-[calc(100vw-1.5rem)] bg-[#FFFFFF] rounded-2xl shadow-xl border border-[#E9E7E1] p-3.5 space-y-3 z-50 text-sm animate-in fade-in duration-150"
+                    className="absolute right-0 mt-1.5 w-64 max-w-[calc(100vw-1.5rem)] bg-white rounded-xl shadow-lg border border-slate-200 p-2.5 space-y-2 z-50 text-xs animate-in fade-in duration-100"
                     role="menu"
                   >
-                    <div className="pb-3 border-b border-[#E9E7E1] flex items-center gap-3">
-                      <div className="w-11 h-11 rounded-xl bg-[#4169E1] text-[#FFFFFF] font-extrabold text-base flex items-center justify-center shadow-xs">
-                        {officerInitial}
-                      </div>
-                      <div className="min-w-0">
-                        <p className="font-bold text-[#252B36] text-[15px] truncate">
-                          {displayOfficerName()}
-                        </p>
-                        <p className="text-xs font-medium text-[#64748B] truncate mt-0.5">
-                          {user.email || user.username}
-                        </p>
-                      </div>
+                    <div className="pb-2 border-b border-slate-100 px-1">
+                      <p className="font-bold text-slate-900 text-xs truncate">
+                        {displayOfficerName()}
+                      </p>
+                      <p className="text-[11px] text-slate-500 truncate mt-0.5">
+                        {user.email || user.username}
+                      </p>
                     </div>
 
-                    <div className="space-y-1">
+                    <div className="space-y-0.5">
                       <Link
                         href="/settings"
                         onClick={() => setProfileTrayOpen(false)}
-                        className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-[#252B36] hover:text-[#4169E1] hover:bg-[#F3F2ED] font-semibold transition cursor-pointer"
+                        className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-slate-700 hover:text-blue-700 hover:bg-slate-50 font-medium transition cursor-pointer"
                       >
-                        <Settings className="w-4 h-4 text-[#64748B]" />
+                        <Settings className="w-3.5 h-3.5 text-slate-500" />
                         <span>{t('nav.settings')}</span>
                       </Link>
                     </div>
 
-                    {/* Logout Action */}
-                    <div className="pt-1.5 border-t border-[#E9E7E1]">
+                    <div className="pt-1 border-t border-slate-100">
                       <button
                         type="button"
                         onClick={() => {
                           setProfileTrayOpen(false);
                           logout();
                         }}
-                        className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-[#DC2626] hover:bg-[#DC2626]/10 font-bold transition cursor-pointer text-left"
+                        className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-red-600 hover:bg-red-50 font-semibold transition cursor-pointer text-left"
                       >
-                        <LogOut className="w-4 h-4 text-[#DC2626]" />
+                        <LogOut className="w-3.5 h-3.5 text-red-500" />
                         <span>{t('nav.logout')}</span>
                       </button>
                     </div>
                   </div>
                 )}
 
-                {/* DPDPA Rights Modal Dialog */}
                 <DpdpaRightsModal
                   isOpen={dpdpaModalOpen}
                   onClose={() => setDpdpaModalOpen(false)}
@@ -256,13 +225,12 @@ export default function Navbar({
                 />
               </div>
             ) : (
-              /* Unauthenticated: Modern SaaS Officer Login Button */
               <button
                 type="button"
                 onClick={openLoginModal}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white bg-[#4169E1] hover:bg-[#3454B4] transition active:scale-95 cursor-pointer shadow-xs"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white bg-blue-700 hover:bg-blue-800 transition active:scale-95 cursor-pointer shadow-xs"
               >
-                <Lock className="w-4 h-4 text-white" />
+                <Lock className="w-3.5 h-3.5 text-white" />
                 <span>{t('nav.officerLogin')}</span>
               </button>
             )}

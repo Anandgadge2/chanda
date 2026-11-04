@@ -13,7 +13,7 @@ import {
   Tooltip,
   Legend,
 } from 'recharts';
-import { BarChart3, Mountain, MapPin } from 'lucide-react';
+import { BarChart3, Mountain } from 'lucide-react';
 import { CHANDRAPUR_TALUKAS } from '../../lib/constants';
 import { useTranslation } from '../LanguageContext';
 
@@ -33,6 +33,7 @@ export default function TalukaMountainChart({ data = [], selectedTaluka = '' }) 
     const violations = Number(item.violationCount || 0);
     const disputes = Number(item.disputeCount || 0);
 
+    // Realistic MLRC Potkharaba/Agricultural ratio: cultivable flows naturally beneath total area
     const cultivableArea = Number((totalArea * 0.88).toFixed(2));
     const disputedArea = Number(
       (item.disputedAreaHa && Number(item.disputedAreaHa) > 0
@@ -44,8 +45,6 @@ export default function TalukaMountainChart({ data = [], selectedTaluka = '' }) 
     return {
       taluka: item.taluka,
       nameMr,
-      nameEn: item.taluka,
-      displayName: isMarathi ? nameMr : item.taluka,
       parcelCount: parcels,
       violationCount: violations,
       disputeCount: disputes,
@@ -62,59 +61,59 @@ export default function TalukaMountainChart({ data = [], selectedTaluka = '' }) 
     if (active && payload && payload.length) {
       const item = payload[0].payload;
       return (
-        <div className="bg-[#252B36] text-white px-4 py-3 rounded-2xl border border-slate-700 shadow-2xl text-xs sm:text-sm z-50 pointer-events-none min-w-[220px]">
-          <div className="font-bold text-white pb-2 border-b border-slate-700 flex items-center justify-between text-sm sm:text-base">
-            <span>{isMarathi ? item.nameMr : item.nameEn}</span>
-            <span className="text-xs text-white/70 font-normal">{isMarathi ? 'तालुका' : 'Taluka'}</span>
+        <div className="bg-slate-900/95 backdrop-blur-md text-white px-3.5 py-2.5 rounded-xl border border-slate-800 shadow-xl text-xs z-50 pointer-events-none min-w-[200px]">
+          <div className="font-bold text-slate-200 pb-1.5 border-b border-slate-800 flex items-center justify-between">
+            <span>{isMarathi ? item.nameMr : item.taluka}</span>
+
           </div>
 
-          <div className="pt-2.5 space-y-2 text-xs sm:text-sm font-mono">
+          <div className="pt-2 space-y-1.5 text-[11px]">
             {chartType === 'bars' ? (
               <>
-                <div className="flex justify-between items-center text-slate-200">
-                  <span className="flex items-center gap-2 font-sans font-medium">
-                    <span className="w-3 h-3 rounded-full bg-[#4169E1]" />
+                <div className="flex justify-between text-slate-300">
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-blue-500" />
                     {isMarathi ? 'नोंदणीकृत भूखंड:' : 'Registered Parcels:'}
                   </span>
-                  <span className="font-bold text-white">{item.parcelCount.toLocaleString('en-IN')}</span>
+                  <span className="font-bold text-white font-mono">{item.parcelCount.toLocaleString('en-IN')}</span>
                 </div>
-                <div className="flex justify-between items-center text-slate-200">
-                  <span className="flex items-center gap-2 font-sans font-medium">
-                    <span className="w-3 h-3 rounded-full bg-[#F59E0B]" />
+                <div className="flex justify-between text-slate-300">
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-amber-500" />
                     {isMarathi ? 'शर्तभंग चौकशी:' : 'Breach Inquiries:'}
                   </span>
-                  <span className="font-bold text-[#F59E0B]">{item.violationCount.toLocaleString('en-IN')}</span>
+                  <span className="font-bold text-amber-400 font-mono">{item.violationCount.toLocaleString('en-IN')}</span>
                 </div>
-                <div className="flex justify-between items-center text-slate-200">
-                  <span className="flex items-center gap-2 font-sans font-medium">
-                    <span className="w-3 h-3 rounded-full bg-[#E85D75]" />
+                <div className="flex justify-between text-slate-300">
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-rose-500" />
                     {isMarathi ? 'सक्रीय वाद:' : 'Active Disputes:'}
                   </span>
-                  <span className="font-bold text-[#E85D75]">{item.disputeCount.toLocaleString('en-IN')}</span>
+                  <span className="font-bold text-rose-400 font-mono">{item.disputeCount.toLocaleString('en-IN')}</span>
                 </div>
               </>
             ) : (
               <>
-                <div className="flex justify-between items-center text-slate-200">
-                  <span className="flex items-center gap-2 font-sans font-medium">
-                    <span className="w-3 h-3 rounded-full bg-[#4169E1]" />
+                <div className="flex justify-between text-blue-300">
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-blue-500" />
                     {isMarathi ? 'एकूण क्षेत्र:' : 'Total Area:'}
                   </span>
-                  <span className="font-bold text-white">{item.totalAreaHa.toLocaleString('en-IN')} Ha</span>
+                  <span className="font-bold font-mono">{item.totalAreaHa.toLocaleString('en-IN')} Ha</span>
                 </div>
-                <div className="flex justify-between items-center text-slate-200">
-                  <span className="flex items-center gap-2 font-sans font-medium">
-                    <span className="w-3 h-3 rounded-full bg-[#16A34A]" />
+                <div className="flex justify-between text-emerald-300">
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500" />
                     {isMarathi ? 'लागवडीयोग्य क्षेत्र:' : 'Cultivable Area:'}
                   </span>
-                  <span className="font-bold text-[#16A34A]">{item.cultivableAreaHa.toLocaleString('en-IN')} Ha</span>
+                  <span className="font-bold font-mono">{item.cultivableAreaHa.toLocaleString('en-IN')} Ha</span>
                 </div>
-                <div className="flex justify-between items-center text-slate-200">
-                  <span className="flex items-center gap-2 font-sans font-medium">
-                    <span className="w-3 h-3 rounded-full bg-[#E85D75]" />
+                <div className="flex justify-between text-rose-300">
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-rose-500" />
                     {isMarathi ? 'बाधित/विवादित क्षेत्र:' : 'Disputed Area:'}
                   </span>
-                  <span className="font-bold text-[#E85D75]">{item.disputedAreaHa.toLocaleString('en-IN')} Ha</span>
+                  <span className="font-bold font-mono">{item.disputedAreaHa.toLocaleString('en-IN')} Ha</span>
                 </div>
               </>
             )}
@@ -126,171 +125,210 @@ export default function TalukaMountainChart({ data = [], selectedTaluka = '' }) 
   };
 
   return (
-    <div className="bg-[#FFFFFF] border border-[#E9E7E1] rounded-2xl p-5 sm:p-6 shadow-sm flex flex-col justify-between hover:shadow-md transition-all">
-      {/* Header with Switcher */}
-      <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3 border-b border-[#E9E7E1] pb-4">
-        <div className="flex items-center gap-3 min-w-0">
-          <div className="w-10 h-10 rounded-xl bg-[#7656D6]/10 border border-[#7656D6]/20 flex items-center justify-center text-[#7656D6] shrink-0 shadow-xs">
-            <BarChart3 className="w-5 h-5" />
-          </div>
-          <div className="min-w-0">
-            <h3 className="text-lg sm:text-xl lg:text-[22px] font-bold text-[#252B36] flex items-center gap-2.5 truncate">
-              <span>{isMarathi ? 'तालुकानिहाय संनियंत्रण व तुलना' : 'Taluka-wise Monitoring & Comparison'}</span>
-              <span className="text-xs px-2.5 py-0.5 rounded-full bg-[#7656D6]/10 text-[#7656D6] border border-[#7656D6]/20 font-bold shrink-0">
-                {isMarathi ? '१५ तालुके' : '15 Talukas'}
-              </span>
+    <div className="bg-white border border-slate-200/70 rounded-xl p-4 sm:p-5 shadow-2xs flex flex-col justify-between hover:border-slate-300 transition-all">
+      {/* Header */}
+      <div className="flex items-center justify-between gap-3 pb-3 border-b border-slate-100">
+        <div>
+          <div className="flex items-center gap-2">
+            <h3 className="text-sm font-semibold text-slate-900 tracking-tight">
+              {isMarathi ? 'तालुकानिहाय सनियंत्रण व तुलना' : 'Taluka-wise Monitoring & Comparison'}
             </h3>
-            <p className="text-sm sm:text-[15px] text-[#64748B] font-medium truncate mt-0.5 leading-snug">
-              {isMarathi
-                ? 'चंद्रपूर जिल्ह्यातील १५ तालुक्यांमधील भूखंड संख्या, वाद व क्षेत्र विश्लेषण'
-                : 'Comparative analysis of parcels, violations and land area across 15 talukas'}
-            </p>
+            <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-600 font-medium">
+              {isMarathi ? '१५ तालुके' : '15 Talukas'}
+            </span>
           </div>
+          <p className="text-xs text-slate-500 mt-0.5">
+            {isMarathi
+              ? 'भूखंड व शर्तभंग प्रकरणांचे तालुकानिहाय विवरण'
+              : 'Comparative summary of parcels, breaches & revenue area'}
+          </p>
         </div>
 
-        {/* View Mode Switcher */}
-        <div
-          className="inline-flex p-1 bg-[#F8F7F3] rounded-xl border border-[#E9E7E1] self-start sm:self-auto shrink-0"
-          role="group"
-          aria-label={isMarathi ? 'आलेख प्रकार' : 'Chart Type'}
-        >
+        {/* View Switcher: Bar vs Mountain Wave */}
+        <div className="inline-flex items-center bg-slate-100 p-0.5 rounded-lg text-xs">
           <button
             type="button"
             onClick={() => setChartType('bars')}
-            className={`px-3 py-1.5 text-xs sm:text-sm font-bold rounded-lg transition cursor-pointer flex items-center gap-1.5 ${
+            className={`px-2.5 py-1 text-[11px] font-medium rounded-md flex items-center gap-1.5 transition-all ${
               chartType === 'bars'
-                ? 'bg-[#4169E1] text-white shadow-xs'
-                : 'text-[#64748B] hover:text-[#252B36]'
+                ? 'bg-white text-slate-900 shadow-2xs font-semibold'
+                : 'text-slate-500 hover:text-slate-900'
             }`}
-            aria-pressed={chartType === 'bars'}
           >
-            <BarChart3 className="w-4 h-4" />
-            <span>{isMarathi ? 'स्तंभ आलेख' : 'Bar Chart'}</span>
+            <BarChart3 className="w-3.5 h-3.5" />
+            <span>{isMarathi ? 'स्तंभ' : 'Bar Chart'}</span>
           </button>
           <button
             type="button"
             onClick={() => setChartType('mountain')}
-            className={`px-3 py-1.5 text-xs sm:text-sm font-bold rounded-lg transition cursor-pointer flex items-center gap-1.5 ${
+            className={`px-2.5 py-1 text-[11px] font-medium rounded-md flex items-center gap-1.5 transition-all ${
               chartType === 'mountain'
-                ? 'bg-[#4169E1] text-white shadow-xs'
-                : 'text-[#64748B] hover:text-[#252B36]'
+                ? 'bg-white text-slate-900 shadow-2xs font-semibold'
+                : 'text-slate-500 hover:text-slate-900'
             }`}
-            aria-pressed={chartType === 'mountain'}
           >
-            <Mountain className="w-4 h-4" />
-            <span>{isMarathi ? 'क्षेत्र विस्तार' : 'Area Flow'}</span>
+            <Mountain className="w-3.5 h-3.5" />
+            <span>{isMarathi ? 'वक्र' : 'Mountain Wave'}</span>
           </button>
         </div>
       </div>
 
-      {/* Modern Legend Bar with 16-17px typography */}
-      <div className="flex items-center gap-5 sm:gap-8 flex-wrap pt-3 pb-1">
-        {chartType === 'bars' ? (
-          <>
-            <div className="flex items-center gap-2">
-              <span className="w-4 h-4 rounded-md bg-[#4169E1] shadow-xs" />
-              <span className="text-[16px] sm:text-[17px] font-bold text-[#252B36]">
-                {isMarathi ? 'नोंदणीकृत भूखंड' : 'Registered Parcels'}
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="w-4 h-4 rounded-md bg-[#F59E0B] shadow-xs" />
-              <span className="text-[16px] sm:text-[17px] font-bold text-[#252B36]">
-                {isMarathi ? 'शर्तभंग चौकशी' : 'Breach Inquiries'}
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="w-4 h-4 rounded-md bg-[#E85D75] shadow-xs" />
-              <span className="text-[16px] sm:text-[17px] font-bold text-[#252B36]">
-                {isMarathi ? 'सक्रीय वाद' : 'Active Disputes'}
-              </span>
-            </div>
-          </>
-        ) : (
-          <>
-            <div className="flex items-center gap-2">
-              <span className="w-4 h-4 rounded-md bg-[#4169E1] shadow-xs" />
-              <span className="text-[16px] sm:text-[17px] font-bold text-[#252B36]">
-                {isMarathi ? 'एकूण क्षेत्र (Ha)' : 'Total Area (Ha)'}
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="w-4 h-4 rounded-md bg-[#16A34A] shadow-xs" />
-              <span className="text-[16px] sm:text-[17px] font-bold text-[#252B36]">
-                {isMarathi ? 'लागवडीयोग्य क्षेत्र (Ha)' : 'Cultivable Area (Ha)'}
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="w-4 h-4 rounded-md bg-[#E85D75] shadow-xs" />
-              <span className="text-[16px] sm:text-[17px] font-bold text-[#252B36]">
-                {isMarathi ? 'विवादित क्षेत्र (Ha)' : 'Disputed Area (Ha)'}
-              </span>
-            </div>
-          </>
-        )}
-      </div>
-
-      {/* Main Chart Area with Larger Marathi Labels & Height */}
-      <div className="h-80 sm:h-96 lg:h-[400px] w-full my-2">
-        <ResponsiveContainer width="100%" height="100%">
-          {chartType === 'bars' ? (
-            <BarChart data={chartData} margin={{ top: 20, right: 15, left: 10, bottom: 40 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#E9E7E1" vertical={false} />
+      {/* Chart Canvas */}
+      <div className="relative pt-2 pb-1 h-56 w-full overflow-x-auto touch-scroll no-scrollbar" aria-label="Taluka comparison visualizer">
+        <div className="h-full min-w-[500px] sm:min-w-full">
+        {chartData.length === 0 ? (
+          <div className="h-full flex items-center justify-center text-xs text-slate-400 font-medium">
+            {isMarathi ? 'नोंदी उपलब्ध नाहीत.' : 'No records available.'}
+          </div>
+        ) : chartType === 'bars' ? (
+          /* Multi-Series Grouped Bar Chart */
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={chartData} margin={{ top: 12, right: 12, left: -16, bottom: 0 }} barGap={2}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#f8fafc" vertical={false} />
               <XAxis
-                dataKey="displayName"
-                tick={{ fontSize: 15, fill: '#252B36', fontWeight: 600 }}
+                dataKey={isMarathi ? 'nameMr' : 'taluka'}
+                tick={{ fontSize: 10, fill: '#64748b' }}
+                axisLine={{ stroke: '#f1f5f9' }}
+                tickLine={false}
                 interval={0}
-                angle={-35}
+                angle={-25}
                 textAnchor="end"
-                stroke="#CBD5E1"
-                dy={8}
+                height={35}
               />
               <YAxis
-                tick={{ fontSize: 15, fill: '#64748B', fontWeight: 600 }}
-                stroke="#CBD5E1"
-                dx={-5}
-                tickFormatter={(v) => Number(v).toLocaleString('en-IN')}
+                tickCount={5}
+                tick={{ fontSize: 10, fill: '#94a3b8' }}
+                axisLine={false}
+                tickLine={false}
+                tickFormatter={(val) => (val >= 1000 ? `${(val / 1000).toFixed(0)}k` : val)}
               />
               <Tooltip content={<CustomTooltip />} />
-              <Bar dataKey="parcelCount" fill="#4169E1" radius={[6, 6, 0, 0]} maxBarSize={30} />
-              <Bar dataKey="violationCount" fill="#F59E0B" radius={[6, 6, 0, 0]} maxBarSize={30} />
-              <Bar dataKey="disputeCount" fill="#E85D75" radius={[6, 6, 0, 0]} maxBarSize={30} />
+              <Legend
+                verticalAlign="top"
+                align="right"
+                wrapperStyle={{ paddingBottom: '8px', fontSize: '11px' }}
+                iconType="circle"
+                iconSize={7}
+                formatter={(value) => {
+                  if (value === 'parcelCount') return isMarathi ? 'नोंदणीकृत भूखंड' : 'Registered Parcels';
+                  if (value === 'violationCount') return isMarathi ? 'शर्तभंग चौकशी' : 'Breach Inquiries';
+                  if (value === 'disputeCount') return isMarathi ? 'सक्रीय वाद' : 'Active Disputes';
+                  return value;
+                }}
+              />
+              <Bar dataKey="parcelCount" name="parcelCount" fill="#3b82f6" radius={[3, 3, 0, 0]} maxBarSize={16} />
+              <Bar dataKey="violationCount" name="violationCount" fill="#f59e0b" radius={[3, 3, 0, 0]} maxBarSize={16} />
+              <Bar dataKey="disputeCount" name="disputeCount" fill="#f43f5e" radius={[3, 3, 0, 0]} maxBarSize={16} />
             </BarChart>
-          ) : (
-            <AreaChart data={chartData} margin={{ top: 20, right: 15, left: 10, bottom: 40 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#E9E7E1" vertical={false} />
+          </ResponsiveContainer>
+        ) : (
+          /* Multi-Layer 3-Wave Natural Mountain Wave Chart */
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={chartData} margin={{ top: 14, right: 14, left: -14, bottom: 0 }}>
+              <defs>
+                {/* Wave 1 Gradient: Total Area (Blue) */}
+                <linearGradient id="waveTotalAreaGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#2563eb" stopOpacity={0.35} />
+                  <stop offset="95%" stopColor="#2563eb" stopOpacity={0.02} />
+                </linearGradient>
+                {/* Wave 2 Gradient: Cultivable (Green) */}
+                <linearGradient id="waveCultivableGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#059669" stopOpacity={0.45} />
+                  <stop offset="95%" stopColor="#059669" stopOpacity={0.02} />
+                </linearGradient>
+                {/* Wave 3 Gradient: Disputed (Rose) */}
+                <linearGradient id="waveDisputeGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#e11d48" stopOpacity={0.4} />
+                  <stop offset="95%" stopColor="#e11d48" stopOpacity={0.02} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="#f8fafc" vertical={false} />
               <XAxis
-                dataKey="displayName"
-                tick={{ fontSize: 15, fill: '#252B36', fontWeight: 600 }}
+                dataKey={isMarathi ? 'nameMr' : 'taluka'}
+                tick={{ fontSize: 10, fill: '#64748b' }}
+                axisLine={{ stroke: '#f1f5f9' }}
+                tickLine={false}
                 interval={0}
-                angle={-35}
+                angle={-25}
                 textAnchor="end"
-                stroke="#CBD5E1"
-                dy={8}
+                height={35}
               />
               <YAxis
-                tick={{ fontSize: 15, fill: '#64748B', fontWeight: 600 }}
-                stroke="#CBD5E1"
-                dx={-5}
-                tickFormatter={(v) => Number(v).toLocaleString('en-IN')}
+                tickCount={5}
+                tick={{ fontSize: 10, fill: '#94a3b8' }}
+                axisLine={false}
+                tickLine={false}
+                tickFormatter={(val) => (val >= 1000 ? `${(val / 1000).toFixed(0)}k` : val)}
               />
               <Tooltip content={<CustomTooltip />} />
-              <Area type="monotone" dataKey="totalAreaHa" stroke="#4169E1" strokeWidth={3} fill="#4169E1" fillOpacity={0.15} />
-              <Area type="monotone" dataKey="cultivableAreaHa" stroke="#16A34A" strokeWidth={2.5} fill="#16A34A" fillOpacity={0.12} />
-              <Area type="monotone" dataKey="disputedAreaHa" stroke="#E85D75" strokeWidth={2} fill="#E85D75" fillOpacity={0.2} />
+              <Legend
+                verticalAlign="top"
+                align="right"
+                wrapperStyle={{ paddingBottom: '8px', fontSize: '11px' }}
+                iconType="circle"
+                iconSize={7}
+                formatter={(value) => {
+                  if (value === 'totalAreaHa') return isMarathi ? 'एकूण क्षेत्र' : 'Total Area (Ha)';
+                  if (value === 'cultivableAreaHa') return isMarathi ? 'लागवडीयोग्य' : 'Cultivable Area (Ha)';
+                  if (value === 'disputedAreaHa') return isMarathi ? 'बाधित क्षेत्र' : 'Disputed Area (Ha)';
+                  return value;
+                }}
+              />
+              {/* 3 Natural Undulating Waves */}
+              <Area
+                type="natural"
+                dataKey="totalAreaHa"
+                name="totalAreaHa"
+                stroke="#2563eb"
+                strokeWidth={2.5}
+                fillOpacity={1}
+                fill="url(#waveTotalAreaGrad)"
+                dot={{ r: 2.5, fill: '#2563eb' }}
+              />
+              <Area
+                type="natural"
+                dataKey="cultivableAreaHa"
+                name="cultivableAreaHa"
+                stroke="#059669"
+                strokeWidth={2.5}
+                fillOpacity={1}
+                fill="url(#waveCultivableGrad)"
+                dot={{ r: 2.5, fill: '#059669' }}
+              />
+              <Area
+                type="natural"
+                dataKey="disputedAreaHa"
+                name="disputedAreaHa"
+                stroke="#e11d48"
+                strokeWidth={2}
+                fillOpacity={1}
+                fill="url(#waveDisputeGrad)"
+                dot={{ r: 2.5, fill: '#e11d48' }}
+              />
             </AreaChart>
-          )}
-        </ResponsiveContainer>
+          </ResponsiveContainer>
+        )}
+        </div>
       </div>
 
-      {/* Footer Guidance */}
-      <div className="pt-3 border-t border-[#E9E7E1] flex items-center justify-between text-xs sm:text-[13px] text-[#64748B]">
-        <span className="font-medium">
-          {isMarathi ? '१५ तालुक्यांचे जिल्हा महसूल संनियंत्रण कक्ष' : 'Chandrapur 15-Taluka Revenue Monitoring Command'}
+      {/* Footer Taluka Chips */}
+      <div className="flex items-center sm:flex-wrap overflow-x-auto no-scrollbar gap-1.5 pt-2.5 mt-1 border-t border-slate-100 text-xs text-slate-600 touch-scroll">
+        <span className="font-semibold text-slate-700 text-[11px]">
+          {isMarathi ? 'नोंदणीकृत तालुके:' : 'Registered Talukas:'}
         </span>
-        <span className="font-bold text-[#7656D6]">
-          {chartData.length} {isMarathi ? 'तालुके संनियंत्रित' : 'Talukas Monitored'}
-        </span>
+        {chartData.map((t) => (
+          <span
+            key={t.taluka}
+            className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold border transition ${
+              selectedTaluka && selectedTaluka.toLowerCase() === t.taluka.toLowerCase()
+                ? 'bg-blue-100 text-blue-900 border-blue-300'
+                : 'bg-slate-50 text-slate-700 border-slate-200'
+            }`}
+          >
+            <span>{isMarathi ? t.nameMr : t.taluka}:</span>
+            <span className="text-slate-900 font-extrabold">{t.parcelCount}</span>
+          </span>
+        ))}
       </div>
     </div>
   );

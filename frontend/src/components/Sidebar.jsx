@@ -89,15 +89,14 @@ export default function Sidebar({
     <>
       {/* ─────────────────────────────────────────────────────────────
           1. DESKTOP DOCK (lg and up)
-          - Solid White (#FFFFFF), Soft Neutral border (#E9E7E1)
-          - Royal Blue (#4169E1) active states
+          - Clean modern enterprise dock, sleek borders
          ───────────────────────────────────────────────────────────── */}
       <aside
         className={clsx(
-          'hidden lg:flex flex-col bg-[#FFFFFF] border border-[#E9E7E1] shadow-[0_1px_3px_rgba(0,0,0,0.04)] transition-[width,padding] duration-200 sticky top-[76px] self-start shrink-0 select-none z-40',
+          'hidden lg:flex flex-col bg-[#FFFFFF] border border-slate-200/90 shadow-2xs transition-[width,padding] duration-200 sticky top-[68px] self-start shrink-0 select-none z-40',
           collapsed
-            ? 'w-[58px] py-3 px-1.5 rounded-2xl items-center overflow-visible'
-            : 'w-72 p-3.5 rounded-2xl overflow-hidden'
+            ? 'w-[54px] py-2.5 px-1 rounded-xl items-center overflow-visible'
+            : 'w-64 p-3 rounded-xl overflow-hidden'
         )}
         style={{
           height: 'fit-content',
@@ -106,51 +105,50 @@ export default function Sidebar({
       >
         <div className="flex flex-col w-full items-center overflow-visible">
           {/* Top Toggle Button */}
-          <div className="flex items-center justify-center shrink-0 mb-2 w-full overflow-visible">
+          <div className="flex items-center justify-center shrink-0 mb-1 w-full overflow-visible">
             {collapsed ? (
               <button
                 type="button"
                 onClick={onToggleCollapse}
-                className="w-10 h-10 rounded-xl text-[#64748B] hover:text-[#252B36] hover:bg-[#F3F2ED] transition-all flex items-center justify-center cursor-pointer border border-transparent hover:border-[#E9E7E1] focus:outline-none focus:ring-2 focus:ring-[#4169E1]/30 group relative"
+                className="w-9 h-9 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-all flex items-center justify-center cursor-pointer border border-transparent hover:border-slate-200 group relative"
                 aria-label={isMarathi ? 'साइडबार विस्तृत करा' : 'Expand Sidebar'}
                 title={isMarathi ? 'साइडबार विस्तृत करा' : 'Expand Sidebar'}
               >
-                <PanelLeftOpen className="w-5 h-5" />
+                <PanelLeftOpen className="w-4.5 h-4.5" />
                 {/* Floating Tooltip */}
                 <div
                   role="tooltip"
-                  className="absolute left-full ml-3 top-1/2 -translate-y-1/2 px-3 py-1.5 bg-[#252B36] text-white rounded-lg shadow-md z-[100] whitespace-nowrap text-sm font-semibold border border-[#252B36] opacity-0 pointer-events-none group-hover:opacity-100 group-hover:translate-x-0 -translate-x-1 transition-all duration-150 flex items-center"
+                  className="absolute left-full ml-2.5 top-1/2 -translate-y-1/2 px-2.5 py-1 bg-slate-900 text-white rounded-md shadow-md z-[100] whitespace-nowrap text-xs font-semibold opacity-0 pointer-events-none group-hover:opacity-100 transition-all flex items-center"
                 >
-                  <div className="absolute top-1/2 -translate-y-1/2 -left-1 w-2 h-2 bg-[#252B36] rotate-45" />
-                  <span>{isMarathi ? 'साइडबार विस्तृत करा' : 'Expand Sidebar'}</span>
+                  <span>{isMarathi ? 'विस्तृत करा' : 'Expand'}</span>
                 </div>
               </button>
             ) : (
-              <div className="w-full flex items-center justify-between px-2 pb-1.5">
-                <span className="text-xs font-bold text-[#64748B] uppercase tracking-wider">
-                  {isMarathi ? 'मुख्य विभाग' : 'Main Modules'}
+              <div className="w-full flex items-center justify-between px-1.5 pb-1">
+                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                  {isMarathi ? 'विभाग' : 'Navigation'}
                 </span>
                 <button
                   type="button"
                   onClick={onToggleCollapse}
-                  className="w-8 h-8 rounded-lg text-[#64748B] hover:text-[#252B36] hover:bg-[#F3F2ED] transition-all flex items-center justify-center cursor-pointer border border-transparent hover:border-[#E9E7E1] focus:outline-none focus:ring-2 focus:ring-[#4169E1]/30"
+                  className="w-7 h-7 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-all flex items-center justify-center cursor-pointer"
                   aria-label={isMarathi ? 'साइडबार संकुचित करा' : 'Collapse Sidebar'}
                   title={isMarathi ? 'साइडबार संकुचित करा' : 'Collapse Sidebar'}
                 >
-                  <PanelLeftClose className="w-4 h-4 text-[#64748B]" />
+                  <PanelLeftClose className="w-4 h-4 text-slate-500" />
                 </button>
               </div>
             )}
           </div>
 
           {/* Micro Divider */}
-          <div className={clsx('bg-[#E9E7E1] my-1 shrink-0', collapsed ? 'w-6 h-[1px]' : 'w-full h-[1px]')} />
+          <div className={clsx('bg-slate-100 my-1 shrink-0', collapsed ? 'w-5 h-[1px]' : 'w-full h-[1px]')} />
 
           {/* Navigation Links */}
           <nav
             className={clsx(
-              'flex flex-col justify-center overflow-visible select-none my-1.5',
-              collapsed ? 'space-y-2 items-center w-full' : 'space-y-1.5 w-full flex-1'
+              'flex flex-col justify-center overflow-visible select-none my-1',
+              collapsed ? 'space-y-1.5 items-center w-full' : 'space-y-1 w-full flex-1'
             )}
           >
             {navItems.map((item) => {
@@ -170,19 +168,19 @@ export default function Sidebar({
                   className={clsx(
                     'group relative flex items-center transition-all select-none overflow-visible cursor-pointer',
                     collapsed
-                      ? 'w-10 h-10 rounded-xl justify-center active:scale-95'
-                      : 'w-full px-3.5 py-2.5 rounded-xl justify-start',
+                      ? 'w-9 h-9 rounded-lg justify-center active:scale-95'
+                      : 'w-full px-3 py-2 rounded-lg justify-start',
                     isActive
-                      ? 'bg-[#4169E1] text-white shadow-sm'
-                      : 'text-[#64748B] hover:text-[#252B36] hover:bg-[#F3F2ED]'
+                      ? 'bg-blue-50 text-blue-700 font-bold border border-blue-200/70 shadow-2xs'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/80 font-medium'
                   )}
                 >
                   {/* Icon */}
                   <div className="w-5 h-5 flex items-center justify-center shrink-0">
                     <Icon
                       className={clsx(
-                        'w-5 h-5 shrink-0',
-                        isActive ? 'text-white stroke-[2.2]' : 'text-[#64748B] group-hover:text-[#252B36] stroke-[1.8]'
+                        'w-4.5 h-4.5 shrink-0 transition-colors',
+                        isActive ? 'text-blue-700 stroke-[2.2]' : 'text-slate-500 group-hover:text-slate-900 stroke-[1.8]'
                       )}
                     />
                   </div>
@@ -190,16 +188,11 @@ export default function Sidebar({
                   {/* Label (Expanded Mode) */}
                   {!collapsed && (
                     <>
-                      <span
-                        className={clsx(
-                          'ml-3 text-[15px] sm:text-base tracking-tight whitespace-nowrap flex-1 leading-normal',
-                          isActive ? 'text-white font-semibold' : 'text-[#252B36] font-medium'
-                        )}
-                      >
+                      <span className="ml-2.5 text-xs sm:text-[13px] tracking-tight whitespace-nowrap flex-1 truncate">
                         {label}
                       </span>
                       {isActive && (
-                        <ChevronRight className="w-4 h-4 text-white/80 shrink-0 ml-auto" />
+                        <div className="w-1.5 h-1.5 rounded-full bg-blue-600 shrink-0 ml-auto" />
                       )}
                     </>
                   )}
@@ -208,9 +201,8 @@ export default function Sidebar({
                   {collapsed && (
                     <div
                       role="tooltip"
-                      className="absolute left-full ml-3 top-1/2 -translate-y-1/2 px-3 py-1.5 bg-[#252B36] text-white rounded-lg shadow-md z-[100] whitespace-nowrap text-sm font-semibold border border-[#252B36] opacity-0 pointer-events-none group-hover:opacity-100 group-hover:translate-x-0 -translate-x-1 transition-all duration-150 flex items-center"
+                      className="absolute left-full ml-2.5 top-1/2 -translate-y-1/2 px-2.5 py-1 bg-slate-900 text-white rounded-md shadow-md z-[100] whitespace-nowrap text-xs font-semibold opacity-0 pointer-events-none group-hover:opacity-100 transition-all flex items-center"
                     >
-                      <div className="absolute top-1/2 -translate-y-1/2 -left-1 w-2 h-2 bg-[#252B36] rotate-45" />
                       <span>{label}</span>
                     </div>
                   )}
@@ -222,42 +214,36 @@ export default function Sidebar({
           {/* Bottom Area: Status Indicator Pill */}
           {collapsed ? (
             <div className="mt-1 pt-1 shrink-0 flex flex-col items-center justify-center w-full">
-              <div className="w-6 h-[1px] bg-[#E9E7E1] mb-2" />
+              <div className="w-5 h-[1px] bg-slate-100 mb-1.5" />
               <div
-                className="group relative flex items-center justify-center w-9 h-9 rounded-full hover:bg-[#F3F2ED] transition-colors cursor-help"
-                aria-label={isMarathi ? '१५ तालुके संनियंत्रण सक्रिय' : '15 Talukas Active'}
+                className="group relative flex items-center justify-center w-8 h-8 rounded-full hover:bg-slate-100 transition-colors cursor-help"
+                aria-label={isMarathi ? '१५ तालुके संनियंत्रण' : '15 Talukas Active'}
               >
-                <span className="relative flex h-2.5 w-2.5">
-                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#16A34A]" />
+                <span className="relative flex h-2 w-2">
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
                 </span>
 
                 {/* Status Tooltip */}
                 <div
                   role="tooltip"
-                  className="absolute left-full ml-3 top-1/2 -translate-y-1/2 px-3 py-1.5 bg-[#252B36] text-white rounded-lg shadow-md z-[100] whitespace-nowrap text-sm font-medium border border-[#252B36] opacity-0 pointer-events-none group-hover:opacity-100 group-hover:translate-x-0 -translate-x-1 transition-all duration-150 flex items-center"
+                  className="absolute left-full ml-2.5 top-1/2 -translate-y-1/2 px-2.5 py-1 bg-slate-900 text-white rounded-md shadow-md z-[100] whitespace-nowrap text-xs font-medium opacity-0 pointer-events-none group-hover:opacity-100 transition-all flex items-center"
                 >
-                  <div className="absolute top-1/2 -translate-y-1/2 -left-1 w-2 h-2 bg-[#252B36] rotate-45" />
                   <span className="flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-[#16A34A] inline-block" />
-                    {isMarathi ? '१५ तालुके संनियंत्रण सक्रिय' : '15 Talukas Active'}
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block" />
+                    {isMarathi ? '१५ तालुके सक्रिय' : '15 Talukas Active'}
                   </span>
                 </div>
               </div>
             </div>
           ) : (
             /* Expanded Mode Footer Status */
-            <div className="w-full mt-3 pt-3 border-t border-[#E9E7E1]">
-              <div className="p-3 bg-[#F8F7F3] border border-[#E9E7E1] rounded-xl flex items-center justify-between">
-                <div>
-                  <span className="block text-xs font-bold text-[#252B36] leading-tight">
-                    {isMarathi ? '१५ तालुके संनियंत्रण' : '15 Talukas Active'}
-                  </span>
-                  <span className="text-[11px] text-[#64748B]">
-                    {isMarathi ? 'प्रणाली सक्रिय' : 'Live System'}
-                  </span>
-                </div>
-                <span className="relative flex h-2.5 w-2.5">
-                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#16A34A]" />
+            <div className="w-full mt-2 pt-2 border-t border-slate-100">
+              <div className="px-2.5 py-1.5 bg-slate-50 border border-slate-200/80 rounded-lg flex items-center justify-between">
+                <span className="text-[11px] font-bold text-slate-700 leading-tight">
+                  {isMarathi ? '१५ तालुके संनियंत्रण' : '15 Talukas Active'}
+                </span>
+                <span className="relative flex h-2 w-2">
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
                 </span>
               </div>
             </div>
