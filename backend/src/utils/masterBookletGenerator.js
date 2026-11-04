@@ -255,10 +255,10 @@ export const CHECKLIST_46_POINTS = [
   { num: 40, text: 'जमिनीच्या निर्बंधित सत्ताप्रकारानुसार नोंद इतर अधिकारामध्ये घेण्यात आली आहे काय?' },
   { num: 41, text: 'इतर अधिकारातील नोंदी/भूधारणा/भोगवटदार यांच्या नोंदी अवैधरित्या कमी केल्या आहेत काय?' },
   { num: 42, text: 'भोगवटदार कंपनी/बिगर शेतकरी असल्यास कलम ८९/८९अ अन्वये परवानगी घेतली आहे काय?' },
-  { num: 43, text: 'खरेदी दिनांक' },
-  { num: 44, text: 'वापर सुरू केला आहे काय?' },
-  { num: 45, text: 'विनापरवानगी हस्तांतरण / वापरात बदल झाला आहे काय?' },
-  { num: 46, text: 'मुद्दा क्र. १० ते ३४ प्रमाणे गाव नमुना १-क अद्यावत आहे काय?' }
+  { num: 43, text: 'कुळ कायदा कलम ८९/८९अ - खरेदी दिनांक', subText: 'खरेदी दिनांक' },
+  { num: 44, text: 'कुळ कायदा कलम ८९/८९अ - वापर सुरू केला आहे काय?', subText: 'वापर सुरू केला आहे काय?' },
+  { num: 45, text: 'कुळ कायदा कलम ८९/८९अ - विनापरवानगी हस्तांतरण / वापरात बदल झाला आहे काय?', subText: 'विना परवानगी/हस्तांतरण/वापरात बदल झाला आहे काय ?' },
+  { num: 46, text: 'मुद्दा क्र. १० ते ३४ प्रमाणे गाव नमुना १-क अद्यावत आहे काय?', subText: 'गाव नमुना १-क अद्यावत आहे काय?' }
 ];
 
 /**
@@ -627,6 +627,8 @@ export async function generateMasterChecklistExcel(parcels, scopeName, res) {
         c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFEFF6FF' } };
       } else if (colIdx <= 27) {
         c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFFBEB' } };
+      } else if (colIdx >= 51 && colIdx <= 53) {
+        c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF5F3FF' } }; // Distinct soft purple highlight for Section 89/89A
       } else {
         c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF1F5F9' } };
       }
@@ -744,10 +746,18 @@ export async function generateMasterChecklistExcel(parcels, scopeName, res) {
     // Points 10-19 (R to AA) - शासकीय जमीन
     { width: 24 }, { width: 22 }, { width: 16 }, { width: 12 }, { width: 14 }, { width: 14 }, { width: 14 }, { width: 14 }, { width: 18 }, { width: 18 },
     // Points 20-46 (AB to BB) - वैधानिक कायदे व पडताळणी
-    ...Array(27).fill({ width: 20 })
+    ...Array(23).fill({ width: 20 }), // Points 20 to 42
+    { width: 16 }, // Point 43: खरेदी दिनांक (AY)
+    { width: 16 }, // Point 44: वापर सुरू केला आहे काय? (AZ)
+    { width: 24 }, // Point 45: विना परवानगी/हस्तांतरण/वापरात बदल झाला आहे काय ? (BA)
+    { width: 22 }  // Point 46: मुद्दा क्र. 10 ते 34 प्रमाणे गाव नमुना 1 क अद्यावत आहे काय ? (BB)
   ];
 
-  await wb.xlsx.write(res);
+  if (res && (typeof res.setHeader === 'function' || typeof res.write === 'function')) {
+    await wb.xlsx.write(res);
+  } else {
+    return await wb.xlsx.writeBuffer();
+  }
 }
 
 export async function generateMasterChecklistPdf(parcels, scopeName, res) {
@@ -997,8 +1007,8 @@ function createGoshwaraWorksheet(wb, sheetName, titleText, nameHeader, rows) {
     views: [{ showGridLines: true }]
   });
 
-  // Row 1: Merged Title Banner
-  ws.mergeCells('A1:N1');
+  // Row 1: Merged Title Banner (All 16 Columns A to P)
+  ws.mergeCells('A1:P1');
   const t1 = ws.getCell('A1');
   t1.value = titleText;
   t1.font = { name: 'Arial', size: 12, bold: true, color: { argb: 'FF000000' } };
@@ -1007,7 +1017,7 @@ function createGoshwaraWorksheet(wb, sheetName, titleText, nameHeader, rows) {
   t1.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF1F5F9' } };
   ws.getRow(1).height = 28;
 
-  // Row 2: Super Headers
+  // Row 2: Super Headers (All 16 Official Columns)
   const r2 = ws.addRow([
     'अ.क्र.',
     nameHeader,
@@ -1017,13 +1027,15 @@ function createGoshwaraWorksheet(wb, sheetName, titleText, nameHeader, rows) {
     'एकूण भोगवटदार वर्ग 2 जमिनी', '',
     'अवैधरित्या वर्ग 2 मधून वर्ग 1 केलेल्या जमिनी', '',
     'इतर अधिकारात नोंद न घेतलेल्या जमिनी', '',
-    'अवैधरित्या इतर अधिकारामधून नोंद कमी केलेल्या जमिनी', ''
+    'अवैधरित्या इतर अधिकारामधून नोंद कमी केलेल्या जमिनी', '',
+    'शर्तभंग झालेल्या जमिनी', ''
   ]);
   r2.height = 26;
 
   // Row 3: Sub Headers
   const r3 = ws.addRow([
     '', '', '', '',
+    'एकूण सर्व्हे क्रमांक', 'एकूण क्षेत्र(हे.आर.)',
     'एकूण सर्व्हे क्रमांक', 'एकूण क्षेत्र(हे.आर.)',
     'एकूण सर्व्हे क्रमांक', 'एकूण क्षेत्र(हे.आर.)',
     'एकूण सर्व्हे क्रमांक', 'एकूण क्षेत्र(हे.आर.)',
@@ -1042,6 +1054,7 @@ function createGoshwaraWorksheet(wb, sheetName, titleText, nameHeader, rows) {
   ws.mergeCells('I2:J2');
   ws.mergeCells('K2:L2');
   ws.mergeCells('M2:N2');
+  ws.mergeCells('O2:P2');
 
   [r2, r3].forEach(row => {
     row.eachCell({ includeEmpty: true }, (cell) => {
@@ -1066,6 +1079,7 @@ function createGoshwaraWorksheet(wb, sheetName, titleText, nameHeader, rows) {
   let sumConv = 0, sumConvA = 0;
   let sumNo = 0, sumNoA = 0;
   let sumDel = 0, sumDelA = 0;
+  let sumShart = 0, sumShartA = 0;
 
   const startDataRow = 4;
   cleanRows.forEach((row, idx) => {
@@ -1073,21 +1087,23 @@ function createGoshwaraWorksheet(wb, sheetName, titleText, nameHeader, rows) {
     const displayName = row.name || (isDistrictName
       ? 'चंद्रपूर जिल्हा'
       : (row.taluka && (row.villageName === 'संपूर्ण तालुका (All Villages)' || !row.villageName))
-      ? `${formatTalukaMr(row.taluka)}`
+      ? formatTalukaMr(row.taluka)
       : cleanVillageName(row.villageName || row.taluka || '-'));
 
     const totalSurveys = Number(row.totalSurveys ?? row.total712Count ?? row.totalGovtLandCount ?? 0);
     const totalAreaVal = parseFloat(row.totalArea ?? row.totalAreaHa ?? 0) || 0;
-    const c1Count = Number(row.c1Surveys ?? row.c1Count ?? row.govtFound1950Count ?? 0);
+    const c1Count = Number(row.c1Count ?? row.c1Surveys ?? 0);
     const c1Area = parseFloat(row.c1Area ?? 0) || 0;
-    const c2Count = Number(row.c2Surveys ?? row.c2Count ?? row.pendingRectifyCount ?? 0);
+    const c2Count = Number(row.c2Count ?? row.c2Surveys ?? 0);
     const c2Area = parseFloat(row.c2Area ?? 0) || 0;
-    const convCount = Number(row.convSurveys ?? row.convCount ?? row.illegalDeletionsCount ?? 0);
+    const convCount = Number(row.convCount ?? row.convSurveys ?? 0);
     const convArea = parseFloat(row.convArea ?? 0) || 0;
-    const noOtherCount = Number(row.noOtherSurveys ?? row.noOtherCount ?? row.pokalistPendingCount ?? 0);
+    const noOtherCount = Number(row.noOtherCount ?? row.noOtherSurveys ?? 0);
     const noOtherArea = parseFloat(row.noOtherArea ?? 0) || 0;
-    const delCount = Number(row.delSurveys ?? row.delCount ?? row.illegalReductionCount ?? row.shartCount ?? 0);
-    const delArea = parseFloat(row.delArea ?? row.illegalReductionArea ?? row.shartArea ?? 0) || 0;
+    const delCount = Number(row.delCount ?? row.delSurveys ?? row.illegalReductionCount ?? 0);
+    const delArea = parseFloat(row.delArea ?? row.illegalReductionArea ?? 0) || 0;
+    const shartCount = Number(row.shartCount ?? row.shartSurveys ?? ((row.govtDeptsShartbhang || 0) + (row.privateShartbhang || 0)) ?? 0);
+    const shartArea = parseFloat(row.shartArea ?? 0) || 0;
 
     sumTot += totalSurveys;
     sumArea += totalAreaVal;
@@ -1101,6 +1117,8 @@ function createGoshwaraWorksheet(wb, sheetName, titleText, nameHeader, rows) {
     sumNoA += noOtherArea;
     sumDel += delCount;
     sumDelA += delArea;
+    sumShart += shartCount;
+    sumShartA += shartArea;
 
     const r = ws.addRow([
       idx + 1,
@@ -1116,7 +1134,9 @@ function createGoshwaraWorksheet(wb, sheetName, titleText, nameHeader, rows) {
       noOtherCount,
       noOtherArea,
       delCount,
-      delArea
+      delArea,
+      shartCount,
+      shartArea
     ]);
 
     r.height = 20;
@@ -1129,7 +1149,7 @@ function createGoshwaraWorksheet(wb, sheetName, titleText, nameHeader, rows) {
 
       if (colIdx === 2) {
         cell.alignment = { horizontal: 'left', vertical: 'middle' };
-      } else if ([4, 6, 8, 10, 12, 14].includes(colIdx)) {
+      } else if ([4, 6, 8, 10, 12, 14, 16].includes(colIdx)) {
         cell.alignment = { horizontal: 'right', vertical: 'middle' };
         cell.numFmt = '#,##0.00';
       } else {
@@ -1155,7 +1175,9 @@ function createGoshwaraWorksheet(wb, sheetName, titleText, nameHeader, rows) {
       { formula: `SUM(K${startDataRow}:K${endDataRow})`, result: sumNo },
       { formula: `SUM(L${startDataRow}:L${endDataRow})`, result: Number(sumNoA.toFixed(2)) },
       { formula: `SUM(M${startDataRow}:M${endDataRow})`, result: sumDel },
-      { formula: `SUM(N${startDataRow}:N${endDataRow})`, result: Number(sumDelA.toFixed(2)) }
+      { formula: `SUM(N${startDataRow}:N${endDataRow})`, result: Number(sumDelA.toFixed(2)) },
+      { formula: `SUM(O${startDataRow}:O${endDataRow})`, result: sumShart },
+      { formula: `SUM(P${startDataRow}:P${endDataRow})`, result: Number(sumShartA.toFixed(2)) }
     ]);
     totalRow.height = 24;
     totalRow.eachCell((cell, colIdx) => {
@@ -1164,7 +1186,7 @@ function createGoshwaraWorksheet(wb, sheetName, titleText, nameHeader, rows) {
       cell.border = thinBorder;
       if (colIdx === 1 || colIdx === 2) {
         cell.alignment = { horizontal: 'center', vertical: 'middle' };
-      } else if ([4, 6, 8, 10, 12, 14].includes(colIdx)) {
+      } else if ([4, 6, 8, 10, 12, 14, 16].includes(colIdx)) {
         cell.alignment = { horizontal: 'right', vertical: 'middle' };
         cell.numFmt = '#,##0.00';
       } else {
@@ -1188,12 +1210,13 @@ function createGoshwaraWorksheet(wb, sheetName, titleText, nameHeader, rows) {
     { width: 16 },  // K: इतर अधिकार नोंद नाही सर्व्हे
     { width: 16 },  // L: इतर अधिकार नोंद नाही क्षेत्र
     { width: 16 },  // M: इतर अधिकार नोंद कमी सर्व्हे
-    { width: 16 }   // N: इतर अधिकार नोंद कमी क्षेत्र
+    { width: 16 },  // N: इतर अधिकार नोंद कमी क्षेत्र
+    { width: 16 },  // O: शर्तभंग सर्व्हे
+    { width: 16 }   // P: शर्तभंग क्षेत्र
   ];
 }
-
 /**
- * GENERATE GOSHAWARA (ROLLUP SUMMARY) PDF (14 Official Columns)
+ * GENERATE GOSHAWARA (ROLLUP SUMMARY) PDF (16 Official Columns)
  */
 export async function generateChecklistSummaryPdf(summaryData, scopeName, res) {
   let tier = 'all';
@@ -1227,8 +1250,10 @@ export async function generateChecklistSummaryPdf(summaryData, scopeName, res) {
       convArea: sourceRows.reduce((a, b) => a + parseFloat(b.convArea ?? 0), 0).toFixed(2),
       noOtherSurveys: sourceRows.reduce((a, b) => a + Number(b.noOtherSurveys ?? b.noOtherCount ?? 0), 0),
       noOtherArea: sourceRows.reduce((a, b) => a + parseFloat(b.noOtherArea ?? 0), 0).toFixed(2),
-      delSurveys: sourceRows.reduce((a, b) => a + Number(b.delSurveys ?? b.delCount ?? b.shartCount ?? 0), 0),
-      delArea: sourceRows.reduce((a, b) => a + parseFloat(b.delArea ?? b.shartArea ?? 0), 0).toFixed(2)
+      delSurveys: sourceRows.reduce((a, b) => a + Number(b.delSurveys ?? b.delCount ?? 0), 0),
+      delArea: sourceRows.reduce((a, b) => a + parseFloat(b.delArea ?? 0), 0).toFixed(2),
+      shartSurveys: sourceRows.reduce((a, b) => a + Number(b.shartSurveys ?? b.shartCount ?? ((b.govtDeptsShartbhang || 0) + (b.privateShartbhang || 0)) ?? 0), 0),
+      shartArea: sourceRows.reduce((a, b) => a + parseFloat(b.shartArea ?? 0), 0).toFixed(2)
     };
     districtRows = [dTot];
   }
@@ -1249,7 +1274,7 @@ export async function generateChecklistSummaryPdf(summaryData, scopeName, res) {
     };
 
     const tableBody = [
-      // Row 1: Super Headers
+      // Row 1: Super Headers (All 16 Official Columns)
       [
         { text: 'अ.क्र.', rowSpan: 2, style: 'th', alignment: 'center' },
         { text: nameHeader, rowSpan: 2, style: 'th', alignment: 'center' },
@@ -1259,7 +1284,8 @@ export async function generateChecklistSummaryPdf(summaryData, scopeName, res) {
         { text: 'एकूण भोगवटदार वर्ग २ जमिनी', colSpan: 2, style: 'th', alignment: 'center' }, {},
         { text: 'अवैधरित्या वर्ग २ मधून वर्ग १ केलेल्या जमिनी', colSpan: 2, style: 'th', alignment: 'center' }, {},
         { text: 'इतर अधिकारात नोंद न घेतलेल्या जमिनी', colSpan: 2, style: 'th', alignment: 'center' }, {},
-        { text: 'अवैधरित्या इतर अधिकारामधून नोंद कमी केलेल्या जमिनी', colSpan: 2, style: 'th', alignment: 'center' }, {}
+        { text: 'अवैधरित्या इतर अधिकारामधून नोंद कमी केलेल्या जमिनी', colSpan: 2, style: 'th', alignment: 'center' }, {},
+        { text: 'शर्तभंग झालेल्या जमिनी', colSpan: 2, style: 'th', alignment: 'center' }, {}
       ],
       // Row 2: Sub Headers
       [
@@ -1268,10 +1294,11 @@ export async function generateChecklistSummaryPdf(summaryData, scopeName, res) {
         { text: 'एकूण सर्व्हे क्रमांक', style: 'thSub', alignment: 'center' }, { text: 'एकूण क्षेत्र(हे.आर.)', style: 'thSub', alignment: 'center' },
         { text: 'एकूण सर्व्हे क्रमांक', style: 'thSub', alignment: 'center' }, { text: 'एकूण क्षेत्र(हे.आर.)', style: 'thSub', alignment: 'center' },
         { text: 'एकूण सर्व्हे क्रमांक', style: 'thSub', alignment: 'center' }, { text: 'एकूण क्षेत्र(हे.आर.)', style: 'thSub', alignment: 'center' },
+        { text: 'एकूण सर्व्हे क्रमांक', style: 'thSub', alignment: 'center' }, { text: 'एकूण क्षेत्र(हे.आर.)', style: 'thSub', alignment: 'center' },
         { text: 'एकूण सर्व्हे क्रमांक', style: 'thSub', alignment: 'center' }, { text: 'एकूण क्षेत्र(हे.आर.)', style: 'thSub', alignment: 'center' }
       ],
-      // Row 3: Column Numbers Row (Matching Excel Sheet 2)
-      ['१', '२', '३', '४', '५', '६', '७', '८', '९', '१०', '११', '१२', '१३', '१४'].map(n => ({
+      // Row 3: Column Numbers Row (Matching Excel Sheet 2 - 1 to 16)
+      ['१', '२', '३', '४', '५', '६', '७', '८', '९', '१०', '११', '१२', '१३', '१४', '१५', '१६'].map(n => ({
         text: n,
         style: 'thNum',
         alignment: 'center'
@@ -1292,27 +1319,30 @@ export async function generateChecklistSummaryPdf(summaryData, scopeName, res) {
     let sumConv = 0, sumConvA = 0;
     let sumNo = 0, sumNoA = 0;
     let sumDel = 0, sumDelA = 0;
+    let sumShart = 0, sumShartA = 0;
 
     cleanRows.forEach((r, idx) => {
       const isDistrictName = r.villageName === 'संपूर्ण जिल्हा (१५ तालुके गोषवारा)' || r.villageName === 'Whole District Rollup';
       const displayName = r.name || (isDistrictName
         ? 'चंद्रपूर जिल्हा'
         : (r.taluka && (r.villageName === 'संपूर्ण तालुका (All Villages)' || !r.villageName))
-        ? `${formatTalukaMr(r.taluka)}`
+        ? formatTalukaMr(r.taluka)
         : cleanVillageName(r.villageName || r.taluka || '-'));
 
       const cnt = Number(r.totalSurveys ?? r.total712Count ?? r.totalGovtLandCount ?? 0);
       const area = parseFloat(r.totalArea ?? r.totalAreaHa ?? 0) || 0;
-      const c1 = Number(r.c1Surveys ?? r.c1Count ?? r.govtFound1950Count ?? 0);
+      const c1 = Number(r.c1Count ?? r.c1Surveys ?? 0);
       const c1A = parseFloat(r.c1Area ?? 0) || 0;
-      const c2 = Number(r.c2Surveys ?? r.c2Count ?? r.pendingRectifyCount ?? 0);
+      const c2 = Number(r.c2Count ?? r.c2Surveys ?? 0);
       const c2A = parseFloat(r.c2Area ?? 0) || 0;
-      const conv = Number(r.convSurveys ?? r.convCount ?? r.illegalDeletionsCount ?? 0);
+      const conv = Number(r.convCount ?? r.convSurveys ?? 0);
       const convA = parseFloat(r.convArea ?? 0) || 0;
-      const noOther = Number(r.noOtherSurveys ?? r.noOtherCount ?? r.pokalistPendingCount ?? 0);
+      const noOther = Number(r.noOtherCount ?? r.noOtherSurveys ?? 0);
       const noOtherA = parseFloat(r.noOtherArea ?? 0) || 0;
-      const del = Number(r.delSurveys ?? r.delCount ?? r.illegalReductionCount ?? r.shartCount ?? 0);
-      const delA = parseFloat(r.delArea ?? r.illegalReductionArea ?? r.shartArea ?? 0) || 0;
+      const del = Number(r.delCount ?? r.delSurveys ?? r.illegalReductionCount ?? 0);
+      const delA = parseFloat(r.delArea ?? r.illegalReductionArea ?? 0) || 0;
+      const shart = Number(r.shartCount ?? r.shartSurveys ?? ((r.govtDeptsShartbhang || 0) + (r.privateShartbhang || 0)) ?? 0);
+      const shartA = parseFloat(r.shartArea ?? 0) || 0;
 
       sumTot += cnt; sumArea += area;
       sumC1 += c1; sumC1A += c1A;
@@ -1320,6 +1350,7 @@ export async function generateChecklistSummaryPdf(summaryData, scopeName, res) {
       sumConv += conv; sumConvA += convA;
       sumNo += noOther; sumNoA += noOtherA;
       sumDel += del; sumDelA += delA;
+      sumShart += shart; sumShartA += shartA;
 
       tableBody.push([
         { text: String(idx + 1), style: 'tdCenter' },
@@ -1335,11 +1366,13 @@ export async function generateChecklistSummaryPdf(summaryData, scopeName, res) {
         { text: String(noOther), style: noOther > 0 ? 'tdWarning' : 'tdCenter' },
         { text: noOtherA.toFixed(2), style: noOtherA > 0 ? 'tdWarningRight' : 'tdRight' },
         { text: String(del), style: del > 0 ? 'tdAlert' : 'tdCenter' },
-        { text: delA.toFixed(2), style: delA > 0 ? 'tdAlertRight' : 'tdRight' }
+        { text: delA.toFixed(2), style: delA > 0 ? 'tdAlertRight' : 'tdRight' },
+        { text: String(shart), style: shart > 0 ? 'tdAlert' : 'tdCenter' },
+        { text: shartA.toFixed(2), style: shartA > 0 ? 'tdAlertRight' : 'tdRight' }
       ]);
     });
 
-    // Total Row
+    // Total Row (All 16 columns)
     tableBody.push([
       { text: 'एकूण', style: 'tdTotalCenter' },
       { text: '-', style: 'tdTotalCenter' },
@@ -1354,7 +1387,9 @@ export async function generateChecklistSummaryPdf(summaryData, scopeName, res) {
       { text: String(sumNo), style: 'tdTotalCenter' },
       { text: sumNoA.toFixed(2), style: 'tdTotalRight' },
       { text: String(sumDel), style: 'tdTotalCenter' },
-      { text: sumDelA.toFixed(2), style: 'tdTotalRight' }
+      { text: sumDelA.toFixed(2), style: 'tdTotalRight' },
+      { text: String(sumShart), style: 'tdTotalCenter' },
+      { text: sumShartA.toFixed(2), style: 'tdTotalRight' }
     ]);
 
     return [
@@ -1363,7 +1398,7 @@ export async function generateChecklistSummaryPdf(summaryData, scopeName, res) {
         table: {
           headerRows: 3,
           dontBreakRows: true,
-          widths: [24, 98, 48, 52, 45, 49, 45, 49, 49, 49, 49, 49, 51, 51],
+          widths: [20, 88, 44, 46, 42, 45, 42, 45, 43, 45, 43, 45, 43, 45, 42, 45],
           body: tableBody
         },
         layout: {
@@ -1508,8 +1543,10 @@ export async function generateChecklistSummaryExcel(summaryData, scopeName, res)
       convArea: sourceRows.reduce((a, b) => a + parseFloat(b.convArea ?? 0), 0).toFixed(2),
       noOtherSurveys: sourceRows.reduce((a, b) => a + Number(b.noOtherSurveys ?? b.noOtherCount ?? 0), 0),
       noOtherArea: sourceRows.reduce((a, b) => a + parseFloat(b.noOtherArea ?? 0), 0).toFixed(2),
-      delSurveys: sourceRows.reduce((a, b) => a + Number(b.delSurveys ?? b.delCount ?? b.shartCount ?? 0), 0),
-      delArea: sourceRows.reduce((a, b) => a + parseFloat(b.delArea ?? b.shartArea ?? 0), 0).toFixed(2)
+      delSurveys: sourceRows.reduce((a, b) => a + Number(b.delSurveys ?? b.delCount ?? 0), 0),
+      delArea: sourceRows.reduce((a, b) => a + parseFloat(b.delArea ?? 0), 0).toFixed(2),
+      shartSurveys: sourceRows.reduce((a, b) => a + Number(b.shartSurveys ?? b.shartCount ?? ((b.govtDeptsShartbhang || 0) + (b.privateShartbhang || 0)) ?? 0), 0),
+      shartArea: sourceRows.reduce((a, b) => a + parseFloat(b.shartArea ?? 0), 0).toFixed(2)
     };
     districtRows = [dTot];
   }
@@ -1550,7 +1587,11 @@ export async function generateChecklistSummaryExcel(summaryData, scopeName, res)
   }
 
   if (res) {
+    if (res && (typeof res.setHeader === 'function' || typeof res.write === 'function')) {
     await wb.xlsx.write(res);
+  } else {
+    return await wb.xlsx.writeBuffer();
+  }
   } else {
     return await wb.xlsx.writeBuffer();
   }
@@ -1640,10 +1681,10 @@ export async function generateCategoryBookletExcel(catId, summaryData, parcels, 
     const isEven = idx % 2 === 0;
     const pt = resolveParcel46Points(p);
 
-    const hasPermit = pt[41] === 'होय' || p.tenancy89ARecords?.[0]?.isGenuineIndustrialUse || p.metadata?.auditPoints?.point_41 === 'होय' ? 'होय' : 'नाही';
+    const hasPermit = pt[42] === 'होय' || pt[41] === 'होय' || p.tenancy89ARecords?.[0]?.isGenuineIndustrialUse || p.metadata?.auditPoints?.point_42 === 'होय' || p.metadata?.auditPoints?.point_41 === 'होय' ? 'होय' : 'नाही';
     const usageBreach = p.metadata?.auditPoints?.point_44 === 'नाही' || p.metadata?.auditPoints?.point_45_usage === 'होय' || (p.forwardCases?.some(fc => fc.violationType === 'UNAUTHORIZED_NA_CONVERSION')) ? 'होय' : 'नाही';
     const transferBreach = p.metadata?.auditPoints?.point_45_transfer === 'होय' || p.tenancy89ARecords?.[0]?.unauthorizedTransfer || (p.forwardCases?.some(fc => fc.violationType === 'SHARTBHANG' || fc.violationType === 'TRIBAL_LAND_VIOLATION')) ? 'होय' : 'नाही';
-    const otherRightsNoted = pt[39] === 'होय' || (p.metadata?.otherRights && p.metadata?.otherRights !== '-' && p.metadata?.otherRights !== '....') ? 'होय' : 'नाही';
+    const otherRightsNoted = pt[40] === 'होय' || pt[39] === 'होय' || (p.metadata?.otherRights && p.metadata?.otherRights !== '-' && p.metadata?.otherRights !== '....') ? 'होय' : 'नाही';
 
     const rowValues = isCat18 ? [
       idx + 1,
@@ -1966,29 +2007,35 @@ export async function generateCategoryBookletExcel(catId, summaryData, parcels, 
       c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF8FAFC' } };
     });
 
-    // Populate data rows
+    // Populate data rows (Strictly real database rollups - no mock multipliers)
     if (isDistrict) {
-      // Aggregate district totals
-      const totalCount = summaryData.reduce((acc, r) => acc + (r.total712Count || 0), 0);
-      const totalArea = Number(totalCount * 1.65).toFixed(2);
-      const c1Count = summaryData.reduce((acc, r) => acc + (r.govtFound1950Count || Math.floor((r.total712Count || 0) * 0.4)), 0);
-      const c2Count = summaryData.reduce((acc, r) => acc + (r.pendingRectifyCount || Math.floor((r.total712Count || 0) * 0.6)), 0);
-      const convCount = summaryData.reduce((acc, r) => acc + (r.illegalDeletionsCount || 0), 0);
-      const noOtherCount = summaryData.reduce((acc, r) => acc + (r.pokalistPendingCount || 0), 0);
-      const remCount = summaryData.reduce((acc, r) => acc + (r.rectifiedCount || 0), 0);
-      const shartCount = summaryData.reduce((acc, r) => acc + ((r.govtDeptsShartbhang || 0) + (r.privateShartbhang || 0)), 0);
+      const distItem = summaryData.find(r => r.id === 'district-chandrapur-grand-total' || r.villageName?.includes('संपूर्ण जिल्हा') || r.isDistrictTotal);
+      const totalCount = distItem ? distItem.total712Count : summaryData.reduce((acc, r) => acc + (r.total712Count || 0), 0);
+      const totalArea = distItem ? (distItem.totalArea || distItem.totalAreaHa) : summaryData.reduce((acc, r) => acc + parseFloat(r.totalArea || r.totalAreaHa || 0), 0).toFixed(2);
+      const c1Count = distItem ? distItem.c1Count : summaryData.reduce((acc, r) => acc + Number(r.c1Count ?? r.c1Surveys ?? 0), 0);
+      const c1Area = distItem ? (distItem.c1Area || 0) : summaryData.reduce((acc, r) => acc + parseFloat(r.c1Area || 0), 0).toFixed(2);
+      const c2Count = distItem ? distItem.c2Count : summaryData.reduce((acc, r) => acc + Number(r.c2Count ?? r.c2Surveys ?? 0), 0);
+      const c2Area = distItem ? (distItem.c2Area || 0) : summaryData.reduce((acc, r) => acc + parseFloat(r.c2Area || 0), 0).toFixed(2);
+      const convCount = distItem ? distItem.convCount : summaryData.reduce((acc, r) => acc + Number(r.convCount ?? r.convSurveys ?? 0), 0);
+      const convArea = distItem ? (distItem.convArea || 0) : summaryData.reduce((acc, r) => acc + parseFloat(r.convArea || 0), 0).toFixed(2);
+      const noOtherCount = distItem ? distItem.noOtherCount : summaryData.reduce((acc, r) => acc + Number(r.noOtherCount ?? r.noOtherSurveys ?? 0), 0);
+      const noOtherArea = distItem ? (distItem.noOtherArea || 0) : summaryData.reduce((acc, r) => acc + parseFloat(r.noOtherArea || 0), 0).toFixed(2);
+      const delCount = distItem ? distItem.delCount : summaryData.reduce((acc, r) => acc + Number(r.delCount ?? r.delSurveys ?? 0), 0);
+      const delArea = distItem ? (distItem.delArea || 0) : summaryData.reduce((acc, r) => acc + parseFloat(r.delArea || 0), 0).toFixed(2);
+      const shartCount = distItem ? distItem.shartCount : summaryData.reduce((acc, r) => acc + Number(r.shartCount ?? r.shartSurveys ?? 0), 0);
+      const shartArea = distItem ? (distItem.shartArea || 0) : summaryData.reduce((acc, r) => acc + parseFloat(r.shartArea || 0), 0).toFixed(2);
 
       const dRow = wsSummary.addRow([
         1,
         'चंद्रपूर जिल्हा (एकूण १५ तालुके)',
         totalCount,
-        Number(totalArea),
-        c1Count, Number((c1Count * 1.5).toFixed(2)),
-        c2Count, Number((c2Count * 1.75).toFixed(2)),
-        convCount, Number((convCount * 1.8).toFixed(2)),
-        noOtherCount, Number((noOtherCount * 1.6).toFixed(2)),
-        remCount, Number((remCount * 1.7).toFixed(2)),
-        shartCount, Number((shartCount * 1.9).toFixed(2))
+        Number(parseFloat(totalArea).toFixed(2)),
+        c1Count, Number(parseFloat(c1Area).toFixed(2)),
+        c2Count, Number(parseFloat(c2Area).toFixed(2)),
+        convCount, Number(parseFloat(convArea).toFixed(2)),
+        noOtherCount, Number(parseFloat(noOtherArea).toFixed(2)),
+        delCount, Number(parseFloat(delArea).toFixed(2)),
+        shartCount, Number(parseFloat(shartArea).toFixed(2))
       ]);
       dRow.height = 26;
       dRow.eachCell((c, colIdx) => {
@@ -2002,26 +2049,32 @@ export async function generateCategoryBookletExcel(catId, summaryData, parcels, 
       dataRows.forEach((row, idx) => {
         const isTot = row.villageName === 'संपूर्ण तालुका (All Villages)';
         const nameVal = isTot ? `${formatTalukaMr(row.taluka)} (संपूर्ण तालुका)` : cleanVillageName(row.villageName || row.taluka || 'गाव');
-        const count712 = row.total712Count || row.totalGovtLandCount || 0;
-        const areaHa = Number(row.totalAreaHa || (count712 * 1.65));
-        const c1 = row.govtFound1950Count || Math.floor(count712 * 0.4);
-        const c2 = row.pendingRectifyCount || Math.floor(count712 * 0.6);
-        const conv = row.illegalDeletionsCount || row.govtDeptsShartbhang || 0;
-        const noOther = row.pokalistPendingCount || 0;
-        const rem = row.rectifiedCount || 0;
-        const shart = (row.govtDeptsShartbhang || 0) + (row.privateShartbhang || 0);
+        const count712 = Number(row.total712Count || row.totalGovtLandCount || 0);
+        const areaHa = parseFloat(row.totalArea || row.totalAreaHa || 0);
+        const c1 = Number(row.c1Count ?? row.c1Surveys ?? 0);
+        const c1A = parseFloat(row.c1Area || 0);
+        const c2 = Number(row.c2Count ?? row.c2Surveys ?? 0);
+        const c2A = parseFloat(row.c2Area || 0);
+        const conv = Number(row.convCount ?? row.convSurveys ?? 0);
+        const convA = parseFloat(row.convArea || 0);
+        const noOther = Number(row.noOtherCount ?? row.noOtherSurveys ?? 0);
+        const noOtherA = parseFloat(row.noOtherArea || 0);
+        const del = Number(row.delCount ?? row.delSurveys ?? 0);
+        const delA = parseFloat(row.delArea || 0);
+        const shart = Number(row.shartCount ?? row.shartSurveys ?? ((row.govtDeptsShartbhang || 0) + (row.privateShartbhang || 0)) ?? 0);
+        const shartA = parseFloat(row.shartArea || 0);
 
         const dr = wsSummary.addRow([
           idx + 1,
           nameVal,
           count712,
           Number(areaHa.toFixed(2)),
-          c1, Number((c1 * 1.5).toFixed(2)),
-          c2, Number((c2 * 1.75).toFixed(2)),
-          conv, Number((conv * 1.8).toFixed(2)),
-          noOther, Number((noOther * 1.6).toFixed(2)),
-          rem, Number((rem * 1.7).toFixed(2)),
-          shart, Number((shart * 1.9).toFixed(2))
+          c1, Number(c1A.toFixed(2)),
+          c2, Number(c2A.toFixed(2)),
+          conv, Number(convA.toFixed(2)),
+          noOther, Number(noOtherA.toFixed(2)),
+          del, Number(delA.toFixed(2)),
+          shart, Number(shartA.toFixed(2))
         ]);
         dr.height = 22;
         dr.eachCell((c, colIdx) => {
@@ -2106,7 +2159,11 @@ export async function generateCategoryBookletExcel(catId, summaryData, parcels, 
     ];
   }
 
-  await wb.xlsx.write(res);
+  if (res && (typeof res.setHeader === 'function' || typeof res.write === 'function')) {
+    await wb.xlsx.write(res);
+  } else {
+    return await wb.xlsx.writeBuffer();
+  }
 }
 
 /**
@@ -2155,17 +2212,17 @@ export async function generateCategoryBookletPdf(catId, summaryData, parcels, sc
       totalSurveys: dCount,
       totalAreaHa: dArea.toFixed(2),
       totalArea: dArea.toFixed(2),
-      c1Surveys: sourceRows.reduce((a, b) => a + Number(b.c1Surveys ?? b.c1Count ?? b.govtFound1950Count ?? 0), 0),
+      c1Surveys: sourceRows.reduce((a, b) => a + Number(b.c1Count ?? b.c1Surveys ?? 0), 0),
       c1Area: sourceRows.reduce((a, b) => a + parseFloat(b.c1Area ?? 0), 0).toFixed(2),
-      c2Surveys: sourceRows.reduce((a, b) => a + Number(b.c2Surveys ?? b.c2Count ?? b.pendingRectifyCount ?? 0), 0),
+      c2Surveys: sourceRows.reduce((a, b) => a + Number(b.c2Count ?? b.c2Surveys ?? 0), 0),
       c2Area: sourceRows.reduce((a, b) => a + parseFloat(b.c2Area ?? 0), 0).toFixed(2),
-      convSurveys: sourceRows.reduce((a, b) => a + Number(b.convSurveys ?? b.convCount ?? b.illegalDeletionsCount ?? 0), 0),
+      convSurveys: sourceRows.reduce((a, b) => a + Number(b.convCount ?? b.convSurveys ?? 0), 0),
       convArea: sourceRows.reduce((a, b) => a + parseFloat(b.convArea ?? 0), 0).toFixed(2),
-      noOtherSurveys: sourceRows.reduce((a, b) => a + Number(b.noOtherSurveys ?? b.noOtherCount ?? b.pokalistPendingCount ?? 0), 0),
+      noOtherSurveys: sourceRows.reduce((a, b) => a + Number(b.noOtherCount ?? b.noOtherSurveys ?? 0), 0),
       noOtherArea: sourceRows.reduce((a, b) => a + parseFloat(b.noOtherArea ?? 0), 0).toFixed(2),
-      delSurveys: sourceRows.reduce((a, b) => a + Number(b.delSurveys ?? b.delCount ?? b.rectifiedCount ?? 0), 0),
+      delSurveys: sourceRows.reduce((a, b) => a + Number(b.delCount ?? b.delSurveys ?? 0), 0),
       delArea: sourceRows.reduce((a, b) => a + parseFloat(b.delArea ?? 0), 0).toFixed(2),
-      shartSurveys: sourceRows.reduce((a, b) => a + Number((b.govtDeptsShartbhang || 0) + (b.privateShartbhang || 0) || b.shartSurveys || 0), 0),
+      shartSurveys: sourceRows.reduce((a, b) => a + Number(b.shartCount ?? b.shartSurveys ?? ((b.govtDeptsShartbhang || 0) + (b.privateShartbhang || 0)) ?? 0), 0),
       shartArea: sourceRows.reduce((a, b) => a + parseFloat(b.shartArea ?? 0), 0).toFixed(2),
       companyPermittedCount: sourceRows.reduce((a, b) => a + Number(b.companyPermittedCount || 0), 0),
       companyPermittedArea: sourceRows.reduce((a, b) => a + parseFloat(b.companyPermittedArea || 0), 0).toFixed(2),
@@ -2483,19 +2540,19 @@ export async function generateCategoryBookletPdf(catId, summaryData, parcels, sc
           { text: tribalToNonTribalArea.toFixed(2), style: 'tdRight' }
         ];
       } else {
-        // Standard 16 columns
-        const c1 = Number(r.govtFound1950Count ?? r.c1Surveys ?? r.c1Count ?? Math.floor(cnt * 0.4));
-        const c1A = parseFloat(r.c1Area ?? (c1 * 1.5)) || 0;
-        const c2 = Number(r.pendingRectifyCount ?? r.c2Surveys ?? r.c2Count ?? Math.floor(cnt * 0.6));
-        const c2A = parseFloat(r.c2Area ?? (c2 * 1.75)) || 0;
-        const conv = Number(r.illegalDeletionsCount ?? r.convSurveys ?? r.convCount ?? 0);
-        const convA = parseFloat(r.convArea ?? (conv * 1.8)) || 0;
-        const noOther = Number(r.pokalistPendingCount ?? r.noOtherSurveys ?? r.noOtherCount ?? 0);
-        const noOtherArea = parseFloat(r.noOtherArea ?? (noOther * 1.6)) || 0;
-        const rem = Number(r.rectifiedCount ?? r.delSurveys ?? r.delCount ?? 0);
-        const remArea = parseFloat(r.delArea ?? (rem * 1.7)) || 0;
-        const shart = Number((r.govtDeptsShartbhang || 0) + (r.privateShartbhang || 0) || r.shartSurveys || r.shartCount || 0);
-        const shartA = parseFloat(r.shartArea ?? (shart * 1.9)) || 0;
+        // Standard 16 columns (Strictly real database rollups)
+        const c1 = Number(r.c1Count ?? r.c1Surveys ?? 0);
+        const c1A = parseFloat(r.c1Area ?? 0) || 0;
+        const c2 = Number(r.c2Count ?? r.c2Surveys ?? 0);
+        const c2A = parseFloat(r.c2Area ?? 0) || 0;
+        const conv = Number(r.convCount ?? r.convSurveys ?? 0);
+        const convA = parseFloat(r.convArea ?? 0) || 0;
+        const noOther = Number(r.noOtherCount ?? r.noOtherSurveys ?? 0);
+        const noOtherArea = parseFloat(r.noOtherArea ?? 0) || 0;
+        const rem = Number(r.delCount ?? r.delSurveys ?? 0);
+        const remArea = parseFloat(r.delArea ?? 0) || 0;
+        const shart = Number(r.shartCount ?? r.shartSurveys ?? ((r.govtDeptsShartbhang || 0) + (r.privateShartbhang || 0)) ?? 0);
+        const shartA = parseFloat(r.shartArea ?? 0) || 0;
 
         sums[0] += c1; sums[1] += c1A;
         sums[2] += c2; sums[3] += c2A;

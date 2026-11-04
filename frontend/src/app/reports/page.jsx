@@ -126,10 +126,10 @@ const CHECKLIST_46_COLUMNS = [
   { num: 40, title: 'जमिनीच्या निर्बंधीत सत्ताप्रकारानुसार नोंद इतर अधिकारामध्ये घेण्यात आली आहे काय? (होय / नाही)', titleEn: 'Restricted tenure noted in other rights? (Yes/No)', group: 'statutory', minW: 'min-w-[150px]' },
   { num: 41, title: 'अधिकार अभिलेखापासून ते आजपावेतोच्या अधिकार अभिलेखानुसार इतर अधिकारातील नोंदी/भुधारणा/भोगवटदार यांच्या नोंदी अवैधरित्या कमी केलेल्या आहेत काय? (होय / नाही)', titleEn: 'Have other rights/tenure entries been illegally deleted?', group: 'statutory', minW: 'min-w-[190px]' },
   { num: 42, title: 'भोगवटदार कंपनी/बिगर शेतकरी असल्यास,सदर जमिन वाणिज्य/रहिवास प्रयोजनाकरीता कंपनीने धारण केलेली असल्यास महाराष्ट्र कुळ वहिवाट व शेतजमिन (विदर्भ प्रदेश) अधिनियम 1948 /महाराष्ट्र कुळ वहिवाट व शेतजमिन (हैद्राबाद प्रदेश) अधिनियम 1950 मधील तरतुदीनुसार परवानगी घेतलेली आहे काय ? (होय/नाही)', titleEn: 'Non-farmer/Company occupant taken prior sanction?', group: 'statutory', minW: 'min-w-[220px]' },
-  { num: 43, title: 'सदर जमिन महाराष्ट्र कुळ वहिवाट व शेतजमिन (विदर्भ प्रदेश) अधिनियम 1948 चे कलम 89 व 89 अ/महाराष्ट्र कुळ वहिवाट व शेतजमिन (हैद्राबाद प्रदेश) अधिनियम 1950 चे कलम 47 व 47 अ अन्वये ख-याखु-या औद्योगिक प्रयोजनाकरिता कंपनीने धारण केलेली आहे काय ? (होय/नाही) [खरेदी दिनांक]', titleEn: 'Bonafide industrial holding under Sec 89/89A? [Purchase Date]', group: 'statutory', minW: 'min-w-[210px]' },
-  { num: 44, title: 'वापर सुरू केला आहे काय?', titleEn: 'Has utilization commenced?', group: 'statutory', minW: 'min-w-[110px]' },
-  { num: 45, title: 'विना परवानगी/हस्तांतरण/वापरात बदल झाला आहे काय ?', titleEn: 'Unauthorized transfer or change of land use?', group: 'statutory', minW: 'min-w-[140px]' },
-  { num: 46, title: 'मुद्दा क्र. 10 ते 34 प्रमाणे गाव नमुना 1 क अद्यावत आहे काय ?', titleEn: 'Is Village Form 1-C updated per points 10 to 34?', group: 'statutory', minW: 'min-w-[130px]' }];
+  { num: 43, title: 'खरेदी दिनांक', titleEn: 'Purchase Date', fullTitle: 'कलम ८९/८९अ - खरेदी दिनांक', fullTitleEn: 'Sec 89/89A - Purchase Date', group: 'statutory', minW: 'w-[140px] min-w-[140px]' },
+  { num: 44, title: 'वापर सुरू केला आहे काय?', titleEn: 'Has utilization commenced?', fullTitle: 'कलम ८९/८९अ - वापर सुरू केला आहे काय?', fullTitleEn: 'Sec 89/89A - Has utilization commenced?', group: 'statutory', minW: 'w-[140px] min-w-[140px]' },
+  { num: 45, title: 'विना परवानगी/हस्तांतरण/वापरात बदल झाला आहे काय ?', titleEn: 'Unauthorized transfer or change of land use?', fullTitle: 'कलम ८९/८९अ - विना परवानगी/हस्तांतरण/वापरात बदल झाला आहे काय ?', fullTitleEn: 'Sec 89/89A - Unauthorized transfer or change of land use?', group: 'statutory', minW: 'w-[180px] min-w-[180px]' },
+  { num: 46, title: 'मुद्दा क्र. 10 ते 34 प्रमाणे गाव नमुना 1 क अद्यावत आहे काय ?', titleEn: 'Is Village Form 1-C updated per points 10 to 34?', fullTitle: 'मुद्दा क्र. 10 ते 34 प्रमाणे गाव नमुना 1 क अद्यावत आहे काय ?', fullTitleEn: 'Is Village Form 1-C updated per points 10 to 34?', group: 'statutory', minW: 'w-[160px] min-w-[160px]' }];
 
 export default function ReportsPage() {
   const { isMarathi } = useTranslation();
@@ -171,6 +171,7 @@ export default function ReportsPage() {
   // Active localized display labels for selected Taluka and Village
   const talukaDisplay = taluka && taluka !== 'all' && taluka !== 'सर्व तालुके' ? formatTalukaName(taluka, isMarathi) : '';
   const villageDisplay = village && village !== 'all' && village !== 'सर्व गावे' ? formatVillageName(village, isMarathi) : '';
+  const isSingleVillage = Boolean(village && village !== 'all' && village !== 'सर्व गावे');
 
   // View state:
   // For 'checklist': 'timeline', 'parcels'
@@ -521,15 +522,31 @@ export default function ReportsPage() {
     );
   }, []);
 
-  // Compute aggregate metrics
+  // Compute aggregate metrics with strict contextual scoping
   const stats = useMemo(() => {
-    const hasSearchOrSpecificFilter = Boolean(appliedFilters.search || appliedFilters.tenure !== 'all' || appliedFilters.violation !== 'all');
+    const isSingleVillageActive = Boolean(appliedFilters.village && appliedFilters.village !== 'all' && appliedFilters.village !== 'सर्व गावे');
+    const hasSearchOrSpecificFilter = Boolean(
+      appliedFilters.search ||
+      appliedFilters.tenure !== 'all' ||
+      appliedFilters.violation !== 'all' ||
+      isSingleVillageActive
+    );
+
+    // When inspecting macro Taluka or Whole District without a single-village filter
     if (serverRollup?.districtTotal && !hasSearchOrSpecificFilter) {
+      const isWholeDistrict = !appliedFilters.taluka || appliedFilters.taluka === 'all' || appliedFilters.taluka === 'सर्व तालुके';
       return {
         totalCount: serverRollup.districtTotal.total712Count,
         totalAreaHa: serverRollup.districtTotal.totalArea,
         class2Count: serverRollup.districtTotal.c2Count,
-        shartbhangCount: serverRollup.districtTotal.shartCount
+        shartbhangCount: serverRollup.districtTotal.shartCount,
+        isMacroScope: true,
+        scopeBadge: isWholeDistrict
+          ? (isMarathi ? 'जिल्हा स्तर' : 'DISTRICT')
+          : (isMarathi ? 'तालुका स्तर' : 'TALUKA'),
+        scopeLabel: isWholeDistrict
+          ? (isMarathi ? 'चंद्रपूर जिल्हा एकत्रित' : 'Chandrapur District Total')
+          : (isMarathi ? `${formatTalukaName(appliedFilters.taluka, true)} तालुका एकत्रित` : `${formatTalukaName(appliedFilters.taluka, false)} Taluka Total`)
       };
     }
 
@@ -552,9 +569,16 @@ export default function ReportsPage() {
       totalCount: parcels.length,
       totalAreaHa: totalArea.toFixed(2),
       class2Count,
-      shartbhangCount
+      shartbhangCount,
+      isMacroScope: false,
+      scopeBadge: isSingleVillageActive
+        ? (isMarathi ? 'गाव स्तर' : 'VILLAGE')
+        : (isMarathi ? 'फिल्टर' : 'FILTERED'),
+      scopeLabel: isSingleVillageActive
+        ? (isMarathi ? `${formatVillageName(appliedFilters.village, true)} गाव तपासणी` : `${formatVillageName(appliedFilters.village, false)} Village Audited`)
+        : (isMarathi ? 'तपासणी केलेले ७/१२' : 'Audited 7/12 Records')
     };
-  }, [serverRollup, parcels, appliedFilters, isClass2Parcel, isViolationParcel]);
+  }, [serverRollup, parcels, appliedFilters, isClass2Parcel, isViolationParcel, isMarathi]);
 
   // Dynamic rollup computed from filtered parcels for 100% mathematical accuracy across all views
   const dynamicRollup = useMemo(() => {
@@ -730,8 +754,8 @@ export default function ReportsPage() {
     ...CHECKLIST_46_COLUMNS.map(col => ({
       key: `point_${col.num}`,
       num: col.num,
-      titleMr: col.title,
-      titleEn: col.titleEn || col.title,
+      titleMr: col.fullTitle || col.title,
+      titleEn: col.fullTitleEn || col.titleEn || col.title,
       getValue: (p) => {
         const val = p.points ? p.points[col.num] : '';
         return (val !== undefined && val !== null) ? String(val).trim() : '';
@@ -1142,8 +1166,10 @@ export default function ReportsPage() {
       const rawConvArea = r.convArea !== undefined ? r.convArea : '0.00';
       const rawNoOtherSurveys = Number(r.noOtherCount !== undefined ? r.noOtherCount : (r.pokalistPendingCount || 0));
       const rawNoOtherArea = r.noOtherArea !== undefined ? r.noOtherArea : '0.00';
-      const rawDelSurveys = Number(r.delCount !== undefined ? r.delCount : (r.illegalReductionCount !== undefined ? r.illegalReductionCount : (r.shartCount || 0)));
-      const rawDelArea = r.delArea !== undefined ? r.delArea : (r.delAreaHa !== undefined ? r.delAreaHa : (r.shartArea !== undefined ? r.shartArea : '0.00'));
+      const rawDelSurveys = Number(r.delCount !== undefined ? r.delCount : (r.illegalReductionCount !== undefined ? r.illegalReductionCount : 0));
+      const rawDelArea = r.delArea !== undefined ? r.delArea : (r.delAreaHa !== undefined ? r.delAreaHa : '0.00');
+      const rawShartSurveys = Number(r.shartCount !== undefined ? r.shartCount : (r.shartSurveys !== undefined ? r.shartSurveys : 0));
+      const rawShartArea = r.shartArea !== undefined ? r.shartArea : (r.shartAreaHa !== undefined ? r.shartAreaHa : '0.00');
 
       return {
         id: rowKey,
@@ -1163,6 +1189,8 @@ export default function ReportsPage() {
         noOtherArea: edit?.noOtherArea !== undefined ? Number(edit.noOtherArea).toFixed(2) : Number(rawNoOtherArea).toFixed(2),
         delSurveys: edit?.delSurveys !== undefined ? Number(edit.delSurveys) : rawDelSurveys,
         delArea: edit?.delArea !== undefined ? Number(edit.delArea).toFixed(2) : Number(rawDelArea).toFixed(2),
+        shartSurveys: edit?.shartSurveys !== undefined ? Number(edit.shartSurveys) : rawShartSurveys,
+        shartArea: edit?.shartArea !== undefined ? Number(edit.shartArea).toFixed(2) : Number(rawShartArea).toFixed(2),
         hasEdit: Boolean(edit)
       };
     };
@@ -1189,6 +1217,8 @@ export default function ReportsPage() {
         noOtherArea: source.reduce((a, b) => a + parseFloat(b.noOtherArea), 0).toFixed(2),
         delSurveys: source.reduce((a, b) => a + b.delSurveys, 0),
         delArea: source.reduce((a, b) => a + parseFloat(b.delArea), 0).toFixed(2),
+        shartSurveys: source.reduce((a, b) => a + (b.shartSurveys || 0), 0),
+        shartArea: source.reduce((a, b) => a + parseFloat(b.shartArea || 0), 0).toFixed(2),
       }];
     }
 
@@ -1453,6 +1483,8 @@ export default function ReportsPage() {
     const sumNoA = rows.reduce((a, b) => a + parseFloat(b.noOtherArea || 0), 0).toFixed(2);
     const sumDel = rows.reduce((a, b) => a + Number(b.delSurveys || 0), 0);
     const sumDelA = rows.reduce((a, b) => a + parseFloat(b.delArea || 0), 0).toFixed(2);
+    const sumShart = rows.reduce((a, b) => a + Number(b.shartSurveys || 0), 0);
+    const sumShartA = rows.reduce((a, b) => a + parseFloat(b.shartArea || 0), 0).toFixed(2);
 
     return (
       <div className="space-y-0 mb-6 bg-white rounded-xl shadow-xs border border-slate-300 overflow-hidden">
@@ -1489,6 +1521,9 @@ export default function ReportsPage() {
                 <th colSpan={2} className="py-1.5 px-2 border-r border-slate-300 bg-emerald-50/70 text-emerald-950 font-black">
                   {isMarathi ? 'अवैधरित्या इतर अधिकारामधून नोंद कमी केलेल्या जमिनी' : 'Illegally Deleted From Other Rights'}
                 </th>
+                <th colSpan={2} className="py-1.5 px-2 border-r border-slate-300 bg-red-50 text-red-950 font-black">
+                  {isMarathi ? 'शर्तभंग झालेल्या जमिनी' : 'Condition Breach Lands'}
+                </th>
                 <th rowSpan={2} className="py-2.5 px-2 w-20 text-center border-l border-slate-300 bg-slate-100/80">
                   {isMarathi ? 'कृती' : 'Action'}
                 </th>
@@ -1505,6 +1540,8 @@ export default function ReportsPage() {
                 <th className="py-1.5 px-1.5 border-r border-slate-300 w-20 text-right text-purple-900">{isMarathi ? 'एकूण क्षेत्र(हे.आर.)' : 'Area (Ha.R)'}</th>
                 <th className="py-1.5 px-1.5 border-r border-slate-300 w-16 text-emerald-900">{isMarathi ? 'एकूण सर्व्हे क्रमांक' : 'Survey No.'}</th>
                 <th className="py-1.5 px-1.5 border-r border-slate-300 w-20 text-right text-emerald-900">{isMarathi ? 'एकूण क्षेत्र(हे.आर.)' : 'Area (Ha.R)'}</th>
+                <th className="py-1.5 px-1.5 border-r border-slate-300 w-16 text-red-900">{isMarathi ? 'एकूण सर्व्हे क्रमांक' : 'Survey No.'}</th>
+                <th className="py-1.5 px-1.5 border-r border-slate-300 w-20 text-right text-red-900">{isMarathi ? 'एकूण क्षेत्र(हे.आर.)' : 'Area (Ha.R)'}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200">
@@ -1661,6 +1698,26 @@ export default function ReportsPage() {
                               className="w-full px-1.5 py-0.5 text-xs text-right border border-emerald-400 rounded bg-white font-mono focus:outline-emerald-600 text-emerald-800"
                             />
                           </td>
+                          {/* Condition Breach (Shartbhang) */}
+                          <td className="py-1 px-1 border-r border-slate-200">
+                            <input
+                              type="number"
+                              min="0"
+                              value={editFormData.shartSurveys ?? ''}
+                              onChange={(e) => setEditFormData(prev => ({ ...prev, shartSurveys: e.target.value }))}
+                              className="w-full px-1.5 py-0.5 text-xs text-center border border-red-400 rounded bg-white font-mono focus:outline-red-600 text-red-800"
+                            />
+                          </td>
+                          <td className="py-1 px-1 border-r border-slate-200">
+                            <input
+                              type="number"
+                              step="0.01"
+                              min="0"
+                              value={editFormData.shartArea ?? ''}
+                              onChange={(e) => setEditFormData(prev => ({ ...prev, shartArea: e.target.value }))}
+                              className="w-full px-1.5 py-0.5 text-xs text-right border border-red-400 rounded bg-white font-mono focus:outline-red-600 text-red-800"
+                            />
+                          </td>
                           {/* Action Buttons */}
                           <td className="py-1 px-1 text-center">
                             <div className="flex items-center justify-center gap-1">
@@ -1732,6 +1789,14 @@ export default function ReportsPage() {
                             {row.delArea}
                           </td>
 
+                          {/* Condition Breach (Shartbhang) */}
+                          <td className="py-2 px-1.5 text-center border-r border-slate-200 font-mono text-red-700 font-bold">
+                            {row.shartSurveys || 0}
+                          </td>
+                          <td className="py-2 px-1.5 text-right border-r border-slate-200 font-mono text-red-600">
+                            {row.shartArea || '0.00'}
+                          </td>
+
                           {/* Edit Action Button */}
                           <td className="py-1 px-1 text-center">
                             <button
@@ -1801,6 +1866,13 @@ export default function ReportsPage() {
                   </td>
                   <td className="py-2.5 px-1.5 text-right border-r border-slate-300 font-mono font-black text-emerald-900">
                     {sumDelA}
+                  </td>
+                  {/* Condition Breach Total */}
+                  <td className="py-2.5 px-1.5 text-center border-r border-slate-300 font-mono font-black text-red-900">
+                    {sumShart}
+                  </td>
+                  <td className="py-2.5 px-1.5 text-right border-r border-slate-300 font-mono font-black text-red-900">
+                    {sumShartA}
                   </td>
                   <td className="py-2.5 px-2 text-center text-slate-400">
                     -
@@ -3006,6 +3078,33 @@ export default function ReportsPage() {
         )}
 
         {/* =========================================================
+            FILTER PENDING CONFIRMATION ALERT BANNER
+        ========================================================= */}
+        {isFilterPending && (
+          <div className="bg-amber-50/95 border border-amber-300 text-amber-950 rounded-xl px-3.5 py-2 text-xs flex flex-wrap items-center justify-between gap-2 shadow-2xs animate-in fade-in">
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="relative flex h-2.5 w-2.5 shrink-0">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-500"></span>
+              </span>
+              <span className="font-semibold text-[11px] sm:text-xs">
+                {isMarathi
+                  ? `तुम्ही नवीन निकष निवडले आहेत (${draftTaluka !== 'all' ? draftTaluka : 'चंद्रपूर'}${draftVillage !== 'all' ? ` / ${draftVillage}` : ''}). माहिती अद्ययावत करण्यासाठी 'लागू करा' वर क्लिक करा.`
+                  : `Filter criteria changed (${draftTaluka !== 'all' ? draftTaluka : 'Chandrapur'}${draftVillage !== 'all' ? ` / ${draftVillage}` : ''}). Click 'Apply' to reload cards and records.`}
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={handleApplyFilters}
+              disabled={loading}
+              className="px-3 py-1 bg-amber-600 hover:bg-amber-700 text-white rounded-lg font-bold text-xs shrink-0 cursor-pointer shadow-2xs transition active:scale-95"
+            >
+              {isMarathi ? 'आता लागू करा (Apply)' : 'Apply Now'}
+            </button>
+          </div>
+        )}
+
+        {/* =========================================================
             METRICS KPI STRIP (Hidden in Goshwara View & Prapatra 1 to 5)
         ========================================================= */}
         {activeTab !== 'renumbering' && !isGoshwaraView && (
@@ -3028,11 +3127,9 @@ export default function ReportsPage() {
               <span className={`text-[11px] font-bold transition ${selectedKpiFilter === 'all' ? 'text-sky-950 font-black' : 'text-slate-700 group-hover:text-sky-950'}`}>
                 {isMarathi ? 'एकूण सर्व्हे / गट संख्या' : 'Total Survey / Gat Parcels'}
               </span>
-              {selectedKpiFilter === 'all' && (
-                <span className="text-[9px] font-extrabold px-1.5 py-0.5 bg-sky-600 text-white rounded-md tracking-wider shadow-2xs">
-                  {isMarathi ? 'सर्व' : 'ALL'}
-                </span>
-              )}
+              <span className="text-[9px] font-extrabold px-1.5 py-0.5 bg-sky-600 text-white rounded-md tracking-wider shadow-2xs">
+                {stats.scopeBadge || (isMarathi ? 'सर्व' : 'ALL')}
+              </span>
             </div>
             {loading ? (
               <div className="h-7 w-20 bg-sky-100/70 animate-pulse rounded-lg mt-1 flex items-center">
@@ -3042,8 +3139,8 @@ export default function ReportsPage() {
               <div className="text-xl font-black text-slate-900 group-hover:text-sky-950 mt-1 font-mono">{stats.totalCount}</div>
             )}
             <div className="flex items-center justify-between text-[10px] mt-0.5">
-              <span className="text-slate-500 font-medium">
-                {isMarathi ? 'तपासणी केलेले ७/१२' : 'Audited 7/12 Records'}
+              <span className="text-slate-500 font-medium max-w-[140px]" title={stats.scopeLabel}>
+                {stats.scopeLabel || (isMarathi ? 'तपासणी केलेले ७/१२' : 'Audited 7/12 Records')}
               </span>
               <span className={`text-[9px] font-bold transition flex items-center gap-0.5 ${loading ? 'text-sky-600 animate-pulse' : selectedKpiFilter === 'all' ? 'text-sky-700' : 'text-slate-400 group-hover:text-sky-600'}`}>
                 {loading
@@ -3254,7 +3351,7 @@ export default function ReportsPage() {
                       ? `${activeCategoryRollupCount} ${isMarathi ? 'गोषवारा नोंदी' : 'Summary Records'}`
                       : (selectedKpiFilter !== 'all' || (violationFilter && violationFilter !== 'all') || (tenureFilter && tenureFilter !== 'all') || (search && search.trim()))
                       ? `${kpiFilteredParcels.length} ${isMarathi ? 'अभिलेख (फिल्टर)' : 'Records (Filtered)'}`
-                      : `${serverRollup?.districtTotal?.total712Count ?? parcels.length} ${isMarathi ? 'अभिलेख' : 'Records'}`
+                      : `${isSingleVillage ? parcels.length : (serverRollup?.districtTotal?.total712Count ?? parcels.length)} ${isMarathi ? 'अभिलेख' : 'Records'}`
                   )}
                 </span>
               </div>
@@ -3291,6 +3388,19 @@ export default function ReportsPage() {
                   >
                     <TableProperties className="w-3.5 h-3.5" />
                     <span>{isMarathi ? 'संक्षिप्त ७/१२ यादी' : 'Compact 7/12 List'}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setActiveView('summary')}
+                    className={`px-3 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shrink-0 ${
+                      activeView === 'summary'
+                        ? 'bg-slate-900 text-white shadow-2xs font-extrabold'
+                        : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    <Layers className="w-3.5 h-3.5 text-indigo-400" />
+                    <span>{isMarathi ? 'गावाचा गोषवारा (१६ रकाने)' : 'Village Summary (16 Cols)'}</span>
                   </button>
                 </div>
               )}
@@ -3335,7 +3445,7 @@ export default function ReportsPage() {
                     <FileSpreadsheet className="w-3.5 h-3.5 text-indigo-700" />
                     <span>{isMarathi ? 'सविस्तर ७/१२ यादी' : 'Detailed 7/12 List'}</span>
                     <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-indigo-100 text-indigo-900 font-mono font-bold">
-                      {selectedKpiFilter !== 'all' ? `${kpiFilteredParcels.length} / ${parcels.length}` : (serverRollup?.districtTotal?.total712Count ?? parcels.length)}
+                      {selectedKpiFilter !== 'all' ? `${kpiFilteredParcels.length} / ${parcels.length}` : (isSingleVillage ? parcels.length : (serverRollup?.districtTotal?.total712Count ?? parcels.length))}
                     </span>
                   </button>
                 </div>
@@ -3946,10 +4056,10 @@ export default function ReportsPage() {
                           </tr>
                         ) : (
                           paginatedParcels.map((p, idx) => {
-                            const hasPermit = p.auditPoints?.point_41 === 'होय' || p.tenancy89ARecords?.[0]?.isGenuineIndustrialUse || p.metadata?.auditPoints?.point_41 === 'होय';
+                            const hasPermit = p.auditPoints?.point_42 === 'होय' || p.auditPoints?.point_41 === 'होय' || p.tenancy89ARecords?.[0]?.isGenuineIndustrialUse || p.metadata?.auditPoints?.point_42 === 'होय' || p.metadata?.auditPoints?.point_41 === 'होय';
                             const usageBreach = p.metadata?.auditPoints?.point_44 === 'नाही' || p.metadata?.auditPoints?.point_45_usage === 'होय' || (p.forwardCases?.some(fc => fc.violationType === 'UNAUTHORIZED_NA_CONVERSION'));
                             const transferBreach = p.metadata?.auditPoints?.point_45_transfer === 'होय' || p.tenancy89ARecords?.[0]?.unauthorizedTransfer || (p.forwardCases?.some(fc => fc.violationType === 'SHARTBHANG' || fc.violationType === 'TRIBAL_LAND_VIOLATION'));
-                            const otherRightsNoted = p.auditPoints?.point_39 === 'होय' || (p.metadata?.otherRights && p.metadata?.otherRights !== '-' && p.metadata?.otherRights !== '....');
+                            const otherRightsNoted = p.auditPoints?.point_40 === 'होय' || p.auditPoints?.point_39 === 'होय' || (p.metadata?.otherRights && p.metadata?.otherRights !== '-' && p.metadata?.otherRights !== '....');
 
                             return (
                               <tr key={p.id || idx} className={`hover:bg-slate-50/80 transition ${usageBreach || transferBreach ? 'bg-rose-50/25' : ''}`}>
@@ -4186,9 +4296,63 @@ export default function ReportsPage() {
             )
           ) : (
             /* =========================================================
-                TAB 1: 1 TO 46 MASTER CHECKLIST AUDIT (TIMELINE OR PARCELS)
+                TAB 1: 1 TO 46 MASTER CHECKLIST AUDIT (SUMMARY, TIMELINE OR PARCELS)
             ========================================================= */
-            activeView === 'timeline' ? (
+            activeView === 'summary' ? (
+              <div className="p-4 sm:p-6 bg-slate-50/50 min-h-[600px] space-y-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 rounded-xl border border-slate-200 shadow-2xs">
+                  <div>
+                    <div className="inline-flex items-center gap-2 px-2.5 py-0.5 bg-blue-100 text-blue-900 rounded-full text-[11px] font-bold mb-1 border border-blue-200">
+                      <Layers className="w-3.5 h-3.5 text-blue-700" />
+                      <span>{isMarathi ? 'मास्टर चेकलिस्ट गोषवारा (१६ रकाने अधिकृत नमुना)' : 'Master Checklist Goshwara (16 Columns)'}</span>
+                    </div>
+                    <h3 className="text-base sm:text-lg font-black text-slate-900 tracking-tight">
+                      {isMarathi ? 'गाव, तालुका व जिल्हास्तरीय एकत्रित महसूल गोषवारा' : 'Village, Taluka & District Revenue Summary Rollup'}
+                    </h3>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      {isMarathi
+                        ? `कार्यक्षेत्र: ${formatScopeText(activeScope, true)} | एकूण गावे: ${categoryVillageRows.length}`
+                        : `Scope: ${formatScopeText(activeScope, false)} | Total Villages: ${categoryVillageRows.length}`}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => handleDownload('excel')}
+                      disabled={downloadingExcel}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg text-xs font-bold transition shadow-2xs cursor-pointer disabled:opacity-50"
+                    >
+                      <Download className="w-3.5 h-3.5" />
+                      <span>{downloadingExcel ? (isMarathi ? 'तयार होत आहे...' : 'Generating...') : (isMarathi ? 'एक्सेल गोषवारा (.xlsx)' : 'Excel (.xlsx)')}</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleDownload('pdf')}
+                      disabled={downloadingPdf}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-rose-700 hover:bg-rose-800 text-white rounded-lg text-xs font-bold transition shadow-2xs cursor-pointer disabled:opacity-50"
+                    >
+                      <FileText className="w-3.5 h-3.5" />
+                      <span>{downloadingPdf ? (isMarathi ? 'तयार होत आहे...' : 'Generating...') : (isMarathi ? 'पीडीएफ गोषवारा (.pdf)' : 'PDF (.pdf)')}</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* 1. Village Goshwara */}
+                {categoryVillageRows.length > 0 && (
+                  renderCategoryGeneralGoshwaraSection(isMarathi ? 'गावाचा गोषवारा' : 'Village Goshwara', isMarathi ? 'गावाचे नाव' : 'Village Name', categoryVillageRows, 'village')
+                )}
+
+                {/* 2. Taluka Goshwara */}
+                {categoryTalukaRows.length > 0 && (
+                  renderCategoryGeneralGoshwaraSection(isMarathi ? 'तालुक्याचा गोषवारा' : 'Taluka Goshwara', isMarathi ? 'तालुक्याचे नाव' : 'Taluka Name', categoryTalukaRows, 'taluka')
+                )}
+
+                {/* 3. District Goshwara */}
+                {categoryDistrictRows.length > 0 && (
+                  renderCategoryGeneralGoshwaraSection(isMarathi ? 'जिल्हाचा गोषवारा' : 'District Goshwara', isMarathi ? 'जिल्हाचे नाव' : 'District Name', categoryDistrictRows, 'district')
+                )}
+              </div>
+            ) : activeView === 'timeline' ? (
             <div>
               {/* Official Government Table Title Header Banner */}
               <div className="p-4 bg-gradient-to-r from-amber-50 via-blue-50/50 to-indigo-50 border-b border-slate-200 flex flex-col items-center text-center">
@@ -4348,12 +4512,42 @@ export default function ReportsPage() {
 
                       {/* 1 to 46 Columns */}
                       {CHECKLIST_46_COLUMNS.map(col => {
+                        if (col.num === 43) {
+                          const isGroupActive = selectedCell?.view === 'timeline' &&
+                            (selectedCell?.colKey === 'point_43' || selectedCell?.colKey === 'point_44' || selectedCell?.colKey === 'point_45');
+                          return (
+                            <th
+                              key="sec_89_89a_super"
+                              colSpan={3}
+                              className={`py-2 px-3 border-r border-slate-300 text-center text-[11px] font-extrabold align-middle transition border-b border-slate-300 w-[460px] max-w-[460px] whitespace-normal break-words ${
+                                isGroupActive
+                                  ? 'bg-purple-200 text-purple-950 ring-2 ring-inset ring-purple-600'
+                                  : 'bg-purple-100/70 text-purple-950'
+                              }`}
+                              title={
+                                isMarathi
+                                  ? 'सदर जमीन महाराष्ट्र कुळ वहिवाट व शेतजमीन (विदर्भ प्रदेश) अधिनियम 1948 चे कलम 89 व 89 अ/महाराष्ट्र कुळ वहिवाट व शेतजमीन (हैद्राबाद प्रदेश) अधिनियम 1950 चे कलम 47 व 47 अ अन्वये ख-याखु-या औद्योगिक प्रयोजनाकरिता कंपनीने धारण केलेली आहे काय ? (होय/नाही)'
+                                  : 'Is land held by company for bonafide industrial purpose under Sec 89 & 89-A (Vidarbha) / Sec 47 & 47-A (Hyderabad)? (Yes/No)'
+                              }
+                            >
+                              <div className="pt-1 pb-1 leading-snug whitespace-normal break-words max-w-[440px] mx-auto text-center">
+                                {isMarathi
+                                  ? 'सदर जमीन महाराष्ट्र कुळ वहिवाट व शेतजमीन (विदर्भ प्रदेश) अधिनियम 1948 चे कलम 89 व 89 अ/महाराष्ट्र कुळ वहिवाट व शेतजमीन (हैद्राबाद प्रदेश) अधिनियम 1950 चे कलम 47 व 47 अ अन्वये ख-याखु-या औद्योगिक प्रयोजनाकरिता कंपनीने धारण केलेली आहे काय ? (होय/नाही)'
+                                  : 'Is land held by company for bonafide industrial purpose under Sec 89 & 89-A (Vidarbha) / Sec 47 & 47-A (Hyderabad)? (Yes/No)'}
+                              </div>
+                            </th>
+                          );
+                        }
+                        if (col.num === 44 || col.num === 45) {
+                          return null; // Grouped under col 43 super header
+                        }
+
                         const isColActive = selectedCell?.view === 'timeline' && selectedCell?.colKey === `point_${col.num}`;
                         return (
                           <th
                             key={col.num}
                             rowSpan={2}
-                            className={`py-2 px-3 border-r border-slate-200 ${col.minW} text-left text-[11px] font-bold align-middle transition ${
+                            className={`py-2 px-3 border-r border-slate-200 ${col.minW} text-left text-[11px] font-bold align-middle whitespace-normal break-words transition ${
                               isColActive
                                 ? 'bg-blue-200 text-blue-950 font-black ring-2 ring-inset ring-blue-500'
                                 : col.group === 'renumbering'
@@ -4364,7 +4558,7 @@ export default function ReportsPage() {
                             }`}
                             title={isMarathi ? col.title : (col.titleEn || col.title)}
                           >
-                            <div className="pt-1 pb-1 leading-relaxed overflow-visible">
+                            <div className="pt-1 pb-1 leading-snug whitespace-normal break-words">
                               {isMarathi ? col.title : (col.titleEn || col.title)}
                             </div>
                           </th>
@@ -4372,7 +4566,7 @@ export default function ReportsPage() {
                       })}
                     </tr>
 
-                    {/* Level 3: Area Sub-headers (कृषक व अकृषक) */}
+                    {/* Level 3: Area Sub-headers (कृषक व अकृषक) & Section 89/89A Sub-headers (43, 44, 45) */}
                     <tr className="bg-slate-100 text-slate-700 font-bold border-b border-slate-300 text-center text-[10px]">
                       <th className={`py-1.5 px-2 border-r border-slate-300 w-20 text-right transition-colors ${
                         selectedCell?.view === 'timeline' && selectedCell?.colKey === 'krushakArea'
@@ -4387,6 +4581,39 @@ export default function ReportsPage() {
                           : 'bg-slate-100 text-slate-600'
                       }`}>
                         {isMarathi ? 'अकृषक (आर चौ.मी)' : 'Non-Agri (R.Sq.m)'}
+                      </th>
+
+                      {/* Col 43 Sub-header: खरेदी दिनांक */}
+                      <th className={`py-1.5 px-2 border-r border-slate-300 w-[140px] min-w-[140px] max-w-[140px] whitespace-normal break-words text-center text-[10.5px] font-bold align-middle transition-colors ${
+                        selectedCell?.view === 'timeline' && selectedCell?.colKey === 'point_43'
+                          ? 'bg-blue-200 text-blue-950 font-black ring-2 ring-inset ring-blue-500'
+                          : 'bg-purple-50/80 text-purple-950'
+                      }`} title={isMarathi ? 'खरेदी दिनांक' : 'Purchase Date'}>
+                        <div className="whitespace-normal break-words text-center leading-tight">
+                          {isMarathi ? 'खरेदी दिनांक' : 'Purchase Date'}
+                        </div>
+                      </th>
+
+                      {/* Col 44 Sub-header: वापर सुरू केला आहे काय? */}
+                      <th className={`py-1.5 px-2 border-r border-slate-300 w-[140px] min-w-[140px] max-w-[140px] whitespace-normal break-words text-center text-[10.5px] font-bold align-middle transition-colors ${
+                        selectedCell?.view === 'timeline' && selectedCell?.colKey === 'point_44'
+                          ? 'bg-blue-200 text-blue-950 font-black ring-2 ring-inset ring-blue-500'
+                          : 'bg-purple-50/80 text-purple-950'
+                      }`} title={isMarathi ? 'वापर सुरू केला आहे काय?' : 'Has utilization commenced?'}>
+                        <div className="whitespace-normal break-words text-center leading-tight">
+                          {isMarathi ? 'वापर सुरू केला आहे काय?' : 'Has utilization commenced?'}
+                        </div>
+                      </th>
+
+                      {/* Col 45 Sub-header: विना परवानगी/हस्तांतरण/वापरात बदल झाला आहे काय ? */}
+                      <th className={`py-1.5 px-2 border-r border-slate-300 w-[180px] min-w-[180px] max-w-[180px] whitespace-normal break-words text-center text-[10.5px] font-bold align-middle transition-colors ${
+                        selectedCell?.view === 'timeline' && selectedCell?.colKey === 'point_45'
+                          ? 'bg-blue-200 text-blue-950 font-black ring-2 ring-inset ring-blue-500'
+                          : 'bg-purple-50/80 text-purple-950'
+                      }`} title={isMarathi ? 'विना परवानगी/हस्तांतरण/वापरात बदल झाला आहे काय ?' : 'Unauthorized transfer or change of land use?'}>
+                        <div className="whitespace-normal break-words text-center leading-tight">
+                          {isMarathi ? 'विना परवानगी/हस्तांतरण/वापरात बदल झाला आहे काय ?' : 'Unauthorized transfer / change of use?'}
+                        </div>
                       </th>
                     </tr>
 
@@ -4408,6 +4635,8 @@ export default function ReportsPage() {
                             className={`py-1 border-r border-slate-200 transition ${
                               isColActive
                                 ? 'bg-blue-600 text-white font-black'
+                                : col.num >= 43 && col.num <= 45
+                                ? 'bg-purple-200 text-purple-950 font-black'
                                 : col.group === 'renumbering'
                                 ? 'bg-amber-200 text-amber-950 font-bold'
                                 : col.group === 'govt'
@@ -4669,7 +4898,7 @@ export default function ReportsPage() {
                               return (
                                 <td
                                   key={col.num}
-                                  onClick={() => handleSelectCell('timeline', idx, colKey, colIdx, isMarathi ? col.title : (col.titleEn || col.title), targetLabel, val, p)}
+                                  onClick={() => handleSelectCell('timeline', idx, colKey, colIdx, isMarathi ? (col.fullTitle || col.title) : (col.fullTitleEn || col.titleEn || col.title), targetLabel, val, p)}
                                   onDoubleClick={() => handleCopyCellText(val)}
                                   className={`py-2 px-2.5 border-r border-slate-100 text-[11px] cursor-pointer transition select-text ${
                                     isSelected
@@ -5500,8 +5729,8 @@ export default function ReportsPage() {
                             <span className="font-mono text-[10px] font-bold text-slate-400 w-6 text-right shrink-0">
                               {col.num}.
                             </span>
-                            <span className="text-slate-700 truncate" title={isMarathi ? col.title : (col.titleEn || col.title)}>
-                              {isMarathi ? col.title : (col.titleEn || col.title)}
+                            <span className="text-slate-700 truncate" title={isMarathi ? (col.fullTitle || col.title) : (col.fullTitleEn || col.titleEn || col.title)}>
+                              {isMarathi ? (col.fullTitle || col.title) : (col.fullTitleEn || col.titleEn || col.title)}
                             </span>
                           </div>
                           <div className="shrink-0">

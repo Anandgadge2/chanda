@@ -1466,6 +1466,12 @@ export const getPrapatraReport = async (req, res) => {
     });
 
     // High-precision Rollup Calculation (Sheet 2 format) across all records with active filters
+    // When generating the 16-column village Goshwara (for master checklist or subject booklets 1-17),
+    // compute the complete village land baseline so Class 1 and Class 2 counts are accurately reflected
+    const isCategory18 = prapatraNum === 18;
+    const rollupPrapatraNum = isCategory18 ? 18 : 0;
+    const rollupBooklet = isCategory18 ? 'true' : 'false';
+
     const dynamicRollupData = await calculateDynamicGoshwaraRollup({
       taluka,
       village,
@@ -1473,8 +1479,8 @@ export const getPrapatraReport = async (req, res) => {
       tenure,
       violation,
       areaRange,
-      prapatraNum,
-      booklet
+      prapatraNum: rollupPrapatraNum,
+      booklet: rollupBooklet
     });
 
     const summaryExportRows = [

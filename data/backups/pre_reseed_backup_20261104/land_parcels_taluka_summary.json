@@ -1,0 +1,137 @@
+[
+  {
+    "_count": {
+      "id": 14371
+    },
+    "_sum": {
+      "totalAreaHa": "37496.5248"
+    },
+    "taluka": "Ballarpur"
+  },
+  {
+    "_count": {
+      "id": 3933
+    },
+    "_sum": {
+      "totalAreaHa": "68655.9184"
+    },
+    "taluka": "Bhadravati"
+  },
+  {
+    "_count": {
+      "id": 17195
+    },
+    "_sum": {
+      "totalAreaHa": "101604.0147"
+    },
+    "taluka": "Brahmapuri"
+  },
+  {
+    "_count": {
+      "id": 10492
+    },
+    "_sum": {
+      "totalAreaHa": "63159.9443"
+    },
+    "taluka": "Chandrapur"
+  },
+  {
+    "_count": {
+      "id": 8118
+    },
+    "_sum": {
+      "totalAreaHa": "21146.9014"
+    },
+    "taluka": "Chimur"
+  },
+  {
+    "_count": {
+      "id": 1725
+    },
+    "_sum": {
+      "totalAreaHa": "3334.314"
+    },
+    "taluka": "Gondpipri"
+  },
+  {
+    "_count": {
+      "id": 8140
+    },
+    "_sum": {
+      "totalAreaHa": "51063.9938"
+    },
+    "taluka": "Jivati"
+  },
+  {
+    "_count": {
+      "id": 14082
+    },
+    "_sum": {
+      "totalAreaHa": "33656.09"
+    },
+    "taluka": "Korpana"
+  },
+  {
+    "_count": {
+      "id": 12573
+    },
+    "_sum": {
+      "totalAreaHa": "17577.4404"
+    },
+    "taluka": "Mul"
+  },
+  {
+    "_count": {
+      "id": 12024
+    },
+    "_sum": {
+      "totalAreaHa": "35458.3951"
+    },
+    "taluka": "Nagbhid"
+  },
+  {
+    "_count": {
+      "id": 5803
+    },
+    "_sum": {
+      "totalAreaHa": "9642.111"
+    },
+    "taluka": "Pombhurna"
+  },
+  {
+    "_count": {
+      "id": 12392
+    },
+    "_sum": {
+      "totalAreaHa": "76776.9484"
+    },
+    "taluka": "Rajura"
+  },
+  {
+    "_count": {
+      "id": 17534
+    },
+    "_sum": {
+      "totalAreaHa": "17807.3069"
+    },
+    "taluka": "Saoli"
+  },
+  {
+    "_count": {
+      "id": 7933
+    },
+    "_sum": {
+      "totalAreaHa": "11078.8816"
+    },
+    "taluka": "Sindewahi"
+  },
+  {
+    "_count": {
+      "id": 1811
+    },
+    "_sum": {
+      "totalAreaHa": "2594.171"
+    },
+    "taluka": "Warora"
+  }
+]
