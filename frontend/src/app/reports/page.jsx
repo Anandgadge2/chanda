@@ -168,6 +168,10 @@ export default function ReportsPage() {
   const search = appliedFilters.search;
   const debouncedSearch = appliedFilters.search;
 
+  // Active localized display labels for selected Taluka and Village
+  const talukaDisplay = taluka && taluka !== 'all' && taluka !== 'सर्व तालुके' ? formatTalukaName(taluka, isMarathi) : '';
+  const villageDisplay = village && village !== 'all' && village !== 'सर्व गावे' ? formatVillageName(village, isMarathi) : '';
+
   // View state:
   // For 'checklist': 'timeline', 'parcels'
   // For 'prapatra5': 'prapatraData'
@@ -4771,10 +4775,10 @@ export default function ReportsPage() {
                     <p className="text-[11px] text-slate-600">
                       {isMarathi
                         ? `प्रमाणित करण्यात येते की, ${talukaDisplay ? `तालुका ${talukaDisplay}, ` : ''}जिल्हा चंद्रपूर अंतर्गत वरील सर्व ७/१२ अधिकार अभिलेख तपासणी अचूक नोंदविली आहे.`
-                        : 'Certified that all aforementioned 7/12 land records inspection data has been verified and found accurate.'}
+                        : `Certified that all aforementioned 7/12 land records inspection data ${talukaDisplay ? `for Taluka ${talukaDisplay}, ` : ''}District Chandrapur has been verified and found accurate.`}
                     </p>
                     <div className="pt-2 font-bold text-slate-800 text-xs">
-                      {isMarathi ? `तहसीलदार, ${talukaDisplay ? `तालुका ${talukaDisplay}, ` : ''}जिल्हा चंद्रपूर` : 'Tehsildar, District Chandrapur'}
+                      {isMarathi ? `तहसीलदार, ${talukaDisplay ? `तालुका ${talukaDisplay}, ` : ''}जिल्हा चंद्रपूर` : `Tehsildar, ${talukaDisplay ? `Taluka ${talukaDisplay}, ` : ''}District Chandrapur`}
                     </div>
                   </div>
                 </div>
