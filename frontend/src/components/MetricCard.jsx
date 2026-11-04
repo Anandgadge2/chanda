@@ -129,7 +129,7 @@ export default function MetricCard({
       onClick={isInteractive ? onClick : undefined}
       onKeyDown={handleKeyDown}
       className={clsx(
-        'p-4 sm:p-5 rounded-xl border transition-all duration-150 flex flex-col justify-between select-none text-left relative overflow-hidden group',
+        'py-2.5 px-3.5 sm:py-3 sm:px-4.5 rounded-xl border transition-all duration-150 flex flex-col justify-between select-none text-left relative overflow-hidden group',
         theme.bg,
         theme.hoverBg,
         isActive
@@ -166,7 +166,7 @@ export default function MetricCard({
           )}
 
           {Icon && (
-            <div className={clsx('w-7 h-7 sm:w-8 sm:h-8 rounded-lg border flex items-center justify-center shrink-0 shadow-2xs', theme.iconBg)}>
+            <div className={clsx('w-6 h-6 sm:w-7 sm:h-7 rounded-md border flex items-center justify-center shrink-0 shadow-2xs', theme.iconBg)}>
               <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 stroke-[2]" />
             </div>
           )}
@@ -174,14 +174,14 @@ export default function MetricCard({
       </div>
 
       {/* Center: Prominent Data Metric */}
-      <div className="mt-3">
+      <div className="mt-1.5 sm:mt-2">
         <p className={clsx('text-2xl sm:text-3xl font-extrabold tracking-tight font-mono leading-none', theme.valueColor)}>
           {value}
         </p>
       </div>
 
       {/* Bottom: Crisp Context Badge & Filter State */}
-      <div className="mt-3.5 pt-2 border-t border-black/5 flex items-center justify-between gap-1 text-[11px]">
+      <div className="mt-2 sm:mt-2.5 pt-1.5 border-t border-black/5 flex items-center justify-between gap-1 text-[11px]">
         {displaySubtext ? (
           <span className={clsx('px-2 py-0.5 rounded-md font-semibold truncate', theme.badgeBg)}>
             {displaySubtext}
