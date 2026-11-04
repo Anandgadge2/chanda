@@ -236,22 +236,22 @@ export default function AuthModal({ isOpen, onClose }) {
         role="dialog"
         aria-modal="true"
         aria-labelledby="auth-modal-title"
-        className="relative w-full max-w-3xl max-h-[90vh] flex flex-col bg-[#FFFFFF] rounded-2xl shadow-xl border border-[#E8E4DA] overflow-hidden text-[#252B36] my-auto transition-all"
+        className="relative w-full max-w-4xl max-h-[92vh] flex flex-col bg-[#FFFFFF] rounded-2xl shadow-2xl border border-[#E9E7E1] overflow-hidden text-[#252B36] my-auto transition-all"
       >
-        {/* Clean, Modern Header */}
-        <div className="px-5 sm:px-6 py-4 bg-[#FFFFFF] border-b border-[#E8E4DA] flex items-center justify-between shrink-0">
-          <div className="flex items-center gap-3">
-            <ChandrapurDistrictLogo className="w-8 h-8 sm:w-9 sm:h-9" />
+        {/* Clean, Modern SaaS Header */}
+        <div className="px-6 py-5 bg-[#FFFFFF] border-b border-[#E9E7E1] flex items-center justify-between shrink-0">
+          <div className="flex items-center gap-3.5">
+            <ChandrapurDistrictLogo className="w-9 h-9 sm:w-11 sm:h-11" />
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-[11px] font-medium text-[#64748B] tracking-wide">
+                <span className="text-xs sm:text-[13px] font-medium text-[#64748B] tracking-wide">
                   {isMarathi ? 'महाराष्ट्र शासन • जिल्हाधिकारी कार्यालय, चंद्रपूर' : 'Govt of Maharashtra • Collectorate Chandrapur'}
                 </span>
-                <span className="text-[10px] bg-[#F0EDE5] text-[#252B36] px-2 py-0.5 rounded-md font-medium hidden sm:inline-block border border-[#E8E4DA]">
+                <span className="text-[11px] bg-[#F8F7F3] text-[#252B36] px-2.5 py-0.5 rounded-full font-semibold hidden sm:inline-block border border-[#E9E7E1]">
                   {isMarathi ? 'अंतर्गत पोर्टल' : 'Official Portal'}
                 </span>
               </div>
-              <h2 id="auth-modal-title" className="text-sm sm:text-base font-bold text-[#252B36] tracking-tight">
+              <h2 id="auth-modal-title" className="text-base sm:text-lg lg:text-xl font-extrabold text-[#252B36] tracking-tight mt-0.5">
                 {isMarathi ? 'भूमी अभिलेख व महसूल अधिकारी अधिकृत प्रणाली' : 'Land Governance & Revenue Officer Portal'}
               </h2>
             </div>
@@ -260,30 +260,30 @@ export default function AuthModal({ isOpen, onClose }) {
           <button
             type="button"
             onClick={onClose}
-            className="w-8 h-8 rounded-lg flex items-center justify-center text-[#64748B] hover:text-[#252B36] hover:bg-[#F0EDE5] transition focus:outline-none focus:ring-2 focus:ring-[#4169E1]/30"
+            className="w-9 h-9 rounded-xl flex items-center justify-center text-[#64748B] hover:text-[#252B36] hover:bg-[#F3F2ED] transition focus:outline-none focus:ring-2 focus:ring-[#4169E1]/30 cursor-pointer"
             aria-label={isMarathi ? 'संवाद बंद करा (Close dialog)' : 'Close dialog'}
           >
-            <X className="w-4 h-4" />
+            <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* 2-Column Clean Workspace Layout */}
         <div className="grid grid-cols-1 md:grid-cols-12 overflow-y-auto flex-1">
           {/* Left Column: Official Hierarchy Selector */}
-          <div className="md:col-span-5 bg-[#F8F6F0] p-3.5 sm:p-4 border-b md:border-b-0 md:border-r border-[#E8E4DA] flex flex-col justify-between">
+          <div className="md:col-span-5 bg-[#F8F7F3] p-4 sm:p-5 border-b md:border-b-0 md:border-r border-[#E9E7E1] flex flex-col justify-between">
             <div>
-              <div className="flex items-center justify-between px-1 mb-2.5">
-                <span className="text-[11px] font-bold text-[#64748B] uppercase tracking-wider flex items-center gap-1.5">
-                  <Users2 className="w-3.5 h-3.5 text-[#64748B]" />
+              <div className="flex items-center justify-between px-1 mb-3">
+                <span className="text-xs font-bold text-[#64748B] uppercase tracking-wider flex items-center gap-2">
+                  <Users2 className="w-4 h-4 text-[#64748B]" />
                   <span>{isMarathi ? 'पदानुक्रम' : 'Officer Hierarchy'}</span>
                 </span>
-                <span className="text-[10px] text-[#64748B] font-semibold">
+                <span className="text-[11px] text-[#64748B] font-semibold">
                   {isMarathi ? '१ ते ७ पदे' : '7 Official Roles'}
                 </span>
               </div>
 
               {/* Hierarchy List */}
-              <div className="flex md:flex-col overflow-x-auto md:overflow-x-visible gap-1.5 md:gap-0 md:space-y-1 pb-1 md:pb-0 touch-scroll no-scrollbar">
+              <div className="flex md:flex-col overflow-x-auto md:overflow-x-visible gap-2 md:gap-0 md:space-y-1.5 pb-2 md:pb-0 touch-scroll no-scrollbar">
                 {HIERARCHY_OFFICERS.map((officer) => {
                   const isSelected = selectedRole === officer.role;
 
@@ -292,28 +292,28 @@ export default function AuthModal({ isOpen, onClose }) {
                       key={officer.role}
                       type="button"
                       onClick={() => handleSelectRole(officer)}
-                      className={`shrink-0 md:shrink md:w-full text-left px-2.5 py-1.5 md:py-2 rounded-xl text-xs transition-all flex items-center justify-between cursor-pointer border ${
+                      className={`shrink-0 md:shrink md:w-full text-left px-3 py-2.5 rounded-xl text-sm transition-all flex items-center justify-between cursor-pointer border ${
                         isSelected
                           ? 'bg-[#4169E1] text-white font-semibold border-[#4169E1] shadow-xs'
-                          : 'text-[#252B36] bg-[#FFFFFF] hover:bg-[#F0EDE5] border-[#E8E4DA]'
+                          : 'text-[#252B36] bg-[#FFFFFF] hover:bg-[#F3F2ED] border-[#E9E7E1]'
                       }`}
                     >
-                      <div className="flex items-center gap-2 min-w-0">
+                      <div className="flex items-center gap-2.5 min-w-0">
                         <span
-                          className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 transition-colors ${
+                          className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0 transition-colors ${
                             isSelected
                               ? 'bg-white/20 text-white'
-                              : 'bg-[#F0EDE5] text-[#252B36]'
+                              : 'bg-[#F3F2ED] text-[#252B36]'
                           }`}
                         >
                           {isMarathi ? officer.rankMr : officer.rankEn}
                         </span>
                         <div className="min-w-0 whitespace-nowrap md:whitespace-normal">
-                          <div className="truncate leading-tight font-medium">
+                          <div className="truncate leading-snug font-semibold text-[13px] sm:text-sm">
                             {isMarathi ? officer.badgeMr : officer.badgeEn}
                           </div>
                           <div
-                            className={`text-[10px] truncate hidden md:block ${
+                            className={`text-xs truncate hidden md:block ${
                               isSelected ? 'text-white/80' : 'text-[#64748B]'
                             }`}
                           >
@@ -328,7 +328,7 @@ export default function AuthModal({ isOpen, onClose }) {
             </div>
 
             {/* Quick Context Footnote */}
-            <div className="mt-4 pt-3 border-t border-[#E8E4DA] text-[11px] text-[#64748B] leading-relaxed hidden md:block px-1">
+            <div className="mt-4 pt-3 border-t border-[#E9E7E1] text-xs text-[#64748B] leading-relaxed hidden md:block px-1">
               <span className="font-bold text-[#252B36]">{isMarathi ? 'टीप:' : 'Note:'}</span>{' '}
               {isMarathi
                 ? 'पदानुक्रमानुसार सुनावणी व फेरफार मंजुरीचे अधिकार निश्चित केले आहेत.'
@@ -337,22 +337,22 @@ export default function AuthModal({ isOpen, onClose }) {
           </div>
 
           {/* Right Column: Active Role Card & Login Form */}
-          <div className="md:col-span-7 p-5 sm:p-6 flex flex-col justify-between space-y-4 bg-[#FFFFFF]">
+          <div className="md:col-span-7 p-6 sm:p-7 flex flex-col justify-between space-y-5 bg-[#FFFFFF]">
             <div className="space-y-4">
               {/* Active Role Summary Banner */}
-              <div className="p-3 bg-[#F8F6F0] rounded-xl border border-[#E8E4DA] space-y-1">
-                <div className="flex items-center gap-1.5 flex-wrap">
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-[#4169E1]/10 text-[#4169E1]">
+              <div className="p-4 bg-[#F8F7F3] rounded-2xl border border-[#E9E7E1] space-y-1.5">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-[#4169E1]/10 text-[#4169E1]">
                     {isMarathi ? 'पद' : 'Role'} #{isMarathi ? currentOfficer.rankMr : currentOfficer.rankEn} • {currentOfficer.roleTag}
                   </span>
-                  <span className="text-[11px] text-[#64748B] truncate">
+                  <span className="text-xs text-[#64748B] truncate">
                     {isMarathi ? currentOfficer.jurisdictionMr : currentOfficer.jurisdictionEn}
                   </span>
                 </div>
-                <h3 className="text-sm sm:text-base font-bold text-[#252B36] truncate">
+                <h3 className="text-base sm:text-lg font-bold text-[#252B36] truncate">
                   {isMarathi ? currentOfficer.titleMr : currentOfficer.titleEn}
                 </h3>
-                <p className="text-[11px] text-[#64748B] line-clamp-1">
+                <p className="text-xs sm:text-[13px] text-[#64748B] line-clamp-2 leading-relaxed">
                   {isMarathi ? currentOfficer.descriptionMr : currentOfficer.descriptionEn}
                 </p>
               </div>
@@ -361,9 +361,9 @@ export default function AuthModal({ isOpen, onClose }) {
               {errorMsg && (
                 <div
                   role="alert"
-                  className="p-3 rounded-xl bg-[#DC2626]/10 border border-[#DC2626]/30 text-[#DC2626] text-xs font-semibold flex items-center gap-2"
+                  className="p-3.5 rounded-xl bg-[#DC2626]/10 border border-[#DC2626]/30 text-[#DC2626] text-sm font-semibold flex items-center gap-2.5"
                 >
-                  <AlertCircle className="w-4 h-4 text-[#DC2626] shrink-0" />
+                  <AlertCircle className="w-5 h-5 text-[#DC2626] shrink-0" />
                   <span>{errorMsg}</span>
                 </div>
               )}
@@ -371,21 +371,21 @@ export default function AuthModal({ isOpen, onClose }) {
               {successMsg && (
                 <div
                   role="status"
-                  className="p-3 rounded-xl bg-[#16A34A]/10 border border-[#16A34A]/30 text-[#16A34A] text-xs font-semibold flex items-center gap-2"
+                  className="p-3.5 rounded-xl bg-[#16A34A]/10 border border-[#16A34A]/30 text-[#16A34A] text-sm font-semibold flex items-center gap-2.5"
                 >
-                  <CheckCircle2 className="w-4 h-4 text-[#16A34A] shrink-0" />
+                  <CheckCircle2 className="w-5 h-5 text-[#16A34A] shrink-0" />
                   <span>{successMsg}</span>
                 </div>
               )}
 
               {/* Official Credential Form */}
-              <form onSubmit={handleExecuteLogin} className="space-y-3.5">
+              <form onSubmit={handleExecuteLogin} className="space-y-4">
                 <div>
-                  <label htmlFor="login-email" className="block text-xs font-semibold text-[#252B36] mb-1.5">
+                  <label htmlFor="login-email" className="block text-sm sm:text-[15px] font-semibold text-[#252B36] mb-1.5">
                     {isMarathi ? 'शासकीय ईमेल (Official ID / NIC)' : 'Official Email (NIC / MahaGov ID)'}
                   </label>
                   <div className="relative">
-                    <Mail className="w-4 h-4 text-[#64748B] absolute left-3.5 top-3 pointer-events-none" />
+                    <Mail className="w-5 h-5 text-[#64748B] absolute left-3.5 top-3.5 pointer-events-none" />
                     <input
                       id="login-email"
                       type="email"
@@ -393,22 +393,22 @@ export default function AuthModal({ isOpen, onClose }) {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="e.g. collector.chandrapur@maharashtra.gov.in"
-                      className="w-full pl-9 pr-3 py-2 text-xs border border-[#E8E4DA] rounded-xl bg-[#FFFFFF] font-medium text-[#252B36] placeholder:text-[#64748B] focus:outline-none focus:ring-2 focus:ring-[#4169E1]/20 focus:border-[#4169E1] transition"
+                      className="w-full pl-11 pr-4 py-2.5 sm:py-3 text-[15px] sm:text-base border border-[#E9E7E1] rounded-xl bg-[#FFFFFF] font-medium text-[#252B36] placeholder:text-[#64748B] focus:outline-none focus:ring-2 focus:ring-[#4169E1]/20 focus:border-[#4169E1] transition"
                     />
                   </div>
                 </div>
 
                 <div>
                   <div className="flex items-center justify-between mb-1.5">
-                    <label htmlFor="login-password" className="block text-xs font-semibold text-[#252B36]">
+                    <label htmlFor="login-password" className="block text-sm sm:text-[15px] font-semibold text-[#252B36]">
                       {isMarathi ? 'संकेतशब्द (Password)' : 'Password'}
                     </label>
-                    <span className="text-[10px] text-[#64748B] font-mono">
+                    <span className="text-xs text-[#64748B] font-mono">
                       {isMarathi ? 'चाचणी संकेतशब्द: 111111' : 'Demo Pass: 111111'}
                     </span>
                   </div>
                   <div className="relative">
-                    <Lock className="w-4 h-4 text-[#64748B] absolute left-3.5 top-3 pointer-events-none" />
+                    <Lock className="w-5 h-5 text-[#64748B] absolute left-3.5 top-3.5 pointer-events-none" />
                     <input
                       id="login-password"
                       type={showPassword ? 'text' : 'password'}
@@ -416,16 +416,16 @@ export default function AuthModal({ isOpen, onClose }) {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="••••••••"
-                      className="w-full pl-9 pr-9 py-2 text-xs border border-[#E8E4DA] rounded-xl bg-[#FFFFFF] font-medium text-[#252B36] placeholder:text-[#64748B] focus:outline-none focus:ring-2 focus:ring-[#4169E1]/20 focus:border-[#4169E1] transition"
+                      className="w-full pl-11 pr-11 py-2.5 sm:py-3 text-[15px] sm:text-base border border-[#E9E7E1] rounded-xl bg-[#FFFFFF] font-medium text-[#252B36] placeholder:text-[#64748B] focus:outline-none focus:ring-2 focus:ring-[#4169E1]/20 focus:border-[#4169E1] transition"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword((prev) => !prev)}
-                      className="absolute right-3 top-2.5 text-[#64748B] hover:text-[#252B36] p-0.5 rounded transition"
+                      className="absolute right-3.5 top-3 text-[#64748B] hover:text-[#252B36] p-1 rounded-lg transition"
                       title={showPassword ? (isMarathi ? 'संकेतशब्द लपवा' : 'Hide password') : (isMarathi ? 'संकेतशब्द दाखवा' : 'Show password')}
                       aria-label={showPassword ? 'Hide password' : 'Show password'}
                     >
-                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                     </button>
                   </div>
                 </div>
@@ -433,15 +433,15 @@ export default function AuthModal({ isOpen, onClose }) {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full py-2.5 rounded-xl bg-[#4169E1] hover:bg-[#3454B4] text-white font-semibold text-xs shadow-xs transition flex items-center justify-center gap-2 active:scale-[0.99] disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-[#4169E1]/30 cursor-pointer"
+                  className="w-full py-3 sm:py-3.5 rounded-xl bg-[#4169E1] hover:bg-[#3454B4] text-white font-bold text-[15px] sm:text-base shadow-sm transition flex items-center justify-center gap-2.5 active:scale-[0.99] disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-[#4169E1]/30 cursor-pointer"
                 >
                   {loading ? (
                     <span>{isMarathi ? 'प्रमाणीकरण चालू आहे...' : 'Authenticating...'}</span>
                   ) : (
                     <>
-                      <ShieldCheck className="w-4 h-4 text-white" />
+                      <ShieldCheck className="w-5 h-5 text-white" />
                       <span>{isMarathi ? 'डॅशबोर्डमध्ये प्रवेश करा' : 'Sign In to Revenue Dashboard'}</span>
-                      <ArrowRight className="w-4 h-4 text-white" />
+                      <ArrowRight className="w-5 h-5 text-white" />
                     </>
                   )}
                 </button>
@@ -450,8 +450,8 @@ export default function AuthModal({ isOpen, onClose }) {
 
             {/* Bottom Governance Note */}
             <div className="pt-2">
-              <p className="text-[11px] text-[#64748B] text-center flex items-center justify-center gap-1.5">
-                <Building2 className="w-3.5 h-3.5 text-[#64748B] shrink-0" />
+              <p className="text-xs sm:text-[13px] text-[#64748B] text-center flex items-center justify-center gap-2">
+                <Building2 className="w-4 h-4 text-[#64748B] shrink-0" />
                 <span>
                   {isMarathi
                     ? 'केवळ अधिकृत महसूल अधिकारी व कर्मचाऱ्यांसाठी मर्यादित.'

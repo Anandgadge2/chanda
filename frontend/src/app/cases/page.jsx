@@ -367,14 +367,14 @@ export default function CasesPage() {
   return (
     <div className="space-y-2.5 sm:space-y-3">
       {/* Executive Command Hero Header - Pro Compact */}
-      <div className="bg-[#FFFFFF] text-[#252B36] rounded-xl px-4 py-3 border border-[#E8E4DA] shadow-[0_1px_2px_rgba(0,0,0,0.03)] flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+      <div className="bg-[#FFFFFF] text-[#252B36] rounded-2xl px-5 sm:px-6 py-4 sm:py-5 border border-[#E9E7E1] shadow-[0_1px_3px_rgba(0,0,0,0.03)] flex flex-col sm:flex-row justify-between sm:items-center gap-2">
         <div className="flex items-center gap-2.5 min-w-0">
           <div className="w-8 h-8 rounded-lg bg-amber-500 text-slate-950 flex items-center justify-center shrink-0 shadow-2xs font-bold">
             <Scale className="w-4 h-4" />
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="text-sm sm:text-base font-extrabold text-slate-900 tracking-tight leading-tight">
+              <h1 className="text-lg sm:text-xl lg:text-[24px] font-extrabold text-[#252B36] tracking-tight leading-tight">
                 {isMarathi ? 'शर्तभंग व अर्ध-न्यायिक सुनावणी कक्ष' : 'Breach & Quasi-Judicial Hearing Chamber'}
               </h1>
               <span className="text-[10px] font-bold bg-amber-100 text-amber-900 px-2 py-0.5 rounded-full border border-amber-300">
@@ -427,7 +427,7 @@ export default function CasesPage() {
           className={`p-2.5 sm:p-3 rounded-xl border text-left transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xs active:scale-98 relative overflow-hidden group cursor-pointer ${
             appliedFilters.status === '' && appliedFilters.isRepossessedToGovt === ''
               ? 'bg-[#FFFFFF] border-[#4169E1] ring-1 ring-[#4169E1]'
-              : 'bg-[#FFFFFF] border-[#E8E4DA] hover:border-[#cbd5e1]'
+              : 'bg-[#FFFFFF] border-[#E9E7E1] hover:border-[#cbd5e1]'
           }`}
         >
           <div className="absolute top-0 left-0 right-0 h-[2px] bg-[#4169E1]" />
@@ -454,7 +454,7 @@ export default function CasesPage() {
           className={`p-2.5 sm:p-3 rounded-xl border text-left transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xs active:scale-98 relative overflow-hidden group cursor-pointer ${
             appliedFilters.status === 'HEARING_SCHEDULED'
               ? 'bg-[#FFFFFF] border-[#4169E1] ring-1 ring-[#4169E1]'
-              : 'bg-[#FFFFFF] border-[#E8E4DA] hover:border-[#cbd5e1]'
+              : 'bg-[#FFFFFF] border-[#E9E7E1] hover:border-[#cbd5e1]'
           }`}
         >
           <div className="absolute top-0 left-0 right-0 h-[2px] bg-[#4169E1]" />
@@ -481,7 +481,7 @@ export default function CasesPage() {
           className={`p-2.5 sm:p-3 rounded-xl border text-left transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xs active:scale-98 relative overflow-hidden group cursor-pointer ${
             appliedFilters.status === 'NOTICE_ISSUED'
               ? 'bg-[#FFFFFF] border-[#D97706] ring-1 ring-[#D97706]'
-              : 'bg-[#FFFFFF] border-[#E8E4DA] hover:border-[#cbd5e1]'
+              : 'bg-[#FFFFFF] border-[#E9E7E1] hover:border-[#cbd5e1]'
           }`}
         >
           <div className="absolute top-0 left-0 right-0 h-[2px] bg-[#D97706]" />
@@ -508,7 +508,7 @@ export default function CasesPage() {
           className={`p-2.5 sm:p-3 rounded-xl border text-left transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xs active:scale-98 relative overflow-hidden group cursor-pointer ${
             appliedFilters.isRepossessedToGovt === 'true'
               ? 'bg-[#FFFFFF] border-[#16A34A] ring-1 ring-[#16A34A]'
-              : 'bg-[#FFFFFF] border-[#E8E4DA] hover:border-[#cbd5e1]'
+              : 'bg-[#FFFFFF] border-[#E9E7E1] hover:border-[#cbd5e1]'
           }`}
         >
           <div className="absolute top-0 left-0 right-0 h-[2px] bg-[#16A34A]" />
@@ -529,7 +529,7 @@ export default function CasesPage() {
         </button>
 
         {/* Metric 5: Total Disputed Area (Rose - Risk Exposure / Area at Stake) */}
-        <div className="p-2.5 sm:p-3 rounded-xl border border-rose-200/80 bg-[#FFFFFF] border border-[#E8E4DA] hover:border-[#cbd5e1] col-span-2 sm:col-span-1 relative overflow-hidden transition-all group">
+        <div className="p-2.5 sm:p-3 rounded-xl border border-rose-200/80 bg-[#FFFFFF] border border-[#E9E7E1] hover:border-[#cbd5e1] col-span-2 sm:col-span-1 relative overflow-hidden transition-all group">
           <div className="absolute top-0 left-0 right-0 h-[2px] bg-[#DC2626]" />
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold text-slate-700 group-hover:text-rose-950 transition-colors">
@@ -714,7 +714,7 @@ export default function CasesPage() {
       {/* Enhanced Table Card (Modern Executive Grid) */}
       <div className="bg-white rounded-2xl border border-slate-200/90 shadow-sm overflow-hidden">
         {/* Table Top Bar */}
-        <div className="px-4 sm:px-5 py-3.5 bg-[#FFFFFF] border-b border-[#E8E4DA] flex items-center justify-between gap-2.5">
+        <div className="px-4 sm:px-5 py-3.5 bg-[#FFFFFF] border-b border-[#E9E7E1] flex items-center justify-between gap-2.5">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-xl bg-blue-100/80 border border-blue-200/80 flex items-center justify-center text-blue-900 shrink-0 shadow-2xs">
               <FolderArchive className="w-4 h-4" />
@@ -1051,7 +1051,7 @@ export default function CasesPage() {
 
             {/* Desktop Full Table (hidden md:block) with Generous Action Column */}
             <div className="hidden md:block w-full overflow-x-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
-              <table className="w-full border-collapse text-xs min-w-[960px]">
+              <table className="w-full border-collapse text-[15px] sm:text-base min-w-[960px]">
                 {/* Native Table Head with Balanced Proportions */}
                 <thead className="bg-slate-50/80 backdrop-blur-sm text-slate-500 text-[11px] font-black uppercase tracking-wider border-b border-slate-200/90 select-none">
                   <tr>

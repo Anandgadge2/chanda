@@ -105,14 +105,14 @@ export default function DocumentsPage() {
   return (
     <div className="space-y-2.5 sm:space-y-3">
       {/* Executive Command Hero Header - Pro Compact */}
-      <div className="bg-[#FFFFFF] text-[#252B36] rounded-xl px-4 py-3 border border-[#E8E4DA] shadow-[0_1px_2px_rgba(0,0,0,0.03)] flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+      <div className="bg-[#FFFFFF] text-[#252B36] rounded-2xl px-5 sm:px-6 py-4 sm:py-5 border border-[#E9E7E1] shadow-[0_1px_3px_rgba(0,0,0,0.03)] flex flex-col sm:flex-row justify-between sm:items-center gap-2">
         <div className="flex items-center gap-2.5 min-w-0">
           <div className="w-8 h-8 rounded-lg bg-[#4169E1] flex items-center justify-center shrink-0 text-white">
             <FolderArchive className="w-4 h-4" />
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="text-sm sm:text-base font-extrabold text-slate-900 tracking-tight leading-tight truncate">
+              <h1 className="text-lg sm:text-xl lg:text-[24px] font-extrabold text-[#252B36] tracking-tight leading-tight truncate">
                 {isMarathi ? 'डिजिटल दस्तऐवज व भौतिक कपाट संदर्भ' : 'Digital DMS & Record Room Repository'}
               </h1>
               <span className="text-[10px] font-extrabold uppercase tracking-wider bg-purple-100 text-purple-900 px-2 py-0.5 rounded-full border border-purple-300">
@@ -263,7 +263,7 @@ export default function DocumentsPage() {
         </div>
 
         <div className="overflow-x-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
-          <table className="w-full text-left text-xs min-w-[720px]">
+          <table className="w-full text-left text-[15px] sm:text-base min-w-[720px]">
             <thead className="bg-slate-100/70 text-slate-600 font-bold border-b border-slate-200/80 text-[11px] uppercase tracking-wider">
               <tr>
                 <th className="py-3 px-4">{isMarathi ? 'दस्तऐवज शीर्षक व वर्गीकरण' : 'Title & Classification'}</th>

@@ -208,7 +208,7 @@ export default function LandingHero({ onOpenAuth }) {
   return (
     <section
       id="search-section"
-      className="relative bg-[#F8F6F0] text-[#252B36] pt-2 sm:pt-3 pb-6 sm:pb-8 border-b border-[#E8E4DA]"
+      className="relative bg-[#F8F7F3] text-[#252B36] pt-2 sm:pt-3 pb-6 sm:pb-8 border-b border-[#E9E7E1]"
       aria-label={isMarathi ? 'चंद्रपूर जिल्हा प्रशासन मुख्य बॅनर' : 'Chandrapur District Administration Main Banner'}
     >
       {/* Full-width Responsive Showcase Container - Scales Elegantly Across All Zoom Levels */}
@@ -221,7 +221,7 @@ export default function LandingHero({ onOpenAuth }) {
           onKeyDown={handleKeyDown}
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
-          className="relative w-full h-[390px] xs:h-[415px] sm:h-[440px] md:h-[470px] lg:h-[500px] xl:h-[520px] rounded-2xl sm:rounded-3xl overflow-hidden border border-[#E8E4DA]/90 shadow-xl shadow-slate-900/10 bg-slate-950 focus:outline-hidden focus:ring-2 focus:ring-amber-400 group"
+          className="relative w-full h-[390px] xs:h-[415px] sm:h-[440px] md:h-[470px] lg:h-[500px] xl:h-[520px] rounded-2xl sm:rounded-3xl overflow-hidden border border-[#E9E7E1]/90 shadow-xl shadow-slate-900/10 bg-slate-950 focus:outline-hidden focus:ring-2 focus:ring-amber-400 group"
         >
           {/* Official Indian Tricolor National Accent Micro-Bar */}
           <div

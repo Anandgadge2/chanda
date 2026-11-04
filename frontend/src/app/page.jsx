@@ -21,7 +21,7 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#F8F6F0] text-[#252B36] font-sans selection:bg-[#4169E1]/20 selection:text-[#252B36]">
+    <div className="min-h-screen flex flex-col bg-[#F8F7F3] text-[#252B36] font-sans selection:bg-[#4169E1]/20 selection:text-[#252B36]">
       {/* Official Government Top Navigation Bar */}
       <LandingNavbar onOpenAuth={handleOpenAuth} />
 

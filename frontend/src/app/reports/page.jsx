@@ -823,7 +823,7 @@ export default function ReportsPage() {
   const renderActiveCellBar = (viewName) => {
     if (!selectedCell || selectedCell.view !== viewName) return null;
     return (
-      <div className="sticky top-0 z-40 bg-[#252B36] text-white px-4 py-2 flex items-center justify-between gap-3 shadow-xs border-b border-[#E8E4DA] animate-in fade-in duration-150 select-none">
+      <div className="sticky top-0 z-40 bg-[#252B36] text-white px-4 py-2 flex items-center justify-between gap-3 shadow-xs border-b border-[#E9E7E1] animate-in fade-in duration-150 select-none">
         <div className="flex items-center gap-2.5 overflow-hidden min-w-0">
           <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-blue-500/30 border border-blue-400/40 text-[11px] font-mono font-black tracking-wide shrink-0">
             <TableProperties className="w-3.5 h-3.5 text-blue-300" />
@@ -1462,7 +1462,7 @@ export default function ReportsPage() {
         </div>
 
         <div className="overflow-x-auto max-h-[600px] overflow-y-auto">
-          <table className="w-full text-left border-collapse text-xs min-w-[1100px]">
+          <table className="w-full text-left border-collapse text-[15px] sm:text-base min-w-[1100px]">
             <thead className="sticky top-0 z-10 shadow-2xs">
               {/* Row 1: Super Headers */}
               <tr className="bg-slate-50 text-slate-900 font-bold border-b border-slate-300 text-center text-[11px]">
@@ -1845,7 +1845,7 @@ export default function ReportsPage() {
         </div>
 
         <div className="overflow-x-auto max-h-[600px] overflow-y-auto scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-slate-100">
-          <table className="w-full text-left border-collapse text-xs min-w-[1280px]">
+          <table className="w-full text-left border-collapse text-[15px] sm:text-base min-w-[1280px]">
             <thead className="sticky top-0 z-10 shadow-2xs">
               {/* Row 1: Super Headers */}
               <tr className="bg-slate-100 text-slate-900 font-bold border-b border-slate-300 text-center text-[11px]">
@@ -2061,7 +2061,7 @@ export default function ReportsPage() {
         </div>
 
         <div className="overflow-x-auto max-h-[600px] overflow-y-auto scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-slate-100">
-          <table className="w-full text-left border-collapse text-xs min-w-[1300px]">
+          <table className="w-full text-left border-collapse text-[15px] sm:text-base min-w-[1300px]">
             <thead className="sticky top-0 z-10 shadow-2xs">
               <tr className="bg-slate-100 text-slate-900 font-bold border-b border-slate-300 text-center text-[11px]">
                 <th rowSpan={2} className="py-2.5 px-2 border-r border-slate-300 w-12 bg-slate-200/90">{isMarathi ? 'अ.क्र.' : 'Sr.'}</th>
@@ -2422,14 +2422,14 @@ export default function ReportsPage() {
         {/* =========================================================
             HEADER & ACTIONS - Pro Compact
         ========================================================= */}
-        <header className="bg-[#FFFFFF] text-[#252B36] rounded-xl px-4 py-3 border border-[#E8E4DA] shadow-[0_1px_2px_rgba(0,0,0,0.03)] flex flex-col md:flex-row items-start md:items-center justify-between gap-2">
+        <header className="bg-[#FFFFFF] text-[#252B36] rounded-2xl px-5 sm:px-6 py-4 sm:py-5 border border-[#E9E7E1] shadow-[0_1px_3px_rgba(0,0,0,0.03)] flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-8 h-8 rounded-lg bg-[#4169E1] text-white flex items-center justify-center shrink-0 shadow-2xs">
+            <div className="w-10 h-10 rounded-xl bg-[#4169E1] text-white flex items-center justify-center shrink-0 shadow-xs">
               <FileSpreadsheet className="w-4 h-4" />
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <h1 className="text-sm sm:text-base font-extrabold text-slate-900 tracking-tight leading-tight ">
+                <h1 className="text-lg sm:text-xl lg:text-[24px] font-extrabold text-[#252B36] tracking-tight leading-tight ">
                   {isMarathi ? 'महसूल तपासणी अहवाल व प्रपत्रे' : 'Revenue Inspection Reports & Prapatras'}
                 </h1>
                 
@@ -2502,7 +2502,7 @@ export default function ReportsPage() {
                 type="button"
                 onClick={() => handleDownload('pdf')}
                 disabled={downloadingPdf}
-                className="flex-1 md:flex-none inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-[#FFFFFF] hover:bg-[#F0EDE5] disabled:opacity-60 text-[#252B36] border border-[#E8E4DA] rounded-lg text-xs font-semibold shadow-xs transition active:scale-95 cursor-pointer"
+                className="flex-1 md:flex-none inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-[#FFFFFF] hover:bg-[#F3F2ED] disabled:opacity-60 text-[#252B36] border border-[#E9E7E1] rounded-lg text-xs font-semibold shadow-xs transition active:scale-95 cursor-pointer"
                 title={
                   isMarathi
                     ? 'स्वाक्षरी व प्रमाणपत्रासह अधिकृत पीडीएफ प्रत डाऊनलोड करा'
@@ -3015,7 +3015,7 @@ export default function ReportsPage() {
             className={`text-left rounded-2xl p-3.5 transition-all duration-200 border cursor-pointer select-none group relative overflow-hidden focus:outline-none focus:ring-2 focus:ring-sky-500/50 ${
               selectedKpiFilter === 'all'
                 ? 'bg-[#FFFFFF] border-[#4169E1] ring-1 ring-[#4169E1]'
-                : 'bg-[#FFFFFF] border-[#E8E4DA] hover:border-[#cbd5e1]'
+                : 'bg-[#FFFFFF] border-[#E9E7E1] hover:border-[#cbd5e1]'
             }`}
           >
             {/* Top Gradient Accent Stripe */}
@@ -3058,7 +3058,7 @@ export default function ReportsPage() {
             className={`text-left rounded-2xl p-3.5 transition-all duration-200 border cursor-pointer select-none group relative overflow-hidden focus:outline-none focus:ring-2 focus:ring-emerald-500/50 ${
               selectedKpiFilter === 'area'
                 ? 'bg-[#FFFFFF] border-[#16A34A] ring-1 ring-[#16A34A]'
-                : 'bg-[#FFFFFF] border-[#E8E4DA] hover:border-[#cbd5e1]'
+                : 'bg-[#FFFFFF] border-[#E9E7E1] hover:border-[#cbd5e1]'
             }`}
           >
             {/* Top Gradient Accent Stripe */}
@@ -3101,7 +3101,7 @@ export default function ReportsPage() {
             className={`text-left rounded-2xl p-3.5 transition-all duration-200 border cursor-pointer select-none group relative overflow-hidden focus:outline-none focus:ring-2 focus:ring-indigo-500/50 ${
               selectedKpiFilter === 'class2'
                 ? 'bg-[#FFFFFF] border-[#4169E1] ring-1 ring-[#4169E1]'
-                : 'bg-[#FFFFFF] border-[#E8E4DA] hover:border-[#cbd5e1]'
+                : 'bg-[#FFFFFF] border-[#E9E7E1] hover:border-[#cbd5e1]'
             }`}
           >
             {/* Top Gradient Accent Stripe */}
@@ -3144,7 +3144,7 @@ export default function ReportsPage() {
             className={`text-left rounded-2xl p-3.5 transition-all duration-200 border cursor-pointer select-none group relative overflow-hidden focus:outline-none focus:ring-2 focus:ring-amber-500/50 ${
               selectedKpiFilter === 'violations'
                 ? 'bg-[#FFFFFF] border-[#D97706] ring-1 ring-[#D97706]'
-                : 'bg-[#FFFFFF] border-[#E8E4DA] hover:border-[#cbd5e1]'
+                : 'bg-[#FFFFFF] border-[#E9E7E1] hover:border-[#cbd5e1]'
             }`}
           >
             {/* Top Gradient Accent Stripe */}
@@ -3403,7 +3403,7 @@ export default function ReportsPage() {
               ========================================================= */
               <div>
                 {/* Official Government Table Title Header Banner */}
-                <div className="p-3.5 sm:p-4 bg-[#FFFFFF] border-b border-[#E8E4DA] flex flex-col items-center text-center">
+                <div className="p-3.5 sm:p-4 bg-[#FFFFFF] border-b border-[#E9E7E1] flex flex-col items-center text-center">
                   <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-100 text-emerald-950 rounded-full text-xs font-bold mb-1 shadow-2xs border border-emerald-200">
                     <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-700" />
                     <span>
@@ -3429,7 +3429,7 @@ export default function ReportsPage() {
                   renderEmptyState()
                 ) : (
                   <div className="overflow-x-auto border-b border-slate-200 bg-white relative" style={{ WebkitOverflowScrolling: 'touch' }}>
-                  <table className="w-full text-left border-collapse text-xs min-w-[1000px]">
+                  <table className="w-full text-left border-collapse text-[15px] sm:text-base min-w-[1000px]">
                     <thead>
                       <tr className="bg-slate-100/90 text-slate-800 font-bold border-b border-slate-300 text-center">
                         <th className="py-2.5 px-2 border-r border-slate-200 w-12">{isMarathi ? 'अ.क्र.' : 'Sr.'}</th>
@@ -3632,7 +3632,7 @@ export default function ReportsPage() {
               ========================================================= */
               <div className="space-y-4 p-3.5 sm:p-4 relative">
                 {loading && renderTableLoadingOverlay()}
-                <div className="p-3 sm:p-4 bg-[#FFFFFF] border border-[#E8E4DA] rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs">
+                <div className="p-3 sm:p-4 bg-[#FFFFFF] border border-[#E9E7E1] rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs">
                   <div className="flex items-center gap-2.5">
                     <div className="w-9 h-9 rounded-xl bg-indigo-800 text-white flex items-center justify-center shrink-0 shadow-2xs">
                       <Layers className="w-5 h-5 text-indigo-200" />
@@ -3852,7 +3852,7 @@ export default function ReportsPage() {
                   17 CATEGORY DETAILED PARCELS TABLE
               ========================================================= */
               <div>
-                <div className="p-3.5 sm:p-4 bg-[#FFFFFF] border-b border-[#E8E4DA] flex flex-col items-center text-center">
+                <div className="p-3.5 sm:p-4 bg-[#FFFFFF] border-b border-[#E9E7E1] flex flex-col items-center text-center">
                   <div className="inline-flex items-center gap-2 px-3 py-1 bg-indigo-100 text-indigo-950 rounded-full text-xs font-bold mb-1 shadow-2xs border border-indigo-200">
                     <FileSpreadsheet className="w-3.5 h-3.5 text-indigo-700" />
                     <span>
@@ -3878,7 +3878,7 @@ export default function ReportsPage() {
                 ) : (
                   <div className="overflow-x-auto border-b border-slate-200 bg-white relative" style={{ WebkitOverflowScrolling: 'touch' }}>
                     {isTenancyCategory ? (
-                    <table className="w-full text-left border-collapse text-xs min-w-[1050px]">
+                    <table className="w-full text-left border-collapse text-[15px] sm:text-base min-w-[1050px]">
                       <thead>
                         <tr className="bg-slate-100/90 text-slate-800 font-bold border-b border-slate-300 text-center">
                           <th className="py-2.5 px-2 border-r border-slate-200 w-12">{isMarathi ? 'अ.क्र.' : 'Sr.'}</th>
@@ -4187,7 +4187,7 @@ export default function ReportsPage() {
             activeView === 'timeline' ? (
             <div>
               {/* Official Government Table Title Header Banner */}
-              <div className="p-4 bg-[#FFFFFF] border-b border-[#E8E4DA] flex flex-col items-center text-center">
+              <div className="p-4 bg-[#FFFFFF] border-b border-[#E9E7E1] flex flex-col items-center text-center">
                 <div className="inline-flex items-center gap-2 px-3 py-1 bg-amber-100 text-amber-900 rounded-full text-xs font-bold mb-1 shadow-2xs border border-amber-200">
                   <Clock className="w-3.5 h-3.5 text-amber-700" />
                   <span>
@@ -4239,7 +4239,7 @@ export default function ReportsPage() {
                   <>
                     {renderActiveCellBar('timeline')}
                     <div className="overflow-x-auto max-h-[70vh] border-b border-slate-300 bg-white">
-                <table className="w-full text-left border-collapse text-[11px] whitespace-nowrap">
+                <table className="w-full text-left border-collapse text-[15px] sm:text-base whitespace-nowrap">
                   <thead className="sticky top-0 z-30 bg-white shadow-md isolate">
                     {/* Level 1: Major Group Headers */}
                     <tr className="bg-slate-200 text-slate-800 font-bold border-b border-slate-300 text-center">
@@ -4726,7 +4726,7 @@ export default function ReportsPage() {
                   <>
                     {renderActiveCellBar('parcels')}
                     <div className="overflow-x-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
-                  <table className="w-full text-left border-collapse text-xs min-w-[840px]">
+                  <table className="w-full text-left border-collapse text-[15px] sm:text-base min-w-[840px]">
                   <thead>
                     <tr className="bg-slate-100/80 text-slate-700 font-bold border-b border-slate-200 text-center">
                       <th className={`py-2.5 px-3 border-r border-slate-200 w-12 transition ${selectedCell?.view === 'parcels' && selectedCell?.colKey === 'srNo' ? 'bg-blue-200 text-blue-950 font-black ring-2 ring-inset ring-blue-500' : ''}`}>{isMarathi ? 'अ.क्र.' : 'Sr.'}</th>

@@ -58,7 +58,7 @@ export default function LandingNavbar({ onOpenAuth }) {
     : (user?.fullNameEn ? user.fullNameEn.charAt(0) : (officerDisplayName ? officerDisplayName.charAt(0) : 'D'));
 
   return (
-    <header className="sticky top-0 z-50 bg-white border-b border-[#E8E4DA] shadow-2xs">
+    <header className="sticky top-0 z-50 bg-white border-b border-[#E9E7E1] shadow-2xs">
       {/* Main Brand & Officer Actions Header */}
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-1.5 sm:py-2">
         <div className="flex items-center justify-between gap-2">
@@ -92,7 +92,7 @@ export default function LandingNavbar({ onOpenAuth }) {
                 </Link>
 
                 {/* Officer Mini Badge & Instant Logout */}
-                <div className="flex items-center gap-2 pl-2 border-l border-[#E8E4DA]">
+                <div className="flex items-center gap-2 pl-2 border-l border-[#E9E7E1]">
                   <div className="w-7 h-7 rounded-lg bg-[#4169E1] text-white font-bold text-xs flex items-center justify-center shadow-xs flex-shrink-0">
                     {officerInitial}
                   </div>
@@ -150,7 +150,7 @@ export default function LandingNavbar({ onOpenAuth }) {
             )}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="w-9 h-9 flex items-center justify-center rounded-xl border border-[#E8E4DA] text-slate-700 hover:bg-slate-100 active:bg-slate-200 transition cursor-pointer"
+              className="w-9 h-9 flex items-center justify-center rounded-xl border border-[#E9E7E1] text-slate-700 hover:bg-slate-100 active:bg-slate-200 transition cursor-pointer"
               aria-label="Toggle menu"
             >
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -161,7 +161,7 @@ export default function LandingNavbar({ onOpenAuth }) {
 
       {/* Mobile Slide-Down Menu */}
       {mobileMenuOpen && (
-        <div className="lg:hidden bg-white border-b border-[#E8E4DA] px-4 pt-3 pb-5 space-y-3 shadow-xl">
+        <div className="lg:hidden bg-white border-b border-[#E9E7E1] px-4 pt-3 pb-5 space-y-3 shadow-xl">
           <div className="pb-2 border-b border-slate-100 flex justify-between items-center">
             <span className="text-xs font-bold text-slate-500">{t('accessibility.language')}:</span>
             <LanguageSwitcher variant="pill" />
@@ -234,10 +234,10 @@ export default function LandingNavbar({ onOpenAuth }) {
             </Link>
           </nav>
 
-          <div className="pt-3 border-t border-[#E8E4DA] flex flex-col gap-2">
+          <div className="pt-3 border-t border-[#E9E7E1] flex flex-col gap-2">
             {user ? (
               <>
-                <div className="flex items-center gap-2 p-2 bg-slate-50 rounded-xl border border-[#E8E4DA]">
+                <div className="flex items-center gap-2 p-2 bg-slate-50 rounded-xl border border-[#E9E7E1]">
                   <div className="w-8 h-8 rounded-lg bg-[#4169E1] text-white font-bold text-xs flex items-center justify-center shadow-xs flex-shrink-0">
                     {officerInitial}
                   </div>

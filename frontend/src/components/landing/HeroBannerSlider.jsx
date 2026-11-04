@@ -202,7 +202,7 @@ export default function HeroBannerSlider() {
 
         {/* Dynamic Slide Container with Smooth Background Transition */}
         <div
-          className={`relative rounded-2xl sm:rounded-3xl p-4 sm:p-6 border bg-[#FFFFFF] border-[#E8E4DA] shadow-sm transition-all duration-500 min-h-[250px] sm:min-h-[280px] flex flex-col justify-between overflow-hidden`}
+          className={`relative rounded-2xl sm:rounded-3xl p-4 sm:p-6 border bg-[#FFFFFF] border-[#E9E7E1] shadow-sm transition-all duration-500 min-h-[250px] sm:min-h-[280px] flex flex-col justify-between overflow-hidden`}
         >
           {/* Subtle watermark background icon */}
           <div className="absolute -right-8 -bottom-8 opacity-5 pointer-events-none" aria-hidden="true">

@@ -210,14 +210,14 @@ export default function BulkUploadPage() {
   return (
     <div className="space-y-2.5 sm:space-y-3">
       {/* Executive Command Hero Header - Pro Compact */}
-      <div className="bg-[#FFFFFF] text-[#252B36] rounded-xl px-4 py-3 border border-[#E8E4DA] shadow-[0_1px_2px_rgba(0,0,0,0.03)] flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+      <div className="bg-[#FFFFFF] text-[#252B36] rounded-2xl px-5 sm:px-6 py-4 sm:py-5 border border-[#E9E7E1] shadow-[0_1px_3px_rgba(0,0,0,0.03)] flex flex-col sm:flex-row justify-between sm:items-center gap-2">
         <div className="flex items-center gap-2.5 min-w-0">
           <div className="w-8 h-8 rounded-lg bg-[#4169E1] flex items-center justify-center shrink-0 text-white">
             <FileSpreadsheet className="w-4 h-4" />
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="text-sm sm:text-base font-extrabold text-slate-900 tracking-tight leading-tight truncate">
+              <h1 className="text-lg sm:text-xl lg:text-[24px] font-extrabold text-[#252B36] tracking-tight leading-tight truncate">
                 {isMarathi ? 'महसूल अभिलेख व गाव नमुना डेटा आयात' : 'Revenue Records & Village Data Ingestion'}
               </h1>
               <span className="text-[10px] font-extrabold uppercase tracking-wider bg-emerald-100 text-emerald-900 px-2 py-0.5 rounded-full border border-emerald-300">

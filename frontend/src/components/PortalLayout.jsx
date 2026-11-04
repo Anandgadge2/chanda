@@ -62,7 +62,7 @@ export default function PortalLayout({ children }) {
   // Public Landing / Legal Pages (No internal layout)
   if (isStandalone) {
     return (
-      <div className="min-h-screen flex flex-col text-[#252B36] bg-[#F8F6F0] selection:bg-[#4169E1]/20 selection:text-[#252B36]">
+      <div className="min-h-screen flex flex-col text-[#252B36] bg-[#F8F7F3] selection:bg-[#4169E1]/20 selection:text-[#252B36]">
         <main id="main-content" className="flex-1 flex flex-col">
           {children}
         </main>
@@ -72,13 +72,13 @@ export default function PortalLayout({ children }) {
     );
   }
 
-  // Loading Session Check State (No sidebar flicker)
+  // Loading Session Check State
   if (loading && !isGlossary) {
     return (
-      <div className="min-h-screen flex flex-col text-[#252B36] bg-[#F8F6F0] font-sans">
+      <div className="min-h-screen flex flex-col text-[#252B36] bg-[#F8F7F3] font-sans">
         <div className="flex-1 flex flex-col items-center justify-center">
-          <div className="w-10 h-10 rounded-full border-[3px] border-[#E8E4DA] border-t-[#4169E1] animate-spin mb-3" />
-          <p className="text-xs font-semibold text-[#64748B]">{t('common.sessionCheck')}</p>
+          <div className="w-12 h-12 rounded-full border-[3.5px] border-[#E9E7E1] border-t-[#4169E1] animate-spin mb-3.5" />
+          <p className="text-sm font-semibold text-[#64748B]">{t('common.sessionCheck')}</p>
         </div>
       </div>
     );
@@ -87,14 +87,14 @@ export default function PortalLayout({ children }) {
   // Unauthenticated user on public /glossary page
   if (!user && isGlossary) {
     return (
-      <div className="min-h-screen flex flex-col text-[#252B36] bg-[#F8F6F0] font-sans">
+      <div className="min-h-screen flex flex-col text-[#252B36] bg-[#F8F7F3] font-sans">
         <Navbar
           sidebarCollapsed={true}
           onToggleSidebar={() => {}}
           onToggleMobileSidebar={() => {}}
           hideSidebarToggle={true}
         />
-        <div className="w-full px-3 sm:px-5 lg:px-6 flex-1 py-4 sm:py-6">
+        <div className="w-full px-3.5 sm:px-6 lg:px-8 flex-1 py-5 sm:py-7">
           <main id="main-content" className="w-full">
             {children}
           </main>
@@ -106,17 +106,17 @@ export default function PortalLayout({ children }) {
     );
   }
 
-  // Unauthenticated user attempting to view protected route:
+  // Unauthenticated user attempting to view protected route
   if (!user) {
     return (
-      <div className="min-h-screen flex flex-col text-[#252B36] bg-[#F8F6F0] font-sans">
+      <div className="min-h-screen flex flex-col text-[#252B36] bg-[#F8F7F3] font-sans">
         <Navbar
           sidebarCollapsed={true}
           onToggleSidebar={() => {}}
           onToggleMobileSidebar={() => {}}
           hideSidebarToggle={true}
         />
-        <main id="main-content" className="flex-1 flex items-center justify-center p-4">
+        <main id="main-content" className="flex-1 flex items-center justify-center p-5">
           <RouteGuard>{children}</RouteGuard>
         </main>
         <AuthModal isOpen={isLoginModalOpen} onClose={closeLoginModal} />
@@ -125,15 +125,15 @@ export default function PortalLayout({ children }) {
     );
   }
 
-  // Authenticated Officer Layout: Full Workspace with Sidebar
+  // Authenticated Officer Layout: Full SaaS Workspace with Modern Sidebar
   return (
-    <div className="min-h-screen flex flex-col text-[#252B36] bg-[#F8F6F0] font-sans w-full max-w-full overflow-x-hidden lg:overflow-x-visible">
+    <div className="min-h-screen flex flex-col text-[#252B36] bg-[#F8F7F3] font-sans w-full max-w-full overflow-x-hidden lg:overflow-x-visible">
       <Navbar
         sidebarCollapsed={sidebarCollapsed}
         onToggleSidebar={handleToggleSidebar}
         onToggleMobileSidebar={() => setMobileSidebarOpen((prev) => !prev)}
       />
-      <div className="w-full max-w-full px-2.5 sm:px-5 lg:px-6 flex-1 py-3 sm:py-4 flex items-start gap-3 sm:gap-4 min-w-0 overflow-x-hidden lg:overflow-x-visible">
+      <div className="w-full max-w-full px-3 sm:px-6 lg:px-8 flex-1 py-4 sm:py-5 flex items-start gap-4 sm:gap-5 min-w-0 overflow-x-hidden lg:overflow-x-visible">
         <Sidebar
           collapsed={sidebarCollapsed}
           mobileOpen={mobileSidebarOpen}
@@ -141,7 +141,7 @@ export default function PortalLayout({ children }) {
           onOpenMobile={() => setMobileSidebarOpen(true)}
           onToggleCollapse={handleToggleSidebar}
         />
-        <main id="main-content" className="flex-1 min-w-0 w-full max-w-full overflow-x-hidden relative pb-20 lg:pb-4 pb-safe">
+        <main id="main-content" className="flex-1 min-w-0 w-full max-w-full overflow-x-hidden relative pb-20 lg:pb-6 pb-safe">
           <RouteGuard>{children}</RouteGuard>
         </main>
       </div>

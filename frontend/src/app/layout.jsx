@@ -7,14 +7,14 @@ import ErrorBoundary from '../components/ErrorBoundary';
 
 const inter = Inter({
   subsets: ['latin'],
-  weight: ['300', '400', '500', '600', '700'],
+  weight: ['300', '400', '500', '600', '700', '800'],
   display: 'swap',
   variable: '--font-inter',
 });
 
 const notoSansDevanagari = Noto_Sans_Devanagari({
   subsets: ['devanagari', 'latin'],
-  weight: ['400', '500', '600', '700', '800'],
+  weight: ['400', '500', '600', '700', '800', '900'],
   display: 'swap',
   variable: '--font-noto-devanagari',
 });
@@ -50,7 +50,7 @@ export default function RootLayout({ children }) {
       <head>
         <meta name="google" content="notranslate" />
       </head>
-      <body className="bg-[#F8F6F0] text-[#252B36] antialiased min-h-screen flex flex-col notranslate font-sans">
+      <body className="bg-[#F8F7F3] text-[#252B36] antialiased min-h-screen flex flex-col notranslate font-sans text-[16px] sm:text-[16.5px] leading-relaxed selection:bg-[#4169E1]/20 selection:text-[#252B36]">
         <ErrorBoundary>
           <LanguageProvider>
             <AuthProvider>

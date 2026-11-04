@@ -188,7 +188,7 @@ export default function SettingsPage() {
   return (
     <div className="space-y-2.5 sm:space-y-3 max-w-6xl mx-auto pb-8">
       {/* Executive Command Hero Header - Pro Compact */}
-      <div className="bg-[#FFFFFF] text-[#252B36] rounded-xl px-4 py-3 border border-[#E8E4DA] shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
+      <div className="bg-[#FFFFFF] text-[#252B36] rounded-2xl px-5 sm:px-6 py-4 sm:py-5 border border-[#E9E7E1] shadow-[0_1px_3px_rgba(0,0,0,0.03)]">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div className="flex items-center gap-2.5 min-w-0">
             <div className="relative shrink-0">
@@ -203,7 +203,7 @@ export default function SettingsPage() {
 
             <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap leading-tight">
-                <h1 className="text-sm sm:text-base font-extrabold text-slate-900 truncate">
+                <h1 className="text-lg sm:text-xl lg:text-[24px] font-extrabold text-[#252B36] tracking-tight leading-tight truncate">
                   {user.fullName || (isMarathi ? 'महसूल अधिकारी' : 'Revenue Officer')}
                 </h1>
                 <span className="px-2 py-0.5 text-[10px] font-extrabold uppercase rounded-full bg-blue-100 text-blue-900 border border-blue-200">
