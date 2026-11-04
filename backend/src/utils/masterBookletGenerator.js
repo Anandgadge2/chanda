@@ -373,47 +373,62 @@ export function resolveParcel46Points(p) {
   points[18] = flags.isIllegalDeletion || c.violationType === 'GOVERNMENT_NAME_MISSING' ? 'होय' : 'नाही';
   points[19] = flags.isPokalist || c.violationType === 'POKALIST_NONDI' || otherRights.includes('बु.ग.दे') ? 'होय' : 'नाही';
 
-  // 20-34 Statutory Categories (वैधानिक कायदे तपासणी - रकाने २० ते ३४)
+  // 20-35 Statutory Categories (वैधानिक कायदे तपासणी - रकाने २० ते ३५) Exactly aligned with Sheet 1
+  // 20: मुंबई कुळ वहिवाट व शेतजमीन (विदर्भ) कायदा
   points[20] = metaPoints.point_20 || (otherRights.includes('कुळ') ? 'होय' : 'नाही');
+  // 21: इनाम व वतन जमिनी (देवस्थान जमिनी वगळुन)
   points[21] = metaPoints.point_21 || (p.tenureClass === 'DEVASTHAN_INAM' || otherRights.includes('इनाम') || otherRights.includes('वतन') ? 'होय' : 'नाही');
-  points[22] = metaPoints.point_22 || (flags.isCorpAllot || flags.isPrivateAllot || otherRights.includes('संस्था') || otherRights.includes('उद्योग') || otherRights.includes('भूमिहीन') || otherRights.includes('प्रकल्प') ? 'होय' : 'नाही');
-  points[23] = metaPoints.point_23 || (p.ceilingRecords?.length > 0 || otherRights.includes('कमाल धारणा') || otherRights.includes('सिलिंग') ? 'होय' : 'नाही');
-  points[24] = metaPoints.point_24 || (otherRights.includes('गुरचरण') || otherRights.includes('चराई') || otherRights.includes('विकास') || otherRights.includes('प्राधिकरण') ? 'होय' : 'नाही');
-  points[25] = metaPoints.point_25 || (p.tenureClass === 'DEVASTHAN_INAM' || otherRights.includes('देवस्थान') ? 'होय' : 'नाही');
-  points[26] = metaPoints.point_26 || (flags.isTribal || p.tribalRecords?.length > 0 || otherRights.includes('आदिवासी') ? 'होय' : 'नाही');
-  points[27] = metaPoints.point_27 || (otherRights.includes('पुनर्वसन') || otherRights.includes('प्रकल्पग्रस्त') ? 'होय' : 'नाही');
-  points[28] = metaPoints.point_28 || (otherRights.includes('भाडेपट्टा') || otherRights.includes('लीज') ? 'होय' : 'नाही');
-  points[29] = metaPoints.point_29 || (p.bhudanRecords?.length > 0 || otherRights.includes('भूदान') || otherRights.includes('ग्रामदान') ? 'होय' : 'नाही');
-  points[30] = metaPoints.point_30 || (otherRights.includes('खाजगी वन') || otherRights.includes('वन जमीन') ? 'होय' : 'नाही');
-  points[31] = metaPoints.point_31 || (otherRights.includes('भूमीधारी') || rawBkTenure.includes('भूमीधारी') ? 'होय' : 'नाही');
-  points[32] = metaPoints.point_32 || (otherRights.includes('सूट') || otherRights.includes('कमाल मर्यादा') ? 'होय' : 'नाही');
-  points[33] = metaPoints.point_33 || (otherRights.includes('वक्फ') || otherRights.includes('कब्रस्तान') ? 'होय' : 'नाही');
-  points[34] = metaPoints.point_34 || (otherRights.includes('भूसंपादन') || otherRights.includes('अधिग्रहित') || otherRights.includes('राखीव') ? 'होय' : 'नाही');
+  // 22: म.ज.म.अधि.1966 अंतर्गत भूमिहीन, शेत मजूर, स्वातंत्र्य सैनिक
+  points[22] = metaPoints.point_22 || (otherRights.includes('भूमिहीन') || otherRights.includes('शेतमजूर') || otherRights.includes('स्वातंत्र्य') ? 'होय' : 'नाही');
+  // 23: म.ज.म.अधि.1966 विविध योजना (गृहनिर्माण, औद्योगिक, शैक्षणिक, वसाहत, प्रकल्प)
+  points[23] = metaPoints.point_23 || (flags.isCorpAllot || flags.isPrivateAllot || otherRights.includes('संस्था') || otherRights.includes('उद्योग') || otherRights.includes('प्रकल्प') ? 'होय' : 'नाही');
+  // 24: महाराष्ट्र शेतजमिन कमाल धारणा अधिनियम 1961 वाटप
+  points[24] = metaPoints.point_24 || (p.ceilingRecords?.length > 0 || otherRights.includes('कमाल धारणा') || otherRights.includes('सिलिंग') ? 'होय' : 'नाही');
+  // 25: महानगरपालिका / प्राधिकरण विकास आराखडा किंवा ग्रामपंचायत गुरचरण
+  points[25] = metaPoints.point_25 || (otherRights.includes('गुरचरण') || otherRights.includes('चराई') || otherRights.includes('विकास') || otherRights.includes('प्राधिकरण') ? 'होय' : 'नाही');
+  // 26: देवस्थान इनाम जमीन
+  points[26] = metaPoints.point_26 || (p.tenureClass === 'DEVASTHAN_INAM' || otherRights.includes('देवस्थान') ? 'होय' : 'नाही');
+  // 27: आदिवासी खातेदारांचे मालकीची जमीन (Sheet 1 Point 27)
+  points[27] = metaPoints.point_27 || (flags.isTribal || p.tribalRecords?.length > 0 || otherRights.includes('आदिवासी') ? 'होय' : 'नाही');
+  // 28: महाराष्ट्र पुर्नवसन अधिनियम 1999 कलम 16 अन्वये प्रदान
+  points[28] = metaPoints.point_28 || (otherRights.includes('पुनर्वसन') || otherRights.includes('प्रकल्पग्रस्त') ? 'होय' : 'नाही');
+  // 29: भाडेपट्टयाने दिलेली शासकीय जमिन
+  points[29] = metaPoints.point_29 || (otherRights.includes('भाडेपट्टा') || otherRights.includes('लीज') ? 'होय' : 'नाही');
+  // 30: भुदान व ग्रामदान अंतर्गत दिलेली
+  points[30] = metaPoints.point_30 || (p.bhudanRecords?.length > 0 || otherRights.includes('भूदान') || otherRights.includes('ग्रामदान') ? 'होय' : 'नाही');
+  // 31: महाराष्ट्र खाजगी वने (संपादन) अधिनियम 1975 व कमाल मर्यादा 1961 चौकशी प्रलंबित
+  points[31] = metaPoints.point_31 || (otherRights.includes('खाजगी वन') || otherRights.includes('वन जमीन') ? 'होय' : 'नाही');
+  // 32: भुमीधारी हक्कान्वये प्राप्त
+  points[32] = metaPoints.point_32 || (otherRights.includes('भूमीधारी') || rawBkTenure.includes('भूमीधारी') ? 'होय' : 'नाही');
+  // 33: कमाल मर्यादेपेक्षा अधिक धारण करण्यास सुट
+  points[33] = metaPoints.point_33 || (otherRights.includes('सूट') || otherRights.includes('कमाल मर्यादा') ? 'होय' : 'नाही');
+  // 34: वक्फ बोर्डाचे मालकीची
+  points[34] = metaPoints.point_34 || (otherRights.includes('वक्फ') || otherRights.includes('कब्रस्तान') ? 'होय' : 'नाही');
+  // 35: भुसंपादन कायदयाअंतर्गत अधिग्रहित/राखीव
+  points[35] = metaPoints.point_35 || (otherRights.includes('भूसंपादन') || otherRights.includes('अधिग्रहित') || otherRights.includes('राखीव') ? 'होय' : 'नाही');
 
-  // 35-46 Enforcement & Conversions (शर्तभंग, रूपांतरण व अद्यावत पडताळणी - रकाने ३५ ते ४६)
-  // 35: भोग. वर्ग-२ मधून वर्ग-१ मध्ये विनापरवानगी रूपांतरण
-  points[35] = metaPoints.point_35 || ((flags.isShartbhang && p.tenureClass === 'BHOGVATDAR_CLASS_1' && b1950.tenureClass === 'BHOGVATDAR_CLASS_2') || otherRights.includes('रूपांतर') ? 'होय' : 'नाही');
-  // 36: मौका चौकशीअंती शर्तभंग
-  points[36] = metaPoints.point_36 || (flags.isShartbhang || c.violationType === 'SHARTBHANG' ? 'होय' : 'नाही');
-  // 37: आदिवासी ते आदिवासी हस्तांतरण
-  points[37] = metaPoints.point_37 || (flags.isTribal && otherRights.includes('हस्तांतरण') ? 'होय' : 'नाही');
-  // 38: आदिवासी ते गैर-आदिवासी हस्तांतरण
-  points[38] = metaPoints.point_38 || (flags.isTribal && c.violationType === 'TRIBAL_LAND_VIOLATION' ? 'होय' : 'नाही');
-  // 39: निर्बंधीत सत्ताप्रकारानुसार नोंद इतर अधिकारामध्ये
-  points[39] = metaPoints.point_39 || (otherRights && otherRights !== '-' && otherRights !== '....' ? 'होय' : 'ईतर अधिकारात नोंद नाही');
-  // 40: इतर अधिकारातील नोंदी/भूधारणा अवैधरित्या कमी
-  points[40] = metaPoints.point_40 || (flags.isIllegalDeletion || c.violationType === 'GOVERNMENT_NAME_MISSING' ? 'होय' : 'नाही');
-  // 41: भोगवटदार कंपनी/बिगर शेतकरी असल्यास परवानगी
-  points[41] = metaPoints.point_41 || (p.tenancy89ARecords?.length > 0 || otherRights.includes('कंपनी') ? 'होय' : 'नाही');
-  // 42: कलम ८९/८९अ अन्वये औद्योगिक प्रयोजनाकरिता कंपनीने धारण
-  points[42] = metaPoints.point_42 || (p.tenancy89ARecords?.[0]?.isGenuineIndustrialUse ? 'होय' : 'नाही');
-  // 43: खरेदी दिनांक
+  // 36-46 Enforcement & Conversions (शर्तभंग, रूपांतरण व अद्यावत पडताळणी - रकाने ३६ ते ४६)
+  // 36: भोग. वर्ग-२ मधून वर्ग-१ मध्ये विनापरवानगी रूपांतरण (Sheet 1 Point 36)
+  points[36] = metaPoints.point_36 || ((flags.isShartbhang && p.tenureClass === 'BHOGVATDAR_CLASS_1' && b1950.tenureClass === 'BHOGVATDAR_CLASS_2') || otherRights.includes('रूपांतर') ? 'होय' : 'नाही');
+  // 37: मौका चौकशीअंती शर्तभंग (Sheet 1 Point 37)
+  points[37] = metaPoints.point_37 || (flags.isShartbhang || c.violationType === 'SHARTBHANG' ? 'होय' : 'नाही');
+  // 38: आदिवासी ते आदिवासी हस्तांतरण परवानगीशिवाय (Sheet 1 Point 38)
+  points[38] = metaPoints.point_38 || (flags.isTribal && otherRights.includes('हस्तांतरण') ? 'होय' : 'नाही');
+  // 39: आदिवासी ते गैर-आदिवासी हस्तांतरण परवानगीशिवाय (Sheet 1 Point 39)
+  points[39] = metaPoints.point_39 || (flags.isTribal && c.violationType === 'TRIBAL_LAND_VIOLATION' ? 'होय' : 'नाही');
+  // 40: जमिनीच्या निर्बंधीत सत्ताप्रकारानुसार नोंद इतर अधिकारामध्ये (Sheet 1 Point 40)
+  points[40] = metaPoints.point_40 || (otherRights && otherRights !== '-' && otherRights !== '....' ? 'होय' : 'ईतर अधिकारात नोंद नाही');
+  // 41: इतर अधिकारातील नोंदी/भूधारणा/भोगवटदार अवैधरित्या कमी (Sheet 1 Point 41)
+  points[41] = metaPoints.point_41 || (flags.isIllegalDeletion || c.violationType === 'GOVERNMENT_NAME_MISSING' ? 'होय' : 'नाही');
+  // 42: भोगवटदार कंपनी/बिगर शेतकरी असल्यास परवानगी (Sheet 1 Point 42)
+  points[42] = metaPoints.point_42 || (p.tenancy89ARecords?.length > 0 || otherRights.includes('कंपनी') ? 'होय' : 'नाही');
+  // 43: खरेदी दिनांक (Sheet 1 Point 43 - कलम ८९/८९अ खरेदी दिनांक)
   points[43] = metaPoints.point_43 || (p.tenancy89ARecords?.[0]?.purchaseDate ? new Date(p.tenancy89ARecords[0].purchaseDate).toLocaleDateString('mr-IN') : '');
-  // 44: वापर सुरू केला आहे काय?
+  // 44: वापर सुरू केला आहे काय? (Sheet 1 Point 44)
   points[44] = metaPoints.point_44 || (p.tenancy89ARecords?.[0]?.isGenuineIndustrialUse ? 'होय' : 'नाही');
-  // 45: विना परवानगी/हस्तांतरण/वापरात बदल
+  // 45: विना परवानगी/हस्तांतरण/वापरात बदल (Sheet 1 Point 45)
   points[45] = metaPoints.point_45 || (flags.isShartbhang ? 'होय' : 'नाही');
-  // 46: गाव नमुना १ क अद्यावत
+  // 46: गाव नमुना १ क अद्यावत (Sheet 1 Point 46)
   points[46] = metaPoints.point_46 || 'होय';
 
   // HIGH FIDELITY OVERRIDE:
@@ -445,8 +460,8 @@ export async function generateMasterChecklistExcel(parcels, scopeName, res) {
     views: [{ showGridLines: true }]
   });
 
-  // Row 1: Title
-  ws.mergeCells('A1:BA1');
+  // Row 1: Title (Spans A1 to BB1 - exactly 54 Columns)
+  ws.mergeCells('A1:BB1');
   const t1 = ws.getCell('A1');
   t1.value = 'महसूल अधिकार अभिलेखातील (7/12) ची तपासणी सुची';
   t1.font = { name: 'Arial', size: 14, bold: true, color: { argb: 'FFFFFFFF' } };
@@ -454,8 +469,8 @@ export async function generateMasterChecklistExcel(parcels, scopeName, res) {
   t1.alignment = { horizontal: 'center', vertical: 'middle' };
   ws.getRow(1).height = 36;
 
-  // Row 2: Subtitle
-  ws.mergeCells('A2:BA2');
+  // Row 2: Subtitle (Spans A2 to BB2)
+  ws.mergeCells('A2:BB2');
   const t2 = ws.getCell('A2');
   t2.value = 'अधिकार अभिलेख (1950) ते आजपर्यतच्या सर्व 7/12 ची तपासणी करुन खालील माहिती भरावी';
   t2.font = { name: 'Arial', size: 11, bold: true, color: { argb: 'FF0F172A' } };
@@ -463,120 +478,162 @@ export async function generateMasterChecklistExcel(parcels, scopeName, res) {
   t2.alignment = { horizontal: 'center', vertical: 'middle' };
   ws.getRow(2).height = 28;
 
-  // Row 3: Jurisdiction Scope
-  ws.mergeCells('A3:BA3');
+  // Row 3: Jurisdiction Scope (Spans A3 to BB3)
+  ws.mergeCells('A3:BB3');
   const t3 = ws.getCell('A3');
   t3.value = `जिल्हा: चंद्रपूर | कार्यक्षेत्र: ${scopeName} | एकूण तपासणी अभिलेख संख्या: ${parcels.length} | दिनांक: ${new Date().toLocaleDateString('mr-IN')}`;
   t3.font = { name: 'Arial', size: 10, italic: true, bold: true, color: { argb: 'FF334155' } };
+  t3.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF1F5F9' } };
   t3.alignment = { horizontal: 'center', vertical: 'middle' };
   ws.getRow(3).height = 22;
 
-  // Row 4 & 5: Exact Multi-Level Headers matching user specification
-  ws.mergeCells('A4:A5'); ws.getCell('A4').value = 'अ.क्र.';
-  ws.mergeCells('B4:B5'); ws.getCell('B4').value = 'गावाचे नाव';
-  ws.mergeCells('C4:C5'); ws.getCell('C4').value = 'सर्व्हे क्रमांक';
-  ws.mergeCells('D4:D5'); ws.getCell('D4').value = 'क्षेत्र\n(हे.आर.)';
-  ws.mergeCells('E4:E5'); ws.getCell('E4').value = 'भोगवटदार वर्ग\n(भूधारणा नुसार )';
-  ws.mergeCells('F4:F5'); ws.getCell('F4').value = 'भोगवटदाराचे नाव';
-  ws.mergeCells('G4:G5'); ws.getCell('G4').value = 'इतर अधिकारातील नोंद (जी नोंद सदर 7/12 चे इतर अधिकारात असेल, तीच नोंद इथे नमूद करावी. उदा. आदिवासी/कुळ इ.)';
+  // Row 4, 5, 6: Exact Multi-Level Headers matching Sheet 1 specifications
+  // Columns 1 to 8: Baseline 7/12 Details
+  ws.mergeCells('A4:A6'); ws.getCell('A4').value = 'अ.क्र.';
+  ws.mergeCells('B4:B6'); ws.getCell('B4').value = 'गावाचे नाव';
+  ws.mergeCells('C4:C6'); ws.getCell('C4').value = 'सर्व्हे क्रमांक';
+  
+  // Row 4: Merged D4:E4 for 'क्षेत्र'
+  ws.mergeCells('D4:E4'); 
+  const areaHead = ws.getCell('D4');
+  areaHead.value = 'क्षेत्र';
+  areaHead.alignment = { horizontal: 'center', vertical: 'middle' };
+  
+  // Rows 5-6: Split into Krushak and Akrushak
+  ws.mergeCells('D5:D6'); ws.getCell('D5').value = 'कृषक (हे.आर)';
+  ws.mergeCells('E5:E6'); ws.getCell('E5').value = 'अकृषक (आर चौ.मी)';
 
-  // Group 1: रिनंबरींग पर्चाप्रमाणे (स्तंभ H ते P, मुद्दे १ ते ९)
-  ws.mergeCells('H4:P4');
-  const g1 = ws.getCell('H4');
-  g1.value = 'सदर गट क्रमांकाचा रिनंबरींग पर्चाप्रमाणे (ऐतिहासिक कालक्रम)';
+  ws.mergeCells('F4:F6'); ws.getCell('F4').value = 'भोगवटदार वर्ग\n(भूधारणा नुसार )';
+  ws.mergeCells('G4:G6'); ws.getCell('G4').value = 'भोगवटदाराचे नाव';
+  ws.mergeCells('H4:H6'); ws.getCell('H4').value = 'इतर अधिकारातील नोंद (जी नोंद सदर 7/12 चे इतर अधिकारात असेल, तीच नोंद इथे नमूद करावी. उदा. आदिवासी/कुळ इ.)';
+
+  // Group 1: सदर गट क्रमांकाचा रिनंबरींग पर्चाप्रमाणे (स्तंभ I ते Q, मुद्दे १ ते ९)
+  ws.mergeCells('I4:Q4');
+  const g1 = ws.getCell('I4');
+  g1.value = 'सदर गट क्रमांकाचा रिनंबरींग पर्चाप्रमाणे (१ ते ९)';
   g1.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFDBEAFE' } };
+  g1.alignment = { horizontal: 'center', vertical: 'middle' };
 
-  ws.getCell('H5').value = 'i) बंदोबस्त क्र';
-  ws.getCell('I5').value = 'ii) बंदोबस्त नंबर प्रमाणे भोगवटदाराचे नाव';
-  ws.getCell('J5').value = 'iii) बंदोबस्त नंबर प्रमाणे भूधारणा';
-  ws.getCell('K5').value = 'i) एकत्रिकरण नंबर';
-  ws.getCell('L5').value = 'ii) एकत्रिकरण नंबर प्रमाणे भोगवटदाराचे नाव';
-  ws.getCell('M5').value = 'iii) एकत्रिकरण नंबरप्रमाणे भूधारणा';
-  ws.getCell('N5').value = 'i) पुर्नमोजणी नंबर(7/12)';
-  ws.getCell('O5').value = 'ii) ७/१२ प्रमाणे भोगवटदाराचे नाव';
-  ws.getCell('P5').value = 'iii) ७/१२ प्रमाणे भूधारणा';
+  ws.mergeCells('I5:I6'); ws.getCell('I5').value = 'i)बंदोबस्त क्र';
+  ws.mergeCells('J5:J6'); ws.getCell('J5').value = 'ii)बंदोबस्त नंबर प्रमाणे भोगवटदाराचे नाव';
+  ws.mergeCells('K5:K6'); ws.getCell('K5').value = 'iii) बंदोबस्त नंबर प्रमाणे भूधारणा';
+  ws.mergeCells('L5:L6'); ws.getCell('L5').value = 'i)एकत्रिकरण नंबर';
+  ws.mergeCells('M5:M6'); ws.getCell('M5').value = 'ii) एकत्रिकरण नंबर प्रमाणे भोगवटदाराचे नाव';
+  ws.mergeCells('N5:N6'); ws.getCell('N5').value = 'iii) एकत्रिकरण नंबरप्रमाणे भूधारणा';
+  ws.mergeCells('O5:O6'); ws.getCell('O5').value = 'i) पुर्नमोजणी नंबर(7/12)';
+  ws.mergeCells('P5:P6'); ws.getCell('P5').value = 'i)७/१२ प्रमाणे भोगवटदाराचे नाव';
+  ws.mergeCells('Q5:Q6'); ws.getCell('Q5').value = 'ii)७/१२ प्रमाणे भूधारणा';
 
-  // Group 2: भोगवटदार सरकार / महाराष्ट्र शासन असल्यास (स्तंभ Q ते Z, मुद्दे १० ते १९)
-  ws.mergeCells('Q4:Z4');
-  const g2 = ws.getCell('Q4');
-  g2.value = 'भोगवटदार सरकार / महाराष्ट्र शासन असल्यास';
+  // Group 2: भोगवटदार सरकार / महाराष्ट्र शासन असल्यास (स्तंभ R ते AA, मुद्दे १० ते १९)
+  ws.mergeCells('R4:AA4');
+  const g2 = ws.getCell('R4');
+  g2.value = 'भोगवटदार सरकार / महाराष्ट्र शासन असल्यास (१० ते १९)';
   g2.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFEF3C7' } };
+  g2.alignment = { horizontal: 'center', vertical: 'middle' };
 
-  ws.getCell('Q5').value = 'सध्यस्थितीतील 7/12 प्रमाणे भोगवटदाराचे नाव';
-  ws.getCell('R5').value = 'अधिकार अभिलेखानुसार जमिनीचा दर्जा/प्रकार (गायरान/सरकार पहाड खडक/परमपोक इ.)';
-  ws.getCell('S5').value = 'मुढ ७/१२ शी तुलना करता सध्यास्थितीती 7/12 मधील क्षेत्र, एकक,भूधारणा, इतर अधिकार मधील नोंदी किंवा वापराचे प्रयोजन या मध्ये तफावत  7/12 मध्ये  आहेत का? असल्यास नमूद करणे.';
-  ws.getCell('T5').value = 'वन / झुडपी जंगल जमीन आहे का?';
-  ws.getCell('U5').value = 'सदर जमीन वाटप झाली आहे का? असल्यास क्षेत्र नमूद करावे.';
-  ws.getCell('V5').value = 'अतिक्रमण आहे का? असल्यास क्षेत्र';
-  ws.getCell('W5').value = 'सदर गट/सर्व्हे नंबरचे KML तयार केले आहे काय?';
-  ws.getCell('X5').value = 'भूसंपादन झाले आहे का? असल्यास भूसंपादित क्षेत्र';
-  ws.getCell('Y5').value = 'अवैधरित्या सरकार किंवा शासन नोंद कमी केली आहे काय?';
-  ws.getCell('Z5').value = 'शासकीय जमिनीवर  पोकळीस्त नोंदी आहेत का ? असल्यास इतर अधिकारामध्ये फेरफारशिवाय काही नोंदी झाल्यात का ? असल्यास नमूद करणे.';
+  ws.mergeCells('R5:R6'); ws.getCell('R5').value = 'सध्यस्थितीतील 7/12 प्रमाणे भोगवटदाराचे नाव';
+  ws.mergeCells('S5:S6'); ws.getCell('S5').value = 'अधिकार अभिलेखानुसार जमिनीचा दर्जा/प्रकार (गायरान/सरकार पहाड खडक/परमपोक इ.)';
+  ws.mergeCells('T5:T6'); ws.getCell('T5').value = 'मूळ ७/१२ शी तुलना करता सध्यास्थितीती 7/12 मधील क्षेत्र, एकक,भूधारणा, इतर अधिकार मधील नोंदी किंवा वापराचे प्रयोजन या मध्ये तफावत 7/12 मध्ये आहेत का? असल्यास नमूद करणे.';
+  ws.mergeCells('U5:U6'); ws.getCell('U5').value = 'वन / झुडपी जंगल जमीन आहे का?';
+  ws.mergeCells('V5:V6'); ws.getCell('V5').value = 'सदर जमीन वाटप झाली आहे का? असल्यास क्षेत्र नमूद करावे.';
+  ws.mergeCells('W5:W6'); ws.getCell('W5').value = 'अतिक्रमण आहे का? असल्यास क्षेत्र';
+  ws.mergeCells('X5:X6'); ws.getCell('X5').value = 'सदर गट/सर्व्हे नंबरचे KML तयार केले आहे काय?';
+  ws.mergeCells('Y5:Y6'); ws.getCell('Y5').value = 'भूसंपादन झाले आहे का? असल्यास भूसंपादित क्षेत्र';
+  ws.mergeCells('Z5:Z6'); ws.getCell('Z5').value = 'अवैधरित्या सरकार किंवा शासन नोंद कमी केली आहे काय?';
+  ws.mergeCells('AA5:AA6'); ws.getCell('AA5').value = 'शासकीय जमिनीवर पोकळीस्त नोंदी आहेत का ? असल्यास इतर अधिकारामध्ये फेरफारशिवाय काही नोंदी झाल्यात का ? असल्यास नमूद करणे.';
 
-  // Group 3: वैधानिक कायदे व तपासणी रकाने (स्तंभ AA ते BA, मुद्दे २० ते ४६)
+  // Group 3: वैधानिक कायदे व पडताळणी रकाने (स्तंभ AB ते BB, मुद्दे २० ते ४६)
+  ws.mergeCells('AB4:BB4');
+  const g3 = ws.getCell('AB4');
+  g3.value = 'वैधानिक कायदे व पडताळणी रकाने (२० ते ४६)';
+  g3.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE2E8F0' } };
+  g3.alignment = { horizontal: 'center', vertical: 'middle' };
+
   const statChecklistHeaders = [
-    { col: 'AA', text: 'मुंबई कुळ वहिवाट व शेतजमीन (विदर्भ) कायदा अन्वये कुळ घोषित केलेली जमीन आहे काय?' },
-    { col: 'AB', text: 'सदर जमिन इनाम व वतन जमिनी (देवस्थान जमिनी वगळुन) प्रकारातील आहे काय ? असल्यास कोणता प्रकार (मदद माश इनाम/खिदमत माश इनाम, इतर)' },
-    { col: 'AC', text: 'सदर जमिन म.ज.म.अधि.1966 अंतर्गत विवीध योजनेअंतर्गत प्रदान/अतिक्रमण नियमानुकूल केलेल्या जमिनी (गृहनिर्माण संस्था,औद्योगिक आस्थापना,शैक्षणिक संस्था,विशेष वसाहत,प्रकल्प इ.) प्रकारची जमिन आहे का ? असल्यास संस्थेचे नाव नमुद करावे. (नसल्यास "नाही" असे नमूद करावे.)' },
-    { col: 'AD', text: 'सदर जमिन महाराष्ट्र शेतजमिन कमाल धारणा अधिनियम 1961 अंतर्गत वाटप केलेल्या जमिनी प्रकारातील आहे काय ? (होय/नाही)' },
-    { col: 'AE', text: 'सदर जमीन महानगरपालिका, नगर पालिका व विविध प्राधिकरण यांच्या विकास आराखडयात समाविष्ट असलेल्या जमिनी अथवा  ग्रामपंचायतकडे गुरचरण अथवा इतर प्रयोजनासाठी वर्ग केलेली आहे का ? (असल्यास, कोणत्या प्रयोजनासाठी आरक्षित आहे?)' },
-    { col: 'AF', text: 'सदर जमीन देवस्थान इनाम जमीन आहे काय? (होय/नाही)' },
-    { col: 'AG', text: 'सदर जमीन आदिवासी खातेदारांचे मालकीची आहे काय? (होय/नाही)' },
-    { col: 'AH', text: 'सदर जमिन महाराष्ट्र पुर्नवसन अधिनियम 1999 च्या कलम 16 अन्वये प्रदान केलेली आहे काय ? (होय/नाही) असल्यास, प्रदान केल्याचा दिनांक नमूद करावा. (नसल्यास "नाही" असे नमूद करावे.)' },
-    { col: 'AI', text: 'सदर जमिन भाडेपट्टयाने दिलेली शासकीय जमिन आहे काय? (होय/नाही)' },
-    { col: 'AJ', text: 'सदर जमिन भुदान व ग्रामदान अंतर्गत दिलेली आहे काय ? (होय/नाही)' },
-    { col: 'AK', text: 'सदर जमिन महाराष्ट्र खाजगी वने (संपादन) अधिनियम 1975 तसेच महाराष्ट्र शेतजमिन (जमिन धारणेची कमाल मर्यादा) अधिनियम 1961 अन्वये चौकशीसाठी प्रलंबित आहे काय ? (होय/नाही)' },
-    { col: 'AL', text: 'सदर जमिन भुमीधारी हक्कान्वये प्राप्त झालेली आहे काय ? (होय/नाही)' },
-    { col: 'AM', text: 'सदर जमिनीस महाराष्ट्र शेतजमिन (जमिन धारणेची कमाल मर्यादा) अधिनियम 1961 अंतर्गत कमाल मर्यादेपेक्षा अधिक धारण करण्यास सुट दिलेली आहे काय ? (होय/नाही)' },
-    { col: 'AN', text: 'सदर जमिन वक्फ बोर्डाचे मालकीची आहे काय? (होय/नाही)' },
-    { col: 'AO', text: 'सदर जमिन भुसंपादन कायदयाअंतर्गत  अधिग्रहित/राखीव आहे काय ? (होय/नाही)' },
-    { col: 'AP', text: 'सदर जमीन रकाना 10 ते 34 पैकी कोणत्याही रकान्यात होय असल्यास सक्षम प्राधिका-यांच्या परवानगीशिवाय भोग. वर्ग-2 मधुन भोग. वर्ग-1 मध्ये रुपांतरीत झालेली आहे काय ? (होय/नाही) असल्यास, सक्षम प्राधिका-यांचे पदनाम व आदेश क्रमांक नमूद करावा.' },
-    { col: 'AQ', text: 'सदर जमीन रकाना 10 ते 34 पैकी कोणत्याही रकान्यात होय असल्यास, मौका चौकशीअंती सदर जमिनीबाबत शर्तभंग झालेला आहे काय ? असल्यास कोणत्या प्रकारचा ? (वापरात बदल/हस्तांतरण/इतर)' },
-    { col: 'AR', text: 'रकाना क्र. 26 चे उत्तर "होय" असल्यास, आदिवासी जमिनीबाबत सक्षम अधिकारी यांचे  परवानगीशिवाय आदिवासी ते आदिवासी हस्तांतरण झाले आहे का ? (होय / नाही)' },
-    { col: 'AS', text: 'रकाना क्र. 26 चे उत्तर "होय" असल्यास, आदिवासी जमिनीबाबत सक्षम अधिकारी यांचे  परवानगीशिवाय  आदिवासी ते गैर आदिवासी हस्तांतरण झाले आहे का ?  (होय / नाही)' },
-    { col: 'AT', text: 'जमिनीच्या निर्बंधीत सत्ताप्रकारानुसार नोंद इतर अधिकारामध्ये घेण्यात आली आहे काय? (होय / नाही)' },
-    { col: 'AU', text: 'अधिकार अभिलेखापासून ते आजपावेतोच्या अधिकार अभिलेखानुसार इतर अधिकारातील नोंदी/भुधारणा/भोगवटदार यांच्या नोंदी अवैधरित्या कमी केलेल्या आहेत काय? (होय / नाही)' },
-    { col: 'AV', text: 'भोगवटदार कंपनी/बिगर शेतकरी असल्यास,सदर जमिन वाणिज्य/रहिवास प्रयोजनाकरीता कंपनीने धारण केलेली असल्यास महाराष्ट्र कुळ वहिवाट व शेतजमिन (विदर्भ प्रदेश) अधिनियम 1948 /महाराष्ट्र कुळ वहिवाट व शेतजमिन (हैद्राबाद प्रदेश) अधिनियम 1950 मधील तरतुदीनुसार परवानगी घेतलेली आहे काय ? (होय/नाही)' },
-    { col: 'AW', text: 'सदर जमिन महाराष्ट्र कुळ वहिवाट व शेतजमिन (विदर्भ प्रदेश) अधिनियम 1948 चे कलम 89 व 89 अ/महाराष्ट्र कुळ वहिवाट व शेतजमिन (हैद्राबाद प्रदेश) अधिनियम 1950 चे कलम 47 व 47 अ अन्वये ख-याखु-या औद्योगिक प्रयोजनाकरिता कंपनीने धारण केलेली आहे काय ? (होय/नाही)' },
-    { col: 'AX', text: 'खरेदी दिनांक' },
-    { col: 'AY', text: 'वापर सुरू केला आहे काय?' },
-    { col: 'AZ', text: 'विना परवानगी/हस्तांतरण/वापरात बदल झाला आहे काय ?' },
-    { col: 'BA', text: 'मुद्दा क्र. 10 ते 34 प्रमाणे गाव नमुना 1 क अद्यावत आहे काय ?' }
+    { col: 'AB', text: 'मुंबई कुळ वहिवाट व शेतजमीन (विदर्भ) कायदा अन्वये कुळ घोषित केलेली जमीन आहे काय?' }, // 20
+    { col: 'AC', text: 'सदर जमिन इनाम व वतन जमिनी (देवस्थान जमिनी वगळुन) प्रकारातील आहे काय ? असल्यास कोणता प्रकार (मदद माश इनाम/खिदमत माश इनाम, इतर)' }, // 21
+    { col: 'AD', text: 'सदर जमिन म.ज.म.अधि.1966 अंतर्गत भूमिहीन, शेत मजूर, स्वातंत्र्य सैनिक प्रदान केलेल्या जमिनी प्रकारातील आहे काय?' }, // 22
+    { col: 'AE', text: 'सदर जमिन म.ज.म.अधि.1966 अंतर्गत विवीध योजनेअंतर्गत प्रदान/अतिक्रमण नियमानुकूल केलेल्या जमिनी (गृहनिर्माण संस्था,औद्योगिक आस्थापना,शैक्षणिक संस्था,विशेष वसाहत,प्रकल्प इ.) प्रकारची जमिन आहे का ? असल्यास संस्थेचे नाव नमुद करावे. (नसल्यास "नाही" असे नमूद करावे.)' }, // 23
+    { col: 'AF', text: 'सदर जमिन महाराष्ट्र शेतजमिन कमाल धारणा अधिनियम 1961 अंतर्गत वाटप केलेल्या जमिनी प्रकारातील आहे काय ? (होय/नाही)' }, // 24
+    { col: 'AG', text: 'सदर जमीन महानगरपालिका, नगर पालिका व विविध प्राधिकरण यांच्या विकास आराखडयात समाविष्ट असलेल्या जमिनी अथवा ग्रामपंचायतकडे गुरचरण अथवा इतर प्रयोजनासाठी वर्ग केलेली आहे का ? (असल्यास, कोणत्या प्रयोजनासाठी आरक्षित आहे?)' }, // 25
+    { col: 'AH', text: 'सदर जमीन देवस्थान इनाम जमीन आहे काय? (होय/नाही)' }, // 26
+    { col: 'AI', text: 'सदर जमीन आदिवासी खातेदारांचे मालकीची आहे काय? (होय/नाही)' }, // 27
+    { col: 'AJ', text: 'सदर जमिन महाराष्ट्र पुर्नवसन अधिनियम 1999 च्या कलम 16 अन्वये प्रदान केलेली आहे काय ? (होय/नाही) असल्यास, प्रदान केल्याचा दिनांक नमूद करावा. (नसल्यास "नाही" असे नमूद करावे.)' }, // 28
+    { col: 'AK', text: 'सदर जमिन भाडेपट्टयाने दिलेली शासकीय जमिन आहे काय? (होय/नाही)' }, // 29
+    { col: 'AL', text: 'सदर जमिन भुदान व ग्रामदान अंतर्गत दिलेली आहे काय ? (होय/नाही)' }, // 30
+    { col: 'AM', text: 'सदर जमिन महाराष्ट्र खाजगी वने (संपादन) अधिनियम 1975 तसेच महाराष्ट्र शेतजमिन (जमिन धारणेची कमाल मर्यादा) अधिनियम 1961 अन्वये चौकशीसाठी प्रलंबित आहे काय ? (होय/नाही)' }, // 31
+    { col: 'AN', text: 'सदर जमिन भुमीधारी हक्कान्वये प्राप्त झालेली आहे काय ? (होय/नाही)' }, // 32
+    { col: 'AO', text: 'सदर जमिनीस महाराष्ट्र शेतजमिन (जमिन धारणेची कमाल मर्यादा) अधिनियम 1961 अंतर्गत कमाल मर्यादेपेक्षा अधिक धारण करण्यास सुट दिलेली आहे काय ? (होय/नाही)' }, // 33
+    { col: 'AP', text: 'सदर जमिन वक्फ बोर्डाचे मालकीची आहे काय? (होय/नाही)' }, // 34
+    { col: 'AQ', text: 'सदर जमिन भुसंपादन कायदयाअंतर्गत अधिग्रहित/राखीव आहे काय ? (होय/नाही)' }, // 35
+    { col: 'AR', text: 'सदर जमीन रकाना 10 ते 34 पैकी कोणत्याही रकान्यात होय असल्यास सक्षम प्राधिका-यांच्या परवानगीशिवाय भोग. वर्ग-2 मधुन भोग. वर्ग-1 मध्ये रुपांतरीत झालेली आहे काय ? (होय/नाही) असल्यास, सक्षम प्राधिका-यांचे पदनाम व आदेश क्रमांक नमूद करावा.' }, // 36
+    { col: 'AS', text: 'सदर जमीन रकाना 10 ते 34 पैकी कोणत्याही रकान्यात होय असल्यास, मौका चौकशीअंती सदर जमिनीबाबत शर्तभंग झालेला आहे काय ? असल्यास कोणत्या प्रकारचा ? (वापरात बदल/हस्तांतरण/इतर)' }, // 37
+    { col: 'AT', text: 'रकाना क्र. 26 चे उत्तर "होय" असल्यास, आदिवासी जमिनीबाबत सक्षम अधिकारी यांचे परवानगीशिवाय आदिवासी ते आदिवासी हस्तांतरण झाले आहे का ? (होय / नाही)' }, // 38
+    { col: 'AU', text: 'रकाना क्र. 26 चे उत्तर "होय" असल्यास, आदिवासी जमिनीबाबत सक्षम अधिकारी यांचे परवानगीशिवाय आदिवासी ते गैर आदिवासी हस्तांतरण झाले आहे का ? (होय / नाही)' }, // 39
+    { col: 'AV', text: 'जमिनीच्या निर्बंधीत सत्ताप्रकारानुसार नोंद इतर अधिकारामध्ये घेण्यात आली आहे काय? (होय / नाही)' }, // 40
+    { col: 'AW', text: 'अधिकार अभिलेखापासून ते आजपावेतोच्या अधिकार अभिलेखानुसार इतर अधिकारातील नोंदी/भुधारणा/भोगवटदार यांच्या नोंदी अवैधरित्या कमी केलेल्या आहेत काय? (होय / नाही)' }, // 41
+    { col: 'AX', text: 'भोगवटदार कंपनी/बिगर शेतकरी असल्यास,सदर जमिन वाणिज्य/रहिवास प्रयोजनाकरीता कंपनीने धारण केलेली असल्यास महाराष्ट्र कुळ वहिवाट व शेतजमिन (विदर्भ प्रदेश) अधिनियम 1948 /महाराष्ट्र कुळ वहिवाट व शेतजमिन (हैद्राबाद प्रदेश) अधिनियम 1950 मधील तरतुदीनुसार परवानगी घेतलेली आहे काय ? (होय/नाही)' } // 42
   ];
 
   statChecklistHeaders.forEach(item => {
-    ws.mergeCells(`${item.col}4:${item.col}5`);
-    const c = ws.getCell(`${item.col}4`);
-    c.value = item.text;
+    ws.mergeCells(`${item.col}5:${item.col}6`);
+    ws.getCell(`${item.col}5`).value = item.text;
   });
 
-  // Header styles
-  [ws.getRow(4), ws.getRow(5)].forEach(row => {
-    row.eachCell(c => {
-      c.font = { name: 'Arial', size: 8.5, bold: true, color: { argb: 'FF0F172A' } };
-      if (!c.fill?.fgColor) {
-        c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: HEADER_BG } };
-      }
+  // Points 43, 44, 45: Section 89 / 89A group (AY to BA)
+  ws.mergeCells('AY5:BA5');
+  const sec89Head = ws.getCell('AY5');
+  sec89Head.value = 'सदर जमिन महाराष्ट्र कुळ वहिवाट व शेतजमिन (विदर्भ प्रदेश) अधिनियम 1948 चे कलम 89 व 89 अ/महाराष्ट्र कुळ वहिवाट व शेतजमिन (हैद्राबाद प्रदेश) अधिनियम 1950 चे कलम 47 व 47 अ अन्वये ख-याखु-या औद्योगिक प्रयोजनाकरिता कंपनीने धारण केलेली आहे काय ? (होय/नाही)';
+  sec89Head.alignment = { horizontal: 'center', vertical: 'middle' };
+
+  ws.getCell('AY6').value = 'खरेदी दिनांक'; // 43
+  ws.getCell('AZ6').value = 'वापर सुरू केला आहे काय?'; // 44
+  ws.getCell('BA6').value = 'विना परवानगी/हस्तांतरण/वापरात बदल झाला आहे काय ?'; // 45
+
+  // Point 46: Village Form 1-C
+  ws.mergeCells('BB5:BB6');
+  ws.getCell('BB5').value = 'मुद्दा क्र. 10 ते 34 प्रमाणे गाव नमुना 1 क अद्यावत आहे काय ?'; // 46
+
+  // Row heights for header rows
+  ws.getRow(4).height = 28;
+  ws.getRow(5).height = 70;
+  ws.getRow(6).height = 40;
+
+  // Row 7: Column Numbers (१ ते ४६ Matching Sheet 1 Row 3 & 4)
+  const colNums = [
+    'अ.क्र.', 'गावाचे नाव', 'सर्व्हे क्रमांक', 'कृषक', 'अकृषक', 'भोगवटदार वर्ग', 'भोगवटदाराचे नाव', 'इतर अधिकारातील नोंद',
+    '१', '२', '३', '४', '५', '६', '७', '८', '९', // 1-9
+    '१०', '११', '१२', '१३', '१४', '१५', '१६', '१७', '१८', '१९', // 10-19
+    '२०', '२१', '२२', '२३', '२४', '२५', '२६', '२७', '२८', '२९', // 20-29
+    '३०', '३१', '३२', '३३', '३४', '३५', '३६', '३७', '३८', '३९', // 30-39
+    '४०', '४१', '४२', '४३', '४४', '४५', '४६' // 40-46
+  ];
+  ws.addRow(colNums);
+  ws.getRow(7).height = 20;
+
+  // Format Header Rows (4, 5, 6, 7)
+  for (let r = 4; r <= 7; r++) {
+    const row = ws.getRow(r);
+    row.eachCell({ includeEmpty: true }, (c, colIdx) => {
+      c.font = { name: 'Arial', size: 9, bold: true };
       c.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
       c.border = thinBorder;
+      if (r === 7) {
+        c.font = { name: 'Arial', size: 8, bold: true, italic: true };
+        c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE2E8F0' } };
+      } else if (colIdx <= 8) {
+        c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF8FAFC' } };
+      } else if (colIdx <= 17) {
+        c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFEFF6FF' } };
+      } else if (colIdx <= 27) {
+        c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFFBEB' } };
+      } else {
+        c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF1F5F9' } };
+      }
     });
-  });
-  ws.getRow(4).height = 40;
-  ws.getRow(5).height = 54;
+  }
 
-  // Row 6: Exact Column Numbering Row matching User Table
-  const numLabels = ['अ.क्र.', 'गावाचे नाव', 'सर्व्हे क्रमांक', 'क्षेत्र', 'भोगवटदार वर्ग (भूधारणा नुसार )', 'भोगवटदाराचे नाव', 'इतर अधिकारातील नोंद'];
-  for (let i = 1; i <= 46; i++) numLabels.push(String(i));
-  const numRow = ws.addRow(numLabels);
-  numRow.height = 20;
-  numRow.eachCell(c => {
-    c.font = { name: 'Arial', size: 8, bold: true, color: { argb: 'FF475569' } };
-    c.alignment = { horizontal: 'center', vertical: 'middle' };
-    c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE2E8F0' } };
-    c.border = thinBorder;
-  });
-
-  // Populate Actual Parcel Records
+  // Populate Data Rows (Total 54 columns per row)
   parcels.forEach((p, idx) => {
     const isEven = idx % 2 === 0;
     const pt = resolveParcel46Points(p);
@@ -586,6 +643,7 @@ export async function generateMasterChecklistExcel(parcels, scopeName, res) {
       cleanVillageName(p.villageName),
       p.gatNumber || p.oldSurveyNo || '-',
       Number(p.totalAreaHa || 0),
+      Number(p.potkharabaAreaHa || (p.metadata?.nonAgriArea ? parseFloat(p.metadata.nonAgriArea) : 0)),
       p.tenureDisplay || p.tenureClass || '-',
       p.currentOwner || 'नोंद उपलब्ध नाही',
       p.remarks || (p.metadata?.otherRights ? p.metadata.otherRights.slice(0, 100) : '-'),
@@ -608,12 +666,12 @@ export async function generateMasterChecklistExcel(parcels, scopeName, res) {
         c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: ZEBRA_BG } };
       }
       // Highlight owner name
-      if (colIdx === 6) {
+      if (colIdx === 7) {
         c.font = { name: 'Arial', size: 9, bold: true, color: { argb: 'FF1E3A8A' } };
         c.alignment = { horizontal: 'left', vertical: 'middle', wrapText: true };
-      } else if (colIdx === 2 || colIdx === 7) {
+      } else if (colIdx === 2 || colIdx === 8) {
         c.alignment = { horizontal: 'left', vertical: 'middle', wrapText: true };
-      } else if (colIdx === 4) {
+      } else if (colIdx === 4 || colIdx === 5) {
         c.alignment = { horizontal: 'right', vertical: 'middle' };
         c.numFmt = '#,##0.0000';
       } else {
@@ -622,54 +680,76 @@ export async function generateMasterChecklistExcel(parcels, scopeName, res) {
     });
   });
 
-  // Footer Signature Block
+  // Footer Signature Block matching Sheet 1 rows 20-26
   ws.addRow([]);
   ws.addRow([]);
   const lastRowIdx = ws.rowCount;
 
-  ws.mergeCells(`A${lastRowIdx + 1}:N${lastRowIdx + 1}`);
-  const sig1 = ws.getCell(`A${lastRowIdx + 1}`);
-  sig1.value = 'माहिती तयार करणाऱ्याचे नाव व पदनाम: __________________\n(तलाठी / महसूल सहाय्यक)   दिनांक: ______________   स्वाक्षरी: ______________';
+  // Stage 1: Talathi / Revenue Assistant
+  ws.mergeCells(`AR${lastRowIdx + 1}:AU${lastRowIdx + 1}`);
+  const sig1 = ws.getCell(`AR${lastRowIdx + 1}`);
+  sig1.value = 'माहिती तयार करणाऱ्याचे नाव व पदनाम: __________________\n(तलाठी / महसूल सहाय्यक)';
   sig1.font = { name: 'Arial', size: 10, bold: true };
-  sig1.alignment = { vertical: 'middle' };
+  sig1.alignment = { vertical: 'middle', horizontal: 'left' };
 
-  ws.mergeCells(`O${lastRowIdx + 1}:AF${lastRowIdx + 1}`);
-  const sig2 = ws.getCell(`O${lastRowIdx + 1}`);
-  sig2.value = 'माहिती तपासणी करणाऱ्या अधिकाऱ्याचे नाव व पदनाम: __________________\n(मंडळ अधिकारी / नायब तहसीलदार)   दिनांक: ______________   स्वाक्षरी: ______________';
+  ws.getCell(`AV${lastRowIdx + 1}`).value = 'दिनांक: ______________';
+  ws.getCell(`AV${lastRowIdx + 1}`).font = { name: 'Arial', size: 10, bold: true };
+
+  ws.getCell(`AW${lastRowIdx + 1}`).value = 'स्वाक्षरी: ______________';
+  ws.getCell(`AW${lastRowIdx + 1}`).font = { name: 'Arial', size: 10, bold: true };
+  ws.getRow(lastRowIdx + 1).height = 36;
+
+  // Stage 2: Circle Officer / Naib Tehsildar
+  ws.mergeCells(`AR${lastRowIdx + 3}:AU${lastRowIdx + 3}`);
+  const sig2 = ws.getCell(`AR${lastRowIdx + 3}`);
+  sig2.value = 'माहिती तपासणी करणाऱ्या अधिकाऱ्याचे नाव व पदनाम: __________________\n(मंडळ अधिकारी / नायब तहसीलदार)';
   sig2.font = { name: 'Arial', size: 10, bold: true };
-  sig2.alignment = { vertical: 'middle' };
+  sig2.alignment = { vertical: 'middle', horizontal: 'left' };
 
-  ws.mergeCells(`AG${lastRowIdx + 1}:BA${lastRowIdx + 1}`);
-  const sig3 = ws.getCell(`AG${lastRowIdx + 1}`);
-  sig3.value = 'माहिती अचूक असल्याबाबत तहसिलदार यांचेव्दारा प्रमाणन\n\nतहसिलदार: __________________   चंद्रपूर';
+  ws.getCell(`AV${lastRowIdx + 3}`).value = 'दिनांक: ______________';
+  ws.getCell(`AV${lastRowIdx + 3}`).font = { name: 'Arial', size: 10, bold: true };
+
+  ws.getCell(`AW${lastRowIdx + 3}`).value = 'स्वाक्षरी: ______________';
+  ws.getCell(`AW${lastRowIdx + 3}`).font = { name: 'Arial', size: 10, bold: true };
+  ws.getRow(lastRowIdx + 3).height = 36;
+
+  // Stage 3: Tehsildar Certification
+  ws.mergeCells(`AR${lastRowIdx + 4}:AW${lastRowIdx + 4}`);
+  const sig3 = ws.getCell(`AR${lastRowIdx + 4}`);
+  sig3.value = 'माहिती अचूक असल्याबाबत तहसिलदार यांचेव्दारा प्रमाणन';
   sig3.font = { name: 'Arial', size: 10, bold: true };
   sig3.alignment = { vertical: 'middle', horizontal: 'center' };
+  ws.getRow(lastRowIdx + 4).height = 28;
 
-  ws.getRow(lastRowIdx + 1).height = 50;
+  // Stage 4: Tehsildar Signature
+  ws.mergeCells(`AX${lastRowIdx + 6}:BB${lastRowIdx + 6}`);
+  const sig4 = ws.getCell(`AX${lastRowIdx + 6}`);
+  sig4.value = 'तहसिलदार: __________________\nचंद्रपूर';
+  sig4.font = { name: 'Arial', size: 10, bold: true };
+  sig4.alignment = { vertical: 'middle', horizontal: 'center' };
+  ws.getRow(lastRowIdx + 6).height = 40;
 
-  // Adjust column widths (Total 53 columns: A to BA)
+  // Set Column Widths (Exact 54 Columns: A to BB)
   ws.columns = [
     { width: 6 },  // 1: Sr No (A)
     { width: 20 }, // 2: Village (B)
     { width: 14 }, // 3: Survey/Gat (C)
-    { width: 13 }, // 4: Area Ha (D)
-    { width: 16 }, // 5: Tenure Class (E)
-    { width: 30 }, // 6: Owner Name (F)
-    { width: 32 }, // 7: Other Rights (G)
-    // Points 1-9 (H to P) - रिनंबरींग पर्चा
+    { width: 13 }, // 4: Agri Area (D)
+    { width: 13 }, // 5: Non-Agri Area (E)
+    { width: 16 }, // 6: Tenure Class (F)
+    { width: 30 }, // 7: Owner Name (G)
+    { width: 32 }, // 8: Other Rights (H)
+    // Points 1-9 (I to Q) - रिनंबरींग पर्चा
     { width: 14 }, { width: 24 }, { width: 14 }, { width: 14 }, { width: 24 }, { width: 14 }, { width: 14 }, { width: 24 }, { width: 14 },
-    // Points 10-19 (Q to Z) - शासकीय जमीन
+    // Points 10-19 (R to AA) - शासकीय जमीन
     { width: 24 }, { width: 22 }, { width: 16 }, { width: 12 }, { width: 14 }, { width: 14 }, { width: 14 }, { width: 14 }, { width: 18 }, { width: 18 },
-    // Points 20-46 (AA to BA) - वैधानिक कायदे व पडताळणी
+    // Points 20-46 (AB to BB) - वैधानिक कायदे व पडताळणी
     ...Array(27).fill({ width: 20 })
   ];
 
   await wb.xlsx.write(res);
 }
 
-/**
- * GENERATE MASTER 1-46 CHECKLIST PDF
- */
 export async function generateMasterChecklistPdf(parcels, scopeName, res) {
   const tableBody = [
     [

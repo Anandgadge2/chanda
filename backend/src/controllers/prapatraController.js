@@ -2026,7 +2026,39 @@ export const uploadPrapatraExcel = async (req, res) => {
         villageCode = String(villageCount).padStart(3, '0');
       }
 
-      // 3. Reconcile and Seed (Idempotent: preserves unchanged duplicates, updates modified, seeds net-new)
+      // Check uploadMode: 'reconcile' (Method 1) vs 'replace' (Method 2)
+      const uploadMode = (req.body.uploadMode || (req.body.replaceVillage === 'true' ? 'replace' : 'reconcile')).toLowerCase();
+      let purgedPreviousCount = 0;
+
+      if (uploadMode === 'replace' || uploadMode === 'clean_slate') {
+        const cleanV = cleanVillageName(finalVillage);
+        const existingParcelsToDelete = await prisma.landParcel.findMany({
+          where: {
+            taluka: { equals: targetTaluka, mode: 'insensitive' },
+            OR: [
+              { villageName: { equals: finalVillage, mode: 'insensitive' } },
+              { villageName: { equals: cleanV, mode: 'insensitive' } }
+            ]
+          },
+          select: { id: true }
+        });
+
+        if (existingParcelsToDelete.length > 0) {
+          const pIds = existingParcelsToDelete.map(p => p.id);
+          await prisma.backwardHistory.deleteMany({ where: { parcelId: { in: pIds } } });
+          await prisma.caseHearing.deleteMany({ where: { case: { parcelId: { in: pIds } } } });
+          await prisma.forwardEnforcementCase.deleteMany({ where: { parcelId: { in: pIds } } });
+          await prisma.ceilingRecord.deleteMany({ where: { parcelId: { in: pIds } } });
+          await prisma.bhudanRecord.deleteMany({ where: { parcelId: { in: pIds } } });
+          await prisma.tribalRecord.deleteMany({ where: { parcelId: { in: pIds } } });
+          await prisma.tenancy89ARecord.deleteMany({ where: { parcelId: { in: pIds } } });
+          await prisma.dmsDocument.deleteMany({ where: { parcelId: { in: pIds } } });
+          await prisma.landParcel.deleteMany({ where: { id: { in: pIds } } });
+          purgedPreviousCount = existingParcelsToDelete.length;
+        }
+      }
+
+      // 3. Reconcile and Seed (Method 1: in-place merge; Method 2: fresh clean seed)
       let reconcileRes = {
         executionSummary: { unchangedPreserved: 0, modifiedUpdated: 0, netNewSeeded: 0, omittedWarning: 0, casesCreated: 0, backwardCreated: 0 },
         diffResult: { unchangedRows: [], modifiedRows: [], netNewRows: [], omittedRows: [] },
@@ -2049,6 +2081,8 @@ export const uploadPrapatraExcel = async (req, res) => {
       results.push({
         village: finalVillage,
         taluka: targetTaluka,
+        uploadMode,
+        purgedPreviousCount,
         total712: stats.total712 || 0,
         parcelsCount: parcels?.length || 0,
         uniqueGatCount: distinctGats.length,
@@ -2114,6 +2148,103 @@ export const uploadPrapatraExcel = async (req, res) => {
     errors: errors.length > 0 ? errors : undefined
   });
 };
+
+/**
+ * Standalone Controller to Purge All Data for a Single Village
+ * Strictly scoped to (taluka + villageName) with cascading foreign keys
+ */
+export const purgeVillageData = async (req, res) => {
+  try {
+    const { taluka, villageName } = req.body;
+    if (!taluka || !villageName || !taluka.trim() || !villageName.trim()) {
+      return res.status(400).json({ success: false, error: 'तालुका आणि गावाचे नाव दोन्ही आवश्यक आहेत.' });
+    }
+
+    const targetTaluka = TALUKA_ALIASES[taluka.toLowerCase()] || taluka.trim();
+    const cleanV = cleanVillageName(villageName.trim());
+
+    // 1. Find all parcels for this village
+    const existingParcels = await prisma.landParcel.findMany({
+      where: {
+        taluka: { equals: targetTaluka, mode: 'insensitive' },
+        OR: [
+          { villageName: { equals: villageName.trim(), mode: 'insensitive' } },
+          { villageName: { equals: cleanV, mode: 'insensitive' } }
+        ]
+      },
+      select: { id: true, upi: true, gatNumber: true }
+    });
+
+    const count = existingParcels.length;
+    if (count > 0) {
+      const pIds = existingParcels.map(p => p.id);
+      await prisma.backwardHistory.deleteMany({ where: { parcelId: { in: pIds } } });
+      await prisma.caseHearing.deleteMany({ where: { case: { parcelId: { in: pIds } } } });
+      await prisma.forwardEnforcementCase.deleteMany({ where: { parcelId: { in: pIds } } });
+      await prisma.ceilingRecord.deleteMany({ where: { parcelId: { in: pIds } } });
+      await prisma.bhudanRecord.deleteMany({ where: { parcelId: { in: pIds } } });
+      await prisma.tribalRecord.deleteMany({ where: { parcelId: { in: pIds } } });
+      await prisma.tenancy89ARecord.deleteMany({ where: { parcelId: { in: pIds } } });
+      await prisma.dmsDocument.deleteMany({ where: { parcelId: { in: pIds } } });
+      await prisma.landParcel.deleteMany({ where: { id: { in: pIds } } });
+    }
+
+    // 2. Reset PrapatraRollup for this village
+    await prisma.prapatraRollup.updateMany({
+      where: {
+        taluka: { equals: targetTaluka, mode: 'insensitive' },
+        OR: [
+          { villageName: { equals: villageName.trim(), mode: 'insensitive' } },
+          { villageName: { equals: cleanV, mode: 'insensitive' } }
+        ]
+      },
+      data: {
+        total712Count: 0,
+        inspected1950Count: 0,
+        govtFound1950Count: 0,
+        illegalDeletionsCount: 0,
+        rectifiedCount: 0,
+        pendingRectifyCount: 0,
+        pokalistCount: 0,
+        pokalistRemovedCount: 0,
+        pokalistPendingCount: 0,
+        govtDeptsAllottedCount: 0,
+        govtDeptsShartbhang: 0,
+        govtDeptsRestoredGovt: 0,
+        privateAllottedCount: 0,
+        privateShartbhang: 0,
+        privateRestoredGovt: 0,
+        totalGovtLandCount: 0,
+        govtAllottedCount: 0,
+        govtShartbhangCount: 0,
+        govtEncroachedCount: 0,
+        govtMojaniDoneCount: 0,
+        remarks: 'गाव डेटा पूर्णपणे रिकामे केला (Clean slate purged by administrator)'
+      }
+    });
+
+    // 3. Recalculate parent Taluka total
+    await syncTalukaTotalRollup(targetTaluka);
+
+    // 4. Invalidate analytics cache
+    try {
+      const { invalidateAnalyticsCache } = await import('./analyticsController.js');
+      invalidateAnalyticsCache();
+    } catch (e) {}
+
+    return res.status(200).json({
+      success: true,
+      message: `गाव '${villageName}' (${targetTaluka}) चा जुना डेटा यशस्वीरीत्या हटवण्यात आला. (${count} भूखंड नोंदी हटवल्या)`,
+      taluka: targetTaluka,
+      villageName,
+      purgedCount: count
+    });
+  } catch (err) {
+    console.error('purgeVillageData error:', err);
+    return res.status(500).json({ success: false, error: err.message });
+  }
+};
+
 
 /**
  * High-level District Rollup Summary for Executive Dashboard

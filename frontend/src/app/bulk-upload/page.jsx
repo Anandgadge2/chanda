@@ -17,6 +17,10 @@ import {
   History,
   FileText,
   LandPlot,
+  Trash2,
+  RefreshCw,
+  GitMerge,
+  AlertTriangle,
 } from 'lucide-react';
 import { api } from '../../lib/api';
 import { CHANDRAPUR_TALUKAS } from '../../lib/constants';
@@ -91,14 +95,23 @@ export default function BulkUploadPage() {
   const [diffReport, setDiffReport] = useState(null);
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
+  const [uploadMode, setUploadMode] = useState('reconcile'); // 'reconcile' (Method 1) | 'replace' (Method 2)
+  const [confirmReplace, setConfirmReplace] = useState(false);
+  const [purgingVillage, setPurgingVillage] = useState(false);
+  const [purgeSuccess, setPurgeSuccess] = useState(null);
 
   const handlePrapatraFileChange = (e) => {
     const selected = Array.from(e.target.files || []);
     if (selected.length > 0) {
       setPrapatraFiles(selected);
+      if (selected.length > 1 && uploadMode === 'replace') {
+        setUploadMode('reconcile');
+        setConfirmReplace(false);
+      }
       setResult(null);
       setDiffReport(null);
       setError(null);
+      setPurgeSuccess(null);
     }
   };
 
@@ -149,12 +162,28 @@ export default function BulkUploadPage() {
       return;
     }
 
+    if (uploadMode === 'replace') {
+      if (prapatraFiles.length > 1) {
+        setError(isMarathi ? 'पद्धत २ (स्वच्छ पुनर्स्थापना) फक्त एका गावाच्या फाईलसाठी वापरता येते. कृपया एकच फाईल निवडा.' : 'Method 2 (Clean Slate Replace) can only be used for a single village file. Please select a single file.');
+        return;
+      }
+      if (!confirmReplace) {
+        setError(isMarathi ? 'कृपया जुना डेटा हटवून नवीन फाईल पुनर्स्थापित करण्याची खात्री करण्यासाठी चेकबॉक्स निवडा.' : 'Please confirm the replacement by checking the confirmation box.');
+        return;
+      }
+    }
+
     setUploading(true);
     setError(null);
     setResult(null);
+    setPurgeSuccess(null);
 
     const formData = new FormData();
     formData.append('taluka', selectedTaluka);
+    formData.append('uploadMode', uploadMode);
+    if (uploadMode === 'replace') {
+      formData.append('replaceVillage', 'true');
+    }
     if (villageName.trim() && prapatraFiles.length === 1) {
       formData.append('villageName', villageName.trim());
     }
@@ -165,11 +194,44 @@ export default function BulkUploadPage() {
 
     try {
       const data = await api.uploadPrapatraExcel(formData);
-      setResult({ ...data, mode: 'prapatra' });
+      setResult({ ...data, mode: 'prapatra', usedUploadMode: uploadMode });
+      if (uploadMode === 'replace') {
+        setConfirmReplace(false);
+      }
     } catch (err) {
       setError(err.message || (isMarathi ? 'प्रपत्र एक्सेल आयात अयशस्वी झाले.' : 'Failed to import Prapatra Excel.'));
     } finally {
       setUploading(false);
+    }
+  };
+
+  const handlePurgeOnly = async () => {
+    if (!selectedTaluka || !villageName.trim()) {
+      setError(isMarathi ? 'डेटा हटवण्यासाठी कृपया तालुका आणि गाव निश्चित निवडा.' : 'Please select both Taluka and Village to purge.');
+      return;
+    }
+    if (!confirmReplace) {
+      setError(isMarathi ? 'कृपया जुना डेटा हटवण्याची खात्री करण्यासाठी पुष्टीकरण चेकबॉक्स निवडा.' : 'Please check the confirmation box to confirm data wipe.');
+      return;
+    }
+
+    const confirmPrompt = window.confirm(
+      isMarathi 
+        ? `सावधान! आपण '${villageName}' (${selectedTaluka}) गावाचा संपूर्ण डेटा कायमचा हटवू इच्छिता का?\n\nया कृतीमुळे या गावातील सर्व जुन्या भूखंड नोंदी व संलग्न प्रकरणांचा जुना डेटा नष्ट होईल.`
+        : `Warning! Are you sure you want to permanently delete all data for village '${villageName}' (${selectedTaluka})?\n\nAll previous parcel entries and linked records for this village will be purged.`
+    );
+    if (!confirmPrompt) return;
+
+    setPurgingVillage(true);
+    setError(null);
+    try {
+      const res = await api.purgeVillageData({ taluka: selectedTaluka, villageName: villageName.trim() });
+      setPurgeSuccess(res.message);
+      setConfirmReplace(false);
+    } catch (err) {
+      setError(err.message || (isMarathi ? 'गाव डेटा हटवणे अयशस्वी.' : 'Failed to purge village data.'));
+    } finally {
+      setPurgingVillage(false);
     }
   };
 
@@ -205,6 +267,8 @@ export default function BulkUploadPage() {
     setDiffReport(null);
     setInspecting(false);
     setError(null);
+    setConfirmReplace(false);
+    setPurgeSuccess(null);
   };
 
   return (
@@ -393,6 +457,163 @@ export default function BulkUploadPage() {
               </div>
             </div>
 
+            {/* Ingestion Strategy / Method Selector (Method 1 vs Method 2) */}
+            <div className="space-y-2.5 pt-1">
+              <label className="block text-xs font-bold text-slate-800">
+                {isMarathi ? 'डेटा प्रक्रिया पद्धत निवडा (Ingestion Strategy):' : 'Select Ingestion Strategy:'}
+              </label>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {/* Method 1: Smart Reconcile & Merge */}
+                <div
+                  onClick={() => {
+                    setUploadMode('reconcile');
+                    setConfirmReplace(false);
+                  }}
+                  className={`p-3.5 rounded-xl border-2 cursor-pointer transition select-none ${
+                    uploadMode === 'reconcile'
+                      ? 'border-emerald-600 bg-emerald-50/50 shadow-xs'
+                      : 'border-slate-200 bg-white hover:border-slate-300 opacity-80 hover:opacity-100'
+                  }`}
+                >
+                  <div className="flex items-start gap-3">
+                    <div className={`p-2 rounded-lg shrink-0 ${uploadMode === 'reconcile' ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-600'}`}>
+                      <GitMerge className="w-4 h-4" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center justify-between gap-1 flex-wrap">
+                        <h4 className="text-xs sm:text-sm font-extrabold text-slate-900">
+                          {isMarathi ? 'पद्धत १: स्मार्ट समन्वय (Smart Reconcile)' : 'Method 1: Smart Reconciliation'}
+                        </h4>
+                        <span className="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full border border-emerald-300">
+                          {isMarathi ? 'डिफॉल्ट / सुरक्षित' : 'Default / Safe'}
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-slate-600 mt-1 leading-relaxed">
+                        {isMarathi
+                          ? 'अस्तित्वात असलेला डेटा सुरक्षित ठेवला जातो. केवळ बदल झालेल्या नोंदी अद्ययावत होतात व नवीन गट जोडले जातात. जुना इतिहास किंवा प्रकरणे सुरक्षित राहतात.'
+                          : 'Preserves existing unchanged records, updates modified fields, and adds net-new gats. Zero data loss for existing cases.'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Method 2: Clean Slate Wipe & Replace */}
+                <div
+                  onClick={() => {
+                    setUploadMode('replace');
+                  }}
+                  className={`p-3.5 rounded-xl border-2 cursor-pointer transition select-none ${
+                    uploadMode === 'replace'
+                      ? 'border-rose-600 bg-rose-50/50 shadow-xs'
+                      : 'border-slate-200 bg-white hover:border-slate-300 opacity-80 hover:opacity-100'
+                  }`}
+                >
+                  <div className="flex items-start gap-3">
+                    <div className={`p-2 rounded-lg shrink-0 ${uploadMode === 'replace' ? 'bg-rose-600 text-white' : 'bg-slate-100 text-slate-600'}`}>
+                      <RefreshCw className="w-4 h-4" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center justify-between gap-1 flex-wrap">
+                        <h4 className="text-xs sm:text-sm font-extrabold text-slate-900">
+                          {isMarathi ? 'पद्धत २: स्वच्छ पुनर्स्थापना (Wipe & Replace)' : 'Method 2: Clean Slate Wipe & Replace'}
+                        </h4>
+                        <span className="text-[10px] font-bold bg-rose-100 text-rose-800 px-2 py-0.5 rounded-full border border-rose-300">
+                          {isMarathi ? 'एका गावासाठी' : 'Single Village'}
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-slate-600 mt-1 leading-relaxed">
+                        {isMarathi
+                          ? 'एका गावाचा जुना डेटा पूर्णपणे हटवून नवीन एक्सेलप्रमाणे अनुक्रमांक १ पासून नव्याने तयार करतो. जुने डुप्लिकेट्स किंवा चुकीच्या नोंदी नष्ट करण्यासाठी.'
+                          : 'Wipes previous parcel entries for this specific village and reseeds fresh from row 1 matching new Excel. Eliminates phantom duplicates.'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Method 2 Warning & Explicit Confirmation Checkbox */}
+              {uploadMode === 'replace' && (
+                <div className="p-3.5 bg-rose-50 border border-rose-300 rounded-xl space-y-2.5 animate-in fade-in">
+                  <div className="flex items-start gap-2.5">
+                    <AlertTriangle className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
+                    <div className="space-y-1 text-xs">
+                      <p className="font-bold text-rose-950">
+                        {isMarathi
+                          ? 'सावधान: स्वच्छ पुनर्स्थापना (Wipe & Replace) कार्यप्रणाली निवडली आहे'
+                          : 'Warning: Clean Slate Wipe & Replace Mode Active'}
+                      </p>
+                      <p className="text-rose-800 text-[11px] leading-relaxed">
+                        {isMarathi
+                          ? `या पर्यायाने निवडलेल्या गावाचे ('${villageName || 'निवडलेले गाव'}') सर्व जुने भूखंड, जुनी संलग्न प्रकरणे व नोंदी डेटाबेसमधून पूर्णपणे हटवल्या जातील आणि नवीन अपलोड केलेल्या एक्सेल फाईलमधील माहिती १००% तंतोतंत नव्याने सिड केली जाईल.`
+                          : `This will completely wipe all previous parcel records and linked cases for '${villageName || 'selected village'}' and re-ingest fresh strictly matching the newly uploaded Excel file.`}
+                      </p>
+                      {prapatraFiles.length > 1 && (
+                        <p className="text-rose-900 font-extrabold text-[11px]">
+                          {isMarathi
+                            ? '⚠️ कृपया फक्त १ फाईल निवडा. एकाच वेळी अनेक गावांवर ही कृती सुरक्षिततेसाठी प्रतिबंधित आहे.'
+                            : '⚠️ Please select only 1 file. Multi-village wipe is disallowed for safety.'}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="pt-2 border-t border-rose-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <label className="flex items-center gap-2 cursor-pointer text-xs font-semibold text-rose-950">
+                      <input
+                        type="checkbox"
+                        checked={confirmReplace}
+                        onChange={(e) => setConfirmReplace(e.target.checked)}
+                        className="w-4 h-4 text-rose-600 border-rose-300 rounded focus:ring-rose-500 cursor-pointer"
+                      />
+                      <span>
+                        {isMarathi
+                          ? 'होय, मी खात्री करतो/करते की या गावाचा जुना डेटा पूर्ण हटवून नव्याने अपलोड करावा.'
+                          : 'Yes, I confirm wiping all existing data for this village and replacing fresh.'}
+                      </span>
+                    </label>
+
+                    {villageName.trim() && (
+                      <button
+                        type="button"
+                        onClick={handlePurgeOnly}
+                        disabled={purgingVillage || !confirmReplace}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-rose-700 hover:bg-rose-800 disabled:opacity-40 text-white rounded-lg text-[11px] font-bold transition cursor-pointer self-start sm:self-auto shadow-2xs"
+                        title={isMarathi ? 'केवळ जुना डेटा डेटाबेसमधून हटवा' : 'Purge old village data only'}
+                      >
+                        {purgingVillage ? (
+                          <>
+                            <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                            <span>{isMarathi ? 'डेटा हटवला जात आहे...' : 'Purging...'}</span>
+                          </>
+                        ) : (
+                          <>
+                            <Trash2 className="w-3.5 h-3.5" />
+                            <span>{isMarathi ? 'केवळ जुना डेटा हटवा (Purge Only)' : 'Purge Old Data Only'}</span>
+                          </>
+                        )}
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {purgeSuccess && (
+                <div className="p-3 bg-emerald-50 border border-emerald-300 rounded-xl text-xs text-emerald-950 flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                    <span>{purgeSuccess}</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setPurgeSuccess(null)}
+                    className="text-[10px] text-emerald-700 hover:underline cursor-pointer"
+                  >
+                    ✕
+                  </button>
+                </div>
+              )}
+            </div>
+
             {/* Drag & Drop Zone */}
             <div className="border-2 border-dashed border-emerald-300 hover:border-emerald-600 rounded-2xl p-6 sm:p-8 text-center bg-emerald-50/20 hover:bg-emerald-50/40 transition cursor-pointer relative">
               <input
@@ -529,6 +750,15 @@ export default function BulkUploadPage() {
                               <span className="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-bold">
                                 {isMarathi ? 'सिडिंग पूर्ण' : 'Seeded'}
                               </span>
+                              {r.uploadMode === 'replace' ? (
+                                <span className="text-[10px] bg-rose-100 text-rose-900 border border-rose-300 px-2 py-0.5 rounded font-bold">
+                                  {isMarathi ? `🗑️ स्वच्छ पुनर्स्थापना (जुने ${r.purgedPreviousCount || 0} हटवले)` : `🗑️ Clean Slate Replaced (Purged ${r.purgedPreviousCount || 0})`}
+                                </span>
+                              ) : (
+                                <span className="text-[10px] bg-emerald-50 text-emerald-900 border border-emerald-200 px-2 py-0.5 rounded font-bold">
+                                  {isMarathi ? '🔄 स्मार्ट समन्वय (Reconciled)' : '🔄 Smart Reconciled'}
+                                </span>
+                              )}
                               {r.detectedLayout && (
                                 <span className="text-[10px] bg-blue-50 text-blue-800 border border-blue-200 px-2 py-0.5 rounded font-bold">
                                   {r.detectedLayout === 'dual_area'
@@ -824,17 +1054,34 @@ export default function BulkUploadPage() {
               <button
                 type="submit"
                 disabled={prapatraFiles.length === 0 || uploading}
-                className="w-full sm:w-auto bg-emerald-700 hover:bg-emerald-800 text-white font-semibold px-6 py-2.5 rounded-xl text-xs shadow-sm transition disabled:opacity-50 flex items-center justify-center gap-2 active:scale-95 cursor-pointer"
+                className={`w-full sm:w-auto ${
+                  uploadMode === 'replace'
+                    ? 'bg-rose-700 hover:bg-rose-800'
+                    : 'bg-emerald-700 hover:bg-emerald-800'
+                } text-white font-semibold px-6 py-2.5 rounded-xl text-xs shadow-sm transition disabled:opacity-50 flex items-center justify-center gap-2 active:scale-95 cursor-pointer`}
               >
                 {uploading ? (
                   <>
                     <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    <span>{isMarathi ? 'तपासणी व सुरक्षित सिडिंग सुरू आहे...' : 'Reconciling and seeding data...'}</span>
+                    <span>
+                      {uploadMode === 'replace'
+                        ? (isMarathi ? 'जुना डेटा हटवून नव्याने सिडिंग सुरू आहे...' : 'Wiping old data & reseeding fresh...')
+                        : (isMarathi ? 'तपासणी व सुरक्षित सिडिंग सुरू आहे...' : 'Reconciling and seeding data...')}
+                    </span>
                   </>
                 ) : (
                   <>
-                    <UploadCloud className="w-4 h-4" />
-                    <span>{isMarathi ? 'बदल तपासून सुरक्षित सिड करा (Reconcile & Seed)' : 'Reconcile & Seed Data'}</span>
+                    {uploadMode === 'replace' ? (
+                      <>
+                        <RefreshCw className="w-4 h-4" />
+                        <span>{isMarathi ? 'जुना डेटा हटवून नव्याने सिड करा (Wipe & Replace)' : 'Wipe & Replace Village Data'}</span>
+                      </>
+                    ) : (
+                      <>
+                        <UploadCloud className="w-4 h-4" />
+                        <span>{isMarathi ? 'बदल तपासून सुरक्षित सिड करा (Reconcile & Seed)' : 'Reconcile & Seed Data'}</span>
+                      </>
+                    )}
                   </>
                 )}
               </button>

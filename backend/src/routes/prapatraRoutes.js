@@ -10,6 +10,7 @@ import {
   updatePrapatraRollup,
   uploadPrapatraExcel,
   inspectPrapatraDiff,
+  purgeVillageData,
   getRenumberingParchaData,
   exportRenumberingParchaExcel,
   exportRenumberingParchaPdf,
@@ -68,6 +69,17 @@ router.post(
   authorize('SUPERADMIN', 'COLLECTOR', 'SUB_COLLECTOR', 'SDO', 'TEHSILDAR', 'NAIB_TEHSILDAR', 'CIRCLE_OFFICER', 'TALATHI'),
   upload.any(),
   uploadPrapatraExcel
+);
+
+/**
+ * @route   POST /api/prapatra/village/purge
+ * @desc    Safely wipe all previous LandParcel & related case records for a single village
+ */
+router.post(
+  '/village/purge',
+  authenticate,
+  authorize('SUPERADMIN', 'COLLECTOR', 'SUB_COLLECTOR', 'SDO', 'TEHSILDAR', 'NAIB_TEHSILDAR', 'CIRCLE_OFFICER', 'TALATHI'),
+  purgeVillageData
 );
 
 /**

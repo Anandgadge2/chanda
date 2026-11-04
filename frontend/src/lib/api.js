@@ -575,6 +575,22 @@ export const api = {
     return resData;
   },
 
+  purgeVillageData: async ({ taluka, villageName }) => {
+    const res = await fetch(`${BASE_URL}/api/prapatra/village/purge`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...getAuthHeaders(),
+      },
+      body: JSON.stringify({ taluka, villageName }),
+    });
+    const resData = await res.json();
+    if (!res.ok) {
+      throw new Error(resData.error || 'गाव डेटा हटवणे अयशस्वी झाले.');
+    }
+    return resData;
+  },
+
   getPrapatraSummary: async () => {
     const res = await dedupedFetch(`${BASE_URL}/api/prapatra/summary`);
     if (!res.ok) {

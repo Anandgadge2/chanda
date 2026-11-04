@@ -105,32 +105,31 @@ const CHECKLIST_46_COLUMNS = [
   // 20 to 46: वैधानिक कायदे व तपासणी रकाने
   { num: 20, title: 'मुंबई कुळ वहिवाट व शेतजमीन (विदर्भ) कायदा अन्वये कुळ घोषित केलेली जमीन आहे काय?', titleEn: 'Is land declared under Tenancy Act (Vidarbha)?', group: 'statutory', minW: 'min-w-[160px]' },
   { num: 21, title: 'सदर जमिन इनाम व वतन जमिनी (देवस्थान जमिनी वगळुन) प्रकारातील आहे काय ? असल्यास कोणता प्रकार (मदद माश इनाम/खिदमत माश इनाम, इतर)', titleEn: 'Is land Inam & Watan (excluding Devasthan)?', group: 'statutory', minW: 'min-w-[170px]' },
-  { num: 22, title: 'सदर जमिन म.ज.म.अधि.1966 अंतर्गत विवीध योजनेअंतर्गत प्रदान/अतिक्रमण नियमानुकूल केलेल्या जमिनी (गृहनिर्माण संस्था,औद्योगिक आस्थापना,शैक्षणिक संस्था,विशेष वसाहत,प्रकल्प इ.) प्रकारची जमिन आहे का ? असल्यास संस्थेचे नाव नमुद करावे.', titleEn: 'Is land granted under MLRC 1966 schemes (Housing, Industry, Education etc.)?', group: 'statutory', minW: 'min-w-[220px]' },
-  { num: 23, title: 'सदर जमिन महाराष्ट्र शेतजमिन कमाल धारणा अधिनियम 1961 अंतर्गत वाटप केलेल्या जमिनी प्रकारातील आहे काय ? (होय/नाही)', titleEn: 'Is land allotted under Agricultural Land Ceiling Act 1961?', group: 'statutory', minW: 'min-w-[160px]' },
-  { num: 24, title: 'सदर जमीन महानगरपालिका, नगर पालिका व विविध प्राधिकरण यांच्या विकास आराखडयात समाविष्ट असलेल्या जमिनी अथवा ग्रामपंचायतकडे गुरचरण अथवा इतर प्रयोजनासाठी वर्ग केलेली आहे का ?', titleEn: 'Is land included in Municipal DP or Gram Panchayat grazing?', group: 'statutory', minW: 'min-w-[180px]' },
-  { num: 25, title: 'सदर जमीन देवस्थान इनाम जमीन आहे काय? (होय/नाही)', titleEn: 'Is land Devasthan Inam? (Yes/No)', group: 'statutory', minW: 'min-w-[110px]' },
-  { num: 26, title: 'सदर जमीन आदिवासी खातेदारांचे मालकीची आहे काय? (होय/नाही)', titleEn: 'Is land owned by Tribal Khatedar? (Yes/No)', group: 'statutory', minW: 'min-w-[120px]' },
-  { num: 27, title: 'सदर जमिन महाराष्ट्र पुर्नवसन अधिनियम 1999 च्या कलम 16 अन्वये प्रदान केलेली आहे काय ? (होय/नाही)', titleEn: 'Is land granted under Rehabilitation Act 1999 Sec 16?', group: 'statutory', minW: 'min-w-[150px]' },
-  { num: 28, title: 'सदर जमिन भाडेपट्टयाने दिलेली शासकीय जमिन आहे काय? (होय/नाही)', titleEn: 'Is land Government leased land? (Yes/No)', group: 'statutory', minW: 'min-w-[120px]' },
-  { num: 29, title: 'सदर जमिन भुदान व ग्रामदान अंतर्गत दिलेली आहे काय ? (होय/नाही)', titleEn: 'Is land granted under Bhoodan & Gramdan?', group: 'statutory', minW: 'min-w-[120px]' },
-  { num: 30, title: 'सदर जमिन महाराष्ट्र खाजगी वने (संपादन) अधिनियम 1975 तसेच महाराष्ट्र शेतजमिन अधिनियम 1961 अन्वये चौकशीसाठी प्रलंबित आहे काय ?', titleEn: 'Is land pending inquiry under Private Forest / Ceiling Act?', group: 'statutory', minW: 'min-w-[170px]' },
-  { num: 31, title: 'सदर जमिन भुमीधारी हक्कान्वये प्राप्त झालेली आहे काय ? (होय/नाही)', titleEn: 'Is land acquired under Bhumidhari rights?', group: 'statutory', minW: 'min-w-[120px]' },
-  { num: 32, title: 'सदर जमिनीस कमाल मर्यादेपेक्षा अधिक धारण करण्यास सुट दिलेली आहे काय ?', titleEn: 'Is land exempted for holding beyond ceiling limit?', group: 'statutory', minW: 'min-w-[140px]' },
-  { num: 33, title: 'सदर जमिन वक्फ बोर्डाचे मालकीची आहे काय? (होय/नाही)', titleEn: 'Is land owned by Waqf Board? (Yes/No)', group: 'statutory', minW: 'min-w-[120px]' },
-  { num: 34, title: 'सदर जमिन भुसंपादन कायदयाअंतर्गत अधिग्रहित/राखीव आहे काय ? (होय/नाही)', titleEn: 'Is land acquired/reserved under Land Acquisition Act?', group: 'statutory', minW: 'min-w-[130px]' },
-  { num: 35, title: 'सदर जमीन रकाना 10 ते 34 पैकी कोणत्याही रकान्यात होय असल्यास सक्षम प्राधिका-यांच्या परवानगीशिवाय भोग. वर्ग-2 मधुन भोग. वर्ग-1 मध्ये रुपांतरीत झालेली आहे काय ?', titleEn: 'Illegal conversion from Class-2 to Class-1 without sanction?', group: 'statutory', minW: 'min-w-[190px]' },
-  { num: 36, title: 'सदर जमीन रकाना 10 ते 34 पैकी कोणत्याही रकान्यात होय असल्यास, मौका चौकशीअंती सदर जमिनीबाबत शर्तभंग झालेला आहे काय ?', titleEn: 'Spot inquiry reveals condition breach?', group: 'statutory', minW: 'min-w-[180px]' },
-  { num: 37, title: 'रकाना क्र. 26 चे उत्तर "होय" असल्यास, आदिवासी जमिनीबाबत सक्षम अधिकारी यांचे परवानगीशिवाय आदिवासी ते आदिवासी हस्तांतरण झाले आहे का ?', titleEn: 'Tribal to Tribal transfer without sanction?', group: 'statutory', minW: 'min-w-[180px]' },
-  { num: 38, title: 'रकाना क्र. 26 चे उत्तर "होय" असल्यास, आदिवासी जमिनीबाबत सक्षम अधिकारी यांचे परवानगीशिवाय आदिवासी ते गैर आदिवासी हस्तांतरण झाले आहे का ?', titleEn: 'Tribal to Non-Tribal alienation without sanction?', group: 'statutory', minW: 'min-w-[180px]' },
-  { num: 39, title: 'जमिनीच्या निर्बंधीत सत्ताप्रकारानुसार नोंद इतर अधिकारामध्ये घेण्यात आली आहे काय? (होय / नाही)', titleEn: 'Restricted tenure noted in other rights? (Yes/No)', group: 'statutory', minW: 'min-w-[140px]' },
-  { num: 40, title: 'अधिकार अभिलेखापासून ते आजपावेतोच्या अधिकार अभिलेखानुसार इतर अधिकारातील नोंदी/भुधारणा/भोगवटदार यांच्या नोंदी अवैधरित्या कमी केलेल्या आहेत काय?', titleEn: 'Have other rights/tenure entries been illegally deleted?', group: 'statutory', minW: 'min-w-[180px]' },
-  { num: 41, title: 'भोगवटदार कंपनी/बिगर शेतकरी असल्यास परवानगी घेतलेली आहे काय ? (होय/नाही)', titleEn: 'Non-farmer/Company occupant taken prior sanction?', group: 'statutory', minW: 'min-w-[160px]' },
-  { num: 42, title: 'सदर जमिन कलम 89 व 89 अ अन्वये ख-याखु-या औद्योगिक प्रयोजनाकरिता कंपनीने धारण केलेली आहे काय ? (होय/नाही)', titleEn: 'Bonafide industrial holding under Sec 89/89A?', group: 'statutory', minW: 'min-w-[160px]' },
-  { num: 43, title: 'खरेदी दिनांक', titleEn: 'Purchase Date', group: 'statutory', minW: 'min-w-[100px]' },
-  { num: 44, title: 'वापर सुरू केला आहे काय?', titleEn: 'Has utilization commenced?', group: 'statutory', minW: 'min-w-[100px]' },
-  { num: 45, title: 'विना परवानगी/हस्तांतरण/वापरात बदल झाला आहे काय ?', titleEn: 'Unauthorized transfer or change of land use?', group: 'statutory', minW: 'min-w-[130px]' },
-  { num: 46, title: 'मुद्दा क्र. 10 ते 34 प्रमाणे गाव नमुना 1 क अद्यावत आहे काय ?', titleEn: 'Is Village Form 1-C updated per points 10 to 34?', group: 'statutory', minW: 'min-w-[120px]' }
-];
+  { num: 22, title: 'सदर जमिन म.ज.म.अधि.1966 अंतर्गत विवीध योजनेअंतर्गत प्रदान/अतिक्रमण नियमानुकूल केलेल्या जमिनी (भूमिहीन, शेत मजूर, स्वातंत्र्य सैनिक इ.)', titleEn: 'Is land granted under MLRC 1966 to landless/laborers/freedom fighters?', group: 'statutory', minW: 'min-w-[200px]' },
+  { num: 23, title: 'सदर जमिन म.ज.म.अधि.1966 अंतर्गत विवीध योजनेअंतर्गत प्रदान/अतिक्रमण नियमानुकूल केलेल्या जमिनी (गृहनिर्माण संस्था,औद्योगिक आस्थापना,शैक्षणिक संस्था,विशेष वसाहत,प्रकल्प इ.) प्रकारची जमिन आहे का ? असल्यास संस्थेचे नाव नमुद करावे. (नसल्यास "नाही" असे नमूद करावे.)', titleEn: 'Is land granted under MLRC 1966 schemes (Housing, Industry, Education etc.)?', group: 'statutory', minW: 'min-w-[220px]' },
+  { num: 24, title: 'सदर जमिन महाराष्ट्र शेतजमिन कमाल धारणा अधिनियम 1961 अंतर्गत वाटप केलेल्या जमिनी प्रकारातील आहे काय ? (होय/नाही)', titleEn: 'Is land allotted under Agricultural Land Ceiling Act 1961?', group: 'statutory', minW: 'min-w-[160px]' },
+  { num: 25, title: 'सदर जमीन महानगरपालिका, नगर पालिका व विविध प्राधिकरण यांच्या विकास आराखडयात समाविष्ट असलेल्या जमिनी अथवा ग्रामपंचायतकडे गुरचरण अथवा इतर प्रयोजनासाठी वर्ग केलेली आहे का ? (असल्यास, कोणत्या प्रयोजनासाठी आरक्षित आहे?)', titleEn: 'Is land included in Municipal DP or Gram Panchayat grazing?', group: 'statutory', minW: 'min-w-[190px]' },
+  { num: 26, title: 'सदर जमीन देवस्थान इनाम जमीन आहे काय? (होय/नाही)', titleEn: 'Is land Devasthan Inam? (Yes/No)', group: 'statutory', minW: 'min-w-[110px]' },
+  { num: 27, title: 'सदर जमीन आदिवासी खातेदारांचे मालकीची आहे काय? (होय/नाही)', titleEn: 'Is land owned by Tribal Khatedar? (Yes/No)', group: 'statutory', minW: 'min-w-[120px]' },
+  { num: 28, title: 'सदर जमिन महाराष्ट्र पुर्नवसन अधिनियम 1999 च्या कलम 16 अन्वये प्रदान केलेली आहे काय ? (होय/नाही) असल्यास, प्रदान केल्याचा दिनांक नमूद करावा. (नसल्यास "नाही" असे नमूद करावे.)', titleEn: 'Is land granted under Rehabilitation Act 1999 Sec 16?', group: 'statutory', minW: 'min-w-[160px]' },
+  { num: 29, title: 'सदर जमिन भाडेपट्टयाने दिलेली शासकीय जमिन आहे काय? (होय/नाही)', titleEn: 'Is land Government leased land? (Yes/No)', group: 'statutory', minW: 'min-w-[120px]' },
+  { num: 30, title: 'सदर जमिन भुदान व ग्रामदान अंतर्गत दिलेली आहे काय ? (होय/नाही)', titleEn: 'Is land granted under Bhoodan & Gramdan?', group: 'statutory', minW: 'min-w-[120px]' },
+  { num: 31, title: 'सदर जमिन महाराष्ट्र खाजगी वने (संपादन) अधिनियम 1975 तसेच महाराष्ट्र शेतजमिन (जमिन धारणेची कमाल मर्यादा) अधिनियम 1961 अन्वये चौकशीसाठी प्रलंबित आहे काय ? (होय/नाही)', titleEn: 'Is land pending inquiry under Private Forest / Ceiling Act?', group: 'statutory', minW: 'min-w-[180px]' },
+  { num: 32, title: 'सदर जमिन भुमीधारी हक्कान्वये प्राप्त झालेली आहे काय ? (होय/नाही)', titleEn: 'Is land acquired under Bhumidhari rights?', group: 'statutory', minW: 'min-w-[120px]' },
+  { num: 33, title: 'सदर जमिनीस महाराष्ट्र शेतजमिन (जमिन धारणेची कमाल मर्यादा) अधिनियम 1961 अंतर्गत कमाल मर्यादेपेक्षा अधिक धारण करण्यास सुट दिलेली आहे काय ? (होय/नाही)', titleEn: 'Is land exempted for holding beyond ceiling limit?', group: 'statutory', minW: 'min-w-[160px]' },
+  { num: 34, title: 'सदर जमिन वक्फ बोर्डाचे मालकीची आहे काय? (होय/नाही)', titleEn: 'Is land owned by Waqf Board? (Yes/No)', group: 'statutory', minW: 'min-w-[120px]' },
+  { num: 35, title: 'सदर जमिन भुसंपादन कायदयाअंतर्गत अधिग्रहित/राखीव आहे काय ? (होय/नाही)', titleEn: 'Is land acquired/reserved under Land Acquisition Act?', group: 'statutory', minW: 'min-w-[130px]' },
+  { num: 36, title: 'सदर जमीन रकाना 10 ते 34 पैकी कोणत्याही रकान्यात होय असल्यास सक्षम प्राधिका-यांच्या परवानगीशिवाय भोग. वर्ग-2 मधुन भोग. वर्ग-1 मध्ये रुपांतरीत झालेली आहे काय ? (होय/नाही) असल्यास, सक्षम प्राधिका-यांचे पदनाम व आदेश क्रमांक नमूद करावा.', titleEn: 'Illegal conversion from Class-2 to Class-1 without sanction?', group: 'statutory', minW: 'min-w-[210px]' },
+  { num: 37, title: 'सदर जमीन रकाना 10 ते 34 पैकी कोणत्याही रकान्यात होय असल्यास, मौका चौकशीअंती सदर जमिनीबाबत शर्तभंग झालेला आहे काय ? असल्यास कोणत्या प्रकारचा ? (वापरात बदल/हस्तांतरण/इतर) (सदर जमिनीबाबत जो शर्तभंग असेल, तो नमूद करावा.)', titleEn: 'Spot inquiry reveals condition breach?', group: 'statutory', minW: 'min-w-[210px]' },
+  { num: 38, title: 'रकाना क्र. 26 चे उत्तर "होय" असल्यास, आदिवासी जमिनीबाबत सक्षम अधिकारी यांचे परवानगीशिवाय आदिवासी ते आदिवासी हस्तांतरण झाले आहे का ? (होय / नाही)', titleEn: 'Tribal to Tribal transfer without sanction?', group: 'statutory', minW: 'min-w-[190px]' },
+  { num: 39, title: 'रकाना क्र. 26 चे उत्तर "होय" असल्यास, आदिवासी जमिनीबाबत सक्षम अधिकारी यांचे परवानगीशिवाय आदिवासी ते गैर आदिवासी हस्तांतरण झाले आहे का ? (होय / नाही)', titleEn: 'Tribal to Non-Tribal alienation without sanction?', group: 'statutory', minW: 'min-w-[190px]' },
+  { num: 40, title: 'जमिनीच्या निर्बंधीत सत्ताप्रकारानुसार नोंद इतर अधिकारामध्ये घेण्यात आली आहे काय? (होय / नाही)', titleEn: 'Restricted tenure noted in other rights? (Yes/No)', group: 'statutory', minW: 'min-w-[150px]' },
+  { num: 41, title: 'अधिकार अभिलेखापासून ते आजपावेतोच्या अधिकार अभिलेखानुसार इतर अधिकारातील नोंदी/भुधारणा/भोगवटदार यांच्या नोंदी अवैधरित्या कमी केलेल्या आहेत काय? (होय / नाही)', titleEn: 'Have other rights/tenure entries been illegally deleted?', group: 'statutory', minW: 'min-w-[190px]' },
+  { num: 42, title: 'भोगवटदार कंपनी/बिगर शेतकरी असल्यास,सदर जमिन वाणिज्य/रहिवास प्रयोजनाकरीता कंपनीने धारण केलेली असल्यास महाराष्ट्र कुळ वहिवाट व शेतजमिन (विदर्भ प्रदेश) अधिनियम 1948 /महाराष्ट्र कुळ वहिवाट व शेतजमिन (हैद्राबाद प्रदेश) अधिनियम 1950 मधील तरतुदीनुसार परवानगी घेतलेली आहे काय ? (होय/नाही)', titleEn: 'Non-farmer/Company occupant taken prior sanction?', group: 'statutory', minW: 'min-w-[220px]' },
+  { num: 43, title: 'सदर जमिन महाराष्ट्र कुळ वहिवाट व शेतजमिन (विदर्भ प्रदेश) अधिनियम 1948 चे कलम 89 व 89 अ/महाराष्ट्र कुळ वहिवाट व शेतजमिन (हैद्राबाद प्रदेश) अधिनियम 1950 चे कलम 47 व 47 अ अन्वये ख-याखु-या औद्योगिक प्रयोजनाकरिता कंपनीने धारण केलेली आहे काय ? (होय/नाही) [खरेदी दिनांक]', titleEn: 'Bonafide industrial holding under Sec 89/89A? [Purchase Date]', group: 'statutory', minW: 'min-w-[210px]' },
+  { num: 44, title: 'वापर सुरू केला आहे काय?', titleEn: 'Has utilization commenced?', group: 'statutory', minW: 'min-w-[110px]' },
+  { num: 45, title: 'विना परवानगी/हस्तांतरण/वापरात बदल झाला आहे काय ?', titleEn: 'Unauthorized transfer or change of land use?', group: 'statutory', minW: 'min-w-[140px]' },
+  { num: 46, title: 'मुद्दा क्र. 10 ते 34 प्रमाणे गाव नमुना 1 क अद्यावत आहे काय ?', titleEn: 'Is Village Form 1-C updated per points 10 to 34?', group: 'statutory', minW: 'min-w-[130px]' }];
 
 export default function ReportsPage() {
   const { isMarathi } = useTranslation();
@@ -719,7 +718,8 @@ export default function ReportsPage() {
     { key: 'srNo', titleMr: 'अ.क्र.', titleEn: 'Sr.', getValue: (p, idx) => String((page - 1) * effectivePageSize + idx + 1) },
     { key: 'village', titleMr: 'गावाचे नाव', titleEn: 'Village Name', getValue: (p) => `${formatVillageName(p.villageName, isMarathi)} (${formatTalukaName(p.taluka, isMarathi)})` },
     { key: 'gatNumber', titleMr: 'सर्व्हे क्रमांक', titleEn: 'Survey No.', getValue: (p) => String(p.gatNumber || p.oldSurveyNo || '-') },
-    { key: 'area', titleMr: 'क्षेत्र', titleEn: 'Area', getValue: (p) => String(p.totalAreaHa || '-') },
+    { key: 'krushakArea', titleMr: 'कृषक (हे.आर)', titleEn: 'Agri Area (Ha.R)', getValue: (p) => String(p.totalAreaHa ? Number(p.totalAreaHa).toFixed(4) : '-') },
+    { key: 'akrushakArea', titleMr: 'अकृषक (आर चौ.मी)', titleEn: 'Non-Agri Area (R.Sq.m)', getValue: (p) => String(p.potkharabaAreaHa ? Number(p.potkharabaAreaHa).toFixed(4) : (p.metadata?.nonAgriArea || '०.००')) },
     { key: 'tenure', titleMr: 'भोगवटदार वर्ग', titleEn: 'Tenure Class', getValue: (p) => String(p.tenureDisplay || p.tenureClass || '-') },
     { key: 'owner', titleMr: 'भोगवटदाराचे नाव', titleEn: 'Occupant Name', getValue: (p) => String(p.currentOwner || '-') },
     { key: 'otherRights', titleMr: 'इतर अधिकारातील नोंद', titleEn: 'Other Rights Entry', getValue: (p) => String((p.points && p.points[40]) || p.otherRights || '-') },
@@ -4241,119 +4241,102 @@ export default function ReportsPage() {
                     <div className="overflow-x-auto max-h-[70vh] border-b border-slate-300 bg-white">
                 <table className="w-full text-left border-collapse text-[11px] whitespace-nowrap">
                   <thead className="sticky top-0 z-30 bg-white shadow-md isolate">
-                    {/* Level 1: Major Group Headers */}
+                    {/* Level 1: Major Group Headers (Exact Sheet 1 Groups) */}
                     <tr className="bg-slate-200 text-slate-800 font-bold border-b border-slate-300 text-center">
-                      <th colSpan={7} className={`py-2.5 px-2 border-r border-slate-300 text-slate-900 font-black transition ${
-                        selectedCell?.view === 'timeline' && ['srNo', 'village', 'gatNumber', 'area', 'tenure', 'owner', 'otherRights'].includes(selectedCell?.colKey)
+                      <th colSpan={8} className={`py-2 px-2 border-r border-slate-300 text-slate-900 font-black transition ${
+                        selectedCell?.view === 'timeline' && ['srNo', 'village', 'gatNumber', 'krushakArea', 'akrushakArea', 'area', 'tenure', 'owner', 'otherRights'].includes(selectedCell?.colKey)
                           ? 'bg-blue-200/90 ring-1 ring-inset ring-blue-400'
                           : 'bg-slate-200'
                       }`}>
                         {isMarathi ? 'मूलभूत ७/१२ तपशील' : 'Baseline 7/12 Details'}
                       </th>
-                      <th colSpan={3} className={`py-2.5 px-2 border-r border-amber-300 text-amber-950 font-black text-center shadow-xs transition ${
-                        selectedCell?.view === 'timeline' && ['point_1', 'point_2', 'point_3'].includes(selectedCell?.colKey)
+                      <th colSpan={9} className={`py-2 px-2 border-r border-amber-300 text-amber-950 font-black text-center shadow-xs transition ${
+                        selectedCell?.view === 'timeline' && [1,2,3,4,5,6,7,8,9].some(n => selectedCell?.colKey === `point_${n}`)
                           ? 'bg-amber-300 ring-2 ring-inset ring-amber-500'
                           : 'bg-amber-200'
                       }`}>
                         <div className="text-xs font-black tracking-wide">
-                          {isMarathi ? '१. बंदोबस्त नोंद (१९५०)' : '1. Settlement Record (1950)'}
+                          {isMarathi ? 'सदर गट क्रमांकाचा रिनंबरींग पर्चाप्रमाणे (१ ते ९)' : 'Renumbering Parcha Sequence (Points 1 to 9)'}
                         </div>
-                        <div className="text-[9px] font-semibold text-amber-900">
-                          {isMarathi ? 'सदर गट क्रमांकाचा रिनंबरींग पर्चाप्रमाणे' : 'Renumbering Slip Sequence'}
-                        </div>
-                      </th>
-                      <th colSpan={3} className={`py-2.5 px-2 border-r border-amber-300 text-amber-950 font-black text-center shadow-xs transition ${
-                        selectedCell?.view === 'timeline' && ['point_4', 'point_5', 'point_6'].includes(selectedCell?.colKey)
-                          ? 'bg-amber-200 ring-2 ring-inset ring-amber-500'
-                          : 'bg-amber-100'
-                      }`}>
-                        <div className="text-xs font-black tracking-wide">
-                          {isMarathi ? '२. एकत्रिकरण नोंद (१९७२)' : '2. Consolidation Record (1972)'}
-                        </div>
-                        <div className="text-[9px] font-semibold text-amber-900">
-                          {isMarathi ? 'सदर गट क्रमांकाचा रिनंबरींग पर्चाप्रमाणे' : 'Renumbering Slip Sequence'}
+                        <div className="text-[10px] font-semibold text-amber-900">
+                          {isMarathi ? '१. बंदोबस्त (१९५०) | २. एकत्रिकरण (१९७२) | ३. पुर्नमोजणी (७/१२)' : '1. Settlement (1950) | 2. Consolidation (1972) | 3. Resurvey (7/12)'}
                         </div>
                       </th>
-                      <th colSpan={3} className={`py-2.5 px-2 border-r border-amber-300 text-amber-950 font-black text-center shadow-xs transition ${
-                        selectedCell?.view === 'timeline' && ['point_7', 'point_8', 'point_9'].includes(selectedCell?.colKey)
-                          ? 'bg-amber-200 ring-2 ring-inset ring-amber-500'
-                          : 'bg-amber-50'
-                      }`}>
-                        <div className="text-xs font-black tracking-wide">
-                          {isMarathi ? '३. पुनर्मोजणी नोंद (१९९५)' : '3. Resurvey 7/12 Record (1995)'}
-                        </div>
-                        <div className="text-[9px] font-semibold text-amber-900">
-                          {isMarathi ? 'सदर गट क्रमांकाचा रिनंबरींग पर्चाप्रमाणे' : 'Renumbering Slip Sequence'}
-                        </div>
-                      </th>
-                      <th colSpan={10} className={`py-2.5 px-2 border-r border-rose-300 text-rose-950 font-black transition ${
+                      <th colSpan={10} className={`py-2 px-2 border-r border-rose-300 text-rose-950 font-black transition ${
                         selectedCell?.view === 'timeline' && [10,11,12,13,14,15,16,17,18,19].some(n => selectedCell?.colKey === `point_${n}`)
                           ? 'bg-rose-200 ring-2 ring-inset ring-rose-500'
                           : 'bg-rose-100'
                       }`}>
-                        {isMarathi ? 'भोगवटदार सरकार / महाराष्ट्र शासन असल्यास' : 'Occupant: Government / Maharashtra State'}
+                        <div className="text-xs font-black tracking-wide">
+                          {isMarathi ? 'भोगवटदार सरकार / महाराष्ट्र शासन असल्यास (१० ते १९)' : 'Occupant: Government / Maharashtra State (Points 10 to 19)'}
+                        </div>
+                        <div className="text-[10px] font-semibold text-rose-900">
+                          {isMarathi ? 'गायरान, वन, तफावत, वाटप, अतिक्रमण, भूसंपादन व पोकळीस्त नोंदी' : 'Gairan, Forest, Discrepancies, Allotments, Encroachment, etc.'}
+                        </div>
                       </th>
-                      <th colSpan={27} className={`py-2.5 px-2 border-r border-blue-300 text-blue-950 font-black transition ${
+                      <th colSpan={27} className={`py-2 px-2 border-r border-blue-300 text-blue-950 font-black transition ${
                         selectedCell?.view === 'timeline' && Array.from({ length: 27 }, (_, i) => i + 20).some(n => selectedCell?.colKey === `point_${n}`)
                           ? 'bg-blue-200 ring-2 ring-inset ring-blue-500'
                           : 'bg-blue-100'
                       }`}>
-                        {isMarathi
-                          ? 'वैधानिक कायदे व पडताळणी रकाने (कुळ, वतन, आदिवासी, कमाल मर्यादा व इतर)'
-                          : 'Statutory Acts & Verification (Tenancy, Inam, Tribal, Ceiling, etc.)'}
+                        <div className="text-xs font-black tracking-wide">
+                          {isMarathi ? 'वैधानिक कायदे व पडताळणी रकाने (२० ते ४६)' : 'Statutory Acts & Verification Checkpoints (Points 20 to 46)'}
+                        </div>
+                        <div className="text-[10px] font-semibold text-blue-900">
+                          {isMarathi ? 'कुळ, इनाम/वतन, म.ज.म.अधि., कमाल धारणा, आदिवासी, शर्तभंग व औद्योगिक प्रयोजन' : 'Tenancy, Inam/Watan, MLRC, Ceiling, Tribal, Breach & Industrial Use'}
+                        </div>
                       </th>
-                      <th className="py-2.5 px-2 bg-slate-200 text-slate-900 font-bold">{isMarathi ? 'कालक्रम' : 'Timeline'}</th>
+                      <th rowSpan={3} className="py-2.5 px-2 bg-slate-200 text-slate-900 font-bold w-16 align-middle text-center">{isMarathi ? 'तपशील' : 'Details'}</th>
                     </tr>
 
-                    {/* Level 2: Specific Column Titles */}
+                    {/* Level 2: Specific Column Titles (Exact Sheet 1 Row 3 & 4 Layout) */}
                     <tr className="bg-slate-100 text-slate-800 font-bold border-b border-slate-300 text-center">
-                      <th className={`py-2.5 px-2 border-r border-slate-300 w-12 leading-normal transition ${
+                      <th rowSpan={2} className={`py-2 px-2 border-r border-slate-300 w-12 leading-normal align-middle transition ${
                         selectedCell?.view === 'timeline' && selectedCell?.colKey === 'srNo'
                           ? 'bg-blue-200 text-blue-950 font-black ring-2 ring-inset ring-blue-500'
                           : 'bg-slate-100'
                       }`}>{isMarathi ? 'अ.क्र.' : 'Sr.'}</th>
-                      <th className={`py-2.5 px-3 border-r border-slate-300 text-left min-w-[120px] leading-normal transition ${
+                      <th rowSpan={2} className={`py-2 px-3 border-r border-slate-300 text-left min-w-[120px] leading-normal align-middle transition ${
                         selectedCell?.view === 'timeline' && selectedCell?.colKey === 'village'
                           ? 'bg-blue-200 text-blue-950 font-black ring-2 ring-inset ring-blue-500'
                           : 'bg-slate-100'
                       }`}>{isMarathi ? 'गावाचे नाव' : 'Village Name'}</th>
-                      <th className={`py-2.5 px-2 border-r border-slate-300 w-24 leading-normal transition ${
+                      <th rowSpan={2} className={`py-2 px-2 border-r border-slate-300 w-24 leading-normal align-middle transition ${
                         selectedCell?.view === 'timeline' && selectedCell?.colKey === 'gatNumber'
                           ? 'bg-blue-200 text-blue-950 font-black ring-2 ring-inset ring-blue-500'
                           : 'bg-slate-100'
                       }`}>{isMarathi ? 'सर्व्हे क्रमांक' : 'Survey No.'}</th>
-                      <th className={`py-2.5 px-2 border-r border-slate-300 w-20 text-right leading-normal transition-colors ${
-                        selectedCell?.view === 'timeline' && selectedCell?.colKey === 'area'
-                          ? 'bg-blue-200 text-blue-950 font-black ring-2 ring-inset ring-blue-500'
-                          : selectedKpiFilter === 'area' ? 'bg-emerald-200 text-emerald-950 font-black ring-1 ring-emerald-500' : 'bg-slate-100'
-                      }`}>
+                      
+                      {/* क्षेत्र Multi-Column Header (Splits into कृषक व अकृषक) */}
+                      <th colSpan={2} className="py-1 px-2 border-r border-slate-300 text-center bg-slate-150 font-extrabold text-slate-900 border-b border-slate-200">
                         {isMarathi ? 'क्षेत्र' : 'Area'}
                       </th>
-                      <th className={`py-2.5 px-2 border-r border-slate-300 w-28 leading-normal transition-colors ${
+
+                      <th rowSpan={2} className={`py-2 px-2 border-r border-slate-300 w-28 leading-normal align-middle transition-colors ${
                         selectedCell?.view === 'timeline' && selectedCell?.colKey === 'tenure'
                           ? 'bg-blue-200 text-blue-950 font-black ring-2 ring-inset ring-blue-500'
                           : selectedKpiFilter === 'class2' ? 'bg-amber-200 text-amber-950 font-black ring-1 ring-amber-500' : 'bg-slate-100'
                       }`}>
                         {isMarathi ? (
-                          <>भोगवटदार वर्ग<br /><span className="text-[9px] font-normal text-slate-500">(भूधारणा नुसार)</span></>
+                          <>भोगवटदार वर्ग<br /><span className="text-[9px] font-normal text-slate-500">(भूधारणा नुसार )</span></>
                         ) : (
                           <>Tenure Class<br /><span className="text-[9px] font-normal text-slate-500">(By Holding)</span></>
                         )}
                       </th>
-                      <th className={`py-2.5 px-3 border-r border-slate-300 text-left min-w-[180px] whitespace-normal break-words leading-normal transition ${
+                      <th rowSpan={2} className={`py-2 px-3 border-r border-slate-300 text-left min-w-[180px] whitespace-normal break-words leading-normal align-middle transition ${
                         selectedCell?.view === 'timeline' && selectedCell?.colKey === 'owner'
                           ? 'bg-blue-300 text-blue-950 font-black ring-2 ring-inset ring-blue-600'
                           : 'bg-blue-100 text-blue-950 font-black'
                       }`}>
                         {isMarathi ? 'भोगवटदाराचे नाव' : 'Occupant Name'}
                       </th>
-                      <th className={`py-2.5 px-3 border-r border-slate-300 text-left w-[240px] min-w-[200px] max-w-[280px] whitespace-normal break-words leading-normal transition ${
+                      <th rowSpan={2} className={`py-2 px-3 border-r border-slate-300 text-left w-[240px] min-w-[200px] max-w-[280px] whitespace-normal break-words leading-normal align-middle transition ${
                         selectedCell?.view === 'timeline' && selectedCell?.colKey === 'otherRights'
                           ? 'bg-blue-200 text-blue-950 font-black ring-2 ring-inset ring-blue-500'
                           : 'bg-slate-100'
                       }`}>
                         {isMarathi ? (
-                          <>इतर अधिकारातील नोंद <br /><span className="text-[9px] font-normal text-slate-500">(जी नोंद सदर 7/12 चे इतर अधिकारात असेल, तीच नोंद इथे नमूद करावी. उदा.आदिवासी/कुळ इ.)</span></>
+                          <>इतर अधिकारातील नोंद <br /><span className="text-[9px] font-normal text-slate-500">(जी नोंद सदर 7/12 चे इतर अधिकारात असेल, तीच नोंद इथे नमूद करावी. उदा. आदिवासी/कुळ इ.)</span></>
                         ) : (
                           <>Other Rights Entry<br /><span className="text-[9px] font-normal text-slate-500">(Tribal/Tenant etc.)</span></>
                         )}
@@ -4365,7 +4348,8 @@ export default function ReportsPage() {
                         return (
                           <th
                             key={col.num}
-                            className={`py-2.5 px-3 border-r border-slate-200 ${col.minW} text-left text-[11px] font-bold align-middle transition ${
+                            rowSpan={2}
+                            className={`py-2 px-3 border-r border-slate-200 ${col.minW} text-left text-[11px] font-bold align-middle transition ${
                               isColActive
                                 ? 'bg-blue-200 text-blue-950 font-black ring-2 ring-inset ring-blue-500'
                                 : col.group === 'renumbering'
@@ -4382,15 +4366,33 @@ export default function ReportsPage() {
                           </th>
                         );
                       })}
-                      <th className="py-2.5 px-2 w-16 text-center bg-slate-100 text-slate-800 font-bold leading-normal">{isMarathi ? 'तपशील' : 'Details'}</th>
                     </tr>
 
-                    {/* Level 3: Official Row Numbering */}
+                    {/* Level 3: Area Sub-headers (कृषक व अकृषक) */}
+                    <tr className="bg-slate-100 text-slate-700 font-bold border-b border-slate-300 text-center text-[10px]">
+                      <th className={`py-1.5 px-2 border-r border-slate-300 w-20 text-right transition-colors ${
+                        selectedCell?.view === 'timeline' && selectedCell?.colKey === 'krushakArea'
+                          ? 'bg-blue-200 text-blue-950 font-black ring-2 ring-inset ring-blue-500'
+                          : selectedKpiFilter === 'area' ? 'bg-emerald-200 text-emerald-950 font-black ring-1 ring-emerald-500' : 'bg-slate-100'
+                      }`}>
+                        {isMarathi ? 'कृषक (हे.आर)' : 'Agri (Ha.R)'}
+                      </th>
+                      <th className={`py-1.5 px-2 border-r border-slate-300 w-22 text-right transition-colors ${
+                        selectedCell?.view === 'timeline' && selectedCell?.colKey === 'akrushakArea'
+                          ? 'bg-blue-200 text-blue-950 font-black ring-2 ring-inset ring-blue-500'
+                          : 'bg-slate-100 text-slate-600'
+                      }`}>
+                        {isMarathi ? 'अकृषक (आर चौ.मी)' : 'Non-Agri (R.Sq.m)'}
+                      </th>
+                    </tr>
+
+                    {/* Level 4: Official Row Numbering (Matching Sheet 1 Row 3 & 4) */}
                     <tr className="bg-slate-200 text-[10px] text-slate-600 text-center border-b-2 border-slate-400 font-mono shadow-[0_2px_4px_rgba(0,0,0,0.06)]">
                       <th className={`py-1 border-r border-slate-300 transition ${selectedCell?.view === 'timeline' && selectedCell?.colKey === 'srNo' ? 'bg-blue-600 text-white font-black' : 'bg-slate-200'}`}>{isMarathi ? 'अ.क्र.' : 'Sr.'}</th>
                       <th className={`py-1 border-r border-slate-300 transition ${selectedCell?.view === 'timeline' && selectedCell?.colKey === 'village' ? 'bg-blue-600 text-white font-black' : 'bg-slate-200'}`}>{isMarathi ? 'गाव' : 'Village'}</th>
                       <th className={`py-1 border-r border-slate-300 transition ${selectedCell?.view === 'timeline' && selectedCell?.colKey === 'gatNumber' ? 'bg-blue-600 text-white font-black' : 'bg-slate-200'}`}>{isMarathi ? 'सर्व्हे' : 'Survey'}</th>
-                      <th className={`py-1 border-r border-slate-300 transition ${selectedCell?.view === 'timeline' && selectedCell?.colKey === 'area' ? 'bg-blue-600 text-white font-black' : 'bg-slate-200'}`}>{isMarathi ? 'क्षेत्र' : 'Area'}</th>
+                      <th className={`py-1 border-r border-slate-300 transition ${selectedCell?.view === 'timeline' && selectedCell?.colKey === 'krushakArea' ? 'bg-blue-600 text-white font-black' : 'bg-slate-200'}`}>{isMarathi ? 'कृषक' : 'Agri'}</th>
+                      <th className={`py-1 border-r border-slate-300 transition ${selectedCell?.view === 'timeline' && selectedCell?.colKey === 'akrushakArea' ? 'bg-blue-600 text-white font-black' : 'bg-slate-200'}`}>{isMarathi ? 'अकृषक' : 'Non-Agri'}</th>
                       <th className={`py-1 border-r border-slate-300 transition ${selectedCell?.view === 'timeline' && selectedCell?.colKey === 'tenure' ? 'bg-blue-600 text-white font-black' : 'bg-slate-200'}`}>{isMarathi ? 'वर्ग' : 'Class'}</th>
                       <th className={`py-1 border-r border-slate-300 transition ${selectedCell?.view === 'timeline' && selectedCell?.colKey === 'owner' ? 'bg-blue-600 text-white font-black' : 'bg-slate-200'}`}>{isMarathi ? 'नाव' : 'Name'}</th>
                       <th className={`py-1 border-r border-slate-300 transition ${selectedCell?.view === 'timeline' && selectedCell?.colKey === 'otherRights' ? 'bg-blue-600 text-white font-black' : 'bg-slate-200'}`}>{isMarathi ? 'इतर हक्क' : 'Other'}</th>
@@ -4438,7 +4440,7 @@ export default function ReportsPage() {
                       ))
                     ) : paginatedParcels.length === 0 ? (
                       <tr>
-                        <td colSpan={54} className="py-16 text-center">
+                        <td colSpan={55} className="py-16 text-center">
                           <div className="max-w-md mx-auto flex flex-col items-center">
                             <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-3 shadow-2xs border ${
                               selectedKpiFilter === 'violations'
@@ -4491,6 +4493,8 @@ export default function ReportsPage() {
                         const villageVal = `${formatVillageName(p.villageName, isMarathi)} (${formatTalukaName(p.taluka, isMarathi)})`;
                         const surveyVal = String(p.gatNumber || p.oldSurveyNo || '-');
                         const areaVal = String(p.totalAreaHa || '-');
+                        const krushakVal = p.totalAreaHa ? Number(p.totalAreaHa).toFixed(4) : '-';
+                        const akrushakVal = p.potkharabaAreaHa ? Number(p.potkharabaAreaHa).toFixed(4) : (p.metadata?.nonAgriArea || '०.००');
                         const tenureVal = String(p.tenureDisplay || p.tenureClass || '-');
                         const ownerVal = String(p.currentOwner || (isMarathi ? 'नोंद उपलब्ध नाही' : 'No record available'));
                         const otherRightsVal = String(p.otherRights || p.remarks || '-');
@@ -4556,25 +4560,39 @@ export default function ReportsPage() {
                               {isCellSelected('timeline', idx, 'gatNumber') && renderCellHandle()}
                             </td>
 
-                            {/* 3. Area */}
+                            {/* 3. Agri Area (कृषक) */}
                             <td
-                              onClick={() => handleSelectCell('timeline', idx, 'area', 3, isMarathi ? 'क्षेत्र' : 'Area', targetLabel, areaVal, p)}
-                              onDoubleClick={() => handleCopyCellText(areaVal)}
+                              onClick={() => handleSelectCell('timeline', idx, 'krushakArea', 3, isMarathi ? 'कृषक (हे.आर)' : 'Agri (Ha.R)', targetLabel, krushakVal, p)}
+                              onDoubleClick={() => handleCopyCellText(krushakVal)}
                               className={`py-2 px-2 text-right border-r border-slate-200 font-mono cursor-pointer transition select-text ${
-                                isCellSelected('timeline', idx, 'area')
+                                isCellSelected('timeline', idx, 'krushakArea')
                                   ? 'ring-2 ring-blue-600 ring-inset bg-blue-100/90 font-black text-blue-950 relative z-20 shadow-xs'
                                   : selectedKpiFilter === 'area'
                                   ? 'bg-emerald-50 text-emerald-950 font-black ring-1 ring-inset ring-emerald-300'
                                   : 'font-medium hover:bg-blue-50/50'
                               }`}
                             >
-                              {p.totalAreaHa}
-                              {isCellSelected('timeline', idx, 'area') && renderCellHandle()}
+                              {krushakVal}
+                              {isCellSelected('timeline', idx, 'krushakArea') && renderCellHandle()}
+                            </td>
+
+                            {/* 4. Non-Agri Area (अकृषक) */}
+                            <td
+                              onClick={() => handleSelectCell('timeline', idx, 'akrushakArea', 4, isMarathi ? 'अकृषक (आर चौ.मी)' : 'Non-Agri (R.Sq.m)', targetLabel, akrushakVal, p)}
+                              onDoubleClick={() => handleCopyCellText(akrushakVal)}
+                              className={`py-2 px-2 text-right border-r border-slate-200 font-mono cursor-pointer transition select-text ${
+                                isCellSelected('timeline', idx, 'akrushakArea')
+                                  ? 'ring-2 ring-blue-600 ring-inset bg-blue-100/90 font-black text-blue-950 relative z-20 shadow-xs'
+                                  : 'text-slate-600 hover:bg-blue-50/50'
+                              }`}
+                            >
+                              {akrushakVal}
+                              {isCellSelected('timeline', idx, 'akrushakArea') && renderCellHandle()}
                             </td>
 
                             {/* 4. Tenure Class */}
                             <td
-                              onClick={() => handleSelectCell('timeline', idx, 'tenure', 4, isMarathi ? 'भोगवटदार वर्ग' : 'Tenure Class', targetLabel, tenureVal, p)}
+                              onClick={() => handleSelectCell('timeline', idx, 'tenure', 5, isMarathi ? 'भोगवटदार वर्ग' : 'Tenure Class', targetLabel, tenureVal, p)}
                               onDoubleClick={() => handleCopyCellText(tenureVal)}
                               className={`py-2 px-2 text-center border-r border-slate-200 cursor-pointer transition select-text ${
                                 isCellSelected('timeline', idx, 'tenure')
@@ -4602,7 +4620,7 @@ export default function ReportsPage() {
 
                             {/* 5. Occupant / Owner Name */}
                             <td
-                              onClick={() => handleSelectCell('timeline', idx, 'owner', 5, isMarathi ? 'भोगवटदाराचे नाव' : 'Occupant Name', targetLabel, ownerVal, p)}
+                              onClick={() => handleSelectCell('timeline', idx, 'owner', 6, isMarathi ? 'भोगवटदाराचे नाव' : 'Occupant Name', targetLabel, ownerVal, p)}
                               onDoubleClick={() => handleCopyCellText(ownerVal)}
                               className={`py-2 px-3 border-r border-slate-200 font-bold cursor-pointer transition select-text whitespace-normal break-words ${
                                 isCellSelected('timeline', idx, 'owner')
@@ -4616,7 +4634,7 @@ export default function ReportsPage() {
 
                             {/* 6. Other Rights */}
                             <td
-                              onClick={() => handleSelectCell('timeline', idx, 'otherRights', 6, isMarathi ? 'इतर अधिकारातील नोंद' : 'Other Rights Entry', targetLabel, otherRightsVal, p)}
+                              onClick={() => handleSelectCell('timeline', idx, 'otherRights', 7, isMarathi ? 'इतर अधिकारातील नोंद' : 'Other Rights Entry', targetLabel, otherRightsVal, p)}
                               onDoubleClick={() => handleCopyCellText(otherRightsVal)}
                               className={`py-2 px-3 border-r border-slate-200 text-slate-600 text-[10px] w-[240px] min-w-[200px] max-w-[280px] whitespace-normal break-words align-top cursor-pointer transition select-text ${
                                 isCellSelected('timeline', idx, 'otherRights')
@@ -4633,7 +4651,7 @@ export default function ReportsPage() {
 
                             {/* 7 to 52: Checklist 1 to 46 values */}
                             {CHECKLIST_46_COLUMNS.map((col, cIdx) => {
-                              const colIdx = 7 + cIdx;
+                              const colIdx = 8 + cIdx;
                               const colKey = `point_${col.num}`;
                               const rawPt = pts[col.num];
                               const val = (rawPt !== undefined && rawPt !== null) ? String(rawPt).trim() : '';
@@ -4718,6 +4736,49 @@ export default function ReportsPage() {
                   />
                 </div>
               )}
+
+              {/* Official Officer Verification & Certification Block matching Sheet 1 */}
+              <div className="border-t-2 border-slate-300 bg-slate-50/90 p-4 sm:p-5 text-xs text-slate-800">
+                <div className="max-w-5xl mx-auto space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pb-3 border-b border-slate-200">
+                    <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-2xs space-y-2">
+                      <div className="font-bold text-slate-900 flex items-center justify-between">
+                        <span>{isMarathi ? 'माहिती तयार करणाऱ्याचे नाव व पदनाम:' : 'Prepared By Name & Designation:'}</span>
+                        <span className="text-slate-400 font-mono text-[11px]">{isMarathi ? '(तलाठी / महसूल सहाय्यक)' : '(Talathi / Revenue Assistant)'}</span>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2 text-[11px] text-slate-600 pt-1">
+                        <div><span className="font-semibold">{isMarathi ? 'दिनांक:' : 'Date:'}</span> {new Date().toLocaleDateString('mr-IN')}</div>
+                        <div><span className="font-semibold">{isMarathi ? 'स्वाक्षरी:' : 'Signature:'}</span> __________________</div>
+                      </div>
+                    </div>
+
+                    <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-2xs space-y-2">
+                      <div className="font-bold text-slate-900 flex items-center justify-between">
+                        <span>{isMarathi ? 'माहिती तपासणी करणाऱ्या अधिकाऱ्याचे नाव व पदनाम:' : 'Verified By Name & Designation:'}</span>
+                        <span className="text-slate-400 font-mono text-[11px]">{isMarathi ? '(मंडळ अधिकारी / नायब तहसीलदार)' : '(Circle Officer / Naib Tehsildar)'}</span>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2 text-[11px] text-slate-600 pt-1">
+                        <div><span className="font-semibold">{isMarathi ? 'दिनांक:' : 'Date:'}</span> {new Date().toLocaleDateString('mr-IN')}</div>
+                        <div><span className="font-semibold">{isMarathi ? 'स्वाक्षरी:' : 'Signature:'}</span> __________________</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-white p-3.5 rounded-xl border border-amber-200/90 shadow-2xs text-center space-y-1.5">
+                    <div className="font-extrabold text-slate-900 text-sm tracking-wide">
+                      {isMarathi ? 'माहिती अचूक असल्याबाबत तहसीलदार यांचेव्दारा प्रमाणन' : 'Accuracy Certification by Tehsildar'}
+                    </div>
+                    <p className="text-[11px] text-slate-600">
+                      {isMarathi
+                        ? `प्रमाणित करण्यात येते की, ${talukaDisplay ? `तालुका ${talukaDisplay}, ` : ''}जिल्हा चंद्रपूर अंतर्गत वरील सर्व ७/१२ अधिकार अभिलेख तपासणी अचूक नोंदविली आहे.`
+                        : 'Certified that all aforementioned 7/12 land records inspection data has been verified and found accurate.'}
+                    </p>
+                    <div className="pt-2 font-bold text-slate-800 text-xs">
+                      {isMarathi ? `तहसीलदार, ${talukaDisplay ? `तालुका ${talukaDisplay}, ` : ''}जिल्हा चंद्रपूर` : 'Tehsildar, District Chandrapur'}
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           ) : (
             <div>
