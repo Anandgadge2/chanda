@@ -114,19 +114,19 @@ export default function Navbar({
             )}
 
             <Link href={user ? '/dashboard' : '/'} className="flex items-center gap-2.5 sm:gap-3 group min-w-0">
-              <div className="p-1 bg-[#FFFFFF] border border-[#E9E7E1] rounded-xl group-hover:border-[#4169E1] transition flex-shrink-0 shadow-2xs">
-                <ChandrapurDistrictLogo className="w-8 h-8 sm:w-9 sm:h-9" />
+              <div className="p-1.5 bg-[#FFFFFF] border border-[#E9E7E1] rounded-xl group-hover:border-[#4169E1] transition flex-shrink-0 shadow-2xs">
+                <ChandrapurDistrictLogo className="w-9 h-9 sm:w-11 sm:h-11" />
               </div>
               <div className="min-w-0">
-                <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
-                  <span className="font-extrabold text-[#252B36] text-sm sm:text-base lg:text-lg tracking-tight group-hover:text-[#4169E1] transition truncate max-w-[150px] xs:max-w-[220px] sm:max-w-none">
+                <div className="flex items-center gap-2.5 flex-wrap sm:flex-nowrap">
+                  <span className="font-extrabold text-[#252B36] text-base sm:text-xl lg:text-[26px] tracking-tight group-hover:text-[#4169E1] transition truncate max-w-[150px] xs:max-w-[220px] sm:max-w-none">
                     {t('portal.title')}
                   </span>
-                  <span className="hidden sm:inline-block text-[11px] font-bold bg-[#4169E1]/10 text-[#4169E1] px-2.5 py-0.5 rounded-full border border-[#4169E1]/20 flex-shrink-0">
+                  <span className="hidden sm:inline-block text-xs sm:text-[14px] lg:text-[15px] font-bold bg-[#4169E1]/10 text-[#4169E1] px-3 py-0.5 rounded-full border border-[#4169E1]/20 flex-shrink-0">
                     {t('portal.mlrcBadge')}
                   </span>
                 </div>
-                <p className="text-xs text-[#64748B] font-medium hidden md:block truncate leading-tight">
+                <p className="text-xs sm:text-[15px] lg:text-[17px] text-[#64748B] font-medium hidden md:block truncate leading-tight mt-0.5">
                   {t('portal.officialTagline')}
                 </p>
               </div>
@@ -134,18 +134,18 @@ export default function Navbar({
           </div>
 
           {/* Right: Language Switcher, Public Portal Link & Executive Profile Tray */}
-          <div className="flex items-center gap-2.5 sm:gap-3 flex-shrink-0">
+          <div className="flex items-center gap-2.5 sm:gap-3.5 flex-shrink-0">
             {/* Bilingual Switcher */}
-            <div className="hidden sm:inline-flex items-center">
+            <div className="hidden sm:inline-flex items-center text-[15px] sm:text-[16px]">
               <LanguageSwitcher variant="pill" />
             </div>
 
             <Link
               href="/"
-              className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold px-3 py-1.5 sm:py-2 rounded-xl border border-[#E9E7E1] text-[#252B36] hover:text-[#4169E1] hover:bg-[#F3F2ED] transition shadow-2xs"
+              className="inline-flex items-center gap-2 text-sm sm:text-base lg:text-[17px] font-semibold px-3.5 py-2 sm:py-2.5 rounded-xl border border-[#E9E7E1] text-[#252B36] hover:text-[#4169E1] hover:bg-[#F3F2ED] transition shadow-2xs"
               title={t('nav.publicPortal')}
             >
-              <ExternalLink className="w-4 h-4 text-[#64748B]" />
+              <ExternalLink className="w-4.5 h-4.5 text-[#64748B]" />
               <span className="hidden md:inline">{t('nav.publicPortal')}</span>
             </Link>
 
@@ -155,7 +155,7 @@ export default function Navbar({
                 <button
                   type="button"
                   onClick={() => setProfileTrayOpen((prev) => !prev)}
-                  className={`flex items-center gap-2.5 py-1.5 px-2 sm:px-3 rounded-xl transition border text-left cursor-pointer shadow-2xs ${
+                  className={`flex items-center gap-3 py-2 px-2.5 sm:px-3.5 rounded-xl transition border text-left cursor-pointer shadow-2xs ${
                     profileTrayOpen
                       ? 'bg-[#F3F2ED] border-[#E9E7E1]'
                       : 'bg-[#FFFFFF] hover:bg-[#F3F2ED] border-[#E9E7E1]'
@@ -166,19 +166,19 @@ export default function Navbar({
                 >
                   {/* Officer Avatar with Online Indicator */}
                   <div className="relative flex-shrink-0">
-                    <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-[#4169E1] text-[#FFFFFF] font-extrabold text-sm flex items-center justify-center shadow-xs">
+                    <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#4169E1] text-[#FFFFFF] font-extrabold text-base flex items-center justify-center shadow-xs">
                       {officerInitial}
                     </div>
                     <span
-                      className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-[#16A34A] border-2 border-white rounded-full"
+                      className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-[#16A34A] border-2 border-white rounded-full"
                       title={t('common.active')}
                     />
                   </div>
 
                   {/* Officer Name & Designation */}
                   <div className="text-left hidden sm:flex flex-col justify-center min-w-0">
-                    <div className="flex items-center gap-1 leading-tight">
-                      <span className="text-sm font-bold text-[#252B36] tracking-tight block max-w-[160px] lg:max-w-[210px] truncate">
+                    <div className="flex items-center gap-1.5 leading-tight">
+                      <span className="text-base sm:text-lg lg:text-[19px] font-bold text-[#252B36] tracking-tight block max-w-[170px] lg:max-w-[230px] truncate">
                         {displayOfficerName()}
                       </span>
                       <ChevronDown
@@ -187,7 +187,7 @@ export default function Navbar({
                         }`}
                       />
                     </div>
-                    <span className="text-xs font-semibold text-[#4169E1] block leading-tight mt-0.5 truncate max-w-[160px] lg:max-w-[210px]">
+                    <span className="text-xs sm:text-[15px] lg:text-[16px] font-semibold text-[#4169E1] block leading-tight mt-0.5 truncate max-w-[170px] lg:max-w-[230px]">
                       {displayDesignation()}
                     </span>
                   </div>
