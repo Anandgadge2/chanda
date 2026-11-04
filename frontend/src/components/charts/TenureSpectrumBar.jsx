@@ -164,3 +164,4 @@ export default function TenureSpectrumBar({ data = [], taluka = '' }) {
     </div>
   );
 }
+

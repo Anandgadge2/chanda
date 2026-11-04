@@ -191,24 +191,24 @@ export default function DashboardPage() {
   return (
     <div className="space-y-4 w-full max-w-full min-w-0">
       {/* ─────────────────────────────────────────────────────────────
-          1. EXECUTIVE COMMAND RIBBON (Visibly Fresh Header Composition)
+          1. EXECUTIVE COMMAND RIBBON - Luminous Enterprise White Toolbar
          ───────────────────────────────────────────────────────────── */}
-      <div className="bg-slate-900 text-white rounded-xl px-4 py-3 sm:px-5 sm:py-3.5 shadow-sm border border-slate-800 flex flex-col md:flex-row justify-between md:items-center gap-3">
+      <div className="bg-white text-slate-900 rounded-xl px-4 py-3 sm:px-5 sm:py-3.5 shadow-[0_1px_3px_rgba(0,0,0,0.03)] border border-slate-200/90 flex flex-col md:flex-row justify-between md:items-center gap-3">
         {/* Title & Identity */}
         <div className="flex items-center gap-3 min-w-0">
-          <div className="w-9 h-9 rounded-lg bg-blue-600 text-white flex items-center justify-center shrink-0">
+          <div className="w-9 h-9 rounded-lg bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-xs">
             <Landmark className="w-5 h-5" />
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="text-base sm:text-lg font-extrabold text-white tracking-tight leading-tight">
+              <h1 className="text-base sm:text-lg font-extrabold text-slate-900 tracking-tight leading-tight">
                 {isMarathi ? 'महसूल संनियंत्रण केंद्र' : 'Revenue Intelligence Command Center'}
               </h1>
-              <span className="text-[11px] font-bold px-2 py-0.5 rounded bg-slate-800 text-blue-300 border border-slate-700 shrink-0">
+              <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200/70 shrink-0">
                 {selectedTalukaScope}
               </span>
             </div>
-            <p className="text-xs text-slate-400 font-medium mt-0.5">
+            <p className="text-xs text-slate-500 font-medium mt-0.5">
               {isMarathi ? 'जिल्हाधिकारी कार्यालय, चंद्रपूर • जमीन अभिलेख व वैधानिक संनियंत्रण' : 'Collectorate, Chandrapur • Land Records & Statutory Monitoring'}
             </p>
           </div>
@@ -217,7 +217,7 @@ export default function DashboardPage() {
         {/* Action Controls Toolbar */}
         <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 flex-wrap sm:flex-nowrap w-full md:w-auto">
           {/* Taluka Selector */}
-          <div className="flex-1 min-w-[140px] sm:w-[180px] sm:flex-initial">
+          <div className="flex-1 min-w-[140px] sm:w-[185px] sm:flex-initial">
             <SearchableSelect
               options={talukaSelectOptions}
               value={draftTaluka}
@@ -236,9 +236,9 @@ export default function DashboardPage() {
             onClick={handleApplyFilters}
             disabled={loading}
             className={clsx(
-              'h-9 px-3 rounded-lg font-bold text-xs flex items-center justify-center gap-1.5 transition active:scale-95 shrink-0 cursor-pointer shadow-xs',
+              'h-9 px-3.5 rounded-lg font-bold text-xs flex items-center justify-center gap-1.5 transition active:scale-95 shrink-0 cursor-pointer shadow-xs',
               isFilterPending
-                ? 'bg-blue-600 hover:bg-blue-700 text-white ring-2 ring-blue-400/40'
+                ? 'bg-blue-600 hover:bg-blue-700 text-white ring-2 ring-blue-500/20'
                 : 'bg-blue-600 hover:bg-blue-700 text-white'
             )}
             title={isMarathi ? 'फिल्टर लागू करा' : 'Apply'}
@@ -252,7 +252,7 @@ export default function DashboardPage() {
             type="button"
             onClick={handleResetFilters}
             disabled={loading}
-            className="h-9 px-2.5 text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-lg border border-slate-700 text-xs font-semibold transition active:scale-95 shrink-0 cursor-pointer flex items-center gap-1"
+            className="h-9 px-2.5 text-slate-600 hover:text-slate-900 bg-white hover:bg-slate-50 rounded-lg border border-slate-200 text-xs font-semibold transition active:scale-95 shrink-0 cursor-pointer flex items-center gap-1 shadow-2xs"
             title={isMarathi ? 'रीसेट' : 'Reset'}
             aria-label={isMarathi ? 'रीसेट' : 'Reset'}
           >
@@ -264,27 +264,27 @@ export default function DashboardPage() {
           <button
             onClick={() => loadData(taluka, true)}
             disabled={loading}
-            className="h-9 px-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 text-xs font-semibold transition active:scale-95 cursor-pointer flex items-center gap-1 shrink-0"
+            className="h-9 px-2.5 rounded-lg bg-white hover:bg-slate-50 text-slate-600 hover:text-slate-900 border border-slate-200 text-xs font-semibold transition active:scale-95 cursor-pointer flex items-center gap-1 shrink-0 shadow-2xs"
             title={isMarathi ? 'माहिती अद्ययावत करा' : 'Refresh'}
             aria-label={isMarathi ? 'माहिती अद्ययावत करा' : 'Refresh'}
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-blue-400' : ''}`} />
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-blue-600' : 'text-slate-500'}`} />
           </button>
 
           {/* Bulk Upload Shortcut */}
           <Link
             href="/bulk-upload"
-            className="h-9 px-3 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs transition active:scale-95 flex items-center gap-1.5 shrink-0 border border-slate-700"
+            className="h-9 px-3 rounded-lg bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 font-semibold text-xs transition active:scale-95 flex items-center gap-1.5 shrink-0 border border-slate-200 shadow-2xs"
             title={isMarathi ? 'गाव डेटा अपलोड' : 'Upload Data'}
           >
-            <UploadCloud className="w-3.5 h-3.5 text-blue-400" />
+            <UploadCloud className="w-3.5 h-3.5 text-blue-600" />
             <span className="hidden sm:inline">{isMarathi ? 'अपलोड' : 'Upload'}</span>
           </Link>
         </div>
       </div>
 
       {/* ─────────────────────────────────────────────────────────────
-          2. SOLID DARK ENTERPRISE KPI CARDS (NO GRADIENTS, NO GLASSMORPHISM)
+          2. EXECUTIVE PASTEL DATA INTELLIGENCE KPI CARDS
          ───────────────────────────────────────────────────────────── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 w-full max-w-full min-w-0">
         <MetricCard
@@ -304,7 +304,7 @@ export default function DashboardPage() {
 
         <MetricCard
           variant="burntOrange"
-          titleMr="शर्तभंग व महसूल वाद"
+          titleMr="शर्तभंग व चौकशी"
           titleEn="Breaches & Inquiries"
           value={analytics.totalViolations.toLocaleString(isMarathi ? 'mr-IN' : 'en-IN')}
           subtext={isMarathi ? 'कलम ३६, ५०-५४' : 'Sec 36, 50-54'}
@@ -342,7 +342,7 @@ export default function DashboardPage() {
 
         <MetricCard
           variant="emerald"
-          titleMr="भोगवटादार वर्ग २ ते १ रूपांतर"
+          titleMr="वर्ग २ ते वर्ग १ रूपांतर"
           titleEn="Class 2 to 1 Conversion"
           value={(analytics.totalClass2To1Conversions || 0).toLocaleString(isMarathi ? 'mr-IN' : 'en-IN')}
           subtext={`${Number(analytics.totalClass2To1AreaHa || 0).toFixed(2)} Ha`}
@@ -351,7 +351,7 @@ export default function DashboardPage() {
           isActive={activeKpi === 'conversions'}
           onClick={() => handleKpiToggle('conversions')}
           actionHref={conversionsUrl}
-          actionTitleMr="रूपांतरित भूखंड नोंदवही"
+          actionTitleMr="भोगवटादार वर्ग २ ते १ रूपांतर नोंदवही"
           actionTitleEn="View Converted Parcels"
         />
       </div>
@@ -370,7 +370,7 @@ export default function DashboardPage() {
               {activeKpi === 'parcels' && (isMarathi ? 'सक्रिय दृश्य: नोंदणीकृत भूखंड व धारणाधिकार' : 'Active View: Land Parcels & Tenure')}
               {activeKpi === 'violations' && (isMarathi ? 'सक्रिय दृश्य: शर्तभंग व महसूल चौकशी' : 'Active View: Breaches & Inquiries')}
               {activeKpi === 'villages' && (isMarathi ? 'सक्रिय दृश्य: समाविष्ट महसूल गावे' : 'Active View: Covered Villages')}
-              {activeKpi === 'conversions' && (isMarathi ? 'सक्रिय दृश्य: वर्ग-२ ते वर्ग-१ रूपांतरण' : 'Active View: Class-2 to 1 Conversions')}
+              {activeKpi === 'conversions' && (isMarathi ? 'सक्रिय दृश्य: भोगवटादार वर्ग-२ ते वर्ग-१ रूपांतरण' : 'Active View: Class-2 to 1 Conversions')}
             </span>
           </div>
 
