@@ -6,87 +6,102 @@ import { ArrowUpRight, Check } from 'lucide-react';
 import { useTranslation } from './LanguageContext';
 
 /**
- * Enterprise Data Analytics KPI Card
- * Distinct solid, subtle background colors per category (Blue, Amber, Violet, Emerald, Neutral)
- * Minimalist, high information density, prominent metrics, zero redundant text.
+ * Modern Enterprise Solid Dark KPI Card
+ * Modern, dark solid colors (deep blue, burnt orange, dark purple, dark emerald).
+ * Solid, opaque, NO gradients, NO glassmorphism, prominent font-mono numbers, natural concise Marathi.
  */
-const KPI_THEMES = {
+const SOLID_DARK_THEMES = {
+  // Deep Blue
   blue: {
-    bg: 'bg-[#F0F5FF]',
-    hoverBg: 'hover:bg-[#E8F0FE]',
-    border: 'border-[#D0E1FD]',
-    activeBorder: 'border-[#2563EB] ring-2 ring-[#2563EB]/20',
-    accent: 'bg-[#2563EB]',
-    iconBg: 'bg-[#FFFFFF] text-[#2563EB] border-[#D0E1FD]',
-    badgeBg: 'bg-[#DBEAFE] text-[#1E40AF]',
-    valueColor: 'text-[#0F172A]',
-    labelColor: 'text-[#334155]',
+    cardBg: 'bg-[#0F172A]',
+    hoverBg: 'hover:bg-[#1E293B]',
+    border: 'border-[#334155]',
+    activeRing: 'ring-2 ring-blue-400 border-blue-400',
+    titleColor: 'text-[#94A3B8]',
+    valueColor: 'text-[#FFFFFF]',
+    badgeBg: 'bg-[#1E293B] text-[#93C5FD] border border-[#334155]',
+    iconBg: 'bg-[#1E293B] text-[#60A5FA] border border-[#334155]',
+    accentColor: '#3B82F6',
+  },
+  // Dark Burnt Orange / Terracotta
+  burntOrange: {
+    cardBg: 'bg-[#7C2D12]',
+    hoverBg: 'hover:bg-[#9A3412]',
+    border: 'border-[#9A3412]',
+    activeRing: 'ring-2 ring-amber-300 border-amber-300',
+    titleColor: 'text-[#FED7AA]',
+    valueColor: 'text-[#FFFFFF]',
+    badgeBg: 'bg-[#9A3412] text-[#FFEDD5] border border-[#C2410C]',
+    iconBg: 'bg-[#9A3412] text-[#FDBA74] border border-[#C2410C]',
+    accentColor: '#F97316',
   },
   amber: {
-    bg: 'bg-[#FFFBEB]',
-    hoverBg: 'hover:bg-[#FEF3C7]',
-    border: 'border-[#FDE68A]',
-    activeBorder: 'border-[#D97706] ring-2 ring-[#D97706]/20',
-    accent: 'bg-[#D97706]',
-    iconBg: 'bg-[#FFFFFF] text-[#D97706] border-[#FDE68A]',
-    badgeBg: 'bg-[#FEF3C7] text-[#92400E]',
-    valueColor: 'text-[#0F172A]',
-    labelColor: 'text-[#334155]',
+    cardBg: 'bg-[#7C2D12]',
+    hoverBg: 'hover:bg-[#9A3412]',
+    border: 'border-[#9A3412]',
+    activeRing: 'ring-2 ring-amber-300 border-amber-300',
+    titleColor: 'text-[#FED7AA]',
+    valueColor: 'text-[#FFFFFF]',
+    badgeBg: 'bg-[#9A3412] text-[#FFEDD5] border border-[#C2410C]',
+    iconBg: 'bg-[#9A3412] text-[#FDBA74] border border-[#C2410C]',
+    accentColor: '#F97316',
   },
   orange: {
-    bg: 'bg-[#FFFBEB]',
-    hoverBg: 'hover:bg-[#FEF3C7]',
-    border: 'border-[#FDE68A]',
-    activeBorder: 'border-[#D97706] ring-2 ring-[#D97706]/20',
-    accent: 'bg-[#D97706]',
-    iconBg: 'bg-[#FFFFFF] text-[#D97706] border-[#FDE68A]',
-    badgeBg: 'bg-[#FEF3C7] text-[#92400E]',
-    valueColor: 'text-[#0F172A]',
-    labelColor: 'text-[#334155]',
+    cardBg: 'bg-[#7C2D12]',
+    hoverBg: 'hover:bg-[#9A3412]',
+    border: 'border-[#9A3412]',
+    activeRing: 'ring-2 ring-amber-300 border-amber-300',
+    titleColor: 'text-[#FED7AA]',
+    valueColor: 'text-[#FFFFFF]',
+    badgeBg: 'bg-[#9A3412] text-[#FFEDD5] border border-[#C2410C]',
+    iconBg: 'bg-[#9A3412] text-[#FDBA74] border border-[#C2410C]',
+    accentColor: '#F97316',
+  },
+  // Dark Royal Purple / Violet
+  purple: {
+    cardBg: 'bg-[#4C1D95]',
+    hoverBg: 'hover:bg-[#581C87]',
+    border: 'border-[#6D28D9]',
+    activeRing: 'ring-2 ring-purple-300 border-purple-300',
+    titleColor: 'text-[#DDD6FE]',
+    valueColor: 'text-[#FFFFFF]',
+    badgeBg: 'bg-[#581C87] text-[#EDE9FE] border border-[#7C3AED]',
+    iconBg: 'bg-[#581C87] text-[#C4B5FD] border border-[#7C3AED]',
+    accentColor: '#A855F7',
   },
   violet: {
-    bg: 'bg-[#F5F3FF]',
-    hoverBg: 'hover:bg-[#EDE9FE]',
-    border: 'border-[#DDD6FE]',
-    activeBorder: 'border-[#7C3AED] ring-2 ring-[#7C3AED]/20',
-    accent: 'bg-[#7C3AED]',
-    iconBg: 'bg-[#FFFFFF] text-[#7C3AED] border-[#DDD6FE]',
-    badgeBg: 'bg-[#EDE9FE] text-[#5B21B6]',
-    valueColor: 'text-[#0F172A]',
-    labelColor: 'text-[#334155]',
+    cardBg: 'bg-[#4C1D95]',
+    hoverBg: 'hover:bg-[#581C87]',
+    border: 'border-[#6D28D9]',
+    activeRing: 'ring-2 ring-purple-300 border-purple-300',
+    titleColor: 'text-[#DDD6FE]',
+    valueColor: 'text-[#FFFFFF]',
+    badgeBg: 'bg-[#581C87] text-[#EDE9FE] border border-[#7C3AED]',
+    iconBg: 'bg-[#581C87] text-[#C4B5FD] border border-[#7C3AED]',
+    accentColor: '#A855F7',
   },
-  purple: {
-    bg: 'bg-[#F5F3FF]',
-    hoverBg: 'hover:bg-[#EDE9FE]',
-    border: 'border-[#DDD6FE]',
-    activeBorder: 'border-[#7C3AED] ring-2 ring-[#7C3AED]/20',
-    accent: 'bg-[#7C3AED]',
-    iconBg: 'bg-[#FFFFFF] text-[#7C3AED] border-[#DDD6FE]',
-    badgeBg: 'bg-[#EDE9FE] text-[#5B21B6]',
-    valueColor: 'text-[#0F172A]',
-    labelColor: 'text-[#334155]',
-  },
+  // Dark Emerald
   emerald: {
-    bg: 'bg-[#ECFDF5]',
-    hoverBg: 'hover:bg-[#D1FAE5]',
-    border: 'border-[#A7F3D0]',
-    activeBorder: 'border-[#059669] ring-2 ring-[#059669]/20',
-    accent: 'bg-[#059669]',
-    iconBg: 'bg-[#FFFFFF] text-[#059669] border-[#A7F3D0]',
-    badgeBg: 'bg-[#D1FAE5] text-[#065F46]',
-    valueColor: 'text-[#0F172A]',
-    labelColor: 'text-[#334155]',
+    cardBg: 'bg-[#064E3B]',
+    hoverBg: 'hover:bg-[#065F46]',
+    border: 'border-[#047857]',
+    activeRing: 'ring-2 ring-emerald-300 border-emerald-300',
+    titleColor: 'text-[#A7F3D0]',
+    valueColor: 'text-[#FFFFFF]',
+    badgeBg: 'bg-[#065F46] text-[#D1FAE5] border border-[#059669]',
+    iconBg: 'bg-[#065F46] text-[#6EE7B7] border border-[#059669]',
+    accentColor: '#10B981',
   },
   green: {
-    bg: 'bg-[#ECFDF5]',
-    hoverBg: 'hover:bg-[#D1FAE5]',
-    border: 'border-[#A7F3D0]',
-    activeBorder: 'border-[#059669] ring-2 ring-[#059669]/20',
-    accent: 'bg-[#059669]',
-    iconBg: 'bg-[#FFFFFF] text-[#059669] border-[#A7F3D0]',
-    badgeBg: 'bg-[#D1FAE5] text-[#065F46]',
-    valueColor: 'text-[#0F172A]',
-    labelColor: 'text-[#334155]',
+    cardBg: 'bg-[#064E3B]',
+    hoverBg: 'hover:bg-[#065F46]',
+    border: 'border-[#047857]',
+    activeRing: 'ring-2 ring-emerald-300 border-emerald-300',
+    titleColor: 'text-[#A7F3D0]',
+    valueColor: 'text-[#FFFFFF]',
+    badgeBg: 'bg-[#065F46] text-[#D1FAE5] border border-[#059669]',
+    iconBg: 'bg-[#065F46] text-[#6EE7B7] border border-[#059669]',
+    accentColor: '#10B981',
   },
 };
 
@@ -105,7 +120,7 @@ export default function MetricCard({
   actionTitleEn,
 }) {
   const { isMarathi } = useTranslation();
-  const theme = KPI_THEMES[variant] || KPI_THEMES.blue;
+  const theme = SOLID_DARK_THEMES[variant] || SOLID_DARK_THEMES.blue;
 
   const displayTitle = isMarathi ? titleMr : (titleEn || titleMr);
   const displaySubtext = isMarathi ? subtext : (subtextEn || subtext);
@@ -129,27 +144,16 @@ export default function MetricCard({
       onClick={isInteractive ? onClick : undefined}
       onKeyDown={handleKeyDown}
       className={clsx(
-        'py-2.5 px-3.5 sm:py-3 sm:px-4.5 rounded-xl border transition-all duration-150 flex flex-col justify-between select-none text-left relative overflow-hidden group',
-        theme.bg,
+        'py-3.5 px-4 sm:py-4 sm:px-5 rounded-xl border transition-all duration-150 flex flex-col justify-between select-none text-left relative overflow-hidden group shadow-sm',
+        theme.cardBg,
         theme.hoverBg,
-        isActive
-          ? theme.activeBorder
-          : clsx(theme.border, 'hover:border-slate-400/60 shadow-xs hover:shadow-sm'),
+        isActive ? theme.activeRing : clsx(theme.border, 'hover:border-white/40'),
         isInteractive && 'cursor-pointer active:scale-[0.99] focus:outline-none'
       )}
     >
-      {/* Top Bar Indicator for Active State */}
-      <div
-        className={clsx(
-          'absolute top-0 left-0 right-0 h-[3px] transition-opacity duration-150',
-          theme.accent,
-          isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-60'
-        )}
-      />
-
-      {/* Top Header: Title + Icon + Action */}
+      {/* Top Header: Title + Action Icon + Category Icon */}
       <div className="flex items-center justify-between gap-2">
-        <span className={clsx('text-xs sm:text-[13px] font-bold tracking-tight leading-snug truncate', theme.labelColor)}>
+        <span className={clsx('text-xs sm:text-[13px] font-bold tracking-tight leading-snug truncate', theme.titleColor)}>
           {displayTitle}
         </span>
 
@@ -159,31 +163,31 @@ export default function MetricCard({
               href={actionHref}
               onClick={(e) => e.stopPropagation()}
               title={displayActionTitle || (isMarathi ? 'नोंदवहीत उघडा' : 'Open')}
-              className="w-6 h-6 rounded-md bg-white/80 hover:bg-white text-slate-500 hover:text-slate-900 border border-slate-200/80 flex items-center justify-center transition-all shadow-2xs"
+              className="w-6 h-6 rounded-md bg-white/10 hover:bg-white/20 text-white/80 hover:text-white flex items-center justify-center transition-all"
             >
               <ArrowUpRight className="w-3.5 h-3.5" />
             </Link>
           )}
 
           {Icon && (
-            <div className={clsx('w-6 h-6 sm:w-7 sm:h-7 rounded-md border flex items-center justify-center shrink-0 shadow-2xs', theme.iconBg)}>
-              <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 stroke-[2]" />
+            <div className={clsx('w-7 h-7 rounded-lg flex items-center justify-center shrink-0', theme.iconBg)}>
+              <Icon className="w-3.5 h-3.5 stroke-[2]" />
             </div>
           )}
         </div>
       </div>
 
-      {/* Center: Prominent Data Metric */}
-      <div className="mt-1.5 sm:mt-2">
+      {/* Center: Bold, Prominent Metric Number */}
+      <div className="mt-2.5 sm:mt-3">
         <p className={clsx('text-2xl sm:text-3xl font-extrabold tracking-tight font-mono leading-none', theme.valueColor)}>
           {value}
         </p>
       </div>
 
-      {/* Bottom: Crisp Context Badge & Filter State */}
-      <div className="mt-2 sm:mt-2.5 pt-1.5 border-t border-black/5 flex items-center justify-between gap-1 text-[11px]">
+      {/* Bottom: Context Sub-metric & Filter Badge */}
+      <div className="mt-3 pt-2 border-t border-white/10 flex items-center justify-between gap-1 text-[11px]">
         {displaySubtext ? (
-          <span className={clsx('px-2 py-0.5 rounded-md font-semibold truncate', theme.badgeBg)}>
+          <span className={clsx('px-2 py-0.5 rounded-md font-semibold font-mono truncate text-[11px]', theme.badgeBg)}>
             {displaySubtext}
           </span>
         ) : (
@@ -191,11 +195,11 @@ export default function MetricCard({
         )}
 
         {isInteractive && (
-          <span className={clsx('text-[10px] font-bold flex items-center gap-1', isActive ? 'text-slate-900 font-extrabold' : 'text-slate-500 group-hover:text-slate-800')}>
+          <span className="text-[10px] font-bold flex items-center gap-1 text-white/70 group-hover:text-white">
             {isActive ? (
               <>
-                <Check className="w-3 h-3 stroke-[2.5]" />
-                <span>{isMarathi ? 'फिल्टर सक्रिय' : 'Active'}</span>
+                <Check className="w-3 h-3 stroke-[2.5] text-white" />
+                <span className="text-white font-extrabold">{isMarathi ? 'सक्रिय' : 'Active'}</span>
               </>
             ) : (
               <span>{isMarathi ? 'फिल्टर' : 'Filter'}</span>
