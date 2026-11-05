@@ -8,13 +8,9 @@ import {
   Pie,
   Cell,
   Tooltip,
-  RadarChart,
-  Radar,
-  PolarGrid,
-  PolarAngleAxis,
-  PolarRadiusAxis,
+  Treemap,
 } from 'recharts';
-import { Layers, ArrowUpRight, PieChart as PieIcon, Activity } from 'lucide-react';
+import { Layers, ArrowUpRight, PieChart as PieIcon, LayoutGrid } from 'lucide-react';
 import { TENURE_CLASSES } from '../../lib/constants';
 import { useTranslation } from '../LanguageContext';
 
@@ -57,7 +53,7 @@ const DEFAULT_TENURE_DATA = [
 export default function TenureSpectrumBar({ data = [], taluka = '' }) {
   const { isMarathi } = useTranslation();
   const [metricMode, setMetricMode] = useState('area'); // 'area' | 'count'
-  const [graphType, setGraphType] = useState('pie'); // 'pie' | 'radar'
+  const [graphType, setGraphType] = useState('pie'); // 'pie' | 'treemap'
   const [activeIndex, setActiveIndex] = useState(null);
 
   const sourceData = (data && data.length > 0) ? data : DEFAULT_TENURE_DATA;
@@ -91,17 +87,23 @@ export default function TenureSpectrumBar({ data = [], taluka = '' }) {
   const totalCount = items.reduce((sum, item) => sum + item.count, 0);
   const totalMetric = metricMode === 'area' ? totalArea : totalCount;
 
-  // Radar multi-axial dataset for Option 2 (Non-bar graph)
-  const radarData = useMemo(() => {
-    return items.map((item) => {
-      const pct = totalMetric > 0 ? Number(((item.value / totalMetric) * 100).toFixed(1)) : 0;
-      return {
-        subject: isMarathi ? item.nameMr : item.nameEn,
-        share: pct,
-        value: item.value,
-        fullMark: 100,
-      };
-    });
+  // Hierarchical Treemap dataset for Recharts Treemap
+  const treemapData = useMemo(() => {
+    return [
+      {
+        name: 'Tenure',
+        children: items.map((item) => ({
+          name: isMarathi ? item.nameMr : item.nameEn,
+          nameMr: item.nameMr,
+          nameEn: item.nameEn,
+          value: item.value > 0 ? item.value : 0.1,
+          color: item.color,
+          pct: totalMetric > 0 ? ((item.value / totalMetric) * 100).toFixed(1) : '0',
+          areaHa: item.areaHa,
+          count: item.count,
+        })),
+      },
+    ];
   }, [items, totalMetric, isMarathi]);
 
   const activeItem = activeIndex !== null && items[activeIndex] ? items[activeIndex] : null;
@@ -130,9 +132,72 @@ export default function TenureSpectrumBar({ data = [], taluka = '' }) {
     return null;
   };
 
+  // Custom Treemap Tile Content Renderer
+  const CustomizedTreemapContent = (props) => {
+    const { depth, x, y, width, height, name, color, pct, areaHa, count } = props;
+    if (depth !== 1 || !width || !height || width < 4 || height < 4) return null;
+
+    return (
+      <g>
+        <rect
+          x={x + 2}
+          y={y + 2}
+          width={width - 4}
+          height={height - 4}
+          style={{
+            fill: color || '#2563EB',
+            stroke: '#FFFFFF',
+            strokeWidth: 2,
+          }}
+          rx={6}
+          ry={6}
+          className="transition-opacity hover:opacity-90 cursor-pointer"
+        />
+        {width > 42 && height > 26 && (
+          <text
+            x={x + 8}
+            y={y + 18}
+            fill="#FFFFFF"
+            fontSize={width > 90 ? 12 : 10.5}
+            fontWeight={700}
+            className="pointer-events-none select-none font-sans"
+          >
+            {name}
+          </text>
+        )}
+        {width > 50 && height > 44 && (
+          <text
+            x={x + 8}
+            y={y + 34}
+            fill="rgba(255,255,255,0.92)"
+            fontSize={11}
+            fontWeight={700}
+            className="pointer-events-none select-none font-mono"
+          >
+            {pct}%
+          </text>
+        )}
+        {width > 85 && height > 64 && (
+          <text
+            x={x + 8}
+            y={y + 50}
+            fill="rgba(255,255,255,0.8)"
+            fontSize={10}
+            fontWeight={600}
+            className="pointer-events-none select-none font-mono"
+          >
+            {metricMode === 'area'
+              ? `${areaHa >= 100000 ? `${(areaHa / 100000).toFixed(2)}L` : areaHa.toFixed(0)} Ha`
+              : `${count} गट`}
+          </text>
+        )}
+      </g>
+    );
+  };
+
   return (
     <div className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 shadow-xs flex flex-col justify-between font-sans">
-      {/* ── HEADER WITH DUAL GRAPH TOGGLE ── */}
+      {/* ── HEADER WITH DUAL GRAPH TOGGLE (PIE VS TREEMAP) ── */}
       <div>
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3.5">
           <div className="flex items-center gap-3 min-w-0">
@@ -156,9 +221,9 @@ export default function TenureSpectrumBar({ data = [], taluka = '' }) {
             </div>
           </div>
 
-          {/* Controls: Two-Graph Switcher (Pie vs Radar) + Metric Mode Toggle */}
+          {/* Controls: Two-Graph Switcher (Pie vs Treemap) + Metric Mode Toggle */}
           <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto flex-wrap">
-            {/* Graph Option Toggle: Pie vs Radar (Non-bar) */}
+            {/* Graph Option Toggle: Pie vs Treemap (Non-bar) */}
             <div className="inline-flex p-0.5 bg-slate-100 rounded-lg border border-slate-200/80 shrink-0" role="group" aria-label="Graph Type">
               <button
                 type="button"
@@ -173,14 +238,14 @@ export default function TenureSpectrumBar({ data = [], taluka = '' }) {
               </button>
               <button
                 type="button"
-                onClick={() => setGraphType('radar')}
+                onClick={() => setGraphType('treemap')}
                 className={`px-2.5 py-1 text-[13px] font-bold rounded-md transition cursor-pointer flex items-center gap-1.5 leading-[1.5] ${
-                  graphType === 'radar' ? 'bg-white text-[#0F172A] shadow-xs' : 'text-slate-500 hover:text-[#0F172A]'
+                  graphType === 'treemap' ? 'bg-white text-[#0F172A] shadow-xs' : 'text-slate-500 hover:text-[#0F172A]'
                 }`}
-                title={isMarathi ? 'रडार आलेख (बिगर-स्तंभ)' : 'Radar Spectrum (Non-bar)'}
+                title={isMarathi ? 'ट्रेमॅप आलेख' : 'Treemap Chart'}
               >
-                <Activity className="w-3.5 h-3.5 text-blue-600" />
-                <span>{isMarathi ? 'रडार' : 'Radar'}</span>
+                <LayoutGrid className="w-3.5 h-3.5 text-blue-600" />
+                <span>{isMarathi ? 'ट्रेमॅप' : 'Treemap'}</span>
               </button>
             </div>
 
@@ -211,7 +276,7 @@ export default function TenureSpectrumBar({ data = [], taluka = '' }) {
         {/* ── MAIN VISUAL AREA (SIDE-BY-SIDE GRAPH & CATEGORY BREAKDOWN) ── */}
         <div className="py-3">
           <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
-            {/* Left: Selected Graph (Option 1: Pie/Donut | Option 2: Radar non-bar) */}
+            {/* Left: Selected Graph (Option 1: Pie/Donut | Option 2: Treemap) */}
             <div className="md:col-span-5 relative h-64 sm:h-72 flex items-center justify-center">
               {graphType === 'pie' ? (
                 <>
@@ -286,34 +351,18 @@ export default function TenureSpectrumBar({ data = [], taluka = '' }) {
                   </div>
                 </>
               ) : (
-                /* OPTION 2: RADAR CHART (Multi-axis polar graph, non-bar) */
+                /* OPTION 2: TREEMAP CHART (Area-proportional mosaic tiles) */
                 <ResponsiveContainer width="100%" height="100%">
-                  <RadarChart cx="50%" cy="50%" outerRadius={78} data={radarData}>
-                    <PolarGrid stroke="#E2E8F0" />
-                    <PolarAngleAxis
-                      dataKey="subject"
-                      tick={{ fontSize: 11, fill: '#334155', fontWeight: 600 }}
-                    />
-                    <PolarRadiusAxis angle={30} domain={[0, 70]} tick={false} axisLine={false} />
-                    <Radar
-                      name={isMarathi ? 'धारणा वाटा (%)' : 'Tenure Share (%)'}
-                      dataKey="share"
-                      stroke="#059669"
-                      fill="#10B981"
-                      fillOpacity={0.45}
-                      strokeWidth={2.5}
-                    />
-                    <Tooltip
-                      formatter={(val) => [`${val}%`, isMarathi ? 'टक्केवारी वाटा' : 'Share']}
-                      contentStyle={{
-                        backgroundColor: '#0F172A',
-                        borderRadius: '10px',
-                        color: '#FFFFFF',
-                        fontSize: '12px',
-                        border: 'none',
-                      }}
-                    />
-                  </RadarChart>
+                  <Treemap
+                    data={treemapData}
+                    dataKey="value"
+                    aspectRatio={4 / 3}
+                    stroke="#ffffff"
+                    isAnimationActive={false}
+                    content={<CustomizedTreemapContent />}
+                  >
+                    <Tooltip content={<CustomPieTooltip />} />
+                  </Treemap>
                 </ResponsiveContainer>
               )}
             </div>
