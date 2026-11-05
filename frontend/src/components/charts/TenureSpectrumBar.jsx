@@ -2,7 +2,8 @@
 
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
-import { Layers, ArrowUpRight, ShieldCheck, CheckCircle2 } from 'lucide-react';
+import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from 'recharts';
+import { Layers, ArrowUpRight, PieChart as PieIcon } from 'lucide-react';
 import { TENURE_CLASSES } from '../../lib/constants';
 import { useTranslation } from '../LanguageContext';
 
@@ -70,7 +71,7 @@ const DEFAULT_TENURE_DATA = [
 export default function TenureSpectrumBar({ data = [], taluka = '' }) {
   const { isMarathi } = useTranslation();
   const [metricMode, setMetricMode] = useState('area'); // 'area' | 'count'
-  const [hoveredTenure, setHoveredTenure] = useState(null);
+  const [activeIndex, setActiveIndex] = useState(null);
 
   const sourceData = (data && data.length > 0) ? data : DEFAULT_TENURE_DATA;
 
@@ -96,7 +97,9 @@ export default function TenureSpectrumBar({ data = [], taluka = '' }) {
         nameEn: config.labelEn,
         count,
         areaHa,
+        value: metricMode === 'area' ? areaHa : count,
         styles,
+        color: styles.color,
         filterHref: `/parcels?tenureClass=${item.tenure}${taluka ? `&taluka=${encodeURIComponent(taluka)}` : ''}`,
       };
     }).sort((a, b) => (metricMode === 'area' ? b.areaHa - a.areaHa : b.count - a.count));
@@ -106,7 +109,7 @@ export default function TenureSpectrumBar({ data = [], taluka = '' }) {
   const totalCount = items.reduce((sum, item) => sum + item.count, 0);
   const totalMetric = metricMode === 'area' ? totalArea : totalCount;
 
-  // 4 Key Summary Tiers mirroring Enforcement Stages on the companion card
+  // 4 Top KPI Cards
   const summaryTiers = useMemo(() => {
     const class1 = items.find((i) => i.key === 'BHOGVATDAR_CLASS_1') || { areaHa: 318757.62, count: 85940 };
     const sarkar = items.find((i) => i.key === 'SARKAR_SHASAN') || { areaHa: 102335.66, count: 27580 };
@@ -121,8 +124,6 @@ export default function TenureSpectrumBar({ data = [], taluka = '' }) {
         stageNumber: '1',
         titleMr: 'वर्ग-१ (खाजगी)',
         titleEn: 'Class-1',
-        subMr: 'मुक्त मालकी हक्क',
-        subEn: 'Freehold',
         valArea: class1.areaHa,
         valCount: class1.count,
         pct: totalArea > 0 ? ((class1.areaHa / totalArea) * 100).toFixed(1) : '64.2',
@@ -136,8 +137,6 @@ export default function TenureSpectrumBar({ data = [], taluka = '' }) {
         stageNumber: '2',
         titleMr: 'शासन/सार्वजनिक',
         titleEn: 'Govt Land',
-        subMr: 'शासकीय राखीव',
-        subEn: 'Sarkar',
         valArea: sarkar.areaHa,
         valCount: sarkar.count,
         pct: totalArea > 0 ? ((sarkar.areaHa / totalArea) * 100).toFixed(1) : '20.6',
@@ -151,8 +150,6 @@ export default function TenureSpectrumBar({ data = [], taluka = '' }) {
         stageNumber: '3',
         titleMr: 'वर्ग-२ (शर्तयुक्त)',
         titleEn: 'Class-2',
-        subMr: 'नियंत्रित सत्ताप्रकार',
-        subEn: 'Restricted',
         valArea: class2.areaHa,
         valCount: class2.count,
         pct: totalArea > 0 ? ((class2.areaHa / totalArea) * 100).toFixed(1) : '11.0',
@@ -166,8 +163,6 @@ export default function TenureSpectrumBar({ data = [], taluka = '' }) {
         stageNumber: '4',
         titleMr: 'वन व देवस्थान',
         titleEn: 'Forest/Inam',
-        subMr: 'संरक्षित व इनाम',
-        subEn: 'Reserved',
         valArea: forestAndInamArea,
         valCount: forestAndInamCount,
         pct: totalArea > 0 ? ((forestAndInamArea / totalArea) * 100).toFixed(1) : '4.2',
@@ -179,6 +174,32 @@ export default function TenureSpectrumBar({ data = [], taluka = '' }) {
       },
     ];
   }, [items, totalArea]);
+
+  const activeItem = activeIndex !== null && items[activeIndex] ? items[activeIndex] : null;
+
+  const CustomTooltip = ({ active, payload }) => {
+    if (active && payload && payload.length) {
+      const item = payload[0].payload;
+      const pct = totalMetric > 0 ? ((item.value / totalMetric) * 100).toFixed(1) : 0;
+      const displayName = isMarathi ? item.nameMr : item.nameEn;
+
+      return (
+        <div className="bg-slate-950 text-white px-3 py-2 rounded-xl shadow-xl border border-slate-800 text-xs pointer-events-none z-50">
+          <div className="flex items-center gap-1.5 font-bold mb-1">
+            <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: item.color }} />
+            <span>{displayName}</span>
+            <span className="text-amber-400 font-mono">({pct}%)</span>
+          </div>
+          <div className="text-[11px] text-slate-300 font-mono">
+            {metricMode === 'area'
+              ? `${item.areaHa.toLocaleString('en-IN', { minimumFractionDigits: 2 })} Ha`
+              : `${item.count.toLocaleString('en-IN')} ${isMarathi ? 'गट' : 'Parcels'}`}
+          </div>
+        </div>
+      );
+    }
+    return null;
+  };
 
   return (
     <div className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 shadow-xs flex flex-col justify-between font-sans">
@@ -229,16 +250,16 @@ export default function TenureSpectrumBar({ data = [], taluka = '' }) {
           </div>
         </div>
 
-        {/* ── SECTION 1: 4 KEY TENURE GROUP CARDS (Mirrors Enforcement Stages) ── */}
+        {/* ── TOP 4 KEY TENURE KPI CARDS ── */}
         <div className="my-4">
-          <div className="text-[13.5px] font-bold uppercase tracking-wider text-slate-500 mb-3 flex items-center justify-between leading-[1.5]">
+          <div className="text-[13.5px] font-bold uppercase tracking-wider text-slate-500 mb-2.5 flex items-center justify-between leading-[1.5]">
             <span>{isMarathi ? 'प्रमुख धारणा प्रवर्ग (KEY TENURE TIERS)' : 'Key Tenure Tiers'}</span>
             <span className="text-[13px] font-medium text-slate-400">
               {isMarathi ? 'वैधानिक वर्गवारी' : 'Statutory Breakdown'}
             </span>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3.5">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
             {summaryTiers.map((tier) => {
               const displayVal = metricMode === 'area'
                 ? `${tier.valArea >= 100000 ? `${(tier.valArea / 100000).toFixed(2)}L` : tier.valArea.toLocaleString('en-IN', { maximumFractionDigits: 0 })} Ha`
@@ -247,20 +268,20 @@ export default function TenureSpectrumBar({ data = [], taluka = '' }) {
               return (
                 <div
                   key={tier.stageNumber}
-                  className={`p-3.5 sm:p-4 rounded-xl border ${tier.cardBorder} ${tier.cardBg} flex flex-col justify-between transition-all duration-150 hover:shadow-xs`}
+                  className={`p-3 sm:p-3.5 rounded-xl border ${tier.cardBorder} ${tier.cardBg} flex flex-col justify-between transition-all duration-150 hover:shadow-xs`}
                 >
-                  <div className="flex items-center justify-between text-[13.5px] font-bold leading-[1.5]">
+                  <div className="flex items-center justify-between text-[13px] font-bold leading-[1.5]">
                     <span className={tier.idxText}>#{tier.stageNumber}</span>
-                    <span className={`text-[12px] font-mono px-1.5 py-0.5 rounded bg-white/70 ${tier.idxText}`}>
+                    <span className={`text-[11.5px] font-mono px-1.5 py-0.2 rounded bg-white/70 ${tier.idxText}`}>
                       {tier.pct}%
                     </span>
                   </div>
 
-                  <p className={`text-xl sm:text-[22px] font-black tracking-tight my-2 tabular-nums font-mono ${tier.countText}`}>
+                  <p className={`text-lg sm:text-[20px] font-black tracking-tight my-1.5 tabular-nums font-mono ${tier.countText}`}>
                     {displayVal}
                   </p>
 
-                  <p className={`text-[14px] font-bold truncate leading-[1.5] ${tier.labelText}`}>
+                  <p className={`text-[13.5px] font-bold truncate leading-[1.5] ${tier.labelText}`}>
                     {isMarathi ? tier.titleMr : tier.titleEn}
                   </p>
                 </div>
@@ -269,97 +290,138 @@ export default function TenureSpectrumBar({ data = [], taluka = '' }) {
           </div>
         </div>
 
-        {/* ── MULTI-COLOR PROPORTIONAL SEGMENTED SPECTRUM BAR ── */}
-        <div className="my-3">
-          <div className="h-3.5 w-full rounded-full overflow-hidden flex bg-slate-100 border border-slate-200/90 shadow-2xs">
-            {items.map((item) => {
-              const val = metricMode === 'area' ? item.areaHa : item.count;
-              const pct = totalMetric > 0 ? (val / totalMetric) * 100 : 0;
-              if (pct <= 0) return null;
-              return (
-                <div
-                  key={item.key}
-                  style={{ width: `${pct}%`, backgroundColor: item.styles.color }}
-                  onMouseEnter={() => setHoveredTenure(item.key)}
-                  onMouseLeave={() => setHoveredTenure(null)}
-                  className="h-full transition-opacity cursor-pointer relative"
-                  title={`${isMarathi ? item.nameMr : item.nameEn}: ${pct.toFixed(1)}%`}
-                />
-              );
-            })}
-          </div>
-        </div>
-
-        {/* ── SECTION 2: DETAILED TENURE BREAKDOWN WITH PROGRESS BARS (Mirrors Breach Categories) ── */}
-        <div className="pt-3.5 border-t border-slate-100">
-          <div className="text-[13.5px] font-bold uppercase tracking-wider text-slate-500 mb-3 flex items-center justify-between leading-[1.5]">
-            <span>{isMarathi ? 'धारणा प्रवर्गनिहाय तपशील व विस्तार' : 'Tenure Categories & Exposure'}</span>
+        {/* ── RICH GRAPHICAL VISUALIZER: DONUT CHART + INTERACTIVE CATEGORY LIST ── */}
+        <div className="pt-3 border-t border-slate-100">
+          <div className="text-[13.5px] font-bold uppercase tracking-wider text-slate-500 mb-2 flex items-center justify-between leading-[1.5]">
+            <span>{isMarathi ? 'धारणा वाटा व वर्गीकरण वक्र' : 'Tenure Share & Donut Distribution'}</span>
             <span className="text-[13px] font-medium text-slate-400">
-              {isMarathi ? 'क्षेत्रफळ व वाटा' : 'Area & Share'}
+              {isMarathi ? 'आलेखात्मक विश्लेषण' : 'Graphical Analytics'}
             </span>
           </div>
 
-          <div className="space-y-3">
-            {items.map((item) => {
-              const val = metricMode === 'area' ? item.areaHa : item.count;
-              const pct = totalMetric > 0 ? ((val / totalMetric) * 100).toFixed(1) : '0';
-              const isHovered = hoveredTenure === item.key;
-
-              return (
-                <Link
-                  key={item.key}
-                  href={item.filterHref}
-                  onMouseEnter={() => setHoveredTenure(item.key)}
-                  onMouseLeave={() => setHoveredTenure(null)}
-                  className={`p-3 rounded-xl border transition-all block group ${
-                    isHovered
-                      ? 'bg-slate-50 border-slate-300 shadow-2xs'
-                      : 'bg-white border-slate-100 hover:border-slate-200'
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-1.5">
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <span
-                        className="w-3 h-3 rounded-full shrink-0 shadow-2xs"
-                        style={{ backgroundColor: item.styles.color }}
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
+            {/* Left: Interactive Donut Chart */}
+            <div className="md:col-span-5 relative h-52 flex items-center justify-center">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={items}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={50}
+                    outerRadius={74}
+                    paddingAngle={3}
+                    dataKey="value"
+                    stroke="#ffffff"
+                    strokeWidth={2}
+                    onMouseEnter={(_, index) => setActiveIndex(index)}
+                    onMouseLeave={() => setActiveIndex(null)}
+                  >
+                    {items.map((entry, index) => (
+                      <Cell
+                        key={`cell-${entry.key}`}
+                        fill={entry.color}
+                        opacity={activeIndex === null || activeIndex === index ? 1 : 0.4}
+                        className="transition-all duration-200 cursor-pointer"
                       />
-                      <span className="text-[14.5px] font-semibold text-[#0F172A] truncate leading-[1.5]">
+                    ))}
+                  </Pie>
+                  <Tooltip content={<CustomTooltip />} />
+                </PieChart>
+              </ResponsiveContainer>
+
+              {/* Dynamic Center Hero Inspector */}
+              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none p-1 text-center">
+                {activeItem ? (
+                  <div className="flex flex-col items-center justify-center">
+                    <span
+                      className="text-[10px] font-bold px-2 py-0.5 rounded-full border mb-0.5 truncate max-w-[120px]"
+                      style={{
+                        backgroundColor: `${activeItem.color}15`,
+                        color: activeItem.color,
+                        borderColor: `${activeItem.color}40`,
+                      }}
+                    >
+                      {isMarathi ? activeItem.nameMr : activeItem.nameEn}
+                    </span>
+                    <span className="text-base sm:text-lg font-black text-slate-900 tracking-tight leading-none my-0.5 font-mono">
+                      {metricMode === 'area'
+                        ? `${activeItem.areaHa >= 100000 ? `${(activeItem.areaHa / 100000).toFixed(2)}L` : activeItem.areaHa.toFixed(0)} Ha`
+                        : `${activeItem.count.toLocaleString('en-IN')}`}
+                    </span>
+                    <span className="text-[11px] font-bold text-slate-500 font-mono">
+                      {totalMetric > 0 ? ((activeItem.value / totalMetric) * 100).toFixed(1) : 0}% {isMarathi ? 'वाटा' : 'share'}
+                    </span>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center">
+                    <span className="text-[10px] uppercase tracking-wider font-bold text-slate-400">
+                      {metricMode === 'area'
+                        ? (isMarathi ? 'एकूण क्षेत्र' : 'Total Area')
+                        : (isMarathi ? 'एकूण गट' : 'Total Parcels')}
+                    </span>
+                    <span className="text-base sm:text-lg font-black text-slate-900 tracking-tight leading-none my-0.5 font-mono">
+                      {metricMode === 'area'
+                        ? `${(totalArea / 100000).toFixed(2)}L Ha`
+                        : totalCount.toLocaleString('en-IN')}
+                    </span>
+                    <span className="text-[11px] text-slate-500 font-medium font-mono">
+                      {items.length} {isMarathi ? 'प्रवर्ग' : 'Classes'}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Right: Interactive Category List */}
+            <div className="md:col-span-7 space-y-1.5">
+              {items.map((item, index) => {
+                const pct = totalMetric > 0 ? ((item.value / totalMetric) * 100).toFixed(1) : '0';
+                const isHovered = activeIndex === index;
+
+                return (
+                  <Link
+                    key={item.key}
+                    href={item.filterHref}
+                    onMouseEnter={() => setActiveIndex(index)}
+                    onMouseLeave={() => setActiveIndex(null)}
+                    className={`px-3 py-2 rounded-xl border transition-all flex items-center justify-between cursor-pointer group ${
+                      isHovered
+                        ? 'border-blue-300 bg-blue-50/70 shadow-2xs'
+                        : 'border-slate-100 bg-slate-50/50 hover:bg-slate-50 hover:border-slate-200'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2 min-w-0 pr-2">
+                      <span
+                        className="w-2.5 h-2.5 rounded-full shrink-0 shadow-2xs"
+                        style={{ backgroundColor: item.color }}
+                      />
+                      <span className={`text-[13.5px] truncate leading-[1.5] ${isHovered ? 'font-bold text-blue-950' : 'font-semibold text-[#0F172A]'}`}>
                         {isMarathi ? item.nameMr : item.nameEn}
                       </span>
                     </div>
 
-                    <div className="flex items-center gap-3 shrink-0">
-                      <span className="text-[14.5px] font-bold font-mono text-[#0F172A] tabular-nums">
+                    <div className="flex items-center gap-2.5 shrink-0">
+                      <span className={`text-[13.5px] font-bold font-mono tabular-nums ${isHovered ? 'text-blue-900' : 'text-[#0F172A]'}`}>
                         {metricMode === 'area'
-                          ? `${item.areaHa.toLocaleString('en-IN', { minimumFractionDigits: 2 })} Ha`
+                          ? `${item.areaHa.toLocaleString('en-IN', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} Ha`
                           : `${item.count.toLocaleString('en-IN')} गट`}
                       </span>
-                      <span className="text-[13.5px] font-medium text-[#475569] font-mono w-14 text-right tabular-nums">
+                      <span className="text-[12px] font-medium text-[#475569] font-mono w-11 text-right tabular-nums">
                         {pct}%
                       </span>
-                      <ArrowUpRight className="w-4 h-4 text-slate-400 group-hover:text-blue-700 transition" />
+                      <ArrowUpRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-blue-700 transition" />
                     </div>
-                  </div>
-
-                  {/* Horizontal Visual Fill Bar */}
-                  <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                    <div
-                      style={{
-                        width: `${pct}%`,
-                        backgroundColor: item.styles.color,
-                      }}
-                      className="h-full rounded-full transition-all duration-300"
-                    />
-                  </div>
-                </Link>
-              );
-            })}
+                  </Link>
+                );
+              })}
+            </div>
           </div>
         </div>
       </div>
 
       {/* ── FOOTER TOTAL ── */}
-      <div className="pt-3.5 border-t border-slate-100 mt-4 flex items-center justify-between text-[13.5px] leading-[1.5]">
+      <div className="pt-3 border-t border-slate-100 mt-3 flex items-center justify-between text-[13.5px] leading-[1.5]">
         <span className="text-[#475569] font-medium">
           {isMarathi ? 'एकूण नोंदणीकृत क्षेत्र व भूखंड:' : 'Total Volume:'}
         </span>

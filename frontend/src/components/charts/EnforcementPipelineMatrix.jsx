@@ -207,6 +207,45 @@ export default function EnforcementPipelineMatrix({
     return violationList.reduce((acc, curr) => acc + (curr.areaHa || 0), 0) || 141788.47;
   }, [violationList]);
 
+  // Breach Distribution for Graphical Donut Analytics
+  const breachChartData = useMemo(() => {
+    const list = violationList.slice(0, 4);
+    const total = list.reduce((acc, v) => acc + v.count, 0) || computedTotalCases;
+    return list.map((v) => ({
+      key: v.type,
+      name: isMarathi ? v.nameMr : v.nameEn,
+      nameMr: v.nameMr,
+      nameEn: v.nameEn,
+      count: v.count,
+      areaHa: v.areaHa,
+      value: v.count,
+      color: v.cfg.color,
+      pct: total > 0 ? ((v.count / total) * 100).toFixed(1) : '0',
+    }));
+  }, [violationList, computedTotalCases, isMarathi]);
+
+  const activeBreachItem = activeIndex !== null && breachChartData[activeIndex] ? breachChartData[activeIndex] : null;
+
+  const CustomBreachTooltip = ({ active, payload }) => {
+    if (active && payload && payload.length) {
+      const item = payload[0].payload;
+      return (
+        <div className="bg-slate-950 text-white px-3 py-2 rounded-xl shadow-xl border border-slate-800 text-xs pointer-events-none z-50">
+          <div className="flex items-center gap-1.5 font-bold mb-1">
+            <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: item.color }} />
+            <span>{item.name}</span>
+            <span className="text-amber-400 font-mono">({item.pct}%)</span>
+          </div>
+          <div className="text-[11px] text-slate-300 font-mono">
+            {formatIndianNumber(item.count, isMarathi)} {isMarathi ? 'दाखल वाद' : 'Cases'}
+            {item.areaHa > 0 ? ` • ${formatHaArea(item.areaHa, isMarathi)}` : ''}
+          </div>
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
     <div className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 shadow-xs flex flex-col justify-between font-sans">
       <div>
@@ -297,23 +336,23 @@ export default function EnforcementPipelineMatrix({
                 </span>
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3.5">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
                 {operationalPipelineStages.map((stage) => {
                   return (
                     <div
                       key={stage.key}
-                      className={`p-3.5 sm:p-4 rounded-xl border ${stage.cardBorder} ${stage.cardBg} flex flex-col justify-between transition-all duration-150 hover:shadow-xs`}
+                      className={`p-3 sm:p-3.5 rounded-xl border ${stage.cardBorder} ${stage.cardBg} flex flex-col justify-between transition-all duration-150 hover:shadow-xs`}
                     >
-                      <div className="flex items-center justify-between text-[13.5px] font-bold leading-[1.5]">
+                      <div className="flex items-center justify-between text-[13px] font-bold leading-[1.5]">
                         <span className={stage.idxText}>#{stage.stageNumber}</span>
                         <span className={stage.idxText}>{isMarathi ? 'टप्पा' : 'Stage'}</span>
                       </div>
 
-                      <p className={`text-2xl sm:text-[26px] font-black tracking-tight my-2 tabular-nums ${stage.countText}`}>
+                      <p className={`text-lg sm:text-[20px] font-black tracking-tight my-1.5 tabular-nums ${stage.countText}`}>
                         {formatIndianNumber(stage.count, isMarathi)}
                       </p>
 
-                      <p className={`text-[14.5px] font-bold truncate leading-[1.5] ${stage.labelText}`}>
+                      <p className={`text-[13.5px] font-bold truncate leading-[1.5] ${stage.labelText}`}>
                         {isMarathi ? stage.labelMr : stage.labelEn}
                       </p>
                     </div>
@@ -322,50 +361,122 @@ export default function EnforcementPipelineMatrix({
               </div>
             </div>
 
-            {/* Section 2: Breach Categories Progress Bars with Generous Vertical Spacing */}
-            <div className="pt-4 border-t border-slate-100">
-              <div className="text-[13.5px] font-bold uppercase tracking-wider text-slate-500 mb-4 flex items-center justify-between leading-[1.5]">
-                <span>{isMarathi ? 'उल्लंघन प्रकार व वाद विस्तार' : 'Breach Categories & Exposure'}</span>
+            {/* Section 2: Breach Distribution Donut + Category List */}
+            <div className="pt-3 border-t border-slate-100">
+              <div className="text-[13.5px] font-bold uppercase tracking-wider text-slate-500 mb-2 flex items-center justify-between leading-[1.5]">
+                <span>{isMarathi ? 'उल्लंघन प्रकार व वाद विस्तार वक्र' : 'Breach Categories & Donut Distribution'}</span>
                 <span className="text-[13px] font-medium text-slate-400">
-                  {isMarathi ? 'वाद संख्या व क्षेत्रफळ' : 'Cases & Area'}
+                  {isMarathi ? 'आलेखात्मक विश्लेषण' : 'Graphical Analytics'}
                 </span>
               </div>
 
-              <div className="space-y-4 sm:space-y-4.5">
-                {violationList.slice(0, 4).map((v) => {
-                  const pct = (v.count / maxViolationCount) * 100;
-                  return (
-                    <Link
-                      key={v.type}
-                      href={`/cases?violationType=${v.type}${taluka ? `&taluka=${encodeURIComponent(taluka)}` : ''}`}
-                      className="block group cursor-pointer"
-                    >
-                      <div className="flex justify-between items-baseline gap-2 mb-1.5">
-                        <span className="text-[14.5px] font-semibold text-[#0F172A] group-hover:text-[#1D4ED8] transition truncate leading-[1.5]">
-                          {isMarathi ? v.nameMr : v.nameEn}
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
+                {/* Left: Interactive Donut Chart */}
+                <div className="md:col-span-5 relative h-52 flex items-center justify-center">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={breachChartData}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={50}
+                        outerRadius={74}
+                        paddingAngle={3}
+                        dataKey="value"
+                        stroke="#ffffff"
+                        strokeWidth={2}
+                        onMouseEnter={(_, index) => setActiveIndex(index)}
+                        onMouseLeave={() => setActiveIndex(null)}
+                      >
+                        {breachChartData.map((entry, index) => (
+                          <Cell
+                            key={`cell-${entry.key}`}
+                            fill={entry.color}
+                            opacity={activeIndex === null || activeIndex === index ? 1 : 0.4}
+                            className="transition-all duration-200 cursor-pointer"
+                          />
+                        ))}
+                      </Pie>
+                      <Tooltip content={<CustomBreachTooltip />} />
+                    </PieChart>
+                  </ResponsiveContainer>
+
+                  {/* Dynamic Center Hero Inspector */}
+                  <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none p-1 text-center">
+                    {activeBreachItem ? (
+                      <div className="flex flex-col items-center justify-center">
+                        <span
+                          className="text-[10px] font-bold px-2 py-0.5 rounded-full border mb-0.5 truncate max-w-[120px]"
+                          style={{
+                            backgroundColor: `${activeBreachItem.color}15`,
+                            color: activeBreachItem.color,
+                            borderColor: `${activeBreachItem.color}40`,
+                          }}
+                        >
+                          {isMarathi ? activeBreachItem.nameMr : activeBreachItem.nameEn}
                         </span>
+                        <span className="text-base sm:text-lg font-black text-slate-900 tracking-tight leading-none my-0.5 font-mono">
+                          {formatIndianNumber(activeBreachItem.count, isMarathi)}
+                        </span>
+                        <span className="text-[11px] font-bold text-slate-500 font-mono">
+                          {activeBreachItem.pct}% {isMarathi ? 'वाटा' : 'share'}
+                        </span>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center justify-center">
+                        <span className="text-[10px] uppercase tracking-wider font-bold text-slate-400">
+                          {isMarathi ? 'एकूण वाद' : 'Total Cases'}
+                        </span>
+                        <span className="text-base sm:text-lg font-black text-slate-900 tracking-tight leading-none my-0.5 font-mono">
+                          {formatIndianNumber(computedTotalCases, isMarathi)}
+                        </span>
+                        <span className="text-[11px] text-slate-500 font-medium font-mono">
+                          {formatHaArea(totalAreaHa, isMarathi)}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
 
-                        <div className="flex items-baseline gap-2 shrink-0 text-right">
-                          <span className="text-[14px] font-bold text-[#0F172A] tabular-nums">
-                            {formatIndianNumber(v.count, isMarathi)} {isMarathi ? 'वाद' : 'Cases'}
+                {/* Right: Interactive Breach List */}
+                <div className="md:col-span-7 space-y-1.5">
+                  {breachChartData.map((v, index) => {
+                    const isHovered = activeIndex === index;
+                    return (
+                      <Link
+                        key={v.key}
+                        href={`/cases?violationType=${v.key}${taluka ? `&taluka=${encodeURIComponent(taluka)}` : ''}`}
+                        onMouseEnter={() => setActiveIndex(index)}
+                        onMouseLeave={() => setActiveIndex(null)}
+                        className={`px-3 py-2 rounded-xl border transition-all flex items-center justify-between cursor-pointer group ${
+                          isHovered
+                            ? 'border-blue-300 bg-blue-50/70 shadow-2xs'
+                            : 'border-slate-100 bg-slate-50/50 hover:bg-slate-50 hover:border-slate-200'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2 min-w-0 pr-2">
+                          <span
+                            className="w-2.5 h-2.5 rounded-full shrink-0 shadow-2xs"
+                            style={{ backgroundColor: v.color }}
+                          />
+                          <span className={`text-[13.5px] truncate leading-[1.5] ${isHovered ? 'font-bold text-blue-950' : 'font-semibold text-[#0F172A]'}`}>
+                            {isMarathi ? v.nameMr : v.nameEn}
                           </span>
-                          {v.areaHa > 0 && (
-                            <span className="text-[13.5px] text-[#475569] font-medium tabular-nums">
-                              ({formatHaArea(v.areaHa, isMarathi)})
-                            </span>
-                          )}
                         </div>
-                      </div>
 
-                      <div className="h-2.5 w-full bg-[#F1F5F9] rounded-full overflow-hidden">
-                        <div
-                          style={{ width: `${Math.max(3, pct)}%` }}
-                          className={`h-full ${v.cfg.barBg} rounded-full transition-all duration-300`}
-                        />
-                      </div>
-                    </Link>
-                  );
-                })}
+                        <div className="flex items-center gap-2.5 shrink-0">
+                          <span className={`text-[13.5px] font-bold font-mono tabular-nums ${isHovered ? 'text-blue-900' : 'text-[#0F172A]'}`}>
+                            {formatIndianNumber(v.count, isMarathi)}
+                          </span>
+                          <span className="text-[12px] font-medium text-[#475569] font-mono w-11 text-right tabular-nums">
+                            {v.pct}%
+                          </span>
+                          <ArrowUpRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-blue-700 transition" />
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </div>
               </div>
             </div>
           </div>
