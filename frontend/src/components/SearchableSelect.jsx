@@ -269,37 +269,37 @@ export default function SearchableSelect({
         aria-label={ariaLabel || placeholder}
         aria-expanded={isOpen}
         title={displayText}
-        className={`w-full h-9 flex items-center justify-between gap-1.5 px-3 py-1.5 rounded-xl border text-xs transition cursor-pointer select-none disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none shadow-2xs ${
+        className={`w-full h-11 min-h-[44px] flex items-center justify-between gap-2 px-3.5 py-2 rounded-xl border text-[15px] leading-[1.5] transition cursor-pointer select-none disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none shadow-2xs ${
           isFiltered
             ? 'bg-blue-50/90 hover:bg-blue-100/70 border-blue-300/80 text-blue-950 font-bold'
-            : 'bg-slate-50/90 hover:bg-white hover:border-slate-300 border-slate-200 text-slate-800 font-semibold'
+            : 'bg-slate-50/90 hover:bg-white hover:border-slate-300 border-slate-200 text-[#0F172A] font-medium'
         } ${
           isOpen ? 'ring-2 ring-[#242b6b]/15 bg-white border-[#242b6b] shadow-xs' : 'focus:ring-2 focus:ring-[#242b6b]/15 focus:border-[#242b6b]'
         } ${buttonClassName}`}
       >
-        <div className="flex-1 flex items-center gap-1.5 min-w-0 overflow-hidden">
+        <div className="flex-1 flex items-center gap-2 min-w-0 overflow-hidden">
           {Icon && (
             <Icon
-              className={`w-3.5 h-3.5 shrink-0 ${
-                isFiltered ? 'text-[#242b6b]' : 'text-slate-400'
+              className={`w-4 h-4 shrink-0 ${
+                isFiltered ? 'text-[#242b6b]' : 'text-[#64748B]'
               }`}
             />
           )}
           <span
-            className={`truncate text-left flex-1 ${
-              isFiltered ? 'text-[#242b6b] font-bold' : 'text-slate-900 font-semibold'
+            className={`truncate text-left flex-1 text-[15px] leading-[1.5] ${
+              isFiltered ? 'text-[#0F172A] font-bold' : (!value || value === 'all' ? 'text-[#64748B] font-medium' : 'text-[#0F172A] font-medium')
             }`}
             title={displayText}
           >
             {displayText}
           </span>
           {showCount && selectedOption?.count !== undefined && (
-            <span className="text-[10px] text-[#242b6b] bg-indigo-50 border border-indigo-200/60 px-1.5 py-0.2 rounded-full shrink-0 font-bold">
+            <span className="text-[13px] text-[#242b6b] bg-indigo-50 border border-indigo-200/60 px-2 py-0.5 rounded-full shrink-0 font-bold leading-[1.5]">
               {selectedOption.count}
             </span>
           )}
         </div>
-        <div className="flex items-center gap-1 shrink-0">
+        <div className="flex items-center gap-1.5 shrink-0">
           {isFiltered && !disabled && (
             <span
               role="button"
@@ -316,18 +316,18 @@ export default function SearchableSelect({
               }}
               title={isMarathi ? 'हा फिल्टर साफ करा' : 'Clear this filter'}
               aria-label={isMarathi ? 'हा फिल्टर साफ करा' : 'Clear this filter'}
-              className="p-0.5 rounded-md hover:bg-blue-200/60 text-[#242b6b] hover:text-blue-950 transition cursor-pointer"
+              className="p-1 rounded-md hover:bg-blue-200/60 text-[#242b6b] hover:text-blue-950 transition cursor-pointer"
             >
-              <X className="w-3.5 h-3.5" />
+              <X className="w-4 h-4" />
             </span>
           )}
           <ChevronDown
-            className={`w-3.5 h-3.5 shrink-0 transition-transform duration-200 ${
+            className={`w-4 h-4 shrink-0 transition-transform duration-200 ${
               isOpen
                 ? 'rotate-180 text-[#242b6b]'
                 : isFiltered
                 ? 'text-[#242b6b]'
-                : 'text-slate-400'
+                : 'text-[#64748B]'
             }`}
           />
         </div>
@@ -339,19 +339,19 @@ export default function SearchableSelect({
           ref={dropdownRef}
           className={`absolute ${
             dropdownAlign === 'right' ? 'right-0' : 'left-0'
-          } mt-1.5 w-full min-w-[240px] sm:min-w-[270px] max-w-[calc(100vw-2rem)] sm:max-w-[340px] bg-white border border-slate-200/90 rounded-2xl shadow-xl shadow-slate-900/12 z-[100] flex flex-col max-h-[340px] overflow-hidden animate-in fade-in zoom-in-95 duration-150 ${dropdownClassName}`}
+          } mt-1.5 w-full min-w-[260px] sm:min-w-[290px] max-w-[calc(100vw-2rem)] sm:max-w-[360px] bg-white border border-slate-200/90 rounded-2xl shadow-xl shadow-slate-900/12 z-[100] flex flex-col max-h-[360px] overflow-hidden animate-in fade-in zoom-in-95 duration-150 ${dropdownClassName}`}
         >
           {/* Fixed Search Header */}
-          <div className="p-2.5 border-b border-slate-100 bg-slate-50/80 shrink-0">
+          <div className="p-3 border-b border-slate-100 bg-slate-50/80 shrink-0">
             <div className="relative flex items-center">
-              <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none shrink-0" />
+              <Search className="w-4 h-4 text-[#64748B] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none shrink-0" />
               <input
                 ref={searchInputRef}
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder={effectiveSearchPlaceholder}
-                className="w-full pl-9 pr-8 py-2 text-sm sm:text-xs bg-white border border-slate-200/90 rounded-xl text-slate-900 font-medium placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#242b6b]/15 focus:border-[#242b6b] transition shadow-2xs tracking-normal"
+                className="w-full pl-9 pr-8 py-2 text-[14.5px] leading-[1.5] bg-white border border-slate-200/90 rounded-xl text-[#0F172A] font-medium placeholder:text-[#64748B] focus:outline-none focus:ring-2 focus:ring-[#242b6b]/15 focus:border-[#242b6b] transition shadow-2xs tracking-normal"
               />
               {searchTerm && (
                 <button
@@ -363,21 +363,21 @@ export default function SearchableSelect({
                   className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 p-1 rounded-md transition cursor-pointer"
                   title={isMarathi ? 'शोध साफ करा' : 'Clear search'}
                 >
-                  <X className="w-3 h-3" />
+                  <X className="w-3.5 h-3.5" />
                 </button>
               )}
             </div>
 
             {/* Sub-header with Results Count & Search State */}
-            <div className="flex items-center justify-between text-[11px] text-slate-400 px-1 pt-2 font-medium select-none">
-              <div className="flex items-center gap-1.5 text-slate-500 font-medium text-[11px]">
+            <div className="flex items-center justify-between text-[13.5px] text-[#475569] px-1 pt-2 font-medium select-none">
+              <div className="flex items-center gap-1.5 text-[#475569] font-medium text-[13.5px]">
                 <span>{isMarathi ? 'उपलब्ध पर्याय' : 'Available options'}</span>
-                <span className="px-1.5 py-0.2 rounded-full bg-slate-200/70 text-slate-700 font-bold text-[10px]">
+                <span className="px-2 py-0.5 rounded-full bg-slate-200/70 text-[#0F172A] font-bold text-[13px]">
                   {filteredOptions.length}
                 </span>
               </div>
               {searchTerm && (
-                <span className="text-[10px] text-[#242b6b] bg-indigo-50 border border-indigo-200/60 px-1.5 py-0.2 rounded-md font-bold">
+                <span className="text-[13px] text-[#242b6b] bg-indigo-50 border border-indigo-200/60 px-2 py-0.5 rounded-md font-bold">
                   {isMarathi ? 'शोध सक्रिय' : 'Filtered'}
                 </span>
               )}
@@ -398,9 +398,9 @@ export default function SearchableSelect({
                 <div className="w-9 h-9 mx-auto mb-2 rounded-full bg-slate-100 flex items-center justify-center text-slate-400">
                   <Search className="w-4 h-4" />
                 </div>
-                <p className="text-xs font-semibold text-slate-700">{isMarathi ? 'कोणताही पर्याय सापडला नाही' : 'No options found'}</p>
+                <p className="text-[14px] font-semibold text-slate-700 leading-[1.5]">{isMarathi ? 'कोणताही पर्याय सापडला नाही' : 'No options found'}</p>
                 {searchTerm && (
-                  <p className="text-[11px] text-slate-400 mt-0.5 truncate max-w-[200px] mx-auto font-mono">
+                  <p className="text-[13px] text-[#475569] mt-0.5 truncate max-w-[200px] mx-auto font-mono">
                     "{searchTerm}"
                   </p>
                 )}
@@ -421,21 +421,21 @@ export default function SearchableSelect({
                       isKeyboardNavRef.current = false;
                       setHighlightedIndex(idx);
                     }}
-                    className={`w-full px-3 py-2 text-left flex items-center justify-between text-xs rounded-xl transition cursor-pointer select-none tracking-normal ${
+                    className={`w-full px-3.5 py-2.5 text-left flex items-center justify-between text-[14.5px] leading-[1.5] rounded-xl transition cursor-pointer select-none tracking-normal ${
                       isSelected
                         ? 'bg-[#242b6b]/10 text-[#242b6b] font-bold border border-[#242b6b]/20 shadow-2xs'
                         : isHighlighted
                         ? 'bg-slate-100/90 text-slate-900 font-semibold'
                         : opt.isCustom
                         ? 'bg-emerald-50/70 hover:bg-emerald-100/80 text-emerald-950 border border-dashed border-emerald-300/80 font-bold'
-                        : 'text-slate-700 hover:bg-slate-50/90 font-medium hover:text-slate-900'
+                        : 'text-slate-800 hover:bg-slate-50/90 font-medium hover:text-slate-950'
                     }`}
                   >
                     <div className="flex flex-col min-w-0 pr-2">
                       <div className="flex items-center gap-1.5 truncate">
                         {opt.isCustom ? (
                           <span className="inline-flex items-center gap-1.5 truncate text-emerald-900">
-                            <span className="w-4 h-4 rounded-full bg-emerald-200 text-emerald-900 flex items-center justify-center text-[11px] font-black shrink-0">+</span>
+                            <span className="w-4 h-4 rounded-full bg-emerald-200 text-emerald-900 flex items-center justify-center text-[12px] font-black shrink-0">+</span>
                             <span className="truncate">{opt.label}</span>
                           </span>
                         ) : (
@@ -443,10 +443,10 @@ export default function SearchableSelect({
                         )}
                         {opt.count !== undefined && (
                           <span
-                            className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold shrink-0 ${
+                            className={`text-[12.5px] px-2 py-0.5 rounded-full font-bold shrink-0 ${
                               isSelected
                                 ? 'bg-[#242b6b] text-white'
-                                : 'bg-slate-100 text-slate-600 border border-slate-200/60'
+                                : 'bg-slate-100 text-slate-700 border border-slate-200/60'
                             }`}
                           >
                             {opt.count}

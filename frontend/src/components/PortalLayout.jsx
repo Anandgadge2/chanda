@@ -62,7 +62,7 @@ export default function PortalLayout({ children }) {
   // Public Landing / Legal Pages (No internal layout)
   if (isStandalone) {
     return (
-      <div className="min-h-screen flex flex-col text-[#252B36] bg-[#F8F7F3] selection:bg-[#4169E1]/20 selection:text-[#252B36]">
+      <div className="min-h-screen flex flex-col text-[#263548] bg-[#F5F6F8] selection:bg-[#2457A7]/20 selection:text-[#263548]">
         <main id="main-content" className="flex-1 flex flex-col">
           {children}
         </main>
@@ -75,10 +75,10 @@ export default function PortalLayout({ children }) {
   // Loading Session Check State
   if (loading && !isGlossary) {
     return (
-      <div className="min-h-screen flex flex-col text-[#252B36] bg-[#F8F7F3] font-sans">
+      <div className="min-h-screen flex flex-col text-[#263548] bg-[#F5F6F8] font-sans">
         <div className="flex-1 flex flex-col items-center justify-center">
-          <div className="w-12 h-12 rounded-full border-[3.5px] border-[#E9E7E1] border-t-[#4169E1] animate-spin mb-3.5" />
-          <p className="text-sm font-semibold text-[#64748B]">{t('common.sessionCheck')}</p>
+          <div className="w-12 h-12 rounded-full border-[3.5px] border-[#E4E8EF] border-t-[#2457A7] animate-spin mb-3.5" />
+          <p className="text-sm font-semibold text-[#718096]">{t('common.sessionCheck')}</p>
         </div>
       </div>
     );
@@ -87,7 +87,7 @@ export default function PortalLayout({ children }) {
   // Unauthenticated user on public /glossary page
   if (!user && isGlossary) {
     return (
-      <div className="min-h-screen flex flex-col text-[#252B36] bg-[#F8F7F3] font-sans">
+      <div className="min-h-screen flex flex-col text-[#263548] bg-[#F5F6F8] font-sans">
         <Navbar
           sidebarCollapsed={true}
           onToggleSidebar={() => {}}
@@ -109,7 +109,7 @@ export default function PortalLayout({ children }) {
   // Unauthenticated user attempting to view protected route
   if (!user) {
     return (
-      <div className="min-h-screen flex flex-col text-[#252B36] bg-[#F8F7F3] font-sans">
+      <div className="min-h-screen flex flex-col text-[#263548] bg-[#F5F6F8] font-sans">
         <Navbar
           sidebarCollapsed={true}
           onToggleSidebar={() => {}}
@@ -127,7 +127,7 @@ export default function PortalLayout({ children }) {
 
   // Authenticated Officer Layout: Full SaaS Workspace with Modern Sidebar
   return (
-    <div className="min-h-screen flex flex-col text-[#252B36] bg-[#F8F7F3] font-sans w-full max-w-full overflow-x-hidden lg:overflow-x-visible">
+    <div className="min-h-screen flex flex-col text-[#263548] bg-[#F5F6F8] font-sans w-full max-w-full overflow-x-hidden lg:overflow-x-visible">
       <Navbar
         sidebarCollapsed={sidebarCollapsed}
         onToggleSidebar={handleToggleSidebar}

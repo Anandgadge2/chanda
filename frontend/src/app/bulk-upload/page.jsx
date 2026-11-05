@@ -210,26 +210,26 @@ export default function BulkUploadPage() {
   return (
     <div className="space-y-2.5 sm:space-y-3">
       {/* Executive Command Hero Header - Pro Compact */}
-      <div className="bg-[#FFFFFF] text-[#252B36] rounded-2xl px-5 sm:px-6 py-4 sm:py-5 border border-[#E9E7E1] shadow-[0_1px_3px_rgba(0,0,0,0.03)] flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+      <div className="bg-[#FFFFFF] text-[#263548] rounded-2xl px-5 sm:px-6 py-4 sm:py-5 border border-[#E4E8EF] shadow-[0_1px_3px_rgba(0,0,0,0.03)] flex flex-col sm:flex-row justify-between sm:items-center gap-2">
         <div className="flex items-center gap-2.5 min-w-0">
-          <div className="w-8 h-8 rounded-lg bg-[#4169E1] flex items-center justify-center shrink-0 text-white">
+          <div className="w-8 h-8 rounded-lg bg-[#142D4E] flex items-center justify-center shrink-0 text-[#C49A45] shadow-xs">
             <FileSpreadsheet className="w-4 h-4" />
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="text-lg sm:text-xl lg:text-[24px] font-extrabold text-[#252B36] tracking-tight leading-tight truncate">
+              <h1 className="text-lg sm:text-xl lg:text-[24px] font-extrabold text-[#263548] tracking-tight leading-tight truncate">
                 {isMarathi ? 'महसूल अभिलेख व गाव नमुना डेटा आयात' : 'Revenue Records & Village Data Ingestion'}
               </h1>
-              <span className="text-[10px] font-extrabold uppercase tracking-wider bg-emerald-100 text-emerald-900 px-2 py-0.5 rounded-full border border-emerald-300">
+              <span className="text-[10px] font-extrabold uppercase tracking-wider bg-[#E8F6F2] text-[#16866A] px-2 py-0.5 rounded-full border border-[#BDE7DC]">
                 {isMarathi ? 'स्वयंचलित सिडिंग' : 'Automated Seeding'}
               </span>
-              <span className="hidden md:inline text-[11px] text-slate-500 font-medium">
+              <span className="hidden md:inline text-[11px] text-[#718096] font-medium">
                 {isMarathi
                   ? '• १ ते ४५ तपासणी प्रपत्रे किंवा कच्च्या भूखंड यादीचे थेट रूपांतर'
                   : '• Ingestion of Checkpoints 1 to 45 booklets or raw parcel registers'}
               </span>
             </div>
-            <p className="text-[11px] text-slate-500 md:hidden truncate font-medium">
+            <p className="text-[11px] text-[#718096] md:hidden truncate font-medium">
               {isMarathi
                 ? '१ ते ४५ तपासणी प्रपत्रे किंवा कच्च्या भूखंड यादीचे थेट रूपांतर'
                 : 'Ingestion of Checkpoints 1 to 45 booklets or raw parcel registers'}
@@ -242,7 +242,7 @@ export default function BulkUploadPage() {
             <a
               href={api.getSampleTemplateUrl()}
               download="गाव_नमुना_नोंदणी.xlsx"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#4169E1] hover:bg-[#3454B4] text-white rounded-lg text-xs font-bold transition shadow-2xs active:scale-95 cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#2457A7] hover:bg-[#1d4687] text-white rounded-lg text-xs font-bold transition shadow-2xs active:scale-95 cursor-pointer"
               title={isMarathi ? 'नमुना एक्सेल डाऊनलोड' : 'Download Sample Excel'}
             >
               <Download className="w-3.5 h-3.5" />
@@ -253,7 +253,7 @@ export default function BulkUploadPage() {
       </div>
 
       {/* Modern Segmented Tabs Selector */}
-      <div className="flex flex-col sm:inline-flex sm:flex-row p-1 rounded-2xl bg-slate-200/60 backdrop-blur-md border border-slate-300/60 gap-1.5 shadow-2xs w-full sm:w-auto">
+      <div className="flex flex-col sm:inline-flex sm:flex-row p-1 rounded-2xl bg-slate-100 border border-[#E4E8EF] gap-1.5 shadow-2xs w-full sm:w-auto">
         <button
           onClick={() => {
             setActiveTab('prapatra');
@@ -261,17 +261,19 @@ export default function BulkUploadPage() {
           }}
           className={`py-2 px-3 sm:px-4 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all cursor-pointer w-full sm:w-auto ${
             activeTab === 'prapatra'
-              ? 'bg-white text-emerald-950 shadow-sm'
-              : 'text-slate-600 hover:text-slate-900 hover:bg-white/40'
+              ? 'bg-[#142D4E] text-white shadow-xs'
+              : 'text-[#718096] hover:text-[#263548] hover:bg-white/60'
           }`}
         >
-          <FolderArchive className="w-4 h-4 text-emerald-700 shrink-0" />
+          <FolderArchive className={`w-4 h-4 shrink-0 ${activeTab === 'prapatra' ? 'text-[#C49A45]' : 'text-slate-500'}`} />
           <span className="truncate">
             {isMarathi
               ? '१ ते ४५ तपासणी प्रपत्र (Official Revenue Booklet)'
               : '1 to 45 Checkpoint Audit Booklet (Official)'}
           </span>
-          <span className="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-extrabold shrink-0">
+          <span className={`text-[10px] px-2 py-0.5 rounded-full font-extrabold shrink-0 ${
+            activeTab === 'prapatra' ? 'bg-[#C49A45] text-slate-950' : 'bg-emerald-100 text-emerald-800'
+          }`}>
             {isMarathi ? 'शिफारस' : 'Recommended'}
           </span>
         </button>
@@ -283,11 +285,11 @@ export default function BulkUploadPage() {
           }}
           className={`py-2 px-3 sm:px-4 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all cursor-pointer w-full sm:w-auto ${
             activeTab === 'parcel'
-              ? 'bg-white text-blue-950 shadow-sm'
-              : 'text-slate-600 hover:text-slate-900 hover:bg-white/40'
+              ? 'bg-[#142D4E] text-white shadow-xs'
+              : 'text-[#718096] hover:text-[#263548] hover:bg-white/60'
           }`}
         >
-          <Layers className="w-4 h-4 text-blue-700 shrink-0" />
+          <Layers className={`w-4 h-4 shrink-0 ${activeTab === 'parcel' ? 'text-[#2457A7]' : 'text-slate-500'}`} />
           <span className="truncate">
             {isMarathi
               ? 'गाव भूखंड यादी नमुना (8-Column Parcel List)'
@@ -394,7 +396,7 @@ export default function BulkUploadPage() {
             </div>
 
             {/* Drag & Drop Zone */}
-            <div className="border-2 border-dashed border-emerald-300 hover:border-emerald-600 rounded-2xl p-6 sm:p-8 text-center bg-emerald-50/20 hover:bg-emerald-50/40 transition cursor-pointer relative">
+            <div className="border-2 border-dashed border-[#BDE7DC] hover:border-[#16866A] rounded-2xl p-6 sm:p-8 text-center bg-[#E8F6F2]/30 hover:bg-[#E8F6F2]/60 transition cursor-pointer relative">
               <input
                 type="file"
                 multiple
@@ -402,8 +404,8 @@ export default function BulkUploadPage() {
                 onChange={handlePrapatraFileChange}
                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
               />
-              <UploadCloud className="w-10 h-10 sm:w-12 sm:h-12 text-emerald-800 mx-auto mb-2" />
-              <p className="text-xs sm:text-sm font-bold text-slate-800">
+              <UploadCloud className="w-10 h-10 sm:w-12 sm:h-12 text-[#16866A] mx-auto mb-2" />
+              <p className="text-xs sm:text-sm font-bold text-[#263548]">
                 {prapatraFiles.length > 0
                   ? isMarathi
                     ? `${prapatraFiles.length} फाईल(्स) निवडल्या आहेत:`
@@ -413,7 +415,7 @@ export default function BulkUploadPage() {
                   : 'Drag or select 1 to 45 Prapatra Excel (.xlsx) files here'}
               </p>
               {prapatraFiles.length > 0 ? (
-                <div className="mt-2 max-h-24 overflow-y-auto text-[11px] text-emerald-900 space-y-0.5">
+                <div className="mt-2 max-h-24 overflow-y-auto text-[11px] text-[#16866A] space-y-0.5">
                   {prapatraFiles.map((f, idx) => (
                     <div key={idx} className="truncate">
                       📄 {f.name} ({(f.size / 1024).toFixed(1)} KB)
@@ -421,7 +423,7 @@ export default function BulkUploadPage() {
                   ))}
                 </div>
               ) : (
-                <p className="text-[11px] text-slate-500 mt-1">
+                <p className="text-[11px] text-[#718096] mt-1">
                   {isMarathi
                     ? 'एकाच वेळी अनेक गावांच्या एक्सेल फाईल्स (Multi-file upload) अपलोड करणे अनुज्ञेय आहे.'
                     : 'Multi-file upload across multiple villages is supported.'}
@@ -799,7 +801,7 @@ export default function BulkUploadPage() {
               <button
                 type="button"
                 onClick={clearForm}
-                className="w-full sm:w-auto px-4 py-2 border border-slate-300 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50 transition cursor-pointer"
+                className="w-full sm:w-auto px-4 py-2 border border-[#E4E8EF] rounded-xl text-xs font-semibold text-slate-700 hover:bg-[#F5F6F8] transition cursor-pointer"
               >
                 {isMarathi ? 'साफ करा (Clear)' : 'Clear'}
               </button>
@@ -807,7 +809,7 @@ export default function BulkUploadPage() {
                 type="button"
                 onClick={handleInspectDiff}
                 disabled={prapatraFiles.length === 0 || inspecting || uploading}
-                className="w-full sm:w-auto bg-slate-800 hover:bg-slate-900 text-white font-semibold px-5 py-2.5 rounded-xl text-xs shadow-sm transition disabled:opacity-50 flex items-center justify-center gap-2 active:scale-95 cursor-pointer"
+                className="w-full sm:w-auto bg-[#142D4E] hover:bg-[#10243E] text-white font-semibold px-5 py-2.5 rounded-xl text-xs shadow-xs transition disabled:opacity-50 flex items-center justify-center gap-2 active:scale-95 cursor-pointer"
               >
                 {inspecting ? (
                   <>
@@ -816,7 +818,7 @@ export default function BulkUploadPage() {
                   </>
                 ) : (
                   <>
-                    <FileSpreadsheet className="w-4 h-4 text-emerald-400" />
+                    <FileSpreadsheet className="w-4 h-4 text-[#C49A45]" />
                     <span>{isMarathi ? 'पडताळणी व पुनरावृत्ती तपासा (Inspect Duplicates)' : 'Inspect & Detect Duplicates'}</span>
                   </>
                 )}
@@ -824,7 +826,7 @@ export default function BulkUploadPage() {
               <button
                 type="submit"
                 disabled={prapatraFiles.length === 0 || uploading}
-                className="w-full sm:w-auto bg-emerald-700 hover:bg-emerald-800 text-white font-semibold px-6 py-2.5 rounded-xl text-xs shadow-sm transition disabled:opacity-50 flex items-center justify-center gap-2 active:scale-95 cursor-pointer"
+                className="w-full sm:w-auto bg-[#16866A] hover:bg-[#126b54] text-white font-semibold px-6 py-2.5 rounded-xl text-xs shadow-xs transition disabled:opacity-50 flex items-center justify-center gap-2 active:scale-95 cursor-pointer"
               >
                 {uploading ? (
                   <>
@@ -861,22 +863,22 @@ export default function BulkUploadPage() {
           </div>
 
           <form onSubmit={handleParcelSubmit} className="space-y-5">
-            <div className="border-2 border-dashed border-blue-300 hover:border-blue-600 rounded-2xl p-6 sm:p-8 text-center bg-blue-50/20 hover:bg-blue-50/40 transition cursor-pointer relative">
+            <div className="border-2 border-dashed border-[#D0E2FA] hover:border-[#2457A7] rounded-2xl p-6 sm:p-8 text-center bg-[#EBF2FC]/30 hover:bg-[#EBF2FC]/60 transition cursor-pointer relative">
               <input
                 type="file"
                 accept=".xlsx,.xls"
                 onChange={handleParcelFileChange}
                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
               />
-              <UploadCloud className="w-10 h-10 sm:w-12 sm:h-12 text-blue-900 mx-auto mb-2" />
-              <p className="text-xs sm:text-sm font-bold text-slate-800">
+              <UploadCloud className="w-10 h-10 sm:w-12 sm:h-12 text-[#2457A7] mx-auto mb-2" />
+              <p className="text-xs sm:text-sm font-bold text-[#263548]">
                 {parcelFile
                   ? parcelFile.name
                   : isMarathi
                   ? 'गाव नमुना एक्सेल (.xlsx) फाईल येथे ड्रॅग करा किंवा निवडा'
                   : 'Drag or select Parcel Excel (.xlsx) file here'}
               </p>
-              <p className="text-[11px] text-slate-500 mt-1">
+              <p className="text-[11px] text-[#718096] mt-1">
                 {parcelFile
                   ? isMarathi
                     ? `फाईल आकार: ${(parcelFile.size / 1024).toFixed(1)} KB`
@@ -888,40 +890,40 @@ export default function BulkUploadPage() {
             </div>
 
             {error && (
-              <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-800 flex items-center gap-2">
-                <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+              <div className="p-3.5 rounded-xl bg-[#FDECEC] border border-[#F8D2D2] text-xs text-[#C44545] flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 text-[#C44545] shrink-0" />
                 <span>{error}</span>
               </div>
             )}
 
             {result && result.mode === 'parcel' && (
-              <div className="p-4 sm:p-5 rounded-2xl bg-blue-50 border border-blue-300 text-xs text-blue-950 space-y-3">
-                <div className="flex items-center gap-2 font-bold text-sm text-blue-900">
-                  <CheckCircle2 className="w-5 h-5 text-blue-600" />
+              <div className="p-4 sm:p-5 rounded-2xl bg-[#EBF2FC] border border-[#D0E2FA] text-xs text-[#2457A7] space-y-3">
+                <div className="flex items-center gap-2 font-bold text-sm text-[#2457A7]">
+                  <CheckCircle2 className="w-5 h-5 text-[#16866A]" />
                   <span>{result.message}</span>
                 </div>
-                <div className="grid grid-cols-3 gap-2 sm:gap-3 pt-2 border-t border-blue-200 text-center">
-                  <div className="p-2 sm:p-2.5 bg-white rounded-lg border border-blue-100">
-                    <span className="text-[10px] text-slate-500 block truncate">
+                <div className="grid grid-cols-3 gap-2 sm:gap-3 pt-2 border-t border-[#D0E2FA] text-center">
+                  <div className="p-2 sm:p-2.5 bg-white rounded-lg border border-[#D0E2FA]">
+                    <span className="text-[10px] text-[#718096] block truncate">
                       {isMarathi ? 'एकूण ओळी' : 'Total Rows'}
                     </span>
-                    <span className="text-sm sm:text-base font-black text-slate-900">
+                    <span className="text-sm sm:text-base font-black text-[#263548]">
                       {result.totalRowsProcessed}
                     </span>
                   </div>
-                  <div className="p-2 sm:p-2.5 bg-white rounded-lg border border-blue-100">
-                    <span className="text-[10px] text-emerald-600 font-bold block truncate">
+                  <div className="p-2 sm:p-2.5 bg-white rounded-lg border border-[#D0E2FA]">
+                    <span className="text-[10px] text-[#16866A] font-bold block truncate">
                       {isMarathi ? 'नोंदणीकृत' : 'Registered'}
                     </span>
-                    <span className="text-sm sm:text-base font-black text-emerald-700">
+                    <span className="text-sm sm:text-base font-black text-[#16866A]">
                       {result.insertedCount}
                     </span>
                   </div>
-                  <div className="p-2 sm:p-2.5 bg-white rounded-lg border border-blue-100">
-                    <span className="text-[10px] text-slate-500 block truncate">
+                  <div className="p-2 sm:p-2.5 bg-white rounded-lg border border-[#D0E2FA]">
+                    <span className="text-[10px] text-[#718096] block truncate">
                       {isMarathi ? 'वगळलेले (Skipped)' : 'Skipped (Duplicates)'}
                     </span>
-                    <span className="text-sm sm:text-base font-black text-slate-600">
+                    <span className="text-sm sm:text-base font-black text-[#718096]">
                       {result.skippedDuplicates}
                     </span>
                   </div>
@@ -930,7 +932,7 @@ export default function BulkUploadPage() {
                 <div className="pt-2 text-right">
                   <Link
                     href="/parcels"
-                    className="inline-flex items-center gap-1 font-bold text-xs text-blue-900 hover:text-blue-700"
+                    className="inline-flex items-center gap-1 font-bold text-xs text-[#2457A7] hover:text-[#1d4687]"
                   >
                     <span>{isMarathi ? 'नोंदवहीत आयात केलेले भूखंड पहा' : 'View imported parcels in register'}</span>
                     <ArrowRight className="w-3.5 h-3.5" />
@@ -943,14 +945,14 @@ export default function BulkUploadPage() {
               <button
                 type="button"
                 onClick={clearForm}
-                className="w-full sm:w-auto px-4 py-2 border border-slate-300 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50 transition"
+                className="w-full sm:w-auto px-4 py-2 border border-[#E4E8EF] rounded-xl text-xs font-semibold text-slate-700 hover:bg-[#F5F6F8] transition cursor-pointer"
               >
                 {isMarathi ? 'साफ करा (Clear)' : 'Clear'}
               </button>
               <button
                 type="submit"
                 disabled={!parcelFile || uploading}
-                className="w-full sm:w-auto bg-blue-900 hover:bg-blue-800 text-white font-semibold px-6 py-2.5 rounded-xl text-xs shadow-sm transition disabled:opacity-50 flex items-center justify-center gap-2 active:scale-95"
+                className="w-full sm:w-auto bg-[#2457A7] hover:bg-[#1d4687] text-white font-semibold px-6 py-2.5 rounded-xl text-xs shadow-xs transition disabled:opacity-50 flex items-center justify-center gap-2 active:scale-95 cursor-pointer"
               >
                 {uploading ? (
                   <>

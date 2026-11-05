@@ -114,10 +114,10 @@ export default function Navbar({
               <ChandrapurDistrictLogo className="w-8 h-8 shrink-0" />
               <div className="min-w-0">
                 <div className="flex items-center gap-2 truncate">
-                  <span className="font-bold text-slate-900 text-sm sm:text-base tracking-tight group-hover:text-blue-700 transition truncate">
+                  <span className="font-bold text-[#0F172A] text-[19px] leading-[1.5] tracking-tight group-hover:text-blue-700 transition truncate">
                     {t('portal.title')}
                   </span>
-                  <span className="hidden md:inline-block text-[10px] font-bold bg-blue-50 text-blue-700 px-2 py-0.5 rounded border border-blue-200 shrink-0">
+                  <span className="hidden md:inline-block text-[13.5px] font-semibold leading-[1.5] bg-blue-50 text-blue-700 px-2 py-0.5 rounded border border-blue-200 shrink-0">
                     {t('portal.mlrcBadge')}
                   </span>
                 </div>

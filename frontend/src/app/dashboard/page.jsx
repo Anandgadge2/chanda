@@ -293,7 +293,7 @@ export default function DashboardPage() {
           titleEn="Registered Land"
           value={analytics.totalParcels.toLocaleString(isMarathi ? 'mr-IN' : 'en-IN')}
           subtext={isMarathi ? 'गट संख्या' : 'Parcels'}
-          subtextEn="Total Parcels"
+          // subtextEn="Total Parcels"
           icon={Landmark}
           isActive={activeKpi === 'parcels'}
           onClick={() => handleKpiToggle('parcels')}
@@ -308,7 +308,7 @@ export default function DashboardPage() {
           titleEn="Breaches & Inquiries"
           value={analytics.totalViolations.toLocaleString(isMarathi ? 'mr-IN' : 'en-IN')}
           subtext={isMarathi ? 'कलम ३६, ५०-५४' : 'Sec 36, 50-54'}
-          subtextEn="Sec 36, 50-54"
+          // subtextEn="Sec 36, 50-54"
           icon={AlertTriangle}
           isActive={activeKpi === 'violations'}
           onClick={() => handleKpiToggle('violations')}
@@ -327,11 +327,11 @@ export default function DashboardPage() {
               ? `${CHANDRAPUR_TALUKAS.find((t) => t.id.toLowerCase() === taluka.toLowerCase())?.nameMr || taluka} तालुका`
               : (isMarathi ? '१५ तालुके' : '15 Talukas')
           }
-          subtextEn={
-            taluka
-              ? `${CHANDRAPUR_TALUKAS.find((t) => t.id.toLowerCase() === taluka.toLowerCase())?.nameEn || taluka} Taluka`
-              : '15 Talukas'
-          }
+          // subtextEn={
+          //   taluka
+          //     ? `${CHANDRAPUR_TALUKAS.find((t) => t.id.toLowerCase() === taluka.toLowerCase())?.nameEn || taluka} Taluka`
+          //     : '15 Talukas'
+          // }
           icon={MapPin}
           isActive={activeKpi === 'villages'}
           onClick={() => handleKpiToggle('villages')}
@@ -346,7 +346,7 @@ export default function DashboardPage() {
           titleEn="Class 2 to 1 Conversion"
           value={(analytics.totalClass2To1Conversions || 0).toLocaleString(isMarathi ? 'mr-IN' : 'en-IN')}
           subtext={`${Number(analytics.totalClass2To1AreaHa || 0).toFixed(2)} Ha`}
-          subtextEn={`${Number(analytics.totalClass2To1AreaHa || 0).toFixed(2)} Ha`}
+          // subtextEn={`${Number(analytics.totalClass2To1AreaHa || 0).toFixed(2)} Ha`}
           icon={ArrowRightLeft}
           isActive={activeKpi === 'conversions'}
           onClick={() => handleKpiToggle('conversions')}

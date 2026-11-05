@@ -74,27 +74,27 @@ export default function Pagination({
 
   const containerClasses = embedded
     ? `flex flex-col md:flex-row items-center justify-between gap-3 w-full text-center sm:text-left ${className}`
-    : `flex flex-col md:flex-row items-center justify-between gap-2.5 px-3 sm:px-4 py-2.5 sm:py-3 bg-white border border-slate-200 rounded-xl shadow-2xs mt-3 sm:mt-4 text-center sm:text-left ${className}`;
+    : `flex flex-col md:flex-row items-center justify-between gap-2.5 px-3 sm:px-4 py-2.5 sm:py-3 bg-white border border-[#E4E8EF] rounded-xl shadow-2xs mt-3 sm:mt-4 text-center sm:text-left ${className}`;
 
   return (
     <div className={containerClasses}>
       {/* Records Count & Optional Rows Per Page */}
       <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3">
-        <div className="text-xs text-slate-600 font-medium">
+        <div className="text-xs text-[#718096] font-medium">
           {isMarathi ? (
             <>
-              एकूण <span className="font-bold text-slate-900">{totalCount}</span> पैकी{' '}
-              <span className="font-bold text-slate-900">{totalCount > 0 ? startRecord : 0}</span> ते{' '}
-              <span className="font-bold text-slate-900">{endRecord}</span> नोंदी दाखवत आहे (पृष्ठ{' '}
-              <span className="font-bold text-blue-900">{currentPage}</span> / {finalTotalPages})
+              एकूण <span className="font-bold text-[#263548]">{totalCount}</span> पैकी{' '}
+              <span className="font-bold text-[#263548]">{totalCount > 0 ? startRecord : 0}</span> ते{' '}
+              <span className="font-bold text-[#263548]">{endRecord}</span> नोंदी दाखवत आहे (पृष्ठ{' '}
+              <span className="font-bold text-[#2457A7]">{currentPage}</span> / {finalTotalPages})
             </>
           ) : (
             <>
               Showing{' '}
-              <span className="font-bold text-slate-900">{totalCount > 0 ? startRecord : 0}</span> to{' '}
-              <span className="font-bold text-slate-900">{endRecord}</span> of{' '}
-              <span className="font-bold text-slate-900">{totalCount}</span> records (Page{' '}
-              <span className="font-bold text-blue-900">{currentPage}</span> of {finalTotalPages})
+              <span className="font-bold text-[#263548]">{totalCount > 0 ? startRecord : 0}</span> to{' '}
+              <span className="font-bold text-[#263548]">{endRecord}</span> of{' '}
+              <span className="font-bold text-[#263548]">{totalCount}</span> records (Page{' '}
+              <span className="font-bold text-[#2457A7]">{currentPage}</span> of {finalTotalPages})
             </>
           )}
         </div>
@@ -165,7 +165,7 @@ export default function Pagination({
                 disabled={isAll}
                 className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg text-xs font-bold transition flex items-center justify-center cursor-pointer ${
                   currentPage === p
-                    ? 'bg-blue-900 text-white shadow-xs'
+                    ? 'bg-[#2457A7] text-white shadow-xs'
                     : 'text-slate-700 hover:bg-slate-100'
                 }`}
               >
@@ -176,7 +176,7 @@ export default function Pagination({
         </div>
 
         {/* Compact Mobile Page Indicator */}
-        <div className="sm:hidden px-2.5 py-1 rounded-lg bg-slate-100 border border-slate-200 text-xs font-bold text-slate-700 font-mono">
+        <div className="sm:hidden px-2.5 py-1 rounded-lg bg-slate-100 border border-[#E4E8EF] text-xs font-bold text-slate-700 font-mono">
           {currentPage} / {finalTotalPages}
         </div>
 
@@ -185,7 +185,7 @@ export default function Pagination({
           type="button"
           onClick={() => onPageChange(currentPage + 1)}
           disabled={currentPage >= finalTotalPages || isAll}
-          className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:hover:bg-transparent disabled:cursor-not-allowed transition active:scale-95 cursor-pointer"
+          className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-[#E4E8EF] text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:hover:bg-transparent disabled:cursor-not-allowed transition active:scale-95 cursor-pointer"
           aria-label={isMarathi ? 'पुढील पृष्ठ' : 'Next page'}
         >
           <span className="hidden sm:inline">{isMarathi ? 'पुढील' : 'Next'}</span>
@@ -197,7 +197,7 @@ export default function Pagination({
           type="button"
           onClick={() => onPageChange(finalTotalPages)}
           disabled={currentPage >= finalTotalPages || isAll}
-          className="inline-flex items-center justify-center p-1.5 rounded-lg border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:hover:bg-transparent disabled:cursor-not-allowed transition active:scale-95 cursor-pointer"
+          className="inline-flex items-center justify-center p-1.5 rounded-lg border border-[#E4E8EF] text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:hover:bg-transparent disabled:cursor-not-allowed transition active:scale-95 cursor-pointer"
           title={isMarathi ? 'शेवटचे पृष्ठ' : 'Last page'}
           aria-label={isMarathi ? 'शेवटचे पृष्ठ' : 'Last page'}
         >

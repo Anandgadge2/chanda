@@ -463,45 +463,45 @@ export default function ParcelsPage() {
     switch (tenureKey) {
       case 'BHOGVATDAR_CLASS_1':
         return {
-          icon: <CheckCircle2 className="w-3 h-3 text-emerald-600 shrink-0" />,
+          icon: <CheckCircle2 className="w-3 h-3 text-[#16866A] shrink-0" />,
           label: isEn ? (config?.labelEn || 'Occupant Class-1') : (config?.labelMr || 'भोगवटादार वर्ग-१'),
           hint: isEn ? 'Transferable without prior permission' : 'विनापरवानगी हस्तांतरण अनुज्ञेय',
-          badgeClass: 'bg-emerald-50 text-emerald-700 border-emerald-200/70',
+          badgeClass: 'bg-[#E8F6F2] text-[#16866A] border-[#BDE7DC]',
         };
       case 'BHOGVATDAR_CLASS_2':
         return {
-          icon: <AlertTriangle className="w-3 h-3 text-amber-600 shrink-0" />,
+          icon: <AlertTriangle className="w-3 h-3 text-[#D28B28] shrink-0" />,
           label: isEn ? (config?.labelEn || 'Occupant Class-2') : (config?.labelMr || 'भोगवटादार वर्ग-२'),
           hint: isEn ? 'Collector prior sanction mandatory' : 'कलेक्टर पूर्वपरवानगी अनिवार्य',
-          badgeClass: 'bg-amber-50 text-amber-700 border-amber-200/70',
+          badgeClass: 'bg-[#FDF6EB] text-[#D28B28] border-[#F9E2BE]',
         };
       case 'SARKAR_SHASAN':
         return {
-          icon: <span className="w-1.5 h-1.5 rounded-full bg-blue-600 inline-block shrink-0" />,
+          icon: <span className="w-1.5 h-1.5 rounded-full bg-[#2457A7] inline-block shrink-0" />,
           label: isEn ? (config?.labelEn || 'Government / State') : (config?.labelMr || 'शासकीय / शासन'),
           hint: isEn ? 'Vested in Maharashtra State Govt' : 'महाराष्ट्र शासनाकडे निहित',
-          badgeClass: 'bg-blue-50 text-blue-700 border-blue-200/70',
+          badgeClass: 'bg-[#EBF2FC] text-[#2457A7] border-[#D0E2FA]',
         };
       case 'DEVASTHAN_INAM':
         return {
-          icon: <span className="w-1.5 h-1.5 rounded-full bg-purple-600 inline-block shrink-0" />,
+          icon: <span className="w-1.5 h-1.5 rounded-full bg-[#7560B5] inline-block shrink-0" />,
           label: isEn ? (config?.labelEn || 'Devasthan / Inam') : (config?.labelMr || 'देवस्थान / इनाम'),
           hint: isEn ? 'Religious Trust / Non-transferable' : 'धार्मिक न्यास / अहस्तांतरणीय',
-          badgeClass: 'bg-purple-50 text-purple-700 border-purple-200/70',
+          badgeClass: 'bg-[#F3F0FA] text-[#7560B5] border-[#DED6F2]',
         };
       case 'FOREST_JANGAL':
         return {
-          icon: <span className="w-1.5 h-1.5 rounded-full bg-green-700 inline-block shrink-0" />,
+          icon: <span className="w-1.5 h-1.5 rounded-full bg-[#0D9488] inline-block shrink-0" />,
           label: isEn ? (config?.labelEn || 'Forest Land') : (config?.labelMr || 'वन जमीन'),
           hint: isEn ? 'Reserved / Protected Forest' : 'राखीव / संरक्षित वनक्षेत्र',
-          badgeClass: 'bg-green-50 text-green-800 border-green-200/70',
+          badgeClass: 'bg-[#F0FDFA] text-[#0D9488] border-[#99F6E4]',
         };
       default:
         return {
           icon: null,
           label: isEn ? (config?.labelEn || tenureKey) : (config?.labelMr || tenureKey),
           hint: '',
-          badgeClass: 'bg-slate-100 text-slate-700 border-slate-200',
+          badgeClass: 'bg-[#F5F6F8] text-[#263548] border-[#E4E8EF]',
         };
     }
   };
@@ -509,20 +509,20 @@ export default function ParcelsPage() {
   return (
     <div className="space-y-2.5 sm:space-y-3">
       {/* Executive Command Header - Pro Compact */}
-      <div className="bg-[#FFFFFF] text-[#252B36] rounded-2xl px-5 sm:px-6 py-4 sm:py-5 border border-[#E9E7E1] shadow-[0_1px_3px_rgba(0,0,0,0.03)] flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+      <div className="bg-[#FFFFFF] text-[#263548] rounded-xl px-4 sm:px-5 py-3 sm:py-3.5 border border-[#E4E8EF] shadow-[0_1px_2px_rgba(20,45,78,0.04)] flex flex-col sm:flex-row justify-between sm:items-center gap-2">
         <div className="flex items-center gap-2.5 min-w-0">
-          <div className="w-8 h-8 rounded-lg bg-[#4169E1] text-white flex items-center justify-center shrink-0">
+          <div className="w-8 h-8 rounded-lg bg-[#EBF2FC] border border-[#D0E2FA] text-[#2457A7] flex items-center justify-center shrink-0">
             <MapPin className="w-4 h-4" />
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="text-lg sm:text-xl lg:text-[24px] font-extrabold text-[#252B36] tracking-tight leading-tight">
+              <h1 className="text-base sm:text-lg lg:text-[20px] font-bold text-[#142D4E] tracking-tight leading-tight">
                 {isMarathi ? 'भूखंड नोंदवही (७/१२ अभिलेख)' : 'Land Parcel Register (7/12 Records)'}
               </h1>
-              <span className="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full border border-emerald-300">
+              <span className="text-[10px] font-bold bg-[#E8F6F2] text-[#16866A] px-2 py-0.5 rounded-full border border-[#BDE7DC]">
                 {isMarathi ? 'चंद्रपूर जिल्हा' : 'Chandrapur District'}
               </span>
-              <span className="hidden md:inline text-[11px] text-slate-500 font-medium">
+              <span className="hidden md:inline text-[11px] text-[#718096] font-medium">
                 {isMarathi
                   ? '• ऐतिहासिक १९५० मूळ मालकी, फेरफार नोंदी व चालू स्थिती'
                   : '• Historical 1950 Provenance, Mutation Entries & Current Status'}
@@ -699,15 +699,15 @@ export default function ParcelsPage() {
             className={clsx(
               'h-9 px-3 sm:px-3.5 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95 shrink-0 shadow-xs cursor-pointer select-none w-full sm:w-auto',
               isFilterPending
-                ? 'bg-[#4169E1] hover:bg-[#3454B4] text-white ring-2 ring-[#4169E1]/30'
-                : 'bg-[#242b6b] hover:bg-[#1a2053] text-white'
+                ? 'bg-[#2457A7] hover:bg-[#1B4588] text-white ring-2 ring-[#2457A7]/25'
+                : 'bg-[#2457A7] hover:bg-[#1B4588] text-white'
             )}
             title={isMarathi ? 'निवडलेले फिल्टर्स लागू करा (Enter)' : 'Apply Selected Filters (Enter)'}
           >
             <Filter className="w-3.5 h-3.5 shrink-0" />
             <span>{isMarathi ? 'लागू करा' : 'Apply'}</span>
             {isFilterPending && (
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-300 animate-pulse shrink-0" />
+              <span className="w-1.5 h-1.5 rounded-full bg-[#C49A45] animate-pulse shrink-0" />
             )}
           </button>
 
@@ -716,18 +716,18 @@ export default function ParcelsPage() {
             type="button"
             onClick={handleResetFilters}
             disabled={loading}
-            className="h-9 px-3 sm:px-3 text-slate-700 hover:text-rose-700 bg-slate-100 hover:bg-rose-50 rounded-xl border border-slate-300 hover:border-rose-300 transition-all active:scale-95 shrink-0 cursor-pointer flex items-center justify-center gap-1.5 text-xs font-bold w-full sm:w-auto shadow-2xs"
+            className="h-9 px-3 sm:px-3 text-[#263548] hover:text-[#C44545] bg-[#F5F6F8] hover:bg-[#FDECEC] rounded-xl border border-[#E4E8EF] hover:border-[#F7C6C6] transition-all active:scale-95 shrink-0 cursor-pointer flex items-center justify-center gap-1.5 text-xs font-bold w-full sm:w-auto shadow-2xs"
             title={isMarathi ? 'सर्व फिल्टर्स रीसेट करा' : 'Reset all filters'}
             aria-label={isMarathi ? 'सर्व फिल्टर्स रीसेट करा' : 'Reset all filters'}
           >
-            <RotateCcw className="w-3.5 h-3.5 text-rose-600 shrink-0" />
+            <RotateCcw className="w-3.5 h-3.5 text-[#C44545] shrink-0" />
             <span>{isMarathi ? 'रीसेट' : 'Reset'}</span>
           </button>
         </div>
       </div>
 
       {/* Enhanced Table Card */}
-      <div className="bg-white border border-slate-200/90 rounded-xl shadow-xs overflow-hidden">
+      <div className="bg-white border border-[#E4E8EF] rounded-xl shadow-xs overflow-hidden">
         {/* Table Top Bar */}
         <div className="px-4 py-2.5 bg-slate-50/80 border-b border-slate-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
           <div className="flex items-center gap-2.5">
@@ -806,13 +806,13 @@ export default function ParcelsPage() {
 
           <div className="flex items-center gap-2 self-end sm:self-auto flex-wrap">
             {/* View Mode Switcher on Mobile/Tablet */}
-            <div className="inline-flex md:hidden p-0.5 rounded-lg bg-slate-200/80 border border-slate-300">
+            <div className="inline-flex md:hidden p-0.5 rounded-lg bg-slate-100 border border-[#E4E8EF]">
               <button
                 type="button"
                 onClick={() => setMobileViewMode('cards')}
                 className={clsx(
                   'px-2 py-1 rounded-md text-[11px] font-bold flex items-center gap-1 transition cursor-pointer',
-                  mobileViewMode === 'cards' ? 'bg-white text-blue-950 shadow-2xs' : 'text-slate-600 hover:text-slate-900'
+                  mobileViewMode === 'cards' ? 'bg-[#142D4E] text-white shadow-2xs' : 'text-slate-600 hover:text-slate-900'
                 )}
                 title={isMarathi ? 'कार्ड दृश्य' : 'Card View'}
               >
@@ -824,7 +824,7 @@ export default function ParcelsPage() {
                 onClick={() => setMobileViewMode('table')}
                 className={clsx(
                   'px-2 py-1 rounded-md text-[11px] font-bold flex items-center gap-1 transition cursor-pointer',
-                  mobileViewMode === 'table' ? 'bg-white text-blue-950 shadow-2xs' : 'text-slate-600 hover:text-slate-900'
+                  mobileViewMode === 'table' ? 'bg-[#142D4E] text-white shadow-2xs' : 'text-slate-600 hover:text-slate-900'
                 )}
                 title={isMarathi ? 'तक्ता दृश्य' : 'Table View'}
               >
@@ -833,8 +833,8 @@ export default function ParcelsPage() {
               </button>
             </div>
 
-            <span className="hidden md:inline-flex items-center gap-1.5 text-[11px] text-slate-500 bg-white px-2.5 py-1 rounded-md border border-slate-200">
-              <Eye className="w-3.5 h-3.5 text-blue-700" />
+            <span className="hidden md:inline-flex items-center gap-1.5 text-[11px] text-slate-500 bg-white px-2.5 py-1 rounded-md border border-[#E4E8EF]">
+              <Eye className="w-3.5 h-3.5 text-[#2457A7]" />
               <span>{isMarathi ? 'ओळीवर क्लिक करून ३६०° साखळी पहा' : 'Click a row to view 360° Provenance Chain'}</span>
             </span>
             {mobileViewMode === 'table' && (
@@ -874,7 +874,7 @@ export default function ParcelsPage() {
               <button
                 type="button"
                 onClick={handleResetFilters}
-                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-[#4169E1] hover:bg-[#3454B4] text-white rounded-lg text-xs font-bold transition shadow-xs active:scale-95"
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-[#2457A7] hover:bg-[#1d4687] text-white rounded-lg text-xs font-bold transition shadow-xs active:scale-95 cursor-pointer"
               >
                 <X className="w-3.5 h-3.5" />
                 <span>{isMarathi ? 'सर्व फिल्टर्स साफ करा' : 'Clear all filters'}</span>
@@ -1003,20 +1003,20 @@ export default function ParcelsPage() {
                         <button
                           type="button"
                           onClick={() => setSelectedUpi(parcel.upi)}
-                          className="flex-1 py-2 px-3 rounded-xl bg-[#4169E1] hover:bg-[#3454B4] active:scale-95 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-2xs transition cursor-pointer"
+                          className="flex-1 py-2 px-3 rounded-xl bg-[#2457A7] hover:bg-[#1d4687] active:scale-95 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-2xs transition cursor-pointer"
                         >
-                          <Eye className="w-3.5 h-3.5 text-amber-400" />
+                          <Eye className="w-3.5 h-3.5 text-[#C49A45]" />
                           <span>{isMarathi ? '३६०° साखळी पहा' : 'View 360° Trace'}</span>
                         </button>
 
                         <button
                           type="button"
                           onClick={() => setUploadModalParcelId(parcel.id)}
-                          className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition active:scale-95 cursor-pointer"
+                          className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-[#E4E8EF] transition active:scale-95 cursor-pointer"
                           title={isMarathi ? 'दस्तऐवज जोडा' : 'Attach Document'}
                           aria-label={isMarathi ? 'दस्तऐवज जोडा' : 'Attach Document'}
                         >
-                          <Upload className="w-3.5 h-3.5" />
+                          <Upload className="w-3.5 h-3.5 text-slate-600" />
                         </button>
                       </div>
                     </div>
@@ -1352,15 +1352,15 @@ export default function ParcelsPage() {
                       <td className="py-2.5 px-2 text-center align-middle">
                         {hasDispute ? (
                           <span
-                            className="inline-flex items-center gap-1 text-[10px] bg-rose-50 text-rose-700 font-semibold px-2 py-0.5 rounded-full border border-rose-200/80 whitespace-nowrap"
+                            className="inline-flex items-center gap-1 text-[10px] bg-[#FDECEC] text-[#C44545] font-semibold px-2 py-0.5 rounded-full border border-[#F8D2D2] whitespace-nowrap"
                             title={activeCase ? (isMarathi ? `सक्रिय केस क्र: ${activeCase.caseNumber}` : `Active Case No: ${activeCase.caseNumber}`) : (isMarathi ? 'शर्तभंग चौकशी प्रलंबित' : 'Breach inquiry pending')}
                           >
-                            <AlertTriangle className="w-3 h-3 text-rose-500 shrink-0" />
+                            <AlertTriangle className="w-3 h-3 text-[#C44545] shrink-0" />
                             <span>{isMarathi ? 'शर्तभंग' : 'Breach'}</span>
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 text-[10px] bg-emerald-50 text-emerald-700 font-semibold px-2 py-0.5 rounded-full border border-emerald-200/80 whitespace-nowrap">
-                            <CheckCircle className="w-3 h-3 text-emerald-600 shrink-0" />
+                          <span className="inline-flex items-center gap-1 text-[10px] bg-[#E8F6F2] text-[#16866A] font-semibold px-2 py-0.5 rounded-full border border-[#BDE7DC] whitespace-nowrap">
+                            <CheckCircle className="w-3 h-3 text-[#16866A] shrink-0" />
                             <span>{isMarathi ? 'निर्वेध' : 'Clear'}</span>
                           </span>
                         )}
@@ -1375,16 +1375,16 @@ export default function ParcelsPage() {
                           <button
                             type="button"
                             onClick={() => setSelectedUpi(parcel.upi)}
-                            className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#4169E1] bg-[#4169E1]/10 hover:bg-[#4169E1]/20 px-2.5 py-1 rounded-md transition active:scale-95 whitespace-nowrap"
+                            className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#2457A7] bg-[#EBF2FC] hover:bg-[#D0E2FA] border border-[#D0E2FA] px-2.5 py-1 rounded-lg transition active:scale-95 whitespace-nowrap cursor-pointer"
                             title={isMarathi ? '१९५० शीर्षक साखळी व संपूर्ण इतिहास पहा' : 'View 1950 title chain and complete history'}
                           >
                             <span>{isMarathi ? '३६०°' : '360°'}</span>
-                            <Eye className="w-3 h-3 text-blue-700" />
+                            <Eye className="w-3 h-3 text-[#2457A7]" />
                           </button>
                           <button
                             type="button"
                             onClick={() => setUploadModalParcelId(parcel.id)}
-                            className="p-1 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-md transition active:scale-95 shrink-0"
+                            className="p-1 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg border border-transparent hover:border-[#E4E8EF] transition active:scale-95 shrink-0 cursor-pointer"
                             title={isMarathi ? 'कागदपत्रे अपलोड करा (DMS)' : 'Upload Documents (DMS)'}
                             aria-label={isMarathi ? 'कागदपत्रे अपलोड करा' : 'Upload Documents'}
                           >

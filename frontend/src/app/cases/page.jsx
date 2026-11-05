@@ -367,26 +367,26 @@ export default function CasesPage() {
   return (
     <div className="space-y-2.5 sm:space-y-3">
       {/* Executive Command Hero Header - Pro Compact */}
-      <div className="bg-[#FFFFFF] text-[#252B36] rounded-2xl px-5 sm:px-6 py-4 sm:py-5 border border-[#E9E7E1] shadow-[0_1px_3px_rgba(0,0,0,0.03)] flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+      <div className="bg-[#FFFFFF] text-[#263548] rounded-2xl px-5 sm:px-6 py-4 sm:py-5 border border-[#E4E8EF] shadow-[0_1px_3px_rgba(0,0,0,0.03)] flex flex-col sm:flex-row justify-between sm:items-center gap-2">
         <div className="flex items-center gap-2.5 min-w-0">
-          <div className="w-8 h-8 rounded-lg bg-amber-500 text-slate-950 flex items-center justify-center shrink-0 shadow-2xs font-bold">
+          <div className="w-8 h-8 rounded-lg bg-[#142D4E] text-[#C49A45] flex items-center justify-center shrink-0 shadow-2xs font-bold">
             <Scale className="w-4 h-4" />
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="text-lg sm:text-xl lg:text-[24px] font-extrabold text-[#252B36] tracking-tight leading-tight">
+              <h1 className="text-lg sm:text-xl lg:text-[24px] font-extrabold text-[#263548] tracking-tight leading-tight">
                 {isMarathi ? 'शर्तभंग व अर्ध-न्यायिक सुनावणी कक्ष' : 'Breach & Quasi-Judicial Hearing Chamber'}
               </h1>
-              <span className="text-[10px] font-bold bg-amber-100 text-amber-900 px-2 py-0.5 rounded-full border border-amber-300">
+              <span className="text-[10px] font-bold bg-[#F3F0FA] text-[#7560B5] px-2 py-0.5 rounded-full border border-[#DED6F2]">
                 {isMarathi ? 'MLRC १९६६' : 'MLRC 1966'}
               </span>
-              <span className="hidden md:inline text-[11px] text-slate-500 font-medium">
+              <span className="hidden md:inline text-[11px] text-[#718096] font-medium">
                 {isMarathi
                   ? '• SDO व तहसीलदार न्यायालयातील सुनावण्या, पंचनामे व शासन जमा आदेश (कलम ३६, ३६अ, ४४, ४५)'
                   : '• SDO & Tehsildar court hearings, panchnamas & govt repossession orders (Sec 36, 36A, 44, 45)'}
               </span>
             </div>
-            <p className="text-[11px] text-slate-500 md:hidden truncate font-medium">
+            <p className="text-[11px] text-[#718096] md:hidden truncate font-medium">
               {isMarathi
                 ? 'SDO व तहसीलदार न्यायालयातील सुनावण्या, पंचनामे व शासन जमा आदेश'
                 : 'SDO & Tehsildar court hearings, panchnamas & repossession orders'}
@@ -398,10 +398,10 @@ export default function CasesPage() {
           <button
             type="button"
             onClick={() => setGlossaryModalOpen(true)}
-            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white hover:bg-amber-50 text-amber-950 border border-amber-200 text-xs font-bold transition-all active:scale-95 shadow-2xs cursor-pointer"
+            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white hover:bg-[#F5F6F8] text-[#263548] border border-[#E4E8EF] text-xs font-bold transition-all active:scale-95 shadow-2xs cursor-pointer"
             title={isMarathi ? 'शर्तभंग व महसूल शब्दावली मदत' : 'Breach & Revenue Glossary Help'}
           >
-            <BookOpen className="w-3.5 h-3.5 text-amber-700" />
+            <BookOpen className="w-3.5 h-3.5 text-[#C49A45]" />
             <span>{isMarathi ? 'शर्तभंग शब्दावली' : 'Breach Glossary'}</span>
           </button>
 
@@ -409,152 +409,152 @@ export default function CasesPage() {
             type="button"
             onClick={() => fetchCases(page)}
             disabled={loading}
-            className="p-1.5 rounded-lg bg-white hover:bg-amber-50 text-slate-700 hover:text-slate-950 border border-slate-300 text-xs transition-all active:scale-95 shadow-2xs cursor-pointer"
+            className="p-1.5 rounded-lg bg-white hover:bg-[#F5F6F8] text-slate-700 hover:text-[#142D4E] border border-[#E4E8EF] text-xs transition-all active:scale-95 shadow-2xs cursor-pointer"
             title={isMarathi ? 'प्रकरणे रीफ्रेश करा' : 'Refresh cases'}
             aria-label={isMarathi ? 'प्रकरणे रीफ्रेश करा' : 'Refresh cases'}
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-amber-600' : 'text-slate-700'}`} />
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-[#2457A7]' : 'text-[#263548]'}`} />
           </button>
         </div>
       </div>
 
-      {/* 5 Dedicated Executive KPI Cards with Compact Pro Styling & Semantic Light Colors */}
+      {/* 5 Dedicated Executive KPI Cards with Compact Pro Styling & Semantic Colors */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-2.5">
-        {/* Metric 1: Total Cases (Blue - Baseline Inventory) */}
+        {/* Metric 1: Total Cases (Primary Blue #2457A7 - Baseline Inventory) */}
         <button
           type="button"
           onClick={() => handleMetricCardFilter('', '')}
           className={`p-2.5 sm:p-3 rounded-xl border text-left transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xs active:scale-98 relative overflow-hidden group cursor-pointer ${
             appliedFilters.status === '' && appliedFilters.isRepossessedToGovt === ''
-              ? 'bg-[#FFFFFF] border-[#4169E1] ring-1 ring-[#4169E1]'
-              : 'bg-[#FFFFFF] border-[#E9E7E1] hover:border-[#cbd5e1]'
+              ? 'bg-[#FFFFFF] border-[#2457A7] ring-1 ring-[#2457A7]'
+              : 'bg-[#FFFFFF] border-[#E4E8EF] hover:border-[#D0E2FA]'
           }`}
         >
-          <div className="absolute top-0 left-0 right-0 h-[2px] bg-[#4169E1]" />
+          <div className="absolute top-0 left-0 right-0 h-[2px] bg-[#2457A7]" />
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-slate-700 group-hover:text-blue-950 transition-colors">
+            <span className="text-[11px] font-bold text-[#263548] group-hover:text-[#2457A7] transition-colors">
               {isMarathi ? 'एकूण प्रकरणे' : 'Total Cases'}
             </span>
-            <div className="w-6 h-6 rounded-lg bg-sky-100/90 border border-sky-200 flex items-center justify-center text-blue-900 transition-transform group-hover:scale-105">
+            <div className="w-6 h-6 rounded-lg bg-[#EBF2FC] border border-[#D0E2FA] flex items-center justify-center text-[#2457A7] transition-transform group-hover:scale-105">
               <Scale className="w-3.5 h-3.5" />
             </div>
           </div>
-          <p className="text-xl sm:text-2xl font-black text-slate-900 mt-1 tracking-tight font-mono">
+          <p className="text-xl sm:text-2xl font-black text-[#263548] mt-1 tracking-tight font-mono">
             {stats.totalCases}
           </p>
-          <p className="text-[10px] text-slate-500 mt-0.5 font-medium truncate">
+          <p className="text-[10px] text-[#718096] mt-0.5 font-medium truncate">
             {isMarathi ? 'नोंदवलेली सर्व प्रकरणे' : 'All registered cases'}
           </p>
         </button>
 
-        {/* Metric 2: Active Hearings (Indigo - Judicial Schedule) */}
+        {/* Metric 2: Active Hearings (Legal Purple #7560B5 - Judicial Schedule) */}
         <button
           type="button"
           onClick={() => handleMetricCardFilter('HEARING_SCHEDULED', '')}
           className={`p-2.5 sm:p-3 rounded-xl border text-left transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xs active:scale-98 relative overflow-hidden group cursor-pointer ${
             appliedFilters.status === 'HEARING_SCHEDULED'
-              ? 'bg-[#FFFFFF] border-[#4169E1] ring-1 ring-[#4169E1]'
-              : 'bg-[#FFFFFF] border-[#E9E7E1] hover:border-[#cbd5e1]'
+              ? 'bg-[#FFFFFF] border-[#7560B5] ring-1 ring-[#7560B5]'
+              : 'bg-[#FFFFFF] border-[#E4E8EF] hover:border-[#DED6F2]'
           }`}
         >
-          <div className="absolute top-0 left-0 right-0 h-[2px] bg-[#4169E1]" />
+          <div className="absolute top-0 left-0 right-0 h-[2px] bg-[#7560B5]" />
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-slate-700 group-hover:text-indigo-950 transition-colors">
+            <span className="text-[11px] font-bold text-[#263548] group-hover:text-[#7560B5] transition-colors">
               {isMarathi ? 'सक्रिय सुनावण्या' : 'Active Hearings'}
             </span>
-            <div className="w-6 h-6 rounded-lg bg-indigo-100/90 border border-indigo-200 flex items-center justify-center text-indigo-700 transition-transform group-hover:scale-105">
+            <div className="w-6 h-6 rounded-lg bg-[#F3F0FA] border border-[#DED6F2] flex items-center justify-center text-[#7560B5] transition-transform group-hover:scale-105">
               <Calendar className="w-3.5 h-3.5" />
             </div>
           </div>
-          <p className="text-xl sm:text-2xl font-black text-indigo-950 mt-1 tracking-tight font-mono">
+          <p className="text-xl sm:text-2xl font-black text-[#263548] mt-1 tracking-tight font-mono">
             {stats.activeHearings}
           </p>
-          <p className="text-[10px] text-indigo-600 mt-0.5 font-medium truncate">
+          <p className="text-[10px] text-[#7560B5] mt-0.5 font-medium truncate">
             {isMarathi ? 'बोर्डावरील सुनावण्या' : 'Hearings on daily board'}
           </p>
         </button>
 
-        {/* Metric 3: Show Cause Notices (Amber - Caution / Vigilance) */}
+        {/* Metric 3: Show Cause Notices (Amber #D28B28 - Caution / Vigilance) */}
         <button
           type="button"
           onClick={() => handleMetricCardFilter('NOTICE_ISSUED', '')}
           className={`p-2.5 sm:p-3 rounded-xl border text-left transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xs active:scale-98 relative overflow-hidden group cursor-pointer ${
             appliedFilters.status === 'NOTICE_ISSUED'
-              ? 'bg-[#FFFFFF] border-[#D97706] ring-1 ring-[#D97706]'
-              : 'bg-[#FFFFFF] border-[#E9E7E1] hover:border-[#cbd5e1]'
+              ? 'bg-[#FFFFFF] border-[#D28B28] ring-1 ring-[#D28B28]'
+              : 'bg-[#FFFFFF] border-[#E4E8EF] hover:border-[#F9E2BE]'
           }`}
         >
-          <div className="absolute top-0 left-0 right-0 h-[2px] bg-[#D97706]" />
+          <div className="absolute top-0 left-0 right-0 h-[2px] bg-[#D28B28]" />
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-slate-700 group-hover:text-amber-950 transition-colors">
+            <span className="text-[11px] font-bold text-[#263548] group-hover:text-[#D28B28] transition-colors">
               {isMarathi ? 'कारणे दाखवा नोटीस' : 'Show Cause Notices'}
             </span>
-            <div className="w-6 h-6 rounded-lg bg-amber-100/90 border border-amber-200 flex items-center justify-center text-amber-700 transition-transform group-hover:scale-105">
+            <div className="w-6 h-6 rounded-lg bg-[#FDF6EB] border border-[#F9E2BE] flex items-center justify-center text-[#D28B28] transition-transform group-hover:scale-105">
               <AlertTriangle className="w-3.5 h-3.5" />
             </div>
           </div>
-          <p className="text-xl sm:text-2xl font-black text-amber-950 mt-1 tracking-tight font-mono">
+          <p className="text-xl sm:text-2xl font-black text-[#263548] mt-1 tracking-tight font-mono">
             {stats.noticesIssued}
           </p>
-          <p className="text-[10px] text-amber-700 mt-0.5 font-medium truncate">
+          <p className="text-[10px] text-[#D28B28] mt-0.5 font-medium truncate">
             {isMarathi ? 'जबाब / खुलासा प्रलंबित' : 'Reply / statement pending'}
           </p>
         </button>
 
-        {/* Metric 4: Shasan Jama (Emerald - Successful State Repossession) */}
+        {/* Metric 4: Shasan Jama (Emerald #16866A - Successful State Repossession) */}
         <button
           type="button"
           onClick={() => handleMetricCardFilter('', 'true')}
           className={`p-2.5 sm:p-3 rounded-xl border text-left transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xs active:scale-98 relative overflow-hidden group cursor-pointer ${
             appliedFilters.isRepossessedToGovt === 'true'
-              ? 'bg-[#FFFFFF] border-[#16A34A] ring-1 ring-[#16A34A]'
-              : 'bg-[#FFFFFF] border-[#E9E7E1] hover:border-[#cbd5e1]'
+              ? 'bg-[#FFFFFF] border-[#16866A] ring-1 ring-[#16866A]'
+              : 'bg-[#FFFFFF] border-[#E4E8EF] hover:border-[#BDE7DC]'
           }`}
         >
-          <div className="absolute top-0 left-0 right-0 h-[2px] bg-[#16A34A]" />
+          <div className="absolute top-0 left-0 right-0 h-[2px] bg-[#16866A]" />
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-slate-700 group-hover:text-emerald-950 transition-colors">
+            <span className="text-[11px] font-bold text-[#263548] group-hover:text-[#16866A] transition-colors">
               {isMarathi ? 'शासन जमा आदेश' : 'Govt Repossessed'}
             </span>
-            <div className="w-6 h-6 rounded-lg bg-emerald-100/90 border border-emerald-200 flex items-center justify-center text-emerald-700 transition-transform group-hover:scale-105">
+            <div className="w-6 h-6 rounded-lg bg-[#E8F6F2] border border-[#BDE7DC] flex items-center justify-center text-[#16866A] transition-transform group-hover:scale-105">
               <ShieldCheck className="w-3.5 h-3.5" />
             </div>
           </div>
-          <p className="text-xl sm:text-2xl font-black text-emerald-950 mt-1 tracking-tight font-mono">
+          <p className="text-xl sm:text-2xl font-black text-[#263548] mt-1 tracking-tight font-mono">
             {stats.shasanJama}
           </p>
-          <p className="text-[10px] text-emerald-700 mt-0.5 font-medium truncate">
+          <p className="text-[10px] text-[#16866A] mt-0.5 font-medium truncate">
             {isMarathi ? 'शासकीय सदरी दाखल' : 'Vested in Govt records'}
           </p>
         </button>
 
-        {/* Metric 5: Total Disputed Area (Rose - Risk Exposure / Area at Stake) */}
-        <div className="p-2.5 sm:p-3 rounded-xl border border-rose-200/80 bg-[#FFFFFF] border border-[#E9E7E1] hover:border-[#cbd5e1] col-span-2 sm:col-span-1 relative overflow-hidden transition-all group">
-          <div className="absolute top-0 left-0 right-0 h-[2px] bg-[#DC2626]" />
+        {/* Metric 5: Total Disputed Area (Rose #C44545 - Risk Exposure / Area at Stake) */}
+        <div className="p-2.5 sm:p-3 rounded-xl border border-[#E4E8EF] hover:border-[#F8D2D2] bg-[#FFFFFF] col-span-2 sm:col-span-1 relative overflow-hidden transition-all group">
+          <div className="absolute top-0 left-0 right-0 h-[2px] bg-[#C44545]" />
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-slate-700 group-hover:text-rose-950 transition-colors">
+            <span className="text-[11px] font-bold text-[#263548] group-hover:text-[#C44545] transition-colors">
               {isMarathi ? 'एकूण शर्तभंग क्षेत्र' : 'Total Breach Area'}
             </span>
-            <div className="w-6 h-6 rounded-lg bg-rose-100/90 border border-rose-200 flex items-center justify-center text-rose-700 transition-transform group-hover:scale-105">
+            <div className="w-6 h-6 rounded-lg bg-[#FDECEC] border border-[#F8D2D2] flex items-center justify-center text-[#C44545] transition-transform group-hover:scale-105">
               <Landmark className="w-3.5 h-3.5" />
             </div>
           </div>
-          <p className="text-xl sm:text-2xl font-black text-rose-950 mt-1 tracking-tight font-mono">
+          <p className="text-xl sm:text-2xl font-black text-[#263548] mt-1 tracking-tight font-mono">
             {Number(stats.totalDisputedAreaHa || 0).toFixed(2)}{' '}
-            <span className="text-xs font-bold text-rose-600">{isMarathi ? 'हेक्टर' : 'Ha'}</span>
+            <span className="text-xs font-bold text-[#C44545]">{isMarathi ? 'हेक्टर' : 'Ha'}</span>
           </p>
-          <p className="text-[10px] text-rose-600 mt-0.5 font-medium truncate">
+          <p className="text-[10px] text-[#C44545] mt-0.5 font-medium truncate">
             {isMarathi ? 'अतिक्रमित / वादग्रस्त क्षेत्र' : 'Encroached / disputed area'}
           </p>
         </div>
       </div>
 
       {/* Modern Filter & Search Command Toolbar */}
-      <div className="relative z-20 bg-white/95 backdrop-blur-xl border border-slate-200/90 rounded-2xl p-2.5 shadow-xs flex flex-col md:flex-row items-stretch md:items-center gap-2 sm:gap-2.5">
+      <div className="relative z-20 bg-white/95 backdrop-blur-xl border border-[#E4E8EF] rounded-2xl p-2.5 shadow-xs flex flex-col md:flex-row items-stretch md:items-center gap-2 sm:gap-2.5">
         {/* Live Search Input & Mobile Filter Toggle Button */}
         <div className="flex items-center gap-2 flex-1 min-w-0">
           <div className="relative flex-1 min-w-0">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <Search className="w-4 h-4 text-[#718096] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
             <input
               type="text"
               value={draftSearch}
@@ -570,7 +570,7 @@ export default function CasesPage() {
                   ? 'केस क्र., गट क्र., गाव किंवा कब्जेदार शोधा...'
                   : 'Search Case No, Gat No, Village or Occupant...'
               }
-              className="w-full pl-10 pr-8 py-2 text-xs bg-slate-50/80 hover:bg-white focus:bg-white border border-slate-200 rounded-xl font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition shadow-2xs"
+              className="w-full pl-10 pr-8 py-2 text-xs bg-slate-50/80 hover:bg-white focus:bg-white border border-[#E4E8EF] rounded-xl font-medium text-[#263548] focus:outline-none focus:ring-2 focus:ring-[#2457A7]/20 focus:border-[#2457A7] transition shadow-2xs"
             />
             {draftSearch && (
               <button
@@ -591,14 +591,14 @@ export default function CasesPage() {
             className={clsx(
               'md:hidden px-2.5 py-2 rounded-xl border text-xs font-bold transition-all flex items-center gap-1.5 shrink-0 active:scale-95 shadow-2xs cursor-pointer',
               showMobileFilters || activeFiltersCount > 0
-                ? 'bg-blue-900 text-white border-blue-900 shadow-xs'
-                : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200'
+                ? 'bg-[#142D4E] text-white border-[#142D4E] shadow-xs'
+                : 'bg-white hover:bg-[#F5F6F8] text-[#263548] border-[#E4E8EF]'
             )}
           >
             <Filter className="w-3.5 h-3.5" />
             <span>{isMarathi ? 'फिल्टर्स' : 'Filters'}</span>
             {activeFiltersCount > 0 && (
-              <span className="w-4 h-4 rounded-full bg-amber-400 text-slate-950 text-[10px] font-black flex items-center justify-center">
+              <span className="w-4 h-4 rounded-full bg-[#C49A45] text-slate-950 text-[10px] font-black flex items-center justify-center">
                 {activeFiltersCount}
               </span>
             )}
@@ -684,15 +684,15 @@ export default function CasesPage() {
             className={clsx(
               'h-9 px-3 sm:px-3.5 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95 shrink-0 shadow-xs cursor-pointer select-none w-full sm:w-auto',
               isFilterPending
-                ? 'bg-blue-600 hover:bg-blue-700 text-white ring-2 ring-blue-400/60 ring-offset-1 shadow-blue-700/20'
-                : 'bg-[#242b6b] hover:bg-[#1a2053] text-white'
+                ? 'bg-[#2457A7] hover:bg-[#1d4687] text-white ring-2 ring-[#2457A7]/40 ring-offset-1 shadow-blue-700/20'
+                : 'bg-[#142D4E] hover:bg-[#10243E] text-white'
             )}
             title={isMarathi ? 'निवडलेले फिल्टर्स लागू करा (Enter)' : 'Apply Selected Filters (Enter)'}
           >
             <Filter className="w-3.5 h-3.5 shrink-0" />
             <span>{isMarathi ? 'लागू करा' : 'Apply'}</span>
             {isFilterPending && (
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-300 animate-pulse shrink-0" />
+              <span className="w-1.5 h-1.5 rounded-full bg-[#C49A45] animate-pulse shrink-0" />
             )}
           </button>
 
@@ -701,36 +701,36 @@ export default function CasesPage() {
             type="button"
             onClick={handleResetFilters}
             disabled={loading}
-            className="h-9 px-3 sm:px-3 text-slate-700 hover:text-rose-700 bg-slate-100 hover:bg-rose-50 rounded-xl border border-slate-300 hover:border-rose-300 transition-all active:scale-95 shrink-0 cursor-pointer flex items-center justify-center gap-1.5 text-xs font-bold w-full sm:w-auto shadow-2xs"
+            className="h-9 px-3 sm:px-3 text-slate-700 hover:text-[#C44545] bg-slate-100 hover:bg-[#FDECEC] rounded-xl border border-[#E4E8EF] hover:border-[#F8D2D2] transition-all active:scale-95 shrink-0 cursor-pointer flex items-center justify-center gap-1.5 text-xs font-bold w-full sm:w-auto shadow-2xs"
             title={isMarathi ? 'सर्व फिल्टर्स रीसेट करा' : 'Reset all filters'}
             aria-label={isMarathi ? 'सर्व फिल्टर्स रीसेट करा' : 'Reset all filters'}
           >
-            <RotateCcw className="w-3.5 h-3.5 text-rose-600 shrink-0" />
+            <RotateCcw className="w-3.5 h-3.5 text-[#C44545] shrink-0" />
             <span>{isMarathi ? 'रीसेट' : 'Reset'}</span>
           </button>
         </div>
       </div>
 
       {/* Enhanced Table Card (Modern Executive Grid) */}
-      <div className="bg-white rounded-2xl border border-slate-200/90 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-2xl border border-[#E4E8EF] shadow-sm overflow-hidden">
         {/* Table Top Bar */}
-        <div className="px-4 sm:px-5 py-3.5 bg-[#FFFFFF] border-b border-[#E9E7E1] flex items-center justify-between gap-2.5">
+        <div className="px-4 sm:px-5 py-3.5 bg-[#FFFFFF] border-b border-[#E4E8EF] flex items-center justify-between gap-2.5">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-xl bg-blue-100/80 border border-blue-200/80 flex items-center justify-center text-blue-900 shrink-0 shadow-2xs">
+            <div className="w-8 h-8 rounded-xl bg-[#EBF2FC] border border-[#D0E2FA] flex items-center justify-center text-[#2457A7] shrink-0 shadow-2xs">
               <FolderArchive className="w-4 h-4" />
             </div>
             <div className="flex items-center gap-2.5 flex-wrap">
-              <span className="text-sm font-black text-slate-900 tracking-tight">
+              <span className="text-sm font-black text-[#263548] tracking-tight">
                 {isMarathi ? 'प्रकरण नोंदवही व सुनावणी तक्ता' : 'Case Register & Hearing Table'}
               </span>
-              <span className="text-[11px] font-extrabold px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-900 border border-blue-200 font-mono">
+              <span className="text-[11px] font-extrabold px-2.5 py-0.5 rounded-full bg-[#EBF2FC] text-[#2457A7] border border-[#D0E2FA] font-mono">
                 {totalCount} {isMarathi ? 'नोंदणी' : 'Records'}
               </span>
               {appliedFilters.village && (
                 <>
                   <span className="text-slate-300">•</span>
-                  <span className="inline-flex items-center gap-1 text-[11px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200/80 px-2.5 py-0.5 rounded-full">
-                    <MapPin className="w-3 h-3 text-emerald-600" />
+                  <span className="inline-flex items-center gap-1 text-[11px] font-bold bg-[#E8F6F2] text-[#16866A] border border-[#BDE7DC] px-2.5 py-0.5 rounded-full">
+                    <MapPin className="w-3 h-3 text-[#16866A]" />
                     {isMarathi ? `गाव: ${formatVillageName(appliedFilters.village, true)}` : `Village: ${formatVillageName(appliedFilters.village, false)}`}
                   </span>
                 </>
@@ -738,10 +738,10 @@ export default function CasesPage() {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-[11px] text-slate-400 font-medium hidden sm:inline">
+            <span className="text-[11px] text-[#718096] font-medium hidden sm:inline">
               {isMarathi ? 'MLRC १९६६ अर्ध-न्यायिक प्रकरणे' : 'MLRC 1966 Quasi-Judicial Cases'}
             </span>
-            <span className="text-[10px] text-blue-800 bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-200 sm:hidden font-bold">
+            <span className="text-[10px] text-[#2457A7] bg-[#EBF2FC] px-2.5 py-0.5 rounded-full border border-[#D0E2FA] sm:hidden font-bold">
               {isMarathi ? 'स्मार्ट कार्ड सूची' : 'Smart Case Cards'}
             </span>
           </div>
@@ -1053,7 +1053,7 @@ export default function CasesPage() {
             <div className="hidden md:block w-full overflow-x-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
               <table className="w-full border-collapse text-[15px] sm:text-base min-w-[960px]">
                 {/* Native Table Head with Balanced Proportions */}
-                <thead className="bg-slate-50/80 backdrop-blur-sm text-slate-500 text-[11px] font-black uppercase tracking-wider border-b border-slate-200/90 select-none">
+                <thead className="bg-[#F5F6F8] text-[#718096] text-[11px] font-black uppercase tracking-wider border-b border-[#E4E8EF] select-none">
                   <tr>
                     <th scope="col" className="py-3 px-2 w-[4%] min-w-[42px] text-center">
                       #
@@ -1093,11 +1093,11 @@ export default function CasesPage() {
                       <tr
                         className={`transition-colors duration-150 ${
                           isExpanded
-                            ? 'bg-blue-50/50 border-l-4 border-l-blue-900'
+                            ? 'bg-[#EBF2FC]/30 border-l-4 border-l-[#2457A7]'
                             : index % 2 === 0
                             ? 'bg-white'
-                            : 'bg-slate-50/40'
-                        } hover:bg-blue-50/30`}
+                            : 'bg-[#F5F6F8]/40'
+                        } hover:bg-[#EBF2FC]/20`}
                       >
                         {/* Col 1: Sr No & Expand Button (Only for cases with hearings/orders) */}
                         <td className="py-3 px-2 text-center align-middle">
@@ -1108,8 +1108,8 @@ export default function CasesPage() {
                                 onClick={() => toggleRowExpansion(c.id)}
                                 className={`w-6 h-6 rounded-lg flex items-center justify-center transition-all cursor-pointer ${
                                   isExpanded
-                                    ? 'bg-blue-900 text-white shadow-2xs'
-                                    : 'bg-blue-50 hover:bg-blue-100 text-blue-900 border border-blue-200/70'
+                                    ? 'bg-[#142D4E] text-white shadow-2xs'
+                                    : 'bg-[#EBF2FC] hover:bg-[#D0E2FA] text-[#2457A7] border border-[#D0E2FA]'
                                 }`}
                                 title={
                                   isExpanded
@@ -1262,17 +1262,17 @@ export default function CasesPage() {
                             <button
                               type="button"
                               onClick={() => setSelectedCaseForHearing(c)}
-                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-blue-950 text-white text-xs font-bold shadow-xs hover:shadow transition-all active:scale-95 shrink-0 cursor-pointer"
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#142D4E] hover:bg-[#10243E] text-white text-xs font-bold shadow-xs hover:shadow transition-all active:scale-95 shrink-0 cursor-pointer"
                               title={isMarathi ? 'सुनावणी / रोजनामा नोंदवा' : 'Record Hearing / Roznama'}
                             >
-                              <Scale className="w-3.5 h-3.5 text-amber-300" />
+                              <Scale className="w-3.5 h-3.5 text-[#C49A45]" />
                               <span>{isMarathi ? 'सुनावणी' : 'Hearing'}</span>
                             </button>
 
                             <button
                               type="button"
                               onClick={() => setTraceUpi(c.parcel?.upi)}
-                              className="w-8 h-8 rounded-xl border border-slate-200 hover:border-slate-300 hover:bg-slate-100/90 text-slate-500 hover:text-slate-900 flex items-center justify-center transition active:scale-95 cursor-pointer shadow-2xs"
+                              className="w-8 h-8 rounded-xl border border-[#E4E8EF] hover:border-[#D0E2FA] hover:bg-[#EBF2FC] text-[#718096] hover:text-[#2457A7] flex items-center justify-center transition active:scale-95 cursor-pointer shadow-2xs"
                               title={isMarathi ? '१९५० जुना इतिहास व फेरफार' : '1950 Title History & Mutations'}
                             >
                               <Eye className="w-3.5 h-3.5" />
@@ -1281,7 +1281,7 @@ export default function CasesPage() {
                             <button
                               type="button"
                               onClick={() => setUploadDocCaseId(c.id)}
-                              className="relative w-8 h-8 rounded-xl border border-slate-200 hover:border-slate-300 hover:bg-slate-100/90 text-slate-500 hover:text-slate-900 flex items-center justify-center transition active:scale-95 cursor-pointer shadow-2xs"
+                              className="relative w-8 h-8 rounded-xl border border-[#E4E8EF] hover:border-slate-300 hover:bg-[#F5F6F8] text-[#718096] hover:text-[#263548] flex items-center justify-center transition active:scale-95 cursor-pointer shadow-2xs"
                               title={
                                 isMarathi
                                   ? `कागदपत्रे / पुरावे अपलोड (${c.documents?.length || 0} उपलब्ध)`
@@ -1290,7 +1290,7 @@ export default function CasesPage() {
                             >
                               <Upload className="w-3.5 h-3.5" />
                               {c.documents?.length > 0 && (
-                                <span className="absolute top-1 right-1 w-2 h-2 bg-blue-600 rounded-full" />
+                                <span className="absolute top-1 right-1 w-2 h-2 bg-[#2457A7] rounded-full" />
                               )}
                             </button>
 
@@ -1298,7 +1298,7 @@ export default function CasesPage() {
                               <button
                                 type="button"
                                 onClick={() => setShasanJamaCase(c)}
-                                className="w-8 h-8 rounded-xl border border-rose-200 hover:border-rose-300 hover:bg-rose-50 text-rose-600 hover:text-rose-800 flex items-center justify-center transition active:scale-95 cursor-pointer shadow-2xs"
+                                className="w-8 h-8 rounded-xl border border-[#F8D2D2] hover:border-[#F4A8A8] bg-[#FDECEC] hover:bg-[#F9D6D6] text-[#C44545] flex items-center justify-center transition active:scale-95 cursor-pointer shadow-2xs"
                                 title={isMarathi ? 'शासन जमा आदेश पारित करा' : 'Issue Govt Repossession Order'}
                               >
                                 <ShieldCheck className="w-3.5 h-3.5" />
@@ -1310,13 +1310,13 @@ export default function CasesPage() {
 
                       {/* Judicial Proceedings Dossier: Rendered ONLY when hearings or final orders exist */}
                       {isExpanded && hasProceedings && (
-                        <tr className="bg-blue-50/20 border-b border-slate-200">
+                        <tr className="bg-[#EBF2FC]/20 border-b border-[#E4E8EF]">
                           <td colSpan={6} className="px-3 sm:px-6 py-3">
-                            <div className="bg-white border border-blue-200/80 rounded-2xl p-4 shadow-sm space-y-3">
+                            <div className="bg-white border border-[#D0E2FA] rounded-2xl p-4 shadow-sm space-y-3">
                               {/* Dossier Header Strip */}
                               <div className="flex flex-wrap items-center justify-between gap-2 pb-2.5 border-b border-slate-100">
-                                <span className="text-xs font-black text-slate-800 flex items-center gap-1.5">
-                                  <Scale className="w-4 h-4 text-blue-700" />
+                                <span className="text-xs font-black text-[#263548] flex items-center gap-1.5">
+                                  <Scale className="w-4 h-4 text-[#2457A7]" />
                                   <span>
                                     {isMarathi
                                       ? `न्यायालयीन रोजनामा व आदेश तपशील (${c.caseNumber})`
