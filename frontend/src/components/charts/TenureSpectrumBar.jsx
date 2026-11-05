@@ -110,21 +110,34 @@ export default function TenureSpectrumBar({ data = [], taluka = '' }) {
 
   const CustomPieTooltip = ({ active, payload }) => {
     if (active && payload && payload.length) {
-      const item = payload[0].payload;
-      const pct = totalMetric > 0 ? ((item.value / totalMetric) * 100).toFixed(1) : 0;
-      const displayName = isMarathi ? item.nameMr : item.nameEn;
+      const p = payload[0];
+      const raw = p.payload || {};
+      const val = typeof p.value === 'number' ? p.value : (typeof raw.value === 'number' ? raw.value : 0);
+      const pct = totalMetric > 0 ? ((val / totalMetric) * 100).toFixed(1) : 0;
+
+      const matched = items.find((i) =>
+        i.id === raw.id ||
+        (isMarathi ? i.nameMr : i.nameEn) === (p.name || raw.name) ||
+        i.nameMr === raw.name ||
+        i.nameEn === raw.name
+      ) || raw;
+
+      const displayName = (isMarathi ? (matched.nameMr || matched.name) : (matched.nameEn || matched.name)) || p.name || '';
+      const color = matched.color || raw.color || p.color || '#2563EB';
+      const numArea = typeof matched.areaHa === 'number' ? matched.areaHa : (metricMode === 'area' ? val : 0);
+      const numCount = typeof matched.count === 'number' ? matched.count : (metricMode === 'count' ? val : 0);
 
       return (
         <div className="bg-slate-950 text-white px-3 py-2 rounded-xl shadow-xl border border-slate-800 text-xs pointer-events-none z-50">
           <div className="flex items-center gap-1.5 font-bold mb-1">
-            <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: item.color }} />
+            <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: color }} />
             <span>{displayName}</span>
             <span className="text-amber-400 font-mono">({pct}%)</span>
           </div>
           <div className="text-[11px] text-slate-300 font-mono">
             {metricMode === 'area'
-              ? `${item.areaHa.toLocaleString('en-IN', { minimumFractionDigits: 2 })} Ha`
-              : `${item.count.toLocaleString('en-IN')} ${isMarathi ? 'गट' : 'Parcels'}`}
+              ? `${(Number(numArea) || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })} Ha`
+              : `${(Number(numCount) || 0).toLocaleString('en-IN')} ${isMarathi ? 'गट' : 'Parcels'}`}
           </div>
         </div>
       );
@@ -134,8 +147,35 @@ export default function TenureSpectrumBar({ data = [], taluka = '' }) {
 
   // Custom Treemap Tile Content Renderer
   const CustomizedTreemapContent = (props) => {
-    const { depth, x, y, width, height, name, color, pct, areaHa, count } = props;
-    if (depth !== 1 || !width || !height || width < 4 || height < 4) return null;
+    const { depth, x, y, width, height, name, index, data, payload } = props;
+    if ((depth !== undefined && depth !== 1) || !width || !height || width < 4 || height < 4) return null;
+
+    // Resolve original data item through multiple fallbacks
+    const raw = data || payload || {};
+    const itemByIndex = (typeof index === 'number' && items[index]) ? items[index] : null;
+    const itemByName = items.find((i) =>
+      (isMarathi ? i.nameMr : i.nameEn) === name ||
+      i.nameMr === name ||
+      i.nameEn === name ||
+      i.nameMr === raw.nameMr ||
+      i.nameEn === raw.nameEn
+    );
+    const item = itemByIndex || itemByName || raw || {};
+
+    const color = props.color || raw.color || item.color || '#2563EB';
+    const numArea = typeof props.areaHa === 'number'
+      ? props.areaHa
+      : (typeof raw.areaHa === 'number'
+        ? raw.areaHa
+        : (typeof item.areaHa === 'number' ? item.areaHa : (metricMode === 'area' && typeof item.value === 'number' ? item.value : 0)));
+    const numCount = typeof props.count === 'number'
+      ? props.count
+      : (typeof raw.count === 'number'
+        ? raw.count
+        : (typeof item.count === 'number' ? item.count : (metricMode === 'count' && typeof item.value === 'number' ? item.value : 0)));
+
+    const pct = props.pct || raw.pct || (totalMetric > 0 && item.value ? ((item.value / totalMetric) * 100).toFixed(1) : '0');
+    const displayName = (isMarathi ? item.nameMr : item.nameEn) || name || raw.name || '';
 
     return (
       <g>
@@ -162,7 +202,7 @@ export default function TenureSpectrumBar({ data = [], taluka = '' }) {
             fontWeight={700}
             className="pointer-events-none select-none font-sans"
           >
-            {name}
+            {displayName}
           </text>
         )}
         {width > 50 && height > 44 && (
@@ -187,8 +227,8 @@ export default function TenureSpectrumBar({ data = [], taluka = '' }) {
             className="pointer-events-none select-none font-mono"
           >
             {metricMode === 'area'
-              ? `${areaHa >= 100000 ? `${(areaHa / 100000).toFixed(2)}L` : areaHa.toFixed(0)} Ha`
-              : `${count} गट`}
+              ? `${numArea >= 100000 ? `${(numArea / 100000).toFixed(2)}L` : (Number(numArea) || 0).toFixed(0)} Ha`
+              : `${(Number(numCount) || 0).toLocaleString('en-IN')} ${isMarathi ? 'गट' : 'Parcels'}`}
           </text>
         )}
       </g>
@@ -324,8 +364,8 @@ export default function TenureSpectrumBar({ data = [], taluka = '' }) {
                         </span>
                         <span className="text-lg sm:text-xl font-black text-slate-900 tracking-tight leading-none my-0.5 font-mono">
                           {metricMode === 'area'
-                            ? `${activeItem.areaHa >= 100000 ? `${(activeItem.areaHa / 100000).toFixed(2)}L` : activeItem.areaHa.toFixed(0)} Ha`
-                            : `${activeItem.count.toLocaleString('en-IN')}`}
+                            ? `${(Number(activeItem.areaHa) || 0) >= 100000 ? `${((Number(activeItem.areaHa) || 0) / 100000).toFixed(2)}L` : (Number(activeItem.areaHa) || 0).toFixed(0)} Ha`
+                            : `${(Number(activeItem.count) || 0).toLocaleString('en-IN')}`}
                         </span>
                         <span className="text-[11.5px] font-bold text-slate-500 font-mono">
                           {totalMetric > 0 ? ((activeItem.value / totalMetric) * 100).toFixed(1) : 0}% {isMarathi ? 'वाटा' : 'share'}
