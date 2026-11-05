@@ -506,7 +506,8 @@ export const api = {
       params.append('taluka', query);
     } else {
       Object.entries(query).forEach(([k, v]) => {
-        if (v !== undefined && v !== null && v !== '' && v !== 'all') {
+        if (v !== undefined && v !== null && v !== '') {
+          if (v === 'all' && k !== 'pageSize' && k !== 'limit') return;
           params.append(k, v);
         }
       });

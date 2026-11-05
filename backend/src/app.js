@@ -39,6 +39,20 @@ const authLimiter = rateLimit({
 });
 app.use('/api/auth/login', authLimiter);
 
+// High-performance Rate Limiter for Report & Prapatra Endpoints (Protection against connection pool exhaustion & rapid polling)
+const reportsLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 120, // 120 requests per minute per IP (generous for rapid UI interactions, protects Postgres pool)
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    success: false,
+    error: 'अहवाल विनंत्यांची मर्यादा ओलांडली आहे. कृपया काही सेकंद थांबा. (Rate limit exceeded for reports. Please wait a moment.)',
+  },
+});
+app.use('/api/prapatra', reportsLimiter);
+app.use('/api/reports', reportsLimiter);
+
 // Production-Ready CORS Handling
 const corsMiddleware = configureCors();
 app.use(corsMiddleware);

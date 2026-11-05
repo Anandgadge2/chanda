@@ -232,6 +232,9 @@ export function cleanVillageName(name) {
   }
 
   let raw = String(name);
+  raw = raw.replace(/UMRILAL\s*MAN\s*RITH/gi, 'उमरी लालमान रीठ');
+  raw = raw.replace(/Kanhalgaon/gi, 'कन्हाळगाव');
+  raw = raw.replace(/tangalakerambodijambhuldhara/gi, 'टांगाळा, केरामबोडी, जांभुळधरा');
 
   // Standardize known aliases / abbreviations
   const aliases = {
