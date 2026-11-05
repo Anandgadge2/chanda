@@ -212,24 +212,24 @@ export default function EnforcementPipelineMatrix({
       <div>
         {/* ── Top Header Section (Matching Reference Images 1 & 2) ── */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
-          <div className="flex items-start sm:items-center gap-3 min-w-0">
+          <div className="flex items-start sm:items-center gap-3.5 min-w-0">
             {/* Scale Icon Badge */}
             <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 shadow-2xs ${
               isMarathi ? 'bg-[#0F2042] text-white' : 'bg-[#FFFBEB] border border-[#FDE68A] text-[#D97706]'
             }`}>
-              <Scale className="w-5 h-5" />
+              <Scale className="w-5 h-5 stroke-[2.2]" />
             </div>
 
             <div className="min-w-0">
               <div className="flex items-center gap-2.5 flex-wrap">
-                <h3 className="text-base sm:text-lg font-bold text-[#0F172A] tracking-tight">
+                <h3 className="text-[18px] font-bold text-[#0F172A] tracking-tight leading-[1.5]">
                   {isMarathi ? 'महसूल वाद व न्यायालयीन कार्यवाही' : 'Enforcement & Legal Inquiries'}
                 </h3>
-                <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-[#FEE2E2]/70 text-[#DC2626] border border-[#FECACA] tabular-nums shrink-0">
+                <span className="text-[14px] font-bold px-3 py-0.5 rounded-full bg-[#FEE2E2]/70 text-[#DC2626] border border-[#FECACA] tabular-nums shrink-0 leading-[1.5]">
                   {formatIndianNumber(computedTotalCases, isMarathi)} {isMarathi ? 'प्रकरणे' : 'Cases'}
                 </span>
               </div>
-              <p className="text-xs text-slate-500 font-medium mt-0.5">
+              <p className="text-[14px] text-[#475569] font-medium mt-0.5 leading-[1.5]">
                 {isMarathi
                   ? 'MLRC कलम ३६, ३६अ, ५०–५४ अन्वये अर्ध-न्यायिक प्रकरणे'
                   : 'Quasi-judicial proceedings under MLRC Sec 36, 36A, 50-54'}
@@ -244,28 +244,28 @@ export default function EnforcementPipelineMatrix({
               <button
                 type="button"
                 onClick={() => setViewMode('categories')}
-                className={`px-2.5 py-1 rounded-md text-xs font-bold transition cursor-pointer flex items-center gap-1.5 ${
+                className={`px-3 py-1.5 rounded-md text-[14px] font-semibold transition cursor-pointer flex items-center gap-1.5 leading-[1.5] ${
                   viewMode === 'categories'
                     ? 'bg-white text-[#0F172A] shadow-xs'
                     : 'text-slate-500 hover:text-[#0F172A]'
                 }`}
                 title={isMarathi ? 'टप्पे व उल्लंघन प्रकार' : 'Pipeline & Breach Categories'}
               >
-                <Layers className="w-3.5 h-3.5" />
+                <Layers className="w-4 h-4" />
                 <span>{isMarathi ? 'संवर्गनिहाय' : 'Overview'}</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => setViewMode('donut')}
-                className={`px-2.5 py-1 rounded-md text-xs font-bold transition cursor-pointer flex items-center gap-1.5 ${
+                className={`px-3 py-1.5 rounded-md text-[14px] font-semibold transition cursor-pointer flex items-center gap-1.5 leading-[1.5] ${
                   viewMode === 'donut'
                     ? 'bg-white text-[#0F172A] shadow-xs'
                     : 'text-slate-500 hover:text-[#0F172A]'
                 }`}
                 title={isMarathi ? 'कारणे दाखवा व लेखापरीक्षण स्थिती' : 'Show-Cause & Audit Status'}
               >
-                <PieIcon className="w-3.5 h-3.5" />
+                <PieIcon className="w-4 h-4" />
                 <span>{isMarathi ? 'टप्पे' : 'Status'}</span>
               </button>
             </div>
@@ -273,11 +273,11 @@ export default function EnforcementPipelineMatrix({
             {/* Cases Chamber Link Button */}
             <Link
               href={`/cases${taluka ? `?taluka=${encodeURIComponent(taluka)}` : ''}`}
-              className="bg-[#EFF6FF] hover:bg-[#DBEAFE] text-[#1D4ED8] border border-[#BFDBFE] px-3.5 py-1.5 rounded-lg text-xs font-bold inline-flex items-center gap-1.5 transition active:scale-95 shadow-2xs"
+              className="bg-[#EFF6FF] hover:bg-[#DBEAFE] text-[#1D4ED8] border border-[#BFDBFE] px-3.5 py-1.5 rounded-lg text-[14px] font-bold inline-flex items-center gap-1.5 transition active:scale-95 shadow-2xs leading-[1.5]"
               title={isMarathi ? 'न्यायालयीन कक्षात जा' : 'Go to Cases Chamber'}
             >
               <span>{isMarathi ? 'न्यायालयीन कक्ष' : 'Cases'}</span>
-              <ArrowUpRight className="w-3.5 h-3.5" />
+              <ArrowUpRight className="w-4 h-4" />
             </Link>
           </div>
         </div>
@@ -290,21 +290,21 @@ export default function EnforcementPipelineMatrix({
           <div className="py-2 font-sans">
             {/* Section 1: 4-Stage Horizontal Pipeline Flow */}
             <div className="my-4">
-              <div className="text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-3 flex items-center justify-between">
+              <div className="text-[13.5px] font-bold uppercase tracking-wider text-slate-500 mb-3 flex items-center justify-between leading-[1.5]">
                 <span>{isMarathi ? 'कारवाई टप्पे (ENFORCEMENT STAGES)' : 'Enforcement Stages'}</span>
-                <span className="text-[11px] font-medium text-slate-400">
+                <span className="text-[13px] font-medium text-slate-400">
                   {isMarathi ? 'प्रगती साखळी' : 'Sequential Flow'}
                 </span>
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3.5">
                 {operationalPipelineStages.map((stage) => {
                   return (
                     <div
                       key={stage.key}
-                      className={`p-3.5 rounded-xl border ${stage.cardBorder} ${stage.cardBg} flex flex-col justify-between transition-all duration-150 hover:shadow-xs`}
+                      className={`p-3.5 sm:p-4 rounded-xl border ${stage.cardBorder} ${stage.cardBg} flex flex-col justify-between transition-all duration-150 hover:shadow-xs`}
                     >
-                      <div className="flex items-center justify-between text-xs font-bold">
+                      <div className="flex items-center justify-between text-[13.5px] font-bold leading-[1.5]">
                         <span className={stage.idxText}>#{stage.stageNumber}</span>
                         <span className={stage.idxText}>{isMarathi ? 'टप्पा' : 'Stage'}</span>
                       </div>
@@ -313,7 +313,7 @@ export default function EnforcementPipelineMatrix({
                         {formatIndianNumber(stage.count, isMarathi)}
                       </p>
 
-                      <p className={`text-xs font-bold truncate ${stage.labelText}`}>
+                      <p className={`text-[14.5px] font-bold truncate leading-[1.5] ${stage.labelText}`}>
                         {isMarathi ? stage.labelMr : stage.labelEn}
                       </p>
                     </div>
@@ -324,9 +324,9 @@ export default function EnforcementPipelineMatrix({
 
             {/* Section 2: Breach Categories Progress Bars with Generous Vertical Spacing */}
             <div className="pt-4 border-t border-slate-100">
-              <div className="text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-4 flex items-center justify-between">
+              <div className="text-[13.5px] font-bold uppercase tracking-wider text-slate-500 mb-4 flex items-center justify-between leading-[1.5]">
                 <span>{isMarathi ? 'उल्लंघन प्रकार व वाद विस्तार' : 'Breach Categories & Exposure'}</span>
-                <span className="text-[11px] font-medium text-slate-400">
+                <span className="text-[13px] font-medium text-slate-400">
                   {isMarathi ? 'वाद संख्या व क्षेत्रफळ' : 'Cases & Area'}
                 </span>
               </div>
@@ -341,16 +341,16 @@ export default function EnforcementPipelineMatrix({
                       className="block group cursor-pointer"
                     >
                       <div className="flex justify-between items-baseline gap-2 mb-1.5">
-                        <span className="text-[13.5px] font-bold text-[#0F172A] group-hover:text-[#1D4ED8] transition truncate">
+                        <span className="text-[14.5px] font-semibold text-[#0F172A] group-hover:text-[#1D4ED8] transition truncate leading-[1.5]">
                           {isMarathi ? v.nameMr : v.nameEn}
                         </span>
 
-                        <div className="flex items-baseline gap-1.5 shrink-0 text-right">
-                          <span className="text-[13.5px] font-bold text-[#0F172A] tabular-nums">
+                        <div className="flex items-baseline gap-2 shrink-0 text-right">
+                          <span className="text-[14px] font-bold text-[#0F172A] tabular-nums">
                             {formatIndianNumber(v.count, isMarathi)} {isMarathi ? 'वाद' : 'Cases'}
                           </span>
                           {v.areaHa > 0 && (
-                            <span className="text-xs text-slate-400 font-normal tabular-nums">
+                            <span className="text-[13.5px] text-[#475569] font-medium tabular-nums">
                               ({formatHaArea(v.areaHa, isMarathi)})
                             </span>
                           )}
@@ -408,7 +408,7 @@ export default function EnforcementPipelineMatrix({
                           backgroundColor: '#0F172A',
                           borderRadius: '8px',
                           color: '#FFFFFF',
-                          fontSize: '12px',
+                          fontSize: '13px',
                           border: 'none',
                         }}
                       />
@@ -418,13 +418,13 @@ export default function EnforcementPipelineMatrix({
 
                 {/* Donut Center Core Display */}
                 <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-center">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#C44545] bg-[#FDECEC] px-2 py-0.5 rounded-full border border-[#F8D2D2] mb-0.5">
+                  <span className="text-[12px] font-bold uppercase tracking-wider text-[#C44545] bg-[#FDECEC] px-2.5 py-0.5 rounded-full border border-[#F8D2D2] mb-1">
                     {isMarathi ? 'एकूण प्रकरणे' : 'Total Cases'}
                   </span>
                   <span className="text-xl sm:text-2xl font-black text-[#0F172A] tracking-tight tabular-nums">
                     {formatIndianNumber(computedTotalCases, isMarathi)}
                   </span>
-                  <span className="text-[10px] text-slate-500 font-medium">
+                  <span className="text-[12px] text-slate-500 font-medium">
                     {isMarathi ? `${formatIndianNumber(computedTotalCases, isMarathi)} दाखल प्रकरणे` : `${formatIndianNumber(computedTotalCases, false)} Registered`}
                   </span>
                 </div>
@@ -447,7 +447,7 @@ export default function EnforcementPipelineMatrix({
                     >
                       <div className="flex items-center gap-3 min-w-0 pr-2">
                         <span className="w-3.5 h-3.5 rounded-full shrink-0 shadow-2xs" style={{ backgroundColor: s.color }} />
-                        <span className="text-sm sm:text-base font-bold text-[#0F172A] truncate">
+                        <span className="text-sm sm:text-base font-bold text-[#0F172A] truncate leading-[1.5]">
                           {s.name}
                         </span>
                       </div>
@@ -470,8 +470,8 @@ export default function EnforcementPipelineMatrix({
       </div>
 
       {/* ── Footer Strip (Matching Reference Images 1, 2 & 3) ── */}
-      <div className="pt-4 border-t border-slate-100 mt-5 flex items-center justify-between text-xs flex-wrap gap-2">
-        <div className="flex items-center gap-1.5 text-xs text-slate-500 font-medium">
+      <div className="pt-4 border-t border-slate-100 mt-5 flex items-center justify-between text-[13.5px] leading-[1.5] flex-wrap gap-2">
+        <div className="flex items-center gap-1.5 text-[13.5px] text-[#475569] font-medium">
           <span>{isMarathi ? 'एकूण बाधित क्षेत्र:' : 'Total Govt Vested:'}</span>
           <span className="font-bold text-[#C44545] tabular-nums">
             {formatHaArea(totalAreaHa, isMarathi)}
@@ -480,10 +480,10 @@ export default function EnforcementPipelineMatrix({
 
         <Link
           href={`/cases?isRepossessedToGovt=true${taluka ? `&taluka=${encodeURIComponent(taluka)}` : ''}`}
-          className="font-bold text-[#15803D] text-xs bg-[#F0FDF4] hover:bg-[#DCFCE7] border border-[#BBF7D0] px-3.5 py-1 rounded-lg tabular-nums flex items-center gap-1.5 transition shadow-2xs"
+          className="font-bold text-[#15803D] text-[13.5px] leading-[1.5] bg-[#F0FDF4] hover:bg-[#DCFCE7] border border-[#BBF7D0] px-3.5 py-1.5 rounded-lg tabular-nums flex items-center gap-1.5 transition shadow-2xs"
           title={isMarathi ? 'शासन जमा आदेश पहा' : 'View Govt Repossession Orders'}
         >
-          <ShieldCheck className="w-3.5 h-3.5" />
+          <ShieldCheck className="w-4 h-4" />
           <span>{formatHaArea(repossessedArea, isMarathi)} {isMarathi ? 'शासन जमा' : 'Repossessed'}</span>
         </Link>
       </div>

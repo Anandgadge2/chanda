@@ -38,6 +38,16 @@ const EnforcementPipelineMatrix = dynamic(
   { ssr: false, loading: () => <ChartSkeleton height="h-[340px]" /> }
 );
 
+const HistoricalProvenanceTrendChart = dynamic(
+  () => import('../../components/charts/HistoricalProvenanceTrendChart'),
+  { ssr: false, loading: () => <ChartSkeleton height="h-[340px]" /> }
+);
+
+const TalukaMountainChart = dynamic(
+  () => import('../../components/charts/TalukaMountainChart'),
+  { ssr: false, loading: () => <ChartSkeleton height="h-[340px]" /> }
+);
+
 const TalukaRankedTable = dynamic(
   () => import('../../components/charts/TalukaRankedTable'),
   { ssr: false, loading: () => <ChartSkeleton height="h-[340px]" /> }
@@ -193,31 +203,31 @@ export default function DashboardPage() {
       {/* ─────────────────────────────────────────────────────────────
           1. EXECUTIVE COMMAND RIBBON - Luminous Enterprise White Toolbar
          ───────────────────────────────────────────────────────────── */}
-      <div className="bg-white text-slate-900 rounded-xl px-4 py-3 sm:px-5 sm:py-3.5 shadow-[0_1px_3px_rgba(0,0,0,0.03)] border border-slate-200/90 flex flex-col md:flex-row justify-between md:items-center gap-3">
+      <div className="bg-white text-slate-900 rounded-2xl px-5 py-4 sm:px-6 sm:py-4.5 shadow-[0_1px_3px_rgba(0,0,0,0.03)] border border-slate-200/90 flex flex-col md:flex-row justify-between md:items-center gap-4 font-sans">
         {/* Title & Identity */}
-        <div className="flex items-center gap-3 min-w-0">
-          <div className="w-9 h-9 rounded-lg bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-xs">
-            <Landmark className="w-5 h-5" />
+        <div className="flex items-center gap-3.5 min-w-0">
+          <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+            <Landmark className="w-5 h-5 stroke-[2.2]" />
           </div>
           <div className="min-w-0">
-            <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="text-base sm:text-lg font-extrabold text-slate-900 tracking-tight leading-tight">
+            <div className="flex items-center gap-2.5 flex-wrap">
+              <h1 className="text-[21px] font-bold text-[#0F172A] tracking-tight leading-[1.5]">
                 {isMarathi ? 'महसूल संनियंत्रण केंद्र' : 'Revenue Intelligence Command Center'}
               </h1>
-              <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200/70 shrink-0">
+              <span className="text-[13.5px] font-bold px-3 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200/70 shrink-0 leading-[1.5]">
                 {selectedTalukaScope}
               </span>
             </div>
-            <p className="text-xs text-slate-500 font-medium mt-0.5">
+            <p className="text-[14px] text-[#334155] font-medium leading-[1.5] mt-0.5">
               {isMarathi ? 'जिल्हाधिकारी कार्यालय, चंद्रपूर • जमीन अभिलेख व वैधानिक संनियंत्रण' : 'Collectorate, Chandrapur • Land Records & Statutory Monitoring'}
             </p>
           </div>
         </div>
 
         {/* Action Controls Toolbar */}
-        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 flex-wrap sm:flex-nowrap w-full md:w-auto">
+        <div className="flex items-center gap-2 shrink-0 flex-wrap sm:flex-nowrap w-full md:w-auto">
           {/* Taluka Selector */}
-          <div className="flex-1 min-w-[140px] sm:w-[185px] sm:flex-initial">
+          <div className="flex-1 min-w-[150px] sm:w-[200px] sm:flex-initial">
             <SearchableSelect
               options={talukaSelectOptions}
               value={draftTaluka}
@@ -236,14 +246,14 @@ export default function DashboardPage() {
             onClick={handleApplyFilters}
             disabled={loading}
             className={clsx(
-              'h-9 px-3.5 rounded-lg font-bold text-xs flex items-center justify-center gap-1.5 transition active:scale-95 shrink-0 cursor-pointer shadow-xs',
+              'h-10 min-h-[40px] px-4 rounded-xl font-semibold text-[14.5px] leading-[1.5] flex items-center justify-center gap-2 transition active:scale-95 shrink-0 cursor-pointer shadow-xs',
               isFilterPending
                 ? 'bg-blue-600 hover:bg-blue-700 text-white ring-2 ring-blue-500/20'
                 : 'bg-blue-600 hover:bg-blue-700 text-white'
             )}
             title={isMarathi ? 'फिल्टर लागू करा' : 'Apply'}
           >
-            <Filter className="w-3.5 h-3.5" />
+            <Filter className="w-4 h-4" />
             <span>{isMarathi ? 'लागू करा' : 'Apply'}</span>
           </button>
 
@@ -252,11 +262,11 @@ export default function DashboardPage() {
             type="button"
             onClick={handleResetFilters}
             disabled={loading}
-            className="h-9 px-2.5 text-slate-600 hover:text-slate-900 bg-white hover:bg-slate-50 rounded-lg border border-slate-200 text-xs font-semibold transition active:scale-95 shrink-0 cursor-pointer flex items-center gap-1 shadow-2xs"
+            className="h-10 min-h-[40px] px-3.5 text-[#334155] hover:text-[#0F172A] bg-white hover:bg-slate-50 rounded-xl border border-slate-200 text-[14.5px] font-semibold leading-[1.5] transition active:scale-95 shrink-0 cursor-pointer flex items-center gap-1.5 shadow-2xs"
             title={isMarathi ? 'रीसेट' : 'Reset'}
             aria-label={isMarathi ? 'रीसेट' : 'Reset'}
           >
-            <RotateCcw className="w-3.5 h-3.5" />
+            <RotateCcw className="w-4 h-4 text-slate-500" />
             <span className="hidden sm:inline">{isMarathi ? 'रीसेट' : 'Reset'}</span>
           </button>
 
@@ -264,20 +274,20 @@ export default function DashboardPage() {
           <button
             onClick={() => loadData(taluka, true)}
             disabled={loading}
-            className="h-9 px-2.5 rounded-lg bg-white hover:bg-slate-50 text-slate-600 hover:text-slate-900 border border-slate-200 text-xs font-semibold transition active:scale-95 cursor-pointer flex items-center gap-1 shrink-0 shadow-2xs"
+            className="h-10 min-h-[40px] px-3.5 rounded-xl bg-white hover:bg-slate-50 text-[#334155] hover:text-[#0F172A] border border-slate-200 text-[14.5px] font-semibold leading-[1.5] transition active:scale-95 cursor-pointer flex items-center gap-1.5 shrink-0 shadow-2xs"
             title={isMarathi ? 'माहिती अद्ययावत करा' : 'Refresh'}
             aria-label={isMarathi ? 'माहिती अद्ययावत करा' : 'Refresh'}
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-blue-600' : 'text-slate-500'}`} />
+            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-blue-600' : 'text-slate-500'}`} />
           </button>
 
           {/* Bulk Upload Shortcut */}
           <Link
             href="/bulk-upload"
-            className="h-9 px-3 rounded-lg bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 font-semibold text-xs transition active:scale-95 flex items-center gap-1.5 shrink-0 border border-slate-200 shadow-2xs"
+            className="h-10 min-h-[40px] px-4 rounded-xl bg-white hover:bg-slate-50 text-[#334155] hover:text-[#0F172A] font-semibold text-[14.5px] leading-[1.5] transition active:scale-95 flex items-center gap-2 shrink-0 border border-slate-200 shadow-2xs"
             title={isMarathi ? 'गाव डेटा अपलोड' : 'Upload Data'}
           >
-            <UploadCloud className="w-3.5 h-3.5 text-blue-600" />
+            <UploadCloud className="w-4 h-4 text-blue-600" />
             <span className="hidden sm:inline">{isMarathi ? 'अपलोड' : 'Upload'}</span>
           </Link>
         </div>
@@ -362,11 +372,11 @@ export default function DashboardPage() {
       {activeKpi && (
         <div
           id="dashboard-focused-section"
-          className="bg-white rounded-xl p-3 sm:p-4 border border-slate-200/90 shadow-2xs transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3"
+          className="bg-white rounded-2xl p-4 sm:p-4.5 border border-slate-200/90 shadow-2xs transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 font-sans"
         >
           <div className="flex items-center gap-2.5 min-w-0">
-            <span className="w-2.5 h-2.5 rounded-full bg-blue-600 shrink-0" />
-            <span className="text-xs sm:text-sm font-bold text-slate-900 truncate">
+            <span className="w-3 h-3 rounded-full bg-blue-600 shrink-0" />
+            <span className="text-[14.5px] font-bold text-[#0F172A] leading-[1.5] truncate">
               {activeKpi === 'parcels' && (isMarathi ? 'सक्रिय दृश्य: नोंदणीकृत भूखंड व धारणाधिकार' : 'Active View: Land Parcels & Tenure')}
               {activeKpi === 'violations' && (isMarathi ? 'सक्रिय दृश्य: शर्तभंग व महसूल चौकशी' : 'Active View: Breaches & Inquiries')}
               {activeKpi === 'villages' && (isMarathi ? 'सक्रिय दृश्य: समाविष्ट महसूल गावे' : 'Active View: Covered Villages')}
@@ -374,7 +384,7 @@ export default function DashboardPage() {
             </span>
           </div>
 
-          <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto">
+          <div className="flex items-center gap-2.5 shrink-0 self-end sm:self-auto">
             <Link
               href={
                 activeKpi === 'parcels'
@@ -385,19 +395,19 @@ export default function DashboardPage() {
                   ? villagesReportUrl
                   : conversionsUrl
               }
-              className="px-3 py-1.5 rounded-lg bg-blue-700 hover:bg-blue-800 text-white font-bold text-xs transition flex items-center gap-1 active:scale-95 cursor-pointer shadow-2xs"
+              className="h-10 px-4 rounded-xl bg-blue-700 hover:bg-blue-800 text-white font-semibold text-[14px] leading-[1.5] transition flex items-center gap-1.5 active:scale-95 cursor-pointer shadow-2xs"
             >
               <span>{isMarathi ? 'नोंदवहीत उघडा' : 'Open Register'}</span>
-              <ChevronRight className="w-3.5 h-3.5" />
+              <ChevronRight className="w-4 h-4" />
             </Link>
 
             <button
               type="button"
               onClick={() => setActiveKpi(null)}
-              className="px-2.5 py-1.5 rounded-lg bg-white hover:bg-slate-100 text-slate-700 font-semibold text-xs transition border border-slate-200 active:scale-95 flex items-center gap-1 cursor-pointer"
+              className="h-10 px-3.5 rounded-xl bg-white hover:bg-slate-100 text-[#334155] font-semibold text-[14px] leading-[1.5] transition border border-slate-200 active:scale-95 flex items-center gap-1.5 cursor-pointer"
               title={isMarathi ? 'फिल्टर बंद करा' : 'Close'}
             >
-              <X className="w-3.5 h-3.5" />
+              <X className="w-4 h-4" />
               <span>{isMarathi ? 'बंद करा' : 'Clear'}</span>
             </button>
           </div>
@@ -425,44 +435,41 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {/* Viz 3: 15 Talukas Ranked Analytics Leaderboard */}
-        <TalukaRankedTable
-          data={analytics.talukaDistribution}
-          selectedTaluka={taluka}
+        {/* Viz 3: 1950 to 2026 Land Transformation & Mutation Curve */}
+        <HistoricalProvenanceTrendChart
+          data={analytics.historicalTimeline}
         />
 
-        {/* Viz 4: 1950 vs 2026 Historical Epoch Baseline Verification */}
-        <HistoricalEpochComparison
-          data={analytics.historicalTimeline}
-          class2To1Area={analytics.totalClass2To1AreaHa}
-          class2To1Count={analytics.totalClass2To1Conversions}
-          taluka={taluka}
+        {/* Viz 4: Taluka-wise Monitoring & Comparison (Bar & Mountain Wave) */}
+        <TalukaMountainChart
+          data={analytics.talukaDistribution}
+          selectedTaluka={taluka}
         />
       </div>
 
       {/* ─────────────────────────────────────────────────────────────
           5. STATUTORY GOVERNANCE STRIP (MLRC 1966 Compliance & Direct Links)
          ───────────────────────────────────────────────────────────── */}
-      <div className="bg-white rounded-xl px-4 py-3 border border-slate-200/90 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-        <div className="flex items-center gap-2.5 min-w-0">
-          <ShieldCheck className="w-4.5 h-4.5 text-blue-700 shrink-0" />
-          <p className="text-slate-700 font-medium truncate">
+      <div className="bg-white rounded-2xl px-5 py-4 border border-slate-200/90 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-4 font-sans">
+        <div className="flex items-center gap-3 min-w-0">
+          <ShieldCheck className="w-5 h-5 text-blue-700 shrink-0" />
+          <p className="text-[14px] text-[#334155] font-medium leading-[1.5] truncate">
             {isMarathi
               ? 'MLRC १९६६ वैधानिक तरतुदी: आदिवासी जमीन संरक्षण (कलम ३६, ३६अ) व शासकीय अतिक्रमण (कलम ५०-५४) • SDO / तहसीलदार न्यायालय'
               : 'MLRC 1966 Statutory Governance: Tribal Land Protection (Sec 36, 36A) & Govt Encroachment (Sec 50-54) • SDO / Tahsildar Court'}
           </p>
         </div>
 
-        <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto">
+        <div className="flex items-center gap-2.5 shrink-0 self-end sm:self-auto">
           <Link
             href="/reports"
-            className="px-3 py-1.5 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-700 font-semibold border border-slate-200 transition"
+            className="h-10 px-4 rounded-xl bg-slate-50 hover:bg-slate-100 text-[#334155] font-semibold text-[14.5px] leading-[1.5] border border-slate-200 transition shadow-2xs flex items-center gap-1.5"
           >
             {isMarathi ? 'प्रपत्र १ ते ६ अहवाल' : 'Prapatra 1-6 Reports'}
           </Link>
           <Link
             href="/documents"
-            className="px-3 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 font-semibold border border-blue-200 transition"
+            className="h-10 px-4 rounded-xl bg-blue-50 hover:bg-blue-100 text-[#1D4ED8] font-semibold text-[14.5px] leading-[1.5] border border-blue-200 transition shadow-2xs flex items-center gap-1.5"
           >
             {isMarathi ? 'जिल्हा अभिलेखागार' : 'District Archives'}
           </Link>
