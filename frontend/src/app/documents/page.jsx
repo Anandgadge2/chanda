@@ -45,10 +45,10 @@ export default function DocumentsPage() {
 
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
 
-  const fetchDocs = async (targetPage = page, filtersToUse = appliedFilters) => {
+  const fetchDocs = async (targetPage = page, filtersToUse = appliedFilters, targetLimit = limit) => {
     setLoading(true);
     try {
-      const params = { page: targetPage, limit };
+      const params = { page: targetPage, limit: targetLimit };
       if (filtersToUse.docType) params.docType = filtersToUse.docType;
       if (filtersToUse.search && filtersToUse.search.trim()) params.search = filtersToUse.search.trim();
 
@@ -99,7 +99,14 @@ export default function DocumentsPage() {
 
   const handlePageChange = (newPage) => {
     setPage(newPage);
-    fetchDocs(newPage, appliedFilters);
+    fetchDocs(newPage, appliedFilters, limit);
+  };
+
+  const handlePageSizeChange = (newLimit) => {
+    const finalLimit = newLimit === 'all' ? 10000 : Number(newLimit);
+    setLimit(finalLimit);
+    setPage(1);
+    fetchDocs(1, appliedFilters, finalLimit);
   };
 
   return (

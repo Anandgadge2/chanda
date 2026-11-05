@@ -278,8 +278,15 @@ export default function CasesPage() {
 
   const handlePageChange = (newPage) => {
     setPage(newPage);
-    fetchCases(newPage, appliedFilters);
+    fetchCases(newPage, appliedFilters, limit);
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handlePageSizeChange = (newLimit) => {
+    const finalLimit = newLimit === 'all' ? 10000 : Number(newLimit);
+    setLimit(finalLimit);
+    setPage(1);
+    fetchCases(1, appliedFilters, finalLimit);
   };
 
   const toggleRowExpansion = (id) => {
