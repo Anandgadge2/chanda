@@ -414,7 +414,7 @@ export default function Sidebar({
                   className={clsx(
                     'py-2.5 px-3 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 border cursor-pointer active:scale-95',
                     isMarathi
-                      ? 'bg-[#142D4E] text-white border-[#142D4E]'
+                      ? 'bg-gradient-to-r from-[#FF6F00] via-[#F97316] to-[#EA580C] text-white border-orange-500 shadow-xs ring-1 ring-orange-400/40'
                       : 'bg-[#FFFFFF] text-[#263548] border-[#E4E8EF] hover:bg-slate-50'
                   )}
                 >
@@ -426,7 +426,7 @@ export default function Sidebar({
                   className={clsx(
                     'py-2.5 px-3 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 border cursor-pointer active:scale-95',
                     !isMarathi
-                      ? 'bg-[#142D4E] text-white border-[#142D4E]'
+                      ? 'bg-gradient-to-r from-[#1E3A8A] via-[#1E40AF] to-[#2563EB] text-white border-blue-600 shadow-xs ring-1 ring-blue-500/40'
                       : 'bg-[#FFFFFF] text-[#263548] border-[#E4E8EF] hover:bg-slate-50'
                   )}
                 >
