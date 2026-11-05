@@ -296,7 +296,7 @@ export default function DashboardPage() {
       {/* ─────────────────────────────────────────────────────────────
           2. EXECUTIVE PASTEL DATA INTELLIGENCE KPI CARDS
          ───────────────────────────────────────────────────────────── */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 w-full max-w-full min-w-0">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3.5 w-full max-w-full min-w-0">
         <MetricCard
           variant="blue"
           titleMr="नोंदणीकृत भूखंड"

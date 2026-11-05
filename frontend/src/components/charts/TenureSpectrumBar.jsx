@@ -8,9 +8,8 @@ import {
   Pie,
   Cell,
   Tooltip,
-  Treemap,
 } from 'recharts';
-import { Layers, ArrowUpRight, PieChart as PieIcon, LayoutGrid } from 'lucide-react';
+import { Layers, ArrowUpRight, PieChart as PieIcon, StretchHorizontal } from 'lucide-react';
 import { TENURE_CLASSES } from '../../lib/constants';
 import { useTranslation } from '../LanguageContext';
 
@@ -53,7 +52,7 @@ const DEFAULT_TENURE_DATA = [
 export default function TenureSpectrumBar({ data = [], taluka = '' }) {
   const { isMarathi } = useTranslation();
   const [metricMode, setMetricMode] = useState('area'); // 'area' | 'count'
-  const [graphType, setGraphType] = useState('pie'); // 'pie' | 'treemap'
+  const [graphType, setGraphType] = useState('strip'); // 'strip' | 'pie' (default to 'strip')
   const [activeIndex, setActiveIndex] = useState(null);
 
   const sourceData = (data && data.length > 0) ? data : DEFAULT_TENURE_DATA;
@@ -86,25 +85,6 @@ export default function TenureSpectrumBar({ data = [], taluka = '' }) {
   const totalArea = items.reduce((sum, item) => sum + item.areaHa, 0);
   const totalCount = items.reduce((sum, item) => sum + item.count, 0);
   const totalMetric = metricMode === 'area' ? totalArea : totalCount;
-
-  // Hierarchical Treemap dataset for Recharts Treemap
-  const treemapData = useMemo(() => {
-    return [
-      {
-        name: 'Tenure',
-        children: items.map((item) => ({
-          name: isMarathi ? item.nameMr : item.nameEn,
-          nameMr: item.nameMr,
-          nameEn: item.nameEn,
-          value: item.value > 0 ? item.value : 0.1,
-          color: item.color,
-          pct: totalMetric > 0 ? ((item.value / totalMetric) * 100).toFixed(1) : '0',
-          areaHa: item.areaHa,
-          count: item.count,
-        })),
-      },
-    ];
-  }, [items, totalMetric, isMarathi]);
 
   const activeItem = activeIndex !== null && items[activeIndex] ? items[activeIndex] : null;
 
@@ -145,99 +125,55 @@ export default function TenureSpectrumBar({ data = [], taluka = '' }) {
     return null;
   };
 
-  // Custom Treemap Tile Content Renderer
-  const CustomizedTreemapContent = (props) => {
-    const { depth, x, y, width, height, name, index, data, payload } = props;
-    if ((depth !== undefined && depth !== 1) || !width || !height || width < 4 || height < 4) return null;
+  // Reusable Category Rows (No truncation, 15px SemiBold name, 15px Bold values, 14px SemiBold pct, line-height 1.5)
+  const renderCategoryRows = () => (
+    <div className="w-full space-y-2">
+      {items.map((item, index) => {
+        const pct = totalMetric > 0 ? ((item.value / totalMetric) * 100).toFixed(1) : '0';
+        const isHovered = activeIndex === index;
 
-    // Resolve original data item through multiple fallbacks
-    const raw = data || payload || {};
-    const itemByIndex = (typeof index === 'number' && items[index]) ? items[index] : null;
-    const itemByName = items.find((i) =>
-      (isMarathi ? i.nameMr : i.nameEn) === name ||
-      i.nameMr === name ||
-      i.nameEn === name ||
-      i.nameMr === raw.nameMr ||
-      i.nameEn === raw.nameEn
-    );
-    const item = itemByIndex || itemByName || raw || {};
-
-    const color = props.color || raw.color || item.color || '#2563EB';
-    const numArea = typeof props.areaHa === 'number'
-      ? props.areaHa
-      : (typeof raw.areaHa === 'number'
-        ? raw.areaHa
-        : (typeof item.areaHa === 'number' ? item.areaHa : (metricMode === 'area' && typeof item.value === 'number' ? item.value : 0)));
-    const numCount = typeof props.count === 'number'
-      ? props.count
-      : (typeof raw.count === 'number'
-        ? raw.count
-        : (typeof item.count === 'number' ? item.count : (metricMode === 'count' && typeof item.value === 'number' ? item.value : 0)));
-
-    const pct = props.pct || raw.pct || (totalMetric > 0 && item.value ? ((item.value / totalMetric) * 100).toFixed(1) : '0');
-    const displayName = (isMarathi ? item.nameMr : item.nameEn) || name || raw.name || '';
-
-    return (
-      <g>
-        <rect
-          x={x + 2}
-          y={y + 2}
-          width={width - 4}
-          height={height - 4}
-          style={{
-            fill: color || '#2563EB',
-            stroke: '#FFFFFF',
-            strokeWidth: 2,
-          }}
-          rx={6}
-          ry={6}
-          className="transition-opacity hover:opacity-90 cursor-pointer"
-        />
-        {width > 42 && height > 26 && (
-          <text
-            x={x + 8}
-            y={y + 18}
-            fill="#FFFFFF"
-            fontSize={width > 90 ? 12 : 10.5}
-            fontWeight={700}
-            className="pointer-events-none select-none font-sans"
+        return (
+          <Link
+            key={item.key}
+            href={item.filterHref}
+            onMouseEnter={() => setActiveIndex(index)}
+            onMouseLeave={() => setActiveIndex(null)}
+            className={`px-3.5 py-2.5 rounded-xl border transition-all flex items-center justify-between cursor-pointer group ${
+              isHovered
+                ? 'border-blue-400 bg-blue-50/80 shadow-xs'
+                : 'border-slate-150 bg-slate-50/60 hover:bg-white hover:border-slate-300'
+            }`}
           >
-            {displayName}
-          </text>
-        )}
-        {width > 50 && height > 44 && (
-          <text
-            x={x + 8}
-            y={y + 34}
-            fill="rgba(255,255,255,0.92)"
-            fontSize={11}
-            fontWeight={700}
-            className="pointer-events-none select-none font-mono"
-          >
-            {pct}%
-          </text>
-        )}
-        {width > 85 && height > 64 && (
-          <text
-            x={x + 8}
-            y={y + 50}
-            fill="rgba(255,255,255,0.8)"
-            fontSize={10}
-            fontWeight={600}
-            className="pointer-events-none select-none font-mono"
-          >
-            {metricMode === 'area'
-              ? `${numArea >= 100000 ? `${(numArea / 100000).toFixed(2)}L` : (Number(numArea) || 0).toFixed(0)} Ha`
-              : `${(Number(numCount) || 0).toLocaleString('en-IN')} ${isMarathi ? 'गट' : 'Parcels'}`}
-          </text>
-        )}
-      </g>
-    );
-  };
+            <div className="flex items-center gap-2.5 min-w-0 pr-2">
+              <span
+                className="w-3.5 h-3.5 rounded-full shrink-0 shadow-2xs"
+                style={{ backgroundColor: item.color }}
+              />
+              <span className={`text-[15px] font-semibold text-[#0F172A] leading-[1.5] ${isHovered ? 'text-blue-950 font-bold' : ''}`}>
+                {isMarathi ? item.nameMr : item.nameEn}
+              </span>
+            </div>
+
+            <div className="flex items-center gap-3 shrink-0">
+              <span className={`text-[15px] font-bold font-mono tabular-nums leading-[1.5] ${isHovered ? 'text-blue-900' : 'text-[#0F172A]'}`}>
+                {metricMode === 'area'
+                  ? `${item.areaHa.toLocaleString('en-IN', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} Ha`
+                  : `${item.count.toLocaleString('en-IN')} ${isMarathi ? 'गट' : 'Parcels'}`}
+              </span>
+              <span className="text-[14px] font-semibold text-[#334155] font-mono w-14 text-right tabular-nums leading-[1.5]">
+                {pct}%
+              </span>
+              <ArrowUpRight className="w-4 h-4 text-slate-400 group-hover:text-blue-700 transition shrink-0" />
+            </div>
+          </Link>
+        );
+      })}
+    </div>
+  );
 
   return (
     <div className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 shadow-xs flex flex-col justify-between font-sans">
-      {/* ── HEADER WITH DUAL GRAPH TOGGLE (PIE VS TREEMAP) ── */}
+      {/* ── HEADER WITH DUAL GRAPH TOGGLE (STRIP VS PIE) ── */}
       <div>
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3.5">
           <div className="flex items-center gap-3 min-w-0">
@@ -261,10 +197,21 @@ export default function TenureSpectrumBar({ data = [], taluka = '' }) {
             </div>
           </div>
 
-          {/* Controls: Two-Graph Switcher (Pie vs Treemap) + Metric Mode Toggle */}
+          {/* Controls: Two-Graph Switcher (Strip vs Pie) + Metric Mode Toggle */}
           <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto flex-wrap">
-            {/* Graph Option Toggle: Pie vs Treemap (Non-bar) */}
+            {/* Graph Option Toggle: Strip vs Pie */}
             <div className="inline-flex p-0.5 bg-slate-100 rounded-lg border border-slate-200/80 shrink-0" role="group" aria-label="Graph Type">
+              <button
+                type="button"
+                onClick={() => setGraphType('strip')}
+                className={`px-2.5 py-1 text-[13px] font-bold rounded-md transition cursor-pointer flex items-center gap-1.5 leading-[1.5] ${
+                  graphType === 'strip' ? 'bg-white text-[#0F172A] shadow-xs' : 'text-slate-500 hover:text-[#0F172A]'
+                }`}
+                title={isMarathi ? 'प्रमाण पट्टी दृश्य' : 'Distribution Strip View'}
+              >
+                <StretchHorizontal className="w-3.5 h-3.5 text-blue-600" />
+                <span>{isMarathi ? 'प्रमाण पट्टी' : 'Strip'}</span>
+              </button>
               <button
                 type="button"
                 onClick={() => setGraphType('pie')}
@@ -275,17 +222,6 @@ export default function TenureSpectrumBar({ data = [], taluka = '' }) {
               >
                 <PieIcon className="w-3.5 h-3.5 text-emerald-600" />
                 <span>{isMarathi ? 'वर्तुळ' : 'Pie'}</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setGraphType('treemap')}
-                className={`px-2.5 py-1 text-[13px] font-bold rounded-md transition cursor-pointer flex items-center gap-1.5 leading-[1.5] ${
-                  graphType === 'treemap' ? 'bg-white text-[#0F172A] shadow-xs' : 'text-slate-500 hover:text-[#0F172A]'
-                }`}
-                title={isMarathi ? 'ट्रेमॅप आलेख' : 'Treemap Chart'}
-              >
-                <LayoutGrid className="w-3.5 h-3.5 text-blue-600" />
-                <span>{isMarathi ? 'ट्रेमॅप' : 'Treemap'}</span>
               </button>
             </div>
 
@@ -313,144 +249,132 @@ export default function TenureSpectrumBar({ data = [], taluka = '' }) {
           </div>
         </div>
 
-        {/* ── MAIN VISUAL AREA (SIDE-BY-SIDE GRAPH & CATEGORY BREAKDOWN) ── */}
+        {/* ── MAIN VISUAL AREA ── */}
         <div className="py-3">
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
-            {/* Left: Selected Graph (Option 1: Pie/Donut | Option 2: Treemap) */}
-            <div className="md:col-span-5 relative h-64 sm:h-72 flex items-center justify-center">
-              {graphType === 'pie' ? (
-                <>
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={items}
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={58}
-                        outerRadius={86}
-                        paddingAngle={3}
-                        dataKey="value"
-                        stroke="#ffffff"
-                        strokeWidth={2}
-                        onMouseEnter={(_, index) => setActiveIndex(index)}
-                        onMouseLeave={() => setActiveIndex(null)}
-                      >
-                        {items.map((entry, index) => (
-                          <Cell
-                            key={`cell-${entry.key}`}
-                            fill={entry.color}
-                            opacity={activeIndex === null || activeIndex === index ? 1 : 0.35}
-                            className="transition-all duration-200 cursor-pointer"
-                          />
-                        ))}
-                      </Pie>
-                      <Tooltip content={<CustomPieTooltip />} />
-                    </PieChart>
-                  </ResponsiveContainer>
+          {graphType === 'strip' ? (
+            /* VIEW 1: DISTRIBUTION STRIP (100% Stacked Segmented Bar + Full-Width Rows) */
+            <div className="space-y-3.5">
+              {/* 100% Stacked Segmented Horizontal Bar */}
+              <div
+                className="h-4 w-full rounded-full overflow-hidden flex gap-0.5 bg-slate-100 p-0.5 shadow-inner"
+                role="progressbar"
+                aria-label={isMarathi ? 'जमीन धारणा वितरण पट्टी' : 'Land Tenure Distribution Strip'}
+              >
+                {items.map((item, index) => {
+                  const pctNumber = totalMetric > 0 ? (item.value / totalMetric) * 100 : 0;
+                  const pctString = pctNumber.toFixed(1);
+                  const displayName = isMarathi ? item.nameMr : item.nameEn;
+                  const formattedVal = metricMode === 'area'
+                    ? `${item.areaHa.toLocaleString('en-IN', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} Ha`
+                    : `${item.count.toLocaleString('en-IN')} ${isMarathi ? 'गट' : 'Parcels'}`;
+                  const isHovered = activeIndex === index;
+                  const isTiny = item.key === 'DEVASTHAN_INAM' || pctNumber < 0.8;
 
-                  {/* Center Hero Badge */}
-                  <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none p-1 text-center">
-                    {activeItem ? (
-                      <div className="flex flex-col items-center justify-center">
-                        <span
-                          className="text-[11px] font-bold px-2.5 py-0.5 rounded-full border mb-1 truncate max-w-[130px]"
-                          style={{
-                            backgroundColor: `${activeItem.color}15`,
-                            color: activeItem.color,
-                            borderColor: `${activeItem.color}40`,
-                          }}
-                        >
-                          {isMarathi ? activeItem.nameMr : activeItem.nameEn}
-                        </span>
-                        <span className="text-lg sm:text-xl font-black text-slate-900 tracking-tight leading-none my-0.5 font-mono">
-                          {metricMode === 'area'
-                            ? `${(Number(activeItem.areaHa) || 0) >= 100000 ? `${((Number(activeItem.areaHa) || 0) / 100000).toFixed(2)}L` : (Number(activeItem.areaHa) || 0).toFixed(0)} Ha`
-                            : `${(Number(activeItem.count) || 0).toLocaleString('en-IN')}`}
-                        </span>
-                        <span className="text-[11.5px] font-bold text-slate-500 font-mono">
-                          {totalMetric > 0 ? ((activeItem.value / totalMetric) * 100).toFixed(1) : 0}% {isMarathi ? 'वाटा' : 'share'}
-                        </span>
-                      </div>
-                    ) : (
-                      <div className="flex flex-col items-center justify-center">
-                        <span className="text-[10.5px] uppercase tracking-wider font-bold text-slate-400">
-                          {metricMode === 'area'
-                            ? (isMarathi ? 'एकूण क्षेत्र' : 'Total Area')
-                            : (isMarathi ? 'एकूण गट' : 'Total Parcels')}
-                        </span>
-                        <span className="text-lg sm:text-xl font-black text-slate-900 tracking-tight leading-none my-0.5 font-mono">
-                          {metricMode === 'area'
-                            ? `${(totalArea / 100000).toFixed(2)}L Ha`
-                            : totalCount.toLocaleString('en-IN')}
-                        </span>
-                        <span className="text-[11.5px] text-slate-500 font-medium font-mono">
-                          {items.length} {isMarathi ? 'प्रवर्ग' : 'Classes'}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                </>
-              ) : (
-                /* OPTION 2: TREEMAP CHART (Area-proportional mosaic tiles) */
+                  return (
+                    <div
+                      key={`strip-${item.key}`}
+                      onMouseEnter={() => setActiveIndex(index)}
+                      onMouseLeave={() => setActiveIndex(null)}
+                      title={`${displayName}: ${formattedVal} (${pctString}%)`}
+                      className={`h-full rounded-full transition-all duration-150 cursor-pointer ${
+                        isTiny ? 'min-w-[6px]' : ''
+                      }`}
+                      style={{
+                        width: `${Math.max(pctNumber, 0.4)}%`,
+                        backgroundColor: item.color,
+                        opacity: activeIndex === null || isHovered ? 1 : 0.45,
+                        filter: isHovered ? 'brightness(1.15)' : 'none',
+                      }}
+                    />
+                  );
+                })}
+              </div>
+
+              {/* Full-width Category Rows */}
+              {renderCategoryRows()}
+            </div>
+          ) : (
+            /* VIEW 2: PIE / DONUT VIEW WITH SIDE-BY-SIDE CATEGORY ROWS */
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+              {/* Left: Donut Chart with Center Stats */}
+              <div className="md:col-span-5 relative h-64 sm:h-72 flex items-center justify-center">
                 <ResponsiveContainer width="100%" height="100%">
-                  <Treemap
-                    data={treemapData}
-                    dataKey="value"
-                    aspectRatio={4 / 3}
-                    stroke="#ffffff"
-                    isAnimationActive={false}
-                    content={<CustomizedTreemapContent />}
-                  >
+                  <PieChart>
+                    <Pie
+                      data={items}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={58}
+                      outerRadius={86}
+                      paddingAngle={3}
+                      dataKey="value"
+                      stroke="#ffffff"
+                      strokeWidth={2}
+                      onMouseEnter={(_, index) => setActiveIndex(index)}
+                      onMouseLeave={() => setActiveIndex(null)}
+                    >
+                      {items.map((entry, index) => (
+                        <Cell
+                          key={`cell-${entry.key}`}
+                          fill={entry.color}
+                          opacity={activeIndex === null || activeIndex === index ? 1 : 0.35}
+                          className="transition-all duration-200 cursor-pointer"
+                        />
+                      ))}
+                    </Pie>
                     <Tooltip content={<CustomPieTooltip />} />
-                  </Treemap>
+                  </PieChart>
                 </ResponsiveContainer>
-              )}
-            </div>
 
-            {/* Right: Interactive 5 Tenure Category Tiles */}
-            <div className="md:col-span-7 space-y-2">
-              {items.map((item, index) => {
-                const pct = totalMetric > 0 ? ((item.value / totalMetric) * 100).toFixed(1) : '0';
-                const isHovered = activeIndex === index;
-
-                return (
-                  <Link
-                    key={item.key}
-                    href={item.filterHref}
-                    onMouseEnter={() => setActiveIndex(index)}
-                    onMouseLeave={() => setActiveIndex(null)}
-                    className={`px-3.5 py-2.5 rounded-xl border transition-all flex items-center justify-between cursor-pointer group ${
-                      isHovered
-                        ? 'border-blue-400 bg-blue-50/80 shadow-xs'
-                        : 'border-slate-150 bg-slate-50/60 hover:bg-white hover:border-slate-300'
-                    }`}
-                  >
-                    <div className="flex items-center gap-2.5 min-w-0 pr-2">
+                {/* Center Hero Badge */}
+                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none p-1 text-center">
+                  {activeItem ? (
+                    <div className="flex flex-col items-center justify-center">
                       <span
-                        className="w-3 h-3 rounded-full shrink-0 shadow-2xs"
-                        style={{ backgroundColor: item.color }}
-                      />
-                      <span className={`text-[14px] truncate leading-[1.5] ${isHovered ? 'font-bold text-blue-950' : 'font-semibold text-[#0F172A]'}`}>
-                        {isMarathi ? item.nameMr : item.nameEn}
+                        className="text-[11px] font-bold px-2.5 py-0.5 rounded-full border mb-1 truncate max-w-[130px]"
+                        style={{
+                          backgroundColor: `${activeItem.color}15`,
+                          color: activeItem.color,
+                          borderColor: `${activeItem.color}40`,
+                        }}
+                      >
+                        {isMarathi ? activeItem.nameMr : activeItem.nameEn}
                       </span>
-                    </div>
-
-                    <div className="flex items-center gap-3 shrink-0">
-                      <span className={`text-[14px] font-bold font-mono tabular-nums ${isHovered ? 'text-blue-900' : 'text-[#0F172A]'}`}>
+                      <span className="text-lg sm:text-xl font-black text-slate-900 tracking-tight leading-none my-0.5 font-mono">
                         {metricMode === 'area'
-                          ? `${item.areaHa.toLocaleString('en-IN', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} Ha`
-                          : `${item.count.toLocaleString('en-IN')} गट`}
+                          ? `${(Number(activeItem.areaHa) || 0) >= 100000 ? `${((Number(activeItem.areaHa) || 0) / 100000).toFixed(2)}L` : (Number(activeItem.areaHa) || 0).toFixed(0)} Ha`
+                          : `${(Number(activeItem.count) || 0).toLocaleString('en-IN')}`}
                       </span>
-                      <span className="text-[13px] font-semibold text-[#475569] font-mono w-12 text-right tabular-nums">
-                        {pct}%
+                      <span className="text-[11.5px] font-bold text-slate-500 font-mono">
+                        {totalMetric > 0 ? ((activeItem.value / totalMetric) * 100).toFixed(1) : 0}% {isMarathi ? 'वाटा' : 'share'}
                       </span>
-                      <ArrowUpRight className="w-4 h-4 text-slate-400 group-hover:text-blue-700 transition" />
                     </div>
-                  </Link>
-                );
-              })}
+                  ) : (
+                    <div className="flex flex-col items-center justify-center">
+                      <span className="text-[10.5px] uppercase tracking-wider font-bold text-slate-400">
+                        {metricMode === 'area'
+                          ? (isMarathi ? 'एकूण क्षेत्र' : 'Total Area')
+                          : (isMarathi ? 'एकूण गट' : 'Total Parcels')}
+                      </span>
+                      <span className="text-lg sm:text-xl font-black text-slate-900 tracking-tight leading-none my-0.5 font-mono">
+                        {metricMode === 'area'
+                          ? `${(totalArea / 100000).toFixed(2)}L Ha`
+                          : totalCount.toLocaleString('en-IN')}
+                      </span>
+                      <span className="text-[11.5px] text-slate-500 font-medium font-mono">
+                        {items.length} {isMarathi ? 'प्रवर्ग' : 'Classes'}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Right: Category Rows */}
+              <div className="md:col-span-7">
+                {renderCategoryRows()}
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
 
@@ -459,7 +383,7 @@ export default function TenureSpectrumBar({ data = [], taluka = '' }) {
         <span className="text-[#475569] font-medium">
           {isMarathi ? 'एकूण नोंदणीकृत क्षेत्र व भूखंड:' : 'Total Volume:'}
         </span>
-        <span className="font-bold text-[#0F172A] font-mono bg-slate-50 px-3 py-1 rounded-lg border border-slate-200 tabular-nums">
+        <span className="font-bold text-[#0F172A] font-mono tabular-nums">
           {totalArea.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Ha • {totalCount.toLocaleString('en-IN')} {isMarathi ? 'गट' : 'Parcels'}
         </span>
       </div>

@@ -120,62 +120,62 @@ export default function MetricCard({
       onClick={isInteractive ? onClick : undefined}
       onKeyDown={handleKeyDown}
       className={clsx(
-        'py-3 px-4 sm:py-3.5 sm:px-4.5 rounded-2xl border transition-all duration-200 flex flex-col justify-between select-none text-left relative overflow-hidden group bg-white shadow-[0_1px_3px_rgba(0,0,0,0.03)] font-sans',
+        'py-2 px-3 sm:py-2.5 sm:px-3.5 rounded-xl border transition-all duration-200 flex flex-col justify-between select-none text-left relative overflow-hidden group bg-white shadow-[0_1px_2px_rgba(0,0,0,0.03)] font-sans',
         isActive
           ? theme.activeRing
-          : 'border-slate-200/90 hover:border-slate-300 hover:shadow-md',
+          : 'border-slate-200/90 hover:border-slate-300 hover:shadow-sm',
         isInteractive && 'cursor-pointer active:scale-[0.99] focus:outline-none'
       )}
     >
-      {/* 3.5px Solid Top Accent Indicator */}
+      {/* 3px Solid Top Accent Indicator */}
       <div
         className={clsx(
-          'absolute top-0 left-0 right-0 h-[3.5px] transition-opacity duration-200',
+          'absolute top-0 left-0 right-0 h-[3px] transition-opacity duration-200',
           theme.accentBar,
           isActive ? 'opacity-100' : 'opacity-85 group-hover:opacity-100'
         )}
       />
 
       {/* Top Header: Title + Action Icon + Category Icon */}
-      <div className="flex items-center justify-between gap-2">
-        <span className="text-[14.5px] font-semibold text-[#334155] tracking-tight leading-[1.5] truncate">
+      <div className="flex items-center justify-between gap-1.5">
+        <span className="text-[13.5px] font-semibold text-[#334155] tracking-tight leading-[1.4] truncate">
           {displayTitle}
         </span>
 
-        <div className="flex items-center gap-1.5 shrink-0">
+        <div className="flex items-center gap-1 shrink-0">
           {actionHref && (
             <Link
               href={actionHref}
               onClick={(e) => e.stopPropagation()}
               title={displayActionTitle || (isMarathi ? 'नोंदवहीत उघडा' : 'Open')}
               className={clsx(
-                'w-7 h-7 rounded-lg bg-white border border-slate-200 text-slate-400 flex items-center justify-center transition-all shadow-2xs',
+                'w-6 h-6 rounded-md bg-white border border-slate-200 text-slate-400 flex items-center justify-center transition-all shadow-2xs',
                 theme.actionHover
               )}
             >
-              <ArrowUpRight className="w-4 h-4" />
+              <ArrowUpRight className="w-3.5 h-3.5" />
             </Link>
           )}
 
           {Icon && (
-            <div className={clsx('w-7 h-7 sm:w-8 sm:h-8 rounded-xl flex items-center justify-center shrink-0 shadow-2xs', theme.iconBox)}>
-              <Icon className="w-4 h-4 stroke-[2]" />
+            <div className={clsx('w-6 h-6 sm:w-6.5 sm:h-6.5 rounded-lg flex items-center justify-center shrink-0 shadow-2xs', theme.iconBox)}>
+              <Icon className="w-3.5 h-3.5 stroke-[2]" />
             </div>
           )}
         </div>
       </div>
 
       {/* Center: Prominent, High-Contrast Metric Number */}
-      <div className="mt-2 sm:mt-2.5">
-        <p className="text-[28px] sm:text-[30px] font-bold tracking-tight font-mono text-[#0F172A] leading-tight tabular-nums">
+      <div className="mt-1 sm:mt-1.5">
+        <p className="text-[22px] sm:text-[24px] font-bold tracking-tight font-mono text-[#0F172A] leading-tight tabular-nums">
           {value}
         </p>
       </div>
 
       {/* Bottom: Context Badge & Filter State */}
-      <div className="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between gap-1.5 text-[13px] leading-[1.5]">
+      <div className="mt-1.5 pt-1.5 border-t border-slate-100 flex items-center justify-between gap-1.5 text-[12px] leading-[1.4]">
         {displaySubtext ? (
-          <span className={clsx('px-2.5 py-0.5 rounded-md font-semibold font-mono truncate text-[13px] leading-[1.5] shadow-2xs', theme.badge)}>
+          <span className={clsx('px-2 py-0.5 rounded font-semibold font-mono truncate text-[12px] leading-[1.4] shadow-2xs', theme.badge)}>
             {displaySubtext}
           </span>
         ) : (
@@ -183,10 +183,10 @@ export default function MetricCard({
         )}
 
         {isInteractive && (
-          <span className={clsx('text-[13px] font-bold flex items-center gap-1 transition-colors leading-[1.5]', isActive ? theme.activeTag : 'text-slate-400 group-hover:text-slate-700')}>
+          <span className={clsx('text-[12px] font-bold flex items-center gap-1 transition-colors leading-[1.4]', isActive ? theme.activeTag : 'text-slate-400 group-hover:text-slate-700')}>
             {isActive ? (
               <>
-                <Check className="w-3.5 h-3.5 stroke-[2.5]" />
+                <Check className="w-3 h-3 stroke-[2.5]" />
                 <span className="font-extrabold">{isMarathi ? 'सक्रिय' : 'Active'}</span>
               </>
             ) : (
