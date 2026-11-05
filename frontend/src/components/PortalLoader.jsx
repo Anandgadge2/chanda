@@ -5,8 +5,7 @@ import clsx from 'clsx';
 /**
  * Standard Portal Loader Component
  * Visual Identity:
- * Royal blue spinner ring with signature amber/saffron arc
- * Matches: border-2 border-blue-900 border-t-amber-500 rounded-full animate-spin
+ * Sleek modern electric indigo spinner ring with high-contrast cyber glow
  */
 export default function PortalLoader({
   size = 'md', // 'sm' | 'md' | 'lg'
@@ -25,11 +24,11 @@ export default function PortalLoader({
       <div
         className={clsx(
           sizeClasses[size] || sizeClasses.md,
-          'border-blue-900 border-t-amber-500 rounded-full animate-spin mx-auto mb-2.5'
+          'border-indigo-100 border-t-indigo-600 rounded-full animate-spin mx-auto mb-2.5'
         )}
       />
       {text && (
-        <p className="text-xs font-bold text-slate-700 tracking-tight">
+        <p className="text-xs font-semibold text-slate-600 tracking-tight">
           {text}
         </p>
       )}

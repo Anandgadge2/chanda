@@ -216,14 +216,14 @@ export default function DocumentsPage() {
               'h-9 px-3.5 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95 shrink-0 shadow-xs cursor-pointer select-none w-full sm:w-auto',
               isFilterPending
                 ? 'bg-purple-600 hover:bg-purple-700 text-white ring-2 ring-purple-400/60 ring-offset-1 shadow-purple-700/20'
-                : 'bg-purple-900 hover:bg-purple-950 text-white'
+                : 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm shadow-indigo-600/20'
             )}
             title={isMarathi ? 'फिल्टर्स लागू करा (Enter)' : 'Apply Filters (Enter)'}
           >
             <Filter className="w-3.5 h-3.5 shrink-0" />
             <span>{isMarathi ? 'लागू करा' : 'Apply'}</span>
             {isFilterPending && (
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-300 animate-pulse shrink-0" />
+              <span className="w-1.5 h-1.5 rounded-full bg-cyan-300 animate-pulse shrink-0" />
             )}
           </button>
 
@@ -248,7 +248,7 @@ export default function DocumentsPage() {
             <span className="text-xs font-bold text-slate-700">
               {isMarathi ? 'एकूण दस्तऐवज:' : 'Total Documents:'}
             </span>
-            <span className="text-xs font-black text-blue-950 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-200/70">
+            <span className="text-xs font-black text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-200 font-mono">
               {totalCount}
             </span>
           </div>
@@ -256,7 +256,7 @@ export default function DocumentsPage() {
             <span className="text-[11px] font-medium text-slate-500 hidden sm:inline">
               {isMarathi ? 'चंद्रपूर अभिलेख कक्ष कोऑर्डिनेट्स' : 'Chandrapur Record Room Coordinates'}
             </span>
-            <span className="text-[10px] text-amber-800 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200 sm:hidden font-medium">
+            <span className="text-[10px] text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200 sm:hidden font-medium">
               {isMarathi ? 'तक्ता आडवा स्क्रोल करा' : 'Scroll table horizontally'}
             </span>
           </div>

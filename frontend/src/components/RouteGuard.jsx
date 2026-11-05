@@ -20,8 +20,8 @@ export default function RouteGuard({ children, allowedRoles = [] }) {
   if (loading) {
     return (
       <div className="min-h-[50vh] flex flex-col items-center justify-center p-8">
-        <div className="w-10 h-10 rounded-full border-[3px] border-blue-900 border-t-amber-500 animate-spin mb-3" />
-        <p className="text-sm font-bold text-slate-700">{isMarathi ? 'सत्र पडताळणी सुरू आहे...' : 'Verifying user session...'}</p>
+        <div className="w-10 h-10 rounded-full border-[3px] border-indigo-100 border-t-indigo-600 animate-spin mb-3" />
+        <p className="text-sm font-semibold text-slate-600">{isMarathi ? 'सत्र पडताळणी सुरू आहे...' : 'Verifying user session...'}</p>
       </div>
     );
   }
@@ -30,14 +30,14 @@ export default function RouteGuard({ children, allowedRoles = [] }) {
   if (!user) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center p-4">
-        <div className="max-w-md w-full bg-white rounded-2xl border border-slate-200 shadow-xl p-6 sm:p-8 text-center">
-          <div className="w-16 h-16 rounded-2xl bg-amber-50 border border-amber-200 text-amber-800 flex items-center justify-center mx-auto mb-4">
+        <div className="max-w-md w-full bg-white/95 backdrop-blur-xl rounded-2xl border border-slate-200/90 shadow-xl shadow-slate-900/5 p-6 sm:p-8 text-center">
+          <div className="w-16 h-16 rounded-2xl bg-indigo-50 border border-indigo-200 text-indigo-600 flex items-center justify-center mx-auto mb-4">
             <Lock className="w-8 h-8" />
           </div>
 
           <div className="flex items-center justify-center gap-2 mb-2">
             <ChandrapurDistrictLogo className="w-6 h-6" />
-            <span className="text-xs font-bold text-slate-700 uppercase tracking-wider">
+            <span className="text-xs font-bold text-slate-700 uppercase tracking-wider font-mono">
               {isMarathi ? 'जिल्हाधिकारी कार्यालय, चंद्रपूर' : 'District Collectorate, Chandrapur'}
             </span>
           </div>
@@ -53,7 +53,7 @@ export default function RouteGuard({ children, allowedRoles = [] }) {
             <button
               type="button"
               onClick={openLoginModal}
-              className="w-full flex items-center justify-center gap-2 bg-blue-900 hover:bg-blue-800 text-white font-bold text-sm py-2.5 px-4 rounded-xl shadow-md transition active:scale-98"
+              className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm py-2.5 px-4 rounded-xl shadow-md shadow-indigo-600/20 transition active:scale-98 cursor-pointer"
             >
               <LogIn className="w-4 h-4" />
               <span>{isMarathi ? 'अधिकारी लॉगिन करा' : 'Sign in as Officer'}</span>
@@ -61,7 +61,7 @@ export default function RouteGuard({ children, allowedRoles = [] }) {
 
             <Link
               href="/"
-              className="w-full flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs py-2.5 px-4 rounded-xl transition"
+              className="w-full flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-2 px-4 rounded-xl transition"
             >
               <ArrowLeft className="w-4 h-4" />
               <span>{isMarathi ? 'मुख्य सार्वजनिक पृष्ठावर परत जा' : 'Return to Public Portal'}</span>
@@ -76,7 +76,7 @@ export default function RouteGuard({ children, allowedRoles = [] }) {
   if (allowedRoles.length > 0 && !allowedRoles.includes(user.role)) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center p-4">
-        <div className="max-w-md w-full bg-white rounded-2xl border border-rose-200 shadow-xl p-6 sm:p-8 text-center">
+        <div className="max-w-md w-full bg-white/95 backdrop-blur-xl rounded-2xl border border-rose-200 shadow-xl p-6 sm:p-8 text-center">
           <div className="w-16 h-16 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 flex items-center justify-center mx-auto mb-4">
             <ShieldAlert className="w-8 h-8" />
           </div>
@@ -94,7 +94,7 @@ export default function RouteGuard({ children, allowedRoles = [] }) {
 
           <Link
             href="/dashboard"
-            className="inline-flex items-center gap-2 bg-blue-900 text-white text-xs font-bold py-2.5 px-5 rounded-xl hover:bg-blue-800 transition"
+            className="inline-flex items-center gap-2 bg-indigo-600 text-white text-xs font-semibold py-2.5 px-5 rounded-xl hover:bg-indigo-700 transition shadow-xs shadow-indigo-600/20"
           >
             <ArrowLeft className="w-4 h-4" />
             <span>{isMarathi ? 'डॅशबोर्डवर परत जा' : 'Return to Dashboard'}</span>

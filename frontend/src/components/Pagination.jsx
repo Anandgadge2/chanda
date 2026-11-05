@@ -74,19 +74,19 @@ export default function Pagination({
 
   const containerClasses = embedded
     ? `flex flex-col md:flex-row items-center justify-between gap-3 w-full text-center sm:text-left ${className}`
-    : `flex flex-col md:flex-row items-center justify-between gap-2.5 px-3 sm:px-4 py-2.5 sm:py-3 bg-white border border-slate-200 rounded-xl shadow-2xs mt-3 sm:mt-4 text-center sm:text-left ${className}`;
+    : `flex flex-col md:flex-row items-center justify-between gap-2.5 px-4 py-3 bg-white/90 backdrop-blur-md border border-slate-200/80 rounded-2xl shadow-[0_2px_12px_-2px_rgba(15,23,42,0.04)] mt-3 sm:mt-4 text-center sm:text-left ${className}`;
 
   return (
     <div className={containerClasses}>
       {/* Records Count & Optional Rows Per Page */}
       <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3">
-        <div className="text-xs text-slate-600 font-medium">
+        <div className="text-xs text-slate-500 font-medium">
           {isMarathi ? (
             <>
               एकूण <span className="font-bold text-slate-900">{totalCount}</span> पैकी{' '}
               <span className="font-bold text-slate-900">{totalCount > 0 ? startRecord : 0}</span> ते{' '}
-              <span className="font-bold text-slate-900">{endRecord}</span> नोंदी दाखवत आहे (पृष्ठ{' '}
-              <span className="font-bold text-blue-900">{currentPage}</span> / {finalTotalPages})
+              <span className="font-bold text-slate-900">{endRecord}</span> नोंदी (पृष्ठ{' '}
+              <span className="font-bold text-indigo-600">{currentPage}</span> / {finalTotalPages})
             </>
           ) : (
             <>
@@ -94,21 +94,21 @@ export default function Pagination({
               <span className="font-bold text-slate-900">{totalCount > 0 ? startRecord : 0}</span> to{' '}
               <span className="font-bold text-slate-900">{endRecord}</span> of{' '}
               <span className="font-bold text-slate-900">{totalCount}</span> records (Page{' '}
-              <span className="font-bold text-blue-900">{currentPage}</span> of {finalTotalPages})
+              <span className="font-bold text-indigo-600">{currentPage}</span> of {finalTotalPages})
             </>
           )}
         </div>
 
         {/* Rows Per Page Dropdown */}
         {onPageSizeChange && (
-          <div className="flex items-center gap-1.5 text-xs text-slate-600 font-medium sm:border-l sm:border-slate-200 sm:pl-3">
+          <div className="flex items-center gap-1.5 text-xs text-slate-500 font-medium sm:border-l sm:border-slate-200 sm:pl-3">
             <span className="whitespace-nowrap">{isMarathi ? 'प्रति पृष्ठ:' : 'Per page:'}</span>
             <div className="relative inline-flex items-center">
               <select
                 value={isAll ? 'all' : (pageSize || limit)}
                 onChange={(e) => onPageSizeChange(e.target.value === 'all' ? 'all' : Number(e.target.value))}
                 aria-label={isMarathi ? 'प्रति पृष्ठ नोंदी निवडा' : 'Select rows per page'}
-                className="appearance-none pl-2.5 pr-7 py-1 bg-white border border-slate-300 hover:border-slate-400 rounded-lg text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 cursor-pointer shadow-2xs transition"
+                className="appearance-none pl-2.5 pr-7 py-1 bg-white border border-slate-200 hover:border-slate-300 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 cursor-pointer shadow-2xs transition"
               >
                 {options.map((opt) => (
                   <option key={opt} value={opt} className="font-semibold text-slate-800">
@@ -116,7 +116,7 @@ export default function Pagination({
                   </option>
                 ))}
               </select>
-              <div className="pointer-events-none absolute right-2 flex items-center text-slate-500">
+              <div className="pointer-events-none absolute right-2 flex items-center text-slate-400">
                 <ChevronDown className="w-3.5 h-3.5" />
               </div>
             </div>
@@ -131,7 +131,7 @@ export default function Pagination({
           type="button"
           onClick={() => onPageChange(1)}
           disabled={currentPage <= 1 || isAll}
-          className="inline-flex items-center justify-center p-1.5 rounded-lg border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:hover:bg-transparent disabled:cursor-not-allowed transition active:scale-95 cursor-pointer"
+          className="inline-flex items-center justify-center p-1.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-30 disabled:hover:bg-transparent disabled:cursor-not-allowed transition active:scale-95 cursor-pointer"
           title={isMarathi ? 'पहिले पृष्ठ' : 'First page'}
           aria-label={isMarathi ? 'पहिले पृष्ठ' : 'First page'}
         >
@@ -143,7 +143,7 @@ export default function Pagination({
           type="button"
           onClick={() => onPageChange(currentPage - 1)}
           disabled={currentPage <= 1 || isAll}
-          className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:hover:bg-transparent disabled:cursor-not-allowed transition active:scale-95 cursor-pointer"
+          className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-30 disabled:hover:bg-transparent disabled:cursor-not-allowed transition active:scale-95 cursor-pointer"
           aria-label={isMarathi ? 'मागील पृष्ठ' : 'Previous page'}
         >
           <ChevronLeft className="w-4 h-4" />
@@ -163,9 +163,9 @@ export default function Pagination({
                 type="button"
                 onClick={() => onPageChange(p)}
                 disabled={isAll}
-                className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg text-xs font-bold transition flex items-center justify-center cursor-pointer ${
+                className={`w-7 h-7 sm:w-8 sm:h-8 rounded-xl text-xs font-bold transition flex items-center justify-center cursor-pointer ${
                   currentPage === p
-                    ? 'bg-blue-900 text-white shadow-xs'
+                    ? 'bg-indigo-600 text-white shadow-xs'
                     : 'text-slate-700 hover:bg-slate-100'
                 }`}
               >
@@ -176,7 +176,7 @@ export default function Pagination({
         </div>
 
         {/* Compact Mobile Page Indicator */}
-        <div className="sm:hidden px-2.5 py-1 rounded-lg bg-slate-100 border border-slate-200 text-xs font-bold text-slate-700 font-mono">
+        <div className="sm:hidden px-2.5 py-1 rounded-xl bg-slate-100 border border-slate-200 text-xs font-bold text-slate-700 font-mono">
           {currentPage} / {finalTotalPages}
         </div>
 
@@ -185,7 +185,7 @@ export default function Pagination({
           type="button"
           onClick={() => onPageChange(currentPage + 1)}
           disabled={currentPage >= finalTotalPages || isAll}
-          className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:hover:bg-transparent disabled:cursor-not-allowed transition active:scale-95 cursor-pointer"
+          className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-30 disabled:hover:bg-transparent disabled:cursor-not-allowed transition active:scale-95 cursor-pointer"
           aria-label={isMarathi ? 'पुढील पृष्ठ' : 'Next page'}
         >
           <span className="hidden sm:inline">{isMarathi ? 'पुढील' : 'Next'}</span>
@@ -197,7 +197,7 @@ export default function Pagination({
           type="button"
           onClick={() => onPageChange(finalTotalPages)}
           disabled={currentPage >= finalTotalPages || isAll}
-          className="inline-flex items-center justify-center p-1.5 rounded-lg border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:hover:bg-transparent disabled:cursor-not-allowed transition active:scale-95 cursor-pointer"
+          className="inline-flex items-center justify-center p-1.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-30 disabled:hover:bg-transparent disabled:cursor-not-allowed transition active:scale-95 cursor-pointer"
           title={isMarathi ? 'शेवटचे पृष्ठ' : 'Last page'}
           aria-label={isMarathi ? 'शेवटचे पृष्ठ' : 'Last page'}
         >

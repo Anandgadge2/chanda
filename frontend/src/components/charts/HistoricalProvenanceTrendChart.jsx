@@ -86,13 +86,13 @@ export default function HistoricalProvenanceTrendChart({ data = [] }) {
         <div className="bg-slate-950 text-white p-3 rounded-xl border border-slate-800 shadow-xl text-xs pointer-events-none z-50 min-w-[210px]">
           <div className="flex items-center justify-between gap-1.5 font-bold mb-2 border-b border-slate-800 pb-1.5">
             <div className="flex items-center gap-1.5">
-              <span className={`w-2 h-2 rounded-full ${is1950 ? 'bg-amber-400' : 'bg-emerald-400'}`} />
+              <span className={`w-2 h-2 rounded-full ${is1950 ? 'bg-cyan-400' : 'bg-emerald-400'}`} />
               <span className="text-white text-xs">{item.epochLabel}</span>
             </div>
             <span
               className={`text-[9px] px-1.5 py-0.5 rounded font-bold ${
                 is1950
-                  ? 'bg-amber-950/80 text-amber-300 border border-amber-800/60'
+                  ? 'bg-cyan-950/80 text-cyan-300 border border-cyan-800/60'
                   : is2026
                   ? 'bg-emerald-950/80 text-emerald-300 border border-emerald-800/60'
                   : 'bg-slate-800 text-slate-300'
@@ -108,7 +108,7 @@ export default function HistoricalProvenanceTrendChart({ data = [] }) {
           <div className="text-[11px] text-slate-300 space-y-1 font-mono">
             <div className="flex justify-between">
               <span className="text-slate-400 font-sans">{isMarathi ? 'नोंदणीकृत क्षेत्र:' : 'Registered Area:'}</span>
-              <span className="font-black text-amber-400">{item.areaHa.toLocaleString('en-IN')} Ha</span>
+              <span className="font-black text-cyan-400">{item.areaHa.toLocaleString('en-IN')} Ha</span>
             </div>
             <div className="flex justify-between">
               <span className="text-slate-400 font-sans">{isMarathi ? 'अभिलेख खाते संख्या:' : 'Record Accounts:'}</span>
@@ -248,7 +248,7 @@ export default function HistoricalProvenanceTrendChart({ data = [] }) {
           </div>
         ) : chartData.length === 1 ? (
           <div className="w-full h-full flex flex-col items-center justify-center p-4 bg-slate-50/70 border border-dashed border-slate-200 rounded-xl text-center">
-            <div className="w-9 h-9 rounded-full bg-amber-100 text-amber-800 flex items-center justify-center mb-2">
+            <div className="w-9 h-9 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center mb-2">
               <CheckCircle2 className="w-5 h-5" />
             </div>
             <h4 className="text-xs font-bold text-slate-800">
@@ -340,7 +340,7 @@ export default function HistoricalProvenanceTrendChart({ data = [] }) {
                 key={item.year}
                 className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[10px] font-bold border font-mono ${
                   item.year === '1950'
-                    ? 'bg-amber-50/70 border-amber-200 text-amber-900'
+                    ? 'bg-cyan-50/70 border-cyan-200 text-cyan-900'
                     : 'bg-emerald-50/70 border-emerald-200 text-emerald-900'
                 }`}
               >
@@ -363,7 +363,7 @@ export default function HistoricalProvenanceTrendChart({ data = [] }) {
         {/* 4-Phase Historical Progression Breadcrumb */}
         <div className="hidden sm:grid grid-cols-4 gap-1 text-[9px] pt-1.5 border-t border-slate-100/70 text-slate-500">
           <div className="flex items-center gap-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" />
+            <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 shrink-0" />
             <span className="truncate font-semibold text-slate-700">
               {isMarathi ? '१. १९५० मूळ बंदोबस्त सनद' : '1. 1950 Baseline Sanad'}
             </span>

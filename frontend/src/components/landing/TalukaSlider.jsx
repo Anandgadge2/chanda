@@ -109,7 +109,7 @@ export default function TalukaSlider() {
               <span className="px-2 py-0.5 rounded bg-blue-50 border border-blue-200 text-blue-900 font-mono text-[11px] font-black">
                 {t.code}
               </span>
-              <span className="text-[10px] font-semibold text-amber-800 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">
+              <span className="text-[10px] font-semibold text-indigo-700 bg-indigo-50 px-1.5 py-0.5 rounded border border-indigo-200/80 font-medium">
                 {isMarathi ? t.highlightMr : t.highlightEn}
               </span>
             </div>
@@ -135,7 +135,7 @@ export default function TalukaSlider() {
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-slate-500">{isMarathi ? 'चौकशी प्रकरणे:' : 'Inquiry Cases:'}</span>
-                <span className="font-mono font-bold text-amber-700">
+                <span className="font-mono font-bold text-rose-600">
                   {violationCount.toLocaleString(isMarathi ? 'mr-IN' : 'en-IN')}
                 </span>
               </div>

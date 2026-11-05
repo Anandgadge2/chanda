@@ -168,7 +168,7 @@ export default function SettingsPage() {
   if (!user) {
     return (
       <div className="max-w-xl mx-auto py-16 text-center space-y-4">
-        <div className="w-16 h-16 rounded-2xl bg-amber-100 text-amber-900 flex items-center justify-center mx-auto">
+        <div className="w-16 h-16 rounded-2xl bg-indigo-50 text-indigo-600 border border-indigo-100 flex items-center justify-center mx-auto">
           <Lock className="w-8 h-8" />
         </div>
         <h2 className="text-xl font-bold text-slate-900">{isMarathi ? 'सत्र समाप्त किंवा अनधिकृत प्रवेश' : 'Session Expired or Unauthorized Access'}</h2>
@@ -177,7 +177,7 @@ export default function SettingsPage() {
         </p>
         <Link
           href="/"
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-900 text-white font-bold text-xs"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs shadow-xs"
         >
           {isMarathi ? 'मुख्य पृष्ठावर जा' : 'Go to Homepage'}
         </Link>
@@ -192,7 +192,7 @@ export default function SettingsPage() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div className="flex items-center gap-2.5 min-w-0">
             <div className="relative shrink-0">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-400 to-amber-600 text-slate-950 font-black text-sm flex items-center justify-center shadow-2xs">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-cyan-500 text-white font-black text-sm flex items-center justify-center shadow-2xs">
                 {user.fullName ? user.fullName.charAt(0) : (isMarathi ? 'अ' : 'O')}
               </div>
               <span
@@ -206,7 +206,7 @@ export default function SettingsPage() {
                 <h1 className="text-sm sm:text-base font-extrabold text-slate-900 truncate">
                   {user.fullName || (isMarathi ? 'महसूल अधिकारी' : 'Revenue Officer')}
                 </h1>
-                <span className="px-2 py-0.5 text-[10px] font-extrabold uppercase rounded-full bg-blue-100 text-blue-900 border border-blue-200">
+                <span className="px-2 py-0.5 text-[10px] font-extrabold uppercase rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200/80">
                   {user.role}
                 </span>
                 <span className="px-2 py-0.5 text-[10px] font-extrabold rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200 flex items-center gap-1">
@@ -243,11 +243,11 @@ export default function SettingsPage() {
           onClick={() => setActiveTab('profile')}
           className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all whitespace-nowrap cursor-pointer ${
             activeTab === 'profile'
-              ? 'bg-white text-blue-950 shadow-sm'
+              ? 'bg-white text-indigo-900 shadow-sm'
               : 'text-slate-600 hover:text-slate-900 hover:bg-white/40'
           }`}
         >
-          <User className="w-4 h-4 text-blue-700" />
+          <User className="w-4 h-4 text-indigo-600" />
           <span>{isMarathi ? '१. संपर्क व वैयक्तिक तपशील' : '1. Profile & Contact'}</span>
         </button>
 
@@ -256,11 +256,11 @@ export default function SettingsPage() {
           onClick={() => setActiveTab('security')}
           className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all whitespace-nowrap cursor-pointer ${
             activeTab === 'security'
-              ? 'bg-white text-blue-950 shadow-sm'
+              ? 'bg-white text-indigo-900 shadow-sm'
               : 'text-slate-600 hover:text-slate-900 hover:bg-white/40'
           }`}
         >
-          <KeyRound className="w-4 h-4 text-amber-600" />
+          <KeyRound className="w-4 h-4 text-indigo-600" />
           <span>{isMarathi ? '२. सुरक्षितता व संकेतशब्द' : '2. Security & Password'}</span>
         </button>
 
@@ -283,7 +283,7 @@ export default function SettingsPage() {
         <div className="bg-white border border-slate-200/90 rounded-2xl sm:rounded-3xl p-5 sm:p-7 shadow-2xs space-y-5">
           <div>
             <h2 className="text-sm sm:text-base font-black text-slate-900 flex items-center gap-2">
-              <User className="w-5 h-5 text-blue-800" />
+              <User className="w-5 h-5 text-indigo-600" />
               <span>{isMarathi ? 'वैयक्तिक व संपर्क तपशील (Profile & Contact Information)' : 'Profile & Contact Information'}</span>
             </h2>
             <p className="text-xs text-slate-500 font-medium mt-0.5">
@@ -319,7 +319,7 @@ export default function SettingsPage() {
                     required
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
-                    className="w-full pl-9 pr-3 py-2 text-xs border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-600 text-slate-900"
+                    className="w-full pl-9 pr-3 py-2 text-xs border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-600 text-slate-900"
                   />
                 </div>
               </div>
@@ -336,7 +336,7 @@ export default function SettingsPage() {
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full pl-9 pr-3 py-2 text-xs border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-600 text-slate-900"
+                    className="w-full pl-9 pr-3 py-2 text-xs border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-600 text-slate-900"
                   />
                 </div>
               </div>
@@ -353,7 +353,7 @@ export default function SettingsPage() {
                     placeholder={isMarathi ? '१० अंकी मोबाइल क्रमांक' : '10-digit mobile number'}
                     value={mobile}
                     onChange={(e) => setMobile(e.target.value)}
-                    className="w-full pl-9 pr-3 py-2 text-xs border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-600 text-slate-900"
+                    className="w-full pl-9 pr-3 py-2 text-xs border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-600 text-slate-900"
                   />
                 </div>
               </div>
@@ -369,7 +369,7 @@ export default function SettingsPage() {
                     type="text"
                     value={designation}
                     onChange={(e) => setDesignation(e.target.value)}
-                    className="w-full pl-9 pr-3 py-2 text-xs border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-600 text-slate-900"
+                    className="w-full pl-9 pr-3 py-2 text-xs border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-600 text-slate-900"
                   />
                 </div>
               </div>
@@ -379,7 +379,7 @@ export default function SettingsPage() {
               <button
                 type="submit"
                 disabled={profileLoading}
-                className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-white bg-blue-900 hover:bg-blue-800 active:scale-98 transition shadow-xs disabled:opacity-50 cursor-pointer"
+                className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 shadow-sm shadow-indigo-600/20 active:scale-98 transition shadow-xs disabled:opacity-50 cursor-pointer"
               >
                 {profileLoading ? (isMarathi ? 'जतन होत आहे...' : 'Saving...') : (isMarathi ? 'माहिती जतन करा (Save Changes)' : 'Save Changes')}
               </button>
@@ -393,7 +393,7 @@ export default function SettingsPage() {
         <div className="bg-white border border-slate-200/90 rounded-2xl sm:rounded-3xl p-5 sm:p-7 shadow-2xs space-y-5">
           <div>
             <h2 className="text-sm sm:text-base font-black text-slate-900 flex items-center gap-2">
-              <KeyRound className="w-5 h-5 text-amber-600" />
+              <KeyRound className="w-5 h-5 text-indigo-600" />
               <span>{isMarathi ? 'सुरक्षितता व संकेतशब्द बदल (Change Password)' : 'Security & Change Password'}</span>
             </h2>
             <p className="text-xs text-slate-500 font-medium mt-0.5">
@@ -429,7 +429,7 @@ export default function SettingsPage() {
                   value={currentPassword}
                   onChange={(e) => setCurrentPassword(e.target.value)}
                   placeholder={isMarathi ? 'सध्याचा पासवर्ड टाका' : 'Enter current password'}
-                  className="w-full pl-9 pr-10 py-2 text-xs border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-600 text-slate-900"
+                  className="w-full pl-9 pr-10 py-2 text-xs border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-600 text-slate-900"
                 />
                 <button
                   type="button"
@@ -455,7 +455,7 @@ export default function SettingsPage() {
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   placeholder={isMarathi ? 'किमान ८ अक्षरे किंवा अंक' : 'Minimum 8 characters or digits'}
-                  className="w-full pl-9 pr-10 py-2 text-xs border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-600 text-slate-900"
+                  className="w-full pl-9 pr-10 py-2 text-xs border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-600 text-slate-900"
                 />
                 <button
                   type="button"
@@ -482,7 +482,7 @@ export default function SettingsPage() {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder={isMarathi ? 'नवीन पासवर्ड पुन्हा टाका' : 'Re-enter new password'}
-                  className="w-full pl-9 pr-3 py-2 text-xs border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-600 text-slate-900"
+                  className="w-full pl-9 pr-3 py-2 text-xs border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-600 text-slate-900"
                 />
               </div>
             </div>
@@ -491,7 +491,7 @@ export default function SettingsPage() {
               <button
                 type="submit"
                 disabled={passwordLoading}
-                className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-white bg-amber-600 hover:bg-amber-700 active:scale-98 transition shadow-xs disabled:opacity-50 cursor-pointer"
+                className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 shadow-sm shadow-indigo-600/20 active:scale-98 transition shadow-xs disabled:opacity-50 cursor-pointer"
               >
                 {passwordLoading ? (isMarathi ? 'संकेतशब्द बदलत आहे...' : 'Updating password...') : (isMarathi ? 'संकेतशब्द बदला (Update Password)' : 'Update Password')}
               </button>
@@ -534,7 +534,7 @@ export default function SettingsPage() {
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-black text-slate-900 flex items-center gap-1.5">
-                      <FileJson className="w-4 h-4 text-blue-700" />
+                      <FileJson className="w-4 h-4 text-indigo-600" />
                       {isMarathi ? 'कलम ११: वैयक्तिक डेटा निर्यात' : 'Section 11: Personal Data Export'}
                     </span>
                     <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-100 text-blue-900 border border-blue-200">
@@ -557,7 +557,7 @@ export default function SettingsPage() {
                   type="button"
                   onClick={handleExportData}
                   disabled={exportLoading}
-                  className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-white bg-blue-900 hover:bg-blue-800 active:scale-98 transition shadow-xs disabled:opacity-50 cursor-pointer"
+                  className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 shadow-sm shadow-indigo-600/20 active:scale-98 transition shadow-xs disabled:opacity-50 cursor-pointer"
                 >
                   <Download className="w-4 h-4" />
                   <span>{exportLoading ? (isMarathi ? 'तयार होत आहे...' : 'Generating...') : (isMarathi ? 'माझा डेटा डाउनलोड करा (.JSON)' : 'Download My Data (.JSON)')}</span>
@@ -641,7 +641,7 @@ export default function SettingsPage() {
               <div className="flex items-center gap-3">
                 <Link
                   href="/privacy-policy"
-                  className="text-blue-700 hover:text-blue-900 font-bold underline inline-flex items-center gap-1"
+                  className="text-indigo-600 hover:text-blue-900 font-bold underline inline-flex items-center gap-1"
                 >
                   <span>{isMarathi ? 'गोपनीयता धोरण' : 'Privacy Policy'}</span>
                   <ArrowRight className="w-3 h-3" />

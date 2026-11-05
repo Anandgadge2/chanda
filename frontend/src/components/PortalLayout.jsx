@@ -62,7 +62,7 @@ export default function PortalLayout({ children }) {
   // Public Landing / Legal Pages (No internal layout)
   if (isStandalone) {
     return (
-      <div className="min-h-screen flex flex-col text-slate-900 selection:bg-amber-400 selection:text-slate-950">
+      <div className="min-h-screen flex flex-col text-slate-900 selection:bg-indigo-500 selection:text-white">
         <main id="main-content" className="flex-1 flex flex-col">
           {children}
         </main>
@@ -72,20 +72,19 @@ export default function PortalLayout({ children }) {
     );
   }
 
-  // Loading Session Check State (No sidebar flicker)
+  // Loading Session Check State
   if (loading && !isGlossary) {
     return (
       <div className="min-h-screen flex flex-col text-slate-900 font-sans">
         <div className="flex-1 flex flex-col items-center justify-center">
-          <div className="w-10 h-10 rounded-full border-[3px] border-blue-900 border-t-amber-500 animate-spin mb-3" />
-          <p className="text-xs font-bold text-slate-700">{t('common.sessionCheck')}</p>
+          <div className="w-10 h-10 rounded-full border-[3px] border-indigo-200 border-t-indigo-600 animate-spin mb-3 shadow-xs" />
+          <p className="text-xs font-semibold text-slate-600">{t('common.sessionCheck')}</p>
         </div>
       </div>
     );
   }
 
-  // Unauthenticated user on public /glossary page:
-  // Render Official Navbar + Full Width Workspace + Footer!
+  // Unauthenticated user on public /glossary page
   if (!user && isGlossary) {
     return (
       <div className="min-h-screen flex flex-col text-slate-900 font-sans">
@@ -107,8 +106,7 @@ export default function PortalLayout({ children }) {
     );
   }
 
-  // Unauthenticated user attempting to view protected route:
-  // Show clean gateway WITHOUT internal officer sidebar!
+  // Unauthenticated user attempting to view protected route
   if (!user) {
     return (
       <div className="min-h-screen flex flex-col text-slate-900 font-sans">
@@ -127,7 +125,7 @@ export default function PortalLayout({ children }) {
     );
   }
 
-  // Authenticated Officer Layout: Full Workspace with Sidebar
+  // Authenticated Officer Layout: Full Workspace with Floating Dock Sidebar
   return (
     <div className="min-h-screen flex flex-col text-slate-900 font-sans w-full max-w-full overflow-x-hidden lg:overflow-x-visible">
       <Navbar

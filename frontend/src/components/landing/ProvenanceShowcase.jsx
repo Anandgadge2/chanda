@@ -49,7 +49,6 @@ export default function ProvenanceShowcase() {
   const [liveDispute, setLiveDispute] = useState(null);
 
   useEffect(() => {
-    // Dynamically fetch an authentic live flagged dispute parcel from the database
     api.getAnalyticsSummary()
       .then((data) => {
         if (data?.featuredDispute) {
@@ -58,59 +57,53 @@ export default function ProvenanceShowcase() {
             villageName: p.villageName,
             taluka: p.taluka,
             gatNumber: p.gatNumber,
-            oldSurveyNo: p.oldSurveyNo || '—',
-            totalAreaHa: p.totalAreaHa ? Number(p.totalAreaHa).toFixed(2) : '—',
-            currentTenureMr: p.currentTenure === 'BHOGVATDAR_CLASS_1' ? 'भोगवटादार वर्ग-१' : 'भोगवटादार वर्ग-२',
-            currentTenureEn: p.currentTenure === 'BHOGVATDAR_CLASS_1' ? 'Bhogvatdar Class-1' : 'Bhogvatdar Class-2',
-            currentOwner: p.currentOwner,
-            baselineOwner: p.baselineOwner,
-            baselineTenureMr: p.baselineTenure || 'वर्ग-२ (नवीन व अविभाज्य शर्त)',
-            baselineTenureEn: 'Class-2 (Impartible New Tenure)',
-            caseNumber: p.caseNumber || `SHT/${p.taluka?.slice(0, 3)?.toUpperCase()}/${p.gatNumber}`,
-            violationTypeMr: p.violationType === 'SHARTBHANG' ? 'शर्तभंग: वर्ग-२ चे अनधिकृत वर्ग-१ रूपांतरण' : 'अतिक्रमण व अनधिकृत हस्तांतरण',
-            violationTypeEn: p.violationType === 'SHARTBHANG' ? 'Breach: Unauthorized Class-2 to Class-1 Conversion' : 'Encroachment & Illegal Alienation',
-            status: p.status || 'FLAGGED_IN_AUDIT',
-            upi: p.upi,
+            baselineOwner: p.baselineOwner || (isMarathi ? 'अभिलेख उपलब्ध नाही' : 'Record Not Available'),
+            baselineTenureMr: p.baselineTenureMr || 'भोगवटादार वर्ग-२',
+            baselineTenureEn: p.baselineTenureEn || 'Occupant Class-2',
+            currentTenureMr: p.tenureClassMr || 'भोगवटादार वर्ग-१ (अवैध रूपांतरण संशयित)',
+            currentTenureEn: p.tenureClass || 'Occupant Class-1 (Suspected Illegal Conversion)',
+            violationTypeMr: p.violationTypeMr || 'वर्ग-२ चे वर्ग-१ मध्ये अनधिकृत रूपांतरण',
+            violationTypeEn: p.violationTypeEn || 'Unauthorized Class-2 to Class-1 Tenure Conversion',
+            totalAreaHa: p.totalAreaHa || '4.80',
+            caseNumber: p.caseNumber || 'REV/MLRC/2026/042',
           });
         }
       })
       .catch(() => {});
-  }, []);
+  }, [isMarathi]);
 
-  const d = liveDispute || {
-    villageName: 'चेक घडोली',
-    taluka: 'Gondpipri',
-    gatNumber: '४८',
-    oldSurveyNo: '२९/१',
-    totalAreaHa: '२.१५',
-    currentTenureMr: 'भोगवटादार वर्ग-१',
-    currentTenureEn: 'Bhogvatdar Class-1',
-    currentOwner: 'विद्यमान कब्जेदार',
-    baselineOwner: 'बळी कृष्णा व इतर (मूळ वाटपदार)',
-    baselineTenureMr: 'वर्ग-२ (नवीन व अविभाज्य शर्त)',
-    baselineTenureEn: 'Class-2 (Impartible New Tenure)',
-    caseNumber: 'SHT/GON/GON-010/48',
-    violationTypeMr: 'शर्तभंग: वर्ग-२ चे परस्पर वर्ग-१ रूपांतरण',
-    violationTypeEn: 'Breach: Unauthorized Class-2 to Class-1 Conversion',
-    status: 'FLAGGED_IN_AUDIT',
-    upi: 'MH-CHA-GON-010-0048-58',
+  const defaultDispute = {
+    villageName: 'विसापूर',
+    taluka: 'chandrapur',
+    gatNumber: '142/2',
+    baselineOwner: isMarathi ? 'आमराई झाडचा जंगल (मूळ १९५० वन क्षेत्र)' : 'Amrai Jungle Reserve (1950 Forest Tract)',
+    baselineTenureMr: 'भोगवटादार वर्ग-२ (नवीन अविभाज्य शर्त)',
+    baselineTenureEn: 'Occupant Class-2 (New Impartible Condition)',
+    currentTenureMr: 'भोगवटादार वर्ग-१ (अवैध फेरफार संशयित)',
+    currentTenureEn: 'Occupant Class-1 (Suspected Illegal Mutation)',
+    violationTypeMr: 'वर्ग-२ ते वर्ग-१ अनधिकृत रूपांतरण व शर्तभंग',
+    violationTypeEn: 'Unauthorized Class-2 to Class-1 Conversion & Breach',
+    totalAreaHa: '4.80',
+    caseNumber: 'REV/CHA/2026/0142',
   };
 
+  const d = liveDispute || defaultDispute;
+
   return (
-    <section id="provenance" className="py-6 sm:py-8 bg-slate-50 text-slate-900 relative border-b border-slate-200">
+    <section id="provenance" className="py-7 sm:py-9 bg-slate-50/60 text-slate-900 relative border-b border-slate-200/80">
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto space-y-1.5 mb-4 sm:mb-5">
-          <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-900 text-xs font-bold border border-emerald-300">
-            <History className="w-3.5 h-3.5 text-emerald-700" />
-            <span>{isMarathi ? '१९५० मूळ शीर्षक साखळी' : '1950 Baseline Title Provenance'}</span>
+        <div className="text-center max-w-3xl mx-auto space-y-1.5 mb-5 sm:mb-6">
+          <div className="inline-flex items-center gap-2 px-3 py-0.5 rounded-full bg-indigo-50 text-indigo-700 text-xs font-semibold border border-indigo-200/80">
+            <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
+            <span>{isMarathi ? '१९५० मूळ शीर्षक साखळी' : '1950 Provenance Ledger'}</span>
           </div>
-          <h2 className="text-base sm:text-2xl font-black text-slate-900 tracking-tight">
+          <h2 className="text-lg sm:text-2xl font-black text-slate-900 tracking-tight">
             {isMarathi
               ? 'ऐतिहासिक हक्कनोंदी व विद्यमान ७/१२ मधील तफावत शोध'
               : 'Historical Provenance & Active 7/12 Discrepancy Detection'}
           </h2>
-          <p className="text-[11px] sm:text-xs text-slate-600 leading-relaxed">
+          <p className="text-[11px] sm:text-xs text-slate-500 leading-relaxed max-w-xl mx-auto">
             {isMarathi
               ? 'स्वातंत्र्य काळातील मूळ अभिलेख (Baseline 1950) व आजच्या चालू ७/१२ मधील सर्व फेरफारांची संगणकीय पडताळणी.'
               : 'Algorithmic linkage verifying 1950 post-independence sanads against active 7/12 mutations.'}
@@ -118,25 +111,25 @@ export default function ProvenanceShowcase() {
         </div>
 
         {/* Interactive Comparison & Timeline Box */}
-        <div className="bg-white border border-slate-200 rounded-2xl sm:rounded-3xl p-3.5 sm:p-6 shadow-2xs space-y-4">
+        <div className="bg-white/90 backdrop-blur-md border border-slate-200/80 rounded-3xl p-4 sm:p-7 shadow-[0_4px_24px_-4px_rgba(15,23,42,0.04)] space-y-5">
           {/* Top Comparison Cards: 1950 Baseline vs Present 2026 */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3.5 sm:gap-4">
             {/* Card 1: 1950 Original Record */}
-            <div className="p-3.5 sm:p-4 rounded-xl bg-emerald-50/50 border-2 border-emerald-300 space-y-2 relative overflow-hidden">
+            <div className="p-4 sm:p-5 rounded-2xl bg-white border border-emerald-200/80 shadow-2xs space-y-2.5 relative overflow-hidden">
               <div className="flex items-center justify-between">
-                <span className="px-2.5 py-0.5 rounded-full text-xs font-black bg-emerald-200/80 text-emerald-900 border border-emerald-400">
+                <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
                   {isMarathi ? 'मूळ अभिलेख (१९५० बेसलाईन)' : 'Baseline Record (1950)'}
                 </span>
-                <span className="text-xs font-mono text-emerald-800 font-bold">
+                <span className="text-xs font-mono text-emerald-700 font-semibold">
                   {isMarathi ? '१३५९ फसली / १९५०' : '1359 Fasli / 1950'}
                 </span>
               </div>
-              <h3 className="text-sm sm:text-base font-bold text-slate-900">
+              <h3 className="text-sm sm:text-base font-extrabold text-slate-900 tracking-tight">
                 {isMarathi
                   ? `गट क्र. ${d.gatNumber}, मौजे ${formatVillage(d.villageName, true)} (ता. ${formatTalukaName(d.taluka, true)})`
                   : `Gat No. ${d.gatNumber}, Village ${formatVillage(d.villageName, false)} (Tal. ${formatTalukaName(d.taluka, false)})`}
               </h3>
-              <div className="space-y-1.5 sm:space-y-2 text-xs text-slate-700 pt-2 border-t border-emerald-200/80">
+              <div className="space-y-1.5 sm:space-y-2 text-xs text-slate-700 pt-2 border-t border-slate-100">
                 <div className="flex justify-between items-start gap-2">
                   <span className="text-slate-500 flex-shrink-0">
                     {isMarathi ? 'मूळ खातेदार:' : 'Original Occupant:'}
@@ -149,7 +142,7 @@ export default function ProvenanceShowcase() {
                   <span className="text-slate-500 flex-shrink-0">
                     {isMarathi ? 'भोगवटादार वर्ग:' : 'Tenure Class:'}
                   </span>
-                  <span className="font-bold text-emerald-800 text-right">
+                  <span className="font-semibold text-emerald-700 text-right">
                     {isMarathi ? d.baselineTenureMr : d.baselineTenureEn}
                   </span>
                 </div>
@@ -165,7 +158,7 @@ export default function ProvenanceShowcase() {
                   <span className="text-slate-500 flex-shrink-0">
                     {isMarathi ? 'कायदेशीर दर्जा:' : 'Legal Tenure:'}
                   </span>
-                  <span className="font-semibold text-emerald-800 text-right">
+                  <span className="font-semibold text-emerald-700 text-right">
                     {isMarathi ? 'नवीन अविभाज्य शर्त जमीन' : 'New Impartible Condition'}
                   </span>
                 </div>
@@ -173,24 +166,24 @@ export default function ProvenanceShowcase() {
             </div>
 
             {/* Card 2: Current Status & Detected Violation */}
-            <div className="p-3.5 sm:p-4 rounded-xl bg-rose-50/50 border-2 border-rose-300 space-y-2 relative overflow-hidden">
+            <div className="p-4 sm:p-5 rounded-2xl bg-white border border-rose-200/80 shadow-2xs space-y-2.5 relative overflow-hidden">
               <div className="flex items-center justify-between">
-                <span className="px-2.5 py-0.5 rounded-full text-xs font-black bg-rose-200/80 text-rose-900 border border-rose-400">
+                <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-50 text-rose-800 border border-rose-200">
                   {isMarathi ? 'विद्यमान ७/१२ स्थिती (तपासणीत निष्पन्न)' : 'Active 7/12 Status (Audit Finding)'}
                 </span>
-                <span className="text-xs font-mono text-rose-800 font-bold">
+                <span className="text-xs font-mono text-rose-600 font-semibold">
                   {isMarathi ? 'सद्यस्थिती २०२६' : 'Active 2026'}
                 </span>
               </div>
-              <h3 className="text-sm sm:text-base font-bold text-slate-900">
+              <h3 className="text-sm sm:text-base font-extrabold text-slate-900 tracking-tight">
                 {isMarathi ? d.violationTypeMr : d.violationTypeEn}
               </h3>
-              <div className="space-y-1.5 sm:space-y-2 text-xs text-slate-700 pt-2 border-t border-rose-200/80">
+              <div className="space-y-1.5 sm:space-y-2 text-xs text-slate-700 pt-2 border-t border-slate-100">
                 <div className="flex justify-between items-start gap-2">
                   <span className="text-slate-500 flex-shrink-0">
                     {isMarathi ? 'विद्यमान नोंद:' : 'Active Record:'}
                   </span>
-                  <span className="font-semibold text-rose-800 text-right">
+                  <span className="font-semibold text-rose-700 text-right">
                     {isMarathi ? d.currentTenureMr : d.currentTenureEn}
                   </span>
                 </div>
@@ -198,21 +191,21 @@ export default function ProvenanceShowcase() {
                   <span className="text-slate-500 flex-shrink-0">
                     {isMarathi ? 'तपासणी स्थिती:' : 'Audit Status:'}
                   </span>
-                  <span className="font-bold text-rose-700 text-right">
+                  <span className="font-bold text-rose-600 text-right">
                     {isMarathi ? 'सक्षम प्राधिकारी आदेश गहाळ / तपासणी प्रलंबित' : 'Missing Competent Sanction / Audit Flagged'}
                   </span>
                 </div>
                 <div className="flex justify-between items-start gap-2">
                   <span className="text-slate-500 flex-shrink-0">
-                    {isMarathi ? 'महसूल केस क्र.:' : 'Revenue Case No.:'}
+                    {isMarathi ? 'महसूल केस क्र.:' : 'Case Identifier:'}
                   </span>
-                  <span className="font-semibold text-amber-800 text-right font-mono">{d.caseNumber}</span>
+                  <span className="font-semibold text-slate-900 text-right font-mono">{d.caseNumber}</span>
                 </div>
                 <div className="flex justify-between items-start gap-2">
                   <span className="text-slate-500 flex-shrink-0">
                     {isMarathi ? 'प्रस्तावित कृती:' : 'Proposed Action:'}
                   </span>
-                  <span className="font-bold text-amber-800 text-right">
+                  <span className="font-semibold text-indigo-700 text-right">
                     {isMarathi ? 'MLRC कलम ५९ अन्वये तपासणी' : 'Inquiry under MLRC Section 59'}
                   </span>
                 </div>
@@ -221,38 +214,38 @@ export default function ProvenanceShowcase() {
           </div>
 
           {/* Chronological Provenance Chain Flow */}
-          <div className="space-y-2.5 pt-3 border-t border-slate-200">
-            <h4 className="text-xs font-bold text-amber-800 uppercase tracking-wider flex items-center gap-1.5">
-              <Layers className="w-4 h-4 text-amber-600 flex-shrink-0" />
-              <span>{isMarathi ? 'हक्कनोंदी व फेरफार साखळी अखंडता (MLRC १९६६)' : 'Title Chain & Mutation Integrity (MLRC 1966)'}</span>
+          <div className="space-y-2.5 pt-3 border-t border-slate-100">
+            <h4 className="text-xs font-bold text-indigo-700 uppercase tracking-wider flex items-center gap-1.5">
+              <Layers className="w-4 h-4 text-indigo-600 flex-shrink-0" />
+              <span>{isMarathi ? 'हक्कनोंदी व फेरफार साखळी अखंडता (MLRC १९६६)' : 'Title Chain & Mutation Lineage (MLRC 1966)'}</span>
             </h4>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 text-xs">
-              <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
+              <div className="p-3.5 rounded-2xl bg-slate-50/80 border border-slate-200/80 space-y-1">
                 <span className="text-emerald-700 font-mono font-bold text-[11px]">
                   {isMarathi ? '१९५० बेसलाईन' : '1950 Baseline'}
                 </span>
                 <p className="font-bold text-slate-900 text-xs">
-                  {isMarathi ? 'मूळ सनद व अधिकार अभिलेख' : 'Original Sanad & Record of Rights'}
+                  {isMarathi ? 'मूळ सनद व अधिकार अभिलेख' : 'Original Sanad & Title'}
                 </p>
                 <p className="text-[10px] text-slate-500">
                   {isMarathi ? 'भोगवटादार वर्ग-२ म्हणून नोंदणीकृत' : 'Registered as Bhogvatdar Class-2'}
                 </p>
               </div>
 
-              <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
-                <span className="text-blue-700 font-mono font-bold text-[11px]">
+              <div className="p-3.5 rounded-2xl bg-slate-50/80 border border-slate-200/80 space-y-1">
+                <span className="text-indigo-700 font-mono font-bold text-[11px]">
                   {isMarathi ? 'कलम ३६ / ३६अ' : 'Section 36 / 36A'}
                 </span>
                 <p className="font-bold text-slate-900 text-xs">
                   {isMarathi ? 'वैधानिक निर्बंध संरक्षण' : 'Statutory Alienation Bar'}
                 </p>
                 <p className="text-[10px] text-slate-500">
-                  {isMarathi ? 'वर्ग-२ व आदिवासी जमीन हस्तांतरणावर बंदी' : 'Ban on non-sanctioned land transfers'}
+                  {isMarathi ? 'वर्ग-२ व आदिवासी जमीन हस्तांतरणावर बंदी' : 'Ban on non-sanctioned transfers'}
                 </p>
               </div>
 
-              <div className="p-3 rounded-xl bg-slate-50 border border-rose-300 space-y-1">
+              <div className="p-3.5 rounded-2xl bg-slate-50/80 border border-rose-200 space-y-1">
                 <span className="text-rose-700 font-mono font-bold text-[11px]">
                   {isMarathi ? 'तपासणी पडताळणी' : 'Cadastral Audit'}
                 </span>
@@ -264,8 +257,8 @@ export default function ProvenanceShowcase() {
                 </p>
               </div>
 
-              <div className="p-3 rounded-xl bg-slate-50 border border-amber-300 space-y-1">
-                <span className="text-amber-700 font-mono font-bold text-[11px]">
+              <div className="p-3.5 rounded-2xl bg-slate-50/80 border border-cyan-200 space-y-1">
+                <span className="text-cyan-700 font-mono font-bold text-[11px]">
                   {isMarathi ? 'महसूल अंमलबजावणी' : 'Enforcement Trial'}
                 </span>
                 <p className="font-bold text-slate-900 text-xs">
@@ -280,14 +273,14 @@ export default function ProvenanceShowcase() {
 
           {/* Action Link to 1950 trace */}
           <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
-            <p className="text-xs text-slate-600">
+            <p className="text-xs text-slate-500">
               {isMarathi
                 ? 'चंद्रपूर जिल्ह्यातील सर्व ४२,४५२ भूखंडांची १९५० साखळी व महसूल अभिलेख पाहण्यासाठी खालील बटणावर क्लिक करा.'
                 : 'Click below to explore full 1950 baseline provenance and mutation lineages across 42,452 parcels.'}
             </p>
             <Link
               href="/parcels"
-              className="inline-flex items-center gap-1.5 px-4 py-2 bg-blue-900 hover:bg-blue-800 text-white text-xs font-bold rounded-xl transition shadow-xs shrink-0"
+              className="inline-flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-xl transition shadow-sm shadow-indigo-500/25 shrink-0"
             >
               <span>{isMarathi ? 'सर्व भूखंड अभिलेख तपासा' : 'Inspect All Parcel Records'}</span>
               <ArrowRight className="w-3.5 h-3.5" />

@@ -208,10 +208,10 @@ export default function LandingHero({ onOpenAuth }) {
   return (
     <section
       id="search-section"
-      className="relative bg-gradient-to-b from-blue-50/40 via-slate-50 to-white text-slate-900 pt-2 sm:pt-3 pb-6 sm:pb-8 border-b border-slate-200"
+      className="relative bg-gradient-to-b from-indigo-50/20 via-slate-50 to-white text-slate-900 pt-3 sm:pt-4 pb-6 sm:pb-8 border-b border-slate-200/80"
       aria-label={isMarathi ? 'चंद्रपूर जिल्हा प्रशासन मुख्य बॅनर' : 'Chandrapur District Administration Main Banner'}
     >
-      {/* Full-width Responsive Showcase Container - Scales Elegantly Across All Zoom Levels */}
+      {/* Full-width Responsive Showcase Container */}
       <div className="w-full max-w-7xl 2xl:max-w-[1536px] mx-auto px-2.5 sm:px-6 lg:px-8 mb-4 sm:mb-6">
         <div
           role="region"
@@ -221,15 +221,15 @@ export default function LandingHero({ onOpenAuth }) {
           onKeyDown={handleKeyDown}
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
-          className="relative w-full h-[390px] xs:h-[415px] sm:h-[440px] md:h-[470px] lg:h-[500px] xl:h-[520px] rounded-2xl sm:rounded-3xl overflow-hidden border border-slate-200/90 shadow-xl shadow-slate-900/10 bg-slate-950 focus:outline-hidden focus:ring-2 focus:ring-amber-400 group"
+          className="relative w-full h-[390px] xs:h-[415px] sm:h-[440px] md:h-[470px] lg:h-[500px] xl:h-[520px] rounded-2xl sm:rounded-3xl overflow-hidden border border-slate-200/90 shadow-2xl shadow-slate-900/10 bg-slate-950 focus:outline-hidden focus:ring-2 focus:ring-indigo-500 group"
         >
-          {/* Official Indian Tricolor National Accent Micro-Bar */}
+          {/* High-Tech Gradient Accent Top Line */}
           <div
-            className="absolute top-0 left-0 right-0 h-[3.5px] z-30 bg-gradient-to-r from-amber-500 via-white to-emerald-600 shadow-xs"
+            className="absolute top-0 left-0 right-0 h-[3px] z-30 bg-gradient-to-r from-indigo-500 via-cyan-400 to-indigo-600 shadow-xs"
             aria-hidden="true"
           />
 
-          {/* Full High-Definition Photographic Showcase (No white washout box, natural daylight clarity) */}
+          {/* Full High-Definition Photographic Showcase */}
           {CHANDRAPUR_BANNERS.map((banner, index) => {
             const isActive = index === currentSlide;
             return (
@@ -247,22 +247,22 @@ export default function LandingHero({ onOpenAuth }) {
                     isActive ? 'scale-105' : 'scale-100'
                   }`}
                 />
-                {/* Natural Cinematic Vignette (Subtle top vignette + bottom caption wash) */}
+                {/* Natural Cinematic Vignette */}
                 <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-slate-950/70 via-slate-950/20 to-transparent pointer-events-none" />
-                <div className="absolute inset-x-0 bottom-0 h-64 sm:h-72 bg-gradient-to-t from-slate-950 via-slate-950/75 to-transparent pointer-events-none" />
+                <div className="absolute inset-x-0 bottom-0 h-64 sm:h-72 bg-gradient-to-t from-slate-950 via-slate-950/80 to-transparent pointer-events-none" />
               </div>
             );
           })}
 
-          {/* Top Controls Overlay: Official Floating Badges & Navigation Controller */}
+          {/* Top Controls Overlay */}
           <div className="absolute top-3 sm:top-5 left-3 sm:left-7 right-3 sm:right-7 flex items-center justify-between gap-2 z-20">
-            {/* Left: Official Government Badges */}
+            {/* Left: Modern Tech Badges */}
             <div className="flex items-center gap-2">
-              <span className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-amber-400 text-slate-950 shadow-md">
-                {isMarathi ? 'महाराष्ट्र शासन' : 'Govt of Maharashtra'}
+              <span className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-indigo-600 text-white shadow-md">
+                {isMarathi ? 'चंद्रपूर लँड पोर्टल' : 'Chandrapur Spatial'}
               </span>
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-slate-900/80 backdrop-blur-md text-amber-300 border border-white/20 shadow-md">
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-slate-900/80 backdrop-blur-md text-cyan-300 border border-white/20 shadow-md">
+                <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
                 {isMarathi ? activeBanner.badgeMr : activeBanner.badgeEn}
               </span>
             </div>
@@ -279,7 +279,7 @@ export default function LandingHero({ onOpenAuth }) {
                 <ChevronLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               </button>
 
-              <span className="px-2 text-[10px] sm:text-xs font-mono font-bold text-amber-300 tracking-wider">
+              <span className="px-2 text-[10px] sm:text-xs font-mono font-bold text-cyan-400 tracking-wider">
                 {isMarathi ? activeBanner.numeralMr : activeBanner.numeralEn}
                 <span className="text-white/40 font-normal mx-0.5">/</span>
                 {isMarathi
@@ -307,7 +307,7 @@ export default function LandingHero({ onOpenAuth }) {
                 title={isPaused ? (isMarathi ? 'सुरू करा (Play)' : 'Play') : (isMarathi ? 'थांबवा (Pause)' : 'Pause')}
               >
                 {isPaused ? (
-                  <Play className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-amber-400 fill-amber-400" />
+                  <Play className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-cyan-400 fill-cyan-400" />
                 ) : (
                   <Pause className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-white/90" />
                 )}
@@ -315,7 +315,7 @@ export default function LandingHero({ onOpenAuth }) {
             </div>
           </div>
 
-          {/* Integrated Lower Showcase Dock (Spans Full Width, Zero Div Clutter) */}
+          {/* Integrated Lower Showcase Dock */}
           <div className="absolute inset-x-0 bottom-0 z-20 px-4 sm:px-7 lg:px-9 pb-3 sm:pb-4 space-y-3 sm:space-y-4">
             {/* Title & Primary Action Row */}
             <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 sm:gap-6">
@@ -333,7 +333,7 @@ export default function LandingHero({ onOpenAuth }) {
               <div className="shrink-0">
                 <Link
                   href={activeBanner.primaryHref}
-                  className="inline-flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-bold text-slate-950 bg-gradient-to-r from-amber-400 to-amber-300 hover:from-amber-300 hover:to-amber-200 shadow-lg shadow-amber-950/40 hover:shadow-amber-400/30 transition-all active:scale-95 group/btn cursor-pointer"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 shadow-lg shadow-indigo-950/40 hover:shadow-indigo-500/30 transition-all active:scale-95 group/btn cursor-pointer"
                 >
                   <span>{isMarathi ? activeBanner.primaryCtaMr : activeBanner.primaryCtaEn}</span>
                   <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 group-hover/btn:translate-x-1 transition-transform" />
@@ -363,7 +363,7 @@ export default function LandingHero({ onOpenAuth }) {
                         {isActive ? (
                           <div
                             key={`prog-desktop-${progressKey}`}
-                            className={`h-full bg-gradient-to-r from-amber-400 to-amber-300 rounded-full animate-hero-progress ${
+                            className={`h-full bg-gradient-to-r from-cyan-400 to-indigo-500 rounded-full animate-hero-progress ${
                               isPaused ? 'animate-hero-progress-paused' : ''
                             }`}
                           />
@@ -376,7 +376,7 @@ export default function LandingHero({ onOpenAuth }) {
                       <div className="flex items-center gap-1 truncate">
                         <span
                           className={`text-[10px] font-mono font-bold ${
-                            isActive ? 'text-amber-400' : 'text-slate-400'
+                            isActive ? 'text-cyan-400' : 'text-slate-400'
                           }`}
                         >
                           {isMarathi ? banner.numeralMr : banner.numeralEn}
@@ -397,7 +397,7 @@ export default function LandingHero({ onOpenAuth }) {
               {/* Mobile Slim Progress Segments (<640px) */}
               <div className="sm:hidden space-y-1.5 pt-0.5">
                 <div className="flex items-center justify-between text-[11px] font-semibold text-white">
-                  <span className="text-amber-300 font-bold">{isMarathi ? activeBanner.shortLabelMr : activeBanner.shortLabelEn}</span>
+                  <span className="text-cyan-300 font-bold">{isMarathi ? activeBanner.shortLabelMr : activeBanner.shortLabelEn}</span>
                   <span className="text-white/60 text-[10px]">
                     {isMarathi ? activeBanner.numeralMr : activeBanner.numeralEn} / {isMarathi
                       ? String(CHANDRAPUR_BANNERS.length).replace(/\d/g, (d) => '०१२३४५६७८९'[d]).padStart(2, '०')
@@ -421,7 +421,7 @@ export default function LandingHero({ onOpenAuth }) {
                         {isActive ? (
                           <div
                             key={`prog-mob-${progressKey}`}
-                            className={`h-full bg-amber-400 rounded-full animate-hero-progress ${
+                            className={`h-full bg-cyan-400 rounded-full animate-hero-progress ${
                               isPaused ? 'animate-hero-progress-paused' : ''
                             }`}
                           />
@@ -438,78 +438,91 @@ export default function LandingHero({ onOpenAuth }) {
         </div>
       </div>
 
-      {/* District Revenue & Administrative Indicators (Colorful, Balanced & Responsive) */}
-      <div className="max-w-7xl 2xl:max-w-[1536px] mx-auto px-2.5 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3.5">
-          <div className="p-2.5 sm:p-4 rounded-xl bg-white border border-blue-200/80 shadow-2xs hover:shadow-xs transition-all flex items-center gap-2.5 sm:gap-3">
-            <div className="w-8 h-8 sm:w-11 sm:h-11 rounded-lg sm:rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-900 flex-shrink-0">
-              <Landmark className="w-4 h-4 sm:w-5 sm:h-5" />
+      {/* Solid Color Telemetry Metrics Dock */}
+      <div className="max-w-7xl 2xl:max-w-[1536px] mx-auto px-2.5 sm:px-6 lg:px-8 text-white">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3.5">
+          <div className="group relative flex flex-col justify-between overflow-hidden rounded-2xl p-4 text-left border border-indigo-500/80 bg-indigo-600 hover:bg-indigo-700 shadow-md shadow-indigo-600/20 hover:shadow-xl hover:shadow-indigo-600/30 transition-all duration-200 ease-[cubic-bezier(0.25,1,0.5,1)] hover:-translate-y-1">
+            <div className="absolute top-0 inset-x-0 h-px bg-white/25 pointer-events-none" />
+            <div className="flex items-center justify-between gap-1.5">
+              <span className="text-[11px] sm:text-xs font-semibold tracking-tight text-indigo-100 group-hover:text-white transition-colors">
+                {isMarathi ? 'प्रशासकीय तालुके' : 'Administrative Talukas'}
+              </span>
+              <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl border border-white/20 bg-white/15 flex items-center justify-center text-white transition-all duration-200 group-hover:scale-105 group-hover:bg-white/25 shadow-2xs">
+                <Landmark className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" />
+              </div>
             </div>
-            <div className="min-w-0">
-              <p className="text-lg sm:text-2xl font-black text-slate-900 leading-none">
+            <div className="mt-3 sm:mt-3.5 flex items-baseline justify-between gap-1">
+              <p className="text-2xl sm:text-3xl font-extrabold tracking-tight font-mono tabular-nums leading-none text-white">
                 {liveStats.talukas.toLocaleString(isMarathi ? 'mr-IN' : 'en-IN')}
               </p>
-              <p className="text-[11px] sm:text-[13px] font-bold text-slate-800 mt-0.5 sm:mt-1 truncate">
-                {isMarathi ? 'प्रशासकीय तालुके' : 'Administrative Talukas'}
-              </p>
-              <p className="text-[9px] sm:text-[10px] text-slate-500 truncate">
-                {isMarathi ? 'चंद्रपूर महसूल उपविभाग' : 'Revenue Sub-Divisions'}
-              </p>
+              <span className="text-[10px] sm:text-[11px] font-medium text-indigo-200/90 truncate">
+                {isMarathi ? '१५ तालुके' : '15 Talukas'}
+              </span>
             </div>
           </div>
 
-          <div className="p-2.5 sm:p-4 rounded-xl bg-white border border-emerald-200/80 shadow-2xs hover:shadow-xs transition-all flex items-center gap-2.5 sm:gap-3">
-            <div className="w-8 h-8 sm:w-11 sm:h-11 rounded-lg sm:rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-700 flex-shrink-0">
-              <Compass className="w-4 h-4 sm:w-5 sm:h-5" />
+          <div className="group relative flex flex-col justify-between overflow-hidden rounded-2xl p-4 text-left border border-emerald-500/80 bg-emerald-600 hover:bg-emerald-700 shadow-md shadow-emerald-600/20 hover:shadow-xl hover:shadow-emerald-600/30 transition-all duration-200 ease-[cubic-bezier(0.25,1,0.5,1)] hover:-translate-y-1">
+            <div className="absolute top-0 inset-x-0 h-px bg-white/25 pointer-events-none" />
+            <div className="flex items-center justify-between gap-1.5">
+              <span className="text-[11px] sm:text-xs font-semibold tracking-tight text-emerald-100 group-hover:text-white transition-colors">
+                {isMarathi ? 'महसूल गावे' : 'Revenue Villages'}
+              </span>
+              <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl border border-white/20 bg-white/15 flex items-center justify-center text-white transition-all duration-200 group-hover:scale-105 group-hover:bg-white/25 shadow-2xs">
+                <Compass className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" />
+              </div>
             </div>
-            <div className="min-w-0">
-              <p className="text-lg sm:text-2xl font-black text-slate-900 leading-none">
+            <div className="mt-3 sm:mt-3.5 flex items-baseline justify-between gap-1">
+              <p className="text-2xl sm:text-3xl font-extrabold tracking-tight font-mono tabular-nums leading-none text-white">
                 {liveStats.villages.toLocaleString(isMarathi ? 'mr-IN' : 'en-IN')}
               </p>
-              <p className="text-[11px] sm:text-[13px] font-bold text-slate-800 mt-0.5 sm:mt-1 truncate">
-                {isMarathi ? 'महसूल गावे' : 'Revenue Villages'}
-              </p>
-              <p className="text-[9px] sm:text-[10px] text-slate-500 truncate">
-                {isMarathi ? 'तपासणी व मूळ हक्कनोंदी' : 'Baseline Audited Records'}
-              </p>
+              <span className="text-[10px] sm:text-[11px] font-medium text-emerald-200/90 truncate">
+                {isMarathi ? 'तपासणी अभिलेख' : 'Audited Villages'}
+              </span>
             </div>
           </div>
 
-          <div className="p-2.5 sm:p-4 rounded-xl bg-white border border-amber-200/80 shadow-2xs hover:shadow-xs transition-all flex items-center gap-2.5 sm:gap-3">
-            <div className="w-8 h-8 sm:w-11 sm:h-11 rounded-lg sm:rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-700 flex-shrink-0">
-              <ShieldCheck className="w-4 h-4 sm:w-5 sm:h-5" />
+          <div className="group relative flex flex-col justify-between overflow-hidden rounded-2xl p-4 text-left border border-sky-500/80 bg-sky-600 hover:bg-sky-700 shadow-md shadow-sky-600/20 hover:shadow-xl hover:shadow-sky-600/30 transition-all duration-200 ease-[cubic-bezier(0.25,1,0.5,1)] hover:-translate-y-1">
+            <div className="absolute top-0 inset-x-0 h-px bg-white/25 pointer-events-none" />
+            <div className="flex items-center justify-between gap-1.5">
+              <span className="text-[11px] sm:text-xs font-semibold tracking-tight text-sky-100 group-hover:text-white transition-colors">
+                {isMarathi ? 'नोंदणीकृत भूखंड' : 'Registered Parcels'}
+              </span>
+              <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl border border-white/20 bg-white/15 flex items-center justify-center text-white transition-all duration-200 group-hover:scale-105 group-hover:bg-white/25 shadow-2xs">
+                <ShieldCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" />
+              </div>
             </div>
-            <div className="min-w-0">
-              <p className="text-lg sm:text-2xl font-black text-slate-900 leading-none">
+            <div className="mt-3 sm:mt-3.5 flex items-baseline justify-between gap-1">
+              <p className="text-2xl sm:text-3xl font-extrabold tracking-tight font-mono tabular-nums leading-none text-white">
                 {liveStats.parcels.toLocaleString(isMarathi ? 'mr-IN' : 'en-IN')}
               </p>
-              <p className="text-[11px] sm:text-[13px] font-bold text-slate-800 mt-0.5 sm:mt-1 truncate">
-                {isMarathi ? 'नोंदणीकृत भूखंड' : 'Registered Parcels'}
-              </p>
-              <p className="text-[9px] sm:text-[10px] text-slate-500 truncate">
-                {isMarathi ? 'डिजिटल ७/१२ व १९५० साठा' : 'Digital 7/12 & 1950 Corpus'}
-              </p>
+              <span className="text-[10px] sm:text-[11px] font-medium text-sky-200/90 truncate">
+                {isMarathi ? 'डिजिटल ७/१२ साठा' : 'Digital 7/12 Records'}
+              </span>
             </div>
           </div>
 
-          <div className="p-2.5 sm:p-4 rounded-xl bg-white border border-indigo-200/80 shadow-2xs hover:shadow-xs transition-all flex items-center gap-2.5 sm:gap-3">
-            <div className="w-8 h-8 sm:w-11 sm:h-11 rounded-lg sm:rounded-xl bg-indigo-50 border border-indigo-200 flex items-center justify-center text-indigo-700 flex-shrink-0">
-              <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />
+          <div className="group relative flex flex-col justify-between overflow-hidden rounded-2xl p-4 text-left border border-violet-500/80 bg-violet-600 hover:bg-violet-700 shadow-md shadow-violet-600/20 hover:shadow-xl hover:shadow-violet-600/30 transition-all duration-200 ease-[cubic-bezier(0.25,1,0.5,1)] hover:-translate-y-1">
+            <div className="absolute top-0 inset-x-0 h-px bg-white/25 pointer-events-none" />
+            <div className="flex items-center justify-between gap-1.5">
+              <span className="text-[11px] sm:text-xs font-semibold tracking-tight text-violet-100 group-hover:text-white transition-colors">
+                {isMarathi ? 'वैधानिक संरक्षण' : 'Statutory Protection'}
+              </span>
+              <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl border border-white/20 bg-white/15 flex items-center justify-center text-white transition-all duration-200 group-hover:scale-105 group-hover:bg-white/25 shadow-2xs">
+                <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" />
+              </div>
             </div>
-            <div className="min-w-0">
-              <p className="text-lg sm:text-2xl font-black text-slate-900 leading-none">
+            <div className="mt-3 sm:mt-3.5 flex items-baseline justify-between gap-1">
+              <p className="text-2xl sm:text-3xl font-extrabold tracking-tight font-mono tabular-nums leading-none text-white">
                 {isMarathi ? 'MLRC १९६६' : 'MLRC 1966'}
               </p>
-              <p className="text-[11px] sm:text-[13px] font-bold text-slate-800 mt-0.5 sm:mt-1 truncate">
-                {isMarathi ? 'वैधानिक संरक्षण' : 'Statutory Protection'}
-              </p>
-              <p className="text-[9px] sm:text-[10px] text-slate-500 truncate">
-                {isMarathi ? '१९५० मूळ शीर्षक पडताळणी' : '1950 Provenance Verification'}
-              </p>
+              <span className="text-[10px] sm:text-[11px] font-medium text-violet-200/90 truncate">
+                {isMarathi ? '१९५० मूळ शीर्षक' : '1950 Baseline'}
+              </span>
             </div>
           </div>
         </div>
       </div>
-    </section>
+      
+</section>
   );
 }

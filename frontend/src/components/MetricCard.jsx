@@ -2,102 +2,112 @@
 
 import clsx from 'clsx';
 import Link from 'next/link';
-import { ArrowUpRight, Check } from 'lucide-react';
+import { ArrowUpRight } from 'lucide-react';
 import { useTranslation } from './LanguageContext';
 
 /**
- * Meaningful semantic light color variants for executive KPI cards:
- * - 'blue'   : Foundational inventory / Master records / Governance scale
- * - 'amber'  : Regulatory vigilance / Compliance inquiries / Actionable audits
- * - 'indigo' : Territorial coverage / Talukas & administrative jurisdiction
- * - 'emerald': Completed conversions / Regularization progress / Positive resolutions
- * - 'rose'   : Severe violations / Encroachments / Critical alerts
+ * Premium Solid-Color KPI Metric Card
+ * High-impact, rich solid hues with crisp white typography and frosted translucent accents.
+ * Designed to look executive, high-tech, and distinctively modern.
  */
 const KPI_VARIANTS = {
   blue: {
-    bg: 'bg-gradient-to-br from-sky-50/90 via-blue-50/40 to-white/95',
-    activeBg: 'bg-gradient-to-br from-sky-100/90 via-blue-50/70 to-white',
-    border: 'border-sky-200/80 hover:border-sky-300',
-    activeBorder: 'border-sky-500 ring-2 ring-sky-500/30 shadow-md',
-    topBar: 'from-sky-500 via-blue-600 to-indigo-600',
-    badge: 'bg-sky-100/80 text-sky-700 border-sky-200/90',
-    title: 'text-slate-700 group-hover:text-sky-950',
-    activeTitle: 'text-sky-950 font-black',
-    value: 'text-slate-900',
-    activeValue: 'text-sky-950',
-    icon: 'text-sky-600',
-    activeTag: 'bg-sky-600 text-white',
-    subtext: 'text-slate-500',
-    actionBtn: 'hover:bg-sky-600 hover:text-white hover:border-sky-600',
-    footerHover: 'group-hover:text-sky-700',
+    bg: 'bg-indigo-600',
+    hoverBg: 'hover:bg-indigo-700',
+    border: 'border-indigo-500/80',
+    shadow: 'shadow-md shadow-indigo-600/20 hover:shadow-xl hover:shadow-indigo-600/30',
+    activeRing: 'ring-2 ring-inset ring-white shadow-xl shadow-indigo-950/30',
+    title: 'text-indigo-100 group-hover:text-white',
+    value: 'text-white',
+    subtext: 'text-indigo-200/90',
+    badge: 'bg-white/15 text-white border-white/20 group-hover:bg-white/25',
+    actionBtn: 'bg-white/15 text-white border-white/20 hover:bg-white hover:text-indigo-700',
+    footer: 'border-indigo-500/60 text-indigo-100/90 group-hover:text-white',
+    pulse: 'bg-white',
   },
   amber: {
-    bg: 'bg-gradient-to-br from-amber-50/90 via-orange-50/40 to-white/95',
-    activeBg: 'bg-gradient-to-br from-amber-100/90 via-orange-50/70 to-white',
-    border: 'border-amber-200/80 hover:border-amber-300',
-    activeBorder: 'border-amber-500 ring-2 ring-amber-500/30 shadow-md',
-    topBar: 'from-amber-500 via-orange-500 to-amber-600',
-    badge: 'bg-amber-100/80 text-amber-800 border-amber-200/90',
-    title: 'text-slate-700 group-hover:text-amber-950',
-    activeTitle: 'text-amber-950 font-black',
-    value: 'text-amber-950',
-    activeValue: 'text-amber-900',
-    icon: 'text-amber-600',
-    activeTag: 'bg-amber-600 text-white',
-    subtext: 'text-amber-800/80',
-    actionBtn: 'hover:bg-amber-600 hover:text-white hover:border-amber-600',
-    footerHover: 'group-hover:text-amber-700',
+    bg: 'bg-amber-600',
+    hoverBg: 'hover:bg-amber-700',
+    border: 'border-amber-500/80',
+    shadow: 'shadow-md shadow-amber-600/20 hover:shadow-xl hover:shadow-amber-600/30',
+    activeRing: 'ring-2 ring-inset ring-white shadow-xl shadow-amber-950/30',
+    title: 'text-amber-100 group-hover:text-white',
+    value: 'text-white',
+    subtext: 'text-amber-200/90',
+    badge: 'bg-white/15 text-white border-white/20 group-hover:bg-white/25',
+    actionBtn: 'bg-white/15 text-white border-white/20 hover:bg-white hover:text-amber-700',
+    footer: 'border-amber-500/60 text-amber-100/90 group-hover:text-white',
+    pulse: 'bg-white',
   },
   indigo: {
-    bg: 'bg-gradient-to-br from-indigo-50/90 via-violet-50/40 to-white/95',
-    activeBg: 'bg-gradient-to-br from-indigo-100/90 via-violet-50/70 to-white',
-    border: 'border-indigo-200/80 hover:border-indigo-300',
-    activeBorder: 'border-indigo-500 ring-2 ring-indigo-500/30 shadow-md',
-    topBar: 'from-indigo-500 via-violet-600 to-purple-600',
-    badge: 'bg-indigo-100/80 text-indigo-700 border-indigo-200/90',
-    title: 'text-slate-700 group-hover:text-indigo-950',
-    activeTitle: 'text-indigo-950 font-black',
-    value: 'text-indigo-950',
-    activeValue: 'text-indigo-900',
-    icon: 'text-indigo-600',
-    activeTag: 'bg-indigo-600 text-white',
-    subtext: 'text-slate-500',
-    actionBtn: 'hover:bg-indigo-600 hover:text-white hover:border-indigo-600',
-    footerHover: 'group-hover:text-indigo-700',
+    bg: 'bg-violet-600',
+    hoverBg: 'hover:bg-violet-700',
+    border: 'border-violet-500/80',
+    shadow: 'shadow-md shadow-violet-600/20 hover:shadow-xl hover:shadow-violet-600/30',
+    activeRing: 'ring-2 ring-inset ring-white shadow-xl shadow-violet-950/30',
+    title: 'text-violet-100 group-hover:text-white',
+    value: 'text-white',
+    subtext: 'text-violet-200/90',
+    badge: 'bg-white/15 text-white border-white/20 group-hover:bg-white/25',
+    actionBtn: 'bg-white/15 text-white border-white/20 hover:bg-white hover:text-violet-700',
+    footer: 'border-violet-500/60 text-violet-100/90 group-hover:text-white',
+    pulse: 'bg-white',
   },
   emerald: {
-    bg: 'bg-gradient-to-br from-emerald-50/90 via-teal-50/40 to-white/95',
-    activeBg: 'bg-gradient-to-br from-emerald-100/90 via-teal-50/70 to-white',
-    border: 'border-emerald-200/80 hover:border-emerald-300',
-    activeBorder: 'border-emerald-500 ring-2 ring-emerald-500/30 shadow-md',
-    topBar: 'from-emerald-500 via-teal-500 to-emerald-600',
-    badge: 'bg-emerald-100/80 text-emerald-800 border-emerald-200/90',
-    title: 'text-slate-700 group-hover:text-emerald-950',
-    activeTitle: 'text-emerald-950 font-black',
-    value: 'text-emerald-950',
-    activeValue: 'text-emerald-900',
-    icon: 'text-emerald-600',
-    activeTag: 'bg-emerald-600 text-white',
-    subtext: 'text-emerald-800/80',
-    actionBtn: 'hover:bg-emerald-600 hover:text-white hover:border-emerald-600',
-    footerHover: 'group-hover:text-emerald-700',
+    bg: 'bg-emerald-600',
+    hoverBg: 'hover:bg-emerald-700',
+    border: 'border-emerald-500/80',
+    shadow: 'shadow-md shadow-emerald-600/20 hover:shadow-xl hover:shadow-emerald-600/30',
+    activeRing: 'ring-2 ring-inset ring-white shadow-xl shadow-emerald-950/30',
+    title: 'text-emerald-100 group-hover:text-white',
+    value: 'text-white',
+    subtext: 'text-emerald-200/90',
+    badge: 'bg-white/15 text-white border-white/20 group-hover:bg-white/25',
+    actionBtn: 'bg-white/15 text-white border-white/20 hover:bg-white hover:text-emerald-700',
+    footer: 'border-emerald-500/60 text-emerald-100/90 group-hover:text-white',
+    pulse: 'bg-white',
   },
   rose: {
-    bg: 'bg-gradient-to-br from-rose-50/90 via-pink-50/40 to-white/95',
-    activeBg: 'bg-gradient-to-br from-rose-100/90 via-pink-50/70 to-white',
-    border: 'border-rose-200/80 hover:border-rose-300',
-    activeBorder: 'border-rose-500 ring-2 ring-rose-500/30 shadow-md',
-    topBar: 'from-rose-500 via-pink-500 to-rose-600',
-    badge: 'bg-rose-100/80 text-rose-700 border-rose-200/90',
-    title: 'text-slate-700 group-hover:text-rose-950',
-    activeTitle: 'text-rose-950 font-black',
-    value: 'text-rose-950',
-    activeValue: 'text-rose-900',
-    icon: 'text-rose-600',
-    activeTag: 'bg-rose-600 text-white',
-    subtext: 'text-rose-700/80',
-    actionBtn: 'hover:bg-rose-600 hover:text-white hover:border-rose-600',
-    footerHover: 'group-hover:text-rose-700',
+    bg: 'bg-rose-600',
+    hoverBg: 'hover:bg-rose-700',
+    border: 'border-rose-500/80',
+    shadow: 'shadow-md shadow-rose-600/20 hover:shadow-xl hover:shadow-rose-600/30',
+    activeRing: 'ring-2 ring-inset ring-white shadow-xl shadow-rose-950/30',
+    title: 'text-rose-100 group-hover:text-white',
+    value: 'text-white',
+    subtext: 'text-rose-200/90',
+    badge: 'bg-white/15 text-white border-white/20 group-hover:bg-white/25',
+    actionBtn: 'bg-white/15 text-white border-white/20 hover:bg-white hover:text-rose-700',
+    footer: 'border-rose-500/60 text-rose-100/90 group-hover:text-white',
+    pulse: 'bg-white',
+  },
+  cyan: {
+    bg: 'bg-sky-600',
+    hoverBg: 'hover:bg-sky-700',
+    border: 'border-sky-500/80',
+    shadow: 'shadow-md shadow-sky-600/20 hover:shadow-xl hover:shadow-sky-600/30',
+    activeRing: 'ring-2 ring-inset ring-white shadow-xl shadow-sky-950/30',
+    title: 'text-sky-100 group-hover:text-white',
+    value: 'text-white',
+    subtext: 'text-sky-200/90',
+    badge: 'bg-white/15 text-white border-white/20 group-hover:bg-white/25',
+    actionBtn: 'bg-white/15 text-white border-white/20 hover:bg-white hover:text-sky-700',
+    footer: 'border-sky-500/50 text-sky-100/90 group-hover:text-white',
+    pulse: 'bg-white',
+  },
+  slate: {
+    bg: 'bg-slate-900',
+    hoverBg: 'hover:bg-slate-950',
+    border: 'border-slate-800',
+    shadow: 'shadow-md shadow-slate-950/20 hover:shadow-xl hover:shadow-slate-950/30',
+    activeRing: 'ring-2 ring-inset ring-white shadow-xl shadow-slate-950/40',
+    title: 'text-slate-300 group-hover:text-white',
+    value: 'text-white',
+    subtext: 'text-slate-400',
+    badge: 'bg-white/10 text-white border-white/15 group-hover:bg-white/20',
+    actionBtn: 'bg-white/10 text-white border-white/15 hover:bg-white hover:text-slate-900',
+    footer: 'border-slate-800 text-slate-300 group-hover:text-white',
+    pulse: 'bg-white',
   },
 };
 
@@ -109,15 +119,12 @@ export default function MetricCard({
   subtext,
   subtextEn,
   icon: Icon,
-  badgeColor,
-  textColor,
-  iconColor,
-  borderColor,
   isActive = false,
   onClick,
   actionHref,
   actionTitleMr,
   actionTitleEn,
+  compact = false,
 }) {
   const { isMarathi } = useTranslation();
   const theme = KPI_VARIANTS[variant] || KPI_VARIANTS.blue;
@@ -144,54 +151,47 @@ export default function MetricCard({
       onClick={isInteractive ? onClick : undefined}
       onKeyDown={handleKeyDown}
       className={clsx(
-        'p-3 sm:p-4 border rounded-xl sm:rounded-2xl transition-all duration-200 flex flex-col justify-between relative overflow-hidden group select-none text-left backdrop-blur-sm',
-        isActive
-          ? clsx(theme.activeBg, theme.activeBorder)
-          : clsx(theme.bg, borderColor || theme.border, 'shadow-2xs'),
-        isInteractive && 'cursor-pointer hover:shadow-md hover:-translate-y-0.5 active:scale-[0.99] focus:outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500'
+        `group relative flex flex-col justify-between overflow-hidden rounded-2xl ${compact ? 'p-3.5 sm:p-4' : 'p-4 sm:p-5'} text-left select-none text-white border`,
+        'transition-all duration-200 ease-[cubic-bezier(0.25,1,0.5,1)] motion-reduce:transition-none',
+        theme.bg,
+        theme.border,
+        theme.shadow,
+        theme.hoverBg,
+        isActive ? theme.activeRing : '',
+        isInteractive && 'cursor-pointer hover:-translate-y-1 active:scale-[0.985] focus:outline-hidden focus-visible:ring-2 focus-visible:ring-white'
       )}
     >
-      {/* Top Gradient Accent Stripe */}
-      <div
-        className={clsx(
-          'absolute top-0 left-0 right-0 h-1 bg-gradient-to-r transition-opacity duration-200',
-          theme.topBar,
-          isActive ? 'opacity-100' : 'opacity-80 group-hover:opacity-100'
-        )}
-      />
+      {/* Subtle top specular sheen */}
+      <div className="absolute top-0 inset-x-0 h-px bg-white/25 pointer-events-none" />
 
-      {/* Card Header: Title + Icons */}
-      <div className="flex items-start justify-between gap-1.5 min-h-[1.75rem] sm:min-h-0 pt-0.5">
-        <div className="flex items-center gap-1.5 min-w-0 flex-1">
+      {/* Card Header: Label + Active Indicator or Action Icon */}
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-1.5 min-w-0">
           <span
             className={clsx(
-              'text-[11px] sm:text-xs font-bold leading-tight line-clamp-2 transition-colors',
-              isActive ? theme.activeTitle : theme.title
+              'text-[11px] sm:text-xs font-semibold tracking-tight transition-colors line-clamp-1',
+              theme.title
             )}
           >
             {displayTitle}
           </span>
           {isActive && (
-            <span
-              className={clsx(
-                'hidden sm:inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[9px] font-extrabold shrink-0 shadow-2xs',
-                theme.activeTag
-              )}
-            >
-              <Check className="w-2.5 h-2.5" />
-              <span>{isMarathi ? 'सक्रिय' : 'Active'}</span>
+            <span className="relative flex h-2 w-2 shrink-0">
+              <span className={clsx('animate-ping absolute inline-flex h-full w-full rounded-full opacity-75', theme.pulse)} />
+              <span className={clsx('relative inline-flex rounded-full h-2 w-2', theme.pulse)} />
             </span>
           )}
         </div>
 
-        <div className="flex items-center gap-1 shrink-0">
+        <div className="flex items-center gap-1.5 shrink-0">
           {actionHref && (
             <Link
               href={actionHref}
               onClick={(e) => e.stopPropagation()}
-              title={displayActionTitle || (isMarathi ? 'थेट नोंदवहीत उघडा' : 'Open in Register')}
+              title={displayActionTitle || (isMarathi ? 'नोंदवहीत उघडा' : 'Open in Register')}
               className={clsx(
-                'w-6 h-6 sm:w-7 sm:h-7 rounded-lg border border-slate-200/90 bg-white/90 text-slate-500 flex items-center justify-center transition-all duration-150 hover:scale-105 active:scale-95 shadow-2xs',
+                'w-6 h-6 rounded-lg border flex items-center justify-center transition-all duration-200',
+                'opacity-0 group-hover:opacity-100 hover:scale-105 active:scale-95',
                 theme.actionBtn
               )}
             >
@@ -202,31 +202,25 @@ export default function MetricCard({
           {Icon && (
             <div
               className={clsx(
-                'w-6 h-6 sm:w-8 sm:h-8 rounded-lg sm:rounded-xl border flex items-center justify-center shrink-0 shadow-2xs transition-transform group-hover:scale-105',
-                badgeColor || theme.badge,
-                isActive && 'ring-2 ring-current/25'
+                'w-7 h-7 sm:w-8 sm:h-8 rounded-xl border flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:scale-105',
+                theme.badge
               )}
             >
-              <Icon className={clsx('w-3 h-3 sm:w-4 sm:h-4', iconColor || theme.icon)} />
+              <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" />
             </div>
           )}
         </div>
       </div>
 
-      {/* Card Content: Big Value + Subtext */}
-      <div className="mt-2 sm:mt-2.5 flex items-baseline justify-between gap-1 flex-wrap sm:flex-nowrap">
-        <p
-          className={clsx(
-            'text-lg sm:text-2xl font-black tracking-tight leading-tight font-mono transition-colors',
-            isActive ? theme.activeValue : (textColor || theme.value)
-          )}
-        >
+      {/* Card Body: Big Solid Value + Numerals */}
+      <div className={`flex items-baseline justify-between gap-1.5 flex-wrap sm:flex-nowrap ${compact ? "mt-2 sm:mt-2.5" : "mt-3 sm:mt-3.5"}`}>
+        <p className={`font-black tracking-tight font-mono tabular-nums leading-none text-white ${compact ? "text-xl sm:text-2xl" : "text-2xl sm:text-3xl font-extrabold"}`}>
           {value}
         </p>
         {displaySubtext && (
           <span
             className={clsx(
-              'text-[9.5px] sm:text-xs font-medium truncate leading-tight max-w-full sm:max-w-[170px]',
+              'text-[10px] sm:text-[11px] font-medium truncate leading-tight transition-colors',
               theme.subtext
             )}
           >
@@ -235,22 +229,23 @@ export default function MetricCard({
         )}
       </div>
 
-      {/* Active state micro-indicator or interactive hint on hover */}
+      {/* Interactive Micro-Footer Strip */}
       {isInteractive && (
         <div
           className={clsx(
-            'mt-1.5 pt-1 border-t border-slate-200/50 flex items-center justify-between text-[9px] text-slate-400 transition-colors',
-            theme.footerHover
+            'mt-2.5 pt-2 border-t flex items-center justify-between text-[10px] font-medium transition-colors',
+            theme.footer
           )}
         >
-          <span>
+          <span className="truncate">
             {isActive
-              ? (isMarathi ? '● फोकस सक्रिय (क्लिक करून सर्व पहा)' : '● Focus Active (Click to show all)')
-              : (isMarathi ? 'डेटा फिल्टर करण्यासाठी क्लिक करा' : 'Click to filter data')}
+              ? (isMarathi ? '● फोकस सक्रिय (रीसेटसाठी क्लिक करा)' : '● Focus Active (Click to reset)')
+              : (isMarathi ? 'डेटा पाहण्यासाठी क्लिक करा' : 'Click to view analytics')}
           </span>
           {actionHref && (
-            <span className="font-semibold group-hover:underline flex items-center">
-              {isMarathi ? 'नोंदवही' : 'Register'} →
+            <span className="font-semibold flex items-center gap-0.5 opacity-80 group-hover:opacity-100 transition-opacity">
+              <span>{isMarathi ? 'नोंदवही' : 'Register'}</span>
+              <span className="transition-transform duration-150 group-hover:translate-x-0.5">→</span>
             </span>
           )}
         </div>

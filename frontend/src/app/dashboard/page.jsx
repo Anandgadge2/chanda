@@ -160,14 +160,14 @@ export default function DashboardPage() {
   return (
     <div className="space-y-2.5 sm:space-y-3 w-full max-w-full min-w-0">
       {/* Modern Executive Command Header - Pro Compact */}
-      <div className="bg-gradient-to-r from-blue-50/80 via-indigo-50/40 to-white text-slate-900 rounded-xl px-3.5 py-2 sm:py-2.5 shadow-2xs border border-blue-200/80 relative z-30 flex flex-col md:flex-row justify-between sm:items-center gap-2">
+      <div className="bg-white/90 backdrop-blur-xl text-slate-900 rounded-2xl px-4 py-3 shadow-[0_4px_20px_-4px_rgba(15,23,42,0.04)] border border-slate-200/80 relative z-30 flex flex-col md:flex-row justify-between sm:items-center gap-3">
         <div className="flex items-center gap-2.5 relative z-10 min-w-0">
-          <div className="w-8 h-8 rounded-lg bg-blue-700 text-white flex items-center justify-center shrink-0 shadow-2xs">
+          <div className="w-9 h-9 rounded-xl bg-indigo-600 text-white flex items-center justify-center shrink-0 shadow-xs">
             <Landmark className="w-4 h-4" />
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-[10px] font-bold bg-amber-500 text-slate-950 px-2 py-0.5 rounded-full shadow-2xs">
+              <span className="text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200/80 px-2.5 py-0.5 rounded-full shadow-2xs">
                 {isMarathi ? "महसूल २०२६" : "Revenue 2026"}
               </span>
               <h1 className="text-sm sm:text-base font-extrabold text-slate-900 tracking-tight leading-tight truncate">
@@ -214,7 +214,7 @@ export default function DashboardPage() {
             <Filter className="w-3.5 h-3.5 shrink-0" />
             <span>{isMarathi ? 'लागू करा' : 'Apply'}</span>
             {isFilterPending && (
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-300 animate-pulse shrink-0" />
+              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse shrink-0" />
             )}
           </button>
 
@@ -234,7 +234,7 @@ export default function DashboardPage() {
           <button
             onClick={() => loadData(taluka, true)}
             disabled={loading}
-            className="h-9 px-2.5 rounded-xl bg-white hover:bg-blue-50 text-slate-800 hover:text-blue-900 border border-slate-300 text-xs font-bold transition-all active:scale-95 shadow-2xs cursor-pointer flex items-center gap-1.5 shrink-0"
+            className="h-9 px-2.5 rounded-xl bg-white hover:bg-blue-50 text-slate-800 hover:text-indigo-600 border border-slate-300 text-xs font-bold transition-all active:scale-95 shadow-2xs cursor-pointer flex items-center gap-1.5 shrink-0"
             title={isMarathi ? 'माहिती रिफ्रेश करा' : 'Refresh Data'}
             aria-label={isMarathi ? 'माहिती रिफ्रेश करा' : 'Refresh Data'}
           >
@@ -244,7 +244,7 @@ export default function DashboardPage() {
 
           <Link
             href="/bulk-upload"
-            className="px-2.5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black text-xs shadow-2xs transition-all active:scale-95 flex items-center gap-1.5 shrink-0 border border-amber-400"
+            className="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs shadow-sm shadow-indigo-600/25 transition-all active:scale-95 flex items-center gap-1.5 shrink-0 border border-indigo-500"
             title={isMarathi ? 'गाव डेटा अपलोड' : 'Upload Village Data'}
           >
             <UploadCloud className="w-3.5 h-3.5" />
@@ -332,7 +332,7 @@ export default function DashboardPage() {
           className={clsx(
             'text-white rounded-2xl p-3.5 sm:p-4 shadow-md border transition-all duration-300',
             activeKpi === 'parcels' && 'bg-gradient-to-r from-[#0d1b3e] via-[#12285a] to-[#0d1b3e] border-sky-400/50 shadow-sky-950/30',
-            activeKpi === 'violations' && 'bg-gradient-to-r from-[#2a1708] via-[#3a200a] to-[#201205] border-amber-400/50 shadow-amber-950/30',
+            activeKpi === 'violations' && 'bg-gradient-to-r from-slate-950 via-slate-900 to-rose-950 border-rose-500/40 shadow-xl',
             activeKpi === 'villages' && 'bg-gradient-to-r from-[#171138] via-[#241a54] to-[#140e32] border-indigo-400/50 shadow-indigo-950/30',
             activeKpi === 'conversions' && 'bg-gradient-to-r from-[#0a2318] via-[#0f3524] to-[#092016] border-emerald-400/50 shadow-emerald-950/30'
           )}
@@ -343,13 +343,13 @@ export default function DashboardPage() {
                 className={clsx(
                   'w-10 h-10 rounded-xl border flex items-center justify-center shrink-0 shadow-2xs mt-0.5',
                   activeKpi === 'parcels' && 'bg-sky-500/20 border-sky-400/40 text-sky-300',
-                  activeKpi === 'violations' && 'bg-amber-500/20 border-amber-400/40 text-amber-300',
+                  activeKpi === 'violations' && 'bg-rose-500/20 border-rose-400/40 text-rose-300',
                   activeKpi === 'villages' && 'bg-indigo-500/20 border-indigo-400/40 text-indigo-300',
                   activeKpi === 'conversions' && 'bg-emerald-500/20 border-emerald-400/40 text-emerald-300'
                 )}
               >
                 {activeKpi === 'parcels' && <Landmark className="w-5 h-5 text-sky-300" />}
-                {activeKpi === 'violations' && <AlertTriangle className="w-5 h-5 text-amber-400" />}
+                {activeKpi === 'violations' && <AlertTriangle className="w-5 h-5 text-rose-400" />}
                 {activeKpi === 'villages' && <MapPin className="w-5 h-5 text-indigo-300" />}
                 {activeKpi === 'conversions' && <ArrowRightLeft className="w-5 h-5 text-emerald-300" />}
               </div>
@@ -359,7 +359,7 @@ export default function DashboardPage() {
                     className={clsx(
                       'text-[10px] font-black uppercase px-2 py-0.5 rounded-full shadow-2xs',
                       activeKpi === 'parcels' && 'bg-sky-400 text-slate-950',
-                      activeKpi === 'violations' && 'bg-amber-400 text-slate-950',
+                      activeKpi === 'violations' && 'bg-rose-600 text-white',
                       activeKpi === 'villages' && 'bg-indigo-400 text-white',
                       activeKpi === 'conversions' && 'bg-emerald-400 text-slate-950'
                     )}
@@ -393,7 +393,7 @@ export default function DashboardPage() {
                     ? villagesReportUrl
                     : conversionsUrl
                 }
-                className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-black text-xs transition shadow-2xs flex items-center gap-1.5 active:scale-95"
+                className="px-3.5 py-2 rounded-xl bg-white hover:bg-slate-100 text-indigo-700 font-bold text-xs transition shadow-xs flex items-center gap-1.5 active:scale-95"
               >
                 <span>{isMarathi ? 'सविस्तर नोंदवहीत जा' : 'Open Full Register'}</span>
                 <ChevronRight className="w-3.5 h-3.5" />
@@ -438,7 +438,7 @@ export default function DashboardPage() {
             </Link>
             <Link
               href={`/parcels?tenureClass=BHOGVATDAR_CLASS_2${taluka ? `&taluka=${encodeURIComponent(taluka)}` : ''}`}
-              className="px-2.5 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-800 font-bold whitespace-nowrap text-[11px] transition"
+              className="px-2.5 py-1 rounded-lg bg-cyan-50/70 hover:bg-indigo-100 border border-cyan-200/80 text-indigo-800 font-bold whitespace-nowrap text-[11px] transition"
             >
               {isMarathi ? 'भोगवटादार वर्ग-२ (62,450 Ha)' : 'Class-2 (62,450 Ha)'}
             </Link>
@@ -475,7 +475,7 @@ export default function DashboardPage() {
           {/* Quick Violation Type Shortcuts */}
           <div className="bg-white border border-slate-200/90 rounded-2xl p-3 shadow-2xs flex items-center gap-2 overflow-x-auto text-xs">
             <span className="font-bold text-slate-700 whitespace-nowrap text-[11px] flex items-center gap-1">
-              <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
+              <AlertTriangle className="w-3.5 h-3.5 text-indigo-600" />
               {isMarathi ? 'उल्लंघन प्रकार फिल्टर:' : 'Violation Filter:'}
             </span>
             <Link
@@ -522,7 +522,7 @@ export default function DashboardPage() {
             <div className="bg-white border border-slate-200/90 rounded-2xl p-4 sm:p-5 shadow-xs flex flex-col justify-between">
               <div>
                 <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
-                  <span className="w-8 h-8 rounded-xl bg-amber-50 border border-amber-200 text-amber-700 flex items-center justify-center font-black">
+                  <span className="w-8 h-8 rounded-xl bg-cyan-50/70 border border-cyan-200/80 text-cyan-700 flex items-center justify-center font-black">
                     §
                   </span>
                   <div>
@@ -547,8 +547,8 @@ export default function DashboardPage() {
                     </span>
                   </div>
 
-                  <div className="p-2.5 rounded-xl bg-amber-50/70 border border-amber-200/80">
-                    <span className="font-black text-amber-900 block mb-0.5">
+                  <div className="p-2.5 rounded-xl bg-cyan-50/70/70 border border-cyan-200/80/80">
+                    <span className="font-black text-cyan-900 block mb-0.5">
                       {isMarathi ? '२. कलम ५० ते ५४ (गायरान व शासकीय भूमी अतिक्रमण):' : '2. Sections 50-54 (Govt & Gairan Encroachment):'}
                     </span>
                     <span>
@@ -672,14 +672,14 @@ export default function DashboardPage() {
               </span>
             </div>
 
-            <div className="p-3 bg-white border border-amber-200 rounded-2xl shadow-2xs">
+            <div className="p-3 bg-white border border-cyan-200/80 rounded-2xl shadow-2xs">
               <span className="text-[11px] font-bold text-slate-600 block">
                 {isMarathi ? 'उर्वरित वर्ग-२ क्षेत्र' : 'Remaining Class-2 Area'}
               </span>
-              <p className="text-xl sm:text-2xl font-black text-amber-700 font-mono mt-1">
+              <p className="text-xl sm:text-2xl font-black text-cyan-700 font-mono mt-1">
                 62,450.17
               </p>
-              <span className="text-[10px] text-amber-600 font-medium">
+              <span className="text-[10px] text-indigo-600 font-medium">
                 {isMarathi ? 'हेक्टर (११.१% जिल्हा क्षेत्र)' : 'Ha (11.1% district area)'}
               </span>
             </div>
@@ -778,10 +778,10 @@ export default function DashboardPage() {
       )}
 
       {/* Statutory Guidance Banner - Sleek & Minimalist */}
-      <div className="bg-gradient-to-r from-[#17203d] via-[#1a2550] to-[#17203d] text-white rounded-2xl p-4 sm:p-5 shadow-xs border border-slate-800 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+      <div className="bg-gradient-to-r from-slate-950 via-slate-900 to-indigo-950 text-white rounded-3xl p-5 sm:p-6 shadow-xl border border-slate-800 flex flex-col lg:flex-row lg:items-center justify-between gap-5">
         <div className="space-y-1.5 max-w-3xl">
           <div className="flex items-center gap-2">
-            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-400/15 text-amber-300 border border-amber-400/25">
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
               {isMarathi ? "वैधानिक मार्गदर्शक (MLRC १९६६)" : "Statutory Guidance (MLRC 1966)"}
             </span>
           </div>
@@ -801,11 +801,11 @@ export default function DashboardPage() {
             className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-xs font-bold text-white transition border border-white/10 shadow-2xs"
           >
             <span>{isMarathi ? "प्रपत्र १ ते ६ अहवाल" : "Prapatra 1-6 Reports"}</span>
-            <ChevronRight className="w-3.5 h-3.5 text-amber-400" />
+            <ChevronRight className="w-3.5 h-3.5 text-indigo-400" />
           </Link>
           <Link
             href="/documents"
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs font-bold transition shadow-2xs"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition shadow-sm shadow-indigo-600/25"
           >
             <span>{isMarathi ? "जिल्हा अभिलेखागार" : "District Archives"}</span>
             <ChevronRight className="w-3.5 h-3.5" />

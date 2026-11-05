@@ -107,7 +107,7 @@ export default function ArchivalDocumentViewer({
       {/* Viewer Header & Controls Bar */}
       <div className="bg-slate-900 text-white px-3 sm:px-4 py-2.5 sm:py-3 flex flex-wrap items-center justify-between gap-2.5 border-b border-slate-800 shrink-0">
         <div className="min-w-0 flex-1 flex items-center gap-2.5">
-          <div className="p-1.5 rounded-lg bg-amber-500/20 text-amber-400 border border-amber-500/30 shrink-0">
+          <div className="p-1.5 rounded-lg bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 shrink-0">
             <FileText className="w-4 h-4" />
           </div>
           <div className="min-w-0">
@@ -135,7 +135,7 @@ export default function ArchivalDocumentViewer({
                 type="button"
                 onClick={() => setViewMode('scan')}
                 className={`px-2 py-1 rounded transition ${
-                  viewMode === 'scan' ? 'bg-amber-500 text-slate-950 font-bold' : 'text-slate-300 hover:text-white'
+                  viewMode === 'scan' ? 'bg-indigo-600 text-white font-semibold shadow-xs' : 'text-slate-300 hover:text-white'
                 }`}
               >
                 {isMarathi ? 'स्कॅन प्रत' : 'Scanned Copy'}
@@ -144,7 +144,7 @@ export default function ArchivalDocumentViewer({
                 type="button"
                 onClick={() => setViewMode('file')}
                 className={`px-2 py-1 rounded transition ${
-                  viewMode === 'file' ? 'bg-amber-500 text-slate-950 font-bold' : 'text-slate-300 hover:text-white'
+                  viewMode === 'file' ? 'bg-indigo-600 text-white font-semibold shadow-xs' : 'text-slate-300 hover:text-white'
                 }`}
               >
                 {isMarathi ? 'PDF फाईल' : 'PDF File'}
@@ -166,7 +166,7 @@ export default function ArchivalDocumentViewer({
             <button
               type="button"
               onClick={handleResetZoom}
-              className="text-[10px] font-mono px-1.5 text-slate-300 hover:text-amber-400 min-w-[2.75rem] text-center transition"
+              className="text-[10px] font-mono px-1.5 text-slate-300 hover:text-cyan-400 min-w-[2.75rem] text-center transition"
               title={isMarathi ? 'मूळ आकार १००% करा (Click to Reset)' : 'Reset to 100%'}
             >
               {Math.round(zoom * 100)}%
@@ -229,7 +229,7 @@ export default function ArchivalDocumentViewer({
               target="_blank"
               rel="noopener noreferrer"
               download
-              className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-lg text-xs transition shadow-xs"
+              className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-lg text-xs transition shadow-xs shadow-indigo-600/20"
               title={isMarathi ? 'मूळ PDF डाऊनलोड करा' : 'Download Original PDF'}
             >
               <Download className="w-3.5 h-3.5" />
@@ -241,7 +241,7 @@ export default function ArchivalDocumentViewer({
 
       {/* Record Room Coordinates Bar */}
       <div className="bg-slate-900/90 text-slate-300 px-3 sm:px-4 py-1.5 border-b border-slate-800/80 flex flex-wrap items-center justify-between gap-2 text-xs">
-        <div className="flex items-center gap-1.5 text-amber-400 font-semibold">
+        <div className="flex items-center gap-1.5 text-cyan-400 font-semibold">
           <FolderArchive className="w-3.5 h-3.5" />
           <span className="text-[11px] sm:text-xs">{isMarathi ? 'भौतिक अभिलेखागार संदर्भ (Record Room Coordinates):' : 'Physical Archive Room Coordinates:'}</span>
         </div>
@@ -249,12 +249,12 @@ export default function ArchivalDocumentViewer({
         <div className="flex flex-wrap items-center gap-2 text-[11px] font-mono">
           <span className="inline-flex items-center gap-1 text-slate-300 bg-slate-800/90 px-2 py-0.5 rounded border border-slate-700">
             <span className="text-slate-400">{isMarathi ? 'कपाट/रॅक:' : 'Rack:'}</span>
-            <strong className="text-amber-300 font-bold">{rackNo}</strong>
+            <strong className="text-cyan-300 font-bold">{rackNo}</strong>
           </span>
 
           <span className="inline-flex items-center gap-1 text-slate-300 bg-slate-800/90 px-2 py-0.5 rounded border border-slate-700">
             <span className="text-slate-400">{isMarathi ? 'गठ्ठा:' : 'Bundle:'}</span>
-            <strong className="text-amber-300 font-bold">{bundleNo}</strong>
+            <strong className="text-cyan-300 font-bold">{bundleNo}</strong>
           </span>
 
           <span
@@ -262,11 +262,11 @@ export default function ArchivalDocumentViewer({
             title={fileNo}
           >
             <span className="text-slate-400 shrink-0">{isMarathi ? 'फाईल क्र.:' : 'File No.:'}</span>
-            <strong className="text-amber-300 font-bold break-all">{fileNo}</strong>
+            <strong className="text-cyan-300 font-bold break-all">{fileNo}</strong>
             <button
               type="button"
               onClick={() => handleCopy(fileNo, 'fileNo')}
-              className="ml-1 text-slate-400 hover:text-amber-300 transition"
+              className="ml-1 text-slate-400 hover:text-cyan-300 transition"
               title={isMarathi ? 'फाईल क्रमांक कॉपी करा' : 'Copy File Number'}
             >
               {copiedField === 'fileNo' ? (

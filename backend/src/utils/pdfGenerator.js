@@ -172,234 +172,423 @@ function getWidthsForPdf(type) {
   }
   return [];
 }
-
 /**
- * Generate Official Prapatra 1 to 5 PDF matching docs/1.pdf - docs/5.pdf
- * Includes both:
- * 1. विभाग १ - गोषवारा (Executive Summary Rollup)
- * 2. विभाग २ - सविस्तर ७/१२ अभिलेख व खातेदार तपासणी यादी (Actual Records & Owners Audit List)
+ * Generate Official Prapatra 1 to 5 PDF matching the 5 Official Maharashtra Govt Booklet Formats
+ * Strictly conforms to Booklet 1-5 PDF layout specifications
  */
 export const generatePrapatraPdf = async (prapatraNum, summaryRecords = [], parcelRecords = [], scopeName = 'सर्व तालुके', res) => {
   let title = '';
-  let summaryHeaders = [];
+  let headerRowsCount = 4;
   let summaryWidths = [];
-  let summaryRowsMapper = null;
+  let headerRows = [];
+  let rowMapper = null;
+  let calcTotals = null;
 
   if (prapatraNum === 1) {
-    title = 'प्रपत्र क्र. १ - शासकीय जमिनींचे सन १९५० पासूनचे सर्व मूळ ७/१२ अभिलेखाची तपासणी करून त्यानुसार ७/१२ अभिलेख अद्यावत करण्याबाबत';
-    summaryHeaders = [
-      'अ.क्र.', 'जिल्हा / तालुका / गाव', 'एकूण ७/१२ संख्या\n[२(अ)]', '१९५० पासून तपासणी\n[३(अ)]',
-      'सरकार नोंद\n७/१२ [४(अ)]', 'अवैधरीत्या सरकार\nनोंद कमी [५(अ)]', 'दुरुस्ती केलेले\n[६(अ)]', 'दुरुस्तीस शिल्लक\n[७(अ)]', 'शेरा'
+    title = 'प्रपत्र क्र. 1 - शासकीय जमिनींचे सन 1950 पासूनचे सर्व मुळ 7/12 अभिलेखाची तपासणी करुन त्यानुसार 7/12 अभिलेख अद्यावत करण्याबाबत';
+    headerRowsCount = 4;
+    summaryWidths = [24, 130, 70, 75, 80, 80, 75, 75, 65];
+
+    headerRows = [
+      [
+        { text: 'अ.क्र.', rowSpan: 3, style: 'tableHeader' },
+        { text: 'जिल्हा', rowSpan: 3, style: 'tableHeader' },
+        { text: 'जिल्ह्यातील एकूण', style: 'tableHeader' },
+        { text: '1950 पासूनच्या तपासणी करण्यात आलेल्या', style: 'tableHeader' },
+        { text: '1950 पासुन सरकार/शासन नोंद आढळून आलेल्या', style: 'tableHeader' },
+        { text: 'अवैधरीत्या सरकार/शासन नोंद कमी केलेल्या', style: 'tableHeader' },
+        { text: 'यापैकी दुरुस्ती करण्यात आलेल्या', style: 'tableHeader' },
+        { text: 'दुरुस्ती करण्यास शिल्लक असलेल्या', style: 'tableHeader' },
+        { text: 'शेरा', rowSpan: 3, style: 'tableHeader' }
+      ],
+      [
+        {}, {},
+        { text: '7/12 ची संख्या', style: 'tableHeader' },
+        { text: '7/12 ची संख्या', style: 'tableHeader' },
+        { text: '7/12 ची संख्या', style: 'tableHeader' },
+        { text: '7/12 ची संख्या', style: 'tableHeader' },
+        { text: '7/12 ची संख्या', style: 'tableHeader' },
+        { text: '7/12 ची संख्या', style: 'tableHeader' },
+        {}
+      ],
+      [
+        {}, {},
+        { text: '2(अ)', style: 'tableHeader' },
+        { text: '3(अ)', style: 'tableHeader' },
+        { text: '4(अ)', style: 'tableHeader' },
+        { text: '5(अ)', style: 'tableHeader' },
+        { text: '6(अ)', style: 'tableHeader' },
+        { text: '7(अ)', style: 'tableHeader' },
+        {}
+      ],
+      ['1', '2', '3', '4', '5', '6', '7', '8', '9'].map(n => ({ text: n, style: 'tableHeaderNum' }))
     ];
-    summaryWidths = [24, 180, 75, 75, 75, 75, 65, 65, 90];
-    summaryRowsMapper = (r, i) => [
-      i + 1,
-      formatTalukaRowName(r),
-      r.total712Count || 0,
-      r.inspected1950Count || 0,
-      r.govtFound1950Count || 0,
-      r.illegalDeletionsCount || 0,
-      r.rectifiedCount || 0,
-      r.pendingRectifyCount || 0,
-      r.remarks || '-'
-    ];
+
+    rowMapper = (r, idx) => {
+      const insp = Number(r.inspected1950Count || r.total712Count || 0);
+      const govtFound = Number(r.govtFound1950Count || r.totalGovtLandCount || 0);
+      const illegalDel = Number(r.illegalDeletionsCount || 0);
+      const rect = Number(r.rectifiedCount || 0);
+      const pendRect = Number(r.pendingRectifyCount || Math.max(0, illegalDel - rect));
+
+      return [
+        { text: (idx + 1).toString(), style: 'tableCell' },
+        { text: formatTalukaRowName(r), style: 'tableCellLeft' },
+        { text: Number(r.total712Count || 0).toLocaleString('en-IN'), style: 'tableCell' },
+        { text: insp.toLocaleString('en-IN'), style: 'tableCell' },
+        { text: govtFound.toLocaleString('en-IN'), style: 'tableCell' },
+        { text: illegalDel.toLocaleString('en-IN'), style: 'tableCell' },
+        { text: rect.toLocaleString('en-IN'), style: 'tableCell' },
+        { text: pendRect.toLocaleString('en-IN'), style: 'tableCell' },
+        { text: r.remarks || '-', style: 'tableCellLeft' }
+      ];
+    };
+
+    calcTotals = (records) => {
+      let t712 = 0, insp = 0, gFound = 0, illDel = 0, rect = 0, pend = 0;
+      records.forEach(r => {
+        const t = Number(r.total712Count || 0);
+        t712 += t;
+        insp += Number(r.inspected1950Count || t || 0);
+        gFound += Number(r.govtFound1950Count || r.totalGovtLandCount || 0);
+        const id = Number(r.illegalDeletionsCount || 0);
+        illDel += id;
+        const rc = Number(r.rectifiedCount || 0);
+        rect += rc;
+        pend += Number(r.pendingRectifyCount || Math.max(0, id - rc));
+      });
+      return [
+        { text: '', style: 'tableCellTotal' },
+        { text: 'एकूण (Total)', style: 'tableCellTotalLeft' },
+        { text: t712.toLocaleString('en-IN'), style: 'tableCellTotal' },
+        { text: insp.toLocaleString('en-IN'), style: 'tableCellTotal' },
+        { text: gFound.toLocaleString('en-IN'), style: 'tableCellTotal' },
+        { text: illDel.toLocaleString('en-IN'), style: 'tableCellTotal' },
+        { text: rect.toLocaleString('en-IN'), style: 'tableCellTotal' },
+        { text: pend.toLocaleString('en-IN'), style: 'tableCellTotal' },
+        { text: '', style: 'tableCellTotal' }
+      ];
+    };
   } else if (prapatraNum === 2) {
-    title = 'प्रपत्र क्र. २ - पोकळीस्त नोंदींचा तपासणी अहवाल (Defunct/Hollow Entries Audit)';
-    summaryHeaders = [
-      'अ.क्र.', 'जिल्हा / तालुका / गाव', 'एकूण ७/१२ संख्या', 'पोकळीस्त नोंद असलेले ७/१२',
-      'वगळण्यात आलेल्या नोंदी', 'वगळण्यास शिल्लक नोंदी', 'शेरा'
+    title = 'प्रपत्र क्र. 2 - शासकीय जमिनीचे 7/12 अभिलेखावरील पोकळीस्त नोंदी (बु.ग.दे./ता.ग.दे./सं.कु.) कमी करण्याबाबत';
+    headerRowsCount = 4;
+    summaryWidths = [30, 200, 130, 130, 130, 90];
+
+    headerRows = [
+      [
+        { text: 'अ.क्र.', rowSpan: 3, style: 'tableHeader' },
+        { text: 'जिल्हा', rowSpan: 3, style: 'tableHeader' },
+        { text: 'शासकीय जमिनीवर पोकळीस्त नोंदी असलेल्या', style: 'tableHeader' },
+        { text: 'नोंदी कमी करण्यात आलेल्या', style: 'tableHeader' },
+        { text: 'नोंदी कमी करावयास शिल्लक', style: 'tableHeader' },
+        { text: 'शेरा', rowSpan: 3, style: 'tableHeader' }
+      ],
+      [
+        {}, {},
+        { text: '7/12 ची संख्या', style: 'tableHeader' },
+        { text: '7/12 ची संख्या', style: 'tableHeader' },
+        { text: '7/12 ची संख्या', style: 'tableHeader' },
+        {}
+      ],
+      [
+        {}, {},
+        { text: '2(अ)', style: 'tableHeader' },
+        { text: '3(अ)', style: 'tableHeader' },
+        { text: '4(अ)', style: 'tableHeader' },
+        {}
+      ],
+      ['1', '2', '3', '4', '5', '6'].map(n => ({ text: n, style: 'tableHeaderNum' }))
     ];
-    summaryWidths = [30, 240, 95, 95, 95, 95, 100];
-    summaryRowsMapper = (r, i) => [
-      i + 1,
-      formatTalukaRowName(r),
-      r.total712Count || 0,
-      r.pokalistCount || 0,
-      r.pokalistRemovedCount || 0,
-      r.pokalistPendingCount || 0,
-      r.remarks || '-'
-    ];
+
+    rowMapper = (r, idx) => {
+      const pok = Number(r.pokalistCount || 0);
+      const pokRem = Number(r.pokalistRemovedCount || 0);
+      const pokPend = Number(r.pokalistPendingCount || Math.max(0, pok - pokRem));
+
+      return [
+        { text: (idx + 1).toString(), style: 'tableCell' },
+        { text: formatTalukaRowName(r), style: 'tableCellLeft' },
+        { text: pok.toLocaleString('en-IN'), style: 'tableCell' },
+        { text: pokRem.toLocaleString('en-IN'), style: 'tableCell' },
+        { text: pokPend.toLocaleString('en-IN'), style: 'tableCell' },
+        { text: r.remarks || '-', style: 'tableCellLeft' }
+      ];
+    };
+
+    calcTotals = (records) => {
+      let pok = 0, pokRem = 0, pokPend = 0;
+      records.forEach(r => {
+        const p = Number(r.pokalistCount || 0);
+        pok += p;
+        const pr = Number(r.pokalistRemovedCount || 0);
+        pokRem += pr;
+        pokPend += Number(r.pokalistPendingCount || Math.max(0, p - pr));
+      });
+      return [
+        { text: '', style: 'tableCellTotal' },
+        { text: 'एकूण (Total)', style: 'tableCellTotalLeft' },
+        { text: pok.toLocaleString('en-IN'), style: 'tableCellTotal' },
+        { text: pokRem.toLocaleString('en-IN'), style: 'tableCellTotal' },
+        { text: pokPend.toLocaleString('en-IN'), style: 'tableCellTotal' },
+        { text: '', style: 'tableCellTotal' }
+      ];
+    };
   } else if (prapatraNum === 3) {
-    title = 'प्रपत्र क्र. ३ - शासकीय विभागांना विविध प्रयोजनार्थ वाटप केलेल्या जमिनींची तपासणी अहवाल';
-    summaryHeaders = [
-      'अ.क्र.', 'जिल्हा / तालुका / गाव', 'शासकीय विभागांना वाटप जमीन', 'शर्तभंग झालेली जमीन',
-      'पुन्हा शासन जमा केलेली जमीन', 'शासन जमा प्रलंबित', 'शेरा'
+    title = 'प्रपत्र क्र. 3 - शासकीय विभाग/महामंडळे/स्थानिक स्वराज्य संस्था यांना प्रदान करण्यात आलेल्या शासकीय जमिनींचे अनधिकृत हस्तांतरण,शर्तभंग झाल्यास सदर जमिनींचे मालकी हक्क पुर्ववत करणे अथवा शासन जमा करण्याबाबत.';
+    headerRowsCount = 4;
+    summaryWidths = [30, 180, 140, 140, 130, 90];
+
+    headerRows = [
+      [
+        { text: 'अ.क्र.', rowSpan: 3, style: 'tableHeader' },
+        { text: 'जिल्हा', rowSpan: 3, style: 'tableHeader' },
+        { text: 'शासकीय विभाग/महामंडळे/स्थानिक स्वराज्य संस्था यांना प्रदान शासकीय जमिनींच्या', style: 'tableHeader' },
+        { text: 'यापैकी अनधिकृत हस्तांतरण अथवा शर्तभंग झालेल्या जमिनींच्या', style: 'tableHeader' },
+        { text: 'मालकी पुर्ववत किंवा शासन जमा केलेल्या जमिनींच्या', style: 'tableHeader' },
+        { text: 'शेरा', rowSpan: 3, style: 'tableHeader' }
+      ],
+      [
+        {}, {},
+        { text: '7/12 ची संख्या', style: 'tableHeader' },
+        { text: '7/12 ची संख्या', style: 'tableHeader' },
+        { text: '7/12 ची संख्या', style: 'tableHeader' },
+        {}
+      ],
+      [
+        {}, {},
+        { text: '2(अ)', style: 'tableHeader' },
+        { text: '3(अ)', style: 'tableHeader' },
+        { text: '4(अ)', style: 'tableHeader' },
+        {}
+      ],
+      ['1', '2', '3', '4', '5', '6'].map(n => ({ text: n, style: 'tableHeaderNum' }))
     ];
-    summaryWidths = [30, 240, 95, 95, 95, 95, 100];
-    summaryRowsMapper = (r, i) => [
-      i + 1,
-      formatTalukaRowName(r),
-      r.govtDeptsAllottedCount || 0,
-      r.govtDeptsShartbhang || 0,
-      r.govtDeptsRestoredGovt || 0,
-      Math.max(0, (r.govtDeptsShartbhang || 0) - (r.govtDeptsRestoredGovt || 0)),
-      r.remarks || '-'
+
+    rowMapper = (r, idx) => [
+      { text: (idx + 1).toString(), style: 'tableCell' },
+      { text: formatTalukaRowName(r), style: 'tableCellLeft' },
+      { text: Number(r.govtDeptsAllottedCount || 0).toLocaleString('en-IN'), style: 'tableCell' },
+      { text: Number(r.govtDeptsShartbhang || 0).toLocaleString('en-IN'), style: 'tableCell' },
+      { text: Number(r.govtDeptsRestoredGovt || 0).toLocaleString('en-IN'), style: 'tableCell' },
+      { text: r.remarks || '-', style: 'tableCellLeft' }
     ];
+
+    calcTotals = (records) => {
+      let allot = 0, shart = 0, rest = 0;
+      records.forEach(r => {
+        allot += Number(r.govtDeptsAllottedCount || 0);
+        shart += Number(r.govtDeptsShartbhang || 0);
+        rest += Number(r.govtDeptsRestoredGovt || 0);
+      });
+      return [
+        { text: '', style: 'tableCellTotal' },
+        { text: 'एकूण (Total)', style: 'tableCellTotalLeft' },
+        { text: allot.toLocaleString('en-IN'), style: 'tableCellTotal' },
+        { text: shart.toLocaleString('en-IN'), style: 'tableCellTotal' },
+        { text: rest.toLocaleString('en-IN'), style: 'tableCellTotal' },
+        { text: '', style: 'tableCellTotal' }
+      ];
+    };
   } else if (prapatraNum === 4) {
-    title = 'प्रपत्र क्र. ४ - खाजगी व्यक्ती / संस्थांना वाटप केलेल्या शासकीय जमिनींची तपासणी अहवाल';
-    summaryHeaders = [
-      'अ.क्र.', 'जिल्हा / तालुका / गाव', 'खाजगी व्यक्तींना वाटप जमीन', 'शर्तभंग झालेली जमीन',
-      'पुन्हा शासन जमा केलेली जमीन', 'शासन जमा प्रलंबित', 'शेरा'
+    title = 'प्रपत्र क्र. 4 - शासनाकडून विविध शैक्षणिक/सामाजिक संस्था, खाजगी संस्था, ट्रस्ट, गृहनिर्माण संस्था व अशा इतर सर्व प्रकारच्या संस्थांना व खाजगी व्यक्ती यांना प्रदान करण्यात आलेल्या शासकीय जमिनींचे अनधिकृत हस्तांतरण,शर्तभंग झाल्यास सदर जमिनींचे मालकी हक्क पुर्ववत करणे अथवा शासन जमा करण्याबाबत.';
+    headerRowsCount = 4;
+    summaryWidths = [30, 180, 140, 140, 130, 90];
+
+    headerRows = [
+      [
+        { text: 'अ.क्र.', rowSpan: 3, style: 'tableHeader' },
+        { text: 'जिल्हा', rowSpan: 3, style: 'tableHeader' },
+        { text: 'शैक्षणिक / सामाजिक संस्था, खाजगी संस्था, ट्रस्ट, गृहनिर्माण संस्था व अशा इतर सर्व प्रकारच्या संस्थांना व खाजगी व्यक्ती यांना प्रदान शासकीय जमिनींच्या', style: 'tableHeader' },
+        { text: 'यापैकी अनधिकृत हस्तांतरण अथवा शर्तभंग झालेल्या जमिनींच्या', style: 'tableHeader' },
+        { text: 'मालकी पुर्ववत किंवा शासन जमा केलेल्या जमिनींच्या', style: 'tableHeader' },
+        { text: 'शेरा', rowSpan: 3, style: 'tableHeader' }
+      ],
+      [
+        {}, {},
+        { text: '7/12 ची संख्या', style: 'tableHeader' },
+        { text: '7/12 ची संख्या', style: 'tableHeader' },
+        { text: '7/12 ची संख्या', style: 'tableHeader' },
+        {}
+      ],
+      [
+        {}, {},
+        { text: '2(अ)', style: 'tableHeader' },
+        { text: '3(अ)', style: 'tableHeader' },
+        { text: '4(अ)', style: 'tableHeader' },
+        {}
+      ],
+      ['1', '2', '3', '4', '5', '6'].map(n => ({ text: n, style: 'tableHeaderNum' }))
     ];
-    summaryWidths = [30, 240, 95, 95, 95, 95, 100];
-    summaryRowsMapper = (r, i) => [
-      i + 1,
-      formatTalukaRowName(r),
-      r.privateAllottedCount || 0,
-      r.privateShartbhang || 0,
-      r.privateRestoredGovt || 0,
-      Math.max(0, (r.privateShartbhang || 0) - (r.privateRestoredGovt || 0)),
-      r.remarks || '-'
+
+    rowMapper = (r, idx) => [
+      { text: (idx + 1).toString(), style: 'tableCell' },
+      { text: formatTalukaRowName(r), style: 'tableCellLeft' },
+      { text: Number(r.privateAllottedCount || 0).toLocaleString('en-IN'), style: 'tableCell' },
+      { text: Number(r.privateShartbhang || 0).toLocaleString('en-IN'), style: 'tableCell' },
+      { text: Number(r.privateRestoredGovt || 0).toLocaleString('en-IN'), style: 'tableCell' },
+      { text: r.remarks || '-', style: 'tableCellLeft' }
     ];
+
+    calcTotals = (records) => {
+      let allot = 0, shart = 0, rest = 0;
+      records.forEach(r => {
+        allot += Number(r.privateAllottedCount || 0);
+        shart += Number(r.privateShartbhang || 0);
+        rest += Number(r.privateRestoredGovt || 0);
+      });
+      return [
+        { text: '', style: 'tableCellTotal' },
+        { text: 'एकूण (Total)', style: 'tableCellTotalLeft' },
+        { text: allot.toLocaleString('en-IN'), style: 'tableCellTotal' },
+        { text: shart.toLocaleString('en-IN'), style: 'tableCellTotal' },
+        { text: rest.toLocaleString('en-IN'), style: 'tableCellTotal' },
+        { text: '', style: 'tableCellTotal' }
+      ];
+    };
   } else {
-    title = 'प्रपत्र क्र. ५ - गायरान / शासकीय जमिनींवरील अतिक्रमणांची तपासणी अहवाल';
-    summaryHeaders = [
-      'अ.क्र.', 'जिल्हा / तालुका / गाव', 'एकूण शासकीय / गायरान जमीन', 'अतिक्रमित जमीन',
-      'मोजणी झालेली जमीन', 'मोजणी शिल्लक जमीन', 'शेरा'
+    title = 'प्रपत्र क्र. 5 - शासकीय जमिनींची एकुण संख्या, वाटप करण्यात आलेल्या जमिनींची संख्या, शर्तभंग,अतिक्रमण झालेल्या जमिनींची संख्या, तसेच मोजणी झालेल्या जमिनींची संख्या याबाबत माहिती';
+    headerRowsCount = 5;
+    summaryWidths = [24, 140, 85, 90, 85, 85, 85, 65];
+
+    headerRows = [
+      [
+        { text: 'अ.क्र.', rowSpan: 4, style: 'tableHeader' },
+        { text: 'जिल्हा', rowSpan: 4, style: 'tableHeader' },
+        { text: 'शासकीय जमिनींच्या एकूण', style: 'tableHeader' },
+        { text: 'वाटप करण्यात आलेल्या शासकीय जमिनींच्या', style: 'tableHeader' },
+        { text: 'शासकीय जमिनींची सद्यस्थिती', colSpan: 3, style: 'tableHeader' },
+        {}, {}
+        ,
+        { text: 'शेरा', rowSpan: 4, style: 'tableHeader' }
+      ],
+      [
+        {}, {},
+        { text: '7/12 ची संख्या', style: 'tableHeader' },
+        { text: '7/12 ची संख्या', style: 'tableHeader' },
+        { text: 'शर्तभंग झालेल्या जमिनींच्या', style: 'tableHeader' },
+        { text: 'अतिक्रमण असलेल्या जमिनींच्या', style: 'tableHeader' },
+        { text: 'मोजणी झालेल्या जमिनींच्या', style: 'tableHeader' },
+        {}
+      ],
+      [
+        {}, {},
+        { text: '2(अ)', style: 'tableHeader' },
+        { text: '3(अ)', style: 'tableHeader' },
+        { text: '7/12 ची संख्या', style: 'tableHeader' },
+        { text: '7/12 ची संख्या', style: 'tableHeader' },
+        { text: '7/12 ची संख्या', style: 'tableHeader' },
+        {}
+      ],
+      [
+        {}, {},
+        {}, {},
+        { text: '4(अ)', style: 'tableHeader' },
+        { text: '5(अ)', style: 'tableHeader' },
+        { text: '6(अ)', style: 'tableHeader' },
+        {}
+      ],
+      ['1', '2', '3', '4', '5', '6', '7', '8'].map(n => ({ text: n, style: 'tableHeaderNum' }))
     ];
-    summaryWidths = [30, 240, 95, 95, 95, 95, 100];
-    summaryRowsMapper = (r, i) => [
-      i + 1,
-      formatTalukaRowName(r),
-      r.totalGovtLandCount || 0,
-      r.govtEncroachedCount || 0,
-      r.govtMojaniDoneCount || 0,
-      Math.max(0, (r.govtEncroachedCount || 0) - (r.govtMojaniDoneCount || 0)),
-      r.remarks || '-'
+
+    rowMapper = (r, idx) => [
+      { text: (idx + 1).toString(), style: 'tableCell' },
+      { text: formatTalukaRowName(r), style: 'tableCellLeft' },
+      { text: Number(r.totalGovtLandCount || 0).toLocaleString('en-IN'), style: 'tableCell' },
+      { text: Number(r.govtAllottedCount || 0).toLocaleString('en-IN'), style: 'tableCell' },
+      { text: Number(r.govtShartbhangCount || 0).toLocaleString('en-IN'), style: 'tableCell' },
+      { text: Number(r.govtEncroachedCount || 0).toLocaleString('en-IN'), style: 'tableCell' },
+      { text: Number(r.govtMojaniDoneCount || 0).toLocaleString('en-IN'), style: 'tableCell' },
+      { text: r.remarks || '-', style: 'tableCellLeft' }
     ];
+
+    calcTotals = (records) => {
+      let tot = 0, allot = 0, shart = 0, encr = 0, moj = 0;
+      records.forEach(r => {
+        tot += Number(r.totalGovtLandCount || 0);
+        allot += Number(r.govtAllottedCount || 0);
+        shart += Number(r.govtShartbhangCount || 0);
+        encr += Number(r.govtEncroachedCount || 0);
+        moj += Number(r.govtMojaniDoneCount || 0);
+      });
+      return [
+        { text: '', style: 'tableCellTotal' },
+        { text: 'एकूण (Total)', style: 'tableCellTotalLeft' },
+        { text: tot.toLocaleString('en-IN'), style: 'tableCellTotal' },
+        { text: allot.toLocaleString('en-IN'), style: 'tableCellTotal' },
+        { text: shart.toLocaleString('en-IN'), style: 'tableCellTotal' },
+        { text: encr.toLocaleString('en-IN'), style: 'tableCellTotal' },
+        { text: moj.toLocaleString('en-IN'), style: 'tableCellTotal' },
+        { text: '', style: 'tableCellTotal' }
+      ];
+    };
   }
 
-  // --- Build Summary Body ---
-  const summaryBody = [];
-  summaryBody.push(summaryHeaders.map(h => ({ text: h, style: 'tableHeader' })));
+  // --- Build Table Body ---
+  const summaryBody = [...headerRows];
 
   summaryRecords.forEach((rec, idx) => {
-    const row = summaryRowsMapper(rec, idx).map(v => ({
-      text: v !== null && v !== undefined ? v.toString() : '-',
-      style: 'tableCell'
-    }));
-    summaryBody.push(row);
+    summaryBody.push(rowMapper(rec, idx));
   });
 
-  // --- Build Detailed Actual Parcels Body ---
-  const detailedHeaders = [
-    'अ.क्र.', 'तालुका / गाव', 'गट क्र.', 'जुना स.नं.', 'क्षेत्र (हे.)',
-    'सध्याचे खातेदार / भोगवटादार नाव', '१९५० मूळ नोंद / मालक', 'धारणा प्रकार',
-    'तपासणी निष्कर्ष / सद्यस्थिती', 'शेरा'
-  ];
-  const detailedWidths = [18, 75, 40, 42, 38, 135, 100, 65, 88, 80];
-
-  const detailedBody = [];
-  detailedBody.push(detailedHeaders.map(h => ({ text: h, style: 'tableHeader' })));
-
-  // If district-wide, limit PDF to top 500 records to prevent memory/timeout issues
-  const parcelsToRender = parcelRecords.slice(0, 500);
-
-  parcelsToRender.forEach((p, idx) => {
-    detailedBody.push([
-      { text: (idx + 1).toString(), style: 'tableCell' },
-      { text: `${(p.taluka ? (TALUKA_EN_TO_MR[p.taluka] || p.taluka) : '')}\n${cleanVillageName(p.villageName)}`, style: 'tableCell', alignment: 'left' },
-      { text: p.gatNumber || '-', style: 'tableCell' },
-      { text: p.oldSurveyNo || '-', style: 'tableCell' },
-      { text: Number(p.totalAreaHa || 0).toFixed(4), style: 'tableCell', alignment: 'right' },
-      { text: p.currentOwner || 'नोंद उपलब्ध नाही', style: 'tableCell', alignment: 'left' },
-      { text: p.baselineOwner1950 || 'नोंद उपलब्ध नाही', style: 'tableCell', alignment: 'left' },
-      { text: p.tenureDisplay || p.tenureClass || '-', style: 'tableCell' },
-      { text: p.statusFinding || '-', style: 'tableCell', alignment: 'left' },
-      { text: p.remarks || '-', style: 'tableCell', alignment: 'left' }
-    ]);
-  });
+  if (summaryRecords.length > 0 && calcTotals) {
+    summaryBody.push(calcTotals(summaryRecords));
+  }
 
   const content = [
-    { text: 'महाराष्ट्र शासन - जिल्हाधिकारी कार्यालय, चंद्रपूर', style: 'mainHeader' },
-    { text: title, style: 'subHeader' },
+    { text: title, style: 'mainTitle' },
     {
       columns: [
-        { text: `कार्यक्षेत्र: ${scopeName}`, style: 'metaText', bold: true },
+        { text: `जिल्हा: चंद्रपूर | कार्यक्षेत्र: ${scopeName}`, style: 'metaText', bold: true },
         { text: `दिनांक: ${new Date().toLocaleDateString('mr-IN')}`, style: 'metaText', alignment: 'right' }
       ],
-      margin: [0, 0, 0, 6]
+      margin: [0, 4, 0, 8]
     },
-    // SECTION 1: Summary Table
-    { text: 'विभाग १: गोषवारा (Summary Rollup)', style: 'sectionHeader' },
     {
       table: {
-        headerRows: 1,
+        headerRows: headerRowsCount,
         widths: summaryWidths,
         body: summaryBody
       },
       layout: {
         fillColor: function (rowIndex) {
-          return (rowIndex === 0) ? '#D9E1F2' : (rowIndex % 2 === 0 ? '#F9FAFB' : null);
+          if (rowIndex < headerRowsCount) return '#F1F5F9';
+          if (rowIndex === summaryBody.length - 1 && calcTotals) return '#E2E8F0';
+          return rowIndex % 2 === 0 ? '#F8FAFC' : null;
         },
         hLineWidth: function () { return 0.5; },
         vLineWidth: function () { return 0.5; },
-        hLineColor: function () { return '#CBD5E1'; },
-        vLineColor: function () { return '#CBD5E1'; },
+        hLineColor: function () { return '#94A3B8'; },
+        vLineColor: function () { return '#94A3B8'; },
         paddingLeft: function () { return 3; },
         paddingRight: function () { return 3; },
         paddingTop: function () { return 3; },
         paddingBottom: function () { return 3; }
       },
-      margin: [0, 0, 0, 10]
+      margin: [0, 0, 0, 16]
+    },
+    {
+      margin: [0, 16, 0, 0],
+      columns: [
+        {
+          width: '*',
+          text: 'माहिती तयार करणाराचे नाव व पदनाम\n(तलाठी / महसूल सहाय्यक)\nदिनांक: ____________\nस्वाक्षरी: ____________',
+          style: 'sigText'
+        },
+        {
+          width: '*',
+          text: 'माहिती तपासणी करणाऱ्या अधिकाऱ्याचे नाव व पदनाम\n(मंडळ अधिकारी / नायब तहसीलदार)\nदिनांक: ____________\nस्वाक्षरी: ____________',
+          style: 'sigText',
+          alignment: 'center'
+        },
+        {
+          width: '*',
+          text: 'अंतिम मंजुरी / प्रमाणीकरण\n(उपविभागीय अधिकारी / तहसीलदार)\nदिनांक: ____________\nस्वाक्षरी: ____________',
+          style: 'sigText',
+          alignment: 'right'
+        }
+      ]
     }
   ];
-
-  // SECTION 2: Detailed Actual Records List
-  if (parcelsToRender.length > 0) {
-    content.push(
-      {
-        text: `विभाग २: सविस्तर ७/१२ अभिलेख व खातेदार तपासणी यादी (एकूण नोंदी: ${parcelRecords.length}${parcelRecords.length > 500 ? ' | पहिले ५०० दाखवले' : ''})`,
-        style: 'sectionHeader',
-        pageBreak: 'before'
-      },
-      {
-        table: {
-          headerRows: 1,
-          widths: detailedWidths,
-          body: detailedBody
-        },
-        layout: {
-          fillColor: function (rowIndex) {
-            return (rowIndex === 0) ? '#E0E7FF' : (rowIndex % 2 === 0 ? '#F8FAFC' : null);
-          },
-          hLineWidth: function () { return 0.5; },
-          vLineWidth: function () { return 0.5; },
-          hLineColor: function () { return '#CBD5E1'; },
-          vLineColor: function () { return '#CBD5E1'; },
-          paddingLeft: function () { return 2; },
-          paddingRight: function () { return 2; },
-          paddingTop: function () { return 2.5; },
-          paddingBottom: function () { return 2.5; }
-        },
-        margin: [0, 0, 0, 12]
-      }
-    );
-  }
-
-  // SECTION 3: Signatures Block
-  content.push({
-    margin: [0, 16, 0, 0],
-    columns: [
-      {
-        width: '*',
-        text: 'माहिती तयार करणाराचे नाव व पदनाम\n(तलाठी / महसूल सहाय्यक)\nदिनांक: ____________\nस्वाक्षरी: ____________',
-        style: 'sigText'
-      },
-      {
-        width: '*',
-        text: 'माहिती तपासणी करणाऱ्या अधिकाऱ्याचे नाव व पदनाम\n(मंडळ अधिकारी / नायब तहसीलदार)\nदिनांक: ____________\nस्वाक्षरी: ____________',
-        style: 'sigText',
-        alignment: 'center'
-      },
-      {
-        width: '*',
-        text: 'अंतिम मंजुरी / प्रमाणीकरण\n(उपविभागीय अधिकारी / तहसीलदार)\nदिनांक: ____________\nस्वाक्षरी: ____________',
-        style: 'sigText',
-        alignment: 'right'
-      }
-    ]
-  });
 
   const docDefinition = {
     pageOrientation: 'landscape',
@@ -407,13 +596,15 @@ export const generatePrapatraPdf = async (prapatraNum, summaryRecords = [], parc
     pageMargins: [15, 15, 15, 15],
     content,
     styles: {
-      mainHeader: { fontSize: 13, bold: true, alignment: 'center', margin: [0, 0, 0, 2] },
-      subHeader: { fontSize: 10, bold: true, alignment: 'center', margin: [0, 0, 0, 4], color: '#1E3A8A' },
-      sectionHeader: { fontSize: 9.5, bold: true, color: '#1E3A8A', margin: [0, 4, 0, 4] },
-      metaText: { fontSize: 8, color: '#374151' },
-      tableHeader: { bold: true, fontSize: 6.5, alignment: 'center', color: '#0F172A' },
-      tableCell: { fontSize: 6.5, alignment: 'center', color: '#1F2937' },
-      sigText: { fontSize: 8, bold: true, color: '#374151', lineHeight: 1.3 }
+      mainTitle: { fontSize: 10.5, bold: true, alignment: 'center', margin: [0, 0, 0, 4], color: '#0F172A' },
+      metaText: { fontSize: 8, color: '#334155' },
+      tableHeader: { bold: true, fontSize: 7, alignment: 'center', color: '#0F172A' },
+      tableHeaderNum: { bold: true, fontSize: 7, alignment: 'center', color: '#475569', italic: true },
+      tableCell: { fontSize: 7, alignment: 'center', color: '#0F172A' },
+      tableCellLeft: { fontSize: 7, alignment: 'left', color: '#0F172A' },
+      tableCellTotal: { bold: true, fontSize: 7.5, alignment: 'center', color: '#0F172A' },
+      tableCellTotalLeft: { bold: true, fontSize: 7.5, alignment: 'left', color: '#0F172A' },
+      sigText: { fontSize: 8, bold: true, color: '#334155', lineHeight: 1.3 }
     },
     defaultStyle: {
       font: 'Nirmala'
@@ -436,5 +627,3 @@ export const generatePrapatraPdf = async (prapatraNum, summaryRecords = [], parc
   }
   return buffer;
 };
-
-

@@ -95,12 +95,12 @@ export default function AddHearingModal({ isOpen, onClose, caseItem, onHearingAd
         className="bg-white rounded-3xl shadow-[0_25px_60px_-15px_rgba(15,23,42,0.3)] border border-slate-100 max-w-lg w-full max-h-[90vh] flex flex-col overflow-hidden my-auto relative animate-in zoom-in-95 duration-150"
       >
         {/* Top Gradient Accent Strip */}
-        <div className="h-1.5 bg-gradient-to-r from-amber-500 via-blue-600 to-indigo-600 shrink-0" />
+        <div className="h-1.5 bg-gradient-to-r from-indigo-500 via-cyan-400 to-indigo-600 shrink-0" />
 
         {/* Modal Header */}
         <div className="px-5 sm:px-6 py-4 bg-white border-b border-slate-100 flex justify-between items-center shrink-0">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="w-10 h-10 rounded-2xl bg-amber-50 border border-amber-200/80 flex items-center justify-center shrink-0 text-amber-700 shadow-2xs">
+            <div className="w-10 h-10 rounded-2xl bg-indigo-50 border border-indigo-200/80 flex items-center justify-center shrink-0 text-indigo-600 shadow-xs">
               <Scale className="w-5 h-5" aria-hidden="true" />
             </div>
             <div className="min-w-0">

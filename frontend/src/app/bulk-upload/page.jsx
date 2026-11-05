@@ -442,7 +442,7 @@ export default function BulkUploadPage() {
                   showCount={true}
                 />
                 {prapatraFiles.length > 1 ? (
-                  <p className="text-[10px] text-amber-700 font-medium mt-1">
+                  <p className="text-[10px] text-indigo-600 font-medium mt-1">
                     {isMarathi
                       ? 'अनेक फाईल्स निवडल्यामुळे गावाचे नाव प्रत्येक फाईलमधून आपोआप ओळखले जाईल.'
                       : 'Village names will be auto-detected per file for multi-file upload.'}
@@ -697,7 +697,7 @@ export default function BulkUploadPage() {
                     <span className="text-[10px] text-slate-500 block">
                       {isMarathi ? 'एकूण ७/१२' : 'Total 7/12'}
                     </span>
-                    <span className="text-sm sm:text-base font-black text-blue-900">
+                    <span className="text-sm sm:text-base font-black text-indigo-700">
                       {result.total712Added}
                     </span>
                   </div>
@@ -778,7 +778,7 @@ export default function BulkUploadPage() {
                               )}
                             </div>
                             <div className="text-[11px] text-slate-600 flex flex-wrap items-center gap-2">
-                              <span>{isMarathi ? 'एकूण ७/१२: ' : 'Total 7/12: '}<strong className="text-blue-900">{r.total712}</strong></span>
+                              <span>{isMarathi ? 'एकूण ७/१२: ' : 'Total 7/12: '}<strong className="text-indigo-700">{r.total712}</strong></span>
                               <span>•</span>
                               <span>{isMarathi ? 'भूखंड नोंदणीकृत (गट/स.नं.): ' : 'Parcels Registered: '}<strong className="text-emerald-700">{r.parcelsCount}</strong></span>
                               {r.uniqueGatCount !== undefined && r.uniqueGatCount !== r.parcelsCount && (
@@ -801,7 +801,7 @@ export default function BulkUploadPage() {
                                   </span>
                                 )}
                                 {r.reconciliation.netNewSeeded > 0 && (
-                                  <span className="px-2 py-0.5 bg-blue-50 text-blue-900 border border-blue-200 rounded font-bold">
+                                  <span className="px-2 py-0.5 bg-blue-50 text-indigo-700 border border-blue-200 rounded font-bold">
                                     ✦ {isMarathi ? `नवीन सिड: ${r.reconciliation.netNewSeeded} गट` : `Net-New Seeded: ${r.reconciliation.netNewSeeded} Gats`}
                                   </span>
                                 )}
@@ -853,7 +853,7 @@ export default function BulkUploadPage() {
                     </Link>
                     <Link
                       href="/cases"
-                      className="inline-flex items-center gap-1 font-bold text-xs text-amber-800 hover:text-amber-900 underline"
+                      className="inline-flex items-center gap-1 font-bold text-xs text-indigo-600 hover:text-indigo-800 underline"
                     >
                       {isMarathi ? 'दाखल प्रकरणे पहा' : 'View Cases'} <ArrowRight className="w-3.5 h-3.5" />
                     </Link>
@@ -1108,14 +1108,14 @@ export default function BulkUploadPage() {
           </div>
 
           <form onSubmit={handleParcelSubmit} className="space-y-5">
-            <div className="border-2 border-dashed border-blue-300 hover:border-blue-600 rounded-2xl p-6 sm:p-8 text-center bg-blue-50/20 hover:bg-blue-50/40 transition cursor-pointer relative">
+            <div className="border-2 border-dashed border-indigo-200 hover:border-indigo-500 rounded-2xl p-6 sm:p-8 text-center bg-indigo-50/30 hover:bg-indigo-50/50 transition cursor-pointer relative">
               <input
                 type="file"
                 accept=".xlsx,.xls"
                 onChange={handleParcelFileChange}
                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
               />
-              <UploadCloud className="w-10 h-10 sm:w-12 sm:h-12 text-blue-900 mx-auto mb-2" />
+              <UploadCloud className="w-10 h-10 sm:w-12 sm:h-12 text-indigo-700 mx-auto mb-2" />
               <p className="text-xs sm:text-sm font-bold text-slate-800">
                 {parcelFile
                   ? parcelFile.name
@@ -1143,7 +1143,7 @@ export default function BulkUploadPage() {
 
             {result && result.mode === 'parcel' && (
               <div className="p-4 sm:p-5 rounded-2xl bg-blue-50 border border-blue-300 text-xs text-blue-950 space-y-3">
-                <div className="flex items-center gap-2 font-bold text-sm text-blue-900">
+                <div className="flex items-center gap-2 font-bold text-sm text-indigo-700">
                   <CheckCircle2 className="w-5 h-5 text-blue-600" />
                   <span>{result.message}</span>
                 </div>
@@ -1177,7 +1177,7 @@ export default function BulkUploadPage() {
                 <div className="pt-2 text-right">
                   <Link
                     href="/parcels"
-                    className="inline-flex items-center gap-1 font-bold text-xs text-blue-900 hover:text-blue-700"
+                    className="inline-flex items-center gap-1 font-bold text-xs text-indigo-700 hover:text-indigo-800"
                   >
                     <span>{isMarathi ? 'नोंदवहीत आयात केलेले भूखंड पहा' : 'View imported parcels in register'}</span>
                     <ArrowRight className="w-3.5 h-3.5" />
@@ -1197,7 +1197,7 @@ export default function BulkUploadPage() {
               <button
                 type="submit"
                 disabled={!parcelFile || uploading}
-                className="w-full sm:w-auto bg-blue-900 hover:bg-blue-800 text-white font-semibold px-6 py-2.5 rounded-xl text-xs shadow-sm transition disabled:opacity-50 flex items-center justify-center gap-2 active:scale-95"
+                className="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 shadow-sm shadow-indigo-600/20 text-white font-semibold px-6 py-2.5 rounded-xl text-xs shadow-sm transition disabled:opacity-50 flex items-center justify-center gap-2 active:scale-95"
               >
                 {uploading ? (
                   <>

@@ -10,7 +10,7 @@ const ENV = process.env.NODE_ENV || 'development';
 
 let keepAliveInterval = null;
 
-const server = app.listen(PORT, async () => {
+const server = app.listen({ port: PORT, host: '0.0.0.0', exclusive: false }, async () => {
   logger.banner({
     name: 'Chandrapur Land Records & Governance Platform API',
     version: '1.0.0',

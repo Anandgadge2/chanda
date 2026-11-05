@@ -235,6 +235,9 @@ export function cleanVillageName(name) {
 
   // Standardize known aliases / abbreviations
   const aliases = {
+    'UMRILAL MAN RITH': 'उमरी लालमान रीठ',
+    'umrilal man rith': 'उमरी लालमान रीठ',
+    'Kanhalgaon': 'कन्हाळगाव',
     'अकोला': 'अकोला, कातलाबोडी',
     'अकोला, कातलाबोडी': 'अकोला, कातलाबोडी',
     'अकोला,कातलाबोडी)': 'अकोला, कातलाबोडी',

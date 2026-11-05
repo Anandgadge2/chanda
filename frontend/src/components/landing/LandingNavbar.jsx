@@ -9,6 +9,7 @@ import {
   X,
   BookOpen,
   LogOut,
+  Sparkles,
 } from 'lucide-react';
 import ChandrapurDistrictLogo from './ChandrapurDistrictLogo';
 import { useAuth } from '../AuthContext';
@@ -58,26 +59,32 @@ export default function LandingNavbar({ onOpenAuth }) {
     : (user?.fullNameEn ? user.fullNameEn.charAt(0) : (officerDisplayName ? officerDisplayName.charAt(0) : 'D'));
 
   return (
-    <header className="sticky top-0 z-50 bg-white border-b border-slate-200 shadow-2xs">
-      {/* Main Brand & Officer Actions Header */}
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-1.5 sm:py-2">
-        <div className="flex items-center justify-between gap-2">
-          {/* Official Emblem & Collectorate Title */}
-          <Link href="/" className="flex items-center gap-2 sm:gap-3 group min-w-0">
-            <ChandrapurDistrictLogo className="w-8 h-8 sm:w-10 sm:h-10 drop-shadow-xs transition-transform group-hover:scale-105 flex-shrink-0" />
+    <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-xl border-b border-slate-200/80 shadow-[0_2px_12px_-2px_rgba(15,23,42,0.04)]">
+      {/* Sleek Modern Gradient Top Line */}
+      <div className="h-[2px] w-full bg-gradient-to-r from-indigo-500 via-cyan-400 to-indigo-600 shadow-xs" />
+
+      {/* Main Brand & Actions Header */}
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-2">
+        <div className="flex items-center justify-between gap-3">
+          {/* Spatial Platform Brand */}
+          <Link href="/" className="flex items-center gap-2.5 sm:gap-3 group min-w-0">
+            <ChandrapurDistrictLogo className="w-8 h-8 sm:w-9 sm:h-9" />
 
             <div className="min-w-0">
-              <h1 className="text-xs sm:text-base font-black text-slate-900 leading-tight group-hover:text-blue-950 transition tracking-tight truncate">
-                {t('portal.title')}
-              </h1>
-              <p className="text-[10px] text-amber-800 font-semibold leading-tight hidden md:block truncate">
+              <div className="flex items-center gap-2">
+                <h1 className="text-xs sm:text-base font-extrabold text-slate-900 leading-tight group-hover:text-indigo-600 transition tracking-tight truncate">
+                  {t('portal.title')}
+                </h1>
+               
+              </div>
+              <p className="text-[10.5px] text-slate-500 font-medium leading-tight hidden md:block truncate">
                 {t('portal.subTitle')}
               </p>
             </div>
           </Link>
 
-          {/* Action CTAs: Language Switcher, Register, Login, Dashboard */}
-          <div className="hidden lg:flex items-center gap-2 flex-shrink-0">
+          {/* Action CTAs: Language Switcher, Dashboard, Login */}
+          <div className="hidden lg:flex items-center gap-2.5 flex-shrink-0">
             {/* Header Language Switcher */}
             <LanguageSwitcher variant="pill" />
 
@@ -85,29 +92,29 @@ export default function LandingNavbar({ onOpenAuth }) {
               <>
                 <Link
                   href="/dashboard"
-                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold text-white bg-blue-900 hover:bg-blue-800 shadow-xs hover:shadow-md transition group"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-500 shadow-sm shadow-indigo-500/20 transition group"
                 >
-                  <LayoutDashboard className="w-3.5 h-3.5 text-amber-400 group-hover:rotate-6 transition-transform" />
+                  <LayoutDashboard className="w-3.5 h-3.5 text-white/90 group-hover:rotate-6 transition-transform" />
                   <span>{t('nav.dashboard')}</span>
                 </Link>
 
                 {/* Officer Mini Badge & Instant Logout */}
                 <div className="flex items-center gap-2 pl-2 border-l border-slate-200">
-                  <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-900 to-indigo-900 text-white font-bold text-xs flex items-center justify-center shadow-xs flex-shrink-0">
+                  <div className="w-7 h-7 rounded-xl bg-gradient-to-br from-indigo-600 to-violet-700 text-white font-bold text-xs flex items-center justify-center shadow-xs flex-shrink-0">
                     {officerInitial}
                   </div>
                   <div className="text-left max-w-[150px]">
                     <span className="text-xs font-bold text-slate-900 leading-snug block truncate">
                       {officerDisplayName}
                     </span>
-                    <span className="text-[10px] text-blue-900 font-semibold leading-tight block truncate">
+                    <span className="text-[10px] text-indigo-600 font-semibold leading-tight block truncate">
                       {displayOfficerDesignation()}
                     </span>
                   </div>
                   <button
                     type="button"
                     onClick={logout}
-                    className="p-1.5 rounded-lg text-slate-500 hover:text-rose-600 hover:bg-rose-50 transition active:scale-95 cursor-pointer"
+                    className="p-1.5 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition active:scale-95 cursor-pointer"
                     title={t('nav.logout')}
                     aria-label="Logout"
                   >
@@ -116,16 +123,14 @@ export default function LandingNavbar({ onOpenAuth }) {
                 </div>
               </>
             ) : (
-              <>
-                <button
-                  type="button"
-                  onClick={() => onOpenAuth('login')}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-blue-950 bg-amber-400 hover:bg-amber-300 border border-amber-500/60 shadow-xs hover:shadow-md transition cursor-pointer"
-                >
-                  <Lock className="w-3.5 h-3.5 text-blue-950" />
-                  <span>{t('nav.officerLogin')}</span>
-                </button>
-              </>
+              <button
+                type="button"
+                onClick={() => onOpenAuth('login')}
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-500 border border-indigo-500 shadow-sm shadow-indigo-500/25 transition-all active:scale-95 cursor-pointer"
+              >
+                <Lock className="w-3.5 h-3.5 text-white/90" />
+                <span>{t('nav.officerLogin')}</span>
+              </button>
             )}
           </div>
 
@@ -136,14 +141,14 @@ export default function LandingNavbar({ onOpenAuth }) {
             {user ? (
               <Link
                 href="/dashboard"
-                className="px-2.5 py-1.5 rounded-lg text-[11px] font-bold text-white bg-blue-900 active:scale-95 transition"
+                className="px-2.5 py-1.5 rounded-xl text-[11px] font-semibold text-white bg-indigo-600 active:scale-95 transition shadow-xs"
               >
                 {t('nav.dashboard')}
               </Link>
             ) : (
               <button
                 onClick={() => onOpenAuth('login')}
-                className="px-2.5 py-1.5 rounded-lg text-[11px] font-bold text-blue-950 bg-amber-400 active:scale-95 transition cursor-pointer"
+                className="px-3 py-1.5 rounded-xl text-[11px] font-semibold text-white bg-indigo-600 active:scale-95 transition shadow-xs cursor-pointer"
               >
                 {t('nav.officerLogin')}
               </button>
@@ -161,75 +166,54 @@ export default function LandingNavbar({ onOpenAuth }) {
 
       {/* Mobile Slide-Down Menu */}
       {mobileMenuOpen && (
-        <div className="lg:hidden bg-white border-b border-slate-200 px-4 pt-3 pb-5 space-y-3 shadow-xl">
+        <div className="lg:hidden bg-white/95 backdrop-blur-xl border-b border-slate-200 px-4 pt-3 pb-5 space-y-3 shadow-xl">
           <div className="pb-2 border-b border-slate-100 flex justify-between items-center">
-            <span className="text-xs font-bold text-slate-500">{t('accessibility.language')}:</span>
+            <span className="text-xs font-semibold text-slate-500">{t('accessibility.language')}:</span>
             <LanguageSwitcher variant="pill" />
           </div>
 
-          <nav className="flex flex-col space-y-2 text-sm font-semibold text-slate-800">
+          <nav className="flex flex-col space-y-1 text-sm font-semibold text-slate-800">
             <a
               href="/"
               onClick={() => setMobileMenuOpen(false)}
-              className="px-3 py-2 rounded-lg hover:bg-slate-100"
+              className="px-3 py-2 rounded-xl hover:bg-slate-100 transition"
             >
               {t('nav.home')}
             </a>
             <a
               href="#search-section"
               onClick={() => setMobileMenuOpen(false)}
-              className="px-3 py-2 rounded-lg hover:bg-slate-100"
+              className="px-3 py-2 rounded-xl hover:bg-slate-100 transition"
             >
               {t('nav.parcels')}
             </a>
             <a
               href="#talukas"
               onClick={() => setMobileMenuOpen(false)}
-              className="px-3 py-2 rounded-lg hover:bg-slate-100"
+              className="px-3 py-2 rounded-xl hover:bg-slate-100 transition"
             >
               {t('nav.talukas')}
             </a>
             <a
               href="#provenance"
               onClick={() => setMobileMenuOpen(false)}
-              className="px-3 py-2 rounded-lg hover:bg-slate-100"
+              className="px-3 py-2 rounded-xl hover:bg-slate-100 transition"
             >
               {t('nav.provenance')}
             </a>
-            <a
-              href="#mlrc"
-              onClick={() => setMobileMenuOpen(false)}
-              className="px-3 py-2 rounded-lg hover:bg-slate-100"
-            >
-              {t('nav.acts')}
-            </a>
-            <a
-              href="#workflow"
-              onClick={() => setMobileMenuOpen(false)}
-              className="px-3 py-2 rounded-lg hover:bg-slate-100"
-            >
-              {t('nav.workflow')}
-            </a>
-            <Link
-              href="/cases"
-              onClick={() => setMobileMenuOpen(false)}
-              className="px-3 py-2 rounded-lg hover:bg-slate-100"
-            >
-              {t('nav.cases')}
-            </Link>
             <Link
               href="/reports"
               onClick={() => setMobileMenuOpen(false)}
-              className="px-3 py-2 rounded-lg hover:bg-slate-100"
+              className="px-3 py-2 rounded-xl hover:bg-slate-100 transition"
             >
               {t('nav.reports')}
             </Link>
             <Link
               href="/glossary"
               onClick={() => setMobileMenuOpen(false)}
-              className="px-3 py-2 rounded-lg hover:bg-slate-100 flex items-center gap-2 text-blue-950 font-bold"
+              className="px-3 py-2 rounded-xl hover:bg-slate-100 flex items-center gap-2 text-indigo-600 font-bold"
             >
-              <BookOpen className="w-4 h-4 text-amber-600" />
+              <BookOpen className="w-4 h-4 text-indigo-600" />
               <span>{t('nav.glossary')}</span>
             </Link>
           </nav>
@@ -238,14 +222,14 @@ export default function LandingNavbar({ onOpenAuth }) {
             {user ? (
               <>
                 <div className="flex items-center gap-2 p-2 bg-slate-50 rounded-xl border border-slate-200">
-                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-900 to-indigo-900 text-white font-bold text-xs flex items-center justify-center shadow-xs flex-shrink-0">
+                  <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-600 to-violet-700 text-white font-bold text-xs flex items-center justify-center shadow-xs flex-shrink-0">
                     {officerInitial}
                   </div>
                   <div className="min-w-0 flex-1">
                     <span className="text-xs font-bold text-slate-900 block truncate">
                       {officerDisplayName}
                     </span>
-                    <span className="text-[10px] text-blue-900 font-semibold block truncate">
+                    <span className="text-[10px] text-indigo-600 font-semibold block truncate">
                       {displayOfficerDesignation()}
                     </span>
                   </div>
@@ -254,7 +238,7 @@ export default function LandingNavbar({ onOpenAuth }) {
                 <Link
                   href="/dashboard"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="w-full py-2.5 rounded-xl text-center font-bold text-white bg-blue-900 text-xs"
+                  className="w-full py-2.5 rounded-xl text-center font-semibold text-white bg-indigo-600 text-xs shadow-xs"
                 >
                   {t('nav.dashboard')}
                 </Link>
@@ -272,17 +256,15 @@ export default function LandingNavbar({ onOpenAuth }) {
                 </button>
               </>
             ) : (
-              <>
-                <button
-                  onClick={() => {
-                    setMobileMenuOpen(false);
-                    onOpenAuth('login');
-                  }}
-                  className="w-full py-2.5 rounded-xl text-center font-bold text-blue-950 bg-amber-400 text-xs shadow-xs cursor-pointer"
-                >
-                  {t('nav.officerLogin')}
-                </button>
-              </>
+              <button
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  onOpenAuth('login');
+                }}
+                className="w-full py-2.5 rounded-xl text-center font-semibold text-white bg-indigo-600 text-xs shadow-sm cursor-pointer"
+              >
+                {t('nav.officerLogin')}
+              </button>
             )}
           </div>
         </div>

@@ -392,13 +392,13 @@ export default function EditParcelModal({ isOpen, onClose, parcel, onUpdateSucce
         aria-labelledby="edit-parcel-modal-title"
         className="bg-white rounded-2xl sm:rounded-3xl shadow-2xl shadow-slate-950/30 border border-slate-200/90 w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col animate-in zoom-in-95 duration-150 my-auto"
       >
-        {/* National Tricolor Micro Accent Line (Portal Theme) */}
-        <div className="h-1 sm:h-1.5 w-full bg-gradient-to-r from-amber-500 via-white to-emerald-600 shrink-0" />
+        {/* Modern Indigo-Cyan Accent Line */}
+        <div className="h-0.5 w-full bg-gradient-to-r from-indigo-500 via-cyan-400 to-indigo-600 shrink-0" />
 
         {/* Header - Portal Theme */}
         <div className="px-4 sm:px-6 py-3.5 sm:py-4 border-b border-slate-200/90 flex items-center justify-between bg-white shrink-0 gap-3">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200/80 text-blue-700 flex items-center justify-center shrink-0 shadow-2xs">
+            <div className="w-10 h-10 rounded-2xl bg-indigo-50 border border-indigo-200 text-indigo-600 flex items-center justify-center shrink-0 shadow-2xs">
               <Edit3 className="w-5 h-5" />
             </div>
             <div className="min-w-0">

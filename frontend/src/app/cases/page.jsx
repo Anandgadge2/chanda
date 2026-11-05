@@ -367,9 +367,9 @@ export default function CasesPage() {
   return (
     <div className="space-y-2.5 sm:space-y-3">
       {/* Executive Command Hero Header - Pro Compact */}
-      <div className="bg-gradient-to-r from-amber-50/80 via-orange-50/40 to-white text-slate-900 rounded-xl px-3.5 py-2 sm:py-2.5 shadow-2xs border border-amber-200/80 flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+      <div className="bg-white/90 backdrop-blur-xl text-slate-900 rounded-xl px-3.5 py-2 sm:py-2.5 shadow-xs border border-slate-200/80 flex flex-col sm:flex-row justify-between sm:items-center gap-2">
         <div className="flex items-center gap-2.5 min-w-0">
-          <div className="w-8 h-8 rounded-lg bg-amber-500 text-slate-950 flex items-center justify-center shrink-0 shadow-2xs font-bold">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-600 to-violet-700 text-white flex items-center justify-center shrink-0 shadow-xs font-bold">
             <Scale className="w-4 h-4" />
           </div>
           <div className="min-w-0">
@@ -377,7 +377,7 @@ export default function CasesPage() {
               <h1 className="text-sm sm:text-base font-extrabold text-slate-900 tracking-tight leading-tight">
                 {isMarathi ? 'शर्तभंग व अर्ध-न्यायिक सुनावणी कक्ष' : 'Breach & Quasi-Judicial Hearing Chamber'}
               </h1>
-              <span className="text-[10px] font-bold bg-amber-100 text-amber-900 px-2 py-0.5 rounded-full border border-amber-300">
+              <span className="text-[10px] font-bold bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-full border border-indigo-200/80 font-mono">
                 {isMarathi ? 'MLRC १९६६' : 'MLRC 1966'}
               </span>
               <span className="hidden md:inline text-[11px] text-slate-500 font-medium">
@@ -398,10 +398,10 @@ export default function CasesPage() {
           <button
             type="button"
             onClick={() => setGlossaryModalOpen(true)}
-            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white hover:bg-amber-50 text-amber-950 border border-amber-200 text-xs font-bold transition-all active:scale-95 shadow-2xs cursor-pointer"
+            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white hover:bg-indigo-50 text-indigo-700 border border-indigo-200/80 text-xs font-semibold transition-all active:scale-95 shadow-xs cursor-pointer"
             title={isMarathi ? 'शर्तभंग व महसूल शब्दावली मदत' : 'Breach & Revenue Glossary Help'}
           >
-            <BookOpen className="w-3.5 h-3.5 text-amber-700" />
+            <BookOpen className="w-3.5 h-3.5 text-indigo-600" />
             <span>{isMarathi ? 'शर्तभंग शब्दावली' : 'Breach Glossary'}</span>
           </button>
 
@@ -409,151 +409,185 @@ export default function CasesPage() {
             type="button"
             onClick={() => fetchCases(page)}
             disabled={loading}
-            className="p-1.5 rounded-lg bg-white hover:bg-amber-50 text-slate-700 hover:text-slate-950 border border-slate-300 text-xs transition-all active:scale-95 shadow-2xs cursor-pointer"
+            className="p-1.5 rounded-lg bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 border border-slate-300 text-xs transition-all active:scale-95 shadow-2xs cursor-pointer"
             title={isMarathi ? 'प्रकरणे रीफ्रेश करा' : 'Refresh cases'}
             aria-label={isMarathi ? 'प्रकरणे रीफ्रेश करा' : 'Refresh cases'}
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-amber-600' : 'text-slate-700'}`} />
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-indigo-600' : 'text-slate-700'}`} />
           </button>
         </div>
       </div>
 
-      {/* 5 Dedicated Executive KPI Cards with Compact Pro Styling & Semantic Light Colors */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-2.5">
-        {/* Metric 1: Total Cases (Blue - Baseline Inventory) */}
+      {/* 5 Solid Color Executive KPI Cards */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5 sm:gap-3 text-white">
+        {/* Metric 1: Total Cases (Solid Indigo) */}
         <button
           type="button"
           onClick={() => handleMetricCardFilter('', '')}
-          className={`p-2.5 sm:p-3 rounded-xl border text-left transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xs active:scale-98 relative overflow-hidden group cursor-pointer ${
+          className={`group relative flex flex-col justify-between overflow-hidden rounded-2xl p-4 text-left select-none border transition-all duration-200 ease-[cubic-bezier(0.25,1,0.5,1)] motion-reduce:transition-none cursor-pointer hover:-translate-y-1 active:scale-[0.985] bg-indigo-600 hover:bg-indigo-700 border-indigo-500/80 shadow-md shadow-indigo-600/20 hover:shadow-xl hover:shadow-indigo-600/30 ${
             appliedFilters.status === '' && appliedFilters.isRepossessedToGovt === ''
-              ? 'bg-gradient-to-br from-sky-100/95 via-blue-50/80 to-white border-blue-500 shadow-xs ring-2 ring-blue-500/30'
-              : 'bg-gradient-to-br from-sky-50/80 via-blue-50/40 to-white/95 border-sky-200/80 hover:border-sky-300 shadow-2xs'
+              ? 'ring-2 ring-white ring-offset-2 ring-offset-indigo-600 shadow-2xl'
+              : ''
           }`}
         >
-          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-600 to-indigo-600" />
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-slate-700 group-hover:text-blue-950 transition-colors">
+          <div className="absolute top-0 inset-x-0 h-px bg-white/25 pointer-events-none" />
+          <div className="flex items-center justify-between gap-1">
+            <span className="text-[11px] sm:text-xs font-semibold tracking-tight text-indigo-100 group-hover:text-white transition-colors">
               {isMarathi ? 'एकूण प्रकरणे' : 'Total Cases'}
             </span>
-            <div className="w-6 h-6 rounded-lg bg-sky-100/90 border border-sky-200 flex items-center justify-center text-blue-900 transition-transform group-hover:scale-105">
-              <Scale className="w-3.5 h-3.5" />
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl border border-white/20 bg-white/15 flex items-center justify-center text-white transition-all duration-200 group-hover:scale-105 group-hover:bg-white/25">
+              <Scale className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" />
             </div>
           </div>
-          <p className="text-xl sm:text-2xl font-black text-slate-900 mt-1 tracking-tight font-mono">
-            {stats.totalCases}
-          </p>
-          <p className="text-[10px] text-slate-500 mt-0.5 font-medium truncate">
-            {isMarathi ? 'नोंदवलेली सर्व प्रकरणे' : 'All registered cases'}
-          </p>
+          <div className="mt-3 sm:mt-3.5 flex items-baseline justify-between gap-1">
+            <p className="text-2xl sm:text-3xl font-extrabold tracking-tight font-mono tabular-nums leading-none text-white">
+              {stats.totalCases}
+            </p>
+            <span className="text-[10px] sm:text-[11px] font-medium text-indigo-200/90 truncate">
+              {isMarathi ? 'सर्व प्रकरणे' : 'Registered'}
+            </span>
+          </div>
         </button>
 
-        {/* Metric 2: Active Hearings (Indigo - Judicial Schedule) */}
+        {/* Metric 2: Active Hearings (Solid Violet) */}
         <button
           type="button"
           onClick={() => handleMetricCardFilter('HEARING_SCHEDULED', '')}
-          className={`p-2.5 sm:p-3 rounded-xl border text-left transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xs active:scale-98 relative overflow-hidden group cursor-pointer ${
+          className={`group relative flex flex-col justify-between overflow-hidden rounded-2xl p-4 text-left select-none border transition-all duration-200 ease-[cubic-bezier(0.25,1,0.5,1)] motion-reduce:transition-none cursor-pointer hover:-translate-y-1 active:scale-[0.985] bg-violet-600 hover:bg-violet-700 border-violet-500/80 shadow-md shadow-violet-600/20 hover:shadow-xl hover:shadow-violet-600/30 ${
             appliedFilters.status === 'HEARING_SCHEDULED'
-              ? 'bg-gradient-to-br from-indigo-100/95 via-violet-50/80 to-white border-indigo-500 shadow-xs ring-2 ring-indigo-500/30'
-              : 'bg-gradient-to-br from-indigo-50/80 via-violet-50/40 to-white/95 border-indigo-200/80 hover:border-indigo-300 shadow-2xs'
+              ? 'ring-2 ring-white ring-offset-2 ring-offset-violet-600 shadow-2xl'
+              : ''
           }`}
         >
-          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-600 to-purple-600" />
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-slate-700 group-hover:text-indigo-950 transition-colors">
-              {isMarathi ? 'सक्रिय सुनावण्या' : 'Active Hearings'}
-            </span>
-            <div className="w-6 h-6 rounded-lg bg-indigo-100/90 border border-indigo-200 flex items-center justify-center text-indigo-700 transition-transform group-hover:scale-105">
-              <Calendar className="w-3.5 h-3.5" />
+          <div className="absolute top-0 inset-x-0 h-px bg-white/25 pointer-events-none" />
+          <div className="flex items-center justify-between gap-1">
+            <div className="flex items-center gap-1.5 min-w-0">
+              <span className="text-[11px] sm:text-xs font-semibold tracking-tight text-violet-100 group-hover:text-white transition-colors">
+                {isMarathi ? 'सक्रिय सुनावण्या' : 'Active Hearings'}
+              </span>
+              {appliedFilters.status === 'HEARING_SCHEDULED' && (
+                <span className="relative flex h-2 w-2 shrink-0">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-white" />
+                </span>
+              )}
+            </div>
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl border border-white/20 bg-white/15 flex items-center justify-center text-white transition-all duration-200 group-hover:scale-105 group-hover:bg-white/25">
+              <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" />
             </div>
           </div>
-          <p className="text-xl sm:text-2xl font-black text-indigo-950 mt-1 tracking-tight font-mono">
-            {stats.activeHearings}
-          </p>
-          <p className="text-[10px] text-indigo-600 mt-0.5 font-medium truncate">
-            {isMarathi ? 'बोर्डावरील सुनावण्या' : 'Hearings on daily board'}
-          </p>
+          <div className="mt-3 sm:mt-3.5 flex items-baseline justify-between gap-1">
+            <p className="text-2xl sm:text-3xl font-extrabold tracking-tight font-mono tabular-nums leading-none text-white">
+              {stats.activeHearings}
+            </p>
+            <span className="text-[10px] sm:text-[11px] font-medium text-violet-200/90 truncate">
+              {isMarathi ? 'बोर्डावर' : 'On Board'}
+            </span>
+          </div>
         </button>
 
-        {/* Metric 3: Show Cause Notices (Amber - Caution / Vigilance) */}
+        {/* Metric 3: Show Cause Notices (Solid Amber) */}
         <button
           type="button"
           onClick={() => handleMetricCardFilter('NOTICE_ISSUED', '')}
-          className={`p-2.5 sm:p-3 rounded-xl border text-left transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xs active:scale-98 relative overflow-hidden group cursor-pointer ${
+          className={`group relative flex flex-col justify-between overflow-hidden rounded-2xl p-4 text-left select-none border transition-all duration-200 ease-[cubic-bezier(0.25,1,0.5,1)] motion-reduce:transition-none cursor-pointer hover:-translate-y-1 active:scale-[0.985] bg-amber-600 hover:bg-amber-700 border-amber-500/80 shadow-md shadow-amber-600/20 hover:shadow-xl hover:shadow-amber-600/30 ${
             appliedFilters.status === 'NOTICE_ISSUED'
-              ? 'bg-gradient-to-br from-amber-100/95 via-orange-50/80 to-white border-amber-500 shadow-xs ring-2 ring-amber-500/30'
-              : 'bg-gradient-to-br from-amber-50/80 via-orange-50/40 to-white/95 border-amber-200/80 hover:border-amber-300 shadow-2xs'
+              ? 'ring-2 ring-white ring-offset-2 ring-offset-amber-600 shadow-2xl'
+              : ''
           }`}
         >
-          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 to-orange-500" />
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-slate-700 group-hover:text-amber-950 transition-colors">
-              {isMarathi ? 'कारणे दाखवा नोटीस' : 'Show Cause Notices'}
-            </span>
-            <div className="w-6 h-6 rounded-lg bg-amber-100/90 border border-amber-200 flex items-center justify-center text-amber-700 transition-transform group-hover:scale-105">
-              <AlertTriangle className="w-3.5 h-3.5" />
+          <div className="absolute top-0 inset-x-0 h-px bg-white/25 pointer-events-none" />
+          <div className="flex items-center justify-between gap-1">
+            <div className="flex items-center gap-1.5 min-w-0">
+              <span className="text-[11px] sm:text-xs font-semibold tracking-tight text-amber-100 group-hover:text-white transition-colors">
+                {isMarathi ? 'कारणे दाखवा नोटीस' : 'Show Cause Notices'}
+              </span>
+              {appliedFilters.status === 'NOTICE_ISSUED' && (
+                <span className="relative flex h-2 w-2 shrink-0">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-white" />
+                </span>
+              )}
+            </div>
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl border border-white/20 bg-white/15 flex items-center justify-center text-white transition-all duration-200 group-hover:scale-105 group-hover:bg-white/25">
+              <AlertTriangle className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" />
             </div>
           </div>
-          <p className="text-xl sm:text-2xl font-black text-amber-950 mt-1 tracking-tight font-mono">
-            {stats.noticesIssued}
-          </p>
-          <p className="text-[10px] text-amber-700 mt-0.5 font-medium truncate">
-            {isMarathi ? 'जबाब / खुलासा प्रलंबित' : 'Reply / statement pending'}
-          </p>
+          <div className="mt-3 sm:mt-3.5 flex items-baseline justify-between gap-1">
+            <p className="text-2xl sm:text-3xl font-extrabold tracking-tight font-mono tabular-nums leading-none text-white">
+              {stats.noticesIssued}
+            </p>
+            <span className="text-[10px] sm:text-[11px] font-medium text-amber-200/90 truncate">
+              {isMarathi ? 'खुलासा प्रलंबित' : 'Pending Reply'}
+            </span>
+          </div>
         </button>
 
-        {/* Metric 4: Shasan Jama (Emerald - Successful State Repossession) */}
+        {/* Metric 4: Shasan Jama (Solid Emerald) */}
         <button
           type="button"
           onClick={() => handleMetricCardFilter('', 'true')}
-          className={`p-2.5 sm:p-3 rounded-xl border text-left transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xs active:scale-98 relative overflow-hidden group cursor-pointer ${
+          className={`group relative flex flex-col justify-between overflow-hidden rounded-2xl p-4 text-left select-none border transition-all duration-200 ease-[cubic-bezier(0.25,1,0.5,1)] motion-reduce:transition-none cursor-pointer hover:-translate-y-1 active:scale-[0.985] bg-emerald-600 hover:bg-emerald-700 border-emerald-500/80 shadow-md shadow-emerald-600/20 hover:shadow-xl hover:shadow-emerald-600/30 ${
             appliedFilters.isRepossessedToGovt === 'true'
-              ? 'bg-gradient-to-br from-emerald-100/95 via-teal-50/80 to-white border-emerald-500 shadow-xs ring-2 ring-emerald-500/30'
-              : 'bg-gradient-to-br from-emerald-50/80 via-teal-50/40 to-white/95 border-emerald-200/80 hover:border-emerald-300 shadow-2xs'
+              ? 'ring-2 ring-white ring-offset-2 ring-offset-emerald-600 shadow-2xl'
+              : ''
           }`}
         >
-          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-600" />
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-slate-700 group-hover:text-emerald-950 transition-colors">
-              {isMarathi ? 'शासन जमा आदेश' : 'Govt Repossessed'}
-            </span>
-            <div className="w-6 h-6 rounded-lg bg-emerald-100/90 border border-emerald-200 flex items-center justify-center text-emerald-700 transition-transform group-hover:scale-105">
-              <ShieldCheck className="w-3.5 h-3.5" />
+          <div className="absolute top-0 inset-x-0 h-px bg-white/25 pointer-events-none" />
+          <div className="flex items-center justify-between gap-1">
+            <div className="flex items-center gap-1.5 min-w-0">
+              <span className="text-[11px] sm:text-xs font-semibold tracking-tight text-emerald-100 group-hover:text-white transition-colors">
+                {isMarathi ? 'शासन जमा आदेश' : 'Govt Repossessed'}
+              </span>
+              {appliedFilters.isRepossessedToGovt === 'true' && (
+                <span className="relative flex h-2 w-2 shrink-0">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-white" />
+                </span>
+              )}
+            </div>
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl border border-white/20 bg-white/15 flex items-center justify-center text-white transition-all duration-200 group-hover:scale-105 group-hover:bg-white/25">
+              <ShieldCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" />
             </div>
           </div>
-          <p className="text-xl sm:text-2xl font-black text-emerald-950 mt-1 tracking-tight font-mono">
-            {stats.shasanJama}
-          </p>
-          <p className="text-[10px] text-emerald-700 mt-0.5 font-medium truncate">
-            {isMarathi ? 'शासकीय सदरी दाखल' : 'Vested in Govt records'}
-          </p>
+          <div className="mt-3 sm:mt-3.5 flex items-baseline justify-between gap-1">
+            <p className="text-2xl sm:text-3xl font-extrabold tracking-tight font-mono tabular-nums leading-none text-white">
+              {stats.shasanJama}
+            </p>
+            <span className="text-[10px] sm:text-[11px] font-medium text-emerald-200/90 truncate">
+              {isMarathi ? 'शासकीय सदरी' : 'Vested'}
+            </span>
+          </div>
         </button>
 
-        {/* Metric 5: Total Disputed Area (Rose - Risk Exposure / Area at Stake) */}
-        <div className="p-2.5 sm:p-3 rounded-xl border border-rose-200/80 bg-gradient-to-br from-rose-50/80 via-pink-50/40 to-white/95 shadow-2xs col-span-2 sm:col-span-1 relative overflow-hidden hover:shadow-xs transition-all duration-200 hover:-translate-y-0.5 group">
-          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-rose-500 to-pink-600" />
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-slate-700 group-hover:text-rose-950 transition-colors">
+        {/* Metric 5: Total Disputed Area (Solid Rose) */}
+        <div className="group relative flex flex-col justify-between overflow-hidden rounded-2xl p-4 text-left select-none border border-rose-500/80 bg-rose-600 hover:bg-rose-700 shadow-md shadow-rose-600/20 hover:shadow-xl hover:shadow-rose-600/30 transition-all duration-200 ease-[cubic-bezier(0.25,1,0.5,1)] hover:-translate-y-1 col-span-2 sm:col-span-1">
+          <div className="absolute top-0 inset-x-0 h-px bg-white/25 pointer-events-none" />
+          <div className="flex items-center justify-between gap-1">
+            <span className="text-[11px] sm:text-xs font-semibold tracking-tight text-rose-100 group-hover:text-white transition-colors">
               {isMarathi ? 'एकूण शर्तभंग क्षेत्र' : 'Total Breach Area'}
             </span>
-            <div className="w-6 h-6 rounded-lg bg-rose-100/90 border border-rose-200 flex items-center justify-center text-rose-700 transition-transform group-hover:scale-105">
-              <Landmark className="w-3.5 h-3.5" />
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl border border-white/20 bg-white/15 flex items-center justify-center text-white transition-all duration-200 group-hover:scale-105 group-hover:bg-white/25">
+              <Landmark className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" />
             </div>
           </div>
-          <p className="text-xl sm:text-2xl font-black text-rose-950 mt-1 tracking-tight font-mono">
-            {Number(stats.totalDisputedAreaHa || 0).toFixed(2)}{' '}
-            <span className="text-xs font-bold text-rose-600">{isMarathi ? 'हेक्टर' : 'Ha'}</span>
-          </p>
-          <p className="text-[10px] text-rose-600 mt-0.5 font-medium truncate">
-            {isMarathi ? 'अतिक्रमित / वादग्रस्त क्षेत्र' : 'Encroached / disputed area'}
-          </p>
+          <div className="mt-3 sm:mt-3.5 flex items-baseline justify-between gap-1">
+            <p className="text-2xl sm:text-3xl font-extrabold tracking-tight font-mono tabular-nums leading-none text-white">
+              {Number(stats.totalDisputedAreaHa || 0).toFixed(2)}{' '}
+              <span className="text-xs font-bold text-rose-200 font-sans">{isMarathi ? 'हे.' : 'Ha'}</span>
+            </p>
+            <span className="text-[10px] sm:text-[11px] font-medium text-rose-200/90 truncate">
+              {isMarathi ? 'चौकशीखाली' : 'Under Enquiry'}
+            </span>
+          </div>
         </div>
       </div>
-
-      {/* Modern Filter & Search Command Toolbar */}
-      <div className="relative z-20 bg-white/95 backdrop-blur-xl border border-slate-200/90 rounded-2xl p-2.5 shadow-xs flex flex-col md:flex-row items-stretch md:items-center gap-2 sm:gap-2.5">
+      
+{/* Modern Filter & Search Command Toolbar */}
+      <div className="relative z-20 bg-white/95 backdrop-blur-xl border border-slate-200/90 rounded-2xl p-3 sm:p-3.5 shadow-xs space-y-3">
         {/* Live Search Input & Mobile Filter Toggle Button */}
-        <div className="flex items-center gap-2 flex-1 min-w-0">
-          <div className="relative flex-1 min-w-0">
+        <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+          <div className="relative flex-1 min-w-[160px]">
             <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
             <input
               type="text"
@@ -570,16 +604,16 @@ export default function CasesPage() {
                   ? 'केस क्र., गट क्र., गाव किंवा कब्जेदार शोधा...'
                   : 'Search Case No, Gat No, Village or Occupant...'
               }
-              className="w-full pl-10 pr-8 py-2 text-xs bg-slate-50/80 hover:bg-white focus:bg-white border border-slate-200 rounded-xl font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition shadow-2xs"
+              className="w-full h-11 pl-10 pr-9 text-sm bg-slate-50/80 hover:bg-white focus:bg-white border border-slate-200 rounded-xl font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/25 focus:border-blue-500 transition shadow-2xs"
             />
             {draftSearch && (
               <button
                 type="button"
                 onClick={handleClearSearch}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5 rounded-lg cursor-pointer"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 p-1 rounded-lg cursor-pointer"
                 title={isMarathi ? 'शोध साफ करा' : 'Clear search'}
               >
-                <X className="w-3.5 h-3.5" />
+                <X className="w-4 h-4" />
               </button>
             )}
           </div>
@@ -589,34 +623,38 @@ export default function CasesPage() {
             type="button"
             onClick={() => setShowMobileFilters((p) => !p)}
             className={clsx(
-              'md:hidden px-2.5 py-2 rounded-xl border text-xs font-bold transition-all flex items-center gap-1.5 shrink-0 active:scale-95 shadow-2xs cursor-pointer',
+              'md:hidden h-11 px-3.5 rounded-xl border text-sm font-bold transition-all flex items-center gap-2 shrink-0 active:scale-95 shadow-2xs cursor-pointer',
               showMobileFilters || activeFiltersCount > 0
-                ? 'bg-blue-900 text-white border-blue-900 shadow-xs'
+                ? 'bg-indigo-600 text-white border-indigo-600 shadow-xs'
                 : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200'
             )}
           >
-            <Filter className="w-3.5 h-3.5" />
+            <Filter className="w-4 h-4" />
             <span>{isMarathi ? 'फिल्टर्स' : 'Filters'}</span>
             {activeFiltersCount > 0 && (
-              <span className="w-4 h-4 rounded-full bg-amber-400 text-slate-950 text-[10px] font-black flex items-center justify-center">
+              <span className="w-5 h-5 rounded-full bg-white text-indigo-700 text-xs font-black flex items-center justify-center">
                 {activeFiltersCount}
               </span>
             )}
-            <ChevronDown className={clsx('w-3.5 h-3.5 transition-transform duration-200', showMobileFilters && 'rotate-180')} />
+            <ChevronDown className={clsx('w-4 h-4 transition-transform duration-200', showMobileFilters && 'rotate-180')} />
           </button>
         </div>
 
-        {/* Filter Dropdowns Suite: Collapsible on mobile, clean row on desktop */}
+        {/* Filter Dropdowns Suite: Collapsible on mobile, clean row/grid on desktop */}
         <div
           className={clsx(
-            'items-center gap-2 sm:gap-2.5',
+            'gap-2.5 sm:gap-3',
             showMobileFilters
-              ? 'grid grid-cols-1 sm:grid-cols-2 pt-2 border-t border-slate-100 md:border-t-0 md:pt-0 md:flex md:flex-wrap lg:flex-nowrap'
-              : 'hidden md:flex md:flex-wrap lg:flex-nowrap'
+              ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[repeat(5,minmax(0,1fr))_auto_auto] pt-2.5 border-t border-slate-100 md:border-t-0 md:pt-0 items-end'
+              : 'hidden md:grid md:grid-cols-[repeat(5,minmax(0,1fr))_auto_auto] items-end'
           )}
         >
           {/* Taluka Dropdown */}
-          <div className="w-full sm:w-auto sm:min-w-[140px] sm:max-w-[190px]">
+          <div className="space-y-1.5 min-w-0">
+            <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+              <MapPin className="w-3.5 h-3.5 text-blue-600" />
+              <span>{isMarathi ? 'तालुका निवडा' : 'Select Taluka'}</span>
+            </label>
             <SearchableSelect
               options={talukaSelectOptions}
               value={draftTaluka}
@@ -628,7 +666,11 @@ export default function CasesPage() {
           </div>
 
           {/* Village Dropdown */}
-          <div className="w-full sm:w-auto sm:min-w-[140px] sm:max-w-[190px]">
+          <div className="space-y-1.5 min-w-0">
+            <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+              <LandPlot className="w-3.5 h-3.5 text-blue-600" />
+              <span>{isMarathi ? 'गाव निवडा' : 'Select Village'}</span>
+            </label>
             <SearchableSelect
               options={villageSelectOptions}
               value={draftVillage}
@@ -641,36 +683,48 @@ export default function CasesPage() {
           </div>
 
           {/* Violation Type Dropdown */}
-          <div className="w-full sm:w-auto sm:min-w-[160px] sm:max-w-[210px]">
+          <div className="space-y-1.5 min-w-0">
+            <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+              <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
+              <span>{isMarathi ? 'उल्लंघन प्रकार' : 'Violation Type'}</span>
+            </label>
             <SearchableSelect
               options={violationSelectOptions}
               value={draftViolationType}
               onChange={(val) => setDraftViolationType(val)}
-              placeholder={isMarathi ? 'सर्व उल्लंघन प्रकार' : 'All Violation Types'}
+              placeholder={isMarathi ? 'सर्व उल्लंघन' : 'All Violations'}
               searchPlaceholder={isMarathi ? 'उल्लंघन शोधा...' : 'Search violation...'}
               showCount={false}
             />
           </div>
 
           {/* Status Dropdown */}
-          <div className="w-full sm:w-auto sm:min-w-[145px] sm:max-w-[185px]">
+          <div className="space-y-1.5 min-w-0">
+            <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+              <Scale className="w-3.5 h-3.5 text-indigo-600" />
+              <span>{isMarathi ? 'सद्यस्थिती' : 'Status'}</span>
+            </label>
             <SearchableSelect
               options={statusSelectOptions}
               value={draftStatus}
               onChange={(val) => setDraftStatus(val)}
-              placeholder={isMarathi ? 'सर्व सद्यस्थिती' : 'All Statuses'}
+              placeholder={isMarathi ? 'सर्व स्थिती' : 'All Statuses'}
               searchPlaceholder={isMarathi ? 'स्थिती शोधा...' : 'Search status...'}
               showCount={false}
             />
           </div>
 
           {/* Shasan Jama Dropdown */}
-          <div className="w-full sm:w-auto sm:min-w-[140px] sm:max-w-[175px]">
+          <div className="space-y-1.5 min-w-0">
+            <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+              <span>{isMarathi ? 'शासन जमा' : 'Govt Repossessed'}</span>
+            </label>
             <SearchableSelect
               options={shasanJamaSelectOptions}
               value={draftIsRepossessedToGovt}
               onChange={(val) => setDraftIsRepossessedToGovt(val)}
-              placeholder={isMarathi ? 'शासन जमा स्थिती' : 'Govt Repossession'}
+              placeholder={isMarathi ? 'सर्व जमा स्थिती' : 'All Repossessed'}
               searchPlaceholder={isMarathi ? 'शोधा...' : 'Search...'}
               showCount={false}
             />
@@ -682,17 +736,17 @@ export default function CasesPage() {
             onClick={handleApplyFilters}
             disabled={loading}
             className={clsx(
-              'h-9 px-3 sm:px-3.5 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95 shrink-0 shadow-xs cursor-pointer select-none w-full sm:w-auto',
+              'h-11 px-5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all active:scale-95 shrink-0 shadow-xs cursor-pointer select-none w-full sm:w-auto',
               isFilterPending
                 ? 'bg-blue-600 hover:bg-blue-700 text-white ring-2 ring-blue-400/60 ring-offset-1 shadow-blue-700/20'
                 : 'bg-[#242b6b] hover:bg-[#1a2053] text-white'
             )}
             title={isMarathi ? 'निवडलेले फिल्टर्स लागू करा (Enter)' : 'Apply Selected Filters (Enter)'}
           >
-            <Filter className="w-3.5 h-3.5 shrink-0" />
+            <Filter className="w-4 h-4 shrink-0" />
             <span>{isMarathi ? 'लागू करा' : 'Apply'}</span>
             {isFilterPending && (
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-300 animate-pulse shrink-0" />
+              <span className="w-2 h-2 rounded-full bg-amber-300 animate-pulse shrink-0" />
             )}
           </button>
 
@@ -701,16 +755,15 @@ export default function CasesPage() {
             type="button"
             onClick={handleResetFilters}
             disabled={loading}
-            className="h-9 px-3 sm:px-3 text-slate-700 hover:text-rose-700 bg-slate-100 hover:bg-rose-50 rounded-xl border border-slate-300 hover:border-rose-300 transition-all active:scale-95 shrink-0 cursor-pointer flex items-center justify-center gap-1.5 text-xs font-bold w-full sm:w-auto shadow-2xs"
+            className="h-11 px-4 text-slate-800 hover:text-rose-700 bg-slate-100 hover:bg-rose-50 rounded-xl border border-slate-300 hover:border-rose-300 transition-all active:scale-95 shrink-0 cursor-pointer flex items-center justify-center gap-2 text-sm font-bold w-full sm:w-auto shadow-2xs"
             title={isMarathi ? 'सर्व फिल्टर्स रीसेट करा' : 'Reset all filters'}
             aria-label={isMarathi ? 'सर्व फिल्टर्स रीसेट करा' : 'Reset all filters'}
           >
-            <RotateCcw className="w-3.5 h-3.5 text-rose-600 shrink-0" />
+            <RotateCcw className="w-4 h-4 text-rose-600 shrink-0" />
             <span>{isMarathi ? 'रीसेट' : 'Reset'}</span>
           </button>
         </div>
       </div>
-
       {/* Enhanced Table Card (Modern Executive Grid) */}
       <div className="bg-white rounded-2xl border border-slate-200/90 shadow-sm overflow-hidden">
         {/* Table Top Bar */}
@@ -750,7 +803,7 @@ export default function CasesPage() {
         {/* Table Content */}
         {loading ? (
           <div className="py-24 text-center">
-            <div className="w-8 h-8 border-2 border-blue-900 border-t-amber-500 rounded-full animate-spin mx-auto mb-2.5" />
+            <div className="w-8 h-8 border-2 border-indigo-100 border-t-indigo-600 rounded-full animate-spin mx-auto mb-2.5" />
             <p className="text-xs font-bold text-slate-600">
               {isMarathi
                 ? 'प्रकरणे व सुनावणी नोंदी लोड होत आहेत...'
@@ -907,10 +960,10 @@ export default function CasesPage() {
                       <button
                         type="button"
                         onClick={() => setSelectedCaseForHearing(c)}
-                        className="flex-1 min-w-0 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-slate-900 hover:bg-blue-950 text-white text-xs font-bold shadow-xs active:scale-95 cursor-pointer"
+                        className="flex-1 min-w-0 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-xs shadow-indigo-600/20 active:scale-95 cursor-pointer"
                         title={isMarathi ? 'सुनावणी / रोजनामा नोंदवा' : 'Record Hearing'}
                       >
-                        <Scale className="w-3.5 h-3.5 text-amber-300 shrink-0" />
+                        <Scale className="w-3.5 h-3.5 text-white shrink-0" />
                         <span className="truncate">{isMarathi ? 'सुनावणी नोंदवा' : 'Record Hearing'}</span>
                       </button>
 
@@ -1262,10 +1315,10 @@ export default function CasesPage() {
                             <button
                               type="button"
                               onClick={() => setSelectedCaseForHearing(c)}
-                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-blue-950 text-white text-xs font-bold shadow-xs hover:shadow transition-all active:scale-95 shrink-0 cursor-pointer"
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-xs shadow-indigo-600/20 hover:shadow transition-all active:scale-95 shrink-0 cursor-pointer"
                               title={isMarathi ? 'सुनावणी / रोजनामा नोंदवा' : 'Record Hearing / Roznama'}
                             >
-                              <Scale className="w-3.5 h-3.5 text-amber-300" />
+                              <Scale className="w-3.5 h-3.5 text-white" />
                               <span>{isMarathi ? 'सुनावणी' : 'Hearing'}</span>
                             </button>
 

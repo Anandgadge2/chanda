@@ -21,29 +21,26 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 font-sans selection:bg-amber-400 selection:text-slate-950">
-      {/* Official Government Top Navigation Bar */}
+    <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 font-sans selection:bg-indigo-500 selection:text-white">
+      {/* Top Navigation Bar */}
       <LandingNavbar onOpenAuth={handleOpenAuth} />
 
-      {/* Hero Banner with Search & Real-time Metrics */}
+      {/* Hero Showcase with Live Telemetry */}
       <LandingHero onOpenAuth={handleOpenAuth} />
 
-      {/* Interactive Feature & Pillar Slider */}
+      {/* Modern Geospatial Feature Slider */}
       <HeroBannerSlider />
 
-      {/* 1950 Baseline & Title Provenance Showcase */}
+      {/* 1950 Provenance Verification Audit */}
       <ProvenanceShowcase />
 
       {/* 15 Talukas Explorer Carousel */}
       <TalukaSlider />
 
-     
-
-
-      {/* Official Multi-Column Government Footer */}
+      {/* Enterprise Platform Footer */}
       <LandingFooter />
 
-      {/* Revenue Officer Internal Login Modal */}
+      {/* Officer Login Modal */}
       <AuthModal
         isOpen={authModalOpen}
         onClose={handleCloseAuth}

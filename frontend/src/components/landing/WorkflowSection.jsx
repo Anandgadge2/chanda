@@ -47,7 +47,7 @@ const STEPS = [
     descMr: 'कलम ३६, ३६अ, ५०-५४ किंवा अकृषिक शर्तभंग आढळल्यास आपोआप खटला दाखल. नोटीस बजावणी, जागेचा पंचनामा व सुनावणी दैनंदिनीचे डिजिटल व्यवस्थापन.',
     descEn: 'Automatic registration of inquiries upon Section 36, 36A, 50-54 or NA breach, streamlining summons, spot panchnamas, and daily roznama.',
     icon: Scale,
-    color: 'from-amber-600 to-orange-600',
+    color: 'from-indigo-600 to-violet-700',
     link: '/cases',
     linkTextMr: 'सुनावणी प्रकरणे पहा',
     linkTextEn: 'View Hearing Cases',

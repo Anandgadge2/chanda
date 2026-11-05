@@ -407,7 +407,7 @@ export default function ParcelsPage() {
     {
       value: '',
       label: isMarathi ? 'सर्व प्रपत्र / विषय (१-१८)' : 'All Booklets (1-18)',
-      subtext: isMarathi ? '१८ वैधानिक विषय पुस्तिका' : '18 Statutory Booklets'
+      
     },
     ...BOOKLET_17_CATEGORIES.map((cat) => ({
       value: String(cat.id),
@@ -470,10 +470,10 @@ export default function ParcelsPage() {
         };
       case 'BHOGVATDAR_CLASS_2':
         return {
-          icon: <AlertTriangle className="w-3 h-3 text-amber-600 shrink-0" />,
+          icon: <AlertTriangle className="w-3 h-3 text-indigo-600 shrink-0" />,
           label: isEn ? (config?.labelEn || 'Occupant Class-2') : (config?.labelMr || 'भोगवटादार वर्ग-२'),
           hint: isEn ? 'Collector prior sanction mandatory' : 'कलेक्टर पूर्वपरवानगी अनिवार्य',
-          badgeClass: 'bg-amber-50 text-amber-700 border-amber-200/70',
+          badgeClass: 'bg-indigo-50/50 text-indigo-700 border-indigo-100/70',
         };
       case 'SARKAR_SHASAN':
         return {
@@ -501,38 +501,34 @@ export default function ParcelsPage() {
           icon: null,
           label: isEn ? (config?.labelEn || tenureKey) : (config?.labelMr || tenureKey),
           hint: '',
-          badgeClass: 'bg-slate-100 text-slate-700 border-slate-200',
+          badgeClass: 'bg-slate-100 text-slate-800 border-slate-200',
         };
     }
   };
 
   return (
-    <div className="space-y-2.5 sm:space-y-3">
+    <div className="space-y-2 sm:space-y-2.5">
       {/* Executive Command Header - Pro Compact */}
-      <div className="bg-gradient-to-r from-emerald-50/80 via-teal-50/40 to-white text-slate-900 rounded-xl px-3.5 py-2 sm:py-2.5 shadow-2xs border border-emerald-200/80 flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+      <div className="bg-white text-slate-900 rounded-xl px-3.5 py-2 shadow-2xs border border-slate-200/90 flex flex-col sm:flex-row justify-between sm:items-center gap-2">
         <div className="flex items-center gap-2.5 min-w-0">
-          <div className="w-8 h-8 rounded-lg bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-2xs">
-            <MapPin className="w-4 h-4" />
+          <div className="w-7 h-7 rounded-lg bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-2xs">
+            <MapPin className="w-3.5 h-3.5" />
           </div>
-          <div className="min-w-0">
-            <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="text-sm sm:text-base font-extrabold text-slate-900 tracking-tight leading-tight">
-                {isMarathi ? 'भूखंड नोंदवही (७/१२ अभिलेख)' : 'Land Parcel Register (7/12 Records)'}
-              </h1>
-              <span className="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full border border-emerald-300">
-                {isMarathi ? 'चंद्रपूर जिल्हा' : 'Chandrapur District'}
-              </span>
-              <span className="hidden md:inline text-[11px] text-slate-500 font-medium">
-                {isMarathi
-                  ? '• ऐतिहासिक १९५० मूळ मालकी, फेरफार नोंदी व चालू स्थिती'
-                  : '• Historical 1950 Provenance, Mutation Entries & Current Status'}
-              </span>
-            </div>
-            <p className="text-[11px] text-slate-500 md:hidden truncate font-medium">
+          <div className="flex items-center gap-2 flex-wrap min-w-0">
+            <h1 className="text-sm sm:text-base font-extrabold text-slate-900 tracking-tight leading-tight">
+              {isMarathi ? 'भूखंड नोंदवही (७/१२ अभिलेख)' : 'Land Parcel Register (7/12 Records)'}
+            </h1>
+            <span className="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full border border-emerald-300">
+              {isMarathi ? 'चंद्रपूर जिल्हा' : 'Chandrapur District'}
+            </span>
+            <span className="text-[10px] font-bold bg-slate-100 text-slate-800 px-2 py-0.5 rounded-full border border-slate-200 font-mono">
+              {isMarathi ? `एकूण ${totalCount} अभिलेख` : `Total ${totalCount} Records`}
+            </span>
+            <span className="hidden xl:inline text-[11px] text-slate-400 font-medium">
               {isMarathi
-                ? 'ऐतिहासिक १९५० मूळ मालकी, फेरफार नोंदी व चालू स्थिती'
-                : 'Historical 1950 Provenance, Mutation Entries & Current Status'}
-            </p>
+                ? '• ऐतिहासिक १९५० मूळ मालकी, फेरफार नोंदी व चालू स्थिती'
+                : '• Historical 1950 Provenance, Mutation Entries & Current Status'}
+            </span>
           </div>
         </div>
 
@@ -540,7 +536,7 @@ export default function ParcelsPage() {
           <button
             type="button"
             onClick={() => setGlossaryModalOpen(true)}
-            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white hover:bg-emerald-50 text-emerald-900 border border-emerald-200 text-xs font-bold transition-all active:scale-95 shadow-2xs cursor-pointer"
+            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white hover:bg-emerald-50 text-emerald-900 border border-emerald-200 text-xs font-bold transition-all active:scale-95 shadow-2xs cursor-pointer"
             title={isMarathi ? '७/१२ संक्षिप्त रूपे मदत' : '7/12 Abbreviations Guide'}
           >
             <BookOpen className="w-3.5 h-3.5 text-emerald-700" />
@@ -550,20 +546,20 @@ export default function ParcelsPage() {
           <button
             onClick={() => fetchParcels(page, appliedFilters, limit)}
             disabled={loading}
-            className="p-1.5 rounded-lg bg-white hover:bg-emerald-50 text-slate-700 hover:text-slate-950 border border-slate-300 text-xs transition-all active:scale-95 shadow-2xs cursor-pointer"
+            className="p-1.5 rounded-lg bg-white hover:bg-emerald-50 text-slate-800 hover:text-slate-950 border border-slate-300 text-xs transition-all active:scale-95 shadow-2xs cursor-pointer"
             title={isMarathi ? 'तक्ता रीफ्रेश करा' : 'Refresh Table'}
             aria-label={isMarathi ? 'तक्ता रीफ्रेश करा' : 'Refresh Table'}
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-emerald-700' : 'text-slate-700'}`} />
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-emerald-700' : 'text-slate-800'}`} />
           </button>
         </div>
       </div>
 
-      {/* Modern Filter & Search Command Toolbar */}
-      <div className="relative z-30 bg-white/95 backdrop-blur-xl border border-slate-200/90 rounded-2xl p-2 sm:p-2.5 shadow-xs flex flex-col lg:flex-row items-stretch lg:items-center gap-1.5 sm:gap-2">
-        {/* Live Search Input & Mobile Filters Toggle Button */}
-        <div className="flex items-center gap-2 flex-1 min-w-0">
-          <div className="relative flex-1 min-w-[140px]">
+      {/* Modern Compact Filter & Search Command Toolbar */}
+      <div className="relative z-30 bg-white/95 backdrop-blur-xl border border-slate-200/90 rounded-xl p-2.5 shadow-xs space-y-2">
+        {/* Mobile Header / Quick Search Toggle on Small Screens */}
+        <div className="lg:hidden flex items-center gap-2">
+          <div className="relative flex-1 min-w-0">
             <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
             <input
               type="text"
@@ -577,16 +573,16 @@ export default function ParcelsPage() {
               }}
               placeholder={
                 isMarathi
-                  ? 'गट क्र., जुना स.नं., गाव, UPI शोधा...'
-                  : 'Search Gat, Survey, Village or UPI...'
+                  ? 'गट क्र., जुना स.नं., किंवा UPI...'
+                  : 'Search Gat, Survey or UPI...'
               }
-              className="w-full h-9 pl-8 pr-7 text-xs bg-slate-50/80 hover:bg-white focus:bg-white border border-slate-200 rounded-xl font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition shadow-2xs"
+              className="w-full h-9 pl-8 pr-7 text-xs bg-slate-50/80 hover:bg-white focus:bg-white border border-slate-200 rounded-lg font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/25 focus:border-emerald-600 transition shadow-2xs"
             />
             {search && (
               <button
                 type="button"
                 onClick={handleClearSearch}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5 cursor-pointer"
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-800 p-0.5 cursor-pointer"
                 title={isMarathi ? 'शोध साफ करा' : 'Clear search'}
               >
                 <X className="w-3.5 h-3.5" />
@@ -594,21 +590,20 @@ export default function ParcelsPage() {
             )}
           </div>
 
-          {/* Mobile Filter Toggle Button */}
           <button
             type="button"
             onClick={() => setShowMobileFilters((p) => !p)}
             className={clsx(
-              'lg:hidden h-9 px-2.5 rounded-xl border text-xs font-bold transition-all flex items-center gap-1.5 shrink-0 active:scale-95 shadow-2xs cursor-pointer',
+              'h-9 px-3 rounded-lg border text-xs font-bold transition-all flex items-center gap-1.5 shrink-0 active:scale-95 shadow-2xs cursor-pointer',
               showMobileFilters || activeFiltersCount > 0
                 ? 'bg-emerald-700 text-white border-emerald-700 shadow-xs'
-                : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200'
+                : 'bg-white hover:bg-slate-50 text-slate-800 border-slate-200'
             )}
           >
             <Filter className="w-3.5 h-3.5" />
             <span>{isMarathi ? 'फिल्टर्स' : 'Filters'}</span>
             {activeFiltersCount > 0 && (
-              <span className="w-4 h-4 rounded-full bg-amber-400 text-slate-950 text-[10px] font-black flex items-center justify-center">
+              <span className="w-4 h-4 rounded-full bg-cyan-400 text-slate-950 text-[10px] font-black flex items-center justify-center">
                 {activeFiltersCount}
               </span>
             )}
@@ -616,17 +611,49 @@ export default function ParcelsPage() {
           </button>
         </div>
 
-        {/* Filter Dropdowns Suite: Guaranteed Single Row on Desktop (lg/xl) */}
+        {/* Filter Dropdowns Suite: Single compact row on desktop */}
         <div
           className={clsx(
-            'items-center gap-1.5 sm:gap-2',
+            'gap-2 items-center',
             showMobileFilters
-              ? 'grid grid-cols-1 sm:grid-cols-2 pt-2 border-t border-slate-100 lg:border-t-0 lg:pt-0 lg:flex lg:flex-nowrap'
-              : 'hidden lg:flex lg:flex-nowrap'
+              ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1.1fr_1.3fr_1fr_0.9fr_auto_auto] pt-2 border-t border-slate-100 lg:border-t-0 lg:pt-0'
+              : 'hidden lg:grid lg:grid-cols-[1.4fr_1fr_1.1fr_1.3fr_1fr_0.9fr_auto_auto]'
           )}
         >
+          {/* Desktop Search Input */}
+          <div className="relative min-w-0 hidden lg:block">
+            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <input
+              type="text"
+              value={search}
+              onChange={handleSearchChange}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  handleApplyFilters();
+                }
+              }}
+              placeholder={
+                isMarathi
+                  ? 'गट क्र., जुना स.नं., किंवा UPI...'
+                  : 'Search Gat, Survey or UPI...'
+              }
+              className="w-full h-9 pl-8 pr-7 text-xs bg-slate-50/80 hover:bg-white focus:bg-white border border-slate-200 rounded-lg font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/25 focus:border-emerald-600 transition shadow-2xs"
+            />
+            {search && (
+              <button
+                type="button"
+                onClick={handleClearSearch}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-800 p-0.5 cursor-pointer"
+                title={isMarathi ? 'शोध साफ करा' : 'Clear search'}
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </div>
+
           {/* Taluka Dropdown */}
-          <div className="w-full sm:w-[125px] lg:w-[130px] xl:w-[140px] shrink-0">
+          <div className="min-w-0">
             <SearchableSelect
               options={talukaSelectOptions}
               value={taluka}
@@ -638,11 +665,12 @@ export default function ParcelsPage() {
               searchPlaceholder={isMarathi ? 'तालुका शोधा...' : 'Search taluka...'}
               icon={MapPin}
               showCount={false}
+              compact={true}
             />
           </div>
 
           {/* Village Dropdown */}
-          <div className="w-full sm:w-[130px] lg:w-[135px] xl:w-[145px] shrink-0">
+          <div className="min-w-0">
             <SearchableSelect
               options={villageSelectOptions}
               value={village}
@@ -651,43 +679,49 @@ export default function ParcelsPage() {
               searchPlaceholder={isMarathi ? 'गाव शोधा...' : 'Search village...'}
               icon={LandPlot}
               showCount={true}
+              compact={true}
             />
           </div>
 
           {/* प्रपत्र / विषय १७ पुस्तिका Dropdown */}
-          <div className="w-full sm:w-[160px] lg:w-[170px] xl:w-[190px] shrink-0">
+          <div className="min-w-0">
             <SearchableSelect
               options={bookletSelectOptions}
               value={bookletCategory}
               onChange={(val) => setBookletCategory(val)}
-              placeholder={isMarathi ? 'सर्व प्रपत्र / विषय (१-१८)' : 'All Booklets (1-18)'}
-              searchPlaceholder={isMarathi ? 'प्रपत्र / विषय शोधा...' : 'Search booklets...'}
+              placeholder={isMarathi ? 'सर्व प्रपत्र (१-१८)' : 'All Booklets (1-18)'}
+              searchPlaceholder={isMarathi ? 'प्रपत्र शोधा...' : 'Search booklets...'}
               icon={BookOpen}
               showCount={false}
+              compact={true}
             />
           </div>
 
           {/* Tenure Class Dropdown */}
-          <div className="w-full sm:w-[125px] lg:w-[130px] xl:w-[140px] shrink-0">
+          <div className="min-w-0">
             <SearchableSelect
               options={tenureSelectOptions}
               value={tenureClass}
               onChange={(val) => setTenureClass(val)}
-              placeholder={isMarathi ? 'सर्व धारणा प्रकार' : 'All Tenure'}
+              placeholder={isMarathi ? 'सर्व धारणा' : 'All Tenure'}
               searchPlaceholder={isMarathi ? 'धारणा शोधा...' : 'Search tenure...'}
+              icon={Layers}
               showCount={false}
+              compact={true}
             />
           </div>
 
           {/* Dispute Status Dropdown */}
-          <div className="w-full sm:w-[115px] lg:w-[120px] xl:w-[130px] shrink-0">
+          <div className="min-w-0">
             <SearchableSelect
               options={disputeSelectOptions}
               value={hasActiveDispute}
               onChange={(val) => setHasActiveDispute(val)}
-              placeholder={isMarathi ? 'सर्व वाद स्थिती' : 'All Dispute'}
+              placeholder={isMarathi ? 'सर्व स्थिती' : 'All Dispute'}
               searchPlaceholder={isMarathi ? 'वाद स्थिती शोधा...' : 'Search dispute...'}
+              icon={AlertTriangle}
               showCount={false}
+              compact={true}
             />
           </div>
 
@@ -697,10 +731,10 @@ export default function ParcelsPage() {
             onClick={handleApplyFilters}
             disabled={loading}
             className={clsx(
-              'h-9 px-3 sm:px-3.5 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95 shrink-0 shadow-xs cursor-pointer select-none w-full sm:w-auto',
+              'h-9 px-3.5 rounded-lg font-bold text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95 shrink-0 shadow-xs cursor-pointer select-none w-full sm:w-auto',
               isFilterPending
                 ? 'bg-emerald-600 hover:bg-emerald-700 text-white ring-2 ring-emerald-400/60 ring-offset-1 shadow-emerald-700/20'
-                : 'bg-[#242b6b] hover:bg-[#1a2053] text-white'
+                : 'bg-slate-900 hover:bg-slate-800 text-white'
             )}
             title={isMarathi ? 'निवडलेले फिल्टर्स लागू करा (Enter)' : 'Apply Selected Filters (Enter)'}
           >
@@ -716,7 +750,7 @@ export default function ParcelsPage() {
             type="button"
             onClick={handleResetFilters}
             disabled={loading}
-            className="h-9 px-3 sm:px-3 text-slate-700 hover:text-rose-700 bg-slate-100 hover:bg-rose-50 rounded-xl border border-slate-300 hover:border-rose-300 transition-all active:scale-95 shrink-0 cursor-pointer flex items-center justify-center gap-1.5 text-xs font-bold w-full sm:w-auto shadow-2xs"
+            className="h-9 px-3 text-slate-800 hover:text-rose-700 bg-slate-100 hover:bg-rose-50 rounded-lg border border-slate-300 hover:border-rose-300 transition-all active:scale-95 shrink-0 cursor-pointer flex items-center justify-center gap-1.5 text-xs font-bold w-full sm:w-auto shadow-2xs"
             title={isMarathi ? 'सर्व फिल्टर्स रीसेट करा' : 'Reset all filters'}
             aria-label={isMarathi ? 'सर्व फिल्टर्स रीसेट करा' : 'Reset all filters'}
           >
@@ -731,7 +765,7 @@ export default function ParcelsPage() {
         {/* Table Top Bar */}
         <div className="px-4 py-2.5 bg-slate-50/80 border-b border-slate-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
           <div className="flex items-center gap-2.5">
-            <div className="w-6 h-6 rounded-md bg-blue-100/80 flex items-center justify-center text-blue-900 shrink-0">
+            <div className="w-6 h-6 rounded-md bg-blue-100/80 flex items-center justify-center text-indigo-600 shrink-0">
               <Layers className="w-3.5 h-3.5" />
             </div>
             <div className="flex items-center gap-2 flex-wrap">
@@ -766,8 +800,8 @@ export default function ParcelsPage() {
               {appliedFilters.tenureClass && (
                 <>
                   <span className="text-slate-300">•</span>
-                  <span className="inline-flex items-center gap-1 text-[11px] font-bold bg-amber-50 text-amber-900 border border-amber-200/80 px-2 py-0.5 rounded-full">
-                    <Layers className="w-3 h-3 text-amber-600" />
+                  <span className="inline-flex items-center gap-1 text-[11px] font-bold bg-indigo-50/50 text-indigo-900 border border-indigo-100/80 px-2 py-0.5 rounded-full">
+                    <Layers className="w-3 h-3 text-indigo-600" />
                     <span>
                       {TENURE_CLASSES[appliedFilters.tenureClass]
                         ? (isMarathi ? TENURE_CLASSES[appliedFilters.tenureClass].labelMr : TENURE_CLASSES[appliedFilters.tenureClass].labelEn)
@@ -788,7 +822,7 @@ export default function ParcelsPage() {
               {stats.class2Count > 0 && !appliedFilters.tenureClass && (
                 <>
                   <span className="text-slate-300">•</span>
-                  <span className="text-xs text-amber-700 font-medium">
+                  <span className="text-xs text-indigo-700 font-medium">
                     {isMarathi ? `वर्ग-२: ${stats.class2Count}` : `Class-2: ${stats.class2Count}`}
                   </span>
                 </>
@@ -838,7 +872,7 @@ export default function ParcelsPage() {
               <span>{isMarathi ? 'ओळीवर क्लिक करून ३६०° साखळी पहा' : 'Click a row to view 360° Provenance Chain'}</span>
             </span>
             {mobileViewMode === 'table' && (
-              <span className="md:hidden text-[10px] text-amber-800 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200 font-semibold">
+              <span className="md:hidden text-[10px] text-indigo-800 bg-indigo-50/50 px-2 py-0.5 rounded-full border border-indigo-100 font-semibold">
                 {isMarathi ? 'तक्ता आडवा स्क्रोल करा ↔' : 'Scroll table horizontally ↔'}
               </span>
             )}
@@ -848,7 +882,7 @@ export default function ParcelsPage() {
         {/* Table Content */}
         {loading ? (
           <div className="py-24 text-center">
-            <div className="w-8 h-8 border-2 border-blue-900 border-t-amber-500 rounded-full animate-spin mx-auto mb-2.5" />
+            <div className="w-8 h-8 border-2 border-indigo-100 border-t-indigo-600 rounded-full animate-spin mx-auto mb-2.5" />
             <p className="text-xs font-bold text-slate-600">
               {isMarathi
                 ? 'भूखंड नोंदवही व शीर्षक साखळी डेटा लोड होत आहे...'
@@ -874,7 +908,7 @@ export default function ParcelsPage() {
               <button
                 type="button"
                 onClick={handleResetFilters}
-                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-blue-900 hover:bg-blue-800 text-white rounded-lg text-xs font-bold transition shadow-xs active:scale-95"
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 shadow-sm shadow-indigo-600/20 text-white rounded-lg text-xs font-bold transition shadow-xs active:scale-95"
               >
                 <X className="w-3.5 h-3.5" />
                 <span>{isMarathi ? 'सर्व फिल्टर्स साफ करा' : 'Clear all filters'}</span>
@@ -885,7 +919,7 @@ export default function ParcelsPage() {
           <>
             {/* Mobile Cards View (Shown on screens < md when mobileViewMode === 'cards') */}
             {mobileViewMode === 'cards' && (
-              <div className="md:hidden p-2.5 sm:p-3 space-y-2.5 bg-slate-50/60 divide-y divide-slate-100">
+              <div className="md:hidden p-3 sm:p-4 space-y-3 bg-slate-50/70 divide-y divide-slate-100">
                 {sortedParcels.map((parcel, index) => {
                   const tenure = getTenureDetails(parcel.tenureClass);
                   const hasDispute = parcel.hasActiveDispute;
@@ -904,21 +938,21 @@ export default function ParcelsPage() {
                   return (
                     <div
                       key={`mob-${parcel.id}`}
-                      className="bg-white rounded-xl border border-slate-200/90 shadow-2xs hover:shadow-xs p-3 space-y-2.5 transition active:scale-[0.99]"
+                      className="bg-white rounded-2xl border border-slate-200/90 shadow-2xs hover:shadow-md p-4 space-y-3 transition active:scale-[0.99]"
                     >
                       {/* Top Row: Gat Badge, Old Survey, Copy UPI */}
                       <div className="flex items-start justify-between gap-2">
-                        <div className="flex items-center gap-1.5 flex-wrap">
-                          <span className="px-2.5 py-1 rounded-lg bg-emerald-100/80 text-emerald-950 border border-emerald-300 font-extrabold text-xs">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="px-3 py-1 rounded-xl bg-emerald-100 text-emerald-950 border border-emerald-300 font-black text-sm">
                             {isMarathi ? 'गट क्र.' : 'Gat'} {parcel.gatNumber}
                           </span>
                           {parcel.hissaNumber && parcel.hissaNumber !== '0' && (
-                            <span className="px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 text-[10px] font-bold">
+                            <span className="px-2 py-0.5 rounded-lg bg-slate-100 text-slate-800 text-xs font-bold">
                               {isMarathi ? 'हि.' : 'H.'} {parcel.hissaNumber}
                             </span>
                           )}
                           {parcel.oldSurveyNo && (
-                            <span className="text-[11px] text-slate-500 font-medium">
+                            <span className="text-xs text-slate-600 font-semibold">
                               ({isMarathi ? 'जुना स.नं.' : 'Old S.'} {parcel.oldSurveyNo})
                             </span>
                           )}
@@ -927,96 +961,99 @@ export default function ParcelsPage() {
                         <button
                           type="button"
                           onClick={() => handleCopyUpi(parcel.upi)}
-                          className="inline-flex items-center gap-1 text-[10px] font-mono font-medium px-2 py-0.5 rounded bg-slate-50 hover:bg-slate-100 text-slate-600 border border-slate-200 cursor-pointer"
+                          className="inline-flex items-center gap-1.5 text-xs font-mono font-bold px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 cursor-pointer"
                           title={isMarathi ? 'UPI कॉपी करा' : 'Copy UPI'}
                         >
-                          {isCopied ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3 text-slate-400" />}
-                          <span className="truncate max-w-[85px]">{parcel.upi?.slice(-10) || 'UPI'}</span>
+                          {isCopied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5 text-slate-500" />}
+                          <span className="truncate max-w-[100px]">{parcel.upi?.slice(-10) || 'UPI'}</span>
                         </button>
                       </div>
 
                       {/* Location: Village & Taluka */}
-                      <div className="flex items-center gap-1 text-xs text-slate-600 font-medium">
-                        <MapPin className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+                      <div className="flex items-center gap-1.5 text-sm text-slate-800 font-medium">
+                        <MapPin className="w-4 h-4 text-emerald-600 shrink-0" />
                         <span className="font-bold text-slate-900">{formatVillageName(parcel.villageName, isMarathi)}</span>
                         <span className="text-slate-300">•</span>
-                        <span>{formatTalukaName(parcel.taluka, isMarathi)}</span>
+                        <span className="font-semibold text-slate-600">{formatTalukaName(parcel.taluka, isMarathi)}</span>
                       </div>
 
                       {/* Owner / Khatedar Card */}
-                      <div className="p-2 rounded-lg bg-slate-50/90 border border-slate-100">
-                        <span className="text-[9.5px] text-slate-400 font-bold uppercase tracking-wider block mb-0.5">
+                      <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/80">
+                        <span className="text-xs text-slate-600 font-bold uppercase tracking-wider block mb-1">
                           {isMarathi ? 'खातेदार / भोगवटदार' : 'Khatedar / Occupant'}
                         </span>
-                        <p className="text-xs font-bold text-slate-900 leading-snug line-clamp-2">
+                        <p className="text-sm font-bold text-slate-950 leading-snug whitespace-normal break-words">
                           {ownerName}
                         </p>
                       </div>
 
                       {/* Metrics: Area & Tenure */}
-                      <div className="grid grid-cols-2 gap-2 text-xs">
-                        <div className="p-2 rounded-lg bg-slate-50/80 border border-slate-100">
-                          <span className="text-[9.5px] text-slate-400 font-medium block">
-                            {isMarathi ? 'क्षेत्रफळ' : 'Total Area'}
+                      <div className="grid grid-cols-2 gap-2.5 text-xs">
+                        <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80">
+                          <span className="text-xs text-slate-600 font-semibold block mb-0.5">
+                            {isMarathi ? 'एकूण क्षेत्र' : 'Total Area'}
                           </span>
-                          <span className="font-extrabold text-slate-900 font-mono text-xs">
+                          <span className="font-black text-slate-950 font-mono text-sm">
                             {areaHa.toFixed(2)} {isMarathi ? 'हे.' : 'Ha'}
                           </span>
-                          <span className="text-[10px] text-slate-500 font-medium ml-1">
+                          <span className="text-xs text-slate-600 font-medium ml-1">
                             ({areaAcres} {isMarathi ? 'एकर' : 'Ac'})
                           </span>
                         </div>
 
-                        <div className="p-2 rounded-lg bg-slate-50/80 border border-slate-100 flex flex-col justify-between">
-                          <span className="text-[9.5px] text-slate-400 font-medium block">
+                        <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 flex flex-col justify-between">
+                          <span className="text-xs text-slate-600 font-semibold block mb-0.5">
                             {isMarathi ? 'धारणा प्रकार' : 'Tenure'}
                           </span>
-                          <span className={clsx('inline-flex items-center gap-1 text-[11px] font-bold px-1.5 py-0.5 rounded border mt-0.5 w-fit', tenure.badgeClass)}>
+                          <span className={clsx('inline-flex items-center gap-1.5 text-xs font-bold px-2 py-0.5 rounded-lg border mt-0.5 w-fit', tenure.badgeClass)}>
                             {tenure.icon}
-                            <span className="truncate max-w-[110px]">{tenure.label}</span>
+                            <span className="whitespace-normal">{tenure.label}</span>
                           </span>
+                          {tenure.hint && (
+                            <p className="text-[10px] text-slate-500 mt-1 font-medium">{tenure.hint}</p>
+                          )}
                         </div>
                       </div>
 
                       {/* Dispute Status Bar */}
                       {hasDispute ? (
-                        <div className="p-2 rounded-lg bg-rose-50 border border-rose-200/80 flex items-center justify-between text-xs">
-                          <div className="flex items-center gap-1.5 text-rose-800 font-bold text-[11px]">
-                            <AlertTriangle className="w-3.5 h-3.5 text-rose-600 shrink-0" />
+                        <div className="p-2.5 rounded-xl bg-rose-50 border border-rose-200 flex items-center justify-between text-xs">
+                          <div className="flex items-center gap-1.5 text-rose-900 font-bold text-xs">
+                            <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" />
                             <span>{isMarathi ? 'शर्तभंग / सक्रिय वाद' : 'Breach / Dispute Flagged'}</span>
                           </div>
                           {activeCase && (
-                            <span className="text-[10px] font-mono text-rose-700 bg-rose-100 px-1.5 py-0.2 rounded font-semibold">
+                            <span className="text-xs font-mono text-rose-800 bg-rose-100 px-2 py-0.5 rounded-md font-bold">
                               {activeCase.caseNumber}
                             </span>
                           )}
                         </div>
                       ) : (
-                        <div className="flex items-center gap-1 text-[11px] text-emerald-700 font-semibold px-1">
-                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                        <div className="flex items-center gap-1.5 text-xs text-emerald-800 font-bold px-1">
+                          <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
                           <span>{isMarathi ? 'निर्वैध नोंद (Clear Record)' : 'Clear Record'}</span>
                         </div>
                       )}
 
                       {/* Quick Action CTAs */}
-                      <div className="pt-1.5 border-t border-slate-100 flex items-center gap-2">
+                      <div className="pt-2 border-t border-slate-100 flex items-center gap-2">
                         <button
                           type="button"
                           onClick={() => setSelectedUpi(parcel.upi)}
-                          className="flex-1 py-2 px-3 rounded-xl bg-blue-900 hover:bg-blue-800 active:scale-95 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-2xs transition cursor-pointer"
+                          className="flex-1 h-11 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 shadow-sm shadow-indigo-600/20 active:scale-95 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-2xs transition cursor-pointer"
                         >
-                          <Eye className="w-3.5 h-3.5 text-amber-400" />
+                          <Eye className="w-4 h-4 text-white shrink-0" />
                           <span>{isMarathi ? '३६०° साखळी पहा' : 'View 360° Trace'}</span>
                         </button>
 
                         <button
                           type="button"
                           onClick={() => setUploadModalParcelId(parcel.id)}
-                          className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition active:scale-95 cursor-pointer"
+                          className="h-11 w-11 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 transition active:scale-95 cursor-pointer flex items-center justify-center shrink-0"
                           title={isMarathi ? 'दस्तऐवज जोडा' : 'Attach Document'}
                           aria-label={isMarathi ? 'दस्तऐवज जोडा' : 'Attach Document'}
                         >
-                          <Upload className="w-3.5 h-3.5" />
+                          <Upload className="w-4 h-4" />
                         </button>
                       </div>
                     </div>
@@ -1033,12 +1070,12 @@ export default function ParcelsPage() {
               )}
               style={{ WebkitOverflowScrolling: 'touch' }}
             >
-              <table className="w-full border-collapse text-xs min-w-[840px]">
+              <table className="w-full border-collapse text-sm min-w-[1150px]">
               {/* Native Table Head with Balanced Proportions */}
-              <thead className="bg-slate-50 text-slate-600 text-[11px] font-bold uppercase tracking-wider border-b border-slate-200 select-none">
+              <thead className="bg-slate-800 text-white text-xs font-black uppercase tracking-wider border-b-2 border-slate-900 select-none sticky top-0 z-10 shadow-xs">
                 <tr>
                   {/* Col 1: # */}
-                  <th scope="col" className="py-2.5 px-2 w-[4%] min-w-[36px] text-center">
+                  <th scope="col" className="py-2 px-2 w-[4%] min-w-[36px] text-center">
                     #
                   </th>
 
@@ -1046,18 +1083,18 @@ export default function ParcelsPage() {
                   <th
                     scope="col"
                     onClick={() => handleSort('upi')}
-                    className="py-2.5 px-3 w-[16%] text-left cursor-pointer hover:bg-slate-100 transition group"
+                    className="py-2 px-2.5 w-[16%] text-left cursor-pointer hover:bg-slate-700 transition-colors duration-150 transition group"
                   >
                     <div className="flex items-center justify-between gap-1">
                       <span>{isMarathi ? 'UPI / भूखंड ओळख' : 'UPI / Parcel ID'}</span>
                       {sortColumn === 'upi' ? (
                         sortDirection === 'asc' ? (
-                          <ArrowUp className="w-3.5 h-3.5 text-blue-900" />
+                          <ArrowUp className="w-4 h-4 text-indigo-600" />
                         ) : (
-                          <ArrowDown className="w-3.5 h-3.5 text-blue-900" />
+                          <ArrowDown className="w-4 h-4 text-indigo-600" />
                         )
                       ) : (
-                        <ArrowUpDown className="w-3 h-3 text-slate-400 group-hover:text-slate-600" />
+                        <ArrowUpDown className="w-3.5 h-3.5 text-slate-400 group-hover:text-slate-600" />
                       )}
                     </div>
                   </th>
@@ -1066,18 +1103,18 @@ export default function ParcelsPage() {
                   <th
                     scope="col"
                     onClick={() => handleSort('villageName')}
-                    className="py-2.5 px-3 w-[14%] text-left cursor-pointer hover:bg-slate-100 transition group"
+                    className="py-2 px-2.5 w-[14%] text-left cursor-pointer hover:bg-slate-700 transition-colors duration-150 transition group"
                   >
                     <div className="flex items-center justify-between gap-1">
                       <span>{isMarathi ? 'तालुका व गाव' : 'Taluka & Village'}</span>
                       {sortColumn === 'villageName' ? (
                         sortDirection === 'asc' ? (
-                          <ArrowUp className="w-3.5 h-3.5 text-blue-900" />
+                          <ArrowUp className="w-4 h-4 text-indigo-600" />
                         ) : (
-                          <ArrowDown className="w-3.5 h-3.5 text-blue-900" />
+                          <ArrowDown className="w-4 h-4 text-indigo-600" />
                         )
                       ) : (
-                        <ArrowUpDown className="w-3 h-3 text-slate-400 group-hover:text-slate-600" />
+                        <ArrowUpDown className="w-3.5 h-3.5 text-slate-400 group-hover:text-slate-600" />
                       )}
                     </div>
                   </th>
@@ -1086,18 +1123,18 @@ export default function ParcelsPage() {
                   <th
                     scope="col"
                     onClick={() => handleSort('gatNumber')}
-                    className="py-2.5 px-3 w-[11%] text-left cursor-pointer hover:bg-slate-100 transition group"
+                    className="py-2 px-2.5 w-[11%] text-left cursor-pointer hover:bg-slate-700 transition-colors duration-150 transition group"
                   >
                     <div className="flex items-center justify-between gap-1">
                       <span>{isMarathi ? 'गट व सर्व्हे क्र.' : 'Gat & Survey No.'}</span>
                       {sortColumn === 'gatNumber' ? (
                         sortDirection === 'asc' ? (
-                          <ArrowUp className="w-3.5 h-3.5 text-blue-900" />
+                          <ArrowUp className="w-4 h-4 text-indigo-600" />
                         ) : (
-                          <ArrowDown className="w-3.5 h-3.5 text-blue-900" />
+                          <ArrowDown className="w-4 h-4 text-indigo-600" />
                         )
                       ) : (
-                        <ArrowUpDown className="w-3 h-3 text-slate-400 group-hover:text-slate-600" />
+                        <ArrowUpDown className="w-3.5 h-3.5 text-slate-400 group-hover:text-slate-600" />
                       )}
                     </div>
                   </th>
@@ -1105,103 +1142,78 @@ export default function ParcelsPage() {
                   {/* Col 5: Current Owner / Khatedar & Ferfar */}
                   <th
                     scope="col"
-                    className="py-2.5 px-3 w-[20%] text-left"
+                    className="py-2.5 px-3 min-w-[280px] text-left"
                   >
                     <div className="flex items-center justify-between gap-1.5">
-                      {/* Khatedar Sort */}
                       <button
                         type="button"
                         onClick={() => handleSort('currentOwner')}
-                        className="inline-flex items-center gap-1 hover:text-blue-900 transition text-left group/owner cursor-pointer"
+                        className="inline-flex items-center gap-1.5 hover:text-indigo-400 transition text-left group/owner cursor-pointer"
                         title={isMarathi ? 'खातेदारानुसार क्रमवारी लावा' : 'Sort by Khatedar'}
                       >
-                        <span className="font-bold">
+                        <span className="font-bold text-xs sm:text-[13px]">
                           {isMarathi ? 'खातेदार / भोगवटदार' : 'Khatedar / Occupant'}
                         </span>
                         {sortColumn === 'currentOwner' ? (
                           sortDirection === 'asc' ? (
-                            <ArrowUp className="w-3.5 h-3.5 text-blue-900 shrink-0" />
+                            <ArrowUp className="w-3.5 h-3.5 text-indigo-400" />
                           ) : (
-                            <ArrowDown className="w-3.5 h-3.5 text-blue-900 shrink-0" />
+                            <ArrowDown className="w-3.5 h-3.5 text-indigo-400" />
                           )
                         ) : (
-                          <ArrowUpDown className="w-3 h-3 text-slate-300 group-hover/owner:text-slate-600 shrink-0" />
-                        )}
-                      </button>
-
-                      {/* Ferfar / Mutation Sort Badge */}
-                      <button
-                        type="button"
-                        onClick={() => handleSort('mutationCount')}
-                        className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold border transition shrink-0 cursor-pointer ${
-                          sortColumn === 'mutationCount'
-                            ? 'bg-blue-100 text-blue-900 border-blue-400 shadow-2xs'
-                            : 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-blue-50 hover:text-blue-800 hover:border-blue-300'
-                        }`}
-                        title={isMarathi ? 'फेरफार संख्येनुसार क्रमवारी लावा (सर्वात जास्त / कमी)' : 'Sort by Mutation Count (Highest / Lowest)'}
-                      >
-                        <History className="w-2.5 h-2.5 shrink-0" />
-                        <span>{isMarathi ? 'फेरफार' : 'Ferfar'}</span>
-                        {sortColumn === 'mutationCount' ? (
-                          sortDirection === 'asc' ? (
-                            <ArrowUp className="w-3 h-3 text-blue-900 shrink-0" />
-                          ) : (
-                            <ArrowDown className="w-3 h-3 text-blue-900 shrink-0" />
-                          )
-                        ) : (
-                          <ArrowUpDown className="w-2.5 h-2.5 text-slate-400 shrink-0" />
+                          <ArrowUpDown className="w-3.5 h-3.5 text-slate-400 group-hover/owner:text-slate-200" />
                         )}
                       </button>
                     </div>
                   </th>
 
-                  {/* Col 6: Area */}
+                  {/* Col 6: Total Area & Potkharaba */}
                   <th
                     scope="col"
                     onClick={() => handleSort('totalAreaHa')}
-                    className="py-2.5 px-3 w-[11%] text-left cursor-pointer hover:bg-slate-100 transition group"
+                    className="py-2 px-2.5 w-[11%] text-left cursor-pointer hover:bg-slate-700 transition-colors duration-150 transition group"
                   >
                     <div className="flex items-center justify-between gap-1">
-                      <span>{isMarathi ? 'क्षेत्र (हे. / एकर)' : 'Area (Ha / Acre)'}</span>
+                      <span>{isMarathi ? 'एकूण क्षेत्र' : 'Total Area'}</span>
                       {sortColumn === 'totalAreaHa' ? (
                         sortDirection === 'asc' ? (
-                          <ArrowUp className="w-3.5 h-3.5 text-blue-900" />
+                          <ArrowUp className="w-4 h-4 text-indigo-600" />
                         ) : (
-                          <ArrowDown className="w-3.5 h-3.5 text-blue-900" />
+                          <ArrowDown className="w-4 h-4 text-indigo-600" />
                         )
                       ) : (
-                        <ArrowUpDown className="w-3 h-3 text-slate-400 group-hover:text-slate-600" />
+                        <ArrowUpDown className="w-3.5 h-3.5 text-slate-400 group-hover:text-slate-600" />
                       )}
                     </div>
                   </th>
 
-                  {/* Col 7: Tenure */}
+                  {/* Col 7: Tenure Class */}
                   <th
                     scope="col"
                     onClick={() => handleSort('tenureClass')}
-                    className="py-2.5 px-3 w-[11%] text-left cursor-pointer hover:bg-slate-100 transition group"
+                    className="py-2.5 px-3 min-w-[170px] text-left cursor-pointer hover:bg-slate-700 transition-colors duration-150 transition group"
                   >
                     <div className="flex items-center justify-between gap-1">
-                      <span>{isMarathi ? 'धारणा प्रकार' : 'Tenure Type'}</span>
+                      <span className="font-bold text-xs sm:text-[13px]">{isMarathi ? 'धारणा प्रकार (भोगवटादार वर्ग)' : 'Tenure / Class'}</span>
                       {sortColumn === 'tenureClass' ? (
                         sortDirection === 'asc' ? (
-                          <ArrowUp className="w-3.5 h-3.5 text-blue-900" />
+                          <ArrowUp className="w-4 h-4 text-indigo-400" />
                         ) : (
-                          <ArrowDown className="w-3.5 h-3.5 text-blue-900" />
+                          <ArrowDown className="w-4 h-4 text-indigo-400" />
                         )
                       ) : (
-                        <ArrowUpDown className="w-3 h-3 text-slate-400 group-hover:text-slate-600" />
+                        <ArrowUpDown className="w-3.5 h-3.5 text-slate-400 group-hover:text-slate-200" />
                       )}
                     </div>
                   </th>
 
                   {/* Col 8: Dispute Status */}
-                  <th scope="col" className="py-2.5 px-2 w-[6%] text-center">
-                    {isMarathi ? 'वाद स्थिती' : 'Dispute Status'}
+                  <th scope="col" className="py-2 px-2 w-[7%] text-center">
+                    {isMarathi ? 'वाद स्थिती' : 'Dispute'}
                   </th>
 
                   {/* Col 9: Actions (Kruti) */}
-                  <th scope="col" className="py-2.5 px-3 w-[7%] min-w-[90px] text-right">
+                  <th scope="col" className="py-2 px-2.5 w-[8%] min-w-[95px] text-right">
                     {isMarathi ? 'कृती' : 'Actions'}
                   </th>
                 </tr>
@@ -1232,22 +1244,22 @@ export default function ParcelsPage() {
                     <tr
                       key={parcel.id}
                       className={`transition-colors cursor-pointer ${
-                        index % 2 === 0 ? 'bg-white' : 'bg-slate-50/40'
-                      } hover:bg-blue-50/40`}
+                        index % 2 === 0 ? 'bg-white' : 'bg-slate-50/60'
+                      } hover:bg-indigo-50/50`}
                       onClick={() => setSelectedUpi(parcel.upi)}
                     >
                       {/* Col 1: Sr No */}
-                      <td className="py-2.5 px-1.5 text-center align-middle">
-                        <span className="font-mono text-[11px] font-medium text-slate-400">
+                      <td className="py-1.5 px-2 text-center align-middle">
+                        <span className="font-mono text-xs font-semibold text-slate-500">
                           {rowNumber}
                         </span>
                       </td>
 
                       {/* Col 2: UPI / भूखंड ओळख */}
-                      <td className="py-2.5 px-3 align-middle">
+                      <td className="py-1.5 px-2.5 align-middle">
                         <div className="flex items-center gap-1.5">
                           <span
-                            className="font-mono text-xs font-semibold text-slate-800 select-all whitespace-nowrap transition group-hover:text-blue-900"
+                            className="font-mono text-sm font-bold text-slate-900 select-all whitespace-nowrap transition group-hover:text-indigo-600"
                             title={isMarathi ? '३६०° शीर्षक साखळी पाहण्यासाठी क्लिक करा' : 'Click to view 360° title trace'}
                           >
                             {parcel.upi}
@@ -1255,46 +1267,46 @@ export default function ParcelsPage() {
                           <button
                             type="button"
                             onClick={(e) => copyToClipboard(parcel.upi, e)}
-                            className="text-slate-300 hover:text-slate-600 p-0.5 rounded transition shrink-0"
+                            className="text-slate-400 hover:text-slate-800 p-1 rounded-md hover:bg-slate-100 transition shrink-0 cursor-pointer"
                             title={isCopied ? (isMarathi ? 'UPI कॉपी झाले!' : 'UPI copied!') : (isMarathi ? 'UPI कॉपी करा' : 'Copy UPI')}
                           >
                             {isCopied ? (
-                              <Check className="w-3.5 h-3.5 text-emerald-600" />
+                              <Check className="w-4 h-4 text-emerald-600" />
                             ) : (
-                              <Copy className="w-3.5 h-3.5" />
+                              <Copy className="w-4 h-4" />
                             )}
                           </button>
                         </div>
                       </td>
 
                       {/* Col 3: Village & Taluka */}
-                      <td className="py-2.5 px-3 align-middle">
+                      <td className="py-1.5 px-2.5 align-middle">
                         <div>
-                          <div className="font-semibold text-slate-900 text-xs truncate" title={formatVillageName(parcel.villageName, isMarathi)}>
+                          <div className="font-bold text-slate-900 text-xs truncate max-w-[130px]" title={formatVillageName(parcel.villageName, isMarathi)}>
                             {formatVillageName(parcel.villageName, isMarathi)}
                           </div>
-                          <div className="text-[11px] text-slate-400 flex items-center gap-1 mt-0.5">
-                            <MapPin className="w-3 h-3 text-slate-400 shrink-0" />
+                          <div className="text-[10px] text-slate-500 font-medium flex items-center gap-1 mt-0.5">
+                            <MapPin className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                             <span>{formatTalukaName(parcel.taluka, isMarathi)}</span>
                           </div>
                         </div>
                       </td>
 
                       {/* Col 4: Gat No, Survey No & Hissa */}
-                      <td className="py-2.5 px-3 align-middle">
+                      <td className="py-1.5 px-2.5 align-middle">
                         <div>
-                          <div className="text-xs flex items-center gap-1">
-                            <span className="font-bold text-slate-900 bg-emerald-50 text-emerald-800 border border-emerald-200/80 rounded px-1.5 py-0.5">
+                          <div className="text-sm flex items-center gap-1.5">
+                            <span className="font-black text-emerald-950 bg-emerald-100 border border-emerald-300 rounded px-1.5 py-0.5 text-xs">
                               {isMarathi ? `गट ${parcel.gatNumber}` : `Gat ${parcel.gatNumber}`}
                             </span>
                             {parcel.hissaNumber && parcel.hissaNumber !== '0' && parcel.hissaNumber !== '०' && (
-                              <span className="text-slate-500 font-medium text-[11px]">
+                              <span className="text-slate-800 font-bold text-xs">
                                 {isMarathi ? `/ हि. ${parcel.hissaNumber}` : `/ Hissa ${parcel.hissaNumber}`}
                               </span>
                             )}
                           </div>
                           {parcel.oldSurveyNo && (
-                            <p className="text-[10px] text-slate-500 mt-1 font-mono">
+                            <p className="text-xs text-slate-600 mt-0.5 font-mono text-[10px]">
                               {isMarathi ? `जुना स.नं. ${parcel.oldSurveyNo}` : `Old S.No. ${parcel.oldSurveyNo}`}
                             </p>
                           )}
@@ -1302,22 +1314,22 @@ export default function ParcelsPage() {
                       </td>
 
                       {/* Col 5: Current Owner / Khatedar */}
-                      <td className="py-2.5 px-3 align-middle">
-                        <div>
+                      <td className="py-2.5 px-3 align-top min-w-[280px]">
+                        <div className="space-y-1.5">
                           <div
-                            className="font-semibold text-slate-900 text-xs truncate max-w-[210px]"
+                            className="font-bold text-slate-950 text-xs sm:text-[13px] leading-snug whitespace-normal break-words"
                             title={ownerName}
                           >
                             {ownerName}
                           </div>
-                          <div className="flex items-center gap-1.5 mt-0.5">
+                          <div className="flex items-center gap-2">
                             {mutationCount > 0 ? (
-                              <span className="inline-flex items-center gap-1 text-[10px] text-blue-700 font-medium">
-                                <History className="w-2.5 h-2.5 shrink-0" />
+                              <span className="inline-flex items-center gap-1 text-[11px] text-indigo-800 font-bold bg-indigo-50 px-2 py-0.5 rounded border border-indigo-200">
+                                <History className="w-3 h-3 shrink-0" />
                                 <span>{mutationCount} {isMarathi ? 'फेरफार' : 'Mutations'}</span>
                               </span>
                             ) : (
-                              <span className="text-[10px] text-slate-400">
+                              <span className="text-[11px] text-slate-500 font-medium">
                                 {isMarathi ? 'मूळ नोंद' : 'Original Record'}
                               </span>
                             )}
@@ -1326,69 +1338,76 @@ export default function ParcelsPage() {
                       </td>
 
                       {/* Col 6: Total & Potkharaba Area */}
-                      <td className="py-2.5 px-3 align-middle">
+                      <td className="py-1.5 px-2.5 align-middle">
                         <div>
                           <div className="font-mono font-bold text-slate-900 text-xs">
                             {areaHa.toFixed(4)} {isMarathi ? 'हे.' : 'Ha'}
                           </div>
-                          <div className="text-[10px] text-slate-400 mt-0.5">
+                          <div className="text-[10px] text-slate-500 font-medium mt-0.5">
                             ~{areaAcres} {isMarathi ? 'एकर' : 'Acres'}{potkharabaHa > 0 ? ` • ${isMarathi ? 'पो.ख.' : 'Potkharaba'} ${potkharabaHa.toFixed(2)}` : ''}
                           </div>
                         </div>
                       </td>
 
                       {/* Col 7: Tenure Class */}
-                      <td className="py-2.5 px-3 align-middle">
-                        <span
-                          className={`inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full border whitespace-nowrap ${tenure.badgeClass}`}
-                          title={tenure.hint}
-                        >
-                          {tenure.icon}
-                          <span>{tenure.label}</span>
-                        </span>
+                      <td className="py-2.5 px-3 align-top min-w-[170px]">
+                        <div className="space-y-1">
+                          <span
+                            className={`inline-flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 rounded-md border whitespace-nowrap shadow-2xs ${tenure.badgeClass}`}
+                            title={tenure.hint}
+                          >
+                            {tenure.icon}
+                            <span>{tenure.label}</span>
+                          </span>
+                          {tenure.hint && (
+                            <p className="text-[10px] text-slate-600 font-medium leading-tight whitespace-normal break-words max-w-[200px]">
+                              {tenure.hint}
+                            </p>
+                          )}
+                        </div>
                       </td>
 
                       {/* Col 8: Dispute Status */}
-                      <td className="py-2.5 px-2 text-center align-middle">
+                      <td className="py-1.5 px-2 text-center align-middle">
                         {hasDispute ? (
                           <span
-                            className="inline-flex items-center gap-1 text-[10px] bg-rose-50 text-rose-700 font-semibold px-2 py-0.5 rounded-full border border-rose-200/80 whitespace-nowrap"
+                            className="inline-flex items-center gap-1 text-[11px] bg-rose-50 text-rose-800 font-bold px-2 py-0.5 rounded border border-rose-300 whitespace-nowrap"
                             title={activeCase ? (isMarathi ? `सक्रिय केस क्र: ${activeCase.caseNumber}` : `Active Case No: ${activeCase.caseNumber}`) : (isMarathi ? 'शर्तभंग चौकशी प्रलंबित' : 'Breach inquiry pending')}
                           >
-                            <AlertTriangle className="w-3 h-3 text-rose-500 shrink-0" />
+                            <AlertTriangle className="w-3.5 h-3.5 text-rose-600 shrink-0" />
                             <span>{isMarathi ? 'शर्तभंग' : 'Breach'}</span>
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 text-[10px] bg-emerald-50 text-emerald-700 font-semibold px-2 py-0.5 rounded-full border border-emerald-200/80 whitespace-nowrap">
-                            <CheckCircle className="w-3 h-3 text-emerald-600 shrink-0" />
+                          <span className="inline-flex items-center gap-1 text-[11px] bg-emerald-50 text-emerald-800 font-bold px-2 py-0.5 rounded border border-emerald-300 whitespace-nowrap">
+                            <CheckCircle className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                             <span>{isMarathi ? 'निर्वेध' : 'Clear'}</span>
                           </span>
                         )}
                       </td>
 
                       {/* Col 9: Action Buttons */}
-                      <td
-                        className="py-2.5 px-3 text-right align-middle"
+                      <td className="py-1.5 px-2.5 text-right align-middle"
                         onClick={(e) => e.stopPropagation()}
                       >
                         <div className="flex items-center justify-end gap-1.5 whitespace-nowrap">
                           <button
                             type="button"
                             onClick={() => setSelectedUpi(parcel.upi)}
-                            className="inline-flex items-center gap-1 text-[11px] font-semibold text-blue-900 bg-blue-50 hover:bg-blue-100 px-2.5 py-1 rounded-md transition active:scale-95 whitespace-nowrap"
+                            className="inline-flex items-center gap-1.5 text-xs font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 px-2.5 py-1 rounded-lg transition active:scale-95 whitespace-nowrap cursor-pointer shadow-2xs"
                             title={isMarathi ? '१९५० शीर्षक साखळी व संपूर्ण इतिहास पहा' : 'View 1950 title chain and complete history'}
                           >
-                            <span>{isMarathi ? '३६०°' : '360°'}</span>
-                            <Eye className="w-3 h-3 text-blue-700" />
+                            <Eye className="w-3.5 h-3.5 shrink-0" />
+                            <span>{isMarathi ? '३६०° साखळी' : '360° Trace'}</span>
                           </button>
+
                           <button
                             type="button"
                             onClick={() => setUploadModalParcelId(parcel.id)}
-                            className="p-1 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-md transition active:scale-95 shrink-0"
-                            title={isMarathi ? 'कागदपत्रे अपलोड करा (DMS)' : 'Upload Documents (DMS)'}
-                            aria-label={isMarathi ? 'कागदपत्रे अपलोड करा' : 'Upload Documents'}
+                            className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 transition active:scale-95 cursor-pointer"
+                            title={isMarathi ? 'दस्तऐवज जोडा' : 'Attach Document'}
+                            aria-label={isMarathi ? 'दस्तऐवज जोडा' : 'Attach Document'}
                           >
-                            <Upload className="w-3.5 h-3.5 text-slate-600" />
+                            <Upload className="w-3.5 h-3.5" />
                           </button>
                         </div>
                       </td>
@@ -1402,7 +1421,7 @@ export default function ParcelsPage() {
       )}
     </div>
 
-      {/* Pagination Controls */}
+    {/* Pagination Controls */}
       <Pagination
         currentPage={page}
         totalPages={totalPages}

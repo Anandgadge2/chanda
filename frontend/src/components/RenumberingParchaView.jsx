@@ -246,7 +246,7 @@ export default function RenumberingParchaView({
       {/* Top Header Controls Bar */}
       <div className="flex flex-wrap items-center justify-between gap-2 px-1">
         <div className="flex items-center gap-2 text-xs font-bold text-slate-800">
-          <TableProperties className="w-4 h-4 text-amber-600" />
+          <TableProperties className="w-4 h-4 text-indigo-600" />
           <span>
             {hasVillageSelected
               ? `रिनंबरिंग पर्चा नोंदवही — ${header.villageName || selectedVillage}`
@@ -366,7 +366,7 @@ export default function RenumberingParchaView({
             {/* Data Rows */}
             {loading ? (
               <div className="py-14 px-4 text-center select-none">
-                <div className="w-8 h-8 border-2 border-blue-900 border-t-amber-500 rounded-full animate-spin mx-auto mb-2.5" />
+                <div className="w-8 h-8 border-2 border-indigo-100 border-t-indigo-600 rounded-full animate-spin mx-auto mb-2.5" />
                 <p className="text-xs font-bold text-slate-700">
                   रिनंबरिंग पर्चा नोंदवही डेटा लोड होत आहे, कृपया प्रतीक्षा करा...
                 </p>
@@ -389,7 +389,7 @@ export default function RenumberingParchaView({
                 {rows.map((row, idx) => (
                   <div
                     key={row.id || idx}
-                    className="grid grid-cols-4 divide-x divide-black group hover:bg-amber-50/30 transition relative"
+                    className="grid grid-cols-4 divide-x divide-black group hover:bg-indigo-50/30 transition relative"
                   >
                     {/* Col 1: चालू सर्व्हे क्रमांक */}
                     <div className="p-0.5">

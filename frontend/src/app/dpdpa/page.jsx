@@ -200,9 +200,9 @@ export default function DpdpaPage() {
                 : 'Submit a formal request to erase your personal profile credentials and digital identity.'}
             </p>
 
-            <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-950 leading-relaxed">
-              <p className="font-bold flex items-center gap-1 text-amber-900 mb-0.5">
-                <AlertTriangle className="w-3.5 h-3.5 text-amber-700 shrink-0" />
+            <div className="p-3.5 bg-slate-50 border border-slate-200/80 rounded-xl text-xs text-slate-700 leading-relaxed">
+              <p className="font-bold flex items-center gap-1 text-slate-900 mb-0.5">
+                <AlertTriangle className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
                 {isMarathi ? 'वैधानिक शासकीय महसूल नोंद (MLRC 1966):' : 'Statutory Revenue Record Exemption (MLRC 1966):'}
               </p>
               <p className="text-[11px]">

@@ -69,7 +69,7 @@ export default function RevenueGlossaryPage() {
                   ? 'जमीन महसूल शब्दावली व संक्षिप्त रूपे (Glossary)'
                   : 'Land Revenue Legal Glossary & Acronyms'}
               </h1>
-              <span className="text-[10px] font-extrabold uppercase tracking-wider bg-amber-500 text-slate-950 px-2 py-0.5 rounded-full shadow-2xs">
+              <span className="text-[10px] font-extrabold uppercase tracking-wider bg-indigo-600 text-white font-mono px-2 py-0.5 rounded-full shadow-2xs">
                 {isMarathi ? 'MLRC १९६६' : 'MLRC 1966'}
               </span>
               <span className="hidden md:inline text-[11px] text-slate-500 font-medium">
@@ -99,22 +99,22 @@ export default function RevenueGlossaryPage() {
           </button>
           <Link
             href={user ? '/dashboard' : '/'}
-            className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-950 bg-amber-400 hover:bg-amber-300 px-3 py-1.5 rounded-lg transition shadow-2xs active:scale-95 cursor-pointer"
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 shadow-sm shadow-indigo-600/20 px-3 py-1.5 rounded-lg transition shadow-2xs active:scale-95 cursor-pointer"
           >
-            <ArrowLeft className="w-3.5 h-3.5 text-slate-950 stroke-[2.5]" />
+            <ArrowLeft className="w-3.5 h-3.5 text-white stroke-[2.5]" />
             <span>{user ? (isMarathi ? 'महसूल डॅशबोर्ड' : 'Revenue Dashboard') : (isMarathi ? 'मुख्य पृष्ठ' : 'Home')}</span>
           </Link>
         </div>
       </div>
 
       {/* Featured Deep-Dive Spotlight Card: 'विनापरवानगी अ.कृ. वापर' */}
-      <div className="bg-gradient-to-br from-amber-500/15 via-amber-50/50 to-orange-500/10 border-2 border-amber-300/80 rounded-2xl p-4 sm:p-6 shadow-xs space-y-3.5">
+      <div className="bg-white/95 backdrop-blur-xl border border-indigo-200/80 rounded-2xl p-4 sm:p-6 shadow-xs space-y-3.5">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-200 text-amber-950 text-xs font-black border border-amber-300 shadow-2xs">
-            <AlertTriangle className="w-4 h-4 text-amber-800 shrink-0" />
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 text-xs font-bold border border-indigo-200/90 shadow-2xs">
+            <AlertTriangle className="w-4 h-4 text-indigo-600 shrink-0" />
             <span>{isMarathi ? 'वैधानिक विश्लेषण: विनापरवानगी अ.कृ. वापर (Unauthorized Non-Agricultural Use)' : 'Statutory Analysis: Unauthorized Non-Agricultural (NA) Use'}</span>
           </div>
-          <span className="text-[11px] font-bold text-amber-900 bg-white/80 px-2.5 py-0.5 rounded-md border border-amber-200">
+          <span className="text-[11px] font-bold text-indigo-700 bg-indigo-50/80 px-2.5 py-0.5 rounded-md border border-indigo-200">
             MLRC 1966 कलम ४२, ४४, ४५ व ४७
           </span>
         </div>
@@ -130,10 +130,10 @@ export default function RevenueGlossaryPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 pt-1">
           {/* Box 1: व्याख्या व कलम संदर्भ */}
-          <div className="p-4 bg-white rounded-xl border border-amber-200/90 shadow-2xs space-y-2 flex flex-col justify-between">
+          <div className="p-4 bg-slate-50/60 rounded-xl border border-slate-200/90 shadow-2xs space-y-2 flex flex-col justify-between">
             <div className="space-y-2">
               <h3 className="font-extrabold text-slate-900 flex items-center gap-1.5 text-xs sm:text-sm">
-                <Scale className="w-4 h-4 text-amber-700 shrink-0" />
+                <Scale className="w-4 h-4 text-indigo-600 shrink-0" />
                 <span>{isMarathi ? '१. कायदेशीर व्याख्या व कलम संदर्भ' : '1. Legal Definition & Statutory Sections'}</span>
               </h3>
               <p className="text-xs text-slate-700 leading-relaxed">
@@ -144,7 +144,7 @@ export default function RevenueGlossaryPage() {
                   )}
               </p>
             </div>
-            <div className="text-xs text-amber-950 font-semibold bg-amber-50 p-2.5 rounded-lg border border-amber-200 leading-normal">
+            <div className="text-xs text-indigo-950 font-medium bg-indigo-50/70 p-2.5 rounded-lg border border-indigo-100 leading-normal">
               {isMarathi ? (
                     <>पूर्वपरवानगीशिवाय केलेला असा कोणताही वापर <strong>कलम ४५ व ४७</strong> अन्वये "विनापरवानगी अ.कृ. वापर" (Unauthorized Non-Agricultural Use) ठरतो.</>
                   ) : (
@@ -154,7 +154,7 @@ export default function RevenueGlossaryPage() {
           </div>
 
           {/* Box 2: परिणाम व कारवाई */}
-          <div className="p-4 bg-white rounded-xl border border-amber-200/90 shadow-2xs space-y-2 flex flex-col justify-between">
+          <div className="p-4 bg-slate-50/60 rounded-xl border border-slate-200/90 shadow-2xs space-y-2 flex flex-col justify-between">
             <div className="space-y-2">
               <h3 className="font-extrabold text-slate-900 flex items-center gap-1.5 text-xs sm:text-sm">
                 <ShieldAlert className="w-4 h-4 text-rose-700 shrink-0" />
@@ -182,47 +182,47 @@ export default function RevenueGlossaryPage() {
         </div>
       </div>
 
-      {/* Quick Statistics Bar - Modern Metric Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-4">
-        <div className="bg-white/95 backdrop-blur-md border border-slate-200/80 rounded-2xl p-3 sm:p-4 shadow-sm text-center relative overflow-hidden transition-all hover:-translate-y-1 hover:shadow-md group">
-          <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-amber-400 to-amber-600" />
-          <span className="text-xl sm:text-2xl font-black text-amber-600 font-mono tracking-tight block">
+      {/* Solid Color Statistics KPI Dock */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-3.5 text-white">
+        <div className="group relative flex flex-col justify-between overflow-hidden rounded-2xl p-4 text-center border border-indigo-500/80 bg-indigo-600 hover:bg-indigo-700 shadow-md shadow-indigo-600/20 hover:shadow-xl hover:shadow-indigo-600/30 transition-all duration-200 ease-[cubic-bezier(0.25,1,0.5,1)] hover:-translate-y-1">
+          <div className="absolute top-0 inset-x-0 h-px bg-white/25 pointer-events-none" />
+          <span className="text-2xl sm:text-3xl font-extrabold text-white font-mono tracking-tight tabular-nums block">
             {REVENUE_SHORTCUTS.length}
           </span>
-          <p className="text-[11px] text-slate-600 font-bold mt-1">
-            {isMarathi ? 'एकूण संक्षिप्त रूपे (Shortcuts)' : 'Total Statutory Acronyms'}
+          <p className="text-[11px] font-semibold text-indigo-100 mt-1.5 tracking-tight">
+            {isMarathi ? 'संक्षिप्त रूपे (Shortcuts)' : 'Statutory Acronyms'}
           </p>
         </div>
-        <div className="bg-white/95 backdrop-blur-md border border-slate-200/80 rounded-2xl p-3 sm:p-4 shadow-sm text-center relative overflow-hidden transition-all hover:-translate-y-1 hover:shadow-md group">
-          <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-blue-500 to-indigo-600" />
-          <span className="text-xl sm:text-2xl font-black text-blue-900 font-mono tracking-tight block">
+        <div className="group relative flex flex-col justify-between overflow-hidden rounded-2xl p-4 text-center border border-sky-500/80 bg-sky-600 hover:bg-sky-700 shadow-md shadow-sky-600/20 hover:shadow-xl hover:shadow-sky-600/30 transition-all duration-200 ease-[cubic-bezier(0.25,1,0.5,1)] hover:-translate-y-1">
+          <div className="absolute top-0 inset-x-0 h-px bg-white/25 pointer-events-none" />
+          <span className="text-2xl sm:text-3xl font-extrabold text-white font-mono tracking-tight tabular-nums block">
             {REVENUE_GLOSSARY_CATEGORIES.length - 1}
           </span>
-          <p className="text-[11px] text-slate-600 font-bold mt-1">
+          <p className="text-[11px] font-semibold text-sky-100 mt-1.5 tracking-tight">
             {isMarathi ? 'विषय वर्गवारी (Categories)' : 'Glossary Categories'}
           </p>
         </div>
-        <div className="bg-white/95 backdrop-blur-md border border-slate-200/80 rounded-2xl p-3 sm:p-4 shadow-sm text-center relative overflow-hidden transition-all hover:-translate-y-1 hover:shadow-md group">
-          <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-600" />
-          <span className="text-base sm:text-lg font-black text-emerald-700 tracking-tight block">
+        <div className="group relative flex flex-col justify-between overflow-hidden rounded-2xl p-4 text-center border border-emerald-500/80 bg-emerald-600 hover:bg-emerald-700 shadow-md shadow-emerald-600/20 hover:shadow-xl hover:shadow-emerald-600/30 transition-all duration-200 ease-[cubic-bezier(0.25,1,0.5,1)] hover:-translate-y-1">
+          <div className="absolute top-0 inset-x-0 h-px bg-white/25 pointer-events-none" />
+          <span className="text-xl sm:text-2xl font-extrabold text-white tracking-tight block font-mono">
             MLRC 1966
           </span>
-          <p className="text-[11px] text-slate-600 font-bold mt-1">
-            {isMarathi ? 'वैधानिक संहिता व कलमे' : 'Statutory Code & Sections'}
+          <p className="text-[11px] font-semibold text-emerald-100 mt-1.5 tracking-tight">
+            {isMarathi ? 'वैधानिक संहिता व कलमे' : 'Statutory Code'}
           </p>
         </div>
-        <div className="bg-white/95 backdrop-blur-md border border-slate-200/80 rounded-2xl p-3 sm:p-4 shadow-sm text-center relative overflow-hidden transition-all hover:-translate-y-1 hover:shadow-md group">
-          <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-purple-500 to-fuchsia-600" />
-          <span className="text-base sm:text-lg font-black text-purple-900 tracking-tight block">
+        <div className="group relative flex flex-col justify-between overflow-hidden rounded-2xl p-4 text-center border border-violet-500/80 bg-violet-600 hover:bg-violet-700 shadow-md shadow-violet-600/20 hover:shadow-xl hover:shadow-violet-600/30 transition-all duration-200 ease-[cubic-bezier(0.25,1,0.5,1)] hover:-translate-y-1">
+          <div className="absolute top-0 inset-x-0 h-px bg-white/25 pointer-events-none" />
+          <span className="text-xl sm:text-2xl font-extrabold text-white tracking-tight block font-mono">
             {isMarathi ? '१५ तालुके' : '15 Talukas'}
           </span>
-          <p className="text-[11px] text-slate-600 font-bold mt-1">
-            {isMarathi ? 'चंद्रपूर जिल्हा कार्यक्षेत्र' : 'Chandrapur District Jurisdiction'}
+          <p className="text-[11px] font-semibold text-violet-100 mt-1.5 tracking-tight">
+            {isMarathi ? 'चंद्रपूर कार्यक्षेत्र' : 'Chandrapur District'}
           </p>
         </div>
       </div>
-
-      {/* Filter & Live Search Command Bar */}
+      
+{/* Filter & Live Search Command Bar */}
       <div className="bg-white/90 backdrop-blur-md border border-slate-200/80 rounded-2xl p-4 sm:p-5 shadow-sm space-y-3.5">
         <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
           <div className="relative flex-1">
@@ -325,7 +325,7 @@ export default function RevenueGlossaryPage() {
                 setSearchQuery('');
                 setSelectedCategory('ALL');
               }}
-              className="inline-block mt-2 text-xs font-bold text-blue-950 bg-amber-100 px-3.5 py-2 rounded-xl border border-amber-300 hover:bg-amber-200 transition shadow-2xs"
+              className="inline-block mt-2 text-xs font-bold text-indigo-700 bg-indigo-50 px-3.5 py-2 rounded-xl border border-indigo-200 hover:bg-indigo-100 transition shadow-2xs"
             >
               {isMarathi ? 'सर्व शब्दावली पूर्ववत पहा' : 'Reset Glossary View'}
             </button>

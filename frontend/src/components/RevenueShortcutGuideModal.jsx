@@ -99,12 +99,12 @@ export default function RevenueShortcutGuideModal({
         className="relative z-10 w-full max-w-4xl max-h-[90vh] bg-white rounded-3xl shadow-[0_25px_60px_-15px_rgba(15,23,42,0.3)] flex flex-col border border-slate-100 overflow-hidden animate-in zoom-in-95 duration-150 my-auto"
       >
         {/* Top Gradient Accent Strip */}
-        <div className="h-1.5 bg-gradient-to-r from-amber-500 via-blue-600 to-indigo-600 shrink-0" />
+        <div className="h-1.5 bg-gradient-to-r from-indigo-500 via-cyan-400 to-indigo-600 shrink-0" />
 
         {/* Header */}
         <div className="px-5 sm:px-6 py-3.5 bg-white border-b border-slate-100 flex justify-between items-center shrink-0 gap-3">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="w-10 h-10 rounded-2xl bg-amber-50 border border-amber-200/80 text-amber-700 flex items-center justify-center shrink-0 shadow-2xs">
+            <div className="w-10 h-10 rounded-2xl bg-indigo-50 border border-indigo-200/80 text-indigo-600 flex items-center justify-center shrink-0 shadow-xs">
               <BookOpen className="w-5 h-5" />
             </div>
             <div className="min-w-0">
@@ -115,7 +115,7 @@ export default function RevenueShortcutGuideModal({
                 >
                   {isMarathi ? 'जमीन महसूल शब्दावली व संक्षिप्त रूपे' : 'Land Revenue Glossary & Abbreviations'}
                 </h2>
-                <span className="text-[10px] font-bold bg-amber-100 text-amber-900 px-2 py-0.5 rounded-full border border-amber-200">
+                <span className="text-[10px] font-bold bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-full border border-indigo-200 font-mono">
                   {isMarathi ? 'MLRC १९६६ Glossary' : 'MLRC 1966 Glossary'}
                 </span>
               </div>
@@ -136,10 +136,10 @@ export default function RevenueShortcutGuideModal({
         </div>
 
         {/* Compact Alert Notice Banner */}
-        <div className="bg-amber-50/90 border-b border-amber-200/80 px-4 sm:px-6 py-2 text-[11px] sm:text-xs text-amber-950 flex items-center gap-2 shrink-0">
-          <AlertTriangle className="w-3.5 h-3.5 text-amber-700 shrink-0" aria-hidden="true" />
+        <div className="bg-slate-50 border-b border-slate-200/80 px-4 sm:px-6 py-2 text-[11px] sm:text-xs text-slate-700 flex items-center gap-2 shrink-0">
+          <AlertTriangle className="w-3.5 h-3.5 text-indigo-600 shrink-0" aria-hidden="true" />
           <p className="leading-normal truncate sm:whitespace-normal">
-            <span className="font-bold text-amber-900">{isMarathi ? 'महत्त्वाची सूचना: ' : 'Statutory Note: '}</span>
+            <span className="font-bold text-slate-900">{isMarathi ? 'महत्त्वाची सूचना: ' : 'Statutory Note: '}</span>
             {isMarathi ? 'विनापरवानगी अ.कृ. वापर हा MLRC कलम ४४/४५ अन्वये गंभीर शर्तभंग असून त्यावर २५ पट दंड अथवा जमीन शासन जमा कारवाई होते.' : 'Unauthorized Non-Agricultural (NA) use violates MLRC Sec 44/45, inviting up to 25x penalty or Government resumption.'}
           </p>
         </div>
@@ -202,7 +202,7 @@ export default function RevenueShortcutGuideModal({
                   setSearchQuery('');
                   setSelectedCategory('ALL');
                 }}
-                className="mt-2 text-xs font-bold text-blue-900 hover:underline"
+                className="mt-2 text-xs font-bold text-indigo-600 hover:underline"
               >
                 {isMarathi ? 'सर्व संज्ञा पूर्ववत दाखवा' : 'Reset & show all terms'}
               </button>
@@ -280,7 +280,7 @@ export default function RevenueShortcutGuideModal({
         {/* Footer */}
         <div className="px-4 sm:px-6 py-3 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row justify-between items-center gap-2 text-xs text-slate-500 shrink-0">
           <div className="flex items-center gap-2">
-            <Scale className="w-3.5 h-3.5 text-blue-900" />
+            <Scale className="w-3.5 h-3.5 text-indigo-600" />
             <span>{isMarathi ? 'संदर्भ: महाराष्ट्र जमीन महसूल संहिता (MLRC) १९६६ व महसूल नियम' : 'Reference: Maharashtra Land Revenue Code (MLRC) 1966 & Revenue Rules'}</span>
           </div>
           <div className="text-[11px] font-bold text-slate-700">

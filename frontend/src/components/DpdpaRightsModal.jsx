@@ -105,7 +105,7 @@ export default function DpdpaRightsModal({ isOpen, onClose, user }) {
         {/* Modal Header */}
         <div className="p-4 sm:p-6 border-b border-slate-100 flex items-start justify-between gap-3 bg-gradient-to-r from-slate-50 via-blue-50/40 to-slate-50 shrink-0">
           <div className="flex items-start gap-3">
-            <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-blue-700 via-blue-800 to-indigo-900 text-white shadow-md shadow-blue-900/20 flex items-center justify-center shrink-0 ring-4 ring-blue-50 mt-0.5">
+            <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-indigo-600 to-violet-700 text-white shadow-md shadow-indigo-600/20 flex items-center justify-center shrink-0 ring-4 ring-blue-50 mt-0.5">
               <ShieldCheck className="w-6 h-6 text-white" aria-hidden="true" />
             </div>
             <div>
@@ -113,7 +113,7 @@ export default function DpdpaRightsModal({ isOpen, onClose, user }) {
                 <h2 id="dpdpa-rights-title" className="text-base sm:text-lg font-black text-slate-900">
                   {isMarathi ? 'माझे डेटा संरक्षण अधिकार (DPDPA 2023)' : 'My Data Protection Rights (DPDPA 2023)'}
                 </h2>
-                <span className="px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wide bg-blue-100 text-blue-900 rounded-full border border-blue-200">
+                <span className="px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wide bg-indigo-50 text-indigo-700 rounded-full border border-indigo-200 font-mono">
                   Data Principal Rights
                 </span>
               </div>
@@ -143,7 +143,7 @@ export default function DpdpaRightsModal({ isOpen, onClose, user }) {
             }}
             className={`flex items-center gap-2 px-4 py-2.5 text-xs sm:text-sm font-bold border-b-2 transition-all ${
               activeTab === 'export'
-                ? 'border-blue-700 text-blue-900 bg-white rounded-t-xl shadow-2xs'
+                ? 'border-indigo-600 text-indigo-900 bg-white rounded-t-xl shadow-2xs'
                 : 'border-transparent text-slate-500 hover:text-slate-800'
             }`}
           >
@@ -226,7 +226,7 @@ export default function DpdpaRightsModal({ isOpen, onClose, user }) {
                   type="button"
                   onClick={handleExport}
                   disabled={exportLoading}
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-white bg-gradient-to-r from-blue-700 via-blue-800 to-indigo-900 hover:from-blue-800 hover:to-indigo-950 active:scale-[0.98] shadow-md shadow-blue-900/20 transition disabled:opacity-50"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 active:scale-[0.98] shadow-sm shadow-indigo-600/20 transition disabled:opacity-50"
                 >
                   {exportLoading ? (
                     <>
@@ -276,8 +276,8 @@ export default function DpdpaRightsModal({ isOpen, onClose, user }) {
               ) : (
                 <form onSubmit={handleErasure} className="space-y-4">
                   {/* Legal Precedence Warning */}
-                  <div className="p-3.5 bg-amber-50 border border-amber-200 rounded-2xl flex items-start gap-3 text-amber-950 text-xs leading-relaxed">
-                    <AlertTriangle className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
+                  <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-2xl flex items-start gap-3 text-slate-700 text-xs leading-relaxed">
+                    <AlertTriangle className="w-4 h-4 text-indigo-600 shrink-0 mt-0.5" />
                     <div>
                       <p className="font-bold mb-0.5">{isMarathi ? 'वैधानिक शासकीय अभिलेख सूचना (MLRC 1966):' : 'Statutory Government Record Notice (MLRC 1966):'}</p>
                       <p>
