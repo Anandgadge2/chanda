@@ -2710,7 +2710,7 @@ export default function ReportsPage() {
                 {isMarathi ? `प्रपत्र क्र. ${selectedPrapatraId}` : `Prapatra ${selectedPrapatraId}`}
               </span>
               <span
-                className="text-xs text-slate-500 font-medium truncate max-w-xs md:max-w-md hidden sm:inline"
+                className="text-xs text-slate-500 font-medium max-w-xs md:max-w-md hidden sm:inline"
                 title={isMarathi ? currentPrapatra5.descMr : currentPrapatra5.descEn}
               >
                 {isMarathi ? currentPrapatra5.descMr : currentPrapatra5.descEn}
