@@ -1963,8 +1963,8 @@ export const getPrapatraReport = async (req, res) => {
     // compute the complete village land baseline so Class 1 and Class 2 counts are accurately reflected
     const isCategory18 = prapatraNum === 18;
     // isPrapatra1to5 already declared above
-    const rollupPrapatraNum = isCategory18 ? 18 : 0;
-    const rollupBooklet = isCategory18 ? 'true' : 'false';
+    const rollupPrapatraNum = isCategory18 ? 18 : (booklet === 'true' ? prapatraNum : 0);
+    const rollupBooklet = booklet === 'true' ? 'true' : 'false';
 
     let dynamicRollupData = null;
     let prapatra1to5Rollup = null;
@@ -1984,7 +1984,7 @@ export const getPrapatraReport = async (req, res) => {
         byTaluka: prapatra1to5Rollup.byTaluka,
         byVillage: prapatra1to5Rollup.byVillage
       };
-    } else if (isChecklist && isAllTalukas && isAllVillages && format !== 'excel' && format !== 'xlsx' && format !== 'pdf') {
+    } else if (isChecklist && isAllTalukas && isAllVillages && format !== 'excel' && format !== 'xlsx' && format !== 'pdf' && (!tenure || tenure === 'all') && (!violation || violation === 'all') && (!search || !search.trim())) {
       // Lightning-fast precomputed summary for whole district Checklist view
       dynamicRollupData = {
         districtTotal: {
@@ -2087,21 +2087,27 @@ export const getPrapatraReport = async (req, res) => {
       return await generatePrapatraPdf(prapatraNum, summaryExportRows, formattedParcels, scopeName, res);
     }
 
-    // Precompute exact, authoritative stats for top 4 KPI cards matching active scope (whole data scope)
+    // Precompute exact, authoritative stats for top 4 KPI cards matching active scope and active filters
     let stats;
+    const isUnfilteredChecklist = isChecklist && isAllTalukas && isAllVillages && (!tenure || tenure === 'all') && (!violation || violation === 'all') && (!search || !search.trim());
+
     if (isAllTalukas && isAllVillages) {
+      const tot712 = Number(totalParcelCount || dynamicRollupData?.districtTotal?.total712Count || (isUnfilteredChecklist ? 133875 : 0));
+      const totArea = dynamicRollupData?.districtTotal?.totalArea || dynamicRollupData?.districtTotal?.totalAreaHa || (tot712 > 0 ? (tot712 * 3.7086).toFixed(2) : '0.00');
+      const class2 = Number(dynamicRollupData?.districtTotal?.c2Count || 0) + Number(dynamicRollupData?.districtTotal?.sarkarCount || 0);
+      const shart = Number(dynamicRollupData?.districtTotal?.shartCount || 0);
       stats = {
-        totalCount: Number(dynamicRollupData?.districtTotal?.total712Count || 133875),
-        totalAreaHa: String(dynamicRollupData?.districtTotal?.totalArea || dynamicRollupData?.districtTotal?.totalAreaHa || '496483.63'),
-        class2Count: Number(dynamicRollupData?.districtTotal?.c2Count || 32750),
-        shartbhangCount: Number(dynamicRollupData?.districtTotal?.shartCount || 6126),
+        totalCount: tot712,
+        totalAreaHa: String(totArea),
+        class2Count: class2,
+        shartbhangCount: shart,
         isMacroScope: true,
         scopeBadge: 'DISTRICT',
         scopeLabel: 'चंद्रपूर जिल्हा एकत्रित'
       };
     } else if (!isAllTalukas && isAllVillages) {
       const tRow = dynamicRollupData?.byTaluka?.find(r => r.taluka?.toLowerCase() === targetTaluka.toLowerCase()) || dynamicRollupData?.byTaluka?.[0] || {};
-      const tot712 = Number(tRow.total712Count || totalParcelCount || 0);
+      const tot712 = Number(totalParcelCount || tRow.total712Count || 0);
       const totArea = tRow.totalArea || tRow.totalAreaHa || (tot712 > 0 ? (tot712 * 3.7086).toFixed(2) : '0.00');
       const tMr = TALUKA_EN_TO_MR[targetTaluka] || targetTaluka;
       const class2 = Number((tRow.c2Count || 0) + (tRow.sarkarCount || 0) || tRow.totalGovtLandCount || 0);
@@ -2116,7 +2122,7 @@ export const getPrapatraReport = async (req, res) => {
       };
     } else {
       const vRow = dynamicRollupData?.byVillage?.find(r => r.villageName?.toLowerCase() === village.toLowerCase()) || dynamicRollupData?.byVillage?.[0] || {};
-      const tot712 = Number(vRow.total712Count || totalParcelCount || 0);
+      const tot712 = Number(totalParcelCount || vRow.total712Count || 0);
       const totArea = vRow.totalArea || vRow.totalAreaHa || (tot712 > 0 ? (tot712 * 3.7086).toFixed(2) : '0.00');
       const class2 = Number((vRow.c2Count || 0) + (vRow.sarkarCount || 0) || vRow.totalGovtLandCount || 0);
       stats = {

@@ -182,7 +182,9 @@ export default function ReportsPage() {
   const { isMarathi } = useTranslation();
   // Main Tab: 'checklist' (Master 46-point checklist) vs 'prapatra5' (5 Official Prapatras) vs 'categories' (17 Statutory Booklets)
   const [activeTab, setActiveTab] = useState('checklist');
+  const [draftCatId, setDraftCatId] = useState(1);
   const [selectedCatId, setSelectedCatId] = useState(1);
+  const [draftPrapatraId, setDraftPrapatraId] = useState(1);
   const [selectedPrapatraId, setSelectedPrapatraId] = useState(1);
   const [prapatraTier, setPrapatraTier] = useState('all');
   const [renumberingExportHandlers, setRenumberingExportHandlers] = useState(null);
@@ -255,7 +257,7 @@ export default function ReportsPage() {
 
     // If user is on Goshwara or Renumbering tabs where individual 7/12 records are hidden,
     // automatically switch to Checklist tab so they can see the records properly
-    if (activeTab === 'goshwara' || activeTab === 'renumbering') {
+    if (activeTab === 'categories' && activeView === 'categorySummary') { setActiveView('categoryData'); if (parcels.length === 0) loadData(1, pageSize, true); } else if (activeTab === 'goshwara' || activeTab === 'renumbering') {
       setActiveTab('checklist');
     }
 
@@ -366,8 +368,8 @@ export default function ReportsPage() {
           setActiveTab(qTab);
         }
       }
-      if (qPrapatra) setSelectedPrapatraId(parseInt(qPrapatra, 10) || 1);
-      if (qCat) setSelectedCatId(parseInt(qCat, 10) || 1);
+      if (qPrapatra) { const p = parseInt(qPrapatra, 10) || 1; setDraftPrapatraId(p); setSelectedPrapatraId(p); }
+      if (qCat) { const c = parseInt(qCat, 10) || 1; setDraftCatId(c); setSelectedCatId(c); }
       if (qTaluka) {
         setDraftTaluka(qTaluka);
         setAppliedFilters((prev) => ({ ...prev, taluka: qTaluka }));
@@ -593,7 +595,7 @@ export default function ReportsPage() {
     // 1. Authoritative whole-scope stats from backend (reflects 133k district, full taluka, or village)
     if (serverStats) {
       return {
-        totalCount: Number(serverStats.totalCount || 0),
+        totalCount: Number(serverTotalCount || serverStats.totalCount || 0),
         totalAreaHa: String(serverStats.totalAreaHa || '0.00'),
         class2Count: Number(serverStats.class2Count || 0),
         shartbhangCount: Number(serverStats.shartbhangCount || 0),
@@ -618,7 +620,7 @@ export default function ReportsPage() {
       if (isSingleVillageActive) {
         const vRow = serverRollup.byVillage?.find(r => r.villageName?.toLowerCase() === appliedFilters.village?.toLowerCase()) || serverRollup.byVillage?.[0];
         if (vRow) {
-          const tot712 = Number(vRow.total712Count || 0);
+          const tot712 = Number(serverTotalCount || vRow.total712Count || 0);
           return {
             totalCount: tot712,
             totalAreaHa: Number(vRow.totalArea || vRow.totalAreaHa || 0).toFixed(2),
@@ -632,7 +634,7 @@ export default function ReportsPage() {
       } else if (!isWholeDistrict) {
         const tRow = serverRollup.byTaluka?.find(r => r.taluka?.toLowerCase() === appliedFilters.taluka?.toLowerCase()) || serverRollup.byTaluka?.[0];
         if (tRow) {
-          const tot712 = Number(tRow.total712Count || 0);
+          const tot712 = Number(serverTotalCount || tRow.total712Count || 0);
           return {
             totalCount: tot712,
             totalAreaHa: Number(tRow.totalArea || tRow.totalAreaHa || 0).toFixed(2),
@@ -645,7 +647,7 @@ export default function ReportsPage() {
         }
       } else if (serverRollup.districtTotal) {
         return {
-          totalCount: Number(serverRollup.districtTotal.total712Count || 133875),
+          totalCount: Number(serverTotalCount || serverRollup.districtTotal.total712Count || (isWholeDistrict && activeTab === 'checklist' && appliedFilters.tenure === 'all' && appliedFilters.violation === 'all' && !appliedFilters.search ? 133875 : 0)),
           totalAreaHa: Number(serverRollup.districtTotal.totalArea || serverRollup.districtTotal.totalAreaHa || 496483.63).toFixed(2),
           class2Count: Number(serverRollup.districtTotal.c2Count || 32750),
           shartbhangCount: Number(serverRollup.districtTotal.shartCount || 6126),
@@ -681,7 +683,7 @@ export default function ReportsPage() {
     }
 
     return {
-      totalCount: isWholeDistrict ? 133875 : 0,
+      totalCount: (isWholeDistrict && activeTab === 'checklist' && appliedFilters.tenure === 'all' && appliedFilters.violation === 'all' && !appliedFilters.search) ? 133875 : (serverTotalCount || 0),
       totalAreaHa: isWholeDistrict ? '496483.63' : '0.00',
       class2Count: isWholeDistrict ? 32750 : 0,
       shartbhangCount: isWholeDistrict ? 6126 : 0,
@@ -1448,6 +1450,8 @@ export default function ReportsPage() {
   };
 
   const isFilterPending =
+    (activeTab === 'categories' && draftCatId !== selectedCatId) ||
+    (activeTab === 'prapatra5' && draftPrapatraId !== selectedPrapatraId) ||
     draftTaluka !== appliedFilters.taluka ||
     draftVillage !== appliedFilters.village ||
     (!isGoshwaraView && activeTab !== 'prapatra5' && activeTab !== 'renumbering' && (
@@ -1457,6 +1461,8 @@ export default function ReportsPage() {
     ));
 
   const hasActiveFilters =
+    (activeTab === 'categories' && selectedCatId !== 1) ||
+    (activeTab === 'prapatra5' && selectedPrapatraId !== 1) ||
     appliedFilters.taluka !== 'all' ||
     appliedFilters.village !== 'all' ||
     draftTaluka !== 'all' ||
@@ -1471,6 +1477,8 @@ export default function ReportsPage() {
     ));
 
   const handleApplyFilters = () => {
+    setSelectedCatId(draftCatId);
+    setSelectedPrapatraId(draftPrapatraId);
     setAppliedFilters({
       taluka: draftTaluka,
       village: draftVillage,
@@ -1487,6 +1495,10 @@ export default function ReportsPage() {
   };
 
   const handleResetFilters = () => {
+    setDraftCatId(1);
+    setSelectedCatId(1);
+    setDraftPrapatraId(1);
+    setSelectedPrapatraId(1);
     setDraftTaluka('all');
     setDraftVillage('all');
     setDraftTenure('all');
@@ -2431,6 +2443,7 @@ export default function ReportsPage() {
               onClick={() => {
                 setActiveTab('prapatra5');
                 setActiveView('prapatraData');
+                setDraftPrapatraId(selectedPrapatraId);
                 setDraftSearch('');
                 setAppliedFilters(prev => ({ ...prev, search: '' }));
               }}
@@ -2449,6 +2462,7 @@ export default function ReportsPage() {
               onClick={() => {
                 setActiveTab('categories');
                 setActiveView('categorySummary');
+                setDraftCatId(selectedCatId);
               }}
               className={`flex-1 min-w-fit px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition flex items-center justify-center gap-1.5 cursor-pointer shrink-0 ${
                 activeTab === 'categories'
@@ -2532,8 +2546,8 @@ export default function ReportsPage() {
                 </label>
                 <SearchableSelect
                   options={categorySelectOptions}
-                  value={selectedCatId}
-                  onChange={val => setSelectedCatId(Number(val))}
+                  value={draftCatId}
+                  onChange={val => setDraftCatId(Number(val))}
                   placeholder={isMarathi ? 'प्रपत्र निवडा...' : 'Select booklet...'}
                   searchPlaceholder={isMarathi ? 'प्रपत्र क्र. किंवा नाव शोधा...' : 'Search booklet no. or subject...'}
                   icon={Compass}
@@ -2552,8 +2566,8 @@ export default function ReportsPage() {
                 </label>
                 <SearchableSelect
                   options={prapatra5SelectOptions}
-                  value={selectedPrapatraId}
-                  onChange={val => setSelectedPrapatraId(Number(val))}
+                  value={draftPrapatraId}
+                  onChange={val => setDraftPrapatraId(Number(val))}
                   placeholder={isMarathi ? 'प्रपत्र निवडा...' : 'Select Prapatra...'}
                   searchPlaceholder={isMarathi ? 'प्रपत्र क्र. १ ते ५ शोधा...' : 'Search Prapatra 1 to 5...'}
                   icon={FileText}
@@ -2775,8 +2789,8 @@ export default function ReportsPage() {
               </span>
               <span className="font-semibold text-[11px] sm:text-xs">
                 {isMarathi
-                  ? `तुम्ही नवीन निकष निवडले आहेत (${draftTaluka !== 'all' ? draftTaluka : 'चंद्रपूर'}${draftVillage !== 'all' ? ` / ${draftVillage}` : ''}). माहिती अद्ययावत करण्यासाठी 'लागू करा' वर क्लिक करा.`
-                  : `Filter criteria changed (${draftTaluka !== 'all' ? draftTaluka : 'Chandrapur'}${draftVillage !== 'all' ? ` / ${draftVillage}` : ''}). Click 'Apply' to reload cards and records.`}
+                  ? `तुम्ही नवीन निकष निवडले आहेत (${activeTab === 'categories' && draftCatId !== selectedCatId ? `प्रपत्र क्र. ${draftCatId}, ` : ''}${activeTab === 'prapatra5' && draftPrapatraId !== selectedPrapatraId ? `प्रपत्र क्र. ${draftPrapatraId}, ` : ''}${draftTaluka !== 'all' ? draftTaluka : 'चंद्रपूर'}${draftVillage !== 'all' ? ` / ${draftVillage}` : ''}). माहिती अद्ययावत करण्यासाठी 'लागू करा' वर क्लिक करा.`
+                  : `Filter criteria changed (${activeTab === 'categories' && draftCatId !== selectedCatId ? `Booklet ${draftCatId}, ` : ''}${activeTab === 'prapatra5' && draftPrapatraId !== selectedPrapatraId ? `Prapatra ${draftPrapatraId}, ` : ''}${draftTaluka !== 'all' ? draftTaluka : 'Chandrapur'}${draftVillage !== 'all' ? ` / ${draftVillage}` : ''}). Click 'Apply' to reload cards and records.`}
               </span>
             </div>
             <button
@@ -2796,7 +2810,7 @@ export default function ReportsPage() {
         {/* =========================================================
             STANDARDIZED CONSTANT KPI METRIC CARDS (BRIGHT SOLID COLORS)
         ========================================================= */}
-        {activeTab !== 'renumbering' && activeTab !== 'prapatra5' && !isGoshwaraView && (
+        {activeTab !== 'renumbering' && (
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3 p-1 -m-1">
             <MetricCard
               variant="blue"
@@ -2969,22 +2983,6 @@ export default function ReportsPage() {
                   <div className="flex items-center bg-slate-200/80 p-1 rounded-xl gap-1">
                     <button
                       type="button"
-                      onClick={() => setActiveView('categorySummary')}
-                      className={`px-3 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shrink-0 ${
-                        activeView === 'categorySummary'
-                          ? 'bg-indigo-900 text-white shadow-2xs font-extrabold'
-                          : 'text-slate-600 hover:text-slate-900'
-                      }`}
-                    >
-                      <Layers className="w-3.5 h-3.5 text-indigo-300" />
-                      <span>{isMarathi ? 'गोषवारा (Rollup)' : 'Rollup Summary'}</span>
-                      <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-indigo-950/60 text-white font-mono font-bold">
-                        {activeCategoryRollupCount}
-                      </span>
-                    </button>
-
-                    <button
-                      type="button"
                       onClick={() => {
                         setActiveView('categoryData');
                         if (parcels.length === 0) {
@@ -3003,6 +3001,24 @@ export default function ReportsPage() {
                         {selectedKpiFilter !== 'all' ? `${kpiFilteredParcels.length} / ${serverTotalCount || parcels.length}` : (serverTotalCount || serverRollup?.districtTotal?.total712Count || parcels.length)}
                       </span>
                     </button>
+                   
+                    <button
+                      type="button"
+                      onClick={() => setActiveView('categorySummary')}
+                      className={`px-3 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shrink-0 ${
+                        activeView === 'categorySummary'
+                          ? 'bg-indigo-900 text-white shadow-2xs font-extrabold'
+                          : 'text-slate-600 hover:text-slate-900'
+                      }`}
+                    >
+                      <Layers className="w-3.5 h-3.5 text-indigo-300" />
+                      <span>{isMarathi ? 'गोषवारा (Rollup)' : 'Rollup Summary'}</span>
+                      <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-indigo-950/60 text-white font-mono font-bold">
+                        {activeCategoryRollupCount}
+                      </span>
+                    </button>
+
+                   
                   </div>
 
                   {/* Preview Area Category Booklet Download Buttons */}
@@ -4121,7 +4137,7 @@ export default function ReportsPage() {
                   17 CATEGORY DETAILED PARCELS TABLE
               ========================================================= */
               <div>
-                <div className="p-3.5 sm:p-4 bg-gradient-to-r from-indigo-50 via-blue-50/50 to-white border-b border-indigo-200/80 flex flex-col items-center text-center">
+                {/* <div className="p-3.5 sm:p-4 bg-gradient-to-r from-indigo-50 via-blue-50/50 to-white border-b border-indigo-200/80 flex flex-col items-center text-center">
                   <div className="inline-flex items-center gap-2 px-3 py-1 bg-indigo-100 text-indigo-950 rounded-full text-xs font-bold mb-1 shadow-2xs border border-indigo-200">
                     <FileSpreadsheet className="w-3.5 h-3.5 text-indigo-700" />
                     <span>
@@ -4140,7 +4156,7 @@ export default function ReportsPage() {
                       ? `कार्यक्षेत्र: ${formatScopeText(activeScope, true)} | एकूण अभिलेख: ${selectedKpiFilter !== 'all' ? `${kpiFilteredParcels.length} (एकूण ${parcels.length} पैकी)` : parcels.length} (डाऊनलोड एक्सेल बुकलेट - शीट १ नमुना)`
                       : `Scope: ${formatScopeText(activeScope, false)} | Total Records: ${selectedKpiFilter !== 'all' ? `${kpiFilteredParcels.length} (of ${parcels.length})` : parcels.length} (Downloaded Booklet Sheet 1 Format)`}
                   </p>
-                </div>
+                </div> */}
 
                 {!loading && paginatedParcels.length === 0 ? (
                   renderEmptyState()
@@ -5568,34 +5584,7 @@ export default function ReportsPage() {
             </div>
           ))}
 
-          {/* =========================================================
-              OFFICIAL 3-TIER SIGNATURE BLOCK
-          ========================================================= */}
-          {/* <div className="p-4 bg-slate-50 border-t border-slate-200">
-            <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3 text-center">
-              {isMarathi ? 'महसूल विभाग तपासणी व प्रमाणीकरण स्वाक्षरी कक्ष' : 'Revenue Department Inspection & Attestation Signature Cell'}
-            </h4>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs text-slate-700">
-              <div className="p-3 bg-white rounded-xl border border-slate-200 space-y-1">
-                <span className="font-bold text-slate-900 block">{isMarathi ? '१. माहिती तयार करणारा:' : '1. Prepared By:'}</span>
-                <span className="text-slate-500 block">{isMarathi ? 'तलाठी / महसूल सहाय्यक' : 'Talathi / Revenue Assistant'}</span>
-                <span className="text-[11px] text-slate-400 block">{isMarathi ? 'दिनांक: ______________' : 'Date: ______________'}</span>
-                <span className="text-[11px] text-slate-400 block">{isMarathi ? 'स्वाक्षरी: ______________' : 'Signature: ______________'}</span>
-              </div>
-              <div className="p-3 bg-white rounded-xl border border-slate-200 space-y-1">
-                <span className="font-bold text-slate-900 block">{isMarathi ? '२. तपासणी अधिकारी:' : '2. Inspected By:'}</span>
-                <span className="text-slate-500 block">{isMarathi ? 'महसूल मंडळ अधिकारी / नायब तहसीलदार' : 'Circle Officer / Naib Tahsildar'}</span>
-                <span className="text-[11px] text-slate-400 block">दिनांक: ______________</span>
-                <span className="text-[11px] text-slate-400 block">स्वाक्षरी: ______________</span>
-              </div>
-              <div className="p-3 bg-white rounded-xl border border-slate-200 space-y-1">
-                <span className="font-bold text-slate-900 block">{isMarathi ? '३. प्रमाणीकरण अधिकारी:' : '3. Certified By:'}</span>
-                <span className="text-slate-500 block">{isMarathi ? 'तहसिलदार, चंद्रपूर' : 'Tahsildar, Chandrapur'}</span>
-                <span className="text-[11px] text-slate-400 block">दिनांक: ______________</span>
-                <span className="text-[11px] text-slate-400 block">स्वाक्षरी: ______________</span>
-              </div>
-            </div>
-          </div> */}
+         
         </div>
         )}
 
