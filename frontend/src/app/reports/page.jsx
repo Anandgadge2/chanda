@@ -2405,95 +2405,7 @@ export default function ReportsPage() {
               </div>
             </div>
 
-            {/* Export Buttons */}
-            <div className="flex items-center gap-2 w-full md:w-auto shrink-0 flex-wrap">
-              <button
-                type="button"
-                onClick={() => handleDownload('excel')}
-                disabled={downloadingExcel}
-                className="flex-1 md:flex-none inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 disabled:opacity-60 text-white rounded-xl text-xs font-bold shadow-xs transition active:scale-95 cursor-pointer"
-                title={
-                  isMarathi
-                    ? 'अधिकृत शासकीय एक्सेल बुकलेट डाऊनलोड करा (खातेदारांच्या संपूर्ण यादीसह)'
-                    : 'Download official statutory Excel booklet (with complete khatedar registry)'
-                }
-              >
-                {downloadingExcel ? (
-                  <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                ) : (
-                  <FileSpreadsheet className="w-3.5 h-3.5" />
-                )}
-                <span>
-                  {downloadingExcel
-                    ? (isMarathi ? 'तयार होत आहे...' : 'Generating...')
-                    : activeTab === 'checklist' && activeView === 'timeline'
-                    ? (isMarathi ? '४६ सूची (.xlsx)' : '46 Points (.xlsx)')
-                    : activeTab === 'checklist' && activeView === 'parcels'
-                    ? (isMarathi ? 'संक्षिप्त ७/१२ (.xlsx)' : 'Compact 7/12 (.xlsx)')
-                    : activeTab === 'prapatra5'
-                    ? (isMarathi ? `प्रपत्र ${selectedPrapatraId} (.xlsx)` : `Prapatra ${selectedPrapatraId} (.xlsx)`)
-                    : activeTab === 'categories'
-                    ? (isMarathi ? `बुकलेट ${selectedCatId} (दोन्ही शीट्स .xlsx)` : `Booklet ${selectedCatId} (Both Sheets .xlsx)`)
-                    : activeTab === 'renumbering'
-                    ? (isMarathi ? 'रिनंबरिंग (.xlsx)' : 'Renumbering (.xlsx)')
-                    : (isMarathi ? 'एक्सेल (.xlsx)' : 'Excel (.xlsx)')}
-                </span>
-                {activeTab !== 'renumbering' && (
-                  <span className="bg-emerald-900/60 text-white text-[10px] px-1.5 py-0.2 rounded-full font-mono font-bold">
-                    {isGoshwaraView
-                      ? activeCategoryRollupCount
-                      : (selectedKpiFilter !== 'all' ? kpiFilteredParcels.length : parcels.length)}
-                  </span>
-                )}
-              </button>
 
-              {/* If on 46-Point Timeline, hide PDF button and show informative badge */}
-              {activeTab === 'checklist' && activeView === 'timeline' ? (
-                <div
-                  className="hidden sm:inline-flex items-center gap-1 px-2.5 py-1.5 bg-slate-100 border border-slate-200 text-amber-800 rounded-xl text-[11px] font-semibold"
-                  title={
-                    isMarathi
-                      ? "४६ मुद्द्यांचे ५३ स्तंभ केवळ एक्सेलमध्ये उपलब्ध आहेत. पीडीएफकरिता 'संक्षिप्त ७/१२ यादी' निवडा."
-                      : "The 53 columns of 46 points are available in Excel only. For PDF, choose 'Compact 7/12 List'."
-                  }
-                >
-                  <Info className="w-3.5 h-3.5 text-amber-700 shrink-0" />
-                </div>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => handleDownload('pdf')}
-                  disabled={downloadingPdf}
-                  className="flex-1 md:flex-none inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-rose-600 to-rose-700 hover:from-rose-700 hover:to-rose-800 disabled:opacity-60 text-white rounded-xl text-xs font-bold shadow-xs transition active:scale-95 cursor-pointer"
-                  title={
-                    isMarathi
-                      ? 'स्वाक्षरी व प्रमाणपत्रासह अधिकृत पीडीएफ प्रत डाऊनलोड करा'
-                      : 'Download official PDF copy with digital certificate & signature'
-                  }
-                >
-                  {downloadingPdf ? (
-                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                  ) : (
-                    <Download className="w-3.5 h-3.5" />
-                  )}
-                  <span>
-                    {downloadingPdf
-                      ? (isMarathi ? 'तयार होत आहे...' : 'Generating...')
-                      : activeTab === 'checklist' && activeView === 'parcels'
-                      ? (isMarathi ? 'संक्षिप्त ७/१२ (.pdf)' : 'Compact 7/12 (.pdf)')
-                      : activeTab === 'prapatra5'
-                      ? (isMarathi ? `प्रपत्र ${selectedPrapatraId} (.pdf)` : `Prapatra ${selectedPrapatraId} (.pdf)`)
-                      : activeTab === 'categories'
-                      ? (activeView === 'categorySummary'
-                          ? (isMarathi ? `बुकलेट ${selectedCatId} गोषवारा (.pdf)` : `Booklet ${selectedCatId} Rollup (.pdf)`)
-                          : (isMarathi ? `बुकलेट ${selectedCatId} सविस्तर यादी (.pdf)` : `Booklet ${selectedCatId} Detailed (.pdf)`))
-                      : activeTab === 'renumbering'
-                      ? (isMarathi ? 'रिनंबरिंग (.pdf)' : 'Renumbering (.pdf)')
-                      : (isMarathi ? 'पीडीएफ (.pdf)' : 'PDF (.pdf)')}
-                  </span>
-                </button>
-              )}
-            </div>
           </div>
 
           {/* Bottom Row: Segmented Pill Tabs */}
@@ -2884,7 +2796,7 @@ export default function ReportsPage() {
         {/* =========================================================
             STANDARDIZED CONSTANT KPI METRIC CARDS (BRIGHT SOLID COLORS)
         ========================================================= */}
-        {activeTab !== 'renumbering' && !isGoshwaraView && (
+        {activeTab !== 'renumbering' && activeTab !== 'prapatra5' && !isGoshwaraView && (
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3 p-1 -m-1">
             <MetricCard
               variant="blue"
@@ -3053,43 +2965,78 @@ export default function ReportsPage() {
               
 
               {activeTab === 'categories' && (
-                <div className="flex items-center bg-slate-200/80 p-1 rounded-xl gap-1">
-                  <button
-                    type="button"
-                    onClick={() => setActiveView('categorySummary')}
-                    className={`px-3 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shrink-0 ${
-                      activeView === 'categorySummary'
-                        ? 'bg-indigo-900 text-white shadow-2xs font-extrabold'
-                        : 'text-slate-600 hover:text-slate-900'
-                    }`}
-                  >
-                    <Layers className="w-3.5 h-3.5 text-indigo-300" />
-                    <span>{isMarathi ? 'गोषवारा (Rollup)' : 'Rollup Summary'}</span>
-                    <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-indigo-950/60 text-white font-mono font-bold">
-                      {activeCategoryRollupCount}
-                    </span>
-                  </button>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <div className="flex items-center bg-slate-200/80 p-1 rounded-xl gap-1">
+                    <button
+                      type="button"
+                      onClick={() => setActiveView('categorySummary')}
+                      className={`px-3 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shrink-0 ${
+                        activeView === 'categorySummary'
+                          ? 'bg-indigo-900 text-white shadow-2xs font-extrabold'
+                          : 'text-slate-600 hover:text-slate-900'
+                      }`}
+                    >
+                      <Layers className="w-3.5 h-3.5 text-indigo-300" />
+                      <span>{isMarathi ? 'गोषवारा (Rollup)' : 'Rollup Summary'}</span>
+                      <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-indigo-950/60 text-white font-mono font-bold">
+                        {activeCategoryRollupCount}
+                      </span>
+                    </button>
 
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setActiveView('categoryData');
-                      if (parcels.length === 0) {
-                        loadData(1, pageSize, true);
-                      }
-                    }}
-                    className={`px-3 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shrink-0 ${
-                      activeView === 'categoryData' || activeView === 'parcels' || activeView === 'timeline'
-                        ? 'bg-white text-indigo-950 shadow-2xs font-extrabold'
-                        : 'text-slate-600 hover:text-slate-900'
-                    }`}
-                  >
-                    <FileSpreadsheet className="w-3.5 h-3.5 text-indigo-700" />
-                    <span>{isMarathi ? 'सविस्तर ७/१२ यादी' : 'Detailed 7/12 List'}</span>
-                    <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-indigo-100 text-indigo-900 font-mono font-bold">
-                      {selectedKpiFilter !== 'all' ? `${kpiFilteredParcels.length} / ${serverTotalCount || parcels.length}` : (serverTotalCount || serverRollup?.districtTotal?.total712Count || parcels.length)}
-                    </span>
-                  </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setActiveView('categoryData');
+                        if (parcels.length === 0) {
+                          loadData(1, pageSize, true);
+                        }
+                      }}
+                      className={`px-3 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shrink-0 ${
+                        activeView === 'categoryData' || activeView === 'parcels' || activeView === 'timeline'
+                          ? 'bg-white text-indigo-950 shadow-2xs font-extrabold'
+                          : 'text-slate-600 hover:text-slate-900'
+                      }`}
+                    >
+                      <FileSpreadsheet className="w-3.5 h-3.5 text-indigo-700" />
+                      <span>{isMarathi ? 'सविस्तर ७/१२ यादी' : 'Detailed 7/12 List'}</span>
+                      <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-indigo-100 text-indigo-900 font-mono font-bold">
+                        {selectedKpiFilter !== 'all' ? `${kpiFilteredParcels.length} / ${serverTotalCount || parcels.length}` : (serverTotalCount || serverRollup?.districtTotal?.total712Count || parcels.length)}
+                      </span>
+                    </button>
+                  </div>
+
+                  {/* Preview Area Category Booklet Download Buttons */}
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => handleDownload('excel')}
+                      disabled={downloadingExcel}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-emerald-50 text-slate-700 hover:text-emerald-800 border border-slate-200 hover:border-emerald-300 rounded-xl text-xs font-bold shadow-2xs transition active:scale-95 cursor-pointer disabled:opacity-60"
+                      title={isMarathi ? 'बुकलेट दोन्ही शीट्स एक्सेल डाऊनलोड करा' : 'Download Booklet Excel'}
+                    >
+                      {downloadingExcel ? (
+                        <RefreshCw className="w-3.5 h-3.5 animate-spin text-emerald-600" />
+                      ) : (
+                        <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600" />
+                      )}
+                      <span>{isMarathi ? `बुकलेट ${selectedCatId} (.xlsx)` : `Booklet ${selectedCatId} (.xlsx)`}</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => handleDownload('pdf')}
+                      disabled={downloadingPdf}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-rose-50 text-slate-700 hover:text-rose-800 border border-slate-200 hover:border-rose-300 rounded-xl text-xs font-bold shadow-2xs transition active:scale-95 cursor-pointer disabled:opacity-60"
+                      title={isMarathi ? 'बुकलेट पीडीएफ प्रत डाऊनलोड करा' : 'Download Booklet PDF'}
+                    >
+                      {downloadingPdf ? (
+                        <RefreshCw className="w-3.5 h-3.5 animate-spin text-rose-600" />
+                      ) : (
+                        <Download className="w-3.5 h-3.5 text-rose-600" />
+                      )}
+                      <span>{isMarathi ? 'PDF अहवाल' : 'PDF Report'}</span>
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
@@ -3193,25 +3140,59 @@ export default function ReportsPage() {
                     </div>
                   </div>
 
-                  {/* Quick Search */}
-                  <div className="relative w-full sm:w-72 shrink-0">
-                    <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                    <input
-                      type="text"
-                      value={prapatraSearch}
-                      onChange={(e) => { setPrapatraSearch(e.target.value); setPrapatraPage(1); }}
-                      placeholder={isMarathi ? 'तालुका किंवा गाव शोधा...' : 'Search taluka or village...'}
-                      className="w-full pl-9 pr-8 py-2 bg-slate-800/95 text-white placeholder-slate-400 text-xs rounded-xl border border-slate-700 focus:outline-none focus:ring-2 focus:ring-amber-400 transition"
-                    />
-                    {prapatraSearch && (
+                  {/* Quick Search & Prapatra Download Buttons */}
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 shrink-0">
+                    <div className="relative w-full sm:w-64 shrink-0">
+                      <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                      <input
+                        type="text"
+                        value={prapatraSearch}
+                        onChange={(e) => { setPrapatraSearch(e.target.value); setPrapatraPage(1); }}
+                        placeholder={isMarathi ? 'तालुका किंवा गाव शोधा...' : 'Search taluka or village...'}
+                        className="w-full pl-9 pr-8 py-2 bg-slate-800/95 text-white placeholder-slate-400 text-xs rounded-xl border border-slate-700 focus:outline-none focus:ring-2 focus:ring-amber-400 transition"
+                      />
+                      {prapatraSearch && (
+                        <button
+                          type="button"
+                          onClick={() => { setPrapatraSearch(''); setPrapatraPage(1); }}
+                          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white cursor-pointer"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                    </div>
+
+                    <div className="flex items-center gap-2 shrink-0">
                       <button
                         type="button"
-                        onClick={() => { setPrapatraSearch(''); setPrapatraPage(1); }}
-                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white cursor-pointer"
+                        onClick={() => handleDownload('excel')}
+                        disabled={downloadingExcel}
+                        className="inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-xs transition active:scale-95 cursor-pointer disabled:opacity-60"
+                        title={isMarathi ? 'प्रपत्र एक्सेल प्रत डाऊनलोड करा' : 'Download Prapatra Excel'}
                       >
-                        <X className="w-3.5 h-3.5" />
+                        {downloadingExcel ? (
+                          <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                        ) : (
+                          <FileSpreadsheet className="w-3.5 h-3.5" />
+                        )}
+                        <span>{isMarathi ? `प्रपत्र ${selectedPrapatraId} (.xlsx)` : `Prapatra ${selectedPrapatraId} (.xlsx)`}</span>
                       </button>
-                    )}
+
+                      <button
+                        type="button"
+                        onClick={() => handleDownload('pdf')}
+                        disabled={downloadingPdf}
+                        className="inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold shadow-xs transition active:scale-95 cursor-pointer disabled:opacity-60"
+                        title={isMarathi ? 'प्रपत्र पीडीएफ प्रत डाऊनलोड करा' : 'Download Prapatra PDF'}
+                      >
+                        {downloadingPdf ? (
+                          <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                        ) : (
+                          <Download className="w-3.5 h-3.5" />
+                        )}
+                        <span>{isMarathi ? `प्रपत्र ${selectedPrapatraId} (.pdf)` : `Prapatra ${selectedPrapatraId} (.pdf)`}</span>
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -4478,17 +4459,55 @@ export default function ReportsPage() {
             ========================================================= */
             activeView === 'timeline' ? (
             <div>
-              {/* Official Government Table Title Header Banner */}
-              <div className="p-4 bg-gradient-to-r from-amber-50 via-blue-50/50 to-indigo-50 border-b border-slate-200 flex flex-col items-center text-center">
-              
-                <h3 className="text-base sm:text-lg font-black text-slate-900 tracking-tight">
-                  {isMarathi
-                    ? 'महसूल अधिकार अभिलेखातील (7/12) ची तपासणी सुची'
-                    : 'Record-of-Rights (7/12) Verification Checklist'}
-                </h3>
-               
-               
-            
+              {/* Official Government Table Title Header Banner & Preview Download Buttons (Matching Image 4) */}
+              <div className="p-3 sm:px-4 sm:py-3.5 bg-white border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center shrink-0 border border-blue-200/70 shadow-2xs">
+                    <FileSpreadsheet className="w-4 h-4 text-blue-700" />
+                  </div>
+                  <div className="flex items-center gap-2 flex-wrap min-w-0">
+                    <h3 className="text-xs sm:text-sm font-bold text-slate-900 tracking-tight">
+                      {isMarathi
+                        ? '४६ मुद्द्यांनुसार अभिलेख तपासणी मास्टर नोंदवही'
+                        : '46 Checkpoint Audit Master Inspection Register'}
+                    </h3>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
+                      {isMarathi ? 'रकाने १ ते ४६' : 'Columns 1 to 46'}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => handleDownload('excel')}
+                    disabled={downloadingExcel}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-emerald-50 text-slate-700 hover:text-emerald-800 border border-slate-200 hover:border-emerald-300 rounded-xl text-xs font-bold shadow-2xs transition active:scale-95 cursor-pointer disabled:opacity-60"
+                    title={isMarathi ? '४६ मुद्द्यांचे ५३ स्तंभ एक्सेल डाऊनलोड करा' : 'Download 46-Point Master Excel'}
+                  >
+                    {downloadingExcel ? (
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin text-emerald-600" />
+                    ) : (
+                      <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600" />
+                    )}
+                    <span>{isMarathi ? 'एक्सेल (.xlsx)' : 'Excel (.xlsx)'}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleDownload('pdf')}
+                    disabled={downloadingPdf}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-rose-50 text-slate-700 hover:text-rose-800 border border-slate-200 hover:border-rose-300 rounded-xl text-xs font-bold shadow-2xs transition active:scale-95 cursor-pointer disabled:opacity-60"
+                    title={isMarathi ? 'अधिकृत पीडीएफ अहवाल डाऊनलोड करा' : 'Download Official PDF Report'}
+                  >
+                    {downloadingPdf ? (
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin text-rose-600" />
+                    ) : (
+                      <Download className="w-3.5 h-3.5 text-rose-600" />
+                    )}
+                    <span>{isMarathi ? 'PDF अहवाल' : 'PDF Report'}</span>
+                  </button>
+                </div>
               </div>
 
               {/* Horizontal Scroll Table or Empty State */}
@@ -5147,6 +5166,55 @@ export default function ReportsPage() {
             </div>
           ) : (
             <div>
+              {/* Compact 7/12 Header & Preview Download Buttons */}
+              <div className="p-3 sm:px-4 sm:py-3.5 bg-white border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center shrink-0 border border-blue-200/70 shadow-2xs">
+                    <TableProperties className="w-4 h-4 text-blue-700" />
+                  </div>
+                  <div className="flex items-center gap-2 flex-wrap min-w-0">
+                    <h3 className="text-xs sm:text-sm font-bold text-slate-900 tracking-tight">
+                      {isMarathi ? 'संक्षिप्त ७/१२ तपासणी नोंदवही' : 'Compact 7/12 Inspection Register'}
+                    </h3>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
+                      {isMarathi ? 'रकाने १ ते १०' : 'Columns 1 to 10'}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => handleDownload('excel')}
+                    disabled={downloadingExcel}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-emerald-50 text-slate-700 hover:text-emerald-800 border border-slate-200 hover:border-emerald-300 rounded-xl text-xs font-bold shadow-2xs transition active:scale-95 cursor-pointer disabled:opacity-60"
+                    title={isMarathi ? 'संक्षिप्त ७/१२ एक्सेल प्रत डाऊनलोड करा' : 'Download Compact 7/12 Excel'}
+                  >
+                    {downloadingExcel ? (
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin text-emerald-600" />
+                    ) : (
+                      <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600" />
+                    )}
+                    <span>{isMarathi ? 'एक्सेल (.xlsx)' : 'Excel (.xlsx)'}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleDownload('pdf')}
+                    disabled={downloadingPdf}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-rose-50 text-slate-700 hover:text-rose-800 border border-slate-200 hover:border-rose-300 rounded-xl text-xs font-bold shadow-2xs transition active:scale-95 cursor-pointer disabled:opacity-60"
+                    title={isMarathi ? 'संक्षिप्त ७/१२ पीडीएफ अहवाल डाऊनलोड करा' : 'Download Compact 7/12 PDF'}
+                  >
+                    {downloadingPdf ? (
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin text-rose-600" />
+                    ) : (
+                      <Download className="w-3.5 h-3.5 text-rose-600" />
+                    )}
+                    <span>{isMarathi ? 'PDF अहवाल' : 'PDF Report'}</span>
+                  </button>
+                </div>
+              </div>
+
               <div className="relative">
                 {!loading && paginatedParcels.length === 0 ? (
                   renderEmptyState()
@@ -5155,54 +5223,57 @@ export default function ReportsPage() {
                     {renderActiveCellBar('parcels')}
                     <div className="overflow-x-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
                   <table className="w-full text-left border-collapse text-xs min-w-[840px]">
-                  <thead>
-                    <tr className="bg-slate-100/80 text-slate-700 font-bold border-b border-slate-200 text-center">
-                      <th className={`py-2.5 px-3 border-r border-slate-200 w-12 transition ${selectedCell?.view === 'parcels' && selectedCell?.colKey === 'srNo' ? 'bg-blue-200 text-blue-950 font-black ring-2 ring-inset ring-blue-500' : ''}`}>{isMarathi ? 'अ.क्र.' : 'Sr.'}</th>
-                      <th className={`py-2.5 px-3 border-r border-slate-200 text-left min-w-[120px] transition ${selectedCell?.view === 'parcels' && selectedCell?.colKey === 'village' ? 'bg-blue-200 text-blue-950 font-black ring-2 ring-inset ring-blue-500' : ''}`}>{isMarathi ? 'गावाचे नाव' : 'Village Name'}</th>
-                      <th className={`py-2.5 px-3 border-r border-slate-200 w-24 transition ${selectedCell?.view === 'parcels' && selectedCell?.colKey === 'gatNumber' ? 'bg-blue-200 text-blue-950 font-black ring-2 ring-inset ring-blue-500' : ''}`}>{isMarathi ? 'सर्व्हे / गट क्र.' : 'Survey / Gat No.'}</th>
-                      <th className={`py-2.5 px-3 border-r border-slate-200 w-24 text-right transition-colors ${
+                  <thead className="sticky top-0 z-20 shadow-xs">
+                    {/* Header Row 1: Primary Column Names (Unified Executive Dark Slate Theme) */}
+                    <tr className="bg-slate-800 text-slate-100 font-extrabold border-b border-slate-700 text-center select-none text-xs">
+                      <th className={`py-2.5 px-3 border-r border-slate-700 w-12 text-center transition ${selectedCell?.view === 'parcels' && selectedCell?.colKey === 'srNo' ? 'bg-blue-600 text-white font-black' : 'bg-slate-800 text-slate-100'}`}>{isMarathi ? 'अ.क्र.' : 'Sr.'}</th>
+                      <th className={`py-2.5 px-3 border-r border-slate-700 text-left min-w-[120px] transition ${selectedCell?.view === 'parcels' && selectedCell?.colKey === 'village' ? 'bg-blue-600 text-white font-black' : 'bg-slate-800 text-slate-100'}`}>{isMarathi ? 'गावाचे नाव' : 'Village Name'}</th>
+                      <th className={`py-2.5 px-3 border-r border-slate-700 w-24 text-center transition ${selectedCell?.view === 'parcels' && selectedCell?.colKey === 'gatNumber' ? 'bg-blue-600 text-white font-black' : 'bg-slate-800 text-slate-100'}`}>{isMarathi ? 'सर्व्हे / गट क्र.' : 'Survey / Gat No.'}</th>
+                      <th className={`py-2.5 px-3 border-r border-slate-700 w-24 text-right transition-colors ${
                         selectedCell?.view === 'parcels' && selectedCell?.colKey === 'area'
-                          ? 'bg-blue-200 text-blue-950 font-black ring-2 ring-inset ring-blue-500'
-                          : selectedKpiFilter === 'area' ? 'bg-emerald-100 text-emerald-950 font-black border-emerald-300 ring-1 ring-emerald-400' : ''
+                          ? 'bg-blue-600 text-white font-black'
+                          : selectedKpiFilter === 'area' ? 'bg-emerald-700 text-white font-black ring-1 ring-inset ring-emerald-400' : 'bg-slate-800 text-slate-100'
                       }`}>
                         {isMarathi ? 'क्षेत्र (हे.आर.)' : 'Area (Ha.R)'}
                       </th>
-                      <th className={`py-2.5 px-3 border-r border-slate-200 text-left min-w-[220px] transition ${
+                      <th className={`py-2.5 px-3 border-r border-slate-700 text-left min-w-[220px] transition ${
                         selectedCell?.view === 'parcels' && selectedCell?.colKey === 'owner'
-                          ? 'bg-blue-300 text-blue-950 font-black ring-2 ring-inset ring-blue-600'
-                          : 'bg-blue-50/40 text-blue-950'
+                          ? 'bg-blue-600 text-white font-black'
+                          : 'bg-slate-800 text-slate-100'
                       }`}>
                         {isMarathi ? 'सध्याचे खातेदार / भोगवटादार नाव' : 'Current Khatedar / Occupant Name'}
                       </th>
-                      <th className={`py-2.5 px-3 border-r border-slate-200 w-28 transition-colors ${
+                      <th className={`py-2.5 px-3 border-r border-slate-700 w-28 text-center transition-colors ${
                         selectedCell?.view === 'parcels' && selectedCell?.colKey === 'tenure'
-                          ? 'bg-blue-200 text-blue-950 font-black ring-2 ring-inset ring-blue-500'
-                          : selectedKpiFilter === 'class2' ? 'bg-amber-100 text-amber-950 font-black border-amber-300 ring-1 ring-amber-400' : ''
+                          ? 'bg-blue-600 text-white font-black'
+                          : selectedKpiFilter === 'class2' ? 'bg-amber-700 text-white font-black ring-1 ring-inset ring-amber-400' : 'bg-slate-800 text-slate-100'
                       }`}>
                         {isMarathi ? 'धारणा प्रकार' : 'Tenure Class'}
                       </th>
-                      <th className={`py-2.5 px-3 border-r border-slate-200 text-left min-w-[150px] transition ${selectedCell?.view === 'parcels' && selectedCell?.colKey === 'baselineOwner' ? 'bg-blue-200 text-blue-950 font-black ring-2 ring-inset ring-blue-500' : ''}`}>{isMarathi ? '१९५० मूळ नोंद' : '1950 Baseline Entry'}</th>
-                      <th className={`py-2.5 px-3 border-r border-slate-200 text-left min-w-[180px] transition-colors ${
+                      <th className={`py-2.5 px-3 border-r border-slate-700 text-left min-w-[150px] transition ${selectedCell?.view === 'parcels' && selectedCell?.colKey === 'baselineOwner' ? 'bg-blue-600 text-white font-black' : 'bg-slate-800 text-slate-100'}`}>{isMarathi ? '१९५० मूळ नोंद' : '1950 Baseline Entry'}</th>
+                      <th className={`py-2.5 px-3 border-r border-slate-700 text-left min-w-[180px] transition-colors ${
                         selectedCell?.view === 'parcels' && selectedCell?.colKey === 'statusFinding'
-                          ? 'bg-blue-200 text-blue-950 font-black ring-2 ring-inset ring-blue-500'
-                          : selectedKpiFilter === 'violations' ? 'bg-rose-100 text-rose-950 font-black border-rose-300 ring-1 ring-rose-400' : ''
+                          ? 'bg-blue-600 text-white font-black'
+                          : selectedKpiFilter === 'violations' ? 'bg-rose-700 text-white font-black ring-1 ring-inset ring-rose-400' : 'bg-slate-800 text-slate-100'
                       }`}>
                         {isMarathi ? 'तपासणी निष्कर्ष / सद्यस्थिती' : 'Inspection Finding / Status'}
                       </th>
-                      <th className={`py-2.5 px-3 text-left min-w-[140px] transition ${selectedCell?.view === 'parcels' && selectedCell?.colKey === 'remarks' ? 'bg-blue-200 text-blue-950 font-black ring-2 ring-inset ring-blue-500' : ''}`}>{isMarathi ? 'शेरा व इतर हक्क' : 'Remarks & Other Rights'}</th>
-                      <th className="py-2.5 px-3 w-16 text-center">{isMarathi ? 'तपशील' : 'Details'}</th>
+                      <th className={`py-2.5 px-3 border-r border-slate-700 text-left min-w-[140px] transition ${selectedCell?.view === 'parcels' && selectedCell?.colKey === 'remarks' ? 'bg-blue-600 text-white font-black' : 'bg-slate-800 text-slate-100'}`}>{isMarathi ? 'शेरा व इतर हक्क' : 'Remarks & Other Rights'}</th>
+                      <th className="py-2.5 px-3 w-16 text-center bg-slate-800 text-slate-100">{isMarathi ? 'तपशील' : 'Details'}</th>
                     </tr>
-                    <tr className="bg-slate-50 text-[10px] text-slate-400 text-center border-b border-slate-200 font-mono">
-                      <th className={`py-1 border-r border-slate-200 transition ${selectedCell?.view === 'parcels' && selectedCell?.colKey === 'srNo' ? 'bg-blue-600 text-white font-bold' : ''}`}>{isMarathi ? '१' : '1'}</th>
-                      <th className={`py-1 border-r border-slate-200 transition ${selectedCell?.view === 'parcels' && selectedCell?.colKey === 'village' ? 'bg-blue-600 text-white font-bold' : ''}`}>{isMarathi ? '२' : '2'}</th>
-                      <th className={`py-1 border-r border-slate-200 transition ${selectedCell?.view === 'parcels' && selectedCell?.colKey === 'gatNumber' ? 'bg-blue-600 text-white font-bold' : ''}`}>{isMarathi ? '३' : '3'}</th>
-                      <th className={`py-1 border-r border-slate-200 transition ${selectedCell?.view === 'parcels' && selectedCell?.colKey === 'area' ? 'bg-blue-600 text-white font-bold' : ''}`}>{isMarathi ? '४' : '4'}</th>
-                      <th className={`py-1 border-r border-slate-200 transition ${selectedCell?.view === 'parcels' && selectedCell?.colKey === 'owner' ? 'bg-blue-600 text-white font-bold' : ''}`}>{isMarathi ? '५' : '5'}</th>
-                      <th className={`py-1 border-r border-slate-200 transition ${selectedCell?.view === 'parcels' && selectedCell?.colKey === 'tenure' ? 'bg-blue-600 text-white font-bold' : ''}`}>{isMarathi ? '६' : '6'}</th>
-                      <th className={`py-1 border-r border-slate-200 transition ${selectedCell?.view === 'parcels' && selectedCell?.colKey === 'baselineOwner' ? 'bg-blue-600 text-white font-bold' : ''}`}>{isMarathi ? '७' : '7'}</th>
-                      <th className={`py-1 border-r border-slate-200 transition ${selectedCell?.view === 'parcels' && selectedCell?.colKey === 'statusFinding' ? 'bg-blue-600 text-white font-bold' : ''}`}>{isMarathi ? '८' : '8'}</th>
-                      <th className={`py-1 border-r border-slate-200 transition ${selectedCell?.view === 'parcels' && selectedCell?.colKey === 'remarks' ? 'bg-blue-600 text-white font-bold' : ''}`}>{isMarathi ? '९' : '9'}</th>
-                      <th className="py-1">{isMarathi ? '१०' : '10'}</th>
+
+                    {/* Header Row 2: Statutory Column Reference Numbers (1 to 10) */}
+                    <tr className="bg-slate-900 text-[10px] text-slate-400 text-center border-b border-slate-700 font-mono font-bold select-none">
+                      <th className={`py-1 border-r border-slate-800 transition ${selectedCell?.view === 'parcels' && selectedCell?.colKey === 'srNo' ? 'bg-blue-600 text-white' : ''}`}>{isMarathi ? '१' : '1'}</th>
+                      <th className={`py-1 border-r border-slate-800 transition ${selectedCell?.view === 'parcels' && selectedCell?.colKey === 'village' ? 'bg-blue-600 text-white' : ''}`}>{isMarathi ? '२' : '2'}</th>
+                      <th className={`py-1 border-r border-slate-800 transition ${selectedCell?.view === 'parcels' && selectedCell?.colKey === 'gatNumber' ? 'bg-blue-600 text-white' : ''}`}>{isMarathi ? '३' : '3'}</th>
+                      <th className={`py-1 border-r border-slate-800 transition ${selectedCell?.view === 'parcels' && selectedCell?.colKey === 'area' ? 'bg-blue-600 text-white' : ''}`}>{isMarathi ? '४' : '4'}</th>
+                      <th className={`py-1 border-r border-slate-800 transition ${selectedCell?.view === 'parcels' && selectedCell?.colKey === 'owner' ? 'bg-blue-600 text-white' : ''}`}>{isMarathi ? '५' : '5'}</th>
+                      <th className={`py-1 border-r border-slate-800 transition ${selectedCell?.view === 'parcels' && selectedCell?.colKey === 'tenure' ? 'bg-blue-600 text-white' : ''}`}>{isMarathi ? '६' : '6'}</th>
+                      <th className={`py-1 border-r border-slate-800 transition ${selectedCell?.view === 'parcels' && selectedCell?.colKey === 'baselineOwner' ? 'bg-blue-600 text-white' : ''}`}>{isMarathi ? '७' : '7'}</th>
+                      <th className={`py-1 border-r border-slate-800 transition ${selectedCell?.view === 'parcels' && selectedCell?.colKey === 'statusFinding' ? 'bg-blue-600 text-white' : ''}`}>{isMarathi ? '८' : '8'}</th>
+                      <th className={`py-1 border-r border-slate-800 transition ${selectedCell?.view === 'parcels' && selectedCell?.colKey === 'remarks' ? 'bg-blue-600 text-white' : ''}`}>{isMarathi ? '९' : '9'}</th>
+                      <th className="py-1 text-slate-400">{isMarathi ? '१०' : '10'}</th>
                     </tr>
                   </thead>
                   <tbody className={`divide-y divide-slate-100 transition-opacity duration-200 ${loading ? 'opacity-40 pointer-events-none select-none' : 'opacity-100'}`}>

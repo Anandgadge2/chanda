@@ -158,7 +158,7 @@ export function cleanVillageName(name) {
     'जाम खुर्द': 'जाम खुर्द',
     'चक नवेगाव-3': 'चक नवेगाव',
     'चक नवेगाव': 'चक नवेगाव',
-    'जामतुकूम': 'जामतुकूम रै',
+    'जामतुकूम': 'जामतुकूम',
     'जामतुकूम रै': 'जामतुकूम रै',
     'शेड वाही babapur': 'शेडवाही',
     'शेडवाही': 'शेडवाही',
@@ -226,6 +226,30 @@ export function cleanVillageName(name) {
   raw = raw.replace(/\s+/g, ' ').trim();
 
   return raw || name || 'अज्ञात गाव';
+}
+
+export function getVillageVariants(name) {
+  if (!name || name === 'all' || name === 'सर्व गावे' || name === 'All Villages' || name === 'संपूर्ण तालुका (All Villages)') return [];
+  const raw = String(name).trim();
+  const cleaned = cleanVillageName(raw);
+  const variants = new Set([
+    raw,
+    cleaned,
+    cleaned.replace(/पूर/g, 'पुर'),
+    cleaned.replace(/पुर/g, 'पूर'),
+    cleaned.replace(/रिठ/g, 'रीठ'),
+    cleaned.replace(/रीठ/g, 'रिठ'),
+    cleaned.replace(/तुकूम/g, 'तुकुम'),
+    cleaned.replace(/तुकुम/g, 'तुकूम'),
+    cleaned.replace(/बु$/g, 'बु.'),
+    cleaned.replace(/खु$/g, 'खु.'),
+    cleaned.replace(/रै$/g, 'रै.'),
+    raw.replace(/पूर/g, 'पुर'),
+    raw.replace(/पुर/g, 'पूर'),
+    raw.replace(/रिठ/g, 'रीठ'),
+    raw.replace(/रीठ/g, 'रिठ')
+  ]);
+  return Array.from(variants).filter(Boolean);
 }
 
 const TALUKA_EN_TO_MR = {

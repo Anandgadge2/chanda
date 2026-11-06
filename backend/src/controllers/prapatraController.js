@@ -16,7 +16,8 @@ import {
   generatePrapatra3Excel,
   generatePrapatra4Excel,
   generatePrapatra5Excel,
-  cleanVillageName
+  cleanVillageName,
+  getVillageVariants
 } from '../utils/prapatraGenerator.js';
 import { generatePrapatraPdf } from '../utils/pdfGenerator.js';
 import {
@@ -886,7 +887,7 @@ export async function getPrapatra1to5RollupData(filters = {}) {
     villageWhere.taluka = { equals: targetTaluka, mode: 'insensitive' };
   }
   if (!isAllVillages) {
-    villageWhere.villageName = { equals: village, mode: 'insensitive' };
+    villageWhere.villageName = { in: getVillageVariants(village), mode: 'insensitive' };
   }
 
   let rawVillages = await prisma.prapatraRollup.findMany({
@@ -1223,7 +1224,7 @@ export const getPrapatraReport = async (req, res) => {
         // If tier === 'all' or default: do NOT restrict villageName, return all taluka totals + all village rollups
       } else {
         // District-wide specific village search
-        where.villageName = { equals: village, mode: 'insensitive' };
+        where.villageName = { in: getVillageVariants(village), mode: 'insensitive' };
         scopeName = `चंद्रपूर जिल्हा | गाव: ${cleanVillageName(village)}`;
       }
     } else {
@@ -1237,7 +1238,7 @@ export const getPrapatraReport = async (req, res) => {
         }
         // If tier === 'all' or default: do NOT restrict villageName, return both taluka summary and village rollups for this taluka
       } else {
-        where.villageName = { equals: village, mode: 'insensitive' };
+        where.villageName = { in: getVillageVariants(village), mode: 'insensitive' };
         scopeName = `तालुका: ${targetTaluka} | गाव: ${cleanVillageName(village)}`;
       }
     }
@@ -1376,7 +1377,9 @@ export const getPrapatraReport = async (req, res) => {
     }
     if (!isAllVillages) {
       const cleanV = cleanVillageName(village);
+      const variants = getVillageVariants(village);
       const orConditions = [
+        { villageName: { in: variants, mode: 'insensitive' } },
         { villageName: { contains: cleanV, mode: 'insensitive' } },
         { villageName: { contains: village, mode: 'insensitive' } },
         { revenueCircle: { contains: cleanV, mode: 'insensitive' } }

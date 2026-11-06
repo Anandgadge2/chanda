@@ -5,6 +5,7 @@ import { invalidateAnalyticsCache } from './analyticsController.js';
 import { syncTalukaTotalRollup, recalculateVillageRollup, uploadPrapatraExcel } from './prapatraController.js';
 import { logAudit } from '../middleware/auditMiddleware.js';
 import { generateParcelDossierPdf } from '../utils/parcelDossierGenerator.js';
+import { getVillageVariants, cleanVillageName } from '../utils/prapatraGenerator.js';
 
 /**
  * Bulk Ingest Village Excel Records
@@ -438,7 +439,8 @@ export const getParcels = async (req, res) => {
 
     const targetVillage = village || villageName;
     if (targetVillage && targetVillage !== 'all' && targetVillage !== 'सर्व गावे') {
-      where.villageName = { equals: targetVillage.trim(), mode: 'insensitive' };
+      const variants = getVillageVariants(targetVillage);
+      where.villageName = { in: variants, mode: 'insensitive' };
     }
     if (tenureClass) where.tenureClass = tenureClass;
     if (hasActiveDispute !== undefined && hasActiveDispute !== '') {

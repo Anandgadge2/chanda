@@ -1,6 +1,7 @@
 import prisma from '../config/prisma.js';
 import { generateBookletExcel, getRowData } from '../utils/bookletExcelGenerator.js';
 import { generateBookletPdf } from '../utils/pdfGenerator.js';
+import { getVillageVariants } from '../utils/prapatraGenerator.js';
 
 const modelMap = {
   ceiling: 'ceilingRecord',
@@ -14,7 +15,7 @@ async function getBookletData(type, query, isExport = false) {
 
   const parcelWhere = {};
   if (taluka) parcelWhere.taluka = { equals: taluka, mode: 'insensitive' };
-  if (village) parcelWhere.villageName = { contains: village, mode: 'insensitive' };
+  if (village) parcelWhere.villageName = { in: getVillageVariants(village), mode: 'insensitive' };
   if (surveyNo) parcelWhere.oldSurveyNo = { contains: surveyNo, mode: 'insensitive' };
   if (gatNo) parcelWhere.gatNumber = { contains: gatNo, mode: 'insensitive' };
   if (tenure) parcelWhere.tenureClass = tenure;

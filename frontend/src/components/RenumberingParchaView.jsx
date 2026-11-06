@@ -8,7 +8,9 @@ import {
   RotateCcw,
   CheckCircle2,
   TableProperties,
-  Info
+  Info,
+  FileSpreadsheet,
+  Download
 } from 'lucide-react';
 import { api } from '../lib/api';
 import { useTranslation } from './LanguageContext';
@@ -286,13 +288,45 @@ export default function RenumberingParchaView({
             <button
               type="button"
               onClick={clearAllRows}
-              className="inline-flex items-center gap-1 px-2 py-1 bg-white hover:bg-rose-50 text-rose-700 font-medium text-xs rounded-lg border border-rose-200 shadow-2xs transition cursor-pointer"
+              className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-white hover:bg-rose-50 text-rose-700 font-medium text-xs rounded-xl border border-rose-200 shadow-2xs transition cursor-pointer"
               title="सर्व पंक्ती रिकाम्या करा"
             >
-              <Trash2 className="w-3 h-3 text-rose-500" />
+              <Trash2 className="w-3.5 h-3.5 text-rose-500" />
               <span>साफ करा</span>
             </button>
           )}
+
+          {/* Excel Export Button */}
+          <button
+            type="button"
+            onClick={handleExportExcel}
+            disabled={downloadingExcel || rows.length === 0}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-emerald-50 text-slate-700 hover:text-emerald-800 border border-slate-200 hover:border-emerald-300 rounded-xl text-xs font-bold shadow-2xs transition active:scale-95 cursor-pointer disabled:opacity-50"
+            title="रिनंबरिंग पर्चा एक्सेल प्रत (.xlsx) डाऊनलोड करा"
+          >
+            {downloadingExcel ? (
+              <RefreshCw className="w-3.5 h-3.5 animate-spin text-emerald-600" />
+            ) : (
+              <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600" />
+            )}
+            <span>{isMarathi ? 'एक्सेल (.xlsx)' : 'Excel (.xlsx)'}</span>
+          </button>
+
+          {/* PDF Export Button */}
+          <button
+            type="button"
+            onClick={handleExportPdf}
+            disabled={downloadingPdf || rows.length === 0}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-rose-50 text-slate-700 hover:text-rose-800 border border-slate-200 hover:border-rose-300 rounded-xl text-xs font-bold shadow-2xs transition active:scale-95 cursor-pointer disabled:opacity-50"
+            title="रिनंबरिंग पर्चा अधिकृत शासकीय पीडीएफ प्रत (.pdf) डाऊनलोड करा"
+          >
+            {downloadingPdf ? (
+              <RefreshCw className="w-3.5 h-3.5 animate-spin text-rose-600" />
+            ) : (
+              <Download className="w-3.5 h-3.5 text-rose-600" />
+            )}
+            <span>{isMarathi ? 'PDF अहवाल' : 'PDF Report'}</span>
+          </button>
         </div>
       </div>
 
