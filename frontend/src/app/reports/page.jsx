@@ -3027,13 +3027,13 @@ export default function ReportsPage() {
                       type="button"
                       onClick={() => handleDownload('excel')}
                       disabled={downloadingExcel}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-emerald-50 text-slate-700 hover:text-emerald-800 border border-slate-200 hover:border-emerald-300 rounded-xl text-xs font-bold shadow-2xs transition active:scale-95 cursor-pointer disabled:opacity-60"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-xs transition active:scale-95 cursor-pointer disabled:opacity-60 select-none"
                       title={isMarathi ? 'बुकलेट दोन्ही शीट्स एक्सेल डाऊनलोड करा' : 'Download Booklet Excel'}
                     >
                       {downloadingExcel ? (
-                        <RefreshCw className="w-3.5 h-3.5 animate-spin text-emerald-600" />
+                        <RefreshCw className="w-3.5 h-3.5 animate-spin text-white" />
                       ) : (
-                        <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600" />
+                        <FileSpreadsheet className="w-3.5 h-3.5 text-white" />
                       )}
                       <span>{isMarathi ? `बुकलेट ${selectedCatId} (.xlsx)` : `Booklet ${selectedCatId} (.xlsx)`}</span>
                     </button>
@@ -3042,13 +3042,13 @@ export default function ReportsPage() {
                       type="button"
                       onClick={() => handleDownload('pdf')}
                       disabled={downloadingPdf}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-rose-50 text-slate-700 hover:text-rose-800 border border-slate-200 hover:border-rose-300 rounded-xl text-xs font-bold shadow-2xs transition active:scale-95 cursor-pointer disabled:opacity-60"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold shadow-xs transition active:scale-95 cursor-pointer disabled:opacity-60 select-none"
                       title={isMarathi ? 'बुकलेट पीडीएफ प्रत डाऊनलोड करा' : 'Download Booklet PDF'}
                     >
                       {downloadingPdf ? (
-                        <RefreshCw className="w-3.5 h-3.5 animate-spin text-rose-600" />
+                        <RefreshCw className="w-3.5 h-3.5 animate-spin text-white" />
                       ) : (
-                        <Download className="w-3.5 h-3.5 text-rose-600" />
+                        <Download className="w-3.5 h-3.5 text-white" />
                       )}
                       <span>{isMarathi ? 'PDF अहवाल' : 'PDF Report'}</span>
                     </button>
@@ -3187,9 +3187,9 @@ export default function ReportsPage() {
                         title={isMarathi ? 'प्रपत्र एक्सेल प्रत डाऊनलोड करा' : 'Download Prapatra Excel'}
                       >
                         {downloadingExcel ? (
-                          <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                          <RefreshCw className="w-3.5 h-3.5 animate-spin text-white" />
                         ) : (
-                          <FileSpreadsheet className="w-3.5 h-3.5" />
+                          <FileSpreadsheet className="w-3.5 h-3.5 text-white" />
                         )}
                         <span>{isMarathi ? `प्रपत्र ${selectedPrapatraId} (.xlsx)` : `Prapatra ${selectedPrapatraId} (.xlsx)`}</span>
                       </button>
@@ -3202,9 +3202,9 @@ export default function ReportsPage() {
                         title={isMarathi ? 'प्रपत्र पीडीएफ प्रत डाऊनलोड करा' : 'Download Prapatra PDF'}
                       >
                         {downloadingPdf ? (
-                          <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                          <RefreshCw className="w-3.5 h-3.5 animate-spin text-white" />
                         ) : (
-                          <Download className="w-3.5 h-3.5" />
+                          <Download className="w-3.5 h-3.5 text-white" />
                         )}
                         <span>{isMarathi ? `प्रपत्र ${selectedPrapatraId} (.pdf)` : `Prapatra ${selectedPrapatraId} (.pdf)`}</span>
                       </button>
@@ -4162,286 +4162,202 @@ export default function ReportsPage() {
                   renderEmptyState()
                 ) : (
                   <div className="overflow-x-auto border-b border-slate-200 bg-white relative" style={{ WebkitOverflowScrolling: 'touch' }}>
-                    {isTenancyCategory ? (
-                    <table className="w-full text-left border-collapse text-xs min-w-[1050px]">
-                      <thead>
-                        <tr className="bg-slate-100/90 text-slate-800 font-bold border-b border-slate-300 text-center">
-                          <th className="py-2.5 px-2 border-r border-slate-200 w-12">{isMarathi ? 'अ.क्र.' : 'Sr.'}</th>
-                          <th className="py-2.5 px-3 border-r border-slate-200 text-left min-w-[140px]">{isMarathi ? 'गावाचे नाव' : 'Village Name'}</th>
-                          <th className="py-2.5 px-2 border-r border-slate-200 w-28">{isMarathi ? 'सर्व्हे क्रमांक' : 'Survey No.'}</th>
-                          <th className="py-2.5 px-2 border-r border-slate-200 w-24 text-right">{isMarathi ? 'क्षेत्र (हे.आर.)' : 'Area (Ha)'}</th>
-                          <th className="py-2.5 px-3 border-r border-slate-200 text-left min-w-[200px] bg-blue-50/60 text-blue-950 font-black">{isMarathi ? 'भोगवटदाराचे नाव' : 'Occupant Name'}</th>
-                          <th className="py-2.5 px-2 border-r border-slate-200 w-28 text-center">{isMarathi ? 'भोगवटदार वर्ग' : 'Occupant Class'}</th>
-                          <th className="py-2.5 px-3 border-r border-slate-200 text-center min-w-[150px] bg-emerald-50/60 text-emerald-950 font-bold">{isMarathi ? 'कंपनीने धारण करताना परवानगी घेतलेली आहे काय?' : 'Company Holding Permission Taken?'}</th>
-                          <th className="py-2.5 px-3 border-r border-slate-200 text-center min-w-[150px] bg-amber-50/60 text-amber-950 font-bold">{isMarathi ? 'वापराबाबत शर्तभंग झालेला आहे काय?' : 'Usage Condition Breach Occurred?'}</th>
-                          <th className="py-2.5 px-3 border-r border-slate-200 text-center min-w-[150px] bg-rose-50/60 text-rose-950 font-bold">{isMarathi ? 'हस्तांतरणाबाबत शर्तभंग आहे काय?' : 'Transfer Condition Breach?'}</th>
-                          <th className="py-2.5 px-3 border-r border-slate-200 text-center min-w-[140px] bg-indigo-50/60 text-indigo-950 font-bold">{isMarathi ? 'इतर अधिकारात नोंद घेतलेली आहे काय?' : 'Recorded in Other Rights?'}</th>
-                          <th className="py-2.5 px-2 w-16 text-center">{isMarathi ? 'तपशील' : 'Details'}</th>
-                        </tr>
-                        <tr className="bg-slate-50 text-[10px] text-slate-400 text-center border-b border-slate-200">
-                          <th className="py-1 border-r border-slate-200">१</th>
-                          <th className="py-1 border-r border-slate-200">२</th>
-                          <th className="py-1 border-r border-slate-200">३</th>
-                          <th className="py-1 border-r border-slate-200">४</th>
-                          <th className="py-1 border-r border-slate-200 bg-blue-50/40">५</th>
-                          <th className="py-1 border-r border-slate-200">६</th>
-                          <th className="py-1 border-r border-slate-200 bg-emerald-50/30">७</th>
-                          <th className="py-1 border-r border-slate-200 bg-amber-50/30">८</th>
-                          <th className="py-1 border-r border-slate-200 bg-rose-50/30">९</th>
-                          <th className="py-1 border-r border-slate-200 bg-indigo-50/30">१०</th>
-                          <th className="py-1">-</th>
-                        </tr>
-                      </thead>
-                      <tbody className={`divide-y divide-slate-100 font-sans transition-opacity duration-200 ${loading ? 'opacity-40 pointer-events-none select-none' : 'opacity-100'}`}>
-                        {loading && paginatedParcels.length === 0 ? (
-                          Array.from({ length: 8 }).map((_, sIdx) => (
-                            <tr key={`skel-cat18-data-${sIdx}`} className="animate-pulse border-b border-slate-100">
-                              <td className="py-2.5 px-2 text-center border-r border-slate-100"><div className="h-4 w-6 bg-slate-200 rounded mx-auto" /></td>
-                              <td className="py-2.5 px-3 border-r border-slate-100"><div className="h-4 w-24 bg-slate-200 rounded" /></td>
-                              <td className="py-2.5 px-2 text-center border-r border-slate-100"><div className="h-4 w-12 bg-slate-200 rounded mx-auto" /></td>
-                              <td className="py-2.5 px-2 text-right border-r border-slate-100"><div className="h-4 w-10 bg-slate-200 rounded ml-auto" /></td>
-                              <td className="py-2.5 px-3 border-r border-slate-100"><div className="h-4 w-32 bg-slate-200 rounded" /></td>
-                              <td className="py-2.5 px-2 text-center border-r border-slate-100"><div className="h-5 w-16 bg-slate-200 rounded mx-auto" /></td>
-                              <td className="py-2.5 px-3 border-r border-slate-100"><div className="h-4 w-16 bg-slate-200 rounded mx-auto" /></td>
-                              <td className="py-2.5 px-3 border-r border-slate-100"><div className="h-4 w-16 bg-slate-200 rounded mx-auto" /></td>
-                              <td className="py-2.5 px-3 border-r border-slate-100"><div className="h-4 w-16 bg-slate-200 rounded mx-auto" /></td>
-                              <td className="py-2.5 px-3 border-r border-slate-100"><div className="h-4 w-16 bg-slate-200 rounded mx-auto" /></td>
-                              <td className="py-2.5 px-2 text-center"><div className="h-4 w-8 bg-slate-200 rounded mx-auto" /></td>
-                            </tr>
-                          ))
-                        ) : paginatedParcels.length === 0 ? (
-                          <tr>
-                            <td colSpan={11} className="py-14 text-center">
-                              <div className="max-w-md mx-auto flex flex-col items-center">
-                                <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-3 shadow-2xs border bg-slate-100 text-slate-500 border-slate-200">
-                                  <Filter className="w-6 h-6" />
-                                </div>
-                                <h4 className="text-sm font-bold text-slate-800 mb-1">
-                                  {isMarathi ? 'कुळ कायदा कलम ८९ व ४७ अंतर्गत कोणतेही ७/१२ अभिलेख आढळले नाहीत.' : 'No records found for Tenancy Act Sec 89 & 47.'}
-                                </h4>
-                                <p className="text-xs text-slate-500 mb-3.5">
-                                  {isMarathi ? 'कृपया इतर गाव किंवा तालुका निवडून तपासा.' : 'Please try selecting a different scope.'}
-                                </p>
-                              </div>
-                            </td>
-                          </tr>
-                        ) : (
-                          paginatedParcels.map((p, idx) => {
-                            const hasPermit = p.auditPoints?.point_42 === 'होय' || p.auditPoints?.point_41 === 'होय' || p.tenancy89ARecords?.[0]?.isGenuineIndustrialUse || p.metadata?.auditPoints?.point_42 === 'होय' || p.metadata?.auditPoints?.point_41 === 'होय';
-                            const usageBreach = p.metadata?.auditPoints?.point_44 === 'नाही' || p.metadata?.auditPoints?.point_45_usage === 'होय' || (p.forwardCases?.some(fc => fc.violationType === 'UNAUTHORIZED_NA_CONVERSION'));
-                            const transferBreach = p.metadata?.auditPoints?.point_45_transfer === 'होय' || p.tenancy89ARecords?.[0]?.unauthorizedTransfer || (p.forwardCases?.some(fc => fc.violationType === 'SHARTBHANG' || fc.violationType === 'TRIBAL_LAND_VIOLATION'));
-                            const otherRightsNoted = p.auditPoints?.point_40 === 'होय' || p.auditPoints?.point_39 === 'होय' || (p.metadata?.otherRights && p.metadata?.otherRights !== '-' && p.metadata?.otherRights !== '....');
+                    {(() => {
+                      const detailedCols = getDetailedColumnsForBooklet(currentCategory?.id, isMarathi);
+                      const totalTableCols = detailedCols.length + 2;
+                      const marathiNumbers = ['१', '२', '३', '४', '५', '६', '७', '८', '९', '१०', '११', '१२', '१३', '१४', '१५', '१६', '१७', '१८'];
 
-                            return (
-                              <tr key={p.id || idx} className={`hover:bg-slate-50/80 transition ${usageBreach || transferBreach ? 'bg-rose-50/25' : ''}`}>
-                                <td className="py-2 px-2 text-center border-r border-slate-200 font-mono text-slate-600">
-                                  {(page - 1) * effectivePageSize + idx + 1}
-                                </td>
-                                <td className="py-2 px-3 border-r border-slate-200 font-medium text-slate-900">{formatVillageName(p.villageName, isMarathi)}</td>
-                                <td className="py-2 px-2 text-center border-r border-slate-200 font-mono font-bold text-slate-800">{p.gatNumber || p.oldSurveyNo || '-'}</td>
-                                <td className="py-2 px-2 text-right border-r border-slate-200 font-mono font-bold text-slate-900">{Number(p.totalAreaHa || 0).toFixed(4)}</td>
-                                <td className="py-2 px-3 border-r border-slate-200 bg-blue-50/20 font-bold text-blue-950">{p.currentOwner || (isMarathi ? 'नोंद उपलब्ध नाही' : 'No record available')}</td>
-                                <td className="py-2 px-2 text-center border-r border-slate-200">
-                                  <span className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-bold ${
-                                    p.tenureClass === 'BHOGVATDAR_CLASS_1' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-900 font-black'
-                                  }`}>
-                                    {p.tenureDisplay || (p.tenureClass === 'BHOGVATDAR_CLASS_1' ? 'वर्ग १' : 'वर्ग २')}
-                                  </span>
-                                </td>
-                                <td className="py-2 px-3 border-r border-slate-200 text-center">
-                                  <span className={`inline-block px-2 py-0.5 rounded-md text-[11px] font-bold ${
-                                    hasPermit ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-900'
-                                  }`}>
-                                    {hasPermit ? (isMarathi ? 'होय' : 'Yes') : (isMarathi ? 'नाही' : 'No')}
-                                  </span>
-                                </td>
-                                <td className="py-2 px-3 border-r border-slate-200 text-center">
-                                  <span className={`inline-block px-2 py-0.5 rounded-md text-[11px] font-bold ${
-                                    usageBreach ? 'bg-rose-100 text-rose-800 shadow-2xs' : 'bg-slate-100 text-slate-600'
-                                  }`}>
-                                    {usageBreach ? (isMarathi ? 'होय' : 'Yes') : (isMarathi ? 'नाही' : 'No')}
-                                  </span>
-                                </td>
-                                <td className="py-2 px-3 border-r border-slate-200 text-center">
-                                  <span className={`inline-block px-2 py-0.5 rounded-md text-[11px] font-bold ${
-                                    transferBreach ? 'bg-red-100 text-red-800 shadow-2xs' : 'bg-slate-100 text-slate-600'
-                                  }`}>
-                                    {transferBreach ? (isMarathi ? 'होय' : 'Yes') : (isMarathi ? 'नाही' : 'No')}
-                                  </span>
-                                </td>
-                                <td className="py-2 px-3 border-r border-slate-200 text-center">
-                                  <span className={`inline-block px-2 py-0.5 rounded-md text-[11px] font-bold ${
-                                    otherRightsNoted ? 'bg-blue-100 text-blue-900' : 'bg-slate-100 text-slate-500'
-                                  }`}>
-                                    {otherRightsNoted ? (isMarathi ? 'होय' : 'Yes') : (isMarathi ? 'नाही' : 'No')}
-                                  </span>
-                                </td>
-                                <td className="py-2 px-2 text-center">
-                                  <button
-                                    onClick={() => setInspectedParcel(p)}
-                                    className="p-1.5 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded-lg transition cursor-pointer"
-                                    title={isMarathi ? 'तपशील पहा' : 'View details'}
-                                  >
-                                    <Eye className="w-4 h-4" />
-                                  </button>
+                      return (
+                        <table className="w-full text-left border-collapse text-xs min-w-[1050px]">
+                          <thead>
+                            <tr className="bg-slate-800 text-slate-100 font-bold border-b border-slate-700 text-center">
+                              <th className="py-2.5 px-2 border-r border-slate-700 w-12">{isMarathi ? 'अ.क्र.' : 'Sr.'}</th>
+                              {detailedCols.map((col, cIdx) => (
+                                <th
+                                  key={`th-col-${cIdx}`}
+                                  className={clsx(
+                                    "py-2.5 px-3 border-r border-slate-700",
+                                    col.minW || 'min-w-[120px]',
+                                    col.align === 'left' ? 'text-left' : col.align === 'right' ? 'text-right' : 'text-center',
+                                    col.isOwner ? 'bg-slate-900/60 text-blue-200 font-black' : ''
+                                  )}
+                                >
+                                  {col.label}
+                                </th>
+                              ))}
+                              <th className="py-2.5 px-2 w-16 text-center">{isMarathi ? 'तपशील' : 'Details'}</th>
+                            </tr>
+                            <tr className="bg-slate-900/90 text-[10px] text-slate-300 text-center border-b border-slate-700">
+                              <th className="py-1 border-r border-slate-700">१</th>
+                              {detailedCols.map((_, cIdx) => (
+                                <th key={`th-num-${cIdx}`} className="py-1 border-r border-slate-700 font-mono">
+                                  {isMarathi ? marathiNumbers[cIdx + 1] || (cIdx + 2) : (cIdx + 2)}
+                                </th>
+                              ))}
+                              <th className="py-1">-</th>
+                            </tr>
+                          </thead>
+                          <tbody className={`divide-y divide-slate-100 font-sans transition-opacity duration-200 ${loading ? 'opacity-40 pointer-events-none select-none' : 'opacity-100'}`}>
+                            {loading && paginatedParcels.length === 0 ? (
+                              Array.from({ length: 8 }).map((_, sIdx) => (
+                                <tr key={`skel-cat-data-${sIdx}`} className="animate-pulse border-b border-slate-100">
+                                  <td className="py-2.5 px-2 text-center border-r border-slate-100"><div className="h-4 w-6 bg-slate-200 rounded mx-auto" /></td>
+                                  {detailedCols.map((col, cIdx) => (
+                                    <td key={`skel-td-${cIdx}`} className="py-2.5 px-3 border-r border-slate-100">
+                                      <div className={clsx("h-4 bg-slate-200 rounded", col.align === 'center' ? 'mx-auto w-16' : col.align === 'right' ? 'ml-auto w-14' : 'w-24')} />
+                                    </td>
+                                  ))}
+                                  <td className="py-2.5 px-2 text-center"><div className="h-4 w-8 bg-slate-200 rounded mx-auto" /></td>
+                                </tr>
+                              ))
+                            ) : paginatedParcels.length === 0 ? (
+                              <tr>
+                                <td colSpan={totalTableCols} className="py-14 text-center">
+                                  <div className="max-w-md mx-auto flex flex-col items-center">
+                                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-3 shadow-2xs border ${
+                                      selectedKpiFilter === 'violations'
+                                        ? 'bg-rose-50 text-rose-600 border-rose-200'
+                                        : selectedKpiFilter === 'class2'
+                                        ? 'bg-amber-50 text-amber-600 border-amber-200'
+                                        : 'bg-slate-100 text-slate-500 border-slate-200'
+                                    }`}>
+                                      <Filter className="w-6 h-6" />
+                                    </div>
+                                    <h4 className="text-sm font-bold text-slate-800 mb-1">
+                                      {selectedKpiFilter !== 'all'
+                                        ? (isMarathi
+                                            ? `${selectedKpiFilter === 'class2' ? 'भोगवटादार वर्ग २ / शासकीय' : selectedKpiFilter === 'violations' ? 'शर्तभंग / संशयित बाबी' : 'निवडलेल्या'} निकषात एकही नोंद नाही.`
+                                            : 'No records match this KPI filter in current selection.')
+                                        : (isMarathi ? 'सदर विषयाकरिता कोणतेही ७/१२ अभिलेख आढळले नाहीत.' : 'No records found for this category.')}
+                                    </h4>
+                                    <p className="text-xs text-slate-500 mb-3.5">
+                                      {selectedKpiFilter !== 'all'
+                                        ? (isMarathi
+                                            ? 'निवडलेल्या गावात या विशिष्ट श्रेणीतील अभिलेख निरंक (०) आहेत.'
+                                            : 'There are 0 matching records for this KPI filter.')
+                                        : (isMarathi ? 'कृपया इतर गाव किंवा तालुका निवडून तपासा.' : 'Please try selecting a different scope.')}
+                                    </p>
+                                    {selectedKpiFilter !== 'all' && (
+                                      <button
+                                        type="button"
+                                        onClick={() => { setSelectedKpiFilter('all'); setPage(1); }}
+                                        className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-blue-900 text-white rounded-xl text-xs font-bold hover:bg-blue-800 transition shadow-2xs cursor-pointer active:scale-95"
+                                      >
+                                        <RotateCcw className="w-3.5 h-3.5" />
+                                        <span>{isMarathi ? 'सर्व अभिलेख दाखवा' : 'Show All Records'}</span>
+                                      </button>
+                                    )}
+                                  </div>
                                 </td>
                               </tr>
-                            );
-                          })
-                        )}
-                      </tbody>
-                    </table>
-                  ) : (
-                  <table className="w-full text-left border-collapse text-xs min-w-[1000px]">
-                    <thead>
-                      <tr className="bg-slate-100/90 text-slate-800 font-bold border-b border-slate-300 text-center">
-                        <th className="py-2.5 px-2 border-r border-slate-200 w-12">{isMarathi ? 'अ.क्र.' : 'Sr.'}</th>
-                        <th className="py-2.5 px-3 border-r border-slate-200 text-left min-w-[110px]">{isMarathi ? 'तालुका' : 'Taluka'}</th>
-                        <th className="py-2.5 px-3 border-r border-slate-200 text-left min-w-[130px]">{isMarathi ? 'गाव' : 'Village'}</th>
-                        <th className="py-2.5 px-2 border-r border-slate-200 w-24">{isMarathi ? 'गट क्र.' : 'Gat No.'}</th>
-                        <th className="py-2.5 px-2 border-r border-slate-200 w-24">{isMarathi ? 'जुना स.नं.' : 'Old Survey'}</th>
-                        <th className={`py-2.5 px-2 border-r border-slate-200 w-24 text-right transition ${selectedKpiFilter === 'area' ? 'bg-emerald-100/90 text-emerald-950 font-black ring-1 ring-emerald-400' : ''}`}>{isMarathi ? 'क्षेत्र (हे.)' : 'Area (Ha)'}</th>
-                        <th className="py-2.5 px-3 border-r border-slate-200 text-left min-w-[220px] bg-blue-50/60 text-blue-950 font-black">
-                          {isMarathi ? 'सध्याचे खातेदार / भोगवटादाराचे नाव' : 'Current Khatedar / Occupant'}
-                        </th>
-                        <th className="py-2.5 px-3 border-r border-slate-200 text-left min-w-[180px] bg-amber-50/50 text-amber-950">
-                          {isMarathi ? 'सन १९५० मधील मूळ नोंद / मालक' : '1950 Baseline Owner'}
-                        </th>
-                        <th className={`py-2.5 px-2 border-r border-slate-200 w-28 text-center transition ${selectedKpiFilter === 'class2' ? 'bg-amber-100/90 text-amber-950 font-black ring-1 ring-amber-400' : ''}`}>{isMarathi ? 'धारणा प्रकार' : 'Tenure'}</th>
-                        <th className={`py-2.5 px-3 border-r border-slate-200 text-left min-w-[180px] transition ${selectedKpiFilter === 'violations' ? 'bg-rose-100/90 text-rose-950 font-black ring-1 ring-rose-400' : ''}`}>{isMarathi ? 'तपासणी निष्कर्ष / सद्यस्थिती' : 'Audit Finding'}</th>
-                        <th className="py-2.5 px-3 border-r border-slate-200 text-left min-w-[130px] font-mono">{isMarathi ? 'फेरफार / आदेश' : 'Order Ref'}</th>
-                        <th className="py-2.5 px-3 border-r border-slate-200 text-left min-w-[140px]">{isMarathi ? 'शेरा व इतर हक्क' : 'Remarks'}</th>
-                        <th className="py-2.5 px-2 w-16 text-center">{isMarathi ? 'तपशील' : 'Details'}</th>
-                      </tr>
-                      <tr className="bg-slate-50 text-[10px] text-slate-400 text-center border-b border-slate-200">
-                        <th className="py-1 border-r border-slate-200">१</th>
-                        <th className="py-1 border-r border-slate-200">२</th>
-                        <th className="py-1 border-r border-slate-200">३</th>
-                        <th className="py-1 border-r border-slate-200">४</th>
-                        <th className="py-1 border-r border-slate-200">५</th>
-                        <th className="py-1 border-r border-slate-200">६</th>
-                        <th className="py-1 border-r border-slate-200 bg-blue-50/40">७</th>
-                        <th className="py-1 border-r border-slate-200 bg-amber-50/30">८</th>
-                        <th className="py-1 border-r border-slate-200">९</th>
-                        <th className="py-1 border-r border-slate-200">१०</th>
-                        <th className="py-1 border-r border-slate-200">११</th>
-                        <th className="py-1 border-r border-slate-200">१२</th>
-                        <th className="py-1">-</th>
-                      </tr>
-                    </thead>
-                    <tbody className={`divide-y divide-slate-100 transition-opacity duration-200 ${loading ? 'opacity-40 pointer-events-none select-none' : 'opacity-100'}`}>
-                      {loading && paginatedParcels.length === 0 ? (
-                        Array.from({ length: 8 }).map((_, sIdx) => (
-                          <tr key={`skel-cat-data-${sIdx}`} className="animate-pulse border-b border-slate-100">
-                            <td className="py-2.5 px-2 text-center border-r border-slate-100"><div className="h-4 w-6 bg-slate-200 rounded mx-auto" /></td>
-                            <td className="py-2.5 px-3 border-r border-slate-100"><div className="h-4 w-20 bg-slate-200 rounded" /></td>
-                            <td className="py-2.5 px-3 border-r border-slate-100"><div className="h-4 w-24 bg-slate-200 rounded" /></td>
-                            <td className="py-2.5 px-2 text-center border-r border-slate-100"><div className="h-4 w-12 bg-slate-200 rounded mx-auto" /></td>
-                            <td className="py-2.5 px-2 text-center border-r border-slate-100"><div className="h-4 w-12 bg-slate-200 rounded mx-auto" /></td>
-                            <td className="py-2.5 px-2 text-right border-r border-slate-100"><div className="h-4 w-10 bg-slate-200 rounded ml-auto" /></td>
-                            <td className="py-2.5 px-3 border-r border-slate-100"><div className="h-4 w-32 bg-slate-200 rounded" /></td>
-                            <td className="py-2.5 px-3 border-r border-slate-100"><div className="h-4 w-24 bg-slate-200 rounded" /></td>
-                            <td className="py-2.5 px-2 text-center border-r border-slate-100"><div className="h-5 w-16 bg-slate-200 rounded mx-auto" /></td>
-                            <td className="py-2.5 px-3 border-r border-slate-100"><div className="h-4 w-28 bg-slate-200 rounded" /></td>
-                            <td className="py-2.5 px-3 border-r border-slate-100"><div className="h-4 w-20 bg-slate-200 rounded" /></td>
-                            <td className="py-2.5 px-3 border-r border-slate-100"><div className="h-4 w-20 bg-slate-200 rounded" /></td>
-                            <td className="py-2.5 px-2 text-center"><div className="h-4 w-8 bg-slate-200 rounded mx-auto" /></td>
-                          </tr>
-                        ))
-                      ) : paginatedParcels.length === 0 ? (
-                        <tr>
-                          <td colSpan={13} className="py-14 text-center">
-                            <div className="max-w-md mx-auto flex flex-col items-center">
-                              <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-3 shadow-2xs border ${
-                                selectedKpiFilter === 'violations'
-                                  ? 'bg-rose-50 text-rose-600 border-rose-200'
-                                  : selectedKpiFilter === 'class2'
-                                  ? 'bg-amber-50 text-amber-600 border-amber-200'
-                                  : 'bg-slate-100 text-slate-500 border-slate-200'
-                              }`}>
-                                <Filter className="w-6 h-6" />
-                              </div>
-                              <h4 className="text-sm font-bold text-slate-800 mb-1">
-                                {selectedKpiFilter !== 'all'
-                                  ? (isMarathi
-                                      ? `${selectedKpiFilter === 'class2' ? 'भोगवटादार वर्ग २ / शासकीय' : selectedKpiFilter === 'violations' ? 'शर्तभंग / संशयित बाबी' : 'निवडलेल्या'} निकषात एकही नोंद नाही.`
-                                      : 'No records match this KPI filter in current selection.')
-                                  : (isMarathi ? 'सदर विषयाकरिता कोणतेही ७/१२ अभिलेख आढळले नाहीत.' : 'No records found for this category.')}
-                              </h4>
-                              <p className="text-xs text-slate-500 mb-3.5">
-                                {selectedKpiFilter !== 'all'
-                                  ? (isMarathi
-                                      ? 'निवडलेल्या गावात या विशिष्ट श्रेणीतील अभिलेख निरंक (०) आहेत.'
-                                      : 'There are 0 matching records for this KPI filter.')
-                                  : (isMarathi ? 'कृपया इतर गाव किंवा तालुका निवडून तपासा.' : 'Please try selecting a different scope.')}
-                              </p>
-                              {selectedKpiFilter !== 'all' && (
-                                <button
-                                  type="button"
-                                  onClick={() => { setSelectedKpiFilter('all'); setPage(1); }}
-                                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-blue-900 text-white rounded-xl text-xs font-bold hover:bg-blue-800 transition shadow-2xs cursor-pointer active:scale-95"
-                                >
-                                  <RotateCcw className="w-3.5 h-3.5" />
-                                  <span>{isMarathi ? 'सर्व अभिलेख दाखवा' : 'Show All Records'}</span>
-                                </button>
-                              )}
-                            </div>
-                          </td>
-                        </tr>
-                      ) : (
-                        paginatedParcels.map((p, idx) => {
-                          const hasAlert = p.statusFinding?.includes('शर्तभंग') || p.statusFinding?.includes('अवैध') || p.statusFinding?.includes('अतिक्रमण');
-                          return (
-                            <tr key={p.id || idx} className={`hover:bg-slate-50/80 transition ${hasAlert ? 'bg-rose-50/20' : ''}`}>
-                              <td className="py-2 px-2 text-center border-r border-slate-200 font-mono text-slate-600">
-                                {(page - 1) * effectivePageSize + idx + 1}
-                              </td>
-                              <td className="py-2 px-3 border-r border-slate-200 text-slate-700 font-medium">{formatTalukaName(p.taluka, isMarathi)}</td>
-                              <td className="py-2 px-3 border-r border-slate-200 font-medium text-slate-900">{formatVillageName(p.villageName, isMarathi)}</td>
-                              <td className="py-2 px-2 text-center border-r border-slate-200 font-mono font-bold text-slate-800">{p.gatNumber || '-'}</td>
-                              <td className="py-2 px-2 text-center border-r border-slate-200 font-mono text-slate-600">{p.oldSurveyNo || '-'}</td>
-                              <td className={`py-2 px-2 text-right border-r border-slate-200 font-mono font-bold transition ${selectedKpiFilter === 'area' ? 'bg-emerald-50 text-emerald-950 font-black ring-1 ring-inset ring-emerald-300' : 'text-slate-900'}`}>{Number(p.totalAreaHa || 0).toFixed(4)}</td>
-                              <td className="py-2 px-3 border-r border-slate-200 bg-blue-50/20 font-bold text-blue-950">{p.currentOwner || (isMarathi ? 'नोंद उपलब्ध नाही' : 'No record available')}</td>
-                              <td className="py-2 px-3 border-r border-slate-200 bg-amber-50/20 text-slate-700 font-medium">{p.baselineOwner1950 || '-'}</td>
-                              <td className={`py-2 px-2 text-center border-r border-slate-200 transition ${selectedKpiFilter === 'class2' ? 'bg-amber-50/80 ring-1 ring-inset ring-amber-300' : ''}`}>
-                                <span className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-bold ${
-                                  p.tenureClass === 'BHOGVATDAR_CLASS_1'
-                                    ? 'bg-emerald-100 text-emerald-800'
-                                    : p.tenureClass === 'BHOGVATDAR_CLASS_2'
-                                    ? 'bg-amber-100 text-amber-900 font-black'
-                                    : p.tenureClass === 'SARKAR_SHASAN'
-                                    ? 'bg-rose-100 text-rose-800'
-                                    : 'bg-slate-100 text-slate-700'
-                                }`}>
-                                  {p.tenureDisplay || p.tenureClass || '-'}
-                                </span>
-                              </td>
-                              <td className={`py-2 px-3 border-r border-slate-200 transition ${selectedKpiFilter === 'violations' ? 'bg-rose-50/80 ring-1 ring-inset ring-rose-300' : ''}`}>
-                                <span className={`inline-block px-2 py-0.5 rounded-md text-[11px] font-semibold ${
-                                  hasAlert ? 'bg-rose-100 text-rose-800 font-bold shadow-2xs' : 'bg-slate-100 text-slate-700'
-                                }`}>
-                                  {p.statusFinding || (isMarathi ? 'प्रमाणित' : 'Verified')}
-                                </span>
-                              </td>
-                              <td className="py-2 px-3 border-r border-slate-200 font-mono text-[11px] text-slate-600">{p.orderRef || '-'}</td>
-                              <td className="py-2 px-3 border-r border-slate-200 text-slate-600 text-[11px] max-w-[220px]" title={p.remarks}>{p.remarks || '-'}</td>
-                              <td className="py-2 px-2 text-center">
-                                <button
-                                  onClick={() => setInspectedParcel(p)}
-                                  className="p-1.5 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded-lg transition cursor-pointer"
-                                  title={isMarathi ? 'तपशील पहा' : 'View details'}
-                                >
-                                  <Eye className="w-4 h-4" />
-                                </button>
-                              </td>
-                            </tr>
-                          );
-                        })
-                      )}
-                    </tbody>
-                  </table>
-                  )}
+                            ) : (
+                              paginatedParcels.map((p, idx) => {
+                                const isBreach = p.metadata?.flags?.isShartbhang || p.auditPoints?.point_37 === 'होय' || (p.forwardCases?.some(fc => fc.violationType === 'SHARTBHANG'));
 
+                                return (
+                                  <tr key={p.id || idx} className={`hover:bg-slate-50/80 transition ${isBreach ? 'bg-rose-50/25' : ''}`}>
+                                    <td className="py-2 px-2 text-center border-r border-slate-200 font-mono text-slate-600">
+                                      {(page - 1) * effectivePageSize + idx + 1}
+                                    </td>
+                                    {detailedCols.map((col, cIdx) => {
+                                      const val = col.getValue ? col.getValue(p) : p[col.key];
+
+                                      // 1. Tenure badge
+                                      if (col.isTenureBadge) {
+                                        const isC1 = p.tenureClass === 'BHOGVATDAR_CLASS_1';
+                                        return (
+                                          <td key={`cell-${idx}-${cIdx}`} className="py-2 px-2 text-center border-r border-slate-200">
+                                            <span className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-bold ${
+                                              isC1 ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-900 font-black'
+                                            }`}>
+                                              {val || (isC1 ? (isMarathi ? 'वर्ग १' : 'Class 1') : (isMarathi ? 'वर्ग २' : 'Class 2'))}
+                                            </span>
+                                          </td>
+                                        );
+                                      }
+
+                                      // 2. Badge (Alert / Boolean Yes-No)
+                                      if (col.isBadge) {
+                                        const isAlert = col.isAlertVal ? col.isAlertVal(val) : false;
+                                        const isPositive = val === 'होय' || val === 'आहे' || val === 'Yes';
+                                        return (
+                                          <td key={`cell-${idx}-${cIdx}`} className="py-2 px-3 border-r border-slate-200 text-center">
+                                            <span className={`inline-block px-2 py-0.5 rounded-md text-[11px] font-bold ${
+                                              isAlert
+                                                ? 'bg-rose-100 text-rose-800 shadow-2xs border border-rose-200'
+                                                : isPositive
+                                                ? 'bg-emerald-100 text-emerald-800'
+                                                : 'bg-slate-100 text-slate-600'
+                                            }`}>
+                                              {val || (isMarathi ? 'नाही' : 'No')}
+                                            </span>
+                                          </td>
+                                        );
+                                      }
+
+                                      // 3. Area column
+                                      if (col.isArea) {
+                                        return (
+                                          <td key={`cell-${idx}-${cIdx}`} className="py-2 px-2 text-right border-r border-slate-200 font-mono font-bold text-slate-900">
+                                            {val}
+                                          </td>
+                                        );
+                                      }
+
+                                      // 4. Owner column
+                                      if (col.isOwner) {
+                                        return (
+                                          <td key={`cell-${idx}-${cIdx}`} className="py-2 px-3 border-r border-slate-200 bg-blue-50/20 font-bold text-blue-950">
+                                            {val || (isMarathi ? 'नोंद उपलब्ध नाही' : 'No record available')}
+                                          </td>
+                                        );
+                                      }
+
+                                      // 5. Survey No (Mono)
+                                      if (col.isMono) {
+                                        return (
+                                          <td key={`cell-${idx}-${cIdx}`} className="py-2 px-2 text-center border-r border-slate-200 font-mono font-bold text-slate-800">
+                                            {val || '-'}
+                                          </td>
+                                        );
+                                      }
+
+                                      // 6. Village column
+                                      if (col.key === 'village') {
+                                        return (
+                                          <td key={`cell-${idx}-${cIdx}`} className="py-2 px-3 border-r border-slate-200 font-medium text-slate-900">
+                                            {formatVillageName(val || p.villageName, isMarathi)}
+                                          </td>
+                                        );
+                                      }
+
+                                      // 7. Default text column
+                                      return (
+                                        <td key={`cell-${idx}-${cIdx}`} className={clsx(
+                                          "py-2 px-3 border-r border-slate-200",
+                                          col.align === 'left' ? 'text-left font-medium text-slate-900' : col.align === 'right' ? 'text-right font-mono' : 'text-center'
+                                        )}>
+                                          {val || '-'}
+                                        </td>
+                                      );
+                                    })}
+                                    <td className="py-2 px-2 text-center">
+                                      <button
+                                        onClick={() => setInspectedParcel(p)}
+                                        className="p-1.5 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded-lg transition cursor-pointer"
+                                        title={isMarathi ? 'तपशील पहा' : 'View details'}
+                                      >
+                                        <Eye className="w-4 h-4" />
+                                      </button>
+                                    </td>
+                                  </tr>
+                                );
+                              })
+                            )}
+                          </tbody>
+                        </table>
+                      );
+                    })()}
                   {loading && renderTableLoadingOverlay()}
                 </div>
                 )}
@@ -4498,13 +4414,13 @@ export default function ReportsPage() {
                     type="button"
                     onClick={() => handleDownload('excel')}
                     disabled={downloadingExcel}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-emerald-50 text-slate-700 hover:text-emerald-800 border border-slate-200 hover:border-emerald-300 rounded-xl text-xs font-bold shadow-2xs transition active:scale-95 cursor-pointer disabled:opacity-60"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-xs transition active:scale-95 cursor-pointer disabled:opacity-60 select-none"
                     title={isMarathi ? '४६ मुद्द्यांचे ५३ स्तंभ एक्सेल डाऊनलोड करा' : 'Download 46-Point Master Excel'}
                   >
                     {downloadingExcel ? (
-                      <RefreshCw className="w-3.5 h-3.5 animate-spin text-emerald-600" />
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin text-white" />
                     ) : (
-                      <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600" />
+                      <FileSpreadsheet className="w-3.5 h-3.5 text-white" />
                     )}
                     <span>{isMarathi ? 'एक्सेल (.xlsx)' : 'Excel (.xlsx)'}</span>
                   </button>
@@ -4513,13 +4429,13 @@ export default function ReportsPage() {
                     type="button"
                     onClick={() => handleDownload('pdf')}
                     disabled={downloadingPdf}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-rose-50 text-slate-700 hover:text-rose-800 border border-slate-200 hover:border-rose-300 rounded-xl text-xs font-bold shadow-2xs transition active:scale-95 cursor-pointer disabled:opacity-60"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold shadow-xs transition active:scale-95 cursor-pointer disabled:opacity-60 select-none"
                     title={isMarathi ? 'अधिकृत पीडीएफ अहवाल डाऊनलोड करा' : 'Download Official PDF Report'}
                   >
                     {downloadingPdf ? (
-                      <RefreshCw className="w-3.5 h-3.5 animate-spin text-rose-600" />
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin text-white" />
                     ) : (
-                      <Download className="w-3.5 h-3.5 text-rose-600" />
+                      <Download className="w-3.5 h-3.5 text-white" />
                     )}
                     <span>{isMarathi ? 'PDF अहवाल' : 'PDF Report'}</span>
                   </button>
@@ -5203,13 +5119,13 @@ export default function ReportsPage() {
                     type="button"
                     onClick={() => handleDownload('excel')}
                     disabled={downloadingExcel}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-emerald-50 text-slate-700 hover:text-emerald-800 border border-slate-200 hover:border-emerald-300 rounded-xl text-xs font-bold shadow-2xs transition active:scale-95 cursor-pointer disabled:opacity-60"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-xs transition active:scale-95 cursor-pointer disabled:opacity-60 select-none"
                     title={isMarathi ? 'संक्षिप्त ७/१२ एक्सेल प्रत डाऊनलोड करा' : 'Download Compact 7/12 Excel'}
                   >
                     {downloadingExcel ? (
-                      <RefreshCw className="w-3.5 h-3.5 animate-spin text-emerald-600" />
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin text-white" />
                     ) : (
-                      <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600" />
+                      <FileSpreadsheet className="w-3.5 h-3.5 text-white" />
                     )}
                     <span>{isMarathi ? 'एक्सेल (.xlsx)' : 'Excel (.xlsx)'}</span>
                   </button>
@@ -5218,13 +5134,13 @@ export default function ReportsPage() {
                     type="button"
                     onClick={() => handleDownload('pdf')}
                     disabled={downloadingPdf}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-rose-50 text-slate-700 hover:text-rose-800 border border-slate-200 hover:border-rose-300 rounded-xl text-xs font-bold shadow-2xs transition active:scale-95 cursor-pointer disabled:opacity-60"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold shadow-xs transition active:scale-95 cursor-pointer disabled:opacity-60 select-none"
                     title={isMarathi ? 'संक्षिप्त ७/१२ पीडीएफ अहवाल डाऊनलोड करा' : 'Download Compact 7/12 PDF'}
                   >
                     {downloadingPdf ? (
-                      <RefreshCw className="w-3.5 h-3.5 animate-spin text-rose-600" />
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin text-white" />
                     ) : (
-                      <Download className="w-3.5 h-3.5 text-rose-600" />
+                      <Download className="w-3.5 h-3.5 text-white" />
                     )}
                     <span>{isMarathi ? 'PDF अहवाल' : 'PDF Report'}</span>
                   </button>

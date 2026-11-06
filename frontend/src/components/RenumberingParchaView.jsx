@@ -301,13 +301,13 @@ export default function RenumberingParchaView({
             type="button"
             onClick={handleExportExcel}
             disabled={downloadingExcel || rows.length === 0}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-emerald-50 text-slate-700 hover:text-emerald-800 border border-slate-200 hover:border-emerald-300 rounded-xl text-xs font-bold shadow-2xs transition active:scale-95 cursor-pointer disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-xs transition active:scale-95 cursor-pointer disabled:opacity-50 select-none"
             title="रिनंबरिंग पर्चा एक्सेल प्रत (.xlsx) डाऊनलोड करा"
           >
             {downloadingExcel ? (
-              <RefreshCw className="w-3.5 h-3.5 animate-spin text-emerald-600" />
+              <RefreshCw className="w-3.5 h-3.5 animate-spin text-white" />
             ) : (
-              <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600" />
+              <FileSpreadsheet className="w-3.5 h-3.5 text-white" />
             )}
             <span>{isMarathi ? 'एक्सेल (.xlsx)' : 'Excel (.xlsx)'}</span>
           </button>
@@ -317,13 +317,13 @@ export default function RenumberingParchaView({
             type="button"
             onClick={handleExportPdf}
             disabled={downloadingPdf || rows.length === 0}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-rose-50 text-slate-700 hover:text-rose-800 border border-slate-200 hover:border-rose-300 rounded-xl text-xs font-bold shadow-2xs transition active:scale-95 cursor-pointer disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold shadow-xs transition active:scale-95 cursor-pointer disabled:opacity-50 select-none"
             title="रिनंबरिंग पर्चा अधिकृत शासकीय पीडीएफ प्रत (.pdf) डाऊनलोड करा"
           >
             {downloadingPdf ? (
-              <RefreshCw className="w-3.5 h-3.5 animate-spin text-rose-600" />
+              <RefreshCw className="w-3.5 h-3.5 animate-spin text-white" />
             ) : (
-              <Download className="w-3.5 h-3.5 text-rose-600" />
+              <Download className="w-3.5 h-3.5 text-white" />
             )}
             <span>{isMarathi ? 'PDF अहवाल' : 'PDF Report'}</span>
           </button>
