@@ -1656,7 +1656,7 @@ export default function ReportsPage() {
                 </th>
               </tr>
               {/* Row 2: Sub-Headers */}
-              <tr className="bg-slate-50 text-[10px] text-slate-700 font-bold border-b border-slate-300 text-center">
+              <tr className="bg-slate-50 text-[11px] sm:text-xs text-slate-700 font-bold border-b border-slate-300 text-center">
                 <th className="py-1.5 px-1.5 border-r border-slate-300 w-16">{isMarathi ? 'एकूण सर्व्हे क्रमांक' : 'Survey No.'}</th>
                 <th className="py-1.5 px-1.5 border-r border-slate-300 w-20 text-right">{isMarathi ? 'एकूण क्षेत्र(हे.आर.)' : 'Area (Ha.R)'}</th>
                 <th className="py-1.5 px-1.5 border-r border-slate-300 w-16">{isMarathi ? 'एकूण सर्व्हे क्रमांक' : 'Survey No.'}</th>
@@ -1692,7 +1692,7 @@ export default function ReportsPage() {
                       <td className="py-2 px-2 text-center border-r border-slate-200 font-mono text-slate-500 font-semibold">
                         {idx + 1}
                       </td>
-                      <td className="py-2 px-3 border-r border-slate-200 font-medium text-slate-900">
+                      <td className="py-3 px-3.5 border-r border-slate-200 font-semibold text-slate-900 text-[13px] sm:text-sm">
                         <div className="flex items-center gap-1.5">
                           <span>{row.name}</span>
                           {row.hasEdit && (
@@ -2064,10 +2064,10 @@ export default function ReportsPage() {
         </div>
 
         <div className="overflow-x-auto max-h-[600px] overflow-y-auto scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-slate-100">
-          <table className="w-full text-left border-collapse text-xs min-w-[1200px]">
+          <table className="w-full text-left border-collapse table-devanagari text-xs sm:text-[13px] min-w-[1200px]">
             <thead className="sticky top-0 z-10 shadow-2xs">
               {/* Row 1: Super Headers (Col 1-4 are standalone full-height columns with rowSpan=2) */}
-              <tr className="bg-slate-100 text-slate-900 font-bold border-b border-slate-300 text-center text-[11px]">
+              <tr className="bg-slate-100 text-slate-900 font-bold border-b border-slate-300 text-center text-xs sm:text-[13px]">
                 <th rowSpan={2} className="py-2.5 px-2 border-r border-slate-300 w-12 bg-slate-200/90 align-middle">
                   {isMarathi ? 'अ.क्र.' : 'Sr.'}
                 </th>
@@ -2106,7 +2106,7 @@ export default function ReportsPage() {
               </tr>
 
               {/* Row 3: Statutory Numbering Row (१ ते N) */}
-              <tr className="bg-slate-100 text-[10px] text-slate-500 font-mono text-center border-b border-slate-300 italic">
+              <tr className="bg-slate-100 text-xs text-slate-600 font-mono font-bold text-center border-b border-slate-300">
                 {Array.from({ length: goshDef.totalCols }).map((_, cIdx) => (
                   <th key={`num-${cIdx}`} className="py-0.5 border-r border-slate-300">
                     {numMr[cIdx] || cIdx + 1}
@@ -2149,7 +2149,7 @@ export default function ReportsPage() {
                       {/* Col 1: Sr. No */}
                       <td className="py-2 px-2 text-center border-r border-slate-200 font-mono text-slate-500 font-semibold">{idx + 1}</td>
                       {/* Col 2: Name */}
-                      <td className="py-2 px-3 border-r border-slate-200 font-medium text-slate-900">{displayName}</td>
+                      <td className="py-3 px-3.5 border-r border-slate-200 font-semibold text-slate-900 text-[13px] sm:text-sm">{displayName}</td>
                       {/* Col 3: Standalone Total Survey No. */}
                       <td className="py-2 px-2 text-center border-r border-slate-200 font-mono font-bold text-indigo-950 bg-indigo-50/20">
                         {row.total712Count || 0}
@@ -3594,7 +3594,7 @@ export default function ReportsPage() {
                       PRAPATRA 4 TABLE: PRIVATE / TRUST / SOCIETY ALLOTMENTS
                   ========================================================= */}
                   {selectedPrapatraId === 4 && (
-                    <table className="w-full text-left border-collapse text-xs min-w-[1050px]">
+                    <table className="w-full text-left border-collapse table-devanagari text-[13px] sm:text-sm min-w-[1050px]">
                       <thead>
                         <tr className="text-white font-extrabold text-center text-xs">
                           <th className="py-3 px-2 border-r border-slate-700 bg-slate-800 text-slate-100 w-12">{isMarathi ? 'अ.क्र.' : 'Sr.'}</th>
@@ -4170,7 +4170,7 @@ export default function ReportsPage() {
                       return (
                         <table className="w-full text-left border-collapse text-xs min-w-[1050px]">
                           <thead>
-                            <tr className="bg-slate-800 text-slate-100 font-bold border-b border-slate-700 text-center">
+                            <tr className="bg-slate-800 text-slate-100 font-extrabold border-b border-slate-700 text-center select-none text-xs sm:text-[13px] md:text-sm tracking-normal">
                               <th className="py-2.5 px-2 border-r border-slate-700 w-12">{isMarathi ? 'अ.क्र.' : 'Sr.'}</th>
                               {detailedCols.map((col, cIdx) => (
                                 <th
@@ -4187,7 +4187,7 @@ export default function ReportsPage() {
                               ))}
                               <th className="py-2.5 px-2 w-16 text-center">{isMarathi ? 'तपशील' : 'Details'}</th>
                             </tr>
-                            <tr className="bg-slate-900/90 text-[10px] text-slate-300 text-center border-b border-slate-700">
+                            <tr className="bg-slate-900/95 text-xs sm:text-[13px] text-slate-300 text-center border-b border-slate-700 font-mono font-bold select-none">
                               <th className="py-1 border-r border-slate-700">१</th>
                               {detailedCols.map((_, cIdx) => (
                                 <th key={`th-num-${cIdx}`} className="py-1 border-r border-slate-700 font-mono">
@@ -4197,7 +4197,7 @@ export default function ReportsPage() {
                               <th className="py-1">-</th>
                             </tr>
                           </thead>
-                          <tbody className={`divide-y divide-slate-100 font-sans transition-opacity duration-200 ${loading ? 'opacity-40 pointer-events-none select-none' : 'opacity-100'}`}>
+                          <tbody className={`divide-y divide-slate-100 transition-opacity duration-200 ${loading ? 'opacity-40 pointer-events-none select-none' : 'opacity-100'}`}>
                             {loading && paginatedParcels.length === 0 ? (
                               Array.from({ length: 8 }).map((_, sIdx) => (
                                 <tr key={`skel-cat-data-${sIdx}`} className="animate-pulse border-b border-slate-100">
@@ -4256,7 +4256,7 @@ export default function ReportsPage() {
 
                                 return (
                                   <tr key={p.id || idx} className={`hover:bg-slate-50/80 transition ${isBreach ? 'bg-rose-50/25' : ''}`}>
-                                    <td className="py-2 px-2 text-center border-r border-slate-200 font-mono text-slate-600">
+                                    <td className="py-3 px-2 text-center border-r border-slate-200 font-mono text-xs sm:text-[13px] text-slate-600">
                                       {(page - 1) * effectivePageSize + idx + 1}
                                     </td>
                                     {detailedCols.map((col, cIdx) => {
@@ -4266,8 +4266,8 @@ export default function ReportsPage() {
                                       if (col.isTenureBadge) {
                                         const isC1 = p.tenureClass === 'BHOGVATDAR_CLASS_1';
                                         return (
-                                          <td key={`cell-${idx}-${cIdx}`} className="py-2 px-2 text-center border-r border-slate-200">
-                                            <span className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-bold ${
+                                          <td key={`cell-${idx}-${cIdx}`} className="py-3 px-2.5 text-center border-r border-slate-200">
+                                            <span className={`inline-block px-2.5 py-1 rounded-md text-xs font-bold ${
                                               isC1 ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-900 font-black'
                                             }`}>
                                               {val || (isC1 ? (isMarathi ? 'वर्ग १' : 'Class 1') : (isMarathi ? 'वर्ग २' : 'Class 2'))}
@@ -4281,8 +4281,8 @@ export default function ReportsPage() {
                                         const isAlert = col.isAlertVal ? col.isAlertVal(val) : false;
                                         const isPositive = val === 'होय' || val === 'आहे' || val === 'Yes';
                                         return (
-                                          <td key={`cell-${idx}-${cIdx}`} className="py-2 px-3 border-r border-slate-200 text-center">
-                                            <span className={`inline-block px-2 py-0.5 rounded-md text-[11px] font-bold ${
+                                          <td key={`cell-${idx}-${cIdx}`} className="py-3 px-3 border-r border-slate-200 text-center">
+                                            <span className={`inline-block px-2.5 py-1 rounded-md text-xs font-bold ${
                                               isAlert
                                                 ? 'bg-rose-100 text-rose-800 shadow-2xs border border-rose-200'
                                                 : isPositive
@@ -4298,7 +4298,7 @@ export default function ReportsPage() {
                                       // 3. Area column
                                       if (col.isArea) {
                                         return (
-                                          <td key={`cell-${idx}-${cIdx}`} className="py-2 px-2 text-right border-r border-slate-200 font-mono font-bold text-slate-900">
+                                          <td key={`cell-${idx}-${cIdx}`} className="py-3 px-2.5 text-right border-r border-slate-200 font-mono font-bold text-slate-900 text-[13px] sm:text-sm">
                                             {val}
                                           </td>
                                         );
@@ -4307,7 +4307,7 @@ export default function ReportsPage() {
                                       // 4. Owner column
                                       if (col.isOwner) {
                                         return (
-                                          <td key={`cell-${idx}-${cIdx}`} className="py-2 px-3 border-r border-slate-200 bg-blue-50/20 font-bold text-blue-950">
+                                          <td key={`cell-${idx}-${cIdx}`} className="py-3 px-3.5 border-r border-slate-200 bg-blue-50/20 font-bold text-blue-950 text-[13px] sm:text-sm leading-snug">
                                             {val || (isMarathi ? 'नोंद उपलब्ध नाही' : 'No record available')}
                                           </td>
                                         );
@@ -4316,7 +4316,7 @@ export default function ReportsPage() {
                                       // 5. Survey No (Mono)
                                       if (col.isMono) {
                                         return (
-                                          <td key={`cell-${idx}-${cIdx}`} className="py-2 px-2 text-center border-r border-slate-200 font-mono font-bold text-slate-800">
+                                          <td key={`cell-${idx}-${cIdx}`} className="py-3 px-2.5 text-center border-r border-slate-200 font-mono font-bold text-slate-800 text-[13px] sm:text-sm">
                                             {val || '-'}
                                           </td>
                                         );
@@ -4325,7 +4325,7 @@ export default function ReportsPage() {
                                       // 6. Village column
                                       if (col.key === 'village') {
                                         return (
-                                          <td key={`cell-${idx}-${cIdx}`} className="py-2 px-3 border-r border-slate-200 font-medium text-slate-900">
+                                          <td key={`cell-${idx}-${cIdx}`} className="py-3 px-3.5 border-r border-slate-200 font-semibold text-slate-900 text-[13px] sm:text-sm">
                                             {formatVillageName(val || p.villageName, isMarathi)}
                                           </td>
                                         );
@@ -4334,14 +4334,14 @@ export default function ReportsPage() {
                                       // 7. Default text column
                                       return (
                                         <td key={`cell-${idx}-${cIdx}`} className={clsx(
-                                          "py-2 px-3 border-r border-slate-200",
-                                          col.align === 'left' ? 'text-left font-medium text-slate-900' : col.align === 'right' ? 'text-right font-mono' : 'text-center'
+                                          "py-3 px-3 border-r border-slate-200",
+                                          col.align === 'left' ? 'text-left font-medium text-slate-900 text-xs sm:text-[13px]' : col.align === 'right' ? 'text-right font-mono text-xs sm:text-[13px]' : 'text-center text-xs sm:text-[13px]'
                                         )}>
                                           {val || '-'}
                                         </td>
                                       );
                                     })}
-                                    <td className="py-2 px-2 text-center">
+                                    <td className="py-3 px-2 text-center">
                                       <button
                                         onClick={() => setInspectedParcel(p)}
                                         className="p-1.5 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded-lg transition cursor-pointer"
@@ -4834,7 +4834,7 @@ export default function ReportsPage() {
                               title={p.excelSrNo ? `Excel Sr: ${p.excelSrNo} | Table Sr: ${srVal}` : `Sr. No: ${srVal}`}
                             >
                               {isRowActive ? (
-                                <span className="inline-block px-1.5 py-0.5 rounded bg-blue-600 text-white font-mono text-[10px] font-black">
+                                <span className="inline-block px-2 py-0.5 rounded bg-blue-600 text-white font-mono text-xs font-black">
                                   {srVal}
                                 </span>
                               ) : (
@@ -5154,10 +5154,10 @@ export default function ReportsPage() {
                   <>
                     {renderActiveCellBar('parcels')}
                     <div className="overflow-x-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
-                  <table className="w-full text-left border-collapse text-xs min-w-[840px]">
+                  <table className="w-full text-left border-collapse table-devanagari text-[13px] sm:text-sm min-w-[880px]">
                   <thead className="sticky top-0 z-20 shadow-xs">
                     {/* Header Row 1: Primary Column Names (Unified Executive Dark Slate Theme) */}
-                    <tr className="bg-slate-800 text-slate-100 font-extrabold border-b border-slate-700 text-center select-none text-xs">
+                    <tr className="bg-slate-800 text-slate-100 font-extrabold border-b border-slate-700 text-center select-none text-xs sm:text-[13px] md:text-sm tracking-normal">
                       <th className={`py-2.5 px-3 border-r border-slate-700 w-12 text-center transition ${selectedCell?.view === 'parcels' && selectedCell?.colKey === 'srNo' ? 'bg-blue-600 text-white font-black' : 'bg-slate-800 text-slate-100'}`}>{isMarathi ? 'अ.क्र.' : 'Sr.'}</th>
                       <th className={`py-2.5 px-3 border-r border-slate-700 text-left min-w-[120px] transition ${selectedCell?.view === 'parcels' && selectedCell?.colKey === 'village' ? 'bg-blue-600 text-white font-black' : 'bg-slate-800 text-slate-100'}`}>{isMarathi ? 'गावाचे नाव' : 'Village Name'}</th>
                       <th className={`py-2.5 px-3 border-r border-slate-700 w-24 text-center transition ${selectedCell?.view === 'parcels' && selectedCell?.colKey === 'gatNumber' ? 'bg-blue-600 text-white font-black' : 'bg-slate-800 text-slate-100'}`}>{isMarathi ? 'सर्व्हे / गट क्र.' : 'Survey / Gat No.'}</th>
@@ -5195,7 +5195,7 @@ export default function ReportsPage() {
                     </tr>
 
                     {/* Header Row 2: Statutory Column Reference Numbers (1 to 10) */}
-                    <tr className="bg-slate-900 text-[10px] text-slate-400 text-center border-b border-slate-700 font-mono font-bold select-none">
+                    <tr className="bg-slate-900 text-xs sm:text-[13px] text-slate-300 text-center border-b border-slate-700 font-mono font-bold select-none">
                       <th className={`py-1 border-r border-slate-800 transition ${selectedCell?.view === 'parcels' && selectedCell?.colKey === 'srNo' ? 'bg-blue-600 text-white' : ''}`}>{isMarathi ? '१' : '1'}</th>
                       <th className={`py-1 border-r border-slate-800 transition ${selectedCell?.view === 'parcels' && selectedCell?.colKey === 'village' ? 'bg-blue-600 text-white' : ''}`}>{isMarathi ? '२' : '2'}</th>
                       <th className={`py-1 border-r border-slate-800 transition ${selectedCell?.view === 'parcels' && selectedCell?.colKey === 'gatNumber' ? 'bg-blue-600 text-white' : ''}`}>{isMarathi ? '३' : '3'}</th>
@@ -5221,7 +5221,7 @@ export default function ReportsPage() {
                           <td className="py-2.5 px-3 border-r border-slate-100"><div className="h-4 w-24 bg-slate-200 rounded" /></td>
                           <td className="py-2.5 px-3 border-r border-slate-100"><div className="h-4 w-28 bg-slate-200 rounded" /></td>
                           <td className="py-2.5 px-3 border-r border-slate-100"><div className="h-4 w-20 bg-slate-200 rounded" /></td>
-                          <td className="py-2.5 px-3 text-center"><div className="h-4 w-8 bg-slate-200 rounded mx-auto" /></td>
+                          <td className="py-3 px-2 text-center"><div className="h-4 w-8 bg-slate-200 rounded mx-auto" /></td>
                         </tr>
                       ))
                     ) : paginatedParcels.length === 0 ? (
@@ -5291,7 +5291,7 @@ export default function ReportsPage() {
                             <td
                               onClick={() => handleSelectCell('parcels', idx, 'srNo', 0, isMarathi ? 'अ.क्र.' : 'Sr.', targetLabel, srVal, p)}
                               onDoubleClick={() => handleCopyCellText(srVal)}
-                              className={`py-2.5 px-3 text-center border-r border-slate-100 font-mono text-slate-500 cursor-pointer transition select-text ${
+                              className={`py-3 px-3 text-center border-r border-slate-100 font-mono text-xs sm:text-[13px] text-slate-600 cursor-pointer transition select-text ${
                                 isCellSelected('parcels', idx, 'srNo')
                                   ? 'ring-2 ring-blue-600 ring-inset bg-blue-100/90 font-bold text-blue-950 relative z-20 shadow-xs'
                                   : 'hover:bg-blue-50/50'
@@ -5312,14 +5312,14 @@ export default function ReportsPage() {
                             <td
                               onClick={() => handleSelectCell('parcels', idx, 'village', 1, isMarathi ? 'गावाचे नाव' : 'Village Name', targetLabel, villageVal, p)}
                               onDoubleClick={() => handleCopyCellText(villageVal)}
-                              className={`py-2.5 px-3 border-r border-slate-100 font-medium text-slate-900 cursor-pointer transition select-text ${
+                              className={`py-3 px-3.5 border-r border-slate-100 font-semibold text-slate-900 text-[13px] sm:text-sm cursor-pointer transition select-text ${
                                 isCellSelected('parcels', idx, 'village')
                                   ? 'ring-2 ring-blue-600 ring-inset bg-blue-100/90 font-bold text-blue-950 relative z-20 shadow-xs'
                                   : 'hover:bg-blue-50/50'
                               }`}
                             >
                               {formatVillageName(p.villageName, isMarathi)}
-                              <span className="block text-[10px] text-slate-400">{formatTalukaName(p.taluka, isMarathi)}</span>
+                              <span className="block text-xs text-slate-500 mt-0.5">{formatTalukaName(p.taluka, isMarathi)}</span>
                               {isCellSelected('parcels', idx, 'village') && renderCellHandle()}
                             </td>
 
@@ -5327,7 +5327,7 @@ export default function ReportsPage() {
                             <td
                               onClick={() => handleSelectCell('parcels', idx, 'gatNumber', 2, isMarathi ? 'सर्व्हे / गट क्र.' : 'Survey / Gat No.', targetLabel, surveyVal, p)}
                               onDoubleClick={() => handleCopyCellText(surveyVal)}
-                              className={`py-2.5 px-3 text-center border-r border-slate-100 font-mono font-bold text-slate-800 cursor-pointer transition select-text ${
+                              className={`py-3 px-3 text-center border-r border-slate-100 font-mono font-bold text-slate-800 text-[13px] sm:text-sm cursor-pointer transition select-text ${
                                 isCellSelected('parcels', idx, 'gatNumber')
                                   ? 'ring-2 ring-blue-600 ring-inset bg-blue-100/90 font-bold text-blue-950 relative z-20 shadow-xs'
                                   : 'hover:bg-blue-50/50'
@@ -5335,7 +5335,7 @@ export default function ReportsPage() {
                             >
                               {p.gatNumber || p.oldSurveyNo || '-'}
                               {p.oldSurveyNo && p.gatNumber && p.oldSurveyNo !== p.gatNumber && (
-                                <span className="block text-[10px] text-slate-400 font-normal">{isMarathi ? 'जुना:' : 'Old:'} {p.oldSurveyNo}</span>
+                                <span className="block text-xs text-slate-500 font-normal mt-0.5">{isMarathi ? 'जुना:' : 'Old:'} {p.oldSurveyNo}</span>
                               )}
                               {isCellSelected('parcels', idx, 'gatNumber') && renderCellHandle()}
                             </td>
@@ -5344,7 +5344,7 @@ export default function ReportsPage() {
                             <td
                               onClick={() => handleSelectCell('parcels', idx, 'area', 3, isMarathi ? 'क्षेत्र (हे.आर.)' : 'Area (Ha.R)', targetLabel, areaVal, p)}
                               onDoubleClick={() => handleCopyCellText(areaVal)}
-                              className={`py-2.5 px-3 text-right border-r border-slate-100 font-mono cursor-pointer transition select-text ${
+                              className={`py-3 px-3 text-right border-r border-slate-100 font-mono font-bold text-slate-900 text-[13px] sm:text-sm cursor-pointer transition select-text ${
                                 isCellSelected('parcels', idx, 'area')
                                   ? 'ring-2 ring-blue-600 ring-inset bg-blue-100/90 font-black text-blue-950 relative z-20 shadow-xs'
                                   : selectedKpiFilter === 'area' ? 'bg-emerald-50/80 font-black text-emerald-950 ring-1 ring-inset ring-emerald-300' : 'font-medium hover:bg-blue-50/50'
@@ -5358,7 +5358,7 @@ export default function ReportsPage() {
                             <td
                               onClick={() => handleSelectCell('parcels', idx, 'owner', 4, isMarathi ? 'सध्याचे खातेदार / भोगवटादार नाव' : 'Current Khatedar / Occupant Name', targetLabel, ownerVal, p)}
                               onDoubleClick={() => handleCopyCellText(ownerVal)}
-                              className={`py-2.5 px-3 border-r border-slate-100 font-bold cursor-pointer transition select-text ${
+                              className={`py-3 px-3.5 border-r border-slate-100 font-bold text-[13px] sm:text-sm leading-snug cursor-pointer transition select-text ${
                                 isCellSelected('parcels', idx, 'owner')
                                   ? 'ring-2 ring-blue-600 ring-inset bg-blue-100/90 font-black text-blue-950 relative z-20 shadow-xs'
                                   : 'bg-blue-50/20 text-blue-900 hover:bg-blue-100/40'
@@ -5372,14 +5372,14 @@ export default function ReportsPage() {
                             <td
                               onClick={() => handleSelectCell('parcels', idx, 'tenure', 5, isMarathi ? 'धारणा प्रकार' : 'Tenure Class', targetLabel, tenureVal, p)}
                               onDoubleClick={() => handleCopyCellText(tenureVal)}
-                              className={`py-2.5 px-3 text-center border-r border-slate-100 cursor-pointer transition select-text ${
+                              className={`py-3 px-3 text-center border-r border-slate-100 cursor-pointer transition select-text ${
                                 isCellSelected('parcels', idx, 'tenure')
                                   ? 'ring-2 ring-blue-600 ring-inset bg-blue-100/90 font-bold text-blue-950 relative z-20 shadow-xs'
                                   : selectedKpiFilter === 'class2' ? 'bg-amber-50/80 ring-1 ring-inset ring-amber-300' : 'hover:bg-blue-50/50'
                               }`}
                             >
                               <span
-                                className={`inline-block px-2 py-0.5 rounded-md text-[10px] font-bold ${
+                                className={`inline-block px-2.5 py-1 rounded-md text-xs font-bold ${
                                   selectedKpiFilter === 'class2'
                                     ? 'bg-amber-200 text-amber-950 ring-1 ring-amber-400 font-black'
                                     : p.tenureClass === 'BHOGVATDAR_CLASS_1'
@@ -5400,13 +5400,13 @@ export default function ReportsPage() {
                             <td
                               onClick={() => handleSelectCell('parcels', idx, 'baselineOwner', 6, isMarathi ? '१९५० मूळ नोंद' : '1950 Baseline Entry', targetLabel, baselineVal, p)}
                               onDoubleClick={() => handleCopyCellText(baselineVal)}
-                              className={`py-2.5 px-3 border-r border-slate-100 text-slate-600 text-[11px] cursor-pointer transition select-text ${
+                              className={`py-3 px-3 border-r border-slate-100 text-slate-700 text-xs sm:text-[13px] cursor-pointer transition select-text ${
                                 isCellSelected('parcels', idx, 'baselineOwner')
                                   ? 'ring-2 ring-blue-600 ring-inset bg-blue-100/90 font-bold text-blue-950 relative z-20 shadow-xs'
                                   : 'hover:bg-blue-50/50'
                               }`}
                             >
-                              <div className="line-clamp-2 max-w-[180px] leading-snug text-slate-700 text-xs font-normal" title={baselineVal}>
+                              <div className="line-clamp-2 max-w-[180px] leading-snug text-slate-700 text-xs sm:text-[13px] font-normal" title={baselineVal}>
                                 {p.baselineOwner1950 || '-'}
                               </div>
                               {isCellSelected('parcels', idx, 'baselineOwner') && renderCellHandle()}
@@ -5416,7 +5416,7 @@ export default function ReportsPage() {
                             <td
                               onClick={() => handleSelectCell('parcels', idx, 'statusFinding', 7, isMarathi ? 'तपासणी निष्कर्ष / सद्यस्थिती' : 'Inspection Finding / Status', targetLabel, statusVal, p)}
                               onDoubleClick={() => handleCopyCellText(statusVal)}
-                              className={`py-2.5 px-3 border-r border-slate-100 text-[11px] cursor-pointer transition select-text ${
+                              className={`py-3 px-3 border-r border-slate-100 text-xs sm:text-[13px] cursor-pointer transition select-text ${
                                 isCellSelected('parcels', idx, 'statusFinding')
                                   ? 'ring-2 ring-blue-600 ring-inset bg-blue-100/90 font-bold text-blue-950 relative z-20 shadow-xs'
                                   : selectedKpiFilter === 'violations' ? 'bg-rose-50/80 ring-1 ring-inset ring-rose-300' : 'hover:bg-blue-50/50'
@@ -5440,7 +5440,7 @@ export default function ReportsPage() {
                             <td
                               onClick={() => handleSelectCell('parcels', idx, 'remarks', 8, isMarathi ? 'शेरा व इतर हक्क' : 'Remarks & Other Rights', targetLabel, remarksVal, p)}
                               onDoubleClick={() => handleCopyCellText(remarksVal)}
-                              className={`py-2.5 px-3 text-slate-500 text-[11px] max-w-[200px] cursor-pointer transition select-text ${
+                              className={`py-3 px-3 text-slate-600 text-xs sm:text-[13px] max-w-[200px] cursor-pointer transition select-text ${
                                 isCellSelected('parcels', idx, 'remarks')
                                   ? 'ring-2 ring-blue-600 ring-inset bg-blue-100/90 font-bold text-blue-950 relative z-20 shadow-xs'
                                   : 'hover:bg-blue-50/50'

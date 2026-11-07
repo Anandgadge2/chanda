@@ -458,3 +458,22 @@ body.high-contrast :focus-visible {
 .taluka-polygon-group:hover path {
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
+
+/* Official Revenue Portal Devanagari Table Typography */
+.table-devanagari {
+  font-family: var(--font-noto-devanagari), var(--font-poppins), 'Segoe UI', system-ui, -apple-system, sans-serif;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  letter-spacing: 0.01em;
+}
+
+.table-devanagari th,
+.table-devanagari td {
+  line-height: 1.45;
+}
+
+.table-devanagari .font-mono {
+  font-feature-settings: 'tnum' 1, 'zero' 1;
+}
+
