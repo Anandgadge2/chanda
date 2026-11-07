@@ -10,7 +10,7 @@ import {
   CartesianGrid,
   Tooltip,
 } from 'recharts';
-import { History, TrendingUp, ArrowUpRight, ArrowDownRight, Layers, CheckCircle2 } from 'lucide-react';
+import { History, TrendingUp, ArrowUpRight, ArrowDownRight, CheckCircle2 } from 'lucide-react';
 import { useTranslation } from '../LanguageContext';
 
 export default function HistoricalProvenanceTrendChart({ data = [] }) {
@@ -327,67 +327,6 @@ export default function HistoricalProvenanceTrendChart({ data = [] }) {
           ))}
         </tbody>
       </table>
-
-      {/* Epoch Pills Footer & Statutory Milestone Breadcrumbs */}
-      <div className="flex flex-col gap-2 pt-2.5 border-t border-slate-100 text-xs">
-        <div className="flex flex-wrap items-center justify-between gap-1.5">
-          <div className="flex flex-wrap items-center gap-1.5">
-            <span className="text-[11px] font-bold text-slate-600">
-              {isMarathi ? 'अभिलेख टप्पे:' : 'Milestone Epochs:'}
-            </span>
-            {chartData.map((item) => (
-              <span
-                key={item.year}
-                className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[10px] font-bold border font-mono ${
-                  item.year === '1950'
-                    ? 'bg-cyan-50/70 border-cyan-200 text-cyan-900'
-                    : 'bg-emerald-50/70 border-emerald-200 text-emerald-900'
-                }`}
-              >
-                <span className="text-slate-500 font-semibold">{item.year}:</span>
-                <span className="font-black">
-                  {metricMode === 'area'
-                    ? `${item.areaHa.toLocaleString('en-IN')} Ha`
-                    : `${item.count.toLocaleString('en-IN')}`}
-                </span>
-              </span>
-            ))}
-          </div>
-
-          <div className="inline-flex items-center gap-1 text-[10px] text-slate-500 font-semibold">
-            <Layers className="w-3.5 h-3.5 text-blue-600" />
-            <span>{isMarathi ? 'विशेष महसूल तपासणी मोहीम' : 'Special Revenue Audit Drive'}</span>
-          </div>
-        </div>
-
-        {/* 4-Phase Historical Progression Breadcrumb */}
-        <div className="hidden sm:grid grid-cols-4 gap-1 text-[9px] pt-1.5 border-t border-slate-100/70 text-slate-500">
-          <div className="flex items-center gap-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 shrink-0" />
-            <span className="truncate font-semibold text-slate-700">
-              {isMarathi ? '१. १९५० मूळ बंदोबस्त सनद' : '1. 1950 Baseline Sanad'}
-            </span>
-          </div>
-          <div className="flex items-center gap-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-slate-400 shrink-0" />
-            <span className="truncate">
-              {isMarathi ? '२. कमाल जमीन धारणा/भूदान' : '2. Land Ceiling / Bhoodan'}
-            </span>
-          </div>
-          <div className="flex items-center gap-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-slate-400 shrink-0" />
-            <span className="truncate">
-              {isMarathi ? '३. आदिवासी संरक्षण (Sec 36)' : '3. Tribal Land (Sec 36/36A)'}
-            </span>
-          </div>
-          <div className="flex items-center gap-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 shrink-0" />
-            <span className="truncate font-semibold text-emerald-800">
-              {isMarathi ? '४. २०२६ चालू प्रपत्र पडताळणी' : '4. 2026 Audit Reconciled'}
-            </span>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }

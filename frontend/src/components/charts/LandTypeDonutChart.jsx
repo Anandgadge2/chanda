@@ -221,7 +221,7 @@ export default function LandTypeDonutChart({ data = [] }) {
 
         {/* Right: Clean Metric List with Circular Dots & Bold Values */}
         {/* Strictly single-language: If Marathi is active show ONLY Marathi, if English is active show ONLY English */}
-        <div className="md:col-span-6 space-y-2">
+        <div className="md:col-span-6 space-y-1.5">
           {chartData.map((item, index) => {
             const pct = totalValue > 0 ? ((item.value / totalValue) * 100).toFixed(1) : 0;
             const isHighlighted = activeIndex === index;
@@ -232,7 +232,7 @@ export default function LandTypeDonutChart({ data = [] }) {
                 key={item.tenure}
                 onMouseEnter={() => setActiveIndex(index)}
                 onMouseLeave={() => setActiveIndex(null)}
-                className={`p-2 rounded-xl border transition-all duration-150 flex items-center justify-between cursor-pointer ${
+                className={`py-1.5 px-2.5 rounded-xl border transition-all duration-150 flex items-center justify-between cursor-pointer ${
                   isHighlighted
                     ? 'border-blue-300 bg-blue-50/70 shadow-2xs'
                     : 'border-slate-100 bg-slate-50/50 hover:bg-slate-50'
@@ -285,16 +285,6 @@ export default function LandTypeDonutChart({ data = [] }) {
           ))}
         </tbody>
       </table>
-
-      {/* Footer Outlay Tag */}
-      <div className="flex items-center justify-between pt-2.5 border-t border-slate-100 text-xs text-slate-600">
-        <span className="text-[11px] font-medium text-slate-500">
-          {isMarathi ? 'एकूण महसूल नोंदणी:' : 'Total Registered Land:'}
-        </span>
-        <span className="font-black text-slate-900 text-[11px] bg-slate-100 px-2.5 py-0.5 rounded-md font-mono">
-          {totalArea.toFixed(2)} Ha • {totalParcels.toLocaleString('en-IN')} {isMarathi ? 'भूखंड' : 'Parcels'}
-        </span>
-      </div>
     </div>
   );
 }

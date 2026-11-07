@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from 'recharts';
 import { ShieldAlert, CheckCircle2 } from 'lucide-react';
 import { VIOLATION_TYPES, ENFORCEMENT_STATUSES } from '../../lib/constants';
@@ -326,7 +325,7 @@ export default function EnforcementDisposalDonut({
                 key={item.key}
                 onMouseEnter={() => setActiveIndex(index)}
                 onMouseLeave={() => setActiveIndex(null)}
-                className={`p-2 rounded-xl border transition-all duration-150 flex items-center justify-between cursor-pointer ${
+                className={`py-1.5 px-2.5 rounded-xl border transition-all duration-150 flex items-center justify-between cursor-pointer ${
                   isHighlighted
                     ? 'border-slate-400 bg-slate-100/90 shadow-2xs'
                     : 'border-slate-100 bg-slate-50/60 hover:bg-slate-50'
@@ -384,24 +383,6 @@ export default function EnforcementDisposalDonut({
           ))}
         </tbody>
       </table>
-
-      {/* Footer Outlay */}
-      <div className="flex items-center justify-between pt-2.5 border-t border-slate-100 text-xs text-slate-600">
-        <div className="flex items-center gap-1.5 text-[11px] font-medium text-slate-500">
-          <span>{isMarathi ? 'एकूण बाधित क्षेत्र:' : 'Total Affected Area:'}</span>
-          <span className="font-black text-rose-700 font-mono">
-            {totalAreaHa.toFixed(2)} Ha
-          </span>
-        </div>
-
-        <Link
-          href="/cases"
-          className="font-black text-emerald-800 text-[11px] bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-2.5 py-0.5 rounded-md transition flex items-center gap-1 font-mono"
-          title={isMarathi ? 'प्रकरणे व शासन जमा आदेश सूची' : 'Cases & Govt Vesting Order List'}
-        >
-          <span>{Number(repossessedArea).toFixed(2)} {isMarathi ? 'Ha शासन जमा' : 'Ha Govt Vested'}</span>
-        </Link>
-      </div>
     </div>
   );
 }

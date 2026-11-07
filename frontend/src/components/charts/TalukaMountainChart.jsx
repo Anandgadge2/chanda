@@ -310,26 +310,6 @@ export default function TalukaMountainChart({ data = [], selectedTaluka = '' }) 
         )}
         </div>
       </div>
-
-      {/* Footer Taluka Chips */}
-      <div className="flex items-center sm:flex-wrap overflow-x-auto no-scrollbar gap-1.5 pt-2.5 mt-1 border-t border-slate-100 text-xs text-slate-600 touch-scroll">
-        <span className="font-semibold text-slate-700 text-[11px]">
-          {isMarathi ? 'नोंदणीकृत तालुके:' : 'Registered Talukas:'}
-        </span>
-        {chartData.map((t) => (
-          <span
-            key={t.taluka}
-            className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold border transition ${
-              selectedTaluka && selectedTaluka.toLowerCase() === t.taluka.toLowerCase()
-                ? 'bg-blue-100 text-blue-900 border-blue-300'
-                : 'bg-slate-50 text-slate-700 border-slate-200'
-            }`}
-          >
-            <span>{isMarathi ? t.nameMr : t.taluka}:</span>
-            <span className="text-slate-900 font-extrabold">{t.parcelCount}</span>
-          </span>
-        ))}
-      </div>
     </div>
   );
 }
