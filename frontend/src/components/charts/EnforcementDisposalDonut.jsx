@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from 'recharts';
-import { ShieldAlert, CheckCircle2 } from 'lucide-react';
+import { ShieldAlert, CheckCircle2, CircleDot, PieChart as PieIcon } from 'lucide-react';
 import { VIOLATION_TYPES, ENFORCEMENT_STATUSES } from '../../lib/constants';
 import { useTranslation } from '../LanguageContext';
 
@@ -32,6 +32,7 @@ export default function EnforcementDisposalDonut({
   repossessedArea = 0,
 }) {
   const { isMarathi } = useTranslation();
+  const [chartType, setChartType] = useState('donut'); // 'donut' (default) | 'pie'
   const [viewMode, setViewMode] = useState('categories'); // 'categories' | 'pipeline'
   const [metricType, setMetricType] = useState('count'); // 'count' | 'area'
   const [activeIndex, setActiveIndex] = useState(null);
@@ -100,6 +101,27 @@ export default function EnforcementDisposalDonut({
 
   const activeItem = activeIndex !== null && activeChartData[activeIndex] ? activeChartData[activeIndex] : null;
 
+  // Pie chart white callout percentage labels
+  const renderPieLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }) => {
+    if (percent < 0.08) return null;
+    const radius = innerRadius + (outerRadius - innerRadius) * 0.58;
+    const RADIAN = Math.PI / 180;
+    const x = cx + radius * Math.cos(-midAngle * RADIAN);
+    const y = cy + radius * Math.sin(-midAngle * RADIAN);
+    return (
+      <text
+        x={x}
+        y={y}
+        fill="#ffffff"
+        textAnchor="middle"
+        dominantBaseline="central"
+        className="font-black text-xs font-mono pointer-events-none drop-shadow-md select-none"
+      >
+        {`${(percent * 100).toFixed(0)}%`}
+      </text>
+    );
+  };
+
   const CustomTooltip = ({ active, payload }) => {
     if (active && payload && payload.length) {
       const item = payload[0].payload;
@@ -113,8 +135,8 @@ export default function EnforcementDisposalDonut({
             <span>{displayName}</span>
           </div>
           <div className="text-[10px] text-slate-300 font-mono flex items-center gap-2">
-            <span>{item.count} {isMarathi ? 'प्रकरणे' : 'Cases'}</span>
-            {item.areaHa > 0 && <span>({item.areaHa.toFixed(2)} Ha)</span>}
+            <span>{item.count.toLocaleString('en-IN')} {isMarathi ? 'प्रकरणे' : 'Cases'}</span>
+            {item.areaHa > 0 && <span>({item.areaHa.toLocaleString('en-IN')} Ha)</span>}
             <span className="text-amber-400 font-bold">[{pct}%]</span>
           </div>
         </div>
@@ -154,8 +176,42 @@ export default function EnforcementDisposalDonut({
           </div>
         </div>
 
-        {/* View Switchers: Mode + Metric Toggle */}
-        <div className="flex items-center gap-1.5 self-start sm:self-auto shrink-0">
+        {/* View Switchers: Chart Style (Donut / Pie) + Mode + Metric Toggle */}
+        <div className="flex items-center gap-1.5 self-start sm:self-auto shrink-0 flex-wrap">
+          {/* Chart Style Switcher */}
+          <div
+            className="inline-flex p-0.5 bg-slate-100 rounded-lg border border-slate-200/80"
+            role="group"
+            aria-label={isMarathi ? 'आलेख प्रकार' : 'Chart Style'}
+          >
+            <button
+              type="button"
+              onClick={() => setChartType('donut')}
+              className={`px-2 py-1 text-[11px] font-bold rounded-md transition cursor-pointer flex items-center gap-1 ${
+                chartType === 'donut'
+                  ? 'bg-white text-rose-900 shadow-2xs'
+                  : 'text-slate-500 hover:text-slate-900'
+              }`}
+              title={isMarathi ? 'डोनट आलेख' : 'Donut Chart'}
+            >
+              <CircleDot className="w-3.5 h-3.5" />
+              <span>{isMarathi ? 'डोनट' : 'Donut'}</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setChartType('pie')}
+              className={`px-2 py-1 text-[11px] font-bold rounded-md transition cursor-pointer flex items-center gap-1 ${
+                chartType === 'pie'
+                  ? 'bg-white text-rose-900 shadow-2xs'
+                  : 'text-slate-500 hover:text-slate-900'
+              }`}
+              title={isMarathi ? 'पाई आलेख' : 'Pie Chart'}
+            >
+              <PieIcon className="w-3.5 h-3.5" />
+              <span>{isMarathi ? 'पाई' : 'Pie'}</span>
+            </button>
+          </div>
+
           {/* Mode Switcher */}
           <div className="inline-flex p-0.5 bg-slate-100 rounded-lg border border-slate-200/80" role="group" aria-label={isMarathi ? 'दृश्य प्रकार' : 'View Mode'}>
             <button
@@ -213,7 +269,7 @@ export default function EnforcementDisposalDonut({
                 }`}
                 title={isMarathi ? 'क्षेत्र हेक्टर' : 'Area (Ha)'}
               >
-                {isMarathi ? 'क्षेत्र Ha' : 'Area (Ha)'}
+                {isMarathi ? 'क्षेत्र' : 'Area'}
               </button>
             </div>
           )}
@@ -222,8 +278,8 @@ export default function EnforcementDisposalDonut({
 
       {/* Side-by-Side Chart & Metric List */}
       <div className="grid grid-cols-1 md:grid-cols-12 gap-3 sm:gap-4 items-center flex-1 my-auto py-1">
-        {/* Left: Donut Chart with Dynamic Center Readout */}
-        <div className="md:col-span-5 relative h-52 flex items-center justify-center">
+        {/* Left: Prominent Donut or Pie Visual */}
+        <div className="md:col-span-5 relative h-60 sm:h-64 flex flex-col items-center justify-center">
           {activeChartData.length === 0 ? (
             <div className="flex flex-col items-center justify-center text-slate-400 py-6">
               <CheckCircle2 className="w-8 h-8 stroke-[1.5] mb-2 opacity-40 text-emerald-500" />
@@ -231,83 +287,99 @@ export default function EnforcementDisposalDonut({
             </div>
           ) : (
             <>
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={activeChartData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={56}
-                    outerRadius={82}
-                    paddingAngle={3}
-                    dataKey="value"
-                    stroke="#ffffff"
-                    strokeWidth={2}
-                    onMouseEnter={(_, index) => setActiveIndex(index)}
-                    onMouseLeave={() => setActiveIndex(null)}
-                  >
-                    {activeChartData.map((entry, index) => (
-                      <Cell
-                        key={`cell-${entry.key}`}
-                        fill={entry.color}
-                        opacity={activeIndex === null || activeIndex === index ? 1 : 0.35}
-                        className="transition-all duration-200 cursor-pointer"
-                      />
-                    ))}
-                  </Pie>
-                  <Tooltip content={<CustomTooltip />} />
-                </PieChart>
-              </ResponsiveContainer>
-
-              {/* Center Readout */}
-              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none p-1 text-center">
-                {activeItem ? (
-                  <div className="flex flex-col items-center justify-center">
-                    <span
-                      className="text-[9px] font-extrabold px-2 py-0.5 rounded-full border shadow-2xs mb-0.5 truncate max-w-[120px]"
-                      style={{
-                        backgroundColor: `${activeItem.color}15`,
-                        color: activeItem.color,
-                        borderColor: `${activeItem.color}40`,
-                      }}
+              <div className="relative w-full h-52 flex items-center justify-center">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={activeChartData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={chartType === 'pie' ? 0 : 66}
+                      outerRadius={chartType === 'pie' ? 92 : 92}
+                      paddingAngle={chartType === 'pie' ? 1.5 : 3}
+                      dataKey="value"
+                      stroke="#ffffff"
+                      strokeWidth={2.5}
+                      label={chartType === 'pie' ? renderPieLabel : false}
+                      labelLine={false}
+                      onMouseEnter={(_, index) => setActiveIndex(index)}
+                      onMouseLeave={() => setActiveIndex(null)}
                     >
-                      {isMarathi ? activeItem.nameMr : (activeItem.nameEn || activeItem.nameMr)}
-                    </span>
-                    <span className="text-base sm:text-lg font-black text-slate-900 tracking-tight leading-none my-0.5 font-mono">
-                      {metricType === 'area' && viewMode === 'categories'
-                        ? `${activeItem.areaHa.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Ha`
-                        : `${activeItem.count.toLocaleString('en-IN')} ${isMarathi ? 'प्रकरणे' : 'Cases'}`}
-                    </span>
-                    <span className="text-[10px] font-bold text-slate-500 font-mono">
-                      {totalValue > 0
-                        ? ((activeItem.value / totalValue) * 100 < 1 && activeItem.value > 0
-                            ? '<1%'
-                            : `${((activeItem.value / totalValue) * 100).toFixed(0)}% ${isMarathi ? 'वाटा' : 'share'}`)
-                        : (isMarathi ? '०% वाटा' : '0% share')}
-                    </span>
-                  </div>
-                ) : (
-                  <div className="flex flex-col items-center justify-center">
-                    <span className="text-[9px] uppercase tracking-wider font-bold text-rose-700 bg-rose-50 border border-rose-200 px-2 py-0.5 rounded-full mb-0.5">
-                      {viewMode === 'categories'
-                        ? (isMarathi ? 'एकूण उल्लंघन' : 'Total Violations')
-                        : (isMarathi ? 'एकूण प्रकरणे' : 'Total Cases')}
-                    </span>
-                    <span className="text-base sm:text-lg font-black text-slate-900 tracking-tight leading-none my-0.5 font-mono">
-                      {metricType === 'area' && viewMode === 'categories'
-                        ? `${totalAreaHa.toLocaleString('en-IN', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} Ha`
-                        : `${totalCount.toLocaleString('en-IN')}`}
-                    </span>
-                    <span className="text-[10px] text-slate-500 font-semibold font-mono">
-                      {viewMode === 'categories'
-                        ? metricType === 'area'
-                          ? `${totalCount.toLocaleString('en-IN')} ${isMarathi ? 'एकूण प्रकरणे' : 'Total Cases'}`
-                          : `${totalAreaHa.toLocaleString('en-IN', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} Ha ${isMarathi ? 'बाधित क्षेत्र' : 'Affected Area'}`
-                        : `${totalViolations.toLocaleString('en-IN')} ${isMarathi ? 'दाखल प्रकरणे' : 'Filed Cases'}`}
-                    </span>
+                      {activeChartData.map((entry, index) => (
+                        <Cell
+                          key={`cell-${entry.key}`}
+                          fill={entry.color}
+                          opacity={activeIndex === null || activeIndex === index ? 1 : 0.35}
+                          className="transition-all duration-200 cursor-pointer"
+                        />
+                      ))}
+                    </Pie>
+                    <Tooltip content={<CustomTooltip />} />
+                  </PieChart>
+                </ResponsiveContainer>
+
+                {/* Donut Center Readout (Spacious hole, multi-tier layout that never overflows) */}
+                {chartType === 'donut' && (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none p-2 text-center">
+                    {activeItem ? (
+                      <div className="flex flex-col items-center justify-center max-w-[130px]">
+                        <span
+                          className="text-[9px] font-extrabold px-2 py-0.5 rounded-full border shadow-2xs mb-0.5 truncate max-w-[125px]"
+                          style={{
+                            backgroundColor: `${activeItem.color}15`,
+                            color: activeItem.color,
+                            borderColor: `${activeItem.color}40`,
+                          }}
+                        >
+                          {isMarathi ? activeItem.nameMr : (activeItem.nameEn || activeItem.nameMr)}
+                        </span>
+                        <span className="text-base sm:text-lg font-black text-slate-900 tracking-tight leading-none my-0.5 font-mono">
+                          {viewMode === 'categories' && metricType === 'area'
+                            ? `${activeItem.areaHa.toLocaleString('en-IN', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} Ha`
+                            : activeItem.count.toLocaleString('en-IN')}
+                        </span>
+                        <span className="text-[10px] font-bold text-slate-500 font-mono">
+                          {isMarathi ? 'प्रकरणे' : 'Cases'} • {pct}%
+                        </span>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center justify-center max-w-[130px]">
+                        <span className="text-[9px] uppercase tracking-wider font-extrabold text-rose-700 bg-rose-50 border border-rose-200 px-2 py-0.5 rounded-full mb-0.5">
+                          {viewMode === 'categories'
+                            ? (isMarathi ? 'एकूण उल्लंघन' : 'Total Violations')
+                            : (isMarathi ? 'एकूण प्रकरणे' : 'Total Cases')}
+                        </span>
+                        <span className="text-base sm:text-lg font-black text-slate-900 tracking-tight leading-none my-0.5 font-mono">
+                          {metricType === 'area' && viewMode === 'categories'
+                            ? `${totalAreaHa.toLocaleString('en-IN', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} Ha`
+                            : totalCount.toLocaleString('en-IN')}
+                        </span>
+                        <span className="text-[10px] text-slate-500 font-bold font-mono">
+                          {viewMode === 'categories'
+                            ? metricType === 'area'
+                              ? `${totalCount.toLocaleString('en-IN')} ${isMarathi ? 'दाखल प्रकरणे' : 'Cases'}`
+                              : `${totalAreaHa.toLocaleString('en-IN', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} Ha ${isMarathi ? 'बाधित' : 'Affected'}`
+                            : `${totalViolations.toLocaleString('en-IN')} ${isMarathi ? 'दाखल प्रकरणे' : 'Cases'}`}
+                        </span>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
+
+              {/* Pie Mode Summary Pill Below Chart */}
+              {chartType === 'pie' && (
+                <div className="mt-1 text-center">
+                  <span className="inline-flex items-center gap-1.5 text-[10px] font-bold text-slate-700 bg-slate-100/90 border border-slate-200/90 px-3 py-1 rounded-full font-mono shadow-2xs">
+                    <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
+                    <span>
+                      {viewMode === 'categories' && metricType === 'area'
+                        ? `${totalAreaHa.toLocaleString('en-IN', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} Ha`
+                        : `${totalCount.toLocaleString('en-IN')} ${isMarathi ? 'प्रकरणे' : 'Cases'}`}
+                    </span>
+                  </span>
+                </div>
+              )}
             </>
           )}
         </div>
