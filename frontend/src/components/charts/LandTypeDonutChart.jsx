@@ -134,9 +134,9 @@ export default function LandTypeDonutChart({ data = [] }) {
       </div>
 
       {/* Side-by-Side Chart & Metric Breakdown */}
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center my-1.5">
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-3 sm:gap-4 items-center flex-1 my-auto py-1">
         {/* Left: Donut Chart with Dynamic Center KPI */}
-        <div className="md:col-span-6 relative h-52 flex items-center justify-center">
+        <div className="md:col-span-5 relative h-52 flex items-center justify-center">
           {chartData.length === 0 ? (
             <div className="flex flex-col items-center justify-center text-slate-400 py-6">
               <PieIcon className="w-8 h-8 stroke-[1.5] mb-2 opacity-40" />
@@ -150,8 +150,8 @@ export default function LandTypeDonutChart({ data = [] }) {
                     data={chartData}
                     cx="50%"
                     cy="50%"
-                    innerRadius={58}
-                    outerRadius={84}
+                    innerRadius={56}
+                    outerRadius={82}
                     paddingAngle={3}
                     dataKey="value"
                     stroke="#ffffff"
@@ -163,7 +163,7 @@ export default function LandTypeDonutChart({ data = [] }) {
                       <Cell
                         key={`cell-${entry.tenure}`}
                         fill={entry.color}
-                        opacity={activeIndex === null || activeIndex === index ? 1 : 0.4}
+                        opacity={activeIndex === null || activeIndex === index ? 1 : 0.35}
                         className="transition-all duration-200 cursor-pointer"
                       />
                     ))}
@@ -173,11 +173,11 @@ export default function LandTypeDonutChart({ data = [] }) {
               </ResponsiveContainer>
 
               {/* Dynamic Center Hero Inspector */}
-              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none p-1">
+              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none p-1 text-center">
                 {activeItem ? (
-                  <div className="flex flex-col items-center justify-center text-center">
+                  <div className="flex flex-col items-center justify-center">
                     <span
-                      className="text-[9px] font-extrabold px-1.5 py-0.2 rounded-full border shadow-2xs mb-0.5 truncate max-w-[110px]"
+                      className="text-[9px] font-extrabold px-2 py-0.5 rounded-full border shadow-2xs mb-0.5 truncate max-w-[120px]"
                       style={{
                         backgroundColor: `${activeItem.color}15`,
                         color: activeItem.color,
@@ -188,29 +188,29 @@ export default function LandTypeDonutChart({ data = [] }) {
                     </span>
                     <span className="text-base sm:text-lg font-black text-slate-900 tracking-tight leading-none my-0.5 font-mono">
                       {metricType === 'area'
-                        ? `${activeItem.areaHa.toFixed(2)} Ha`
-                        : `${activeItem.count} ${isMarathi ? 'भूखंड' : 'Parcels'}`}
+                        ? `${activeItem.areaHa.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Ha`
+                        : `${activeItem.count.toLocaleString('en-IN')} ${isMarathi ? 'भूखंड' : 'Parcels'}`}
                     </span>
-                    <span className="text-[9px] font-bold text-slate-500 font-mono">
+                    <span className="text-[10px] font-bold text-slate-500 font-mono">
                       {totalValue > 0 ? ((activeItem.value / totalValue) * 100).toFixed(1) : 0}% {isMarathi ? 'वाटा' : 'share'}
                     </span>
                   </div>
                 ) : (
-                  <div className="flex flex-col items-center justify-center text-center">
-                    <span className="text-[9px] uppercase tracking-wider font-bold text-slate-400">
+                  <div className="flex flex-col items-center justify-center">
+                    <span className="text-[9px] uppercase tracking-wider font-bold text-slate-500 bg-slate-100 border border-slate-200/80 px-2 py-0.5 rounded-full mb-0.5">
                       {metricType === 'area'
                         ? (isMarathi ? 'एकूण क्षेत्र' : 'Total Area')
                         : (isMarathi ? 'एकूण भूखंड' : 'Total Parcels')}
                     </span>
                     <span className="text-base sm:text-lg font-black text-slate-900 tracking-tight leading-none my-0.5 font-mono">
                       {metricType === 'area'
-                        ? `${totalArea.toFixed(2)} Ha`
+                        ? `${totalArea.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Ha`
                         : totalParcels.toLocaleString('en-IN')}
                     </span>
-                    <span className="text-[9px] text-slate-500 font-medium font-mono">
+                    <span className="text-[10px] text-slate-500 font-semibold font-mono">
                       {metricType === 'area'
                         ? `${totalParcels.toLocaleString('en-IN')} ${isMarathi ? 'भूखंड' : 'Parcels'}`
-                        : `${totalArea.toFixed(2)} Ha`}
+                        : `${totalArea.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Ha`}
                     </span>
                   </div>
                 )}
@@ -219,45 +219,70 @@ export default function LandTypeDonutChart({ data = [] }) {
           )}
         </div>
 
-        {/* Right: Clean Metric List with Circular Dots & Bold Values */}
-        {/* Strictly single-language: If Marathi is active show ONLY Marathi, if English is active show ONLY English */}
-        <div className="md:col-span-6 space-y-1.5">
-          {chartData.map((item, index) => {
-            const pct = totalValue > 0 ? ((item.value / totalValue) * 100).toFixed(1) : 0;
-            const isHighlighted = activeIndex === index;
-            const displayName = isMarathi ? item.nameMr : (item.nameEn || item.nameMr);
+        {/* Right: Pro Structured Metric Panel */}
+        <div className="md:col-span-7 bg-slate-50/70 border border-slate-200/80 rounded-2xl p-2.5 sm:p-3 flex flex-col justify-center">
+          {/* Micro Header */}
+          <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-slate-500 pb-2 mb-1 border-b border-slate-200/70 px-2 font-mono">
+            <span>{isMarathi ? 'धारणा प्रकार' : 'Tenure Class'}</span>
+            <div className="flex items-center gap-3">
+              <span>{metricType === 'area' ? (isMarathi ? 'क्षेत्रफळ (Ha)' : 'Area (Ha)') : (isMarathi ? 'संख्या (Parcels)' : 'Parcels')}</span>
+              <span className="w-10 text-right">% {isMarathi ? 'वाटा' : 'Share'}</span>
+            </div>
+          </div>
 
-            return (
-              <div
-                key={item.tenure}
-                onMouseEnter={() => setActiveIndex(index)}
-                onMouseLeave={() => setActiveIndex(null)}
-                className={`py-1.5 px-2.5 rounded-xl border transition-all duration-150 flex items-center justify-between cursor-pointer ${
-                  isHighlighted
-                    ? 'border-blue-300 bg-blue-50/70 shadow-2xs'
-                    : 'border-slate-100 bg-slate-50/50 hover:bg-slate-50'
-                }`}
-              >
-                <div className="flex items-center gap-2 min-w-0 pr-2">
-                  <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: item.color }} />
-                  <div className="min-w-0">
-                    <p className={`text-xs truncate ${isHighlighted ? 'font-black text-blue-950' : 'font-bold text-slate-800'}`}>
-                      {displayName}
-                    </p>
+          {/* Structured Rows */}
+          <div className="divide-y divide-slate-100/90">
+            {chartData.map((item, index) => {
+              const pct = totalValue > 0 ? ((item.value / totalValue) * 100).toFixed(1) : 0;
+              const isHighlighted = activeIndex === index;
+              const displayName = isMarathi ? item.nameMr : (item.nameEn || item.nameMr);
+
+              return (
+                <div
+                  key={item.tenure}
+                  onMouseEnter={() => setActiveIndex(index)}
+                  onMouseLeave={() => setActiveIndex(null)}
+                  className={`py-1.5 px-2.5 rounded-xl transition-all duration-150 flex items-center justify-between cursor-pointer ${
+                    isHighlighted
+                      ? 'bg-white shadow-xs border border-blue-300 ring-1 ring-blue-100'
+                      : 'hover:bg-white/80 border border-transparent'
+                  }`}
+                >
+                  <div className="flex items-center gap-2.5 min-w-0 pr-2">
+                    <span
+                      className="w-2.5 h-2.5 rounded-full shrink-0 shadow-2xs transition-transform duration-200"
+                      style={{
+                        backgroundColor: item.color,
+                        transform: isHighlighted ? 'scale(1.25)' : 'scale(1)',
+                      }}
+                    />
+                    <div className="min-w-0">
+                      <p className={`text-xs truncate ${isHighlighted ? 'font-black text-slate-950' : 'font-bold text-slate-800'}`}>
+                        {displayName}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3 shrink-0 text-right">
+                    <span className={`text-xs font-black block font-mono ${isHighlighted ? 'text-slate-950' : 'text-slate-900'}`}>
+                      {metricType === 'area'
+                        ? `${item.areaHa.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Ha`
+                        : `${item.count.toLocaleString('en-IN')}`}
+                    </span>
+                    <span
+                      className={`text-[10px] font-bold font-mono px-1.5 py-0.5 rounded-md min-w-[40px] text-right ${
+                        isHighlighted
+                          ? 'bg-blue-100 text-blue-900 font-extrabold'
+                          : 'bg-slate-200/60 text-slate-600'
+                      }`}
+                    >
+                      {pct}%
+                    </span>
                   </div>
                 </div>
-
-                <div className="text-right shrink-0">
-                  <span className={`text-xs font-black block font-mono ${isHighlighted ? 'text-blue-900' : 'text-slate-900'}`}>
-                    {metricType === 'area'
-                      ? `${item.areaHa.toFixed(2)} Ha`
-                      : `${item.count} ${isMarathi ? 'भूखंड' : 'Parcels'}`}
-                  </span>
-                  <span className="text-[10px] text-slate-500 font-semibold font-mono">{pct}%</span>
-                </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
       </div>
 

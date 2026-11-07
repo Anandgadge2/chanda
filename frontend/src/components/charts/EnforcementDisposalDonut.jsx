@@ -138,7 +138,9 @@ export default function EnforcementDisposalDonut({
                   ? (isMarathi ? 'शर्तभंग व महसूल उल्लंघन प्रकार' : 'Breach & Revenue Violation Categories')
                   : (isMarathi ? 'अर्ध-न्यायिक प्रकरणे व स्थिती' : 'Quasi-Judicial Cases & Status')}
               </span>
-            
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200 font-bold shrink-0">
+                {isMarathi ? 'MLRC उल्लंघन' : 'MLRC Violations'}
+              </span>
             </h3>
             <p className="text-[11px] text-slate-500 font-medium mt-0.5">
               {viewMode === 'categories'
@@ -219,9 +221,9 @@ export default function EnforcementDisposalDonut({
       </div>
 
       {/* Side-by-Side Chart & Metric List */}
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center my-1.5">
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-3 sm:gap-4 items-center flex-1 my-auto py-1">
         {/* Left: Donut Chart with Dynamic Center Readout */}
-        <div className="md:col-span-6 relative h-52 flex items-center justify-center">
+        <div className="md:col-span-5 relative h-52 flex items-center justify-center">
           {activeChartData.length === 0 ? (
             <div className="flex flex-col items-center justify-center text-slate-400 py-6">
               <CheckCircle2 className="w-8 h-8 stroke-[1.5] mb-2 opacity-40 text-emerald-500" />
@@ -236,7 +238,7 @@ export default function EnforcementDisposalDonut({
                     cx="50%"
                     cy="50%"
                     innerRadius={56}
-                    outerRadius={84}
+                    outerRadius={82}
                     paddingAngle={3}
                     dataKey="value"
                     stroke="#ffffff"
@@ -248,7 +250,7 @@ export default function EnforcementDisposalDonut({
                       <Cell
                         key={`cell-${entry.key}`}
                         fill={entry.color}
-                        opacity={activeIndex === null || activeIndex === index ? 1 : 0.4}
+                        opacity={activeIndex === null || activeIndex === index ? 1 : 0.35}
                         className="transition-all duration-200 cursor-pointer"
                       />
                     ))}
@@ -262,7 +264,7 @@ export default function EnforcementDisposalDonut({
                 {activeItem ? (
                   <div className="flex flex-col items-center justify-center">
                     <span
-                      className="text-[9px] font-extrabold px-1.5 py-0.2 rounded-full border shadow-2xs mb-0.5 max-w-[120px]"
+                      className="text-[9px] font-extrabold px-2 py-0.5 rounded-full border shadow-2xs mb-0.5 truncate max-w-[120px]"
                       style={{
                         backgroundColor: `${activeItem.color}15`,
                         color: activeItem.color,
@@ -273,10 +275,10 @@ export default function EnforcementDisposalDonut({
                     </span>
                     <span className="text-base sm:text-lg font-black text-slate-900 tracking-tight leading-none my-0.5 font-mono">
                       {metricType === 'area' && viewMode === 'categories'
-                        ? `${activeItem.areaHa.toFixed(1)} Ha`
-                        : `${activeItem.count} ${isMarathi ? 'प्रकरणे' : 'Cases'}`}
+                        ? `${activeItem.areaHa.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Ha`
+                        : `${activeItem.count.toLocaleString('en-IN')} ${isMarathi ? 'प्रकरणे' : 'Cases'}`}
                     </span>
-                    <span className="text-[9px] font-bold text-slate-500 font-mono">
+                    <span className="text-[10px] font-bold text-slate-500 font-mono">
                       {totalValue > 0
                         ? ((activeItem.value / totalValue) * 100 < 1 && activeItem.value > 0
                             ? '<1%'
@@ -286,20 +288,22 @@ export default function EnforcementDisposalDonut({
                   </div>
                 ) : (
                   <div className="flex flex-col items-center justify-center">
-                    <span className="text-[9px] font-extrabold px-1.5 py-0.2 rounded-full border shadow-2xs mb-0.5 bg-rose-50 text-rose-700 border-rose-200">
+                    <span className="text-[9px] uppercase tracking-wider font-bold text-rose-700 bg-rose-50 border border-rose-200 px-2 py-0.5 rounded-full mb-0.5">
                       {viewMode === 'categories'
                         ? (isMarathi ? 'एकूण उल्लंघन' : 'Total Violations')
                         : (isMarathi ? 'एकूण प्रकरणे' : 'Total Cases')}
                     </span>
                     <span className="text-base sm:text-lg font-black text-slate-900 tracking-tight leading-none my-0.5 font-mono">
                       {metricType === 'area' && viewMode === 'categories'
-                        ? `${totalAreaHa.toFixed(1)} Ha`
-                        : `${totalCount} ${isMarathi ? 'प्रकरणे' : 'Cases'}`}
+                        ? `${totalAreaHa.toLocaleString('en-IN', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} Ha`
+                        : `${totalCount.toLocaleString('en-IN')}`}
                     </span>
-                    <span className="text-[9px] font-bold text-slate-500 font-mono">
+                    <span className="text-[10px] text-slate-500 font-semibold font-mono">
                       {viewMode === 'categories'
-                        ? `${totalAreaHa.toFixed(1)} Ha ${isMarathi ? 'बाधित क्षेत्र' : 'Affected Area'}`
-                        : `${totalViolations} ${isMarathi ? 'दाखल प्रकरणे' : 'Filed Cases'}`}
+                        ? metricType === 'area'
+                          ? `${totalCount.toLocaleString('en-IN')} ${isMarathi ? 'एकूण प्रकरणे' : 'Total Cases'}`
+                          : `${totalAreaHa.toLocaleString('en-IN', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} Ha ${isMarathi ? 'बाधित क्षेत्र' : 'Affected Area'}`
+                        : `${totalViolations.toLocaleString('en-IN')} ${isMarathi ? 'दाखल प्रकरणे' : 'Filed Cases'}`}
                     </span>
                   </div>
                 )}
@@ -308,52 +312,79 @@ export default function EnforcementDisposalDonut({
           )}
         </div>
 
-        {/* Right: Stacked Categories / Status Items with Legend Bullets */}
-        {/* Strictly single-language: If Marathi is active show ONLY Marathi, if English is active show ONLY English */}
-        <div className="md:col-span-6 space-y-1.5">
-          {activeChartData.map((item, index) => {
-            const pct = totalValue > 0
-              ? ((item.value / totalValue) * 100 < 1 && item.value > 0
-                  ? '<1'
-                  : ((item.value / totalValue) * 100).toFixed(0))
-              : 0;
-            const isHighlighted = activeIndex === index;
-            const displayName = isMarathi ? item.nameMr : (item.nameEn || item.nameMr);
+        {/* Right: Pro Structured Metric Panel */}
+        <div className="md:col-span-7 bg-slate-50/70 border border-slate-200/80 rounded-2xl p-2.5 sm:p-3 flex flex-col justify-center">
+          {/* Micro Header */}
+          <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-slate-500 pb-2 mb-1 border-b border-slate-200/70 px-2 font-mono">
+            <span>{viewMode === 'categories' ? (isMarathi ? 'उल्लंघन प्रकार' : 'Violation Category') : (isMarathi ? 'कार्यवाही टप्पा' : 'Pipeline Stage')}</span>
+            <div className="flex items-center gap-3">
+              <span>{viewMode === 'categories' && metricType === 'area' ? (isMarathi ? 'क्षेत्र (Ha)' : 'Area (Ha)') : (isMarathi ? 'संख्या' : 'Cases')}</span>
+              <span className="w-10 text-right">% {isMarathi ? 'वाटा' : 'Share'}</span>
+            </div>
+          </div>
 
-            return (
-              <div
-                key={item.key}
-                onMouseEnter={() => setActiveIndex(index)}
-                onMouseLeave={() => setActiveIndex(null)}
-                className={`py-1.5 px-2.5 rounded-xl border transition-all duration-150 flex items-center justify-between cursor-pointer ${
-                  isHighlighted
-                    ? 'border-slate-400 bg-slate-100/90 shadow-2xs'
-                    : 'border-slate-100 bg-slate-50/60 hover:bg-slate-50'
-                }`}
-              >
-                <div className="flex items-center gap-2 min-w-0 pr-2">
-                  <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: item.color }} />
-                  <div className="min-w-0">
-                    <span className={`text-xs block ${isHighlighted ? 'font-black text-slate-950' : 'font-bold text-slate-800'}`}>
-                      {displayName}
-                    </span>
-                    {item.areaHa > 0 && viewMode === 'categories' && (
-                      <span className="text-[10px] text-slate-500 font-semibold block leading-tight font-mono">
-                        {item.areaHa.toFixed(2)} {isMarathi ? 'Ha बाधित' : 'Ha affected'}
+          {/* Structured Rows */}
+          <div className="divide-y divide-slate-100/90">
+            {activeChartData.map((item, index) => {
+              const pct = totalValue > 0
+                ? ((item.value / totalValue) * 100 < 1 && item.value > 0
+                    ? '<1'
+                    : ((item.value / totalValue) * 100).toFixed(0))
+                : 0;
+              const isHighlighted = activeIndex === index;
+              const displayName = isMarathi ? item.nameMr : (item.nameEn || item.nameMr);
+
+              return (
+                <div
+                  key={item.key}
+                  onMouseEnter={() => setActiveIndex(index)}
+                  onMouseLeave={() => setActiveIndex(null)}
+                  className={`py-1.5 px-2.5 rounded-xl transition-all duration-150 flex items-center justify-between cursor-pointer ${
+                    isHighlighted
+                      ? 'bg-white shadow-xs border border-rose-300 ring-1 ring-rose-100'
+                      : 'hover:bg-white/80 border border-transparent'
+                  }`}
+                >
+                  <div className="flex items-start gap-2.5 min-w-0 pr-2">
+                    <span
+                      className="w-2.5 h-2.5 rounded-full shrink-0 mt-1 shadow-2xs transition-transform duration-200"
+                      style={{
+                        backgroundColor: item.color,
+                        transform: isHighlighted ? 'scale(1.25)' : 'scale(1)',
+                      }}
+                    />
+                    <div className="min-w-0">
+                      <span className={`text-xs block leading-tight ${isHighlighted ? 'font-black text-slate-950' : 'font-bold text-slate-800'}`}>
+                        {displayName}
                       </span>
-                    )}
+                      {item.areaHa > 0 && viewMode === 'categories' && (
+                        <span className="text-[10px] text-slate-500 font-semibold block leading-tight font-mono mt-0.5">
+                          {item.areaHa.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {isMarathi ? 'Ha बाधित' : 'Ha affected'}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3 shrink-0 text-right">
+                    <span className={`text-xs font-black block font-mono ${isHighlighted ? 'text-slate-950' : 'text-slate-900'}`}>
+                      {viewMode === 'categories' && metricType === 'area'
+                        ? `${item.areaHa.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Ha`
+                        : `${item.count.toLocaleString('en-IN')}`}
+                    </span>
+                    <span
+                      className={`text-[10px] font-bold font-mono px-1.5 py-0.5 rounded-md min-w-[40px] text-right ${
+                        isHighlighted
+                          ? 'bg-rose-100 text-rose-900 font-extrabold'
+                          : 'bg-slate-200/60 text-slate-600'
+                      }`}
+                    >
+                      {pct}%
+                    </span>
                   </div>
                 </div>
-
-                <div className="text-right shrink-0">
-                  <span className={`text-xs font-black block font-mono ${isHighlighted ? 'text-slate-950' : 'text-slate-900'}`}>
-                    {item.count}
-                  </span>
-                  <span className="text-[10px] text-slate-500 font-semibold font-mono">{pct}%</span>
-                </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
       </div>
 
