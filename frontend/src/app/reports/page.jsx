@@ -2391,47 +2391,31 @@ export default function ReportsPage() {
       <div className="w-full space-y-3 sm:space-y-4">
         
         {/* =========================================================
-            PRO UNIFIED CONTROL HEADER & SEGMENTED TABS
+            PRO UNIFIED CONTROL HEADER & SEGMENTED TABS (ONE ROW)
         ========================================================= */}
-        <div className="bg-white border border-slate-200/90 rounded-2xl p-3 sm:p-4 shadow-xs space-y-3">
-          {/* Top Row: Title, Jurisdiction Badge & Action Export Buttons */}
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-indigo-700 text-white flex items-center justify-center shrink-0 shadow-xs">
-                <FileSpreadsheet className="w-5 h-5" />
-              </div>
-              <div className="min-w-0">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <h1 className="text-sm sm:text-base md:text-lg font-black text-slate-950 tracking-tight leading-tight">
-                    {isMarathi ? 'महसूल तपासणी अहवाल व प्रपत्रे' : 'Revenue Inspection Reports & Prapatras'}
-                  </h1>
-                  <span className="inline-flex items-center text-[10px] sm:text-[11px] font-bold px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-800 border border-indigo-200/60">
-                    {isMarathi ? 'चंद्रपूर जिल्हा • MLRC 1966' : 'Chandrapur District • MLRC 1966'}
-                  </span>
-                </div>
-                <p className="text-[11px] sm:text-xs text-slate-500 font-medium mt-0.5 hidden sm:block">
-                  {isMarathi
-                    ? 'ऐतिहासिक ७/१२ पडताळणी, शासकीय प्रपत्रे व १८ विषयनिहाय बुकलेट्स'
-                    : 'Historical 7/12 Audit, Statutory Prapatras & 18 Subject Booklets'}
-                </p>
-              </div>
+        <div className="bg-white border border-slate-200/90 rounded-2xl p-2.5 sm:p-3 shadow-xs flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+          {/* Title & Brand Icon */}
+          <div className="flex items-center gap-3 shrink-0">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-indigo-700 via-indigo-600 to-indigo-500 text-white flex items-center justify-center shrink-0 shadow-xs ring-4 ring-indigo-50/70">
+              <FileSpreadsheet className="w-5 h-5" />
             </div>
-
-
+            <h1 className="text-base sm:text-lg font-black text-slate-950 tracking-tight leading-tight select-none">
+              {isMarathi ? 'महसूल तपासणी अहवाल व प्रपत्रे' : 'Revenue Inspection Reports & Prapatras'}
+            </h1>
           </div>
 
-          {/* Bottom Row: Segmented Pill Tabs */}
-          <div className="flex items-center bg-slate-100/90 p-1 rounded-xl overflow-x-auto no-scrollbar gap-1 border border-slate-200/60">
+          {/* Segmented Pill Tabs */}
+          <div className="flex items-center bg-slate-100/90 p-1 rounded-xl overflow-x-auto no-scrollbar gap-1 border border-slate-200/60 shrink-0 max-w-full">
             <button
               type="button"
               onClick={() => {
                 setActiveTab('checklist');
                 setActiveView('timeline');
               }}
-              className={`flex-1 min-w-fit px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition flex items-center justify-center gap-1.5 cursor-pointer shrink-0 ${
+              className={`px-3 sm:px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shrink-0 select-none ${
                 activeTab === 'checklist'
-                  ? 'bg-white text-indigo-950 shadow-xs font-black'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
+                  ? 'bg-white text-indigo-950 shadow-xs ring-1 ring-slate-900/5 font-black'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
               }`}
             >
               <ShieldCheck className={`w-4 h-4 ${activeTab === 'checklist' ? 'text-indigo-600' : 'text-slate-500'}`} />
@@ -2447,10 +2431,10 @@ export default function ReportsPage() {
                 setDraftSearch('');
                 setAppliedFilters(prev => ({ ...prev, search: '' }));
               }}
-              className={`flex-1 min-w-fit px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition flex items-center justify-center gap-1.5 cursor-pointer shrink-0 ${
+              className={`px-3 sm:px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shrink-0 select-none ${
                 activeTab === 'prapatra5'
-                  ? 'bg-white text-emerald-950 shadow-xs font-black'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
+                  ? 'bg-white text-emerald-950 shadow-xs ring-1 ring-slate-900/5 font-black'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
               }`}
             >
               <FileText className={`w-4 h-4 ${activeTab === 'prapatra5' ? 'text-emerald-600' : 'text-slate-500'}`} />
@@ -2464,10 +2448,10 @@ export default function ReportsPage() {
                 setActiveView('categorySummary');
                 setDraftCatId(selectedCatId);
               }}
-              className={`flex-1 min-w-fit px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition flex items-center justify-center gap-1.5 cursor-pointer shrink-0 ${
+              className={`px-3 sm:px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shrink-0 select-none ${
                 activeTab === 'categories'
-                  ? 'bg-white text-blue-950 shadow-xs font-black'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
+                  ? 'bg-white text-blue-950 shadow-xs ring-1 ring-slate-900/5 font-black'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
               }`}
             >
               <Layers className={`w-4 h-4 ${activeTab === 'categories' ? 'text-blue-600' : 'text-slate-500'}`} />
@@ -2479,10 +2463,10 @@ export default function ReportsPage() {
               onClick={() => {
                 setActiveTab('renumbering');
               }}
-              className={`flex-1 min-w-fit px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition flex items-center justify-center gap-1.5 cursor-pointer shrink-0 ${
+              className={`px-3 sm:px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shrink-0 select-none ${
                 activeTab === 'renumbering'
-                  ? 'bg-white text-amber-950 shadow-xs font-black'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
+                  ? 'bg-white text-amber-950 shadow-xs ring-1 ring-slate-900/5 font-black'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
               }`}
             >
               <TableProperties className={`w-4 h-4 ${activeTab === 'renumbering' ? 'text-amber-600' : 'text-slate-500'}`} />
