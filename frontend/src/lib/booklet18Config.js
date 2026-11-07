@@ -169,7 +169,7 @@ export function getDetailedColumnsForBooklet(catId, isMarathi = true) {
   if (num === 1) {
     // 1) सरकारी जमीन
     return [
-      { key: 'village', label: isMarathi ? 'गावाचे नाव' : 'Village Name', minW: 'min-w-[140px]', align: 'left', getValue: p => p.villageName },
+      { key: 'village', label: isMarathi ? 'गावाचे नाव' : 'Village Name', minW: 'min-w-[150px]', align: 'left', getValue: p => p.villageName },
       { key: 'surveyNo', label: isMarathi ? 'सर्व्हे क्रमांक' : 'Survey No.', minW: 'w-24', align: 'center', isMono: true, getValue: p => p.gatNumber || p.oldSurveyNo || '-' },
       { key: 'area', label: isMarathi ? 'क्षेत्र (हे.आर.)' : 'Area (Ha)', minW: 'w-24', align: 'right', isArea: true, getValue: p => Number(p.totalAreaHa || 0).toFixed(4) },
       { key: 'tenureType', label: isMarathi ? 'भूधारणा पद्धती' : 'Tenure Type', minW: 'w-28', align: 'center', getValue: p => p.tenureDisplay || (p.tenureClass === 'SARKAR_SHASAN' ? 'सरकार' : 'भोगवटदार') },
@@ -185,7 +185,7 @@ export function getDetailedColumnsForBooklet(catId, isMarathi = true) {
   if (num === 7) {
     // 7) विकास आराखडा व गुरचरण जमिनी
     return [
-      { key: 'village', label: isMarathi ? 'गावाचे नाव' : 'Village Name', minW: 'min-w-[140px]', align: 'left', getValue: p => p.villageName },
+      { key: 'village', label: isMarathi ? 'गावाचे नाव' : 'Village Name', minW: 'min-w-[150px]', align: 'left', getValue: p => p.villageName },
       { key: 'surveyNo', label: isMarathi ? 'सर्व्हे क्रमांक' : 'Survey No.', minW: 'w-24', align: 'center', isMono: true, getValue: p => p.gatNumber || p.oldSurveyNo || '-' },
       { key: 'area', label: isMarathi ? 'क्षेत्र (हे.आर.)' : 'Area (Ha)', minW: 'w-24', align: 'right', isArea: true, getValue: p => Number(p.totalAreaHa || 0).toFixed(4) },
       { key: 'owner', label: isMarathi ? 'भोगवटदाराचे नाव' : 'Occupant Name', minW: 'min-w-[180px]', align: 'left', isOwner: true, getValue: p => p.currentOwner || p.metadata?.ownerName || '-' },
@@ -200,7 +200,7 @@ export function getDetailedColumnsForBooklet(catId, isMarathi = true) {
   if (num === 9) {
     // 9) आदिवासी खातेदारांचे मालकीच्या जमिनी
     return [
-      { key: 'village', label: isMarathi ? 'गावाचे नाव' : 'Village Name', minW: 'min-w-[140px]', align: 'left', getValue: p => p.villageName },
+      { key: 'village', label: isMarathi ? 'गावाचे नाव' : 'Village Name', minW: 'min-w-[150px]', align: 'left', getValue: p => p.villageName },
       { key: 'surveyNo', label: isMarathi ? 'सर्व्हे क्रमांक' : 'Survey No.', minW: 'w-24', align: 'center', isMono: true, getValue: p => p.gatNumber || p.oldSurveyNo || '-' },
       { key: 'area', label: isMarathi ? 'क्षेत्र (हे.आर.)' : 'Area (Ha)', minW: 'w-24', align: 'right', isArea: true, getValue: p => Number(p.totalAreaHa || 0).toFixed(4) },
       { key: 'owner', label: isMarathi ? 'भोगवटदाराचे नाव' : 'Occupant Name', minW: 'min-w-[180px]', align: 'left', isOwner: true, getValue: p => p.currentOwner || p.metadata?.ownerName || '-' },
@@ -216,7 +216,7 @@ export function getDetailedColumnsForBooklet(catId, isMarathi = true) {
   if (num === 10 || num === 11) {
     // 10) पुनर्वसन / 11) भाडेपट्टयाने शासकीय जमीन
     return [
-      { key: 'village', label: isMarathi ? 'गावाचे नाव' : 'Village Name', minW: 'min-w-[140px]', align: 'left', getValue: p => p.villageName },
+      { key: 'village', label: isMarathi ? 'गावाचे नाव' : 'Village Name', minW: 'min-w-[150px]', align: 'left', getValue: p => p.villageName },
       { key: 'surveyNo', label: isMarathi ? 'सर्व्हे क्रमांक' : 'Survey No.', minW: 'w-24', align: 'center', isMono: true, getValue: p => p.gatNumber || p.oldSurveyNo || '-' },
       { key: 'area', label: isMarathi ? 'क्षेत्र (हे.आर.)' : 'Area (Ha)', minW: 'w-24', align: 'right', isArea: true, getValue: p => Number(p.totalAreaHa || 0).toFixed(4) },
       { key: 'owner', label: isMarathi ? 'भोगवटदाराचे नाव' : 'Occupant Name', minW: 'min-w-[180px]', align: 'left', isOwner: true, getValue: p => p.currentOwner || p.metadata?.ownerName || '-' },
@@ -230,7 +230,7 @@ export function getDetailedColumnsForBooklet(catId, isMarathi = true) {
   if (num === 12) {
     // 12) भुदान व ग्रामदान अंतर्गत प्रदान केलेल्या जमिनी
     return [
-      { key: 'village', label: isMarathi ? 'गावाचे नाव' : 'Village Name', minW: 'min-w-[140px]', align: 'left', getValue: p => p.villageName },
+      { key: 'village', label: isMarathi ? 'गावाचे नाव' : 'Village Name', minW: 'min-w-[150px]', align: 'left', getValue: p => p.villageName },
       { key: 'surveyNo', label: isMarathi ? 'सर्व्हे क्रमांक' : 'Survey No.', minW: 'w-24', align: 'center', isMono: true, getValue: p => p.gatNumber || p.oldSurveyNo || '-' },
       { key: 'area', label: isMarathi ? 'क्षेत्र (हे.आर.)' : 'Area (Ha)', minW: 'w-24', align: 'right', isArea: true, getValue: p => Number(p.totalAreaHa || 0).toFixed(4) },
       { key: 'owner', label: isMarathi ? 'भोगवटदाराचे नाव' : 'Occupant Name', minW: 'min-w-[180px]', align: 'left', isOwner: true, getValue: p => p.currentOwner || p.metadata?.ownerName || '-' },
@@ -245,7 +245,7 @@ export function getDetailedColumnsForBooklet(catId, isMarathi = true) {
   if (num === 13) {
     // 13) खाजगी वने संपादन प्रलंबित
     return [
-      { key: 'village', label: isMarathi ? 'गावाचे नाव' : 'Village Name', minW: 'min-w-[140px]', align: 'left', getValue: p => p.villageName },
+      { key: 'village', label: isMarathi ? 'गावाचे नाव' : 'Village Name', minW: 'min-w-[150px]', align: 'left', getValue: p => p.villageName },
       { key: 'surveyNo', label: isMarathi ? 'सर्व्हे क्रमांक' : 'Survey No.', minW: 'w-24', align: 'center', isMono: true, getValue: p => p.gatNumber || p.oldSurveyNo || '-' },
       { key: 'area', label: isMarathi ? 'क्षेत्र (हे.आर.)' : 'Area (Ha)', minW: 'w-24', align: 'right', isArea: true, getValue: p => Number(p.totalAreaHa || 0).toFixed(4) },
       { key: 'owner', label: isMarathi ? 'भोगवटदाराचे नाव' : 'Occupant Name', minW: 'min-w-[180px]', align: 'left', isOwner: true, getValue: p => p.currentOwner || p.metadata?.ownerName || '-' },
@@ -258,7 +258,7 @@ export function getDetailedColumnsForBooklet(catId, isMarathi = true) {
   if (num === 14 || num === 15 || num === 16 || num === 17) {
     // 14) भूमीधारी / 15) कमाल मर्यादा सूट / 16) वक्फ / 17) भूसंपादन
     return [
-      { key: 'village', label: isMarathi ? 'गावाचे नाव' : 'Village Name', minW: 'min-w-[140px]', align: 'left', getValue: p => p.villageName },
+      { key: 'village', label: isMarathi ? 'गावाचे नाव' : 'Village Name', minW: 'min-w-[150px]', align: 'left', getValue: p => p.villageName },
       { key: 'surveyNo', label: isMarathi ? 'सर्व्हे क्रमांक' : 'Survey No.', minW: 'w-24', align: 'center', isMono: true, getValue: p => p.gatNumber || p.oldSurveyNo || '-' },
       { key: 'area', label: isMarathi ? 'क्षेत्र (हे.आर.)' : 'Area (Ha)', minW: 'w-24', align: 'right', isArea: true, getValue: p => Number(p.totalAreaHa || 0).toFixed(4) },
       { key: 'owner', label: isMarathi ? 'भोगवटदाराचे नाव' : 'Occupant Name', minW: 'min-w-[180px]', align: 'left', isOwner: true, getValue: p => p.currentOwner || p.metadata?.ownerName || '-' },
@@ -273,7 +273,7 @@ export function getDetailedColumnsForBooklet(catId, isMarathi = true) {
   if (num === 18) {
     // 18) कुळ कायदा कलम 89 व 89-अ/47 व 47 प्रमाणे धारण केलेली जमीन
     return [
-      { key: 'village', label: isMarathi ? 'गावाचे नाव' : 'Village Name', minW: 'min-w-[140px]', align: 'left', getValue: p => p.villageName },
+      { key: 'village', label: isMarathi ? 'गावाचे नाव' : 'Village Name', minW: 'min-w-[150px]', align: 'left', getValue: p => p.villageName },
       { key: 'surveyNo', label: isMarathi ? 'सर्व्हे क्रमांक' : 'Survey No.', minW: 'w-24', align: 'center', isMono: true, getValue: p => p.gatNumber || p.oldSurveyNo || '-' },
       { key: 'area', label: isMarathi ? 'क्षेत्र (हे.आर.)' : 'Area (Ha)', minW: 'w-24', align: 'right', isArea: true, getValue: p => Number(p.totalAreaHa || 0).toFixed(4) },
       { key: 'owner', label: isMarathi ? 'भोगवटदाराचे नाव' : 'Occupant Name', minW: 'min-w-[180px]', align: 'left', isOwner: true, getValue: p => p.currentOwner || p.metadata?.ownerName || '-' },
@@ -287,7 +287,7 @@ export function getDetailedColumnsForBooklet(catId, isMarathi = true) {
 
   // Default: Booklets 2, 3, 4, 5, 6, 8
   return [
-    { key: 'village', label: isMarathi ? 'गावाचे नाव' : 'Village Name', minW: 'min-w-[140px]', align: 'left', getValue: p => p.villageName },
+    { key: 'village', label: isMarathi ? 'गावाचे नाव' : 'Village Name', minW: 'min-w-[150px]', align: 'left', getValue: p => p.villageName },
     { key: 'surveyNo', label: isMarathi ? 'सर्व्हे क्रमांक' : 'Survey No.', minW: 'w-24', align: 'center', isMono: true, getValue: p => p.gatNumber || p.oldSurveyNo || '-' },
     { key: 'area', label: isMarathi ? 'क्षेत्र (हे.आर.)' : 'Area (Ha)', minW: 'w-24', align: 'right', isArea: true, getValue: p => Number(p.totalAreaHa || 0).toFixed(4) },
     { key: 'owner', label: isMarathi ? 'भोगवटदाराचे नाव' : 'Occupant Name', minW: 'min-w-[180px]', align: 'left', isOwner: true, getValue: p => p.currentOwner || p.metadata?.ownerName || '-' },

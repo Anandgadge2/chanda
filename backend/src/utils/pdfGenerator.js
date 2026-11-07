@@ -24,7 +24,8 @@ const TALUKA_EN_TO_MR = {
 
 const formatTalukaRowName = (r) => {
   if (r.villageName && r.villageName !== 'संपूर्ण तालुका (All Villages)') {
-    return cleanVillageName(r.villageName);
+    const tMr = r.taluka ? (TALUKA_EN_TO_MR[r.taluka] || r.taluka) : null;
+    return tMr ? `${cleanVillageName(r.villageName)} (${tMr})` : cleanVillageName(r.villageName);
   }
   return r.taluka ? `${TALUKA_EN_TO_MR[r.taluka] || r.taluka} (संपूर्ण तालुका)` : 'एकूण';
 };

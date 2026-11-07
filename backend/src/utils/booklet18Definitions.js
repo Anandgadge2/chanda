@@ -161,9 +161,37 @@ export function getBooklet18Category(id) {
 export function getDetailedColumnsForBooklet(catId) {
   const num = parseInt(catId, 10);
 
+  // Taluka mapping & helper
+  const TALUKA_EN_TO_MR = {
+    'Chandrapur': 'चंद्रपूर',
+    'Ballarpur': 'बल्लारपूर',
+    'Rajura': 'राजुरा',
+    'Bhadravati': 'भद्रावती',
+    'Warora': 'वरोरा',
+    'Chimur': 'चिमूर',
+    'Brahmapuri': 'ब्रह्मपुरी',
+    'Nagbhid': 'नागभीड',
+    'Sindewahi': 'सिंदेवाही',
+    'Mul': 'मूल',
+    'Saoli': 'सावली',
+    'Pombhurna': 'पोंभुर्णा',
+    'Gondpipri': 'गोंडपिपरी',
+    'Korpana': 'कोरपना',
+    'Jivati': 'जिवती'
+  };
+  const formatTalukaMr = (name) => {
+    if (!name) return '';
+    const clean = String(name).trim();
+    return TALUKA_EN_TO_MR[clean] || clean;
+  };
+
   // Common extractors
   const getSr = (p, idx) => idx + 1;
-  const getVillage = (p) => p.villageName || '-';
+  const getVillage = (p) => {
+    const v = p.villageName || '-';
+    const t = p.taluka ? formatTalukaMr(p.taluka) : '';
+    return t ? `${v} (${t})` : v;
+  };
   const getSurvey = (p) => p.gatNumber || p.oldSurveyNo || '-';
   const getArea = (p) => Number(p.totalAreaHa || 0);
   const getOwner = (p) => p.currentOwner || p.metadata?.ownerName || 'नोंद उपलब्ध नाही';
@@ -179,7 +207,7 @@ export function getDetailedColumnsForBooklet(catId) {
     // 1) सरकारी जमीन
     return [
       { key: 'srNo', label: 'अ.क्र.', width: 6, align: 'center', getValue: getSr },
-      { key: 'village', label: 'गावाचे नाव', width: 20, align: 'left', getValue: getVillage },
+      { key: 'village', label: 'गावाचे नाव', width: 22, align: 'left', getValue: getVillage },
       { key: 'surveyNo', label: 'सर्व्हे क्रमांक', width: 16, align: 'center', getValue: getSurvey },
       { key: 'area', label: 'क्षेत्र (हे.आर.)', width: 14, align: 'right', isArea: true, getValue: getArea },
       { key: 'tenureType', label: 'भूधारणा पद्धती', width: 18, align: 'center', getValue: (p) => p.tenureDisplay || (p.tenureClass === 'SARKAR_SHASAN' ? 'सरकार' : 'भोगवटदार') },
@@ -196,7 +224,7 @@ export function getDetailedColumnsForBooklet(catId) {
     // 7) विकास आराखडा व गुरचरण जमिनी
     return [
       { key: 'srNo', label: 'अ.क्र.', width: 6, align: 'center', getValue: getSr },
-      { key: 'village', label: 'गावाचे नाव', width: 20, align: 'left', getValue: getVillage },
+      { key: 'village', label: 'गावाचे नाव', width: 22, align: 'left', getValue: getVillage },
       { key: 'surveyNo', label: 'सर्व्हे क्रमांक', width: 16, align: 'center', getValue: getSurvey },
       { key: 'area', label: 'क्षेत्र (हे.आर.)', width: 14, align: 'right', isArea: true, getValue: getArea },
       { key: 'owner', label: 'भोगवटदाराचे नाव', width: 28, align: 'left', isOwner: true, getValue: getOwner },
@@ -211,16 +239,17 @@ export function getDetailedColumnsForBooklet(catId) {
   if (num === 9) {
     // 9) आदिवासी खातेदारांचे मालकीच्या जमिनी
     return [
-      { key: 'village', label: isMarathi ? 'गावाचे नाव' : 'Village Name', minW: 'min-w-[140px]', align: 'left', getValue: p => p.villageName },
-      { key: 'surveyNo', label: isMarathi ? 'सर्व्हे क्रमांक' : 'Survey No.', minW: 'w-24', align: 'center', isMono: true, getValue: p => p.gatNumber || p.oldSurveyNo || '-' },
-      { key: 'area', label: isMarathi ? 'क्षेत्र (हे.आर.)' : 'Area (Ha)', minW: 'w-24', align: 'right', isArea: true, getValue: p => Number(p.totalAreaHa || 0).toFixed(4) },
-      { key: 'owner', label: isMarathi ? 'भोगवटदाराचे नाव' : 'Occupant Name', minW: 'min-w-[180px]', align: 'left', isOwner: true, getValue: p => p.currentOwner || p.metadata?.ownerName || '-' },
-      { key: 'tenureClass', label: isMarathi ? 'भोगवट्दार वर्ग' : 'Occupant Class', minW: 'w-24', align: 'center', isTenureBadge: true, getValue: p => p.tenureDisplay || (p.tenureClass === 'BHOGVATDAR_CLASS_1' ? 'वर्ग १' : 'वर्ग २') },
-      { key: 'tribalKhatedarName', label: isMarathi ? 'आदिवासी खातेदाराचे नाव' : 'Tribal Khatedar Name', minW: 'min-w-[180px]', align: 'left', getValue: p => (p.metadata?.flags?.isTribal || p.metadata?.tribalName) ? (p.metadata?.tribalName || p.currentOwner || '-') : '-' },
-      { key: 'shartbhang', label: isMarathi ? 'शर्तभंग झालेला आहे काय?' : 'Condition Breach Occurred?', minW: 'w-32', align: 'center', isBadge: true, isAlertVal: val => val === 'होय', getValue: p => getShartbhang(p) ? 'होय' : 'नाही' },
-      { key: 'otherRightsNoted', label: isMarathi ? 'इतर अधिकारात नोंद घेतलेली आहे काय?' : 'Other Rights Noted?', minW: 'w-32', align: 'center', isBadge: true, getValue: p => getOtherRights(p) ? 'होय' : 'नाही' },
-      { key: 'illegalDel', label: isMarathi ? 'अवैधरित्या इतर अधिकारातील नोंदी कमी केलेल्या आहे काय?' : 'Other Rights Illegally Deleted?', minW: 'min-w-[160px]', align: 'center', isBadge: true, isAlertVal: val => val === 'होय', getValue: p => getIllegalDel(p) ? 'होय' : 'नाही' },
-      { key: 'tribalToNonTribal', label: isMarathi ? 'अवैधरित्या आदिवासी ते गैर- आदिवासी हस्तांतरण झालेले आहे काय?' : 'Illegal Tribal to Non-Tribal Transfer?', minW: 'min-w-[180px]', align: 'center', isBadge: true, isAlertVal: val => val === 'होय', getValue: p => (p.auditPoints?.point_39 === 'होय' || p.metadata?.auditPoints?.point_39 === 'होय' || p.metadata?.tribalToNonTribalIllegal || (p.metadata?.flags?.isTribal && (p.forwardCases?.some(fc => fc.violationType === 'TRIBAL_LAND_VIOLATION') || p.metadata?.otherRights?.includes('गैर-आदिवासी')))) ? 'होय' : 'नाही' }
+      { key: 'srNo', label: 'अ.क्र.', width: 6, align: 'center', getValue: getSr },
+      { key: 'village', label: 'गावाचे नाव', width: 22, align: 'left', getValue: getVillage },
+      { key: 'surveyNo', label: 'सर्व्हे क्रमांक', width: 16, align: 'center', getValue: getSurvey },
+      { key: 'area', label: 'क्षेत्र (हे.आर.)', width: 14, align: 'right', isArea: true, getValue: getArea },
+      { key: 'owner', label: 'भोगवटदाराचे नाव', width: 28, align: 'left', isOwner: true, getValue: getOwner },
+      { key: 'tenureClass', label: 'भोगवट्दार वर्ग', width: 16, align: 'center', getValue: getTenureClass },
+      { key: 'tribalKhatedarName', label: 'आदिवासी खातेदाराचे नाव', width: 24, align: 'left', getValue: (p) => (p.metadata?.flags?.isTribal || p.metadata?.tribalName) ? (p.metadata?.tribalName || p.currentOwner || '-') : '-' },
+      { key: 'shartbhang', label: 'शर्तभंग झालेला आहे काय?', width: 18, align: 'center', isAlert: true, getValue: getShartbhang },
+      { key: 'otherRightsNoted', label: 'इतर अधिकारात नोंद घेतलेली आहे काय?', width: 20, align: 'center', getValue: getOtherRightsNoted },
+      { key: 'illegalDel', label: 'अवैधरित्या इतर अधिकारातील नोंदी कमी केलेल्या आहे काय?', width: 22, align: 'center', isAlert: true, getValue: getIllegalDel },
+      { key: 'tribalToNonTribal', label: 'अवैधरित्या आदिवासी ते गैर- आदिवासी हस्तांतरण झालेले आहे काय?', width: 26, align: 'center', isAlert: true, getValue: (p, pt) => pt[39] === 'होय' || p.metadata?.tribalToNonTribalIllegal || (p.metadata?.flags?.isTribal && (p.forwardCases?.some(fc => fc.violationType === 'TRIBAL_LAND_VIOLATION') || p.metadata?.otherRights?.includes('गैर-आदिवासी'))) ? 'होय' : 'नाही' }
     ];
   }
 
@@ -228,7 +257,7 @@ export function getDetailedColumnsForBooklet(catId) {
     // 10) पुनर्वसन / 11) भाडेपट्टयाने शासकीय जमीन
     return [
       { key: 'srNo', label: 'अ.क्र.', width: 6, align: 'center', getValue: getSr },
-      { key: 'village', label: 'गावाचे नाव', width: 20, align: 'left', getValue: getVillage },
+      { key: 'village', label: 'गावाचे नाव', width: 22, align: 'left', getValue: getVillage },
       { key: 'surveyNo', label: 'सर्व्हे क्रमांक', width: 16, align: 'center', getValue: getSurvey },
       { key: 'area', label: 'क्षेत्र (हे.आर.)', width: 14, align: 'right', isArea: true, getValue: getArea },
       { key: 'owner', label: 'भोगवटदाराचे नाव', width: 28, align: 'left', isOwner: true, getValue: getOwner },
@@ -243,7 +272,7 @@ export function getDetailedColumnsForBooklet(catId) {
     // 12) भुदान व ग्रामदान अंतर्गत प्रदान केलेल्या जमिनी
     return [
       { key: 'srNo', label: 'अ.क्र.', width: 6, align: 'center', getValue: getSr },
-      { key: 'village', label: 'गावाचे नाव', width: 20, align: 'left', getValue: getVillage },
+      { key: 'village', label: 'गावाचे नाव', width: 22, align: 'left', getValue: getVillage },
       { key: 'surveyNo', label: 'सर्व्हे क्रमांक', width: 16, align: 'center', getValue: getSurvey },
       { key: 'area', label: 'क्षेत्र (हे.आर.)', width: 14, align: 'right', isArea: true, getValue: getArea },
       { key: 'owner', label: 'भोगवटदाराचे नाव', width: 28, align: 'left', isOwner: true, getValue: getOwner },
@@ -259,7 +288,7 @@ export function getDetailedColumnsForBooklet(catId) {
     // 13) खाजगी वने संपादन प्रलंबित
     return [
       { key: 'srNo', label: 'अ.क्र.', width: 6, align: 'center', getValue: getSr },
-      { key: 'village', label: 'गावाचे नाव', width: 20, align: 'left', getValue: getVillage },
+      { key: 'village', label: 'गावाचे नाव', width: 22, align: 'left', getValue: getVillage },
       { key: 'surveyNo', label: 'सर्व्हे क्रमांक', width: 16, align: 'center', getValue: getSurvey },
       { key: 'area', label: 'क्षेत्र (हे.आर.)', width: 14, align: 'right', isArea: true, getValue: getArea },
       { key: 'owner', label: 'भोगवटदाराचे नाव', width: 28, align: 'left', isOwner: true, getValue: getOwner },
@@ -273,7 +302,7 @@ export function getDetailedColumnsForBooklet(catId) {
     // 14) भूमीधारी / 15) कमाल धारणा सूट / 16) वक्फ / 17) भूसंपादन
     return [
       { key: 'srNo', label: 'अ.क्र.', width: 6, align: 'center', getValue: getSr },
-      { key: 'village', label: 'गावाचे नाव', width: 20, align: 'left', getValue: getVillage },
+      { key: 'village', label: 'गावाचे नाव', width: 22, align: 'left', getValue: getVillage },
       { key: 'surveyNo', label: 'सर्व्हे क्रमांक', width: 16, align: 'center', getValue: getSurvey },
       { key: 'area', label: 'क्षेत्र (हे.आर.)', width: 14, align: 'right', isArea: true, getValue: getArea },
       { key: 'owner', label: 'भोगवटदाराचे नाव', width: 28, align: 'left', isOwner: true, getValue: getOwner },
@@ -289,7 +318,7 @@ export function getDetailedColumnsForBooklet(catId) {
     // 18) कुळ कायदा कलम 89 व 89-अ/47 व 47 प्रमाणे धारण केलेली जमीन
     return [
       { key: 'srNo', label: 'अ.क्र.', width: 6, align: 'center', getValue: getSr },
-      { key: 'village', label: 'गावाचे नाव', width: 20, align: 'left', getValue: getVillage },
+      { key: 'village', label: 'गावाचे नाव', width: 22, align: 'left', getValue: getVillage },
       { key: 'surveyNo', label: 'सर्व्हे क्रमांक', width: 16, align: 'center', getValue: getSurvey },
       { key: 'area', label: 'क्षेत्र (हे.आर.)', width: 14, align: 'right', isArea: true, getValue: getArea },
       { key: 'owner', label: 'भोगवटदाराचे नाव', width: 28, align: 'left', isOwner: true, getValue: getOwner },
@@ -304,7 +333,7 @@ export function getDetailedColumnsForBooklet(catId) {
   // Default: Booklets 2, 3, 4, 5, 6, 8
   return [
     { key: 'srNo', label: 'अ.क्र.', width: 6, align: 'center', getValue: getSr },
-    { key: 'village', label: 'गावाचे नाव', width: 20, align: 'left', getValue: getVillage },
+    { key: 'village', label: 'गावाचे नाव', width: 22, align: 'left', getValue: getVillage },
     { key: 'surveyNo', label: 'सर्व्हे क्रमांक', width: 16, align: 'center', getValue: getSurvey },
     { key: 'area', label: 'क्षेत्र (हे.आर.)', width: 14, align: 'right', isArea: true, getValue: getArea },
     { key: 'owner', label: 'भोगवटदाराचे नाव', width: 28, align: 'left', isOwner: true, getValue: getOwner },

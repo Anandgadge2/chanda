@@ -2149,7 +2149,16 @@ export default function ReportsPage() {
                       {/* Col 1: Sr. No */}
                       <td className="py-2 px-2 text-center border-r border-slate-200 font-mono text-slate-500 font-semibold">{idx + 1}</td>
                       {/* Col 2: Name */}
-                      <td className="py-3 px-3.5 border-r border-slate-200 font-semibold text-slate-900 text-[13px] sm:text-sm">{displayName}</td>
+                      <td className="py-3 px-3.5 border-r border-slate-200 font-semibold text-slate-900 text-[13px] sm:text-sm">
+                        <div>
+                          <span>{displayName}</span>
+                          {!isDistrict && !isTaluka && row.taluka && (
+                            <span className="block text-xs font-normal text-slate-500 mt-0.5">
+                              {talukaDisplay}
+                            </span>
+                          )}
+                        </div>
+                      </td>
                       {/* Col 3: Standalone Total Survey No. */}
                       <td className="py-2 px-2 text-center border-r border-slate-200 font-mono font-bold text-indigo-950 bg-indigo-50/20">
                         {row.total712Count || 0}
@@ -4308,9 +4317,18 @@ export default function ReportsPage() {
 
                                       // 6. Village column
                                       if (col.key === 'village') {
+                                        const vName = formatVillageName(val || p.villageName, isMarathi);
+                                        const tName = p.taluka ? formatTalukaName(p.taluka, isMarathi) : '';
                                         return (
                                           <td key={`cell-${idx}-${cIdx}`} className="py-3 px-3.5 border-r border-slate-200 font-semibold text-slate-900 text-[13px] sm:text-sm">
-                                            {formatVillageName(val || p.villageName, isMarathi)}
+                                            <div>
+                                              <span>{vName}</span>
+                                              {tName && (
+                                                <span className="block text-xs font-normal text-slate-500 mt-0.5">
+                                                  {tName}
+                                                </span>
+                                              )}
+                                            </div>
                                           </td>
                                         );
                                       }

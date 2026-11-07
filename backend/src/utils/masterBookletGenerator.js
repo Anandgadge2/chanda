@@ -1736,7 +1736,10 @@ export async function generateCategoryBookletExcel(catId, summaryData, parcels, 
       const dataRows = rows.length > 0 ? rows : summaryData;
       dataRows.forEach((row, idx) => {
         const isTot = row.villageName === 'संपूर्ण तालुका (All Villages)';
-        const nameVal = isTot ? `${formatTalukaMr(row.taluka)} (संपूर्ण तालुका)` : cleanVillageName(row.villageName || row.taluka || 'गाव');
+        const talukaPart = (!isTot && row.taluka) ? ` (${formatTalukaMr(row.taluka)})` : '';
+        const nameVal = isTot
+          ? `${formatTalukaMr(row.taluka)} (संपूर्ण तालुका)`
+          : `${cleanVillageName(row.villageName || row.taluka || 'गाव')}${talukaPart}`;
 
         const drCells = [idx + 1, nameVal];
         goshwaraDef.superHeaders.forEach(sh => {
@@ -1928,7 +1931,8 @@ export async function generateCategoryBookletPdf(catId, summaryData, parcels, sc
     dataRows.forEach((r, idx) => {
       const isDistrictName = isDistrict || r.isDistrictTotal;
       const isTalukaTotalName = r.villageName === 'संपूर्ण तालुका (All Villages)';
-      const displayName = isDistrictName ? 'चंद्रपूर जिल्हा' : (isTalukaTotalName ? `${formatTalukaMr(r.taluka)} (संपूर्ण तालुका)` : cleanVillageName(r.villageName || r.taluka || '-'));
+      const talukaPart = (!isDistrictName && !isTalukaTotalName && r.taluka) ? ` (${formatTalukaMr(r.taluka)})` : '';
+      const displayName = isDistrictName ? 'चंद्रपूर जिल्हा' : (isTalukaTotalName ? `${formatTalukaMr(r.taluka)} (संपूर्ण तालुका)` : `${cleanVillageName(r.villageName || r.taluka || '-')}${talukaPart}`);
 
       const totSurv = Number(r.total712Count || 0);
       const totAr = parseFloat(r.totalAreaHa || 0);
@@ -2044,7 +2048,7 @@ export async function generateCategoryBookletPdf(catId, summaryData, parcels, sc
   // Detailed Table column widths
   const detailedWidths = detailedCols.map(c => {
     if (c.key === 'srNo') return 22;
-    if (c.key === 'village') return 70;
+    if (c.key === 'village') return 80;
     if (c.key === 'surveyNo') return 48;
     if (c.key === 'area') return 42;
     if (c.key === 'owner') return 120;

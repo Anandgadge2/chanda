@@ -272,7 +272,8 @@ const TALUKA_EN_TO_MR = {
 
 const getRowDisplayName = (row) => {
   if (row.villageName && row.villageName !== 'संपूर्ण तालुका (All Villages)') {
-    return cleanVillageName(row.villageName);
+    const tMr = row.taluka ? (TALUKA_EN_TO_MR[row.taluka] || row.taluka) : null;
+    return tMr ? `${cleanVillageName(row.villageName)} (${tMr})` : cleanVillageName(row.villageName);
   }
   const tMr = row.taluka ? (TALUKA_EN_TO_MR[row.taluka] || row.taluka) : null;
   return row.name || (tMr ? `${tMr} (संपूर्ण तालुका)` : null) || cleanVillageName(row.villageName) || 'एकूण';
