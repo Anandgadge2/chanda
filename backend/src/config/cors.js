@@ -9,7 +9,8 @@ import { logger } from '../utils/logger.js';
 export function configureCors() {
   // Built-in explicit whitelist of verified environments
   const baseWhitelist = [
-    'https://chanda-eta.vercel.app', // Production Frontend
+    'https://chandrapur.vercel.app', // Production Frontend
+    'https://chanda-eta.vercel.app', // Alternative Frontend
     'http://localhost:3000',         // Local Next.js Frontend
     'http://127.0.0.1:3000',         // Local IP
     'http://localhost:3001',         // Secondary local dev port
