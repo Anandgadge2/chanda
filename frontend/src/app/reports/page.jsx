@@ -2485,6 +2485,65 @@ export default function ReportsPage() {
         </div>
 
         {/* =========================================================
+            STANDARDIZED CONSTANT KPI METRIC CARDS (BRIGHT SOLID COLORS)
+        ========================================================= */}
+        {activeTab !== 'renumbering' && (
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3 p-1 -m-1">
+            <MetricCard
+              variant="blue"
+              titleMr="एकूण सर्व्हे / गट संख्या"
+              titleEn="Total Survey / Gat Parcels"
+              value={stats.totalCount}
+              subtext={stats.scopeLabel || (isMarathi ? 'तपासणी केलेले ७/१२' : 'Audited 7/12 Records')}
+              subtextEn={stats.scopeLabel || 'Audited 7/12 Records'}
+              icon={Landmark}
+              isActive={selectedKpiFilter === 'all'}
+              onClick={() => handleKpiCardClick('all')}
+              compact={true}
+            />
+
+            <MetricCard
+              variant="emerald"
+              titleMr="एकूण क्षेत्र (हेक्टर)"
+              titleEn="Total Land Area (Ha)"
+              value={stats.totalAreaHa}
+              subtext={isMarathi ? 'हेक्टर आर क्षेत्र' : 'Hectare-Are Area'}
+              subtextEn="Hectare-Are Area"
+              icon={LandPlot}
+              isActive={selectedKpiFilter === 'area'}
+              onClick={() => handleKpiCardClick('area')}
+              compact={true}
+            />
+
+            <MetricCard
+              variant="indigo"
+              titleMr="भोगवटादार वर्ग २ / शासकीय"
+              titleEn="Class-2 / Govt Land"
+              value={stats.class2Count}
+              subtext={isMarathi ? 'अविभाज्य शर्तीवरील जमिनी' : 'Restricted Holdings'}
+              subtextEn="Restricted Holdings"
+              icon={Layers}
+              isActive={selectedKpiFilter === 'class2'}
+              onClick={() => handleKpiCardClick('class2')}
+              compact={true}
+            />
+
+            <MetricCard
+              variant="rose"
+              titleMr="शर्तभंग / संशयित बाबी"
+              titleEn="Breaches & Inquiries"
+              value={stats.shartbhangCount}
+              subtext={isMarathi ? 'विशेष चौकशी आवश्यक' : 'Inquiry Required'}
+              subtextEn="Inquiry Required"
+              icon={AlertTriangle}
+              isActive={selectedKpiFilter === 'violations'}
+              onClick={() => handleKpiCardClick('violations')}
+              compact={true}
+            />
+          </div>
+        )}
+
+        {/* =========================================================
             PRO INTEGRATED FILTER & SELECTION SUITE (ONE SINGLE COMPACT CARD)
         ========================================================= */}
         <div className="bg-white border border-slate-200/90 rounded-2xl p-3 sm:p-3.5 shadow-xs space-y-2.5">
@@ -2794,68 +2853,6 @@ export default function ReportsPage() {
             >
               {isMarathi ? 'आता लागू करा (Apply)' : 'Apply Now'}
             </button>
-          </div>
-        )}
-
-        {/* =========================================================
-            METRICS KPI STRIP (Hidden in Goshwara View & Prapatra 1 to 5)
-        ========================================================= */}
-        {/* =========================================================
-            STANDARDIZED CONSTANT KPI METRIC CARDS (BRIGHT SOLID COLORS)
-        ========================================================= */}
-        {activeTab !== 'renumbering' && (
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3 p-1 -m-1">
-            <MetricCard
-              variant="blue"
-              titleMr="एकूण सर्व्हे / गट संख्या"
-              titleEn="Total Survey / Gat Parcels"
-              value={stats.totalCount}
-              subtext={stats.scopeLabel || (isMarathi ? 'तपासणी केलेले ७/१२' : 'Audited 7/12 Records')}
-              subtextEn={stats.scopeLabel || 'Audited 7/12 Records'}
-              icon={Landmark}
-              isActive={selectedKpiFilter === 'all'}
-              onClick={() => handleKpiCardClick('all')}
-              compact={true}
-            />
-
-            <MetricCard
-              variant="emerald"
-              titleMr="एकूण क्षेत्र (हेक्टर)"
-              titleEn="Total Land Area (Ha)"
-              value={stats.totalAreaHa}
-              subtext={isMarathi ? 'हेक्टर आर क्षेत्र' : 'Hectare-Are Area'}
-              subtextEn="Hectare-Are Area"
-              icon={LandPlot}
-              isActive={selectedKpiFilter === 'area'}
-              onClick={() => handleKpiCardClick('area')}
-              compact={true}
-            />
-
-            <MetricCard
-              variant="indigo"
-              titleMr="भोगवटादार वर्ग २ / शासकीय"
-              titleEn="Class-2 / Govt Land"
-              value={stats.class2Count}
-              subtext={isMarathi ? 'अविभाज्य शर्तीवरील जमिनी' : 'Restricted Holdings'}
-              subtextEn="Restricted Holdings"
-              icon={Layers}
-              isActive={selectedKpiFilter === 'class2'}
-              onClick={() => handleKpiCardClick('class2')}
-              compact={true}
-            />
-
-            <MetricCard
-              variant="rose"
-              titleMr="शर्तभंग / संशयित बाबी"
-              titleEn="Breaches & Inquiries"
-              value={stats.shartbhangCount}
-              subtext={isMarathi ? 'विशेष चौकशी आवश्यक' : 'Inquiry Required'}
-              subtextEn="Inquiry Required"
-              icon={AlertTriangle}
-              isActive={selectedKpiFilter === 'violations'}
-              onClick={() => handleKpiCardClick('violations')}
-              compact={true}
-            />
           </div>
         )}
 

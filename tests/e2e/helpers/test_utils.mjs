@@ -66,7 +66,9 @@ export async function fetchChecklistParcels(options = {}) {
       areaRange: options.areaRange || 'all',
       search: options.search || '',
       format: 'json',
-      booklet: 'false'
+      booklet: 'false',
+      pageSize: options.pageSize !== undefined ? options.pageSize : 'all',
+      limit: options.limit !== undefined ? options.limit : 'all'
     }
   };
 
