@@ -100,6 +100,7 @@ export default function EnforcementDisposalDonut({
   const totalAreaHa = violationData.reduce((acc, curr) => acc + curr.areaHa, 0);
 
   const activeItem = activeIndex !== null && activeChartData[activeIndex] ? activeChartData[activeIndex] : null;
+  const activeItemPct = activeItem && totalValue > 0 ? ((activeItem.value / totalValue) * 100).toFixed(1) : 0;
 
   // Pie chart white callout percentage labels
   const renderPieLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }) => {
@@ -339,7 +340,7 @@ export default function EnforcementDisposalDonut({
                             : activeItem.count.toLocaleString('en-IN')}
                         </span>
                         <span className="text-[10px] font-bold text-slate-500 font-mono">
-                          {isMarathi ? 'प्रकरणे' : 'Cases'} • {pct}%
+                          {isMarathi ? 'प्रकरणे' : 'Cases'} • {activeItemPct}%
                         </span>
                       </div>
                     ) : (
