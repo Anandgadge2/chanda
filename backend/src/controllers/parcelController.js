@@ -217,10 +217,13 @@ const TRACE_CACHE_TTL_MS = 60 * 1000; // 60 seconds TTL
 const traceCache = new Map();
 const inFlightTraces = new Map();
 
+const PARCEL_LIST_CACHE_TTL_MS = 3 * 60 * 1000; // 3 minutes TTL
+const parcelListCache = new Map();
 const inFlightParcelLists = new Map();
 
 export const invalidateParcelCache = () => {
   traceCache.clear();
+  parcelListCache.clear();
 };
 
 /**
@@ -495,6 +498,16 @@ export const getParcels = async (req, res) => {
     }
 
     const cacheKey = JSON.stringify({ taluka, villageCode, villageName: targetVillage, tenureClass, hasActiveDispute, targetBooklet, search, sortBy, orderDir, pageNum, take, isAll });
+    
+    // Instant cache return if available and within TTL
+    const now = Date.now();
+    const cachedEntry = parcelListCache.get(cacheKey);
+    if (cachedEntry && (now - cachedEntry.timestamp < PARCEL_LIST_CACHE_TTL_MS)) {
+      res.setHeader('Cache-Control', 'public, max-age=30, stale-while-revalidate=120');
+      res.setHeader('X-Cache-Status', 'HIT');
+      return res.json(cachedEntry.data);
+    }
+
     let pending = inFlightParcelLists.get(cacheKey);
 
     if (!pending) {
@@ -532,7 +545,7 @@ export const getParcels = async (req, res) => {
 
     const [parcels, totalCount] = await pending;
 
-    res.json({
+    const responsePayload = {
       success: true,
       parcels,
       pagination: {
@@ -541,7 +554,18 @@ export const getParcels = async (req, res) => {
         limit: isAll ? totalCount : take,
         totalPages: isAll ? 1 : Math.ceil(totalCount / take),
       },
-    });
+    };
+
+    // Store in cache (keep up to 150 entries)
+    if (parcelListCache.size >= 150) {
+      const oldestKey = parcelListCache.keys().next().value;
+      parcelListCache.delete(oldestKey);
+    }
+    parcelListCache.set(cacheKey, { timestamp: now, data: responsePayload });
+
+    res.setHeader('Cache-Control', 'public, max-age=30, stale-while-revalidate=120');
+    res.setHeader('X-Cache-Status', 'MISS');
+    res.json(responsePayload);
   } catch (err) {
     console.error('Get parcels error:', err);
     res.status(500).json({ success: false, error: err.message });

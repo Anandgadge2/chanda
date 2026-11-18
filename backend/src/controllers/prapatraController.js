@@ -2177,6 +2177,10 @@ export const getBookletCategories = async (req, res) => {
   });
 };
 
+// Cache for getTalukaVillages (15 min TTL)
+const talukaVillagesCache = new Map();
+const TALUKA_VILLAGES_CACHE_TTL = 15 * 60 * 1000;
+
 /**
  * Get dynamic list of real villages for dropdown filtering
  */
@@ -2184,42 +2188,54 @@ export const getTalukaVillages = async (req, res) => {
   try {
     const { taluka = 'all' } = req.query;
     const targetTaluka = TALUKA_ALIASES[taluka?.toLowerCase()] || taluka;
+    const cacheKey = (targetTaluka || 'all').toLowerCase();
+
+    // Check in-memory cache for instant <1ms response
+    const now = Date.now();
+    const cached = talukaVillagesCache.get(cacheKey);
+    if (cached && (now - cached.timestamp < TALUKA_VILLAGES_CACHE_TTL)) {
+      res.setHeader('Cache-Control', 'public, max-age=300, stale-while-revalidate=600');
+      res.setHeader('X-Cache-Status', 'HIT');
+      return res.status(200).json(cached.data);
+    }
 
     const rollupWhere = {
       villageName: { not: 'संपूर्ण तालुका (All Villages)' }
     };
-    const parcelWhere = {};
 
     if (taluka && taluka !== 'all' && taluka !== 'सर्व तालुके') {
       rollupWhere.taluka = { equals: targetTaluka, mode: 'insensitive' };
-      parcelWhere.taluka = { equals: targetTaluka, mode: 'insensitive' };
     }
 
-    const [rollupRecords, parcelRecords] = await Promise.all([
-      prisma.prapatraRollup.findMany({
-        where: rollupWhere,
-        select: {
-          id: true,
-          taluka: true,
-          villageName: true,
-          total712Count: true,
-          govtFound1950Count: true,
-          illegalDeletionsCount: true,
-          pokalistCount: true,
-          govtEncroachedCount: true,
-          govtShartbhangCount: true
-        },
-        orderBy: [{ villageName: 'asc' }]
-      }),
-      prisma.landParcel.findMany({
-        where: parcelWhere,
-        select: {
-          taluka: true,
-          villageName: true
-        },
-        distinct: ['villageName']
-      })
-    ]);
+    // High performance query: prapatraRollup + indexed raw distinct SQL query
+    // (Bypasses Prisma findMany(distinct) which does slow in-memory JS deserialization over 133k rows)
+    const rollupQuery = prisma.prapatraRollup.findMany({
+      where: rollupWhere,
+      select: {
+        id: true,
+        taluka: true,
+        villageName: true,
+        total712Count: true,
+        govtFound1950Count: true,
+        illegalDeletionsCount: true,
+        pokalistCount: true,
+        govtEncroachedCount: true,
+        govtShartbhangCount: true
+      },
+      orderBy: [{ villageName: 'asc' }]
+    });
+
+    const isSpecificTaluka = taluka && taluka !== 'all' && taluka !== 'सर्व तालुके';
+    const parcelQuery = isSpecificTaluka
+      ? prisma.$queryRawUnsafe(
+          `SELECT DISTINCT village_name as "villageName", taluka FROM land_parcels WHERE taluka ILIKE $1 AND village_name IS NOT NULL`,
+          targetTaluka
+        ).catch(() => [])
+      : prisma.$queryRawUnsafe(
+          `SELECT DISTINCT village_name as "villageName", taluka FROM land_parcels WHERE village_name IS NOT NULL`
+        ).catch(() => []);
+
+    const [rollupRecords, parcelRecords] = await Promise.all([rollupQuery, parcelQuery]);
 
     // Clean village names and deduplicate using robust normalized map
     const cleanVillagesMap = new Map();
@@ -2253,12 +2269,18 @@ export const getTalukaVillages = async (req, res) => {
     // Sort Marathi village names alphabetically
     cleanVillages.sort((a, b) => a.villageName.localeCompare(b.villageName, 'mr'));
 
-    return res.status(200).json({
+    const responseData = {
       success: true,
       taluka: targetTaluka,
       count: cleanVillages.length,
       villages: cleanVillages
-    });
+    };
+
+    talukaVillagesCache.set(cacheKey, { timestamp: now, data: responseData });
+
+    res.setHeader('Cache-Control', 'public, max-age=300, stale-while-revalidate=600');
+    res.setHeader('X-Cache-Status', 'MISS');
+    return res.status(200).json(responseData);
   } catch (err) {
     console.error('getTalukaVillages error:', err);
     return res.status(500).json({ success: false, error: err.message });

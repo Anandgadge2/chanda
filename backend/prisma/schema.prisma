@@ -104,6 +104,7 @@ model LandParcel {
   tenancy89ARecords Tenancy89ARecord[]
 
   @@index([taluka, villageCode, gatNumber], name: "idx_parcel_hierarchy_lookup")
+  @@index([taluka, villageName, gatNumber], name: "idx_lp_taluka_village_gat")
   @@index([villageName], name: "idx_parcel_village_name")
   @@index([metadata], type: Gin, name: "idx_parcel_metadata_gin")
   @@index([tenureClass], name: "idx_parcel_tenure")

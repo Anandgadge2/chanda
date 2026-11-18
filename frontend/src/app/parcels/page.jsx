@@ -66,11 +66,46 @@ export const BOOKLET_18_CATEGORIES = BOOKLET_17_CATEGORIES;
 
 export default function ParcelsPage() {
   const { isMarathi } = useTranslation();
-  const [parcels, setParcels] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [totalCount, setTotalCount] = useState(0);
+  const [parcels, setParcels] = useState(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const cached = sessionStorage.getItem('chanda_parcels_cache_v1');
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (Array.isArray(parsed.parcels) && parsed.parcels.length > 0) return parsed.parcels;
+        }
+      } catch {}
+    }
+    return [];
+  });
+  const [loading, setLoading] = useState(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const cached = sessionStorage.getItem('chanda_parcels_cache_v1');
+        if (cached) return false;
+      } catch {}
+    }
+    return true;
+  });
+  const [totalCount, setTotalCount] = useState(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const cached = sessionStorage.getItem('chanda_parcels_cache_v1');
+        if (cached) return JSON.parse(cached).total || 0;
+      } catch {}
+    }
+    return 0;
+  });
   const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
+  const [totalPages, setTotalPages] = useState(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const cached = sessionStorage.getItem('chanda_parcels_cache_v1');
+        if (cached) return JSON.parse(cached).totalPages || 1;
+      } catch {}
+    }
+    return 1;
+  });
   const [limit, setLimit] = useState(25);
 
   // Draft Filter Inputs
@@ -127,6 +162,17 @@ export default function ParcelsPage() {
       setParcels(data.parcels || []);
       setTotalCount(data.pagination?.total || 0);
       setTotalPages(data.pagination?.totalPages || 1);
+
+      // Cache page 1 baseline in sessionStorage for zero-latency warm visits
+      if (targetPage === 1 && !filtersToUse.taluka && !filtersToUse.village && !filtersToUse.search && !filtersToUse.bookletCategory && !filtersToUse.tenureClass && filtersToUse.hasActiveDispute === '') {
+        try {
+          sessionStorage.setItem('chanda_parcels_cache_v1', JSON.stringify({
+            parcels: data.parcels || [],
+            total: data.pagination?.total || 0,
+            totalPages: data.pagination?.totalPages || 1
+          }));
+        } catch {}
+      }
     } catch (err) {
       console.error('Failed to load parcels:', err);
     } finally {
