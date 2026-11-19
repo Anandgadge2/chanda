@@ -1081,7 +1081,7 @@ export async function getPrapatra1to5RollupData(filters = {}) {
     if (P4_TALUKA_ALLOTMENTS[t.taluka]) {
       t.privateAllottedCount = Math.max(t.privateAllottedCount || 0, P4_TALUKA_ALLOTMENTS[t.taluka]);
     }
-    const row = mapPrapatraFields(t, idx, tMr, `${tMr} (संपूर्ण तालुका)`, false);
+    const row = mapPrapatraFields(t, idx, tMr, tMr, false);
     row.totalArea = Number(t.total712Count * 3.7086).toFixed(2);
     row.c2Count = t.totalGovtLandCount || Math.round(t.total712Count * 0.2446);
     row.shartCount = t.govtShartbhangCount ? (t.govtShartbhangCount + (t.illegalDeletionsCount || 0)) : Math.round(t.total712Count * 0.0457);
@@ -1106,7 +1106,7 @@ export async function getPrapatra1to5RollupData(filters = {}) {
       distTotalObj,
       0,
       'चंद्रपूर',
-      'चंद्रपूर जिल्हा (सर्व १५ तालुके एकत्रित)',
+      'चंद्रपूर जिल्हा',
       true
     );
     districtTotal.total712Count = 133875;
@@ -1127,7 +1127,7 @@ export async function getPrapatra1to5RollupData(filters = {}) {
       distTotalObj,
       0,
       tMr,
-      `${tMr} तालुका (एकत्रित गोषवारा)`,
+      tMr,
       true
     );
     talukaTotal.totalArea = Number(distTotalObj.total712Count * 3.7086).toFixed(2);

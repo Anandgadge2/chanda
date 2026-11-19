@@ -1,23 +1,8 @@
-import { Poppins, Noto_Sans_Devanagari } from 'next/font/google';
 import './globals.css';
 import PortalLayout from '../components/PortalLayout';
 import { AuthProvider } from '../components/AuthContext';
 import { LanguageProvider } from '../components/LanguageContext';
 import ErrorBoundary from '../components/ErrorBoundary';
-
-const poppins = Poppins({
-  subsets: ['latin'],
-  weight: ['300', '400', '500', '600', '700'],
-  display: 'swap',
-  variable: '--font-poppins',
-});
-
-const notoSansDevanagari = Noto_Sans_Devanagari({
-  subsets: ['devanagari', 'latin'],
-  weight: ['400', '500', '600', '700', '800'],
-  display: 'swap',
-  variable: '--font-noto-devanagari',
-});
 
 export const viewport = {
   width: 'device-width',
@@ -46,9 +31,15 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="mr" translate="no" className={`${poppins.variable} ${notoSansDevanagari.variable} notranslate`}>
+    <html lang="mr" translate="no" className="notranslate">
       <head>
         <meta name="google" content="notranslate" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;500;600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap"
+          rel="stylesheet"
+        />
       </head>
       <body className="bg-slate-50 text-slate-900 antialiased min-h-screen flex flex-col notranslate font-sans">
         <ErrorBoundary>

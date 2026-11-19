@@ -52,6 +52,18 @@ import Pagination from '../../components/Pagination';
 import SearchableSelect from '../../components/SearchableSelect';
 import { useTranslation } from '../../components/LanguageContext';
 import { cleanVillageName, formatVillageName, formatScopeText, formatTalukaName, formatRemarks } from '../../lib/villageUtils';
+import dynamic from 'next/dynamic';
+import ChartSkeleton from '../../components/charts/ChartSkeleton';
+
+const BookletGoshwaraAnalytics = dynamic(
+  () => import('../../components/charts/BookletGoshwaraAnalytics'),
+  { ssr: false, loading: () => <ChartSkeleton height="h-[280px]" /> }
+);
+
+const Checklist46Analytics = dynamic(
+  () => import('../../components/charts/Checklist46Analytics'),
+  { ssr: false, loading: () => <ChartSkeleton height="h-[280px]" /> }
+);
 
 // 17 Official Statutory Booklet Categories
 const STATUTORY_CATEGORIES = [
@@ -231,7 +243,7 @@ export default function ReportsPage() {
   // Goshwara is EXCLUSIVELY for 1 to 18 Subject Booklets
   const isGoshwaraView = activeTab === 'categories' && activeView === 'categorySummary';
   const [goshwaraTier, setGoshwaraTier] = useState('all'); // 'all', 'village', 'taluka', 'district'
-  const [categoryGoshwaraTier, setCategoryGoshwaraTier] = useState('all'); // 'all', 'village', 'taluka', 'district'
+  const [categoryGoshwaraTier, setCategoryGoshwaraTier] = useState('taluka'); // 'village', 'taluka', 'district'
   const [prapatraSearch, setPrapatraSearch] = useState('');
   const [prapatraPage, setPrapatraPage] = useState(1);
   const [prapatraPageSize, setPrapatraPageSize] = useState(25);
@@ -524,6 +536,10 @@ export default function ReportsPage() {
   const currentCategory = useMemo(() => {
     return STATUTORY_CATEGORIES.find(c => c.id === selectedCatId) || STATUTORY_CATEGORIES[0];
   }, [selectedCatId]);
+
+  const goshDef = useMemo(() => {
+    return getGoshwaraConfigForBooklet(currentCategory?.id, isMarathi);
+  }, [currentCategory?.id, isMarathi]);
 
   const isTenancyCategory = currentCategory?.id === 18;
 
@@ -1152,8 +1168,28 @@ export default function ReportsPage() {
     return summaryData || [];
   }, [serverRollup, summaryData, taluka]);
 
-  // Individual Tier Rows for Category Booklets (Village, Taluka, District) matching Image 2
+  // Hierarchy Level Checks (District vs Taluka vs Village)
+  const isVillageSelected = Boolean(village && village !== 'all' && village !== 'सर्व गावे');
+  const isTalukaSelected = Boolean(taluka && taluka !== 'all' && taluka !== 'सर्व तालुके') && !isVillageSelected;
+  const isDistrictSelected = !isTalukaSelected && !isVillageSelected;
+
+  // Sync categoryGoshwaraTier automatically when user changes taluka or village filter
+  useEffect(() => {
+    if (isVillageSelected) {
+      setCategoryGoshwaraTier('village');
+    } else if (isTalukaSelected) {
+      setCategoryGoshwaraTier('taluka');
+    } else {
+      setCategoryGoshwaraTier('district');
+    }
+  }, [isVillageSelected, isTalukaSelected]);
+
+  // Individual Tier Rows for Category Booklets (Village, Taluka, District)
   const categoryVillageRows = useMemo(() => {
+    // If District is selected (all talukas), do not show village breakdown
+    if (isDistrictSelected) {
+      return [];
+    }
     if (serverRollup?.byVillage && serverRollup.byVillage.length > 0) {
       return serverRollup.byVillage;
     }
@@ -1165,9 +1201,13 @@ export default function ReportsPage() {
       !r.id?.startsWith('t-') && 
       r.id !== 'district-chandrapur-grand-total'
     );
-  }, [serverRollup, summaryData]);
+  }, [serverRollup, summaryData, isDistrictSelected]);
 
   const categoryTalukaRows = useMemo(() => {
+    // If a specific village is chosen, taluka aggregate table is not shown
+    if (isVillageSelected) {
+      return [];
+    }
     if (serverRollup?.byTaluka && serverRollup.byTaluka.length > 0) {
       return serverRollup.byTaluka;
     }
@@ -1175,20 +1215,18 @@ export default function ReportsPage() {
       r.villageName === 'संपूर्ण तालुका (All Villages)' || 
       r.id?.startsWith('t-')
     );
-  }, [serverRollup, summaryData]);
+  }, [serverRollup, summaryData, isVillageSelected]);
 
   const categoryDistrictRows = useMemo(() => {
-    // If a specific village is chosen, district aggregate is not relevant to that single village
-    if (village && village !== 'all' && village !== 'सर्व गावे') {
+    // If a specific taluka or village is chosen, district aggregate table must NOT be shown
+    if (!isDistrictSelected) {
       return [];
     }
     if (serverRollup?.districtTotal) {
       const dt = serverRollup.districtTotal;
       return [{
         ...dt,
-        villageName: isMarathi
-          ? 'चंद्रपूर जिल्हा (सर्व १५ तालुके एकत्रित गोषवारा)'
-          : 'Chandrapur District (All 15 Talukas Consolidated)'
+        villageName: isMarathi ? 'चंद्रपूर जिल्हा' : 'Chandrapur District'
       }];
     }
     const dist = (summaryData || []).filter(r => 
@@ -1196,17 +1234,20 @@ export default function ReportsPage() {
       r.villageName?.includes('संपूर्ण जिल्हा') || 
       r.villageName === 'Whole District Rollup'
     );
-    if (dist.length > 0) return dist;
-    // CRITICAL: Only compute district grand total if all talukas are loaded (>1 taluka)
-    if (categoryTalukaRows.length > 1 && (!taluka || taluka === 'all' || taluka === 'सर्व तालुके')) {
+    if (dist.length > 0) {
+      return dist.map(d => ({
+        ...d,
+        villageName: isMarathi ? 'चंद्रपूर जिल्हा' : 'Chandrapur District'
+      }));
+    }
+    // Only compute district grand total if all talukas are loaded (>1 taluka)
+    if (categoryTalukaRows.length > 1 && isDistrictSelected) {
       const totalCount = categoryTalukaRows.reduce((a, b) => a + (b.total712Count || 0), 0);
       return [{
         id: 'district-chandrapur-grand-total',
         district: 'Chandrapur',
         taluka: 'All',
-        villageName: isMarathi 
-          ? 'चंद्रपूर जिल्हा (सर्व १५ तालुके एकत्रित गोषवारा)' 
-          : 'Chandrapur District (All 15 Talukas Consolidated)',
+        villageName: isMarathi ? 'चंद्रपूर जिल्हा' : 'Chandrapur District',
         total712Count: totalCount,
         totalAreaHa: categoryTalukaRows.reduce((a, b) => a + Number(b.totalAreaHa || b.totalArea || 0), 0),
         totalArea: categoryTalukaRows.reduce((a, b) => a + Number(b.totalAreaHa || b.totalArea || 0), 0).toFixed(2),
@@ -1235,18 +1276,19 @@ export default function ReportsPage() {
       }];
     }
     return [];
-  }, [serverRollup, summaryData, categoryTalukaRows, isMarathi, taluka, village]);
+  }, [serverRollup, summaryData, categoryTalukaRows, isMarathi, isDistrictSelected]);
 
   // Context-aware active category rollup rows count
   const activeCategoryRollupCount = useMemo(() => {
-    if (village && village !== 'all' && village !== 'सर्व गावे') {
+    if (isVillageSelected) {
       return categoryVillageRows.length;
     }
-    if (taluka && taluka !== 'all' && taluka !== 'सर्व तालुके') {
-      return categoryVillageRows.length + categoryTalukaRows.length + (categoryDistrictRows.length > 0 ? 1 : 0);
+    if (isTalukaSelected) {
+      return categoryGoshwaraTier === 'village' ? categoryVillageRows.length : categoryTalukaRows.length;
     }
-    return categoryVillageRows.length + categoryTalukaRows.length + (categoryDistrictRows.length > 0 ? 1 : 0);
-  }, [village, taluka, categoryVillageRows.length, categoryTalukaRows.length, categoryDistrictRows.length]);
+    // District level
+    return categoryGoshwaraTier === 'taluka' ? categoryTalukaRows.length : (categoryDistrictRows.length || categoryTalukaRows.length);
+  }, [isVillageSelected, isTalukaSelected, categoryGoshwaraTier, categoryVillageRows.length, categoryTalukaRows.length, categoryDistrictRows.length]);
 
   // Processed Ghoshwara Rows with manual edits overlaid
   const { processedDistrictRows, processedTalukaRows, processedVillageRows } = useMemo(() => {
@@ -2036,55 +2078,41 @@ export default function ReportsPage() {
     return (
       <div className="space-y-0 mb-6 bg-white rounded-xl shadow-xs border border-slate-300 overflow-hidden">
         {/* Strictly formatted Title Banner matching Image 2 */}
-        <div className="bg-slate-800 text-white font-extrabold text-sm md:text-base py-2.5 px-4 text-center tracking-wide border-b border-slate-300 flex items-center justify-between">
-          <div className="w-24 hidden sm:flex items-center text-[10px] text-slate-300 gap-1 font-mono">
-            <Layers className="w-3.5 h-3.5 text-blue-400" />
+        <div className="bg-slate-800 text-white font-extrabold text-sm md:text-base py-3 px-4 text-center tracking-wide border-b border-slate-300 flex items-center justify-between">
+          <div className="w-24 hidden sm:flex items-center text-xs text-slate-300 gap-1.5 font-sans font-medium">
+            <Layers className="w-4 h-4 text-blue-400" />
             <span>{goshDef.totalCols} {isMarathi ? 'रकाने' : 'Cols'}</span>
           </div>
           <div className="flex-1 flex flex-col items-center justify-center">
-            <div className="flex items-center gap-2">
-              <span className="text-center font-black tracking-wide text-white">{title}</span>
-              {isDistrict && taluka && taluka !== 'all' && taluka !== 'सर्व तालुके' && (
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 shadow-2xs">
-                  {isMarathi ? 'जिल्हास्तरीय संदर्भ (सर्व १५ तालुके)' : 'District Benchmark (All 15 Talukas)'}
-                </span>
-              )}
-            </div>
-            {isDistrict && taluka && taluka !== 'all' && taluka !== 'सर्व तालुके' && (
-              <span className="text-[10px] font-medium text-amber-200/90 mt-0.5">
-                {isMarathi
-                  ? `टीप: निवडलेल्या ${formatTalukaName(taluka, true)} तालुक्याकरिता संपूर्ण चंद्रपूर जिल्ह्याचा एकत्रित तुलनात्मक गोषवारा.`
-                  : `Note: Consolidated district total across all 15 talukas for comparative reference with selected ${formatTalukaName(taluka, false)} taluka.`}
-              </span>
-            )}
+            <span className="text-center font-black tracking-wide text-white text-base md:text-lg">{title}</span>
           </div>
-          <span className="text-[11px] font-semibold text-slate-200 bg-slate-700/80 border border-slate-600 px-2.5 py-0.5 rounded-md">
+          <span className="text-xs font-bold text-slate-200 bg-slate-700/90 border border-slate-600 px-3 py-1 rounded-md shadow-2xs">
             {rows.length} {isDistrict ? (isMarathi ? 'जिल्हा' : 'District') : isTaluka ? (isMarathi ? 'तालुका' : 'Taluka') : (isMarathi ? 'गावे' : 'Villages')}
           </span>
         </div>
 
-        <div className="overflow-x-auto max-h-[600px] overflow-y-auto scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-slate-100">
-          <table className="w-full text-left border-collapse table-devanagari text-xs sm:text-[13px] min-w-[1200px]">
+        <div className="overflow-x-auto max-h-[650px] overflow-y-auto scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-slate-100">
+          <table className="w-full text-left border-collapse table-devanagari text-sm min-w-[1280px]">
             <thead className="sticky top-0 z-10 shadow-2xs">
               {/* Row 1: Super Headers (Col 1-4 are standalone full-height columns with rowSpan=2) */}
-              <tr className="bg-slate-100 text-slate-900 font-bold border-b border-slate-300 text-center text-xs sm:text-[13px]">
-                <th rowSpan={2} className="py-2.5 px-2 border-r border-slate-300 w-12 bg-slate-200/90 align-middle">
+              <tr className="bg-slate-100/95 text-slate-900 font-bold border-b border-slate-300 text-center text-xs sm:text-sm">
+                <th rowSpan={2} className="py-3 px-2.5 border-r border-slate-300 w-14 bg-slate-200/95 align-middle text-xs sm:text-sm font-bold text-slate-800">
                   {isMarathi ? 'अ.क्र.' : 'Sr.'}
                 </th>
-                <th rowSpan={2} className="py-2.5 px-3 border-r border-slate-300 text-left min-w-[150px] bg-slate-200/90 align-middle">
+                <th rowSpan={2} className="py-3 px-4 border-r border-slate-300 text-left min-w-[190px] bg-slate-200/95 align-middle text-xs sm:text-sm font-extrabold text-slate-900">
                   {nameHeader}
                 </th>
-                <th rowSpan={2} className="py-2.5 px-2 border-r border-slate-300 w-24 bg-slate-200/90 align-middle font-black text-slate-900">
+                <th rowSpan={2} className="py-3 px-3 border-r border-slate-300 w-28 bg-slate-200/95 align-middle font-black text-slate-900 text-xs sm:text-sm">
                   {isMarathi ? 'एकूण सर्व्हे क्रमांक' : 'Total Survey No.'}
                 </th>
-                <th rowSpan={2} className="py-2.5 px-2.5 border-r border-slate-300 w-28 text-right bg-slate-200/90 align-middle font-black text-slate-900">
+                <th rowSpan={2} className="py-3 px-3.5 border-r border-slate-300 w-32 text-right bg-slate-200/95 align-middle font-black text-slate-900 text-xs sm:text-sm">
                   {isMarathi ? 'एकूण क्षेत्र(हे.आर.)' : 'Total Area (Ha.R)'}
                 </th>
                 {goshDef.superHeaders.map((sh, sIdx) => (
                   <th
                     key={`sh-${sIdx}`}
                     colSpan={2}
-                    className={clsx('py-1.5 px-2 border-r border-slate-300 font-black text-center text-[11px]', sh.colorClass)}
+                    className={clsx('py-2.5 px-3 border-r border-slate-300 font-black text-center text-xs sm:text-[13px] leading-snug tracking-tight', sh.colorClass)}
                   >
                     {sh.label}
                   </th>
@@ -2092,13 +2120,13 @@ export default function ReportsPage() {
               </tr>
 
               {/* Row 2: Sub-Headers (Only under the paired breakdown groups; Col 1-4 are rowSpan=2) */}
-              <tr className="bg-slate-50 text-[10px] text-slate-700 font-bold border-b border-slate-300 text-center">
+              <tr className="bg-slate-50 text-xs sm:text-[12px] text-slate-700 font-bold border-b border-slate-300 text-center">
                 {goshDef.superHeaders.map((_, sIdx) => (
                   <Fragment key={`sub-${sIdx}`}>
-                    <th className="py-1.5 px-1 border-r border-slate-300 w-16 text-center">
+                    <th className="py-2 px-2 border-r border-slate-300 w-20 text-center font-bold text-slate-700 leading-tight">
                       {isMarathi ? 'एकूण सर्व्हे क्रमांक' : 'Survey No.'}
                     </th>
-                    <th className="py-1.5 px-1.5 border-r border-slate-300 w-22 text-right">
+                    <th className="py-2 px-2.5 border-r border-slate-300 w-28 text-right font-bold text-slate-700 leading-tight">
                       {isMarathi ? 'एकूण क्षेत्र(हे.आर.)' : 'Area (Ha.R)'}
                     </th>
                   </Fragment>
@@ -2106,9 +2134,9 @@ export default function ReportsPage() {
               </tr>
 
               {/* Row 3: Statutory Numbering Row (१ ते N) */}
-              <tr className="bg-slate-100 text-xs text-slate-600 font-mono font-bold text-center border-b border-slate-300">
+              <tr className="bg-slate-100/90 text-xs sm:text-sm text-slate-600 font-bold text-center border-b border-slate-300 select-none">
                 {Array.from({ length: goshDef.totalCols }).map((_, cIdx) => (
-                  <th key={`num-${cIdx}`} className="py-0.5 border-r border-slate-300">
+                  <th key={`num-${cIdx}`} className="py-1 border-r border-slate-300">
                     {numMr[cIdx] || cIdx + 1}
                   </th>
                 ))}
@@ -2127,15 +2155,15 @@ export default function ReportsPage() {
                 </tr>
               ) : (
                 rows.map((row, idx) => {
-                  const talukaDisplay = formatTalukaName(row.taluka, isMarathi);
+                  const rawTaluka = (row.taluka || row.villageName || '')
+                    .replace(/\s*\((?:संपूर्ण|Whole|All)[^)]*\)/gi, '')
+                    .replace(/\s*\(एकत्रित[^)]*\)/gi, '')
+                    .trim();
+                  const talukaDisplay = formatTalukaName(rawTaluka, isMarathi);
                   const displayName = isDistrict
-                    ? (row.villageName || (isMarathi ? 'चंद्रपूर जिल्हा (सर्व १५ तालुके एकत्रित गोषवारा)' : 'Chandrapur District (All 15 Talukas Consolidated)'))
+                    ? (isMarathi ? 'चंद्रपूर जिल्हा' : 'Chandrapur District')
                     : isTaluka
-                    ? (row.taluka
-                        ? (village && village !== 'all' && village !== 'सर्व गावे'
-                            ? (isMarathi ? `${talukaDisplay} (संपूर्ण तालुका - सर्व गावे एकत्रित)` : `${talukaDisplay} Taluka (Consolidated - All Villages)`)
-                            : (isMarathi ? `${talukaDisplay} (संपूर्ण तालुका)` : `${talukaDisplay} Taluka (Whole Taluka)`))
-                        : (isMarathi ? 'सर्व तालुके' : 'All Talukas'))
+                    ? (row.taluka ? talukaDisplay : (isMarathi ? 'सर्व तालुके' : 'All Talukas'))
                     : formatVillageName(row.villageName || row.taluka, isMarathi);
 
                   return (
@@ -2143,28 +2171,30 @@ export default function ReportsPage() {
                       key={row.id || idx}
                       className={clsx(
                         'transition-colors',
-                        isDistrict ? 'bg-indigo-50/70 font-bold text-indigo-950' : isTaluka ? 'bg-slate-50 font-bold text-slate-900' : (idx % 2 === 1 ? 'bg-slate-50/40 hover:bg-blue-50/40' : 'bg-white hover:bg-blue-50/40')
+                        isDistrict ? 'bg-indigo-50/70 font-bold text-indigo-950 hover:bg-indigo-100/60' : isTaluka ? 'bg-slate-50 font-bold text-slate-900 hover:bg-blue-50/50' : (idx % 2 === 1 ? 'bg-slate-50/40 hover:bg-blue-50/50' : 'bg-white hover:bg-blue-50/50')
                       )}
                     >
                       {/* Col 1: Sr. No */}
-                      <td className="py-2 px-2 text-center border-r border-slate-200 font-mono text-slate-500 font-semibold">{idx + 1}</td>
+                      <td className="py-3 px-2.5 text-center border-r border-slate-200 text-xs sm:text-sm text-slate-600 font-bold tabular-nums">
+                        {idx + 1}
+                      </td>
                       {/* Col 2: Name */}
-                      <td className="py-3 px-3.5 border-r border-slate-200 font-semibold text-slate-900 text-[13px] sm:text-sm">
+                      <td className="py-3 px-4 border-r border-slate-200 font-bold text-slate-900 text-sm sm:text-[15px] leading-snug">
                         <div>
                           <span>{displayName}</span>
                           {!isDistrict && !isTaluka && row.taluka && (
-                            <span className="block text-xs font-normal text-slate-500 mt-0.5">
+                            <span className="block text-xs font-semibold text-slate-500 mt-0.5">
                               {talukaDisplay}
                             </span>
                           )}
                         </div>
                       </td>
                       {/* Col 3: Standalone Total Survey No. */}
-                      <td className="py-2 px-2 text-center border-r border-slate-200 font-mono font-bold text-indigo-950 bg-indigo-50/20">
+                      <td className="py-3 px-3 text-center border-r border-slate-200 font-black text-indigo-950 bg-indigo-50/40 text-sm sm:text-base tabular-nums">
                         {row.total712Count || 0}
                       </td>
                       {/* Col 4: Standalone Total Area (Ha.R) */}
-                      <td className="py-2 px-2.5 text-right border-r border-slate-200 font-mono font-bold text-emerald-800">
+                      <td className="py-3 px-3.5 text-right border-r border-slate-200 font-black text-emerald-800 bg-emerald-50/30 text-sm sm:text-base tabular-nums">
                         {row.totalArea || (row.totalAreaHa ? Number(row.totalAreaHa).toFixed(2) : '0.00')}
                       </td>
                       {/* Col 5+: Breakdown Pairs */}
@@ -2173,16 +2203,16 @@ export default function ReportsPage() {
                         const ar = Number(row[sh.areaKey] || 0).toFixed(2);
                         return (
                           <Fragment key={`cell-${idx}-${sIdx}`}>
-                            <td className="py-2 px-1 text-center border-r border-slate-200 font-mono font-bold">
+                            <td className="py-3 px-2 text-center border-r border-slate-200 tabular-nums">
                               {cnt > 0 ? (
-                                <span className={clsx("inline-block px-1.5 py-0.5 rounded text-[11px] font-black border shadow-2xs", sh.colorClass || 'bg-slate-100 text-slate-900')}>
+                                <span className={clsx("inline-flex items-center justify-center min-w-[32px] px-2 py-0.5 rounded-md text-xs sm:text-sm font-black border shadow-2xs tracking-tight", sh.colorClass || 'bg-slate-100 text-slate-900')}>
                                   {cnt}
                                 </span>
                               ) : (
-                                <span className="text-slate-400">0</span>
+                                <span className="text-slate-400 font-medium text-xs sm:text-sm">0</span>
                               )}
                             </td>
-                            <td className={clsx("py-2 px-1.5 text-right border-r border-slate-200 font-mono", cnt > 0 ? 'font-bold text-slate-900' : 'text-slate-400')}>
+                            <td className={clsx("py-3 px-2.5 text-right border-r border-slate-200 tabular-nums text-xs sm:text-sm", cnt > 0 ? 'font-bold text-slate-900' : 'text-slate-400 font-medium')}>
                               {ar}
                             </td>
                           </Fragment>
@@ -2196,21 +2226,21 @@ export default function ReportsPage() {
 
             {/* Totals Row */}
             {rows.length > 0 && (
-              <tfoot className="bg-slate-100 font-bold border-t-2 border-slate-300">
+              <tfoot className="bg-slate-100 font-black border-t-2 border-slate-300 shadow-inner">
                 <tr className="text-slate-900">
-                  <td className="py-2.5 px-2 text-center border-r border-slate-300 font-mono">-</td>
-                  <td className="py-2.5 px-3 border-r border-slate-300 font-black text-slate-900">{isMarathi ? 'एकूण' : 'Total'}</td>
-                  <td className="py-2.5 px-2 text-center border-r border-slate-300 font-mono font-black text-indigo-950">{sumSurveys}</td>
-                  <td className="py-2.5 px-2.5 text-right border-r border-slate-300 font-mono font-black text-emerald-800">{sumArea}</td>
+                  <td className="py-3 px-2.5 text-center border-r border-slate-300 text-slate-400 text-sm">-</td>
+                  <td className="py-3 px-4 border-r border-slate-300 font-black text-slate-950 text-sm sm:text-base">{isMarathi ? 'एकूण' : 'Total'}</td>
+                  <td className="py-3 px-3 text-center border-r border-slate-300 font-black text-indigo-950 text-sm sm:text-base tabular-nums bg-indigo-50/50">{sumSurveys}</td>
+                  <td className="py-3 px-3.5 text-right border-r border-slate-300 font-black text-emerald-800 text-sm sm:text-base tabular-nums bg-emerald-50/50">{sumArea}</td>
                   {goshDef.superHeaders.map((sh, sIdx) => {
                     const pairSumCnt = rows.reduce((a, b) => a + Number(b[sh.countKey] || 0), 0);
                     const pairSumAr = rows.reduce((a, b) => a + parseFloat(b[sh.areaKey] || 0), 0).toFixed(2);
                     return (
                       <Fragment key={`foot-${sIdx}`}>
-                        <td className="py-2.5 px-1 text-center border-r border-slate-300 font-mono font-black text-slate-900">
+                        <td className="py-3 px-2 text-center border-r border-slate-300 font-black text-slate-900 text-xs sm:text-sm tabular-nums">
                           {pairSumCnt}
                         </td>
-                        <td className="py-2.5 px-1.5 text-right border-r border-slate-300 font-mono font-black text-slate-900">
+                        <td className="py-3 px-2.5 text-right border-r border-slate-300 font-black text-slate-900 text-xs sm:text-sm tabular-nums">
                           {pairSumAr}
                         </td>
                       </Fragment>
@@ -3213,10 +3243,10 @@ export default function ReportsPage() {
                       PRAPATRA 1 TABLE (BOOKLET 1 PDF) - 9 COLUMNS
                   ========================================================= */}
                   {selectedPrapatraId === 1 && (
-                    <table className="w-full text-left border-collapse text-xs min-w-[1150px]">
+                    <table className="w-full text-left border-collapse table-devanagari text-sm min-w-[1150px]">
                       <thead>
                         {/* Header Row 1: Thematic Concept Headers */}
-                        <tr className="text-white font-extrabold text-center text-xs">
+                        <tr className="text-white font-extrabold text-center text-xs sm:text-sm">
                           <th rowSpan={2} className="py-3 px-2 border-r border-slate-700 bg-slate-800 text-slate-100 w-12">{isMarathi ? 'अ.क्र.' : 'Sr.'}</th>
                           <th rowSpan={2} className="py-3 px-3 border-r border-slate-700 bg-slate-800 text-slate-100 text-left min-w-[200px]">{isMarathi ? 'जिल्हा / कार्यक्षेत्र' : 'District / Jurisdiction'}</th>
                           <th className="py-2.5 px-3 border-r border-indigo-800 bg-indigo-900 text-indigo-100 w-32">{isMarathi ? 'जिल्ह्यातील एकूण' : 'Total in District'}</th>
@@ -3228,16 +3258,16 @@ export default function ReportsPage() {
                           <th rowSpan={2} className="py-3 px-3 bg-slate-800 text-slate-100 w-32">{isMarathi ? 'शेरा' : 'Remarks'}</th>
                         </tr>
                         {/* Header Row 2: Sub-headers */}
-                        <tr className="text-[11px] font-bold text-center border-b border-slate-700">
-                          <th className="py-1.5 px-2 border-r border-indigo-800 bg-indigo-950 text-indigo-200">{isMarathi ? '७/१२ ची संख्या' : 'No. of 7/12'}</th>
-                          <th className="py-1.5 px-2 border-r border-sky-800 bg-sky-950 text-sky-200">{isMarathi ? '७/१२ ची संख्या' : 'No. of 7/12'}</th>
-                          <th className="py-1.5 px-2 border-r border-emerald-800 bg-emerald-950 text-emerald-200">{isMarathi ? '७/१२ ची संख्या' : 'No. of 7/12'}</th>
-                          <th className="py-1.5 px-2 border-r border-rose-800 bg-rose-950 text-rose-200 font-extrabold">{isMarathi ? '७/१२ ची संख्या' : 'No. of 7/12'}</th>
-                          <th className="py-1.5 px-2 border-r border-teal-800 bg-teal-950 text-teal-200 font-bold">{isMarathi ? '७/१२ ची संख्या' : 'No. of 7/12'}</th>
-                          <th className="py-1.5 px-2 border-r border-amber-800 bg-amber-950 text-amber-200 font-extrabold">{isMarathi ? '७/१२ ची संख्या' : 'No. of 7/12'}</th>
+                        <tr className="text-xs font-bold text-center border-b border-slate-700">
+                          <th className="py-2 px-2 border-r border-indigo-800 bg-indigo-950 text-indigo-200">{isMarathi ? '७/१२ ची संख्या' : 'No. of 7/12'}</th>
+                          <th className="py-2 px-2 border-r border-sky-800 bg-sky-950 text-sky-200">{isMarathi ? '७/१२ ची संख्या' : 'No. of 7/12'}</th>
+                          <th className="py-2 px-2 border-r border-emerald-800 bg-emerald-950 text-emerald-200">{isMarathi ? '७/१२ ची संख्या' : 'No. of 7/12'}</th>
+                          <th className="py-2 px-2 border-r border-rose-800 bg-rose-950 text-rose-200 font-extrabold">{isMarathi ? '७/१२ ची संख्या' : 'No. of 7/12'}</th>
+                          <th className="py-2 px-2 border-r border-teal-800 bg-teal-950 text-teal-200 font-bold">{isMarathi ? '७/१२ ची संख्या' : 'No. of 7/12'}</th>
+                          <th className="py-2 px-2 border-r border-amber-800 bg-amber-950 text-amber-200 font-extrabold">{isMarathi ? '७/१२ ची संख्या' : 'No. of 7/12'}</th>
                         </tr>
                         {/* Header Row 3: Official Column Notations */}
-                        <tr className="bg-slate-900 text-[11px] text-slate-400 font-mono text-center border-b border-slate-800">
+                        <tr className="bg-slate-900 text-xs text-slate-400 text-center border-b border-slate-800">
                           <th className="py-1 border-r border-slate-800">-</th>
                           <th className="py-1 border-r border-slate-800">-</th>
                           <th className="py-1 border-r border-slate-800 text-indigo-300">२(अ)</th>
@@ -3249,7 +3279,7 @@ export default function ReportsPage() {
                           <th className="py-1">-</th>
                         </tr>
                         {/* Header Row 4: Sequence Numbers */}
-                        <tr className="bg-slate-950 text-[10px] text-slate-500 font-mono font-bold text-center border-b-2 border-indigo-500">
+                        <tr className="bg-slate-950 text-xs text-slate-400 font-bold text-center border-b-2 border-indigo-500">
                           <th className="py-1 border-r border-slate-850">१</th>
                           <th className="py-1 border-r border-slate-850">२</th>
                           <th className="py-1 border-r border-slate-850">३</th>
@@ -3362,9 +3392,9 @@ export default function ReportsPage() {
                       PRAPATRA 2 TABLE: REMOVAL OF POKALIST ENTRIES
                   ========================================================= */}
                   {selectedPrapatraId === 2 && (
-                    <table className="w-full text-left border-collapse text-xs min-w-[950px]">
+                    <table className="w-full text-left border-collapse table-devanagari text-sm min-w-[950px]">
                       <thead>
-                        <tr className="text-white font-extrabold text-center text-xs">
+                        <tr className="text-white font-extrabold text-center text-xs sm:text-sm">
                           <th className="py-3 px-2 border-r border-slate-700 bg-slate-800 text-slate-100 w-12">{isMarathi ? 'अ.क्र.' : 'Sr.'}</th>
                           <th className="py-3 px-3 border-r border-slate-700 bg-slate-800 text-slate-100 text-left min-w-[220px]">{isMarathi ? 'जिल्हा / कार्यक्षेत्र' : 'District / Jurisdiction'}</th>
                           <th className="py-3 px-3 border-r border-amber-800 bg-amber-900 text-amber-100 min-w-[200px]">{isMarathi ? 'शासकीय जमिनीवर पोकळीस्त नोंदी असलेल्या' : 'Govt Lands with Pokalist Remarks'}</th>
@@ -3372,15 +3402,15 @@ export default function ReportsPage() {
                           <th className="py-3 px-3 border-r border-rose-800 bg-rose-900 text-rose-100 min-w-[180px]">{isMarathi ? 'नोंदी कमी करावयास शिल्लक' : 'Entries Pending Removal'}</th>
                           <th className="py-3 px-3 bg-slate-800 text-slate-100 w-36">{isMarathi ? 'शेरा' : 'Remarks'}</th>
                         </tr>
-                        <tr className="text-[11px] font-bold text-center border-b border-slate-700">
-                          <th className="py-1.5 px-2 border-r border-slate-800 bg-slate-900 text-slate-400">-</th>
-                          <th className="py-1.5 px-2 border-r border-slate-800 bg-slate-900 text-slate-400">-</th>
-                          <th className="py-1.5 px-2 border-r border-amber-800 bg-amber-950 text-amber-200">{isMarathi ? '७/१२ ची संख्या' : 'No. of 7/12'}</th>
-                          <th className="py-1.5 px-2 border-r border-teal-800 bg-teal-950 text-teal-200">{isMarathi ? '७/१२ ची संख्या' : 'No. of 7/12'}</th>
-                          <th className="py-1.5 px-2 border-r border-rose-800 bg-rose-950 text-rose-200 font-extrabold">{isMarathi ? '७/१२ ची संख्या' : 'No. of 7/12'}</th>
-                          <th className="py-1.5 px-2 bg-slate-900 text-slate-400">-</th>
+                        <tr className="text-xs font-bold text-center border-b border-slate-700">
+                          <th className="py-2 px-2 border-r border-slate-800 bg-slate-900 text-slate-400">-</th>
+                          <th className="py-2 px-2 border-r border-slate-800 bg-slate-900 text-slate-400">-</th>
+                          <th className="py-2 px-2 border-r border-amber-800 bg-amber-950 text-amber-200">{isMarathi ? '७/१२ ची संख्या' : 'No. of 7/12'}</th>
+                          <th className="py-2 px-2 border-r border-teal-800 bg-teal-950 text-teal-200">{isMarathi ? '७/१२ ची संख्या' : 'No. of 7/12'}</th>
+                          <th className="py-2 px-2 border-r border-rose-800 bg-rose-950 text-rose-200 font-extrabold">{isMarathi ? '७/१२ ची संख्या' : 'No. of 7/12'}</th>
+                          <th className="py-2 px-2 bg-slate-900 text-slate-400">-</th>
                         </tr>
-                        <tr className="bg-slate-900 text-[11px] text-slate-400 font-mono text-center border-b border-slate-800">
+                        <tr className="bg-slate-900 text-xs text-slate-400 text-center border-b border-slate-800">
                           <th className="py-1 border-r border-slate-800">-</th>
                           <th className="py-1 border-r border-slate-800">-</th>
                           <th className="py-1 border-r border-slate-800 text-amber-300">२(अ)</th>
@@ -3388,7 +3418,7 @@ export default function ReportsPage() {
                           <th className="py-1 border-r border-slate-800 text-rose-300 font-bold">४(अ)</th>
                           <th className="py-1">-</th>
                         </tr>
-                        <tr className="bg-slate-950 text-[10px] text-slate-500 font-mono font-bold text-center border-b-2 border-amber-500">
+                        <tr className="bg-slate-950 text-xs text-slate-400 font-bold text-center border-b-2 border-amber-500">
                           <th className="py-1 border-r border-slate-850">१</th>
                           <th className="py-1 border-r border-slate-850">२</th>
                           <th className="py-1 border-r border-slate-850">३</th>
@@ -3473,9 +3503,9 @@ export default function ReportsPage() {
                        PRAPATRA 3 TABLE: GOVT DEPT / CORPORATION ALLOTMENTS
                   ========================================================= */}
                   {selectedPrapatraId === 3 && (
-                    <table className="w-full text-left border-collapse text-xs min-w-[1000px]">
+                    <table className="w-full text-left border-collapse table-devanagari text-sm min-w-[1000px]">
                       <thead>
-                        <tr className="text-white font-extrabold text-center text-xs">
+                        <tr className="text-white font-extrabold text-center text-xs sm:text-sm">
                           <th className="py-3 px-2 border-r border-slate-700 bg-slate-800 text-slate-100 w-12">{isMarathi ? 'अ.क्र.' : 'Sr.'}</th>
                           <th className="py-3 px-3 border-r border-slate-700 bg-slate-800 text-slate-100 text-left min-w-[220px]">{isMarathi ? 'जिल्हा / कार्यक्षेत्र' : 'District / Jurisdiction'}</th>
                           <th className="py-3 px-3 border-r border-blue-800 bg-blue-900 text-blue-100 min-w-[220px]">{isMarathi ? 'शासकीय विभाग/महामंडळे यांना प्रदान जमिनी' : 'Allotted to Govt Depts / Corporations'}</th>
@@ -3483,15 +3513,15 @@ export default function ReportsPage() {
                           <th className="py-3 px-3 border-r border-teal-800 bg-teal-900 text-teal-100 min-w-[200px]">{isMarathi ? 'शासन जमा / पुनर्प्राप्त केलेल्या जमिनी' : 'Restored / Re-possessed by Govt'}</th>
                           <th className="py-3 px-3 bg-slate-800 text-slate-100 w-36">{isMarathi ? 'शेरा' : 'Remarks'}</th>
                         </tr>
-                        <tr className="text-[11px] font-bold text-center border-b border-slate-700">
-                          <th className="py-1.5 px-2 border-r border-slate-800 bg-slate-900 text-slate-400">-</th>
-                          <th className="py-1.5 px-2 border-r border-slate-800 bg-slate-900 text-slate-400">-</th>
-                          <th className="py-1.5 px-2 border-r border-blue-800 bg-blue-950 text-blue-200">{isMarathi ? '७/१२ ची संख्या' : 'No. of 7/12'}</th>
-                          <th className="py-1.5 px-2 border-r border-rose-800 bg-rose-950 text-rose-200 font-extrabold">{isMarathi ? '७/१२ ची संख्या' : 'No. of 7/12'}</th>
-                          <th className="py-1.5 px-2 border-r border-teal-800 bg-teal-950 text-teal-200 font-bold">{isMarathi ? '७/१२ ची संख्या' : 'No. of 7/12'}</th>
-                          <th className="py-1.5 px-2 bg-slate-900 text-slate-400">-</th>
+                        <tr className="text-xs font-bold text-center border-b border-slate-700">
+                          <th className="py-2 px-2 border-r border-slate-800 bg-slate-900 text-slate-400">-</th>
+                          <th className="py-2 px-2 border-r border-slate-800 bg-slate-900 text-slate-400">-</th>
+                          <th className="py-2 px-2 border-r border-blue-800 bg-blue-950 text-blue-200">{isMarathi ? '७/१२ ची संख्या' : 'No. of 7/12'}</th>
+                          <th className="py-2 px-2 border-r border-rose-800 bg-rose-950 text-rose-200 font-extrabold">{isMarathi ? '७/१२ ची संख्या' : 'No. of 7/12'}</th>
+                          <th className="py-2 px-2 border-r border-teal-800 bg-teal-950 text-teal-200 font-bold">{isMarathi ? '७/१२ ची संख्या' : 'No. of 7/12'}</th>
+                          <th className="py-2 px-2 bg-slate-900 text-slate-400">-</th>
                         </tr>
-                        <tr className="bg-slate-900 text-[11px] text-slate-400 font-mono text-center border-b border-slate-800">
+                        <tr className="bg-slate-900 text-xs text-slate-400 text-center border-b border-slate-800">
                           <th className="py-1 border-r border-slate-800">-</th>
                           <th className="py-1 border-r border-slate-800">-</th>
                           <th className="py-1 border-r border-slate-800 text-blue-300">२(अ)</th>
@@ -3499,7 +3529,7 @@ export default function ReportsPage() {
                           <th className="py-1 border-r border-slate-800 text-teal-300">४(अ)</th>
                           <th className="py-1">-</th>
                         </tr>
-                        <tr className="bg-slate-950 text-[10px] text-slate-500 font-mono font-bold text-center border-b-2 border-blue-500">
+                        <tr className="bg-slate-950 text-xs text-slate-400 font-bold text-center border-b-2 border-blue-500">
                           <th className="py-1 border-r border-slate-850">१</th>
                           <th className="py-1 border-r border-slate-850">२</th>
                           <th className="py-1 border-r border-slate-850">३</th>
@@ -3584,9 +3614,9 @@ export default function ReportsPage() {
                       PRAPATRA 4 TABLE: PRIVATE / TRUST / SOCIETY ALLOTMENTS
                   ========================================================= */}
                   {selectedPrapatraId === 4 && (
-                    <table className="w-full text-left border-collapse table-devanagari text-[13px] sm:text-sm min-w-[1050px]">
+                    <table className="w-full text-left border-collapse table-devanagari text-sm min-w-[1050px]">
                       <thead>
-                        <tr className="text-white font-extrabold text-center text-xs">
+                        <tr className="text-white font-extrabold text-center text-xs sm:text-sm">
                           <th className="py-3 px-2 border-r border-slate-700 bg-slate-800 text-slate-100 w-12">{isMarathi ? 'अ.क्र.' : 'Sr.'}</th>
                           <th className="py-3 px-3 border-r border-slate-700 bg-slate-800 text-slate-100 text-left min-w-[220px]">{isMarathi ? 'जिल्हा / कार्यक्षेत्र' : 'District / Jurisdiction'}</th>
                           <th className="py-3 px-3 border-r border-purple-800 bg-purple-900 text-purple-100 min-w-[240px]">{isMarathi ? 'खाजगी / शैक्षणिक संस्था / ट्रस्ट यांना प्रदान जमिनी' : 'Allotted to Private / Trust / Societies'}</th>
@@ -3594,15 +3624,15 @@ export default function ReportsPage() {
                           <th className="py-3 px-3 border-r border-teal-800 bg-teal-900 text-teal-100 min-w-[200px]">{isMarathi ? 'शासन जमा / पुनर्प्राप्त केलेल्या जमिनी' : 'Restored / Re-possessed by Govt'}</th>
                           <th className="py-3 px-3 bg-slate-800 text-slate-100 w-36">{isMarathi ? 'शेरा' : 'Remarks'}</th>
                         </tr>
-                        <tr className="text-[11px] font-bold text-center border-b border-slate-700">
-                          <th className="py-1.5 px-2 border-r border-slate-800 bg-slate-900 text-slate-400">-</th>
-                          <th className="py-1.5 px-2 border-r border-slate-800 bg-slate-900 text-slate-400">-</th>
-                          <th className="py-1.5 px-2 border-r border-purple-800 bg-purple-950 text-purple-200">{isMarathi ? '७/१२ ची संख्या' : 'No. of 7/12'}</th>
-                          <th className="py-1.5 px-2 border-r border-rose-800 bg-rose-950 text-rose-200 font-extrabold">{isMarathi ? '७/१२ ची संख्या' : 'No. of 7/12'}</th>
-                          <th className="py-1.5 px-2 border-r border-teal-800 bg-teal-950 text-teal-200 font-bold">{isMarathi ? '७/१२ ची संख्या' : 'No. of 7/12'}</th>
-                          <th className="py-1.5 px-2 bg-slate-900 text-slate-400">-</th>
+                        <tr className="text-xs font-bold text-center border-b border-slate-700">
+                          <th className="py-2 px-2 border-r border-slate-800 bg-slate-900 text-slate-400">-</th>
+                          <th className="py-2 px-2 border-r border-slate-800 bg-slate-900 text-slate-400">-</th>
+                          <th className="py-2 px-2 border-r border-purple-800 bg-purple-950 text-purple-200">{isMarathi ? '७/१२ ची संख्या' : 'No. of 7/12'}</th>
+                          <th className="py-2 px-2 border-r border-rose-800 bg-rose-950 text-rose-200 font-extrabold">{isMarathi ? '७/१२ ची संख्या' : 'No. of 7/12'}</th>
+                          <th className="py-2 px-2 border-r border-teal-800 bg-teal-950 text-teal-200 font-bold">{isMarathi ? '७/१२ ची संख्या' : 'No. of 7/12'}</th>
+                          <th className="py-2 px-2 bg-slate-900 text-slate-400">-</th>
                         </tr>
-                        <tr className="bg-slate-900 text-[11px] text-slate-400 font-mono text-center border-b border-slate-800">
+                        <tr className="bg-slate-900 text-xs text-slate-400 text-center border-b border-slate-800">
                           <th className="py-1 border-r border-slate-800">-</th>
                           <th className="py-1 border-r border-slate-800">-</th>
                           <th className="py-1 border-r border-slate-800 text-purple-300">२(अ)</th>
@@ -3610,7 +3640,7 @@ export default function ReportsPage() {
                           <th className="py-1 border-r border-slate-800 text-teal-300">४(अ)</th>
                           <th className="py-1">-</th>
                         </tr>
-                        <tr className="bg-slate-950 text-[10px] text-slate-500 font-mono font-bold text-center border-b-2 border-purple-500">
+                        <tr className="bg-slate-950 text-xs text-slate-400 font-bold text-center border-b-2 border-purple-500">
                           <th className="py-1 border-r border-slate-850">१</th>
                           <th className="py-1 border-r border-slate-850">२</th>
                           <th className="py-1 border-r border-slate-850">३</th>
@@ -3695,9 +3725,9 @@ export default function ReportsPage() {
                       PRAPATRA 5 TABLE: GAIRAN & GOVT LAND STATUS & ALLOTMENTS
                   ========================================================= */}
                   {selectedPrapatraId === 5 && (
-                    <table className="w-full text-left border-collapse text-xs min-w-[1150px]">
+                    <table className="w-full text-left border-collapse table-devanagari text-sm min-w-[1150px]">
                       <thead>
-                        <tr className="text-white font-extrabold text-center text-xs">
+                        <tr className="text-white font-extrabold text-center text-xs sm:text-sm">
                           <th rowSpan={2} className="py-3 px-2 border-r border-slate-700 bg-slate-800 text-slate-100 w-12">{isMarathi ? 'अ.क्र.' : 'Sr.'}</th>
                           <th rowSpan={2} className="py-3 px-3 border-r border-slate-700 bg-slate-800 text-slate-100 text-left min-w-[200px]">{isMarathi ? 'जिल्हा / कार्यक्षेत्र' : 'District / Jurisdiction'}</th>
                           <th className="py-2.5 px-3 border-r border-emerald-800 bg-emerald-900 text-emerald-100 w-32">{isMarathi ? 'एकूण शासकीय जमिनींच्या' : 'Total Govt Lands'}</th>
@@ -3707,14 +3737,14 @@ export default function ReportsPage() {
                           <th className="py-2.5 px-3 border-r border-sky-800 bg-sky-900 text-sky-100 w-36">{isMarathi ? 'मोजणी झालेल्या जमिनींच्या' : 'Demarcated / Measured'}</th>
                           <th rowSpan={2} className="py-3 px-3 bg-slate-800 text-slate-100 w-32">{isMarathi ? 'शेरा' : 'Remarks'}</th>
                         </tr>
-                        <tr className="text-[11px] font-bold text-center border-b border-slate-700">
-                          <th className="py-1.5 px-2 border-r border-emerald-800 bg-emerald-950 text-emerald-200">{isMarathi ? '७/१२ ची संख्या' : 'No. of 7/12'}</th>
-                          <th className="py-1.5 px-2 border-r border-indigo-800 bg-indigo-950 text-indigo-200">{isMarathi ? '७/१२ ची संख्या' : 'No. of 7/12'}</th>
-                          <th className="py-1.5 px-2 border-r border-rose-800 bg-rose-950 text-rose-200 font-extrabold">{isMarathi ? '७/१२ ची संख्या' : 'No. of 7/12'}</th>
-                          <th className="py-1.5 px-2 border-r border-red-800 bg-red-950 text-red-200 font-extrabold">{isMarathi ? '७/१२ ची संख्या' : 'No. of 7/12'}</th>
-                          <th className="py-1.5 px-2 border-r border-sky-800 bg-sky-950 text-sky-200 font-bold">{isMarathi ? '७/१२ ची संख्या' : 'No. of 7/12'}</th>
+                        <tr className="text-xs font-bold text-center border-b border-slate-700">
+                          <th className="py-2 px-2 border-r border-emerald-800 bg-emerald-950 text-emerald-200">{isMarathi ? '७/१२ ची संख्या' : 'No. of 7/12'}</th>
+                          <th className="py-2 px-2 border-r border-indigo-800 bg-indigo-950 text-indigo-200">{isMarathi ? '७/१२ ची संख्या' : 'No. of 7/12'}</th>
+                          <th className="py-2 px-2 border-r border-rose-800 bg-rose-950 text-rose-200 font-extrabold">{isMarathi ? '७/१२ ची संख्या' : 'No. of 7/12'}</th>
+                          <th className="py-2 px-2 border-r border-red-800 bg-red-950 text-red-200 font-extrabold">{isMarathi ? '७/१२ ची संख्या' : 'No. of 7/12'}</th>
+                          <th className="py-2 px-2 border-r border-sky-800 bg-sky-950 text-sky-200 font-bold">{isMarathi ? '७/१२ ची संख्या' : 'No. of 7/12'}</th>
                         </tr>
-                        <tr className="bg-slate-900 text-[11px] text-slate-400 font-mono text-center border-b border-slate-800">
+                        <tr className="bg-slate-900 text-xs text-slate-400 text-center border-b border-slate-800">
                           <th className="py-1 border-r border-slate-800">-</th>
                           <th className="py-1 border-r border-slate-800">-</th>
                           <th className="py-1 border-r border-slate-800 text-emerald-300">२(अ)</th>
@@ -3724,7 +3754,7 @@ export default function ReportsPage() {
                           <th className="py-1 border-r border-slate-800 text-sky-300">६(अ)</th>
                           <th className="py-1">-</th>
                         </tr>
-                        <tr className="bg-slate-950 text-[10px] text-slate-500 font-mono font-bold text-center border-b-2 border-emerald-500">
+                        <tr className="bg-slate-950 text-xs text-slate-400 font-bold text-center border-b-2 border-emerald-500">
                           <th className="py-1 border-r border-slate-850">१</th>
                           <th className="py-1 border-r border-slate-850">२</th>
                           <th className="py-1 border-r border-slate-850">३</th>
@@ -3932,69 +3962,118 @@ export default function ReportsPage() {
 
                 {/* Tier Filter Quick Switcher Pills */}
                 <div className="flex flex-wrap items-center gap-1.5 p-1.5 bg-slate-100/80 rounded-xl border border-slate-200 shadow-2xs">
-                  <button
-                    type="button"
-                    onClick={() => setCategoryGoshwaraTier('all')}
-                    className={clsx(
-                      'px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer',
-                      categoryGoshwaraTier === 'all'
-                        ? 'bg-slate-900 text-white shadow-2xs font-extrabold'
-                        : 'text-slate-600 hover:text-slate-900 hover:bg-white/70'
-                    )}
-                  >
-                    {isMarathi ? 'सर्व गोषवारा (गाव, तालुका, जिल्हा)' : 'All Rollups (Village, Taluka, District)'}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setCategoryGoshwaraTier('village')}
-                    className={clsx(
-                      'px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer',
-                      categoryGoshwaraTier === 'village'
-                        ? 'bg-slate-900 text-white shadow-2xs font-extrabold'
-                        : 'text-slate-600 hover:text-slate-900 hover:bg-white/70'
-                    )}
-                  >
-                    <span>{isMarathi ? 'गावाचा गोषवारा' : 'Village Goshwara'}</span>
-                    <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-slate-700 text-white font-mono">{categoryVillageRows.length}</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setCategoryGoshwaraTier('taluka')}
-                    className={clsx(
-                      'px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer',
-                      categoryGoshwaraTier === 'taluka'
-                        ? 'bg-slate-900 text-white shadow-2xs font-extrabold'
-                        : 'text-slate-600 hover:text-slate-900 hover:bg-white/70'
-                    )}
-                  >
-                    <span>{isMarathi ? 'तालुक्याचा गोषवारा' : 'Taluka Goshwara'}</span>
-                    <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-slate-700 text-white font-mono">{categoryTalukaRows.length}</span>
-                  </button>
-                  {(!village || village === 'all' || village === 'सर्व गावे') && categoryDistrictRows.length > 0 && (
+                  {/* 1. District Level Switcher */}
+                  {isDistrictSelected && (
+                    <>
+                      {categoryDistrictRows.length > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => setCategoryGoshwaraTier('district')}
+                          className={clsx(
+                            'px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer',
+                            categoryGoshwaraTier === 'district'
+                              ? 'bg-slate-900 text-white shadow-2xs font-extrabold'
+                              : 'text-slate-600 hover:text-slate-900 hover:bg-white/70'
+                          )}
+                        >
+                          <span>{isMarathi ? 'जिल्ह्याचा गोषवारा' : 'District Goshwara'}</span>
+                        </button>
+                      )}
+                      {categoryTalukaRows.length > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => setCategoryGoshwaraTier('taluka')}
+                          className={clsx(
+                            'px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer',
+                            categoryGoshwaraTier === 'taluka'
+                              ? 'bg-slate-900 text-white shadow-2xs font-extrabold'
+                              : 'text-slate-600 hover:text-slate-900 hover:bg-white/70'
+                          )}
+                        >
+                          <span>{isMarathi ? 'तालुकानिहाय गोषवारा' : 'Taluka-wise Goshwara'}</span>
+                          <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-slate-700 text-white font-mono">{categoryTalukaRows.length}</span>
+                        </button>
+                      )}
+                    </>
+                  )}
+
+                  {/* 2. Taluka Level Switcher */}
+                  {isTalukaSelected && (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => setCategoryGoshwaraTier('taluka')}
+                        className={clsx(
+                          'px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer',
+                          categoryGoshwaraTier === 'taluka'
+                            ? 'bg-slate-900 text-white shadow-2xs font-extrabold'
+                            : 'text-slate-600 hover:text-slate-900 hover:bg-white/70'
+                        )}
+                      >
+                        <span>{isMarathi ? 'तालुक्याचा गोषवारा' : 'Taluka Goshwara'}</span>
+                      </button>
+                      {categoryVillageRows.length > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => setCategoryGoshwaraTier('village')}
+                          className={clsx(
+                            'px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer',
+                            categoryGoshwaraTier === 'village'
+                              ? 'bg-slate-900 text-white shadow-2xs font-extrabold'
+                              : 'text-slate-600 hover:text-slate-900 hover:bg-white/70'
+                          )}
+                        >
+                          <span>{isMarathi ? 'गावाचा गोषवारा' : 'Village Goshwara'}</span>
+                          <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-slate-700 text-white font-mono">{categoryVillageRows.length}</span>
+                        </button>
+                      )}
+                    </>
+                  )}
+
+                  {/* 3. Village Level Switcher */}
+                  {isVillageSelected && (
                     <button
                       type="button"
-                      onClick={() => setCategoryGoshwaraTier('district')}
-                      className={clsx(
-                        'px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer',
-                        categoryGoshwaraTier === 'district'
-                          ? 'bg-slate-900 text-white shadow-2xs font-extrabold'
-                          : 'text-slate-600 hover:text-slate-900 hover:bg-white/70'
-                      )}
+                      onClick={() => setCategoryGoshwaraTier('village')}
+                      className="px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-900 text-white shadow-2xs font-extrabold flex items-center gap-1.5 cursor-default"
                     >
-                      <span>{isMarathi ? 'जिल्हाचा गोषवारा' : 'District Goshwara'}</span>
-                      <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-slate-700 text-white font-mono">{categoryDistrictRows.length}</span>
+                      <span>{isMarathi ? 'गावाचा गोषवारा' : 'Village Goshwara'}</span>
+                      <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-slate-700 text-white font-mono">{categoryVillageRows.length || 1}</span>
                     </button>
                   )}
                 </div>
 
-                {/* Render Strictly Formatted Goshwara Tables matching Image 2 */}
-                {isTenancyCategory ? (
-                  <div className="space-y-6">
-                    {/* 1. गावाचा गोषवारा */}
-                    {(categoryGoshwaraTier === 'all' || categoryGoshwaraTier === 'village') && categoryVillageRows.length > 0 && (
-                      renderCategoryTenancyGoshwaraSection(isMarathi ? 'गावाचा गोषवारा' : 'Village Goshwara', isMarathi ? 'गावाचे नाव' : 'Village Name', categoryVillageRows, 'village')
-                    )}
-                    {categoryGoshwaraTier === 'village' && categoryVillageRows.length === 0 && (
+                {/* =========================================================
+                    BOOKLET 1 TO 18 GOSHAWARA GRAPHICS, ANALYTICS & CHARTS
+                ========================================================= */}
+                <BookletGoshwaraAnalytics
+                  selectedCatId={selectedCatId}
+                  category={currentCategory}
+                  goshDef={goshDef}
+                  talukaRows={categoryTalukaRows}
+                  villageRows={categoryVillageRows}
+                  districtRows={categoryDistrictRows}
+                  categoryRollupRows={categoryRollupRows}
+                  activeTier={categoryGoshwaraTier}
+                  taluka={taluka}
+                  village={village}
+                  isMarathi={isMarathi}
+                  parcels={parcels}
+                  activeScope={activeScope}
+                />
+
+                {/* Render Strictly Formatted Goshwara Tables matching Selected Tier Only */}
+                <div className="space-y-6">
+                  {/* 1. गावाचा गोषवारा */}
+                  {categoryGoshwaraTier === 'village' && (
+                    categoryVillageRows.length > 0 ? (
+                      renderCategoryDynamicGoshwaraSection(
+                        isMarathi ? 'गावाचा गोषवारा' : 'Village Goshwara',
+                        isMarathi ? 'गावाचे नाव' : 'Village Name',
+                        categoryVillageRows,
+                        'village'
+                      )
+                    ) : (
                       <div className="py-12 px-4 text-center bg-white rounded-xl border border-slate-200 shadow-2xs">
                         <div className="w-10 h-10 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center mx-auto mb-2 border border-amber-200">
                           <Info className="w-5 h-5" />
@@ -4015,112 +4094,56 @@ export default function ReportsPage() {
                           </button>
                         )}
                       </div>
-                    )}
+                    )
+                  )}
 
-                    {/* 2. तालुक्याचा गोषवारा */}
-                    {(categoryGoshwaraTier === 'all' || categoryGoshwaraTier === 'taluka') && categoryTalukaRows.length > 0 && (
-                      renderCategoryTenancyGoshwaraSection(isMarathi ? 'तालुक्याचा गोषवारा' : 'Taluka Goshwara', isMarathi ? 'तालुक्याचे नाव' : 'Taluka Name', categoryTalukaRows, 'taluka')
-                    )}
-                    {categoryGoshwaraTier === 'taluka' && categoryTalukaRows.length === 0 && (
+                  {/* 2. तालुक्याचा गोषवारा */}
+                  {categoryGoshwaraTier === 'taluka' && (
+                    categoryTalukaRows.length > 0 ? (
+                      renderCategoryDynamicGoshwaraSection(
+                        isDistrictSelected
+                          ? (isMarathi ? 'तालुकानिहाय गोषवारा' : 'Taluka-wise Goshwara')
+                          : (isMarathi ? 'तालुक्याचा गोषवारा' : 'Taluka Goshwara'),
+                        isMarathi ? 'तालुक्याचे नाव' : 'Taluka Name',
+                        categoryTalukaRows,
+                        'taluka'
+                      )
+                    ) : (
                       <div className="py-12 px-4 text-center bg-white rounded-xl border border-slate-200 shadow-2xs">
                         <div className="w-10 h-10 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center mx-auto mb-2 border border-slate-200">
                           <Info className="w-5 h-5" />
                         </div>
                         <h4 className="text-sm font-bold text-slate-800">{isMarathi ? 'तालुक्याचा गोषवारा उपलब्ध नाही.' : 'No taluka rollup available.'}</h4>
                       </div>
-                    )}
+                    )
+                  )}
 
-                    {/* 3. जिल्हाचा गोषवारा */}
-                    {(categoryGoshwaraTier === 'all' || categoryGoshwaraTier === 'district') && categoryDistrictRows.length > 0 && (
-                      renderCategoryTenancyGoshwaraSection(isMarathi ? 'जिल्हाचा गोषवारा' : 'District Goshwara', isMarathi ? 'जिल्हाचे नाव' : 'District Name', categoryDistrictRows, 'district')
-                    )}
-                    {categoryGoshwaraTier === 'district' && categoryDistrictRows.length === 0 && (
+                  {/* 3. जिल्हाचा गोषवारा */}
+                  {categoryGoshwaraTier === 'district' && (
+                    categoryDistrictRows.length > 0 ? (
+                      renderCategoryDynamicGoshwaraSection(
+                        isMarathi ? 'जिल्हाचा गोषवारा' : 'District Goshwara',
+                        isMarathi ? 'जिल्हाचे नाव' : 'District Name',
+                        categoryDistrictRows,
+                        'district'
+                      )
+                    ) : categoryTalukaRows.length > 0 ? (
+                      renderCategoryDynamicGoshwaraSection(
+                        isMarathi ? 'जिल्हाचा गोषवारा' : 'District Goshwara',
+                        isMarathi ? 'तालुक्याचे नाव' : 'Taluka Name',
+                        categoryTalukaRows,
+                        'taluka'
+                      )
+                    ) : (
                       <div className="py-12 px-4 text-center bg-white rounded-xl border border-slate-200 shadow-2xs">
                         <div className="w-10 h-10 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center mx-auto mb-2 border border-slate-200">
                           <Info className="w-5 h-5" />
                         </div>
-                        <h4 className="text-sm font-bold text-slate-800">
-                          {village && village !== 'all'
-                            ? (isMarathi ? 'विशिष्ट गाव निवडलेले असताना जिल्हा गोषवारा लागू नाही.' : 'District rollup not applicable when specific village is filtered.')
-                            : (isMarathi ? 'जिल्हा गोषवारा उपलब्ध नाही.' : 'No district rollup available.')}
-                        </h4>
+                        <h4 className="text-sm font-bold text-slate-800">{isMarathi ? 'जिल्हा गोषवारा उपलब्ध नाही.' : 'No district rollup available.'}</h4>
                       </div>
-                    )}
-
-                    {categoryVillageRows.length === 0 && categoryTalukaRows.length === 0 && categoryDistrictRows.length === 0 && (
-                      <div className="py-16 text-center text-slate-400 border border-slate-200 rounded-xl bg-white shadow-2xs">
-                        <Info className="w-8 h-8 mx-auto mb-2 text-slate-300" />
-                        <span className="text-sm font-semibold">{isMarathi ? 'कोणतीही गोषवारा नोंद आढळली नाही.' : 'No summary records found.'}</span>
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <div className="space-y-6">
-                    {/* 1. गावाचा गोषवारा */}
-                    {(categoryGoshwaraTier === 'all' || categoryGoshwaraTier === 'village') && categoryVillageRows.length > 0 && (
-                      renderCategoryGeneralGoshwaraSection(isMarathi ? 'गावाचा गोषवारा' : 'Village Goshwara', isMarathi ? 'गावाचे नाव' : 'Village Name', categoryVillageRows, 'village')
-                    )}
-                    {categoryGoshwaraTier === 'village' && categoryVillageRows.length === 0 && (
-                      <div className="py-12 px-4 text-center bg-white rounded-xl border border-slate-200 shadow-2xs">
-                        <div className="w-10 h-10 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center mx-auto mb-2 border border-amber-200">
-                          <Info className="w-5 h-5" />
-                        </div>
-                        <h4 className="text-sm font-bold text-slate-800">
-                          {village && village !== 'all'
-                            ? (isMarathi ? `निवडलेल्या '${formatVillageName(village, true)}' गावात या प्रपत्रांतर्गत एकही नोंद उपलब्ध नाही.` : `No records found for village '${formatVillageName(village, false)}' in this category.`)
-                            : (isMarathi ? 'या कार्यक्षेत्रात गावनिहाय गोषवारा उपलब्ध नाही.' : 'No village rollup records available.')}
-                        </h4>
-                        {village && village !== 'all' && (
-                          <button
-                            type="button"
-                            onClick={() => { setVillage('all'); }}
-                            className="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-900 text-white rounded-lg text-xs font-bold hover:bg-blue-800 transition shadow-2xs cursor-pointer active:scale-95"
-                          >
-                            <RotateCcw className="w-3.5 h-3.5" />
-                            <span>{isMarathi ? 'सर्व गावे निवडा' : 'Select All Villages'}</span>
-                          </button>
-                        )}
-                      </div>
-                    )}
-
-                    {/* 2. तालुक्याचा गोषवारा */}
-                    {(categoryGoshwaraTier === 'all' || categoryGoshwaraTier === 'taluka') && categoryTalukaRows.length > 0 && (
-                      renderCategoryGeneralGoshwaraSection(isMarathi ? 'तालुक्याचा गोषवारा' : 'Taluka Goshwara', isMarathi ? 'तालुक्याचे नाव' : 'Taluka Name', categoryTalukaRows, 'taluka')
-                    )}
-                    {categoryGoshwaraTier === 'taluka' && categoryTalukaRows.length === 0 && (
-                      <div className="py-12 px-4 text-center bg-white rounded-xl border border-slate-200 shadow-2xs">
-                        <div className="w-10 h-10 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center mx-auto mb-2 border border-slate-200">
-                          <Info className="w-5 h-5" />
-                        </div>
-                        <h4 className="text-sm font-bold text-slate-800">{isMarathi ? 'तालुक्याचा गोषवारा उपलब्ध नाही.' : 'No taluka rollup available.'}</h4>
-                      </div>
-                    )}
-
-                    {/* 3. जिल्हाचा गोषवारा */}
-                    {(categoryGoshwaraTier === 'all' || categoryGoshwaraTier === 'district') && categoryDistrictRows.length > 0 && (
-                      renderCategoryGeneralGoshwaraSection(isMarathi ? 'जिल्हाचा गोषवारा' : 'District Goshwara', isMarathi ? 'जिल्हाचे नाव' : 'District Name', categoryDistrictRows, 'district')
-                    )}
-                    {categoryGoshwaraTier === 'district' && categoryDistrictRows.length === 0 && (
-                      <div className="py-12 px-4 text-center bg-white rounded-xl border border-slate-200 shadow-2xs">
-                        <div className="w-10 h-10 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center mx-auto mb-2 border border-slate-200">
-                          <Info className="w-5 h-5" />
-                        </div>
-                        <h4 className="text-sm font-bold text-slate-800">
-                          {village && village !== 'all'
-                            ? (isMarathi ? 'विशिष्ट गाव निवडलेले असताना जिल्हा गोषवारा लागू नाही.' : 'District rollup not applicable when specific village is filtered.')
-                            : (isMarathi ? 'जिल्हा गोषवारा उपलब्ध नाही.' : 'No district rollup available.')}
-                        </h4>
-                      </div>
-                    )}
-
-                    {categoryVillageRows.length === 0 && categoryTalukaRows.length === 0 && categoryDistrictRows.length === 0 && (
-                      <div className="py-16 text-center text-slate-400 border border-slate-200 rounded-xl bg-white shadow-2xs">
-                        <Info className="w-8 h-8 mx-auto mb-2 text-slate-300" />
-                        <span className="text-sm font-semibold">{isMarathi ? 'कोणतीही गोषवारा नोंद आढळली नाही.' : 'No summary records found.'}</span>
-                      </div>
-                    )}
-                  </div>
-                )}
+                    )
+                  )}
+                </div>
               </div>
             ) : (
               /* =========================================================
@@ -4148,6 +4171,26 @@ export default function ReportsPage() {
                   </p>
                 </div> */}
 
+                {/* Booklet Detailed 7/12 Analytics Header */}
+                <div className="p-3 sm:p-4 pb-0">
+                  <BookletGoshwaraAnalytics
+                    selectedCatId={selectedCatId}
+                    category={currentCategory}
+                    goshDef={goshDef}
+                    talukaRows={categoryTalukaRows}
+                    villageRows={categoryVillageRows}
+                    districtRows={categoryDistrictRows}
+                    categoryRollupRows={categoryRollupRows}
+                    activeTier={categoryGoshwaraTier}
+                    taluka={taluka}
+                    village={village}
+                    isMarathi={isMarathi}
+                    parcels={parcels}
+                    isDetailedView={true}
+                    activeScope={activeScope}
+                  />
+                </div>
+
                 {!loading && paginatedParcels.length === 0 ? (
                   renderEmptyState()
                 ) : (
@@ -4158,9 +4201,9 @@ export default function ReportsPage() {
                       const marathiNumbers = ['१', '२', '३', '४', '५', '६', '७', '८', '९', '१०', '११', '१२', '१३', '१४', '१५', '१६', '१७', '१८'];
 
                       return (
-                        <table className="w-full text-left border-collapse text-xs min-w-[1050px]">
+                        <table className="w-full text-left border-collapse table-devanagari text-sm min-w-[1050px]">
                           <thead>
-                            <tr className="bg-slate-800 text-slate-100 font-extrabold border-b border-slate-700 text-center select-none text-xs sm:text-[13px] md:text-sm tracking-normal">
+                            <tr className="bg-slate-800 text-slate-100 font-extrabold border-b border-slate-700 text-center select-none text-xs sm:text-sm tracking-normal">
                               <th className="py-2.5 px-2 border-r border-slate-700 w-12">{isMarathi ? 'अ.क्र.' : 'Sr.'}</th>
                               {detailedCols.map((col, cIdx) => (
                                 <th
@@ -4177,10 +4220,10 @@ export default function ReportsPage() {
                               ))}
                               <th className="py-2.5 px-2 w-16 text-center">{isMarathi ? 'तपशील' : 'Details'}</th>
                             </tr>
-                            <tr className="bg-slate-900/95 text-xs sm:text-[13px] text-slate-300 text-center border-b border-slate-700 font-mono font-bold select-none">
+                            <tr className="bg-slate-900/95 text-xs sm:text-sm text-slate-300 text-center border-b border-slate-700 font-bold select-none">
                               <th className="py-1 border-r border-slate-700">१</th>
                               {detailedCols.map((_, cIdx) => (
-                                <th key={`th-num-${cIdx}`} className="py-1 border-r border-slate-700 font-mono">
+                                <th key={`th-num-${cIdx}`} className="py-1 border-r border-slate-700">
                                   {isMarathi ? marathiNumbers[cIdx + 1] || (cIdx + 2) : (cIdx + 2)}
                                 </th>
                               ))}
@@ -4390,6 +4433,19 @@ export default function ReportsPage() {
             ========================================================= */
             activeView === 'timeline' ? (
             <div>
+              {/* 46 Checklist Graphics, Analytics & Charts */}
+              <div className="p-3 sm:p-4 pb-0">
+                <Checklist46Analytics
+                  parcels={parcels}
+                  stats={stats}
+                  serverRollup={serverRollup}
+                  taluka={taluka}
+                  village={village}
+                  isMarathi={isMarathi}
+                  activeScope={activeScope}
+                />
+              </div>
+
               {/* Official Government Table Title Header Banner & Preview Download Buttons (Matching Image 4) */}
               <div className="p-3 sm:px-4 sm:py-3.5 bg-white border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div className="flex items-center gap-2.5 min-w-0">
@@ -4449,7 +4505,7 @@ export default function ReportsPage() {
                   <>
                     {renderActiveCellBar('timeline')}
                     <div className="overflow-x-auto max-h-[70vh] border-b border-slate-300 bg-white">
-                <table className="w-full text-left border-collapse text-[11px] whitespace-nowrap">
+                <table className="w-full text-left border-collapse table-devanagari text-xs sm:text-[13px] whitespace-nowrap">
                   <thead className="sticky top-0 z-30 bg-white shadow-md isolate">
                     {/* Level 1: Major Group Headers (Sleek Executive Color Themes with Hover Animation) */}
                     <tr className="text-white font-extrabold border-b-2 border-slate-900 text-center select-none shadow-xs">

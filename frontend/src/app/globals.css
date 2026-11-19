@@ -3,6 +3,8 @@
 @tailwind utilities;
 
 :root {
+  --font-poppins: 'Poppins', sans-serif;
+  --font-noto-devanagari: 'Noto Sans Devanagari', sans-serif;
   --primary-indigo: #4f46e5;
   --primary-violet: #6366f1;
   --primary-cyan: #06b6d4;
@@ -461,19 +463,32 @@ body.high-contrast :focus-visible {
 
 /* Official Revenue Portal Devanagari Table Typography */
 .table-devanagari {
-  font-family: var(--font-noto-devanagari), var(--font-poppins), 'Segoe UI', system-ui, -apple-system, sans-serif;
+  font-family: var(--font-poppins), var(--font-noto-devanagari), 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, system-ui, sans-serif;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   letter-spacing: 0.01em;
 }
 
-.table-devanagari th,
-.table-devanagari td {
-  line-height: 1.45;
+.table-devanagari th {
+  letter-spacing: 0.015em;
+  font-family: var(--font-poppins), var(--font-noto-devanagari), 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, system-ui, sans-serif;
 }
 
-.table-devanagari .font-mono {
-  font-feature-settings: 'tnum' 1, 'zero' 1;
+.table-devanagari th,
+.table-devanagari td {
+  line-height: 1.5;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+/* Modern clean tabular numbers for tables, avoiding harsh terminal monospace & slashed zeros */
+.table-devanagari .font-mono,
+.table-devanagari .tabular-nums,
+table.table-devanagari .font-mono,
+table.table-devanagari code {
+  font-family: var(--font-poppins), var(--font-noto-devanagari), 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, system-ui, sans-serif !important;
+  font-variant-numeric: tabular-nums lining-nums;
+  font-feature-settings: 'tnum' 1, 'zero' 0;
+  letter-spacing: 0.015em;
 }
 

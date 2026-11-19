@@ -1738,7 +1738,7 @@ export async function generateCategoryBookletExcel(catId, summaryData, parcels, 
         const isTot = row.villageName === 'संपूर्ण तालुका (All Villages)';
         const talukaPart = (!isTot && row.taluka) ? ` (${formatTalukaMr(row.taluka)})` : '';
         const nameVal = isTot
-          ? `${formatTalukaMr(row.taluka)} (संपूर्ण तालुका)`
+          ? formatTalukaMr(row.taluka)
           : `${cleanVillageName(row.villageName || row.taluka || 'गाव')}${talukaPart}`;
 
         const drCells = [idx + 1, nameVal];
@@ -1932,7 +1932,7 @@ export async function generateCategoryBookletPdf(catId, summaryData, parcels, sc
       const isDistrictName = isDistrict || r.isDistrictTotal;
       const isTalukaTotalName = r.villageName === 'संपूर्ण तालुका (All Villages)';
       const talukaPart = (!isDistrictName && !isTalukaTotalName && r.taluka) ? ` (${formatTalukaMr(r.taluka)})` : '';
-      const displayName = isDistrictName ? 'चंद्रपूर जिल्हा' : (isTalukaTotalName ? `${formatTalukaMr(r.taluka)} (संपूर्ण तालुका)` : `${cleanVillageName(r.villageName || r.taluka || '-')}${talukaPart}`);
+      const displayName = isDistrictName ? 'चंद्रपूर जिल्हा' : (isTalukaTotalName ? formatTalukaMr(r.taluka) : `${cleanVillageName(r.villageName || r.taluka || '-')}${talukaPart}`);
 
       const totSurv = Number(r.total712Count || 0);
       const totAr = parseFloat(r.totalAreaHa || 0);
