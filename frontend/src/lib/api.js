@@ -747,4 +747,88 @@ export const api = {
     a.remove();
     window.URL.revokeObjectURL(url);
   },
+
+  // ==========================================
+  // GOOGLE DRIVE ON-DEMAND SYNC APIs
+  // ==========================================
+  getDriveStatus: async () => {
+    const res = await fetch(`${BASE_URL}/api/drive-sync/status`, {
+      headers: { ...getAuthHeaders() }
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ error: 'गुगल ड्राइव्ह जोडणी तपासण्यात अयशस्वी' }));
+      throw new Error(err.error || 'गुगल ड्राइव्ह जोडणी तपासण्यात अयशस्वी');
+    }
+    return res.json();
+  },
+
+  scanDriveHierarchy: async (rootFolderId = '') => {
+    const url = rootFolderId
+      ? `${BASE_URL}/api/drive-sync/scan?rootFolderId=${encodeURIComponent(rootFolderId)}`
+      : `${BASE_URL}/api/drive-sync/scan`;
+    const res = await fetch(url, {
+      headers: { ...getAuthHeaders() }
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ error: 'गुगल ड्राइव्ह स्कॅन अयशस्वी झाले' }));
+      throw new Error(err.error || 'गुगल ड्राइव्ह स्कॅन अयशस्वी झाले');
+    }
+    return res.json();
+  },
+
+  pullVillageFromDrive: async (payload) => {
+    const res = await fetch(`${BASE_URL}/api/drive-sync/pull`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...getAuthHeaders()
+      },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json().catch(() => ({ error: 'ड्राईव्ह डेटा सिंक अयशस्वी' }));
+    if (!res.ok) throw new Error(data.error || 'ड्राईव्ह डेटा सिंक अयशस्वी');
+    return data;
+  },
+
+  pushVillageToDrive: async (payload) => {
+    const res = await fetch(`${BASE_URL}/api/drive-sync/push`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...getAuthHeaders()
+      },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json().catch(() => ({ error: 'ड्राईव्हवर डेटा पाठवणे अयशस्वी' }));
+    if (!res.ok) throw new Error(data.error || 'ड्राईव्हवर डेटा पाठवणे अयशस्वी');
+    return data;
+  },
+
+  addDriveColumn: async (payload) => {
+    const res = await fetch(`${BASE_URL}/api/drive-sync/add-column`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...getAuthHeaders()
+      },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json().catch(() => ({ error: 'कॉलम जोडण्यात अयशस्वी' }));
+    if (!res.ok) throw new Error(data.error || 'कॉलम जोडण्यात अयशस्वी');
+    return data;
+  },
+
+  addDriveRow: async (payload) => {
+    const res = await fetch(`${BASE_URL}/api/drive-sync/add-row`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...getAuthHeaders()
+      },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json().catch(() => ({ error: 'रो जोडण्यात अयशस्वी' }));
+    if (!res.ok) throw new Error(data.error || 'रो जोडण्यात अयशस्वी');
+    return data;
+  },
 };

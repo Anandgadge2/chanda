@@ -21,12 +21,14 @@ import {
   RefreshCw,
   GitMerge,
   AlertTriangle,
+  HardDrive,
 } from 'lucide-react';
 import { api } from '../../lib/api';
 import { CHANDRAPUR_TALUKAS } from '../../lib/constants';
 import SearchableSelect from '../../components/SearchableSelect';
 import { useTranslation } from '../../components/LanguageContext';
 import { formatVillageName } from '../../lib/villageUtils';
+import GoogleDriveSyncPanel from '../../components/GoogleDriveSyncPanel';
 
 export default function BulkUploadPage() {
   const { isMarathi } = useTranslation();
@@ -358,10 +360,34 @@ export default function BulkUploadPage() {
               : 'Village Parcel List (8-Column Format)'}
           </span>
         </button>
+
+        <button
+          onClick={() => {
+            setActiveTab('drive');
+            clearForm();
+          }}
+          className={`py-2 px-3 sm:px-4 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all cursor-pointer w-full sm:w-auto ${
+            activeTab === 'drive'
+              ? 'bg-white text-indigo-950 shadow-sm'
+              : 'text-slate-600 hover:text-slate-900 hover:bg-white/40'
+          }`}
+        >
+          <HardDrive className="w-4 h-4 text-indigo-700 shrink-0" />
+          <span className="truncate">
+            {isMarathi
+              ? 'गुगल ड्राइव्ह ऑन-डिमांड सिंक'
+              : 'Google Drive On-Demand Sync'}
+          </span>
+          <span className="text-[10px] bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded-full font-extrabold shrink-0">
+            {isMarathi ? 'थेट जोडणी' : 'Direct Sync'}
+          </span>
+        </button>
       </div>
 
       {/* Main Upload Body */}
-      {activeTab === 'prapatra' ? (
+      {activeTab === 'drive' ? (
+        <GoogleDriveSyncPanel />
+      ) : activeTab === 'prapatra' ? (
         <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-6 shadow-sm space-y-5">
           {/* Informational Guidance */}
           <div className="bg-emerald-50/70 border border-emerald-200 rounded-xl p-3.5 text-xs text-emerald-950 flex items-start gap-3">

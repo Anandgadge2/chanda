@@ -60,11 +60,6 @@ const BookletGoshwaraAnalytics = dynamic(
   { ssr: false, loading: () => <ChartSkeleton height="h-[280px]" /> }
 );
 
-const Checklist46Analytics = dynamic(
-  () => import('../../components/charts/Checklist46Analytics'),
-  { ssr: false, loading: () => <ChartSkeleton height="h-[280px]" /> }
-);
-
 // 17 Official Statutory Booklet Categories
 const STATUTORY_CATEGORIES = [
   { id: 1, nameMr: 'सरकारी जमीन', nameEn: 'Government Land', descMr: 'गायरान, वन, पहाड, खडक, अतिक्रमण व वाटप तपासणी', descEn: 'Gairan, forest, hill, rocky terrain, encroachment & allotment inspection' },
@@ -1987,63 +1982,63 @@ export default function ReportsPage() {
             </tbody>
             {/* Grand Total Footer */}
             {rows.length > 0 && (
-              <tfoot className="bg-slate-100 font-bold border-t-2 border-slate-300 text-slate-900">
-                <tr>
-                  <td className="py-2.5 px-2 text-center border-r border-slate-300 font-black">
+              <tfoot className="sticky bottom-0 z-20 bg-slate-100 font-bold border-t-2 border-slate-300 text-slate-900 shadow-md">
+                <tr className="bg-slate-100">
+                  <td className="py-2.5 px-2 text-center border-r border-slate-300 font-black bg-slate-100">
                     {isMarathi ? 'एकूण' : 'Total'}
                   </td>
-                  <td className="py-2.5 px-3 border-r border-slate-300 font-black">
+                  <td className="py-2.5 px-3 border-r border-slate-300 font-black bg-slate-100">
                     -
                   </td>
-                  <td className="py-2.5 px-2.5 text-center border-r border-slate-300 font-mono font-black text-slate-900">
+                  <td className="py-2.5 px-2.5 text-center border-r border-slate-300 font-mono font-black text-slate-900 bg-slate-100">
                     {sumSurveys}
                   </td>
-                  <td className="py-2.5 px-2.5 text-right border-r border-slate-300 font-mono font-black text-slate-900">
+                  <td className="py-2.5 px-2.5 text-right border-r border-slate-300 font-mono font-black text-slate-900 bg-slate-100">
                     {sumArea}
                   </td>
                   {/* Class 1 Total */}
-                  <td className="py-2.5 px-1.5 text-center border-r border-slate-300 font-mono font-black text-blue-900">
+                  <td className="py-2.5 px-1.5 text-center border-r border-slate-300 font-mono font-black text-blue-900 bg-blue-50">
                     {sumC1}
                   </td>
-                  <td className="py-2.5 px-1.5 text-right border-r border-slate-300 font-mono font-black text-blue-900">
+                  <td className="py-2.5 px-1.5 text-right border-r border-slate-300 font-mono font-black text-blue-900 bg-blue-50">
                     {sumC1A}
                   </td>
                   {/* Class 2 Total */}
-                  <td className="py-2.5 px-1.5 text-center border-r border-slate-300 font-mono font-black text-amber-900">
+                  <td className="py-2.5 px-1.5 text-center border-r border-slate-300 font-mono font-black text-amber-900 bg-amber-50">
                     {sumC2}
                   </td>
-                  <td className="py-2.5 px-1.5 text-right border-r border-slate-300 font-mono font-black text-amber-900">
+                  <td className="py-2.5 px-1.5 text-right border-r border-slate-300 font-mono font-black text-amber-900 bg-amber-50">
                     {sumC2A}
                   </td>
                   {/* Conversion Total */}
-                  <td className="py-2.5 px-1.5 text-center border-r border-slate-300 font-mono font-black text-rose-900">
+                  <td className="py-2.5 px-1.5 text-center border-r border-slate-300 font-mono font-black text-rose-900 bg-rose-50">
                     {sumConv}
                   </td>
-                  <td className="py-2.5 px-1.5 text-right border-r border-slate-300 font-mono font-black text-rose-900">
+                  <td className="py-2.5 px-1.5 text-right border-r border-slate-300 font-mono font-black text-rose-900 bg-rose-50">
                     {sumConvA}
                   </td>
                   {/* No Other Rights Total */}
-                  <td className="py-2.5 px-1.5 text-center border-r border-slate-300 font-mono font-black text-purple-900">
+                  <td className="py-2.5 px-1.5 text-center border-r border-slate-300 font-mono font-black text-purple-900 bg-purple-50">
                     {sumNo}
                   </td>
-                  <td className="py-2.5 px-1.5 text-right border-r border-slate-300 font-mono font-black text-purple-900">
+                  <td className="py-2.5 px-1.5 text-right border-r border-slate-300 font-mono font-black text-purple-900 bg-purple-50">
                     {sumNoA}
                   </td>
                   {/* Illegal Deletion Total */}
-                  <td className="py-2.5 px-1.5 text-center border-r border-slate-300 font-mono font-black text-emerald-900">
+                  <td className="py-2.5 px-1.5 text-center border-r border-slate-300 font-mono font-black text-emerald-900 bg-emerald-50">
                     {sumDel}
                   </td>
-                  <td className="py-2.5 px-1.5 text-right border-r border-slate-300 font-mono font-black text-emerald-900">
+                  <td className="py-2.5 px-1.5 text-right border-r border-slate-300 font-mono font-black text-emerald-900 bg-emerald-50">
                     {sumDelA}
                   </td>
                   {/* Condition Breach Total */}
-                  <td className="py-2.5 px-1.5 text-center border-r border-slate-300 font-mono font-black text-red-900">
+                  <td className="py-2.5 px-1.5 text-center border-r border-slate-300 font-mono font-black text-red-900 bg-red-50">
                     {sumShart}
                   </td>
-                  <td className="py-2.5 px-1.5 text-right border-r border-slate-300 font-mono font-black text-red-900">
+                  <td className="py-2.5 px-1.5 text-right border-r border-slate-300 font-mono font-black text-red-900 bg-red-50">
                     {sumShartA}
                   </td>
-                  <td className="py-2.5 px-2 text-center text-slate-400">
+                  <td className="py-2.5 px-2 text-center text-slate-400 bg-slate-100">
                     -
                   </td>
                 </tr>
@@ -2226,21 +2221,21 @@ export default function ReportsPage() {
 
             {/* Totals Row */}
             {rows.length > 0 && (
-              <tfoot className="bg-slate-100 font-black border-t-2 border-slate-300 shadow-inner">
-                <tr className="text-slate-900">
-                  <td className="py-3 px-2.5 text-center border-r border-slate-300 text-slate-400 text-sm">-</td>
-                  <td className="py-3 px-4 border-r border-slate-300 font-black text-slate-950 text-sm sm:text-base">{isMarathi ? 'एकूण' : 'Total'}</td>
-                  <td className="py-3 px-3 text-center border-r border-slate-300 font-black text-indigo-950 text-sm sm:text-base tabular-nums bg-indigo-50/50">{sumSurveys}</td>
-                  <td className="py-3 px-3.5 text-right border-r border-slate-300 font-black text-emerald-800 text-sm sm:text-base tabular-nums bg-emerald-50/50">{sumArea}</td>
+              <tfoot className="sticky bottom-0 z-20 bg-slate-100 font-black border-t-2 border-slate-300 shadow-md">
+                <tr className="text-slate-900 bg-slate-100">
+                  <td className="py-3 px-2.5 text-center border-r border-slate-300 text-slate-400 text-sm bg-slate-100">-</td>
+                  <td className="py-3 px-4 border-r border-slate-300 font-black text-slate-950 text-sm sm:text-base bg-slate-100">{isMarathi ? 'एकूण' : 'Total'}</td>
+                  <td className="py-3 px-3 text-center border-r border-slate-300 font-black text-indigo-950 text-sm sm:text-base tabular-nums bg-indigo-50">{sumSurveys}</td>
+                  <td className="py-3 px-3.5 text-right border-r border-slate-300 font-black text-emerald-800 text-sm sm:text-base tabular-nums bg-emerald-50">{sumArea}</td>
                   {goshDef.superHeaders.map((sh, sIdx) => {
                     const pairSumCnt = rows.reduce((a, b) => a + Number(b[sh.countKey] || 0), 0);
                     const pairSumAr = rows.reduce((a, b) => a + parseFloat(b[sh.areaKey] || 0), 0).toFixed(2);
                     return (
                       <Fragment key={`foot-${sIdx}`}>
-                        <td className="py-3 px-2 text-center border-r border-slate-300 font-black text-slate-900 text-xs sm:text-sm tabular-nums">
+                        <td className="py-3 px-2 text-center border-r border-slate-300 font-black text-slate-900 text-xs sm:text-sm tabular-nums bg-slate-100">
                           {pairSumCnt}
                         </td>
-                        <td className="py-3 px-2.5 text-right border-r border-slate-300 font-black text-slate-900 text-xs sm:text-sm tabular-nums">
+                        <td className="py-3 px-2.5 text-right border-r border-slate-300 font-black text-slate-900 text-xs sm:text-sm tabular-nums bg-slate-100">
                           {pairSumAr}
                         </td>
                       </Fragment>
@@ -4433,19 +4428,6 @@ export default function ReportsPage() {
             ========================================================= */
             activeView === 'timeline' ? (
             <div>
-              {/* 46 Checklist Graphics, Analytics & Charts */}
-              <div className="p-3 sm:p-4 pb-0">
-                <Checklist46Analytics
-                  parcels={parcels}
-                  stats={stats}
-                  serverRollup={serverRollup}
-                  taluka={taluka}
-                  village={village}
-                  isMarathi={isMarathi}
-                  activeScope={activeScope}
-                />
-              </div>
-
               {/* Official Government Table Title Header Banner & Preview Download Buttons (Matching Image 4) */}
               <div className="p-3 sm:px-4 sm:py-3.5 bg-white border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div className="flex items-center gap-2.5 min-w-0">
