@@ -4,7 +4,8 @@ import React, { useState, useEffect, useCallback, useMemo, useRef, Fragment } fr
 import {
   getBookletCategory,
   getDetailedColumnsForBooklet,
-  getGoshwaraConfigForBooklet
+  getGoshwaraConfigForBooklet,
+  getBookletKpiSpecs
 } from '../../lib/booklet18Config';
 import { createPortal } from 'react-dom';
 import {
@@ -40,7 +41,11 @@ import {
   Copy,
   RotateCcw,
   Save,
-  Landmark
+  Landmark,
+  Trees,
+  ShieldAlert,
+  Users,
+  AlertOctagon
 } from 'lucide-react';
 import clsx from 'clsx';
 import { CHANDRAPUR_TALUKAS } from '../../lib/constants';
@@ -59,6 +64,22 @@ const BookletGoshwaraAnalytics = dynamic(
   () => import('../../components/charts/BookletGoshwaraAnalytics'),
   { ssr: false, loading: () => <ChartSkeleton height="h-[280px]" /> }
 );
+
+const ICON_MAP = {
+  Landmark,
+  LandPlot,
+  Layers,
+  AlertTriangle,
+  ShieldCheck,
+  ShieldAlert,
+  Building2,
+  Users,
+  CheckCircle2,
+  Scale,
+  FileText,
+  Trees,
+  AlertOctagon
+};
 
 // 17 Official Statutory Booklet Categories
 const STATUTORY_CATEGORIES = [
@@ -704,6 +725,61 @@ export default function ReportsPage() {
     };
   }, [serverStats, serverRollup, parcels, serverTotalCount, appliedFilters, isMarathi, isClass2Parcel, isViolationParcel]);
 
+  // Dynamic 5 KPI cards for 1 to 18 Statutory Booklets strictly matching sheet headers
+  const dynamicBookletKpis = useMemo(() => {
+    if (activeTab !== 'categories') return [];
+
+    const specs = getBookletKpiSpecs(selectedCatId, isMarathi);
+    const isSingleVillage = Boolean(appliedFilters.village && appliedFilters.village !== 'all' && appliedFilters.village !== 'सर्व गावे');
+    const isSingleTaluka = Boolean(appliedFilters.taluka && appliedFilters.taluka !== 'all' && appliedFilters.taluka !== 'सर्व तालुके' && !isSingleVillage);
+
+    // 1. Locate the active rollup row matching scope
+    let activeRollupRow = null;
+    if (serverRollup) {
+      if (isSingleVillage) {
+        activeRollupRow = serverRollup.byVillage?.find(r => r.villageName?.toLowerCase() === appliedFilters.village?.toLowerCase()) || serverRollup.byVillage?.[0];
+      } else if (isSingleTaluka) {
+        activeRollupRow = serverRollup.byTaluka?.find(r => r.taluka?.toLowerCase() === appliedFilters.taluka?.toLowerCase()) || serverRollup.byTaluka?.[0];
+      } else {
+        activeRollupRow = serverRollup.districtTotal;
+      }
+    }
+
+    // 2. Map specs into ready-to-render KPI objects
+    return specs.map(spec => {
+      let count = 0;
+      let area = 0;
+
+      if (spec.key === 'all') {
+        count = Number(serverTotalCount || activeRollupRow?.total712Count || serverStats?.totalCount || parcels.length || 0);
+        area = parseFloat(activeRollupRow?.totalArea || activeRollupRow?.totalAreaHa || serverStats?.totalAreaHa || 0);
+      } else if (activeRollupRow && activeRollupRow[spec.countKey] !== undefined) {
+        count = Number(activeRollupRow[spec.countKey] || 0);
+        area = parseFloat(activeRollupRow[spec.areaKey] || 0);
+      } else if (parcels && parcels.length > 0) {
+        // Fallback compute from loaded parcel array using predicate
+        const filtered = parcels.filter(spec.filterPredicate);
+        count = filtered.length;
+        area = filtered.reduce((acc, p) => acc + (parseFloat(p.totalAreaHa) || 0), 0);
+      }
+
+      const formattedArea = `${Number((area || 0).toFixed(2)).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Ha`;
+      const subtext = isMarathi ? spec.subtextMr : spec.subtextEn;
+      const subtextEn = spec.subtextEn;
+      const IconCmp = ICON_MAP[spec.icon] || Landmark;
+
+      return {
+        ...spec,
+        value: count,
+        area: formattedArea,
+        areaEn: formattedArea,
+        subtext,
+        subtextEn,
+        iconComponent: IconCmp
+      };
+    });
+  }, [activeTab, selectedCatId, serverRollup, serverStats, serverTotalCount, parcels, appliedFilters, isMarathi]);
+
   // Dynamic rollup computed from filtered parcels for 100% mathematical accuracy across all views
   const dynamicRollup = useMemo(() => {
     if (!parcels || parcels.length === 0) return { byVillage: [], byTaluka: [], districtTotal: null };
@@ -835,6 +911,16 @@ export default function ReportsPage() {
     if (!parcels || parcels.length === 0) return [];
     if (selectedKpiFilter === 'all') return parcels;
 
+    // 1. Dynamic Booklet 1 to 18 statutory KPI filter
+    if (activeTab === 'categories') {
+      const specs = getBookletKpiSpecs(selectedCatId, isMarathi);
+      const matchedSpec = specs.find(s => s.key === selectedKpiFilter);
+      if (matchedSpec && matchedSpec.filterPredicate) {
+        return parcels.filter(matchedSpec.filterPredicate);
+      }
+    }
+
+    // 2. Global / Checklist filters
     if (selectedKpiFilter === 'area') {
       // Filter parcels with area > 0 and sort descending by acreage (largest first)
       return [...parcels]
@@ -851,7 +937,7 @@ export default function ReportsPage() {
     }
 
     return parcels;
-  }, [parcels, selectedKpiFilter, isClass2Parcel, isViolationParcel]);
+  }, [parcels, selectedKpiFilter, activeTab, selectedCatId, isMarathi, isClass2Parcel, isViolationParcel]);
 
   const isAllRows = pageSize === 'all';
   const effectivePageSize = isAllRows ? (serverTotalCount || kpiFilteredParcels.length || 1) : (Number(pageSize) || 25);
@@ -1268,6 +1354,24 @@ export default function ReportsPage() {
         delArea: categoryTalukaRows.reduce((a, b) => a + Number(b.delArea || 0), 0).toFixed(2),
         shartCount: categoryTalukaRows.reduce((a, b) => a + (b.shartCount || 0), 0),
         shartArea: categoryTalukaRows.reduce((a, b) => a + Number(b.shartArea || 0), 0).toFixed(2),
+        tribalToTribalCount: categoryTalukaRows.reduce((a, b) => a + (b.tribalToTribalCount || 0), 0),
+        tribalToTribalArea: categoryTalukaRows.reduce((a, b) => a + Number(b.tribalToTribalArea || 0), 0).toFixed(2),
+        tribalToNonTribalCount: categoryTalukaRows.reduce((a, b) => a + (b.tribalToNonTribalCount || 0), 0),
+        tribalToNonTribalArea: categoryTalukaRows.reduce((a, b) => a + Number(b.tribalToNonTribalArea || 0), 0).toFixed(2),
+        bhudanTransferCount: categoryTalukaRows.reduce((a, b) => a + (b.bhudanTransferCount || 0), 0),
+        bhudanTransferArea: categoryTalukaRows.reduce((a, b) => a + Number(b.bhudanTransferArea || 0), 0).toFixed(2),
+        encroachedCount: categoryTalukaRows.reduce((a, b) => a + (b.encroachedCount || 0), 0),
+        encroachedArea: categoryTalukaRows.reduce((a, b) => a + Number(b.encroachedArea || 0), 0).toFixed(2),
+        allottedCount: categoryTalukaRows.reduce((a, b) => a + (b.allottedCount || 0), 0),
+        allottedArea: categoryTalukaRows.reduce((a, b) => a + Number(b.allottedArea || 0), 0).toFixed(2),
+        govtDeletedCount: categoryTalukaRows.reduce((a, b) => a + (b.govtDeletedCount || 0), 0),
+        govtDeletedArea: categoryTalukaRows.reduce((a, b) => a + Number(b.govtDeletedArea || 0), 0).toFixed(2),
+        sarkarCount: categoryTalukaRows.reduce((a, b) => a + (b.sarkarCount || 0), 0),
+        sarkarArea: categoryTalukaRows.reduce((a, b) => a + Number(b.sarkarArea || 0), 0).toFixed(2),
+        inamCount: categoryTalukaRows.reduce((a, b) => a + (b.inamCount || 0), 0),
+        inamArea: categoryTalukaRows.reduce((a, b) => a + Number(b.inamArea || 0), 0).toFixed(2),
+        forestCount: categoryTalukaRows.reduce((a, b) => a + (b.forestCount || 0), 0),
+        forestArea: categoryTalukaRows.reduce((a, b) => a + Number(b.forestArea || 0), 0).toFixed(2),
       }];
     }
     return [];
@@ -2510,21 +2614,23 @@ export default function ReportsPage() {
         </div>
 
         {/* =========================================================
-            STANDARDIZED CONSTANT KPI METRIC CARDS (BRIGHT SOLID COLORS)
+            DYNAMIC KPI METRIC CARDS (CHECKLIST & PRAPATRA 1-5 ONLY; BOOKLET 1-18 IS INSIDE COLLAPSIBLE GRAPHICS)
         ========================================================= */}
-        {activeTab !== 'renumbering' && (
+        {activeTab !== 'categories' && activeTab !== 'renumbering' && (
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3 p-1 -m-1">
             <MetricCard
               variant="blue"
               titleMr="एकूण सर्व्हे / गट संख्या"
               titleEn="Total Survey / Gat Parcels"
               value={stats.totalCount}
+              unit={isMarathi ? 'गट' : 'parcels'}
               subtext={stats.scopeLabel || (isMarathi ? 'तपासणी केलेले ७/१२' : 'Audited 7/12 Records')}
               subtextEn={stats.scopeLabel || 'Audited 7/12 Records'}
               icon={Landmark}
               isActive={selectedKpiFilter === 'all'}
               onClick={() => handleKpiCardClick('all')}
               compact={true}
+              loading={loading}
             />
 
             <MetricCard
@@ -2532,12 +2638,14 @@ export default function ReportsPage() {
               titleMr="एकूण क्षेत्र (हेक्टर)"
               titleEn="Total Land Area (Ha)"
               value={stats.totalAreaHa}
+              unit={isMarathi ? 'हेक्टर' : 'Ha'}
               subtext={isMarathi ? 'हेक्टर आर क्षेत्र' : 'Hectare-Are Area'}
               subtextEn="Hectare-Are Area"
               icon={LandPlot}
               isActive={selectedKpiFilter === 'area'}
               onClick={() => handleKpiCardClick('area')}
               compact={true}
+              loading={loading}
             />
 
             <MetricCard
@@ -2545,12 +2653,14 @@ export default function ReportsPage() {
               titleMr="भोगवटादार वर्ग २ / शासकीय"
               titleEn="Class-2 / Govt Land"
               value={stats.class2Count}
+              unit={isMarathi ? 'गट' : 'parcels'}
               subtext={isMarathi ? 'अविभाज्य शर्तीवरील जमिनी' : 'Restricted Holdings'}
               subtextEn="Restricted Holdings"
               icon={Layers}
               isActive={selectedKpiFilter === 'class2'}
               onClick={() => handleKpiCardClick('class2')}
               compact={true}
+              loading={loading}
             />
 
             <MetricCard
@@ -2558,12 +2668,14 @@ export default function ReportsPage() {
               titleMr="शर्तभंग / संशयित बाबी"
               titleEn="Breaches & Inquiries"
               value={stats.shartbhangCount}
+              unit={isMarathi ? 'गट' : 'parcels'}
               subtext={isMarathi ? 'विशेष चौकशी आवश्यक' : 'Inquiry Required'}
               subtextEn="Inquiry Required"
               icon={AlertTriangle}
               isActive={selectedKpiFilter === 'violations'}
               onClick={() => handleKpiCardClick('violations')}
               compact={true}
+              loading={loading}
             />
           </div>
         )}
@@ -2957,6 +3069,30 @@ export default function ReportsPage() {
               <p className="text-xs text-slate-500 mt-0.5">
                 {formatScopeText(activeScope, isMarathi) || (isMarathi ? 'चंद्रपूर जिल्हा कार्यक्षेत्र' : 'Chandrapur District Jurisdiction')}
               </p>
+              {selectedKpiFilter !== 'all' && (
+                <div className="flex items-center gap-2 mt-2">
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-100 text-amber-950 border border-amber-300">
+                    <Filter className="w-3 h-3 text-amber-700" />
+                    <span>
+                      {isMarathi ? 'सक्रिय निकष:' : 'Active Filter:'}{' '}
+                      {activeTab === 'categories'
+                        ? getBookletKpiSpecs(selectedCatId, isMarathi).find(s => s.key === selectedKpiFilter)?.[isMarathi ? 'titleMr' : 'titleEn'] || selectedKpiFilter
+                        : selectedKpiFilter === 'area' ? (isMarathi ? 'क्षेत्रफळ' : 'Area') : selectedKpiFilter === 'class2' ? (isMarathi ? 'वर्ग-२ / शासकीय' : 'Class-2 / Govt') : (isMarathi ? 'शर्तभंग / संशयित बाबी' : 'Violations')}
+                    </span>
+                    <span className="ml-1 px-1.5 py-0.2 rounded-full bg-amber-200 text-amber-900 font-mono text-[10px]">
+                      {kpiFilteredParcels.length}
+                    </span>
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => { setSelectedKpiFilter('all'); setPage(1); }}
+                    className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-500 hover:text-rose-600 cursor-pointer transition px-2 py-0.5 rounded-md hover:bg-rose-50"
+                  >
+                    <X className="w-3 h-3" />
+                    <span>{isMarathi ? 'फिल्टर रद्द करा' : 'Clear Filter'}</span>
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* View Mode Toggle Pill */}
@@ -4055,6 +4191,10 @@ export default function ReportsPage() {
                   isMarathi={isMarathi}
                   parcels={parcels}
                   activeScope={activeScope}
+                  dynamicBookletKpis={dynamicBookletKpis}
+                  selectedKpiFilter={selectedKpiFilter}
+                  onKpiFilterSelect={handleKpiCardClick}
+                  loading={loading}
                 />
 
                 {/* Render Strictly Formatted Goshwara Tables matching Selected Tier Only */}
@@ -4183,6 +4323,10 @@ export default function ReportsPage() {
                     parcels={parcels}
                     isDetailedView={true}
                     activeScope={activeScope}
+                    dynamicBookletKpis={dynamicBookletKpis}
+                    selectedKpiFilter={selectedKpiFilter}
+                    onKpiFilterSelect={handleKpiCardClick}
+                    loading={loading}
                   />
                 </div>
 

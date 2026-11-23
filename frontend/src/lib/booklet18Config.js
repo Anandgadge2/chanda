@@ -165,6 +165,8 @@ export function getDetailedColumnsForBooklet(catId, isMarathi = true) {
   const getIllegalConv = (p) => p.auditPoints?.point_36 === 'होय' || p.metadata?.auditPoints?.point_36 === 'होय' || p.metadata?.flags?.isIllegalConversion || (p.tenureClass === 'BHOGVATDAR_CLASS_1' && p.metadata?.flags?.isShartbhang);
   const getOtherRights = (p) => p.auditPoints?.point_40 === 'होय' || p.metadata?.auditPoints?.point_40 === 'होय' || (p.metadata?.otherRights && p.metadata.otherRights !== '-' && p.metadata.otherRights !== '....');
   const getIllegalDel = (p) => p.auditPoints?.point_41 === 'होय' || p.metadata?.auditPoints?.point_41 === 'होय' || p.metadata?.flags?.isIllegalDeletion || (p.forwardCases?.some(fc => fc.violationType === 'GOVERNMENT_NAME_MISSING'));
+  const getTribalToTribal = (p) => p.auditPoints?.point_38 === 'होय' || p.metadata?.auditPoints?.point_38 === 'होय' || p.metadata?.tribalToTribal || (p.metadata?.flags?.isTribal && p.metadata?.otherRights?.includes('हस्तांतरण'));
+  const getTribalToNonTribal = (p) => p.auditPoints?.point_39 === 'होय' || p.metadata?.auditPoints?.point_39 === 'होय' || p.metadata?.tribalToNonTribalIllegal || (p.metadata?.flags?.isTribal && (p.forwardCases?.some(fc => fc.violationType === 'TRIBAL_LAND_VIOLATION') || p.metadata?.otherRights?.includes('गैर-आदिवासी')));
 
   if (num === 1) {
     // 1) सरकारी जमीन
@@ -198,18 +200,18 @@ export function getDetailedColumnsForBooklet(catId, isMarathi = true) {
   }
 
   if (num === 9) {
-    // 9) आदिवासी खातेदारांचे मालकीच्या जमिनी
+    // 9) आदिवासी खातेदारांचे मालकीच्या जमिनी (Strictly conforms to official Booklet 9 format)
     return [
       { key: 'village', label: isMarathi ? 'गावाचे नाव' : 'Village Name', minW: 'min-w-[150px]', align: 'left', getValue: p => p.villageName },
       { key: 'surveyNo', label: isMarathi ? 'सर्व्हे क्रमांक' : 'Survey No.', minW: 'w-24', align: 'center', isMono: true, getValue: p => p.gatNumber || p.oldSurveyNo || '-' },
       { key: 'area', label: isMarathi ? 'क्षेत्र (हे.आर.)' : 'Area (Ha)', minW: 'w-24', align: 'right', isArea: true, getValue: p => Number(p.totalAreaHa || 0).toFixed(4) },
       { key: 'owner', label: isMarathi ? 'भोगवटदाराचे नाव' : 'Occupant Name', minW: 'min-w-[180px]', align: 'left', isOwner: true, getValue: p => p.currentOwner || p.metadata?.ownerName || '-' },
       { key: 'tenureClass', label: isMarathi ? 'भोगवट्दार वर्ग' : 'Occupant Class', minW: 'w-24', align: 'center', isTenureBadge: true, getValue: p => p.tenureDisplay || (p.tenureClass === 'BHOGVATDAR_CLASS_1' ? 'वर्ग १' : 'वर्ग २') },
-      { key: 'tribalKhatedarName', label: isMarathi ? 'आदिवासी खातेदाराचे नाव' : 'Tribal Khatedar Name', minW: 'min-w-[180px]', align: 'left', getValue: p => (p.metadata?.flags?.isTribal || p.metadata?.tribalName) ? (p.metadata?.tribalName || p.currentOwner || '-') : '-' },
-      { key: 'shartbhang', label: isMarathi ? 'शर्तभंग झालेला आहे काय?' : 'Condition Breach Occurred?', minW: 'w-32', align: 'center', isBadge: true, isAlertVal: val => val === 'होय', getValue: p => getShartbhang(p) ? 'होय' : 'नाही' },
+      { key: 'illegalConv', label: isMarathi ? 'अवैधरित्या वर्ग 2 मधून वर्ग 1 मध्ये रूपांतरण केलेले आहे काय?' : 'Illegal Class 2 to 1?', minW: 'min-w-[180px]', align: 'center', isBadge: true, isAlertVal: val => val === 'होय', getValue: p => getIllegalConv(p) ? 'होय' : 'नाही' },
       { key: 'otherRightsNoted', label: isMarathi ? 'इतर अधिकारात नोंद घेतलेली आहे काय?' : 'Other Rights Noted?', minW: 'w-32', align: 'center', isBadge: true, getValue: p => getOtherRights(p) ? 'होय' : 'नाही' },
       { key: 'illegalDel', label: isMarathi ? 'अवैधरित्या इतर अधिकारातील नोंदी कमी केलेल्या आहे काय?' : 'Other Rights Illegally Deleted?', minW: 'min-w-[160px]', align: 'center', isBadge: true, isAlertVal: val => val === 'होय', getValue: p => getIllegalDel(p) ? 'होय' : 'नाही' },
-      { key: 'tribalToNonTribal', label: isMarathi ? 'अवैधरित्या आदिवासी ते गैर- आदिवासी हस्तांतरण झालेले आहे काय?' : 'Illegal Tribal to Non-Tribal Transfer?', minW: 'min-w-[180px]', align: 'center', isBadge: true, isAlertVal: val => val === 'होय', getValue: p => (p.auditPoints?.point_39 === 'होय' || p.metadata?.auditPoints?.point_39 === 'होय' || p.metadata?.tribalToNonTribalIllegal || (p.metadata?.flags?.isTribal && (p.forwardCases?.some(fc => fc.violationType === 'TRIBAL_LAND_VIOLATION') || p.metadata?.otherRights?.includes('गैर-आदिवासी')))) ? 'होय' : 'नाही' }
+      { key: 'tribalToTribal', label: isMarathi ? 'अवैधरित्या आदिवासी ते आदिवासी हस्तांतरण झालेले आहे काय?' : 'Illegal Tribal to Tribal?', minW: 'min-w-[180px]', align: 'center', isBadge: true, isAlertVal: val => val === 'होय', getValue: p => getTribalToTribal(p) ? 'होय' : 'नाही' },
+      { key: 'tribalToNonTribal', label: isMarathi ? 'अवैधरित्या आदिवासी ते गैर- आदिवासी हस्तांतरण झालेले आहे काय?' : 'Illegal Tribal to Non-Tribal Transfer?', minW: 'min-w-[180px]', align: 'center', isBadge: true, isAlertVal: val => val === 'होय', getValue: p => getTribalToNonTribal(p) ? 'होय' : 'नाही' }
     ];
   }
 
@@ -401,4 +403,516 @@ export function getGoshwaraConfigForBooklet(catId, isMarathi = true) {
       { label: isMarathi ? 'अवैधरित्या इतर अधिकारामधून नोंद कमी केलेल्या जमिनी' : 'Illegally Deleted', countKey: 'delCount', areaKey: 'delArea', colorClass: 'bg-emerald-50 text-emerald-950' }
     ]
   };
+}
+
+/**
+ * DYNAMIC KPI CARDS SPECIFICATION FOR BOOKLETS 1 TO 18
+ * Strictly aligned with the official Gazette/ODS sheet headers
+ */
+export function getBookletKpiSpecs(catId, isMarathi = true) {
+  const num = parseInt(catId, 10);
+
+  // Common parcel predicates for client-side filtering
+  const getShartbhang = (p) => p.auditPoints?.point_37 === 'होय' || p.metadata?.auditPoints?.point_37 === 'होय' || p.metadata?.flags?.isShartbhang || (p.forwardCases?.some(fc => fc.violationType === 'SHARTBHANG'));
+  const getIllegalConv = (p) => p.auditPoints?.point_36 === 'होय' || p.metadata?.auditPoints?.point_36 === 'होय' || p.metadata?.flags?.isIllegalConversion || (p.tenureClass === 'BHOGVATDAR_CLASS_1' && p.metadata?.flags?.isShartbhang);
+  const getOtherRightsMissing = (p) => !p.auditPoints?.point_40 || p.auditPoints?.point_40 === 'नाही' || !p.metadata?.otherRights || p.metadata?.otherRights === '-' || p.metadata?.otherRights === '....';
+  const getIllegalDel = (p) => p.auditPoints?.point_41 === 'होय' || p.metadata?.auditPoints?.point_41 === 'होय' || p.metadata?.flags?.isIllegalDeletion || (p.forwardCases?.some(fc => fc.violationType === 'GOVERNMENT_NAME_MISSING'));
+  const isClass2 = (p) => p.tenureClass === 'BHOGVATDAR_CLASS_2' || String(p.tenureDisplay || '').includes('वर्ग-२') || String(p.tenureDisplay || '').includes('वर्ग २');
+
+  if (num === 1) {
+    // 1) सरकारी जमीन (Government Land)
+    return [
+      {
+        key: 'all',
+        variant: 'blue',
+        titleMr: 'एकूण शासकीय जमिनी',
+        titleEn: 'Total Govt Parcels',
+        subtextMr: 'शासकीय नोंदवही अभिलेख',
+        subtextEn: 'Govt Register Records',
+        icon: 'Landmark',
+        countKey: 'total712Count',
+        areaKey: 'totalAreaHa',
+        filterPredicate: () => true
+      },
+      {
+        key: 'forest',
+        variant: 'emerald',
+        titleMr: 'वन / झुडपी जंगल',
+        titleEn: 'Forest / Scrub Lands',
+        subtextMr: 'वन विभागाशी संबंधित क्षेत्र',
+        subtextEn: 'Forest Notified Holdings',
+        icon: 'Trees',
+        countKey: 'forestCount',
+        areaKey: 'forestArea',
+        filterPredicate: (p) => p.auditPoints?.point_13 === 'आहे' || p.metadata?.auditPoints?.point_13 === 'आहे' || p.tenureClass === 'FOREST_JANGAL' || p.metadata?.otherRights?.includes('वन')
+      },
+      {
+        key: 'encroached',
+        variant: 'rose',
+        titleMr: 'अतिक्रमण झालेल्या जमिनी',
+        titleEn: 'Encroached Lands',
+        subtextMr: 'मौका पाहणीअंती अतिक्रमण',
+        subtextEn: 'Spot Inspection Encroachment',
+        icon: 'AlertTriangle',
+        isAlert: true,
+        countKey: 'encroachedCount',
+        areaKey: 'encroachedArea',
+        filterPredicate: (p) => p.auditPoints?.point_15 === 'आहे' || p.metadata?.auditPoints?.point_15 === 'आहे' || p.metadata?.flags?.isEncroached === true
+      },
+      {
+        key: 'allotted',
+        variant: 'indigo',
+        titleMr: 'वाटप झालेल्या जमिनी',
+        titleEn: 'Allotted Govt Lands',
+        subtextMr: 'विविध योजनांखाली प्रदान',
+        subtextEn: 'Scheme Allotments',
+        icon: 'CheckCircle2',
+        countKey: 'allottedCount',
+        areaKey: 'allottedArea',
+        filterPredicate: (p) => p.auditPoints?.point_14 === 'होय' || p.metadata?.auditPoints?.point_14 === 'होय' || p.metadata?.flags?.isCorpAllot || p.metadata?.flags?.isPrivateAllot
+      },
+      {
+        key: 'govtDeleted',
+        variant: 'purple',
+        titleMr: 'अवैध शासन नोंद वगळणी',
+        titleEn: 'Govt Name Deleted',
+        subtextMr: 'सरकार/शासन नाव कमी केलेले',
+        subtextEn: 'Illegally Deleted Govt Entry',
+        icon: 'ShieldAlert',
+        isAlert: true,
+        countKey: 'delCount',
+        areaKey: 'delArea',
+        filterPredicate: (p) => p.auditPoints?.point_18 === 'होय' || p.metadata?.auditPoints?.point_18 === 'होय' || p.metadata?.flags?.isIllegalDeletion
+      }
+    ];
+  }
+
+  if (num === 7) {
+    // 7) विकास आराखडा व गुरचरण जमिनी (DP & Gurcharan)
+    return [
+      {
+        key: 'all',
+        variant: 'blue',
+        titleMr: 'एकूण आराखडा व गुरचरण',
+        titleEn: 'Total DP & Grazing Lands',
+        subtextMr: 'नियोजन व चराई क्षेत्र',
+        subtextEn: 'DP & Grazing Register',
+        icon: 'Landmark',
+        countKey: 'total712Count',
+        areaKey: 'totalAreaHa',
+        filterPredicate: () => true
+      },
+      {
+        key: 'authorityReservation',
+        variant: 'indigo',
+        titleMr: 'प्राधिकरणाचे आरक्षण',
+        titleEn: 'Authority Reservation',
+        subtextMr: 'मनपा / नगरपरिषद / प्राधिकरण',
+        subtextEn: 'Municipal / DP Reserved',
+        icon: 'Building2',
+        countKey: 'c1Count',
+        areaKey: 'c1Area',
+        filterPredicate: (p) => p.metadata?.otherRights?.includes('मनपा') || p.metadata?.otherRights?.includes('प्राधिकरण') || p.metadata?.authorityName
+      },
+      {
+        key: 'gurcharan',
+        variant: 'emerald',
+        titleMr: 'ग्रामपंचायत गुरचरण / चराई',
+        titleEn: 'GP Gurcharan / Grazing',
+        subtextMr: 'सार्वजनिक गुरचरण जमिनी',
+        subtextEn: 'Pasture Grazing Lands',
+        icon: 'LandPlot',
+        countKey: 'c2Count',
+        areaKey: 'c2Area',
+        filterPredicate: (p) => p.metadata?.otherRights?.includes('गुरचरण') || p.metadata?.otherRights?.includes('चराई') || p.metadata?.reservationPurpose?.includes('गुरचरण')
+      },
+      {
+        key: 'noOther',
+        variant: 'purple',
+        titleMr: 'इतर अधिकारात नोंद नसलेल्या',
+        titleEn: 'Not in Other Rights',
+        subtextMr: '७/१२ इतर अधिकार कोरा',
+        subtextEn: 'Missing In Other Rights',
+        icon: 'AlertTriangle',
+        isAlert: true,
+        countKey: 'noOtherCount',
+        areaKey: 'noOtherArea',
+        filterPredicate: (p) => !p.metadata?.otherRights || p.metadata?.otherRights === '-' || p.metadata?.otherRights === '....'
+      },
+      {
+        key: 'del',
+        variant: 'rose',
+        titleMr: 'इतर अधिकारातून नोंद कमी',
+        titleEn: 'Deleted from Other Rights',
+        subtextMr: 'अवैधरित्या वगळलेली नोंद',
+        subtextEn: 'Illegally Deleted Rights',
+        icon: 'ShieldAlert',
+        isAlert: true,
+        countKey: 'delCount',
+        areaKey: 'delArea',
+        filterPredicate: getIllegalDel
+      }
+    ];
+  }
+
+  if (num === 9) {
+    // 9) आदिवासी खातेदारांचे जमिनी (Tribal Khatedar Lands - MLRC Sec 36/36A)
+    return [
+      {
+        key: 'all',
+        variant: 'blue',
+        titleMr: 'एकूण आदिवासी खातेदार जमिनी',
+        titleEn: 'Total Tribal Lands',
+        subtextMr: 'कलम ३६/३६अ संरक्षित जमिनी',
+        subtextEn: 'Sec 36/36A Protected Parcels',
+        icon: 'Users',
+        countKey: 'total712Count',
+        areaKey: 'totalAreaHa',
+        filterPredicate: () => true
+      },
+      {
+        key: 'tribalToNonTribal',
+        variant: 'rose',
+        titleMr: 'आदिवासी ते गैर-आदिवासी हस्तांतरण',
+        titleEn: 'Tribal to Non-Tribal',
+        subtextMr: 'विनापरवानगी अवैध हस्तांतरण',
+        subtextEn: 'Unauthorized Alienation',
+        icon: 'AlertTriangle',
+        isAlert: true,
+        countKey: 'tribalToNonTribalCount',
+        areaKey: 'tribalToNonTribalArea',
+        filterPredicate: (p) => p.auditPoints?.point_39 === 'होय' || p.metadata?.auditPoints?.point_39 === 'होय' || p.metadata?.tribalToNonTribalIllegal || (p.metadata?.flags?.isTribal && (p.forwardCases?.some(fc => fc.violationType === 'TRIBAL_LAND_VIOLATION') || p.metadata?.otherRights?.includes('गैर-आदिवासी')))
+      },
+      {
+        key: 'tribalToTribal',
+        variant: 'amber',
+        titleMr: 'आदिवासी ते आदिवासी हस्तांतरण',
+        titleEn: 'Tribal to Tribal Transfer',
+        subtextMr: 'सक्षम अधिकारी पूर्वपरवानगी तपासणी',
+        subtextEn: 'Prior Sanction Verification',
+        icon: 'Scale',
+        countKey: 'tribalToTribalCount',
+        areaKey: 'tribalToTribalArea',
+        filterPredicate: (p) => p.auditPoints?.point_38 === 'होय' || p.metadata?.auditPoints?.point_38 === 'होय' || (p.metadata?.flags?.isTribal && p.metadata?.otherRights?.includes('हस्तांतरण'))
+      },
+      {
+        key: 'conv',
+        variant: 'purple',
+        titleMr: 'अवैध वर्ग २ चे वर्ग १ रूपांतरण',
+        titleEn: 'Illegal Class 2 to 1',
+        subtextMr: 'सक्षम मंजुरीशिवाय रूपांतरण',
+        subtextEn: 'Unsanctioned Freehold Conversion',
+        icon: 'Layers',
+        isAlert: true,
+        countKey: 'convCount',
+        areaKey: 'convArea',
+        filterPredicate: getIllegalConv
+      },
+      {
+        key: 'del',
+        variant: 'emerald',
+        titleMr: 'इतर अधिकारातून नोंद कमी',
+        titleEn: 'Rights Illegally Deleted',
+        subtextMr: 'आदिवासी हक्क वगळलेली नोंद',
+        subtextEn: 'Protected Rights Deleted',
+        icon: 'ShieldAlert',
+        isAlert: true,
+        countKey: 'delCount',
+        areaKey: 'delArea',
+        filterPredicate: getIllegalDel
+      }
+    ];
+  }
+
+  if (num === 12) {
+    // 12) भुदान व ग्रामदान प्रदान जमिनी (Bhoodan & Gramdan)
+    return [
+      {
+        key: 'all',
+        variant: 'blue',
+        titleMr: 'एकूण भूदान / ग्रामदान जमिनी',
+        titleEn: 'Total Bhoodan Lands',
+        subtextMr: 'भूदान चळवळ प्रदान जमिनी',
+        subtextEn: 'Bhoodan Donated Holdings',
+        icon: 'Landmark',
+        countKey: 'total712Count',
+        areaKey: 'totalAreaHa',
+        filterPredicate: () => true
+      },
+      {
+        key: 'bhudanTransfer',
+        variant: 'rose',
+        titleMr: 'अनधिकृत हस्तांतरण',
+        titleEn: 'Unauthorized Transfers',
+        subtextMr: 'विनापरवानगी विक्री / हस्तांतरण',
+        subtextEn: 'Alienation Without Sanction',
+        icon: 'AlertTriangle',
+        isAlert: true,
+        countKey: 'bhudanTransferCount',
+        areaKey: 'bhudanTransferArea',
+        filterPredicate: (p) => p.metadata?.flags?.isUnauthorizedTransfer || p.metadata?.otherRights?.includes('हस्तांतरण') || p.bhudanRecords?.some(br => br.unauthorizedAlienation)
+      },
+      {
+        key: 'conv',
+        variant: 'amber',
+        titleMr: 'अवैध वर्ग २ चे वर्ग १ रूपांतरण',
+        titleEn: 'Illegal Class 2 to 1',
+        subtextMr: 'भूदान जमिनीचे अवैध वर्ग १',
+        subtextEn: 'Illegal Freehold Conversion',
+        icon: 'Layers',
+        isAlert: true,
+        countKey: 'convCount',
+        areaKey: 'convArea',
+        filterPredicate: getIllegalConv
+      },
+      {
+        key: 'noOther',
+        variant: 'purple',
+        titleMr: 'इतर अधिकारात नोंद नसलेल्या',
+        titleEn: 'Not in Other Rights',
+        subtextMr: 'भूदान मंडळाची नोंद नसणे',
+        subtextEn: 'Bhoodan Board Entry Missing',
+        icon: 'FileText',
+        countKey: 'noOtherCount',
+        areaKey: 'noOtherArea',
+        filterPredicate: (p) => !p.metadata?.otherRights || p.metadata?.otherRights === '-' || p.metadata?.otherRights === '....'
+      },
+      {
+        key: 'del',
+        variant: 'emerald',
+        titleMr: 'इतर अधिकारातून नोंद कमी',
+        titleEn: 'Rights Illegally Deleted',
+        subtextMr: 'अवैधरित्या वगळलेली नोंद',
+        subtextEn: 'Illegally Deleted Rights',
+        icon: 'ShieldAlert',
+        isAlert: true,
+        countKey: 'delCount',
+        areaKey: 'delArea',
+        filterPredicate: getIllegalDel
+      }
+    ];
+  }
+
+  if (num === 18) {
+    // 18) कुळ कायदा कलम ८९ व ८९-अ / ४७ व ४७ (Company Holdings)
+    return [
+      {
+        key: 'all',
+        variant: 'blue',
+        titleMr: 'एकूण कंपनी धारण जमिनी',
+        titleEn: 'Total Company Holdings',
+        subtextMr: 'कलम ८९/८९-अ अंतर्गत जमिनी',
+        subtextEn: 'Sec 89/89-A Industrial Lands',
+        icon: 'Building2',
+        countKey: 'total712Count',
+        areaKey: 'totalAreaHa',
+        filterPredicate: () => true
+      },
+      {
+        key: 'companyPermitted',
+        variant: 'emerald',
+        titleMr: 'परवानगी घेतलेल्या जमिनी',
+        titleEn: 'Company With Permit',
+        subtextMr: 'सक्षम अधिकाऱ्यांची पूर्वमंजुरी',
+        subtextEn: 'Prior Sanction Obtained',
+        icon: 'CheckCircle2',
+        countKey: 'companyPermittedCount',
+        areaKey: 'companyPermittedArea',
+        filterPredicate: (p) => p.auditPoints?.point_42 === 'होय' || p.auditPoints?.point_41 === 'होय' || p.tenancy89ARecords?.[0]?.isGenuineIndustrialUse || p.metadata?.auditPoints?.point_41 === 'होय'
+      },
+      {
+        key: 'companyUnpermitted',
+        variant: 'amber',
+        titleMr: 'विनापरवानगी धारण जमिनी',
+        titleEn: 'Without Sanction',
+        subtextMr: 'सक्षम मंजुरीविना कंपनी खरेदी',
+        subtextEn: 'Company Acquired Without Sanction',
+        icon: 'AlertTriangle',
+        isAlert: true,
+        countKey: 'companyUnpermittedCount',
+        areaKey: 'companyUnpermittedArea',
+        filterPredicate: (p) => (p.auditPoints?.point_42 === 'नाही' || p.metadata?.auditPoints?.point_41 === 'नाही') && (p.currentOwner?.includes('कंपनी') || p.currentOwner?.includes('प्रा.लि') || p.currentOwner?.includes('उद्योग'))
+      },
+      {
+        key: 'usageBreach',
+        variant: 'rose',
+        titleMr: 'वापराबाबत शर्तभंग',
+        titleEn: 'Usage Condition Breach',
+        subtextMr: 'औद्योगिक वापर सुरू न करणे',
+        subtextEn: 'Failure to Utilize for NA Purpose',
+        icon: 'Scale',
+        isAlert: true,
+        countKey: 'usageBreachCount',
+        areaKey: 'usageBreachArea',
+        filterPredicate: (p) => p.metadata?.auditPoints?.point_44 === 'नाही' || p.metadata?.auditPoints?.point_45_usage === 'होय' || (p.forwardCases?.some(fc => fc.violationType === 'UNAUTHORIZED_NA_CONVERSION'))
+      },
+      {
+        key: 'transferBreach',
+        variant: 'purple',
+        titleMr: 'हस्तांतरणाबाबत शर्तभंग',
+        titleEn: 'Transfer Condition Breach',
+        subtextMr: 'विनापरवानगी विक्री / पोटभाडे',
+        subtextEn: 'Unauthorized Subletting/Sale',
+        icon: 'ShieldAlert',
+        isAlert: true,
+        countKey: 'transferBreachCount',
+        areaKey: 'transferBreachArea',
+        filterPredicate: (p) => p.metadata?.auditPoints?.point_45_transfer === 'होय' || p.tenancy89ARecords?.[0]?.unauthorizedTransfer || (p.forwardCases?.some(fc => fc.violationType === 'SHARTBHANG' || fc.violationType === 'TRIBAL_LAND_VIOLATION'))
+      }
+    ];
+  }
+
+  // Booklets 14, 15, 16, 17 (BREACH Type)
+  if (num === 14 || num === 15 || num === 16 || num === 17) {
+    const titles = {
+      14: { totalMr: 'एकूण भूमीधारी हक्क जमिनी', totalEn: 'Total Bhumidhari Lands', breachMr: 'भूमीधारी शर्तभंग', breachEn: 'Bhumidhari Breaches' },
+      15: { totalMr: 'एकूण कमाल मर्यादा सूट जमिनी', totalEn: 'Total Ceiling Exemption Lands', breachMr: 'सूट शर्तभंग जमिनी', breachEn: 'Exemption Breaches' },
+      16: { totalMr: 'एकूण वक्फ बोर्ड जमिनी', totalEn: 'Total Waqf Board Lands', breachMr: 'वक्फ कायदा शर्तभंग', breachEn: 'Waqf Act Breaches' },
+      17: { totalMr: 'एकूण भूसंपादन अधिग्रहित / राखीव', totalEn: 'Total Land Acquisition Lands', breachMr: 'संपादन शर्तभंग / अवैध व्यवहार', breachEn: 'Acquisition Breaches' }
+    }[num];
+
+    return [
+      {
+        key: 'all',
+        variant: 'blue',
+        titleMr: titles.totalMr,
+        titleEn: titles.totalEn,
+        subtextMr: 'वैधानिक नोंदवही अभिलेख',
+        subtextEn: 'Statutory Register Records',
+        icon: 'Landmark',
+        countKey: 'total712Count',
+        areaKey: 'totalAreaHa',
+        filterPredicate: () => true
+      },
+      {
+        key: 'class2',
+        variant: 'indigo',
+        titleMr: 'भोगवटदार वर्ग २ जमिनी',
+        titleEn: 'Class-2 Restricted',
+        subtextMr: 'अविभाज्य शर्तीवरील धारिका',
+        subtextEn: 'Restricted Inalienable Holdings',
+        icon: 'Layers',
+        countKey: 'c2Count',
+        areaKey: 'c2Area',
+        filterPredicate: isClass2
+      },
+      {
+        key: 'conv',
+        variant: 'purple',
+        titleMr: 'अवैध वर्ग २ चे वर्ग १ रूपांतरण',
+        titleEn: 'Illegal Class 2 to 1',
+        subtextMr: 'नजराणा/मंजुरीविना रूपांतरण',
+        subtextEn: 'Unsanctioned Freehold Conversion',
+        icon: 'Scale',
+        isAlert: true,
+        countKey: 'convCount',
+        areaKey: 'convArea',
+        filterPredicate: getIllegalConv
+      },
+      {
+        key: 'shart',
+        variant: 'rose',
+        titleMr: titles.breachMr,
+        titleEn: titles.breachEn,
+        subtextMr: 'मौका चौकशीअंती शर्तभंग',
+        subtextEn: 'Spot Inquiry Condition Breach',
+        icon: 'AlertTriangle',
+        isAlert: true,
+        countKey: 'shartCount',
+        areaKey: 'shartArea',
+        filterPredicate: getShartbhang
+      },
+      {
+        key: 'del',
+        variant: 'emerald',
+        titleMr: 'इतर अधिकारातून नोंद कमी',
+        titleEn: 'Rights Illegally Deleted',
+        subtextMr: 'अवैधरित्या वगळलेली नोंद',
+        subtextEn: 'Illegally Deleted Rights',
+        icon: 'ShieldAlert',
+        isAlert: true,
+        countKey: 'delCount',
+        areaKey: 'delArea',
+        filterPredicate: getIllegalDel
+      }
+    ];
+  }
+
+  // Standard Booklets: 2, 3, 4, 5, 6, 8, 10, 11, 13
+  const bookletSpecificTitles = {
+    2: { totalMr: 'एकूण कुळ वहिवाट जमिनी', totalEn: 'Total Tenancy Parcels', breachMr: 'कुळ वहिवाट शर्तभंग' },
+    3: { totalMr: 'एकूण इनाम व वतन जमिनी', totalEn: 'Total Inam/Watan Lands', breachMr: 'इनाम वतन शर्तभंग' },
+    4: { totalMr: 'एकूण भूमिहीन प्रदान जमिनी', totalEn: 'Total Landless Grants', breachMr: 'भूमिहीन वाटप शर्तभंग' },
+    5: { totalMr: 'एकूण संस्था / उद्योग प्रदान जमिनी', totalEn: 'Total Institutional Grants', breachMr: 'वापरात बदल व शर्तभंग' },
+    6: { totalMr: 'एकूण कमाल धारणा वाटप जमिनी', totalEn: 'Total Ceiling Allotments', breachMr: 'सिलिंग वाटप शर्तभंग' },
+    8: { totalMr: 'एकूण देवस्थान इनाम जमिनी', totalEn: 'Total Devasthan Inam Lands', breachMr: 'देवस्थान नोंद वगळणे व शर्तभंग' },
+    10: { totalMr: 'एकूण प्रकल्पग्रस्त प्रदान जमिनी', totalEn: 'Total Rehabilitation Grants', breachMr: 'पुनर्वसन वाटप शर्तभंग' },
+    11: { totalMr: 'एकूण शासकीय भाडेपट्टा जमिनी', totalEn: 'Total Leased Govt Lands', breachMr: 'भाडेपट्टा कालावधी व शर्तभंग' },
+    13: { totalMr: 'एकूण खाजगी वने / कमाल धारणा चौकशी', totalEn: 'Total Forest / Ceiling Inquiries', breachMr: 'प्रलंबित चौकशी व शर्तभंग' }
+  }[num] || { totalMr: 'एकूण तपासणी जमिनी', totalEn: 'Total Audited Parcels', breachMr: 'शर्तभंग झालेल्या जमिनी' };
+
+  return [
+    {
+      key: 'all',
+      variant: 'blue',
+      titleMr: bookletSpecificTitles.totalMr,
+      titleEn: bookletSpecificTitles.totalEn,
+      subtextMr: 'पुस्तिका नोंदवही अभिलेख',
+      subtextEn: 'Booklet Register Records',
+      icon: 'Landmark',
+      countKey: 'total712Count',
+      areaKey: 'totalAreaHa',
+      filterPredicate: () => true
+    },
+    {
+      key: 'class2',
+      variant: 'indigo',
+      titleMr: 'भोगवटदार वर्ग २ जमिनी',
+      titleEn: 'Class-2 Restricted',
+      subtextMr: 'अविभाज्य शर्तीवरील धारिका',
+      subtextEn: 'Restricted Inalienable Holdings',
+      icon: 'Layers',
+      countKey: 'c2Count',
+      areaKey: 'c2Area',
+      filterPredicate: isClass2
+    },
+    {
+      key: 'conv',
+      variant: 'purple',
+      titleMr: 'अवैध वर्ग २ चे वर्ग १ रूपांतरण',
+      titleEn: 'Illegal Class 2 to 1',
+      subtextMr: 'सक्षम मंजुरीविना रूपांतरण',
+      subtextEn: 'Unsanctioned Freehold Conversion',
+      icon: 'Scale',
+      isAlert: true,
+      countKey: 'convCount',
+      areaKey: 'convArea',
+      filterPredicate: getIllegalConv
+    },
+    {
+      key: 'shart',
+      variant: 'rose',
+      titleMr: bookletSpecificTitles.breachMr,
+      titleEn: 'Condition Breaches',
+      subtextMr: 'चौकशीअंती आढळलेला शर्तभंग',
+      subtextEn: 'Inquiry Condition Breaches',
+      icon: 'AlertTriangle',
+      isAlert: true,
+      countKey: 'delCount',
+      areaKey: 'delArea',
+      filterPredicate: (p) => getShartbhang(p) || getIllegalDel(p)
+    },
+    {
+      key: 'noOther',
+      variant: 'amber',
+      titleMr: 'इतर अधिकारात नोंद नसलेल्या',
+      titleEn: 'Not in Other Rights',
+      subtextMr: 'इतर अधिकार रकाना कोरा',
+      subtextEn: 'Missing In Other Rights',
+      icon: 'FileText',
+      countKey: 'noOtherCount',
+      areaKey: 'noOtherArea',
+      filterPredicate: getOtherRightsMissing
+    }
+  ];
 }

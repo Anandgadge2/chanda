@@ -104,20 +104,23 @@ export default function LandTypeDonutChart({ data = [] }) {
 
   return (
     <div className="bg-white border border-slate-200/90 rounded-2xl p-4 sm:p-5 shadow-xs flex flex-col justify-between hover:border-slate-300/80 transition-all">
-      {/* Header with Switchers */}
-      <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2 border-b border-slate-100 pb-3">
+      {/* Redesigned 2-Tier Header: Full Title Width + Clean Dedicated Toolbar */}
+      <div className="flex flex-col gap-2.5 border-b border-slate-100 pb-3">
+        {/* Row 1: Icon, Title & Badge with 100% full breathing room */}
         <div className="flex items-center gap-2.5 min-w-0">
-          <div className="w-8 h-8 rounded-xl bg-emerald-50 border border-emerald-200/80 flex items-center justify-center text-emerald-700 shrink-0 shadow-2xs">
-            <Layers className="w-4 h-4" />
+          <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-emerald-50 border border-emerald-200/80 flex items-center justify-center text-emerald-700 shrink-0 shadow-2xs">
+            <Layers className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
           </div>
-          <div className="min-w-0">
-            <h3 className="text-xs sm:text-sm font-bold text-slate-900 flex items-center gap-2 truncate">
-              <span>{isMarathi ? 'जमीन प्रकार व धारणाधिकार' : 'Land Classification & Tenure'}</span>
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200 font-bold shrink-0">
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h3 className="text-xs sm:text-sm font-bold text-slate-900 tracking-tight leading-snug">
+                <span>{isMarathi ? 'जमीन प्रकार व धारणाधिकार' : 'Land Classification & Tenure'}</span>
+              </h3>
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/90 font-bold shrink-0">
                 {isMarathi ? 'MLRC वर्ग' : 'MLRC Class'}
               </span>
-            </h3>
-            <p className="text-[11px] text-slate-500 font-medium truncate mt-0.5">
+            </div>
+            <p className="text-[11px] text-slate-500 font-medium mt-0.5 truncate">
               {isMarathi
                 ? 'भोगवटादार वर्ग १, वर्ग २ व शासकीय भूमी विश्लेषण'
                 : 'Occupant Class-1, Class-2 & Government Land Analytics'}
@@ -125,27 +128,14 @@ export default function LandTypeDonutChart({ data = [] }) {
           </div>
         </div>
 
-        {/* View Switchers: Chart Style (Pie / Donut) + Metric */}
-        <div className="flex items-center gap-1.5 self-start sm:self-auto shrink-0 flex-wrap">
+        {/* Row 2: Dedicated Control Toolbar (Chart Style + Metric Switcher) */}
+        <div className="flex items-center justify-between gap-2 flex-wrap pt-1 border-t border-slate-100/80">
           {/* Chart Style Switcher */}
           <div
             className="inline-flex p-0.5 bg-slate-100 rounded-lg border border-slate-200/80"
             role="group"
             aria-label={isMarathi ? 'आलेख प्रकार' : 'Chart Style'}
           >
-            <button
-              type="button"
-              onClick={() => setChartType('pie')}
-              className={`px-2 py-1 text-[11px] font-bold rounded-md transition cursor-pointer flex items-center gap-1 ${
-                chartType === 'pie'
-                  ? 'bg-white text-emerald-900 shadow-2xs'
-                  : 'text-slate-500 hover:text-slate-900'
-              }`}
-              title={isMarathi ? 'पाई आलेख' : 'Pie Chart'}
-            >
-              <PieIcon className="w-3.5 h-3.5" />
-              <span>{isMarathi ? 'पाई' : 'Pie'}</span>
-            </button>
             <button
               type="button"
               onClick={() => setChartType('donut')}
@@ -159,6 +149,19 @@ export default function LandTypeDonutChart({ data = [] }) {
               <CircleDot className="w-3.5 h-3.5" />
               <span>{isMarathi ? 'डोनट' : 'Donut'}</span>
             </button>
+            <button
+              type="button"
+              onClick={() => setChartType('pie')}
+              className={`px-2 py-1 text-[11px] font-bold rounded-md transition cursor-pointer flex items-center gap-1 ${
+                chartType === 'pie'
+                  ? 'bg-white text-emerald-900 shadow-2xs'
+                  : 'text-slate-500 hover:text-slate-900'
+              }`}
+              title={isMarathi ? 'पाई आलेख' : 'Pie Chart'}
+            >
+              <PieIcon className="w-3.5 h-3.5" />
+              <span>{isMarathi ? 'पाई' : 'Pie'}</span>
+            </button>
           </div>
 
           {/* Metric Switcher */}
@@ -170,7 +173,7 @@ export default function LandTypeDonutChart({ data = [] }) {
             <button
               type="button"
               onClick={() => setMetricType('area')}
-              className={`px-2.5 py-1 text-[11px] font-bold rounded-md transition cursor-pointer ${
+              className={`px-2.5 py-1 text-[10px] font-bold rounded-md transition cursor-pointer ${
                 metricType === 'area'
                   ? 'bg-white text-slate-900 shadow-2xs'
                   : 'text-slate-600 hover:text-slate-900'
@@ -181,7 +184,7 @@ export default function LandTypeDonutChart({ data = [] }) {
             <button
               type="button"
               onClick={() => setMetricType('count')}
-              className={`px-2.5 py-1 text-[11px] font-bold rounded-md transition cursor-pointer ${
+              className={`px-2.5 py-1 text-[10px] font-bold rounded-md transition cursor-pointer ${
                 metricType === 'count'
                   ? 'bg-white text-slate-900 shadow-2xs'
                   : 'text-slate-600 hover:text-slate-900'

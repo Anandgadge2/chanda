@@ -118,6 +118,9 @@ export default function MetricCard({
   value,
   subtext,
   subtextEn,
+  area,
+  areaEn,
+  unit,
   icon: Icon,
   isActive = false,
   onClick,
@@ -125,6 +128,7 @@ export default function MetricCard({
   actionTitleMr,
   actionTitleEn,
   compact = false,
+  loading = false,
 }) {
   const { isMarathi } = useTranslation();
   const theme = KPI_VARIANTS[variant] || KPI_VARIANTS.blue;
@@ -132,6 +136,18 @@ export default function MetricCard({
   const displayTitle = isMarathi ? titleMr : (titleEn || titleMr);
   const displaySubtext = isMarathi ? subtext : (subtextEn || subtext);
   const displayActionTitle = isMarathi ? actionTitleMr : (actionTitleEn || actionTitleMr);
+
+  // Separate Area and Subtext intelligently if passed together with ' • '
+  let displayArea = isMarathi ? (area || '') : (areaEn || area || '');
+  let displaySub = displaySubtext;
+
+  if (!displayArea && typeof displaySubtext === 'string' && displaySubtext.includes(' • ')) {
+    const parts = displaySubtext.split(' • ');
+    if (parts[0].includes('Ha') || parts[0].includes('हेक्टर') || parts[0].includes('क्षेत्रफळ') || parts[0].includes('Area')) {
+      displayArea = parts[0];
+      displaySub = parts.slice(1).join(' • ');
+    }
+  }
 
   const isInteractive = typeof onClick === 'function';
 
@@ -151,81 +167,124 @@ export default function MetricCard({
       onClick={isInteractive ? onClick : undefined}
       onKeyDown={handleKeyDown}
       className={clsx(
-        `group relative flex flex-col justify-between overflow-hidden rounded-2xl ${compact ? 'p-3.5 sm:p-4' : 'p-4 sm:p-5'} text-left select-none text-white border`,
+        `group relative flex flex-col justify-between overflow-hidden rounded-2xl ${compact ? 'p-2.5 sm:p-3' : 'p-4 sm:p-5'} text-left select-none text-white border min-w-0`,
         'transition-all duration-200 ease-[cubic-bezier(0.25,1,0.5,1)] motion-reduce:transition-none',
         theme.bg,
         theme.border,
         theme.shadow,
         theme.hoverBg,
         isActive ? theme.activeRing : '',
-        isInteractive && 'cursor-pointer hover:-translate-y-1 active:scale-[0.985] focus:outline-hidden focus-visible:ring-2 focus-visible:ring-white'
+        isInteractive && 'cursor-pointer hover:-translate-y-0.5 active:scale-[0.985] focus:outline-hidden focus-visible:ring-2 focus-visible:ring-white'
       )}
     >
       {/* Subtle top specular sheen */}
       <div className="absolute top-0 inset-x-0 h-px bg-white/25 pointer-events-none" />
 
       {/* Card Header: Label + Active Indicator or Action Icon */}
-      <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-1.5 min-w-0">
+      <div className="flex items-start justify-between gap-1.5 min-w-0">
+        <div className="flex items-start gap-1.5 min-w-0 flex-1">
           <span
             className={clsx(
-              'text-[11px] sm:text-xs font-semibold tracking-tight transition-colors line-clamp-1',
+              'text-[11px] sm:text-xs font-bold tracking-tight transition-colors line-clamp-2 min-h-[1.85rem] sm:min-h-[2rem] leading-snug break-words',
               theme.title
             )}
+            title={displayTitle}
           >
             {displayTitle}
           </span>
           {isActive && (
-            <span className="relative flex h-2 w-2 shrink-0">
+            <span className="relative flex h-2 w-2 shrink-0 mt-0.5">
               <span className={clsx('animate-ping absolute inline-flex h-full w-full rounded-full opacity-75', theme.pulse)} />
               <span className={clsx('relative inline-flex rounded-full h-2 w-2', theme.pulse)} />
             </span>
           )}
         </div>
 
-        <div className="flex items-center gap-1.5 shrink-0">
+        <div className="flex items-center gap-1 shrink-0 ml-1">
           {actionHref && (
             <Link
               href={actionHref}
               onClick={(e) => e.stopPropagation()}
               title={displayActionTitle || (isMarathi ? 'नोंदवहीत उघडा' : 'Open in Register')}
               className={clsx(
-                'w-6 h-6 rounded-lg border flex items-center justify-center transition-all duration-200',
+                'w-5 h-5 rounded-md border flex items-center justify-center transition-all duration-200',
                 'opacity-0 group-hover:opacity-100 hover:scale-105 active:scale-95',
                 theme.actionBtn
               )}
             >
-              <ArrowUpRight className="w-3.5 h-3.5" />
+              <ArrowUpRight className="w-3 h-3" />
             </Link>
           )}
 
           {Icon && (
             <div
               className={clsx(
-                'w-7 h-7 sm:w-8 sm:h-8 rounded-xl border flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:scale-105',
+                compact
+                  ? 'w-6 h-6 rounded-lg border flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:scale-105'
+                  : 'w-7 h-7 sm:w-8 sm:h-8 rounded-xl border flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:scale-105',
                 theme.badge
               )}
             >
-              <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" />
+              <Icon className={compact ? 'w-3 h-3 text-white' : 'w-3.5 h-3.5 sm:w-4 sm:h-4 text-white'} />
             </div>
           )}
         </div>
       </div>
 
-      {/* Card Body: Big Solid Value + Numerals */}
-      <div className={`flex items-baseline justify-between gap-1.5 flex-wrap sm:flex-nowrap ${compact ? "mt-2 sm:mt-2.5" : "mt-3 sm:mt-3.5"}`}>
-        <p className={`font-black tracking-tight font-mono tabular-nums leading-none text-white ${compact ? "text-xl sm:text-2xl" : "text-2xl sm:text-3xl font-extrabold"}`}>
-          {value}
-        </p>
-        {displaySubtext && (
-          <span
-            className={clsx(
-              'text-[10px] sm:text-[11px] font-medium truncate leading-tight transition-colors',
-              theme.subtext
+      {/* Card Body: Big Solid Value + Dedicated Area Row + Subtext */}
+      <div className={`flex flex-col justify-center ${compact ? 'mt-1.5' : 'mt-2.5'} min-w-0`}>
+        {loading ? (
+          <div className="py-0.5 space-y-1.5 min-w-0">
+            {/* 3-Dot Staggered Bounce Loader for Value */}
+            <div className="flex items-center gap-1.5 h-6">
+              <span className="w-2 h-2 rounded-full bg-white animate-bounce [animation-delay:-0.3s]" />
+              <span className="w-2 h-2 rounded-full bg-white animate-bounce [animation-delay:-0.15s]" />
+              <span className="w-2 h-2 rounded-full bg-white animate-bounce" />
+              <span className="text-[10px] font-medium text-white/60 ml-1 font-mono">{isMarathi ? 'लोड होत आहे...' : 'Loading...'}</span>
+            </div>
+            {/* Pulsing Skeleton Placeholders for Area Badge & Subtext */}
+            <div className="flex items-center gap-2">
+              <div className="h-4 w-20 bg-white/20 rounded-md animate-pulse" />
+              <div className="h-2.5 w-16 bg-white/15 rounded-md animate-pulse" />
+            </div>
+          </div>
+        ) : (
+          <>
+            {/* Row 1: Primary Count & Unit (Full width available, zero collision) */}
+            <div className="flex items-baseline gap-1 min-w-0">
+              <p className={`font-black tracking-tight font-mono tabular-nums leading-none text-white ${compact ? 'text-xl sm:text-2xl' : 'text-2xl sm:text-3xl'}`}>
+                {typeof value === 'number' ? value.toLocaleString('en-IN') : value}
+              </p>
+              {unit && (
+                <span className="text-[10px] font-semibold text-white/70 uppercase tracking-wide">
+                  {unit}
+                </span>
+              )}
+            </div>
+
+            {/* Row 2: Dedicated Area Badge (Placed on its own line, zero collision with numbers) */}
+            {displayArea && (
+              <div className="mt-1 flex items-center">
+                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] sm:text-[10.5px] font-bold font-mono tracking-tight bg-black/25 text-white/95 border border-white/20 shadow-2xs shrink-0">
+                  <span className="text-[9px] font-normal text-white/60">{isMarathi ? 'क्षेत्र:' : 'Area:'}</span>
+                  <span>{displayArea}</span>
+                </span>
+              </div>
             )}
-          >
-            {displaySubtext}
-          </span>
+
+            {/* Row 3: Statutory Description / Subtext */}
+            {displaySub && (
+              <p
+                className={clsx(
+                  'mt-1 text-[10px] sm:text-[10.5px] font-medium leading-tight line-clamp-1 transition-colors',
+                  theme.subtext
+                )}
+                title={displaySub}
+              >
+                {displaySub}
+              </p>
+            )}
+          </>
         )}
       </div>
 
@@ -233,17 +292,27 @@ export default function MetricCard({
       {isInteractive && (
         <div
           className={clsx(
-            'mt-2.5 pt-2 border-t flex items-center justify-between text-[10px] font-medium transition-colors',
+            `${compact ? 'mt-1.5 pt-1.5 text-[9.5px]' : 'mt-2.5 pt-2 text-[10px]'} border-t flex items-center justify-between font-medium transition-colors min-w-0`,
             theme.footer
           )}
         >
-          <span className="truncate">
-            {isActive
-              ? (isMarathi ? '● फोकस सक्रिय (रीसेटसाठी क्लिक करा)' : '● Focus Active (Click to reset)')
-              : (isMarathi ? 'डेटा पाहण्यासाठी क्लिक करा' : 'Click to view analytics')}
+          <span className="leading-tight font-semibold flex items-center gap-1 min-w-0">
+            {loading ? (
+              <span className="text-white/70 flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-white/70 animate-ping shrink-0" />
+                <span>{isMarathi ? 'डेटा लोड होत आहे' : 'Fetching data...'}</span>
+              </span>
+            ) : isActive ? (
+              <>
+                <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse shrink-0" />
+                <span className="truncate">{isMarathi ? 'सक्रिय (रीसेट)' : 'Active (Reset)'}</span>
+              </>
+            ) : (
+              <span className="truncate">{isMarathi ? 'नोंदी फिल्टर करा' : 'Click to filter'}</span>
+            )}
           </span>
-          {actionHref && (
-            <span className="font-semibold flex items-center gap-0.5 opacity-80 group-hover:opacity-100 transition-opacity">
+          {actionHref && !loading && (
+            <span className="font-semibold flex items-center gap-0.5 opacity-80 group-hover:opacity-100 transition-opacity shrink-0 ml-1">
               <span>{isMarathi ? 'नोंदवही' : 'Register'}</span>
               <span className="transition-transform duration-150 group-hover:translate-x-0.5">→</span>
             </span>

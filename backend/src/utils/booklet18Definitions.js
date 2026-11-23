@@ -202,6 +202,8 @@ export function getDetailedColumnsForBooklet(catId) {
   const getIllegalConv = (p, pt) => pt[36] === 'होय' || p.metadata?.flags?.isIllegalConversion || (p.tenureClass === 'BHOGVATDAR_CLASS_1' && p.metadata?.flags?.isShartbhang) ? 'होय' : 'नाही';
   const getOtherRightsNoted = (p, pt) => pt[40] === 'होय' || (p.metadata?.otherRights && p.metadata.otherRights !== '-' && p.metadata.otherRights !== '....') ? 'होय' : 'नाही';
   const getIllegalDel = (p, pt) => pt[41] === 'होय' || p.metadata?.flags?.isIllegalDeletion || p.forwardCases?.some(fc => fc.violationType === 'GOVERNMENT_NAME_MISSING') ? 'होय' : 'नाही';
+  const getTribalToTribal = (p, pt) => pt[38] === 'होय' || p.metadata?.auditPoints?.point_38 === 'होय' || p.metadata?.tribalToTribal || (p.metadata?.flags?.isTribal && p.metadata?.otherRights?.includes('हस्तांतरण')) ? 'होय' : 'नाही';
+  const getTribalToNonTribal = (p, pt) => pt[39] === 'होय' || p.metadata?.auditPoints?.point_39 === 'होय' || p.metadata?.tribalToNonTribalIllegal || (p.metadata?.flags?.isTribal && (p.forwardCases?.some(fc => fc.violationType === 'TRIBAL_LAND_VIOLATION') || p.metadata?.otherRights?.includes('गैर-आदिवासी'))) ? 'होय' : 'नाही';
 
   if (num === 1) {
     // 1) सरकारी जमीन
@@ -237,7 +239,7 @@ export function getDetailedColumnsForBooklet(catId) {
   }
 
   if (num === 9) {
-    // 9) आदिवासी खातेदारांचे मालकीच्या जमिनी
+    // 9) आदिवासी खातेदारांचे मालकीच्या जमिनी (Strictly conforms to official Booklet 9 format)
     return [
       { key: 'srNo', label: 'अ.क्र.', width: 6, align: 'center', getValue: getSr },
       { key: 'village', label: 'गावाचे नाव', width: 22, align: 'left', getValue: getVillage },
@@ -245,11 +247,11 @@ export function getDetailedColumnsForBooklet(catId) {
       { key: 'area', label: 'क्षेत्र (हे.आर.)', width: 14, align: 'right', isArea: true, getValue: getArea },
       { key: 'owner', label: 'भोगवटदाराचे नाव', width: 28, align: 'left', isOwner: true, getValue: getOwner },
       { key: 'tenureClass', label: 'भोगवट्दार वर्ग', width: 16, align: 'center', getValue: getTenureClass },
-      { key: 'tribalKhatedarName', label: 'आदिवासी खातेदाराचे नाव', width: 24, align: 'left', getValue: (p) => (p.metadata?.flags?.isTribal || p.metadata?.tribalName) ? (p.metadata?.tribalName || p.currentOwner || '-') : '-' },
-      { key: 'shartbhang', label: 'शर्तभंग झालेला आहे काय?', width: 18, align: 'center', isAlert: true, getValue: getShartbhang },
+      { key: 'illegalConv', label: 'अवैधरित्या वर्ग 2 मधून वर्ग 1 मध्ये रूपांतरण केलेले आहे काय?', width: 24, align: 'center', isAlert: true, getValue: getIllegalConv },
       { key: 'otherRightsNoted', label: 'इतर अधिकारात नोंद घेतलेली आहे काय?', width: 20, align: 'center', getValue: getOtherRightsNoted },
       { key: 'illegalDel', label: 'अवैधरित्या इतर अधिकारातील नोंदी कमी केलेल्या आहे काय?', width: 22, align: 'center', isAlert: true, getValue: getIllegalDel },
-      { key: 'tribalToNonTribal', label: 'अवैधरित्या आदिवासी ते गैर- आदिवासी हस्तांतरण झालेले आहे काय?', width: 26, align: 'center', isAlert: true, getValue: (p, pt) => pt[39] === 'होय' || p.metadata?.tribalToNonTribalIllegal || (p.metadata?.flags?.isTribal && (p.forwardCases?.some(fc => fc.violationType === 'TRIBAL_LAND_VIOLATION') || p.metadata?.otherRights?.includes('गैर-आदिवासी'))) ? 'होय' : 'नाही' }
+      { key: 'tribalToTribal', label: 'अवैधरित्या आदिवासी ते आदिवासी हस्तांतरण झालेले आहे काय?', width: 24, align: 'center', isAlert: true, getValue: getTribalToTribal },
+      { key: 'tribalToNonTribal', label: 'अवैधरित्या आदिवासी ते गैर- आदिवासी हस्तांतरण झालेले आहे काय?', width: 26, align: 'center', isAlert: true, getValue: getTribalToNonTribal }
     ];
   }
 

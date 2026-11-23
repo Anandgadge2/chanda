@@ -148,24 +148,25 @@ export default function EnforcementDisposalDonut({
 
   return (
     <div className="bg-white border border-slate-200/90 rounded-2xl p-4 sm:p-5 shadow-xs flex flex-col justify-between hover:border-slate-300/80 transition-all">
-      {/* Header with Switchers */}
-      <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2 border-b border-slate-100 pb-3">
+      {/* Redesigned 2-Tier Header: Full Title Width + Clean Dedicated Toolbar */}
+      <div className="flex flex-col gap-2.5 border-b border-slate-100 pb-3">
+        {/* Row 1: Icon, Title & Badge with 100% full breathing room */}
         <div className="flex items-center gap-2.5 min-w-0">
-          <div className="w-8 h-8 rounded-xl bg-rose-50 border border-rose-200/80 flex items-center justify-center text-rose-700 shrink-0 shadow-2xs">
-            <ShieldAlert className="w-4 h-4" />
+          <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-rose-50 border border-rose-200/90 flex items-center justify-center text-rose-700 shrink-0 shadow-2xs">
+            <ShieldAlert className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
           </div>
-          <div className="min-w-0">
-            <h3 className="text-xs sm:text-sm font-bold text-slate-900 flex items-center gap-2">
-              <span>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h3 className="text-xs sm:text-sm font-bold text-slate-900 tracking-tight leading-snug">
                 {viewMode === 'categories'
                   ? (isMarathi ? 'शर्तभंग व महसूल उल्लंघन प्रकार' : 'Breach & Revenue Violation Categories')
                   : (isMarathi ? 'अर्ध-न्यायिक प्रकरणे व स्थिती' : 'Quasi-Judicial Cases & Status')}
-              </span>
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200 font-bold shrink-0">
+              </h3>
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200/90 font-bold shrink-0">
                 {isMarathi ? 'MLRC उल्लंघन' : 'MLRC Violations'}
               </span>
-            </h3>
-            <p className="text-[11px] text-slate-500 font-medium mt-0.5">
+            </div>
+            <p className="text-[11px] text-slate-500 font-medium mt-0.5 truncate">
               {viewMode === 'categories'
                 ? (isMarathi
                     ? 'MLRC कलम ३६, ३६अ, ५०-५४ व भोगवटादार वर्ग-२ शर्तभंग'
@@ -177,43 +178,9 @@ export default function EnforcementDisposalDonut({
           </div>
         </div>
 
-        {/* View Switchers: Chart Style (Donut / Pie) + Mode + Metric Toggle */}
-        <div className="flex items-center gap-1.5 self-start sm:self-auto shrink-0 flex-wrap">
-          {/* Chart Style Switcher */}
-          <div
-            className="inline-flex p-0.5 bg-slate-100 rounded-lg border border-slate-200/80"
-            role="group"
-            aria-label={isMarathi ? 'आलेख प्रकार' : 'Chart Style'}
-          >
-            <button
-              type="button"
-              onClick={() => setChartType('donut')}
-              className={`px-2 py-1 text-[11px] font-bold rounded-md transition cursor-pointer flex items-center gap-1 ${
-                chartType === 'donut'
-                  ? 'bg-white text-rose-900 shadow-2xs'
-                  : 'text-slate-500 hover:text-slate-900'
-              }`}
-              title={isMarathi ? 'डोनट आलेख' : 'Donut Chart'}
-            >
-              <CircleDot className="w-3.5 h-3.5" />
-              <span>{isMarathi ? 'डोनट' : 'Donut'}</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setChartType('pie')}
-              className={`px-2 py-1 text-[11px] font-bold rounded-md transition cursor-pointer flex items-center gap-1 ${
-                chartType === 'pie'
-                  ? 'bg-white text-rose-900 shadow-2xs'
-                  : 'text-slate-500 hover:text-slate-900'
-              }`}
-              title={isMarathi ? 'पाई आलेख' : 'Pie Chart'}
-            >
-              <PieIcon className="w-3.5 h-3.5" />
-              <span>{isMarathi ? 'पाई' : 'Pie'}</span>
-            </button>
-          </div>
-
-          {/* Mode Switcher */}
+        {/* Row 2: Dedicated Control Toolbar (Mode Switcher + Chart Type + Metric Switcher) */}
+        <div className="flex items-center justify-between gap-2 flex-wrap pt-1 border-t border-slate-100/80">
+          {/* Primary View Mode Tabs (Categories / Pipeline) */}
           <div className="inline-flex p-0.5 bg-slate-100 rounded-lg border border-slate-200/80" role="group" aria-label={isMarathi ? 'दृश्य प्रकार' : 'View Mode'}>
             <button
               type="button"
@@ -245,42 +212,79 @@ export default function EnforcementDisposalDonut({
             </button>
           </div>
 
-          {/* Metric Switcher (only for categories view) */}
-          {viewMode === 'categories' && (
-            <div className="inline-flex p-0.5 bg-slate-100 rounded-lg border border-slate-200/80" role="group" aria-label={isMarathi ? 'मापन पद्धती' : 'Metric Switcher'}>
+          {/* Secondary Controls: Chart Style (Donut / Pie) + Metric Switcher */}
+          <div className="flex items-center gap-1.5 flex-wrap">
+            {/* Chart Style Switcher */}
+            <div
+              className="inline-flex p-0.5 bg-slate-100 rounded-lg border border-slate-200/80"
+              role="group"
+              aria-label={isMarathi ? 'आलेख प्रकार' : 'Chart Style'}
+            >
               <button
                 type="button"
-                onClick={() => setMetricType('count')}
-                className={`px-2 py-1 text-[10px] font-bold rounded-md transition cursor-pointer ${
-                  metricType === 'count'
-                    ? 'bg-white text-slate-900 shadow-2xs'
-                    : 'text-slate-500 hover:text-slate-800'
+                onClick={() => setChartType('donut')}
+                className={`px-2 py-1 text-[11px] font-bold rounded-md transition cursor-pointer flex items-center gap-1 ${
+                  chartType === 'donut'
+                    ? 'bg-white text-rose-900 shadow-2xs'
+                    : 'text-slate-500 hover:text-slate-900'
                 }`}
-                title={isMarathi ? 'प्रकरण संख्या' : 'Case Count'}
+                title={isMarathi ? 'डोनट आलेख' : 'Donut Chart'}
               >
-                {isMarathi ? 'संख्या' : 'Count'}
+                <CircleDot className="w-3.5 h-3.5" />
+                <span>{isMarathi ? 'डोनट' : 'Donut'}</span>
               </button>
               <button
                 type="button"
-                onClick={() => setMetricType('area')}
-                className={`px-2 py-1 text-[10px] font-bold rounded-md transition cursor-pointer ${
-                  metricType === 'area'
-                    ? 'bg-white text-slate-900 shadow-2xs'
-                    : 'text-slate-500 hover:text-slate-800'
+                onClick={() => setChartType('pie')}
+                className={`px-2 py-1 text-[11px] font-bold rounded-md transition cursor-pointer flex items-center gap-1 ${
+                  chartType === 'pie'
+                    ? 'bg-white text-rose-900 shadow-2xs'
+                    : 'text-slate-500 hover:text-slate-900'
                 }`}
-                title={isMarathi ? 'क्षेत्र हेक्टर' : 'Area (Ha)'}
+                title={isMarathi ? 'पाई आलेख' : 'Pie Chart'}
               >
-                {isMarathi ? 'क्षेत्र' : 'Area'}
+                <PieIcon className="w-3.5 h-3.5" />
+                <span>{isMarathi ? 'पाई' : 'Pie'}</span>
               </button>
             </div>
-          )}
+
+            {/* Metric Switcher (only for categories view) */}
+            {viewMode === 'categories' && (
+              <div className="inline-flex p-0.5 bg-slate-100 rounded-lg border border-slate-200/80" role="group" aria-label={isMarathi ? 'मापन पद्धती' : 'Metric Switcher'}>
+                <button
+                  type="button"
+                  onClick={() => setMetricType('count')}
+                  className={`px-2 py-1 text-[10px] font-bold rounded-md transition cursor-pointer ${
+                    metricType === 'count'
+                      ? 'bg-white text-slate-900 shadow-2xs'
+                      : 'text-slate-500 hover:text-slate-800'
+                  }`}
+                  title={isMarathi ? 'प्रकरण संख्या' : 'Case Count'}
+                >
+                  {isMarathi ? 'संख्या' : 'Count'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setMetricType('area')}
+                  className={`px-2 py-1 text-[10px] font-bold rounded-md transition cursor-pointer ${
+                    metricType === 'area'
+                      ? 'bg-white text-slate-900 shadow-2xs'
+                      : 'text-slate-500 hover:text-slate-800'
+                  }`}
+                  title={isMarathi ? 'क्षेत्र हेक्टर' : 'Area (Ha)'}
+                >
+                  {isMarathi ? 'क्षेत्र' : 'Area'}
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
       {/* Side-by-Side Chart & Metric List */}
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-3 sm:gap-4 items-center flex-1 my-auto py-1">
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-3 sm:gap-4 items-center flex-1 my-auto py-2">
         {/* Left: Prominent Donut or Pie Visual */}
-        <div className="md:col-span-5 relative h-60 sm:h-64 flex flex-col items-center justify-center">
+        <div className="md:col-span-5 relative h-56 sm:h-60 flex flex-col items-center justify-center">
           {activeChartData.length === 0 ? (
             <div className="flex flex-col items-center justify-center text-slate-400 py-6">
               <CheckCircle2 className="w-8 h-8 stroke-[1.5] mb-2 opacity-40 text-emerald-500" />
@@ -392,7 +396,7 @@ export default function EnforcementDisposalDonut({
             <span>{viewMode === 'categories' ? (isMarathi ? 'उल्लंघन प्रकार' : 'Violation Category') : (isMarathi ? 'कार्यवाही टप्पा' : 'Pipeline Stage')}</span>
             <div className="flex items-center gap-3">
               <span>{viewMode === 'categories' && metricType === 'area' ? (isMarathi ? 'क्षेत्र (Ha)' : 'Area (Ha)') : (isMarathi ? 'संख्या' : 'Cases')}</span>
-              <span className="w-10 text-right">% {isMarathi ? 'वाटा' : 'Share'}</span>
+              <span className="w-11 text-right">% {isMarathi ? 'वाटा' : 'Share'}</span>
             </div>
           </div>
 
@@ -445,10 +449,10 @@ export default function EnforcementDisposalDonut({
                         : `${item.count.toLocaleString('en-IN')}`}
                     </span>
                     <span
-                      className={`text-[10px] font-bold font-mono px-1.5 py-0.5 rounded-md min-w-[40px] text-right ${
+                      className={`text-[10px] font-bold font-mono px-1.5 py-0.5 rounded-md min-w-[42px] text-center ${
                         isHighlighted
-                          ? 'bg-rose-100 text-rose-900 font-extrabold'
-                          : 'bg-slate-200/60 text-slate-600'
+                          ? 'bg-rose-100 text-rose-900 font-extrabold ring-1 ring-rose-200'
+                          : 'bg-slate-200/70 text-slate-700'
                       }`}
                     >
                       {pct}%

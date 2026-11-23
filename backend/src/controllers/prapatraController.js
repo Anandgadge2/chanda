@@ -470,7 +470,14 @@ export async function calculateDynamicGoshwaraRollup(filters = {}) {
     COALESCE(SUM(CASE WHEN metadata->'auditPoints'->>'point_39' = 'होय' OR (metadata->'flags'->>'isTribal' = 'true' AND (metadata->>'otherRights' LIKE '%गैर-आदिवासी%' ${prapatraNum === 9 ? "OR EXISTS (SELECT 1 FROM forward_enforcement_cases fc WHERE fc.parcel_id = land_parcels.id AND fc.violation_type::text = 'TRIBAL_LAND_VIOLATION')" : ""})) THEN total_area_ha ELSE 0 END), 0)::float as "tribalToNonTribalArea",
     -- Bhudan Booklet 12 metrics
     COUNT(CASE WHEN (metadata->>'otherRights' LIKE '%भूदान%' OR metadata->>'otherRights' LIKE '%ग्रामदान%') AND (metadata->'flags'->>'isUnauthorizedTransfer' = 'true' OR metadata->>'otherRights' LIKE '%हस्तांतरण%' ${prapatraNum === 12 ? "OR EXISTS (SELECT 1 FROM bhudan_records br WHERE br.parcel_id = land_parcels.id AND br.unauthorized_transfer = true)" : ""}) THEN 1 END)::int as "bhudanTransferCount",
-    COALESCE(SUM(CASE WHEN (metadata->>'otherRights' LIKE '%भूदान%' OR metadata->>'otherRights' LIKE '%ग्रामदान%') AND (metadata->'flags'->>'isUnauthorizedTransfer' = 'true' OR metadata->>'otherRights' LIKE '%हस्तांतरण%' ${prapatraNum === 12 ? "OR EXISTS (SELECT 1 FROM bhudan_records br WHERE br.parcel_id = land_parcels.id AND br.unauthorized_transfer = true)" : ""}) THEN total_area_ha ELSE 0 END), 0)::float as "bhudanTransferArea"
+    COALESCE(SUM(CASE WHEN (metadata->>'otherRights' LIKE '%भूदान%' OR metadata->>'otherRights' LIKE '%ग्रामदान%') AND (metadata->'flags'->>'isUnauthorizedTransfer' = 'true' OR metadata->>'otherRights' LIKE '%हस्तांतरण%' ${prapatraNum === 12 ? "OR EXISTS (SELECT 1 FROM bhudan_records br WHERE br.parcel_id = land_parcels.id AND br.unauthorized_transfer = true)" : ""}) THEN total_area_ha ELSE 0 END), 0)::float as "bhudanTransferArea",
+    -- Booklet 1 (Govt Lands) & General Encroachment / Allotment / Govt Deletion metrics
+    COUNT(CASE WHEN metadata->'flags'->>'isEncroached' = 'true' OR metadata->'auditPoints'->>'point_15' = 'आहे' OR metadata->'auditPoints'->>'point_15' = 'होय' THEN 1 END)::int as "encroachedCount",
+    COALESCE(SUM(CASE WHEN metadata->'flags'->>'isEncroached' = 'true' OR metadata->'auditPoints'->>'point_15' = 'आहे' OR metadata->'auditPoints'->>'point_15' = 'होय' THEN total_area_ha ELSE 0 END), 0)::float as "encroachedArea",
+    COUNT(CASE WHEN metadata->'flags'->>'isCorpAllot' = 'true' OR metadata->'flags'->>'isPrivateAllot' = 'true' OR metadata->'auditPoints'->>'point_14' = 'होय' THEN 1 END)::int as "allottedCount",
+    COALESCE(SUM(CASE WHEN metadata->'flags'->>'isCorpAllot' = 'true' OR metadata->'flags'->>'isPrivateAllot' = 'true' OR metadata->'auditPoints'->>'point_14' = 'होय' THEN total_area_ha ELSE 0 END), 0)::float as "allottedArea",
+    COUNT(CASE WHEN metadata->'flags'->>'isIllegalDeletion' = 'true' OR metadata->'auditPoints'->>'point_18' = 'होय' THEN 1 END)::int as "govtDeletedCount",
+    COALESCE(SUM(CASE WHEN metadata->'flags'->>'isIllegalDeletion' = 'true' OR metadata->'auditPoints'->>'point_18' = 'होय' THEN total_area_ha ELSE 0 END), 0)::float as "govtDeletedArea"
   `;
 
   // 1. byVillage Query
@@ -545,6 +552,12 @@ export async function calculateDynamicGoshwaraRollup(filters = {}) {
     tribalToNonTribalArea: Number(r.tribalToNonTribalArea || 0),
     bhudanTransferCount: r.bhudanTransferCount || 0,
     bhudanTransferArea: Number(r.bhudanTransferArea || 0),
+    encroachedCount: r.encroachedCount || 0,
+    encroachedArea: Number(r.encroachedArea || 0),
+    allottedCount: r.allottedCount || 0,
+    allottedArea: Number(r.allottedArea || 0),
+    govtDeletedCount: r.govtDeletedCount || 0,
+    govtDeletedArea: Number(r.govtDeletedArea || 0),
     remarks: r.shartCount > 0 ? 'शर्तभंग / अनधिकृत हस्तांतरण' : 'तपासणी प्रमाणित'
   })).sort((a, b) => a.villageName.localeCompare(b.villageName, 'mr'));
 
@@ -598,6 +611,12 @@ export async function calculateDynamicGoshwaraRollup(filters = {}) {
           tribalToNonTribalArea: 0,
           bhudanTransferCount: 0,
           bhudanTransferArea: 0,
+          encroachedCount: 0,
+          encroachedArea: 0,
+          allottedCount: 0,
+          allottedArea: 0,
+          govtDeletedCount: 0,
+          govtDeletedArea: 0,
           remarks: `${TALUKA_EN_TO_MR[r.taluka] || r.taluka} तालुका एकत्रित`
         });
       }
@@ -638,6 +657,12 @@ export async function calculateDynamicGoshwaraRollup(filters = {}) {
       t.tribalToNonTribalArea += (r.tribalToNonTribalArea || 0);
       t.bhudanTransferCount += (r.bhudanTransferCount || 0);
       t.bhudanTransferArea += (r.bhudanTransferArea || 0);
+      t.encroachedCount += (r.encroachedCount || 0);
+      t.encroachedArea += (r.encroachedArea || 0);
+      t.allottedCount += (r.allottedCount || 0);
+      t.allottedArea += (r.allottedArea || 0);
+      t.govtDeletedCount += (r.govtDeletedCount || 0);
+      t.govtDeletedArea += (r.govtDeletedArea || 0);
     });
 
     byTaluka = Array.from(talukaMap.values()).map(t => ({
@@ -719,6 +744,18 @@ export async function calculateDynamicGoshwaraRollup(filters = {}) {
       transferBreachArea: Number(r.transferBreachArea || 0),
       otherRightsCount: r.otherRightsCount || 0,
       otherRightsArea: Number(r.otherRightsArea || 0),
+      tribalToTribalCount: r.tribalToTribalCount || 0,
+      tribalToTribalArea: Number(r.tribalToTribalArea || 0),
+      tribalToNonTribalCount: r.tribalToNonTribalCount || 0,
+      tribalToNonTribalArea: Number(r.tribalToNonTribalArea || 0),
+      bhudanTransferCount: r.bhudanTransferCount || 0,
+      bhudanTransferArea: Number(r.bhudanTransferArea || 0),
+      encroachedCount: r.encroachedCount || 0,
+      encroachedArea: Number(r.encroachedArea || 0),
+      allottedCount: r.allottedCount || 0,
+      allottedArea: Number(r.allottedArea || 0),
+      govtDeletedCount: r.govtDeletedCount || 0,
+      govtDeletedArea: Number(r.govtDeletedArea || 0),
       remarks: `${TALUKA_EN_TO_MR[r.taluka] || r.taluka} तालुका एकत्रित`
     })).sort((a, b) => a.taluka.localeCompare(b.taluka));
   }
@@ -762,6 +799,18 @@ export async function calculateDynamicGoshwaraRollup(filters = {}) {
         transferBreachArea: 0,
         otherRightsCount: 0,
         otherRightsArea: 0,
+        tribalToTribalCount: 0,
+        tribalToTribalArea: 0,
+        tribalToNonTribalCount: 0,
+        tribalToNonTribalArea: 0,
+        bhudanTransferCount: 0,
+        bhudanTransferArea: 0,
+        encroachedCount: 0,
+        encroachedArea: 0,
+        allottedCount: 0,
+        allottedArea: 0,
+        govtDeletedCount: 0,
+        govtDeletedArea: 0,
         remarks: 'जिल्हास्तरीय एकत्रित गोषवारा'
       };
 
@@ -796,6 +845,18 @@ export async function calculateDynamicGoshwaraRollup(filters = {}) {
         rawDist.transferBreachArea += (t.transferBreachArea || 0);
         rawDist.otherRightsCount += (t.otherRightsCount || 0);
         rawDist.otherRightsArea += (t.otherRightsArea || 0);
+        rawDist.tribalToTribalCount += (t.tribalToTribalCount || 0);
+        rawDist.tribalToTribalArea += (t.tribalToTribalArea || 0);
+        rawDist.tribalToNonTribalCount += (t.tribalToNonTribalCount || 0);
+        rawDist.tribalToNonTribalArea += (t.tribalToNonTribalArea || 0);
+        rawDist.bhudanTransferCount += (t.bhudanTransferCount || 0);
+        rawDist.bhudanTransferArea += (t.bhudanTransferArea || 0);
+        rawDist.encroachedCount += (t.encroachedCount || 0);
+        rawDist.encroachedArea += (t.encroachedArea || 0);
+        rawDist.allottedCount += (t.allottedCount || 0);
+        rawDist.allottedArea += (t.allottedArea || 0);
+        rawDist.govtDeletedCount += (t.govtDeletedCount || 0);
+        rawDist.govtDeletedArea += (t.govtDeletedArea || 0);
       });
 
       distTotal = {
