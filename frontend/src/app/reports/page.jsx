@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useMemo, useRef, Fragment } from 'react';
 import {
+  STATUTORY_CATEGORIES,
   getBookletCategory,
   getDetailedColumnsForBooklet,
   getGoshwaraConfigForBooklet,
@@ -80,28 +81,6 @@ const ICON_MAP = {
   Trees,
   AlertOctagon
 };
-
-// 17 Official Statutory Booklet Categories
-const STATUTORY_CATEGORIES = [
-  { id: 1, nameMr: 'सरकारी जमीन', nameEn: 'Government Land', descMr: 'गायरान, वन, पहाड, खडक, अतिक्रमण व वाटप तपासणी', descEn: 'Gairan, forest, hill, rocky terrain, encroachment & allotment inspection' },
-  { id: 2, nameMr: 'कुळ वहिवाट व शेतजमीन कायदा', nameEn: 'Tenancy & Agricultural Land Act', descMr: 'कुळ घोषित जमिनी, शर्तभंग व वर्ग-२ चे वर्ग-१ अवैध रूपांतरण', descEn: 'Declared tenant lands, breach & illegal conversion from Class-2 to Class-1' },
-  { id: 3, nameMr: 'जमिन इनाम व वतन जमिनी', nameEn: 'Inam & Watan Lands', descMr: 'मदद माश/खिदमत माश इनाम वतन जमिनी व शर्तभंग', descEn: 'Madad Mash/Khidmat Mash Inam Watan lands & condition breaches' },
-  { id: 4, nameMr: 'म.ज.म.अधि. १९६६ भूमिहीन वाटप', nameEn: 'MLRC 1966 Landless Allotments', descMr: 'भूमिहीन, शेतमजूर, स्वातंत्र्य सैनिक प्रदान जमिनी', descEn: 'Lands granted to landless, farm laborers, freedom fighters' },
-  { id: 5, nameMr: 'म.ज.म.अधि. १९६६ संस्था/उद्योग', nameEn: 'MLRC 1966 Institutions / Industries', descMr: 'गृहनिर्माण संस्था, उद्योग, शैक्षणिक संस्था, प्रकल्प प्रदान जमिनी', descEn: 'Housing societies, industries, educational institutes, projects' },
-  { id: 6, nameMr: 'महाराष्ट्र शेतजमीन कमाल धारणा १९६१', nameEn: 'Agricultural Land Ceiling Act 1961', descMr: 'सिलिंग कायद्यान्वये वाटप जमिनी व शर्तभंग', descEn: 'Ceiling Act surplus land allotments & condition breaches' },
-  { id: 7, nameMr: 'विकास आराखडा व गुरचरण जमिनी', nameEn: 'Development Plan & Gurcharan Lands', descMr: 'महानगरपालिका/प्राधिकरण विकास आराखडा व ग्रामपंचायत गुरचरण', descEn: 'Municipal/Authority DP and Gram Panchayat grazing lands' },
-  { id: 8, nameMr: 'जमीन देवस्थान इनाम जमिनी', nameEn: 'Devasthan Inam Lands', descMr: 'देवस्थान इनाम जमिनी व वर्ग रूपांतरण तपासणी', descEn: 'Devasthan Inam trust lands & tenure conversion review' },
-  { id: 9, nameMr: 'आदिवासी खातेदारांचे जमिनी', nameEn: 'Tribal Khatedar Lands', descMr: 'कलम ३६/३६अ अन्वये आदिवासी ते आदिवासी/गैर-आदिवासी हस्तांतरण', descEn: 'Sec 36/36A tribal to tribal / non-tribal land transfers' },
-  { id: 10, nameMr: 'पुनर्वसन अधिनियम १९९९ कलम १६', nameEn: 'Rehabilitation Act 1999 Sec 16', descMr: 'प्रकल्पग्रस्तांना प्रदान जमिनी व इतर हक्क तपासणी', descEn: 'Project-affected persons allotment review & rights verification' },
-  { id: 11, nameMr: 'भाडेपट्ट्याने दिलेली शासकीय जमीन', nameEn: 'Govt Leased Lands', descMr: 'शासकीय भाडेपट्टा जमिनी, कालावधी व शर्तभंग', descEn: 'Government lease lands, tenure duration & breach check' },
-  { id: 12, nameMr: 'भूदान व ग्रामदान प्रदान जमिनी', nameEn: 'Bhoodan & Gramdan Lands', descMr: 'भूदान चळवळ अंतर्गत प्रदान व अनधिकृत हस्तांतरण', descEn: 'Bhoodan movement lands & unauthorized alienations' },
-  { id: 13, nameMr: 'खाजगी वने संपादन अधिनियम १९७५', nameEn: 'Private Forest Acquisition Act 1975', descMr: 'खाजगी वने संपादन व कमाल जमीन धारणा प्रलंबित चौकशी', descEn: 'Private forest acquisition & pending ceiling inquiries' },
-  { id: 14, nameMr: 'भूमीधारी हक्क प्राप्त जमिनी', nameEn: 'Bhumidhari Rights Lands', descMr: 'भूमीधारी हक्क जमिनी व वर्ग-२ रूपांतरण तपासणी', descEn: 'Bhumidhari rights verification & Class-2 conversion check' },
-  { id: 15, nameMr: 'कमाल जमीन धारणा सूट जमीन', nameEn: 'Ceiling Exemption Lands', descMr: 'कमाल मर्यादेपेक्षा अधिक जमीन धारणा विशेष सूट', descEn: 'Special exemption holdings exceeding ceiling limits' },
-  { id: 16, nameMr: 'वक्फ बोर्डाचे मालकीची जमीन', nameEn: 'Waqf Board Lands', descMr: 'वक्फ बोर्ड मालमत्ता व इतर हक्क तपासणी', descEn: 'Waqf board registered properties & other rights' },
-  { id: 17, nameMr: 'भूसंपादन अधिग्रहित / राखीव जमीन', nameEn: 'Land Acquisition Acquired/Reserved', descMr: 'भूसंपादन कायदयांतर्गत अधिग्रहित किंवा राखीव जमिनी', descEn: 'Lands acquired or reserved under Land Acquisition Act' },
-  { id: 18, nameMr: 'कुळ कायद्याचे कलम 89 व 89-अ/47 व 47 प्रमाणे धारण केलेली जमीन', nameEn: 'Tenancy Act Sec 89 & 89-A / 47 & 47 Holdings', descMr: 'कंपनीने धारण करताना परवानगी, वापराबाबत व हस्तांतरणाबाबत शर्तभंग, इतर अधिकारात नोंद तपासणी', descEn: 'Company holding permission, use breach, transfer breach & other rights' }
-];
 
 // 5 Official Statutory Prapatras (Strictly Matching Official Government Booklets 1 to 5 PDF Formats)
 const OFFICIAL_5_PRAPATRAS = [

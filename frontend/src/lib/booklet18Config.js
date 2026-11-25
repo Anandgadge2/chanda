@@ -14,7 +14,7 @@ export const STATUTORY_CATEGORIES = [
   },
   {
     id: 2,
-    nameMr: 'कुळ वहिवाट व शेतजमीन कायदा',
+    nameMr: 'कुळ वहिवाट व शेतजमीन (विदर्भ/हैदराबाद) कायदा अन्वये कुळ घोषित केलेली जमीन जमिनी',
     nameEn: 'Tenancy & Agricultural Land Act',
     descMr: 'कुळ घोषित जमिनी, शर्तभंग व वर्ग-२ चे वर्ग-१ अवैध रूपांतरण',
     descEn: 'Declared tenant lands, breach & illegal conversion from Class-2 to Class-1',
@@ -22,7 +22,7 @@ export const STATUTORY_CATEGORIES = [
   },
   {
     id: 3,
-    nameMr: 'जमिन इनाम व वतन जमिनी',
+    nameMr: 'इनाम व वतन जमिनी (देवस्थान जमिनी वगळून) प्रकारातील जमिनी',
     nameEn: 'Inam & Watan Lands',
     descMr: 'मदद माश/खिदमत माश इनाम वतन जमिनी व शर्तभंग',
     descEn: 'Madad Mash/Khidmat Mash Inam Watan lands & condition breaches',
@@ -54,7 +54,7 @@ export const STATUTORY_CATEGORIES = [
   },
   {
     id: 7,
-    nameMr: 'विकास आराखडा व गुरचरण जमिनी',
+    nameMr: 'महानगरपालिका, नगर पालिका व विविध प्राधिकरण यांच्या विकास आराखडयात समाविष्ट असलेल्या जमिनी अथवा ग्रामपंचायतकडे गुरचरण अथवा इतर प्रयोजनासाठी वर्ग केलेल्या जमिनी',
     nameEn: 'Development Plan & Gurcharan Lands',
     descMr: 'महानगरपालिका/प्राधिकरण विकास आराखडा व ग्रामपंचायत गुरचरण',
     descEn: 'Municipal/Authority DP and Gram Panchayat grazing lands',
@@ -189,7 +189,7 @@ export function getDetailedColumnsForBooklet(catId, isMarathi = true) {
     return [
       { key: 'village', label: isMarathi ? 'गावाचे नाव' : 'Village Name', minW: 'min-w-[150px]', align: 'left', getValue: p => p.villageName },
       { key: 'surveyNo', label: isMarathi ? 'सर्व्हे क्रमांक' : 'Survey No.', minW: 'w-24', align: 'center', isMono: true, getValue: p => p.gatNumber || p.oldSurveyNo || '-' },
-      { key: 'area', label: isMarathi ? 'क्षेत्र (हे.आर.)' : 'Area (Ha)', minW: 'w-24', align: 'right', isArea: true, getValue: p => Number(p.totalAreaHa || 0).toFixed(4) },
+      { key: 'area', label: isMarathi ? 'क्षेत्र' : 'Area (Ha)', minW: 'w-24', align: 'right', isArea: true, getValue: p => Number(p.totalAreaHa || 0).toFixed(4) },
       { key: 'owner', label: isMarathi ? 'भोगवटदाराचे नाव' : 'Occupant Name', minW: 'min-w-[180px]', align: 'left', isOwner: true, getValue: p => p.currentOwner || p.metadata?.ownerName || '-' },
       { key: 'tenureClass', label: isMarathi ? 'भोगवट्दार वर्ग' : 'Occupant Class', minW: 'w-24', align: 'center', isTenureBadge: true, getValue: p => p.tenureDisplay || (p.tenureClass === 'BHOGVATDAR_CLASS_1' ? 'वर्ग १' : 'वर्ग २') },
       { key: 'authorityName', label: isMarathi ? 'प्राधिकरणाचे नाव' : 'Authority Name', minW: 'min-w-[160px]', align: 'left', getValue: p => p.metadata?.authorityName || (p.metadata?.otherRights?.includes('मनपा') ? 'महानगरपालिका' : (p.metadata?.otherRights?.includes('ग्रामपंचायत') ? 'ग्रामपंचायत' : (p.metadata?.otherRights?.includes('प्राधिकरण') ? 'नियोजन प्राधिकरण' : 'स्थानिक संस्था'))) },
@@ -204,14 +204,14 @@ export function getDetailedColumnsForBooklet(catId, isMarathi = true) {
     return [
       { key: 'village', label: isMarathi ? 'गावाचे नाव' : 'Village Name', minW: 'min-w-[150px]', align: 'left', getValue: p => p.villageName },
       { key: 'surveyNo', label: isMarathi ? 'सर्व्हे क्रमांक' : 'Survey No.', minW: 'w-24', align: 'center', isMono: true, getValue: p => p.gatNumber || p.oldSurveyNo || '-' },
-      { key: 'area', label: isMarathi ? 'क्षेत्र (हे.आर.)' : 'Area (Ha)', minW: 'w-24', align: 'right', isArea: true, getValue: p => Number(p.totalAreaHa || 0).toFixed(4) },
+      { key: 'area', label: isMarathi ? 'क्षेत्र' : 'Area (Ha)', minW: 'w-24', align: 'right', isArea: true, getValue: p => Number(p.totalAreaHa || 0).toFixed(4) },
       { key: 'owner', label: isMarathi ? 'भोगवटदाराचे नाव' : 'Occupant Name', minW: 'min-w-[180px]', align: 'left', isOwner: true, getValue: p => p.currentOwner || p.metadata?.ownerName || '-' },
       { key: 'tenureClass', label: isMarathi ? 'भोगवट्दार वर्ग' : 'Occupant Class', minW: 'w-24', align: 'center', isTenureBadge: true, getValue: p => p.tenureDisplay || (p.tenureClass === 'BHOGVATDAR_CLASS_1' ? 'वर्ग १' : 'वर्ग २') },
       { key: 'illegalConv', label: isMarathi ? 'अवैधरित्या वर्ग 2 मधून वर्ग 1 मध्ये रूपांतरण केलेले आहे काय?' : 'Illegal Class 2 to 1?', minW: 'min-w-[180px]', align: 'center', isBadge: true, isAlertVal: val => val === 'होय', getValue: p => getIllegalConv(p) ? 'होय' : 'नाही' },
       { key: 'otherRightsNoted', label: isMarathi ? 'इतर अधिकारात नोंद घेतलेली आहे काय?' : 'Other Rights Noted?', minW: 'w-32', align: 'center', isBadge: true, getValue: p => getOtherRights(p) ? 'होय' : 'नाही' },
       { key: 'illegalDel', label: isMarathi ? 'अवैधरित्या इतर अधिकारातील नोंदी कमी केलेल्या आहे काय?' : 'Other Rights Illegally Deleted?', minW: 'min-w-[160px]', align: 'center', isBadge: true, isAlertVal: val => val === 'होय', getValue: p => getIllegalDel(p) ? 'होय' : 'नाही' },
       { key: 'tribalToTribal', label: isMarathi ? 'अवैधरित्या आदिवासी ते आदिवासी हस्तांतरण झालेले आहे काय?' : 'Illegal Tribal to Tribal?', minW: 'min-w-[180px]', align: 'center', isBadge: true, isAlertVal: val => val === 'होय', getValue: p => getTribalToTribal(p) ? 'होय' : 'नाही' },
-      { key: 'tribalToNonTribal', label: isMarathi ? 'अवैधरित्या आदिवासी ते गैर- आदिवासी हस्तांतरण झालेले आहे काय?' : 'Illegal Tribal to Non-Tribal Transfer?', minW: 'min-w-[180px]', align: 'center', isBadge: true, isAlertVal: val => val === 'होय', getValue: p => getTribalToNonTribal(p) ? 'होय' : 'नाही' }
+      { key: 'tribalToNonTribal', label: isMarathi ? 'अवैधरित्या आदिवासी ते गैर-आदिवासी हस्तांतरण झालेले आहे काय?' : 'Illegal Tribal to Non-Tribal Transfer?', minW: 'min-w-[180px]', align: 'center', isBadge: true, isAlertVal: val => val === 'होय', getValue: p => getTribalToNonTribal(p) ? 'होय' : 'नाही' }
     ];
   }
 
@@ -220,10 +220,10 @@ export function getDetailedColumnsForBooklet(catId, isMarathi = true) {
     return [
       { key: 'village', label: isMarathi ? 'गावाचे नाव' : 'Village Name', minW: 'min-w-[150px]', align: 'left', getValue: p => p.villageName },
       { key: 'surveyNo', label: isMarathi ? 'सर्व्हे क्रमांक' : 'Survey No.', minW: 'w-24', align: 'center', isMono: true, getValue: p => p.gatNumber || p.oldSurveyNo || '-' },
-      { key: 'area', label: isMarathi ? 'क्षेत्र (हे.आर.)' : 'Area (Ha)', minW: 'w-24', align: 'right', isArea: true, getValue: p => Number(p.totalAreaHa || 0).toFixed(4) },
+      { key: 'area', label: isMarathi ? 'क्षेत्र' : 'Area (Ha)', minW: 'w-24', align: 'right', isArea: true, getValue: p => Number(p.totalAreaHa || 0).toFixed(4) },
       { key: 'owner', label: isMarathi ? 'भोगवटदाराचे नाव' : 'Occupant Name', minW: 'min-w-[180px]', align: 'left', isOwner: true, getValue: p => p.currentOwner || p.metadata?.ownerName || '-' },
       { key: 'tenureClass', label: isMarathi ? 'भोगवट्दार वर्ग' : 'Occupant Class', minW: 'w-24', align: 'center', isTenureBadge: true, getValue: p => p.tenureDisplay || (p.tenureClass === 'BHOGVATDAR_CLASS_1' ? 'वर्ग १' : 'वर्ग २') },
-      { key: 'illegalConv', label: isMarathi ? 'अवैधरित्या वर्ग 2 मधून वर्ग 1' : 'Illegal Class 2 to 1?', minW: 'w-32', align: 'center', isBadge: true, isAlertVal: val => val === 'होय', getValue: p => getIllegalConv(p) ? 'होय' : 'नाही' },
+      { key: 'illegalConv', label: isMarathi ? 'अवैधरित्या वर्ग 2 मधून वर्ग 1 मध्ये रूपांतरण केलेले आहे काय?' : 'Illegal Class 2 to 1?', minW: 'min-w-[180px]', align: 'center', isBadge: true, isAlertVal: val => val === 'होय', getValue: p => getIllegalConv(p) ? 'होय' : 'नाही' },
       { key: 'otherRightsNoted', label: isMarathi ? 'इतर अधिकारात नोंद घेतलेली आहे काय?' : 'Other Rights Noted?', minW: 'w-32', align: 'center', isBadge: true, getValue: p => getOtherRights(p) ? 'होय' : 'नाही' },
       { key: 'illegalDel', label: isMarathi ? 'अवैधरित्या इतर अधिकारातील नोंदी कमी केलेल्या आहे काय?' : 'Other Rights Illegally Deleted?', minW: 'min-w-[160px]', align: 'center', isBadge: true, isAlertVal: val => val === 'होय', getValue: p => getIllegalDel(p) ? 'होय' : 'नाही' }
     ];
@@ -234,10 +234,10 @@ export function getDetailedColumnsForBooklet(catId, isMarathi = true) {
     return [
       { key: 'village', label: isMarathi ? 'गावाचे नाव' : 'Village Name', minW: 'min-w-[150px]', align: 'left', getValue: p => p.villageName },
       { key: 'surveyNo', label: isMarathi ? 'सर्व्हे क्रमांक' : 'Survey No.', minW: 'w-24', align: 'center', isMono: true, getValue: p => p.gatNumber || p.oldSurveyNo || '-' },
-      { key: 'area', label: isMarathi ? 'क्षेत्र (हे.आर.)' : 'Area (Ha)', minW: 'w-24', align: 'right', isArea: true, getValue: p => Number(p.totalAreaHa || 0).toFixed(4) },
+      { key: 'area', label: isMarathi ? 'क्षेत्र' : 'Area (Ha)', minW: 'w-24', align: 'right', isArea: true, getValue: p => Number(p.totalAreaHa || 0).toFixed(4) },
       { key: 'owner', label: isMarathi ? 'भोगवटदाराचे नाव' : 'Occupant Name', minW: 'min-w-[180px]', align: 'left', isOwner: true, getValue: p => p.currentOwner || p.metadata?.ownerName || '-' },
       { key: 'tenureClass', label: isMarathi ? 'भोगवट्दार वर्ग' : 'Occupant Class', minW: 'w-24', align: 'center', isTenureBadge: true, getValue: p => p.tenureDisplay || (p.tenureClass === 'BHOGVATDAR_CLASS_1' ? 'वर्ग १' : 'वर्ग २') },
-      { key: 'illegalConv', label: isMarathi ? 'अवैधरित्या वर्ग 2 मधून वर्ग 1' : 'Illegal Class 2 to 1?', minW: 'w-32', align: 'center', isBadge: true, isAlertVal: val => val === 'होय', getValue: p => getIllegalConv(p) ? 'होय' : 'नाही' },
+      { key: 'illegalConv', label: isMarathi ? 'अवैधरित्या वर्ग 2 मधून वर्ग 1 मध्ये रूपांतरण केलेले आहे काय?' : 'Illegal Class 2 to 1?', minW: 'min-w-[180px]', align: 'center', isBadge: true, isAlertVal: val => val === 'होय', getValue: p => getIllegalConv(p) ? 'होय' : 'नाही' },
       { key: 'otherRightsNoted', label: isMarathi ? 'इतर अधिकारात नोंद घेतलेली आहे काय?' : 'Other Rights Noted?', minW: 'w-32', align: 'center', isBadge: true, getValue: p => getOtherRights(p) ? 'होय' : 'नाही' },
       { key: 'illegalDel', label: isMarathi ? 'अवैधरित्या इतर अधिकारातील नोंदी कमी केलेल्या आहे काय?' : 'Other Rights Illegally Deleted?', minW: 'min-w-[160px]', align: 'center', isBadge: true, isAlertVal: val => val === 'होय', getValue: p => getIllegalDel(p) ? 'होय' : 'नाही' },
       { key: 'illegalTransfer', label: isMarathi ? 'अवैधरित्या हस्तांतरण झालेले आहे काय?' : 'Illegal Transfer Occurred?', minW: 'min-w-[150px]', align: 'center', isBadge: true, isAlertVal: val => val === 'होय', getValue: p => (p.metadata?.flags?.isUnauthorizedTransfer || p.metadata?.otherRights?.includes('हस्तांतरण') || p.bhudanRecords?.some(br => br.unauthorizedAlienation)) ? 'होय' : 'नाही' }
@@ -249,7 +249,7 @@ export function getDetailedColumnsForBooklet(catId, isMarathi = true) {
     return [
       { key: 'village', label: isMarathi ? 'गावाचे नाव' : 'Village Name', minW: 'min-w-[150px]', align: 'left', getValue: p => p.villageName },
       { key: 'surveyNo', label: isMarathi ? 'सर्व्हे क्रमांक' : 'Survey No.', minW: 'w-24', align: 'center', isMono: true, getValue: p => p.gatNumber || p.oldSurveyNo || '-' },
-      { key: 'area', label: isMarathi ? 'क्षेत्र (हे.आर.)' : 'Area (Ha)', minW: 'w-24', align: 'right', isArea: true, getValue: p => Number(p.totalAreaHa || 0).toFixed(4) },
+      { key: 'area', label: isMarathi ? 'क्षेत्र' : 'Area (Ha)', minW: 'w-24', align: 'right', isArea: true, getValue: p => Number(p.totalAreaHa || 0).toFixed(4) },
       { key: 'owner', label: isMarathi ? 'भोगवटदाराचे नाव' : 'Occupant Name', minW: 'min-w-[180px]', align: 'left', isOwner: true, getValue: p => p.currentOwner || p.metadata?.ownerName || '-' },
       { key: 'tenureClass', label: isMarathi ? 'भोगवट्दार वर्ग' : 'Occupant Class', minW: 'w-24', align: 'center', isTenureBadge: true, getValue: p => p.tenureDisplay || (p.tenureClass === 'BHOGVATDAR_CLASS_1' ? 'वर्ग १' : 'वर्ग २') },
       { key: 'otherRightsNoted', label: isMarathi ? 'इतर अधिकारात नोंद घेतलेली आहे काय?' : 'Other Rights Noted?', minW: 'w-32', align: 'center', isBadge: true, getValue: p => getOtherRights(p) ? 'होय' : 'नाही' },
@@ -262,10 +262,10 @@ export function getDetailedColumnsForBooklet(catId, isMarathi = true) {
     return [
       { key: 'village', label: isMarathi ? 'गावाचे नाव' : 'Village Name', minW: 'min-w-[150px]', align: 'left', getValue: p => p.villageName },
       { key: 'surveyNo', label: isMarathi ? 'सर्व्हे क्रमांक' : 'Survey No.', minW: 'w-24', align: 'center', isMono: true, getValue: p => p.gatNumber || p.oldSurveyNo || '-' },
-      { key: 'area', label: isMarathi ? 'क्षेत्र (हे.आर.)' : 'Area (Ha)', minW: 'w-24', align: 'right', isArea: true, getValue: p => Number(p.totalAreaHa || 0).toFixed(4) },
+      { key: 'area', label: isMarathi ? 'क्षेत्र' : 'Area (Ha)', minW: 'w-24', align: 'right', isArea: true, getValue: p => Number(p.totalAreaHa || 0).toFixed(4) },
       { key: 'owner', label: isMarathi ? 'भोगवटदाराचे नाव' : 'Occupant Name', minW: 'min-w-[180px]', align: 'left', isOwner: true, getValue: p => p.currentOwner || p.metadata?.ownerName || '-' },
       { key: 'tenureClass', label: isMarathi ? 'भोगवट्दार वर्ग' : 'Occupant Class', minW: 'w-24', align: 'center', isTenureBadge: true, getValue: p => p.tenureDisplay || (p.tenureClass === 'BHOGVATDAR_CLASS_1' ? 'वर्ग १' : 'वर्ग २') },
-      { key: 'illegalConv', label: isMarathi ? 'अवैधरित्या वर्ग 2 मधून वर्ग 1' : 'Illegal Class 2 to 1?', minW: 'w-32', align: 'center', isBadge: true, isAlertVal: val => val === 'होय', getValue: p => getIllegalConv(p) ? 'होय' : 'नाही' },
+      { key: 'illegalConv', label: isMarathi ? 'अवैधरित्या वर्ग 2 मधून वर्ग 1 मध्ये रूपांतरण केलेले आहे काय?' : 'Illegal Class 2 to 1?', minW: 'min-w-[180px]', align: 'center', isBadge: true, isAlertVal: val => val === 'होय', getValue: p => getIllegalConv(p) ? 'होय' : 'नाही' },
       { key: 'otherRightsNoted', label: isMarathi ? 'इतर अधिकारात नोंद घेतलेली आहे काय?' : 'Other Rights Noted?', minW: 'w-32', align: 'center', isBadge: true, getValue: p => getOtherRights(p) ? 'होय' : 'नाही' },
       { key: 'illegalDel', label: isMarathi ? 'अवैधरित्या इतर अधिकारातील नोंदी कमी केलेल्या आहे काय?' : 'Other Rights Illegally Deleted?', minW: 'min-w-[160px]', align: 'center', isBadge: true, isAlertVal: val => val === 'होय', getValue: p => getIllegalDel(p) ? 'होय' : 'नाही' },
       { key: 'shartbhang', label: isMarathi ? 'शर्तभंग झालेला आहे काय?' : 'Condition Breach Occurred?', minW: 'w-32', align: 'center', isBadge: true, isAlertVal: val => val === 'होय', getValue: p => getShartbhang(p) ? 'होय' : 'नाही' }
@@ -277,12 +277,12 @@ export function getDetailedColumnsForBooklet(catId, isMarathi = true) {
     return [
       { key: 'village', label: isMarathi ? 'गावाचे नाव' : 'Village Name', minW: 'min-w-[150px]', align: 'left', getValue: p => p.villageName },
       { key: 'surveyNo', label: isMarathi ? 'सर्व्हे क्रमांक' : 'Survey No.', minW: 'w-24', align: 'center', isMono: true, getValue: p => p.gatNumber || p.oldSurveyNo || '-' },
-      { key: 'area', label: isMarathi ? 'क्षेत्र (हे.आर.)' : 'Area (Ha)', minW: 'w-24', align: 'right', isArea: true, getValue: p => Number(p.totalAreaHa || 0).toFixed(4) },
+      { key: 'area', label: isMarathi ? 'क्षेत्र' : 'Area (Ha)', minW: 'w-24', align: 'right', isArea: true, getValue: p => Number(p.totalAreaHa || 0).toFixed(4) },
       { key: 'owner', label: isMarathi ? 'भोगवटदाराचे नाव' : 'Occupant Name', minW: 'min-w-[180px]', align: 'left', isOwner: true, getValue: p => p.currentOwner || p.metadata?.ownerName || '-' },
       { key: 'tenureClass', label: isMarathi ? 'भोगवट्दार वर्ग' : 'Occupant Class', minW: 'w-24', align: 'center', isTenureBadge: true, getValue: p => p.tenureDisplay || (p.tenureClass === 'BHOGVATDAR_CLASS_1' ? 'वर्ग १' : 'वर्ग २') },
       { key: 'hasPermit', label: isMarathi ? 'कंपनीने धारण करताना परवानगी घेतलेली आहे काय?' : 'Company Permit Taken?', minW: 'min-w-[150px]', align: 'center', isBadge: true, getValue: p => (p.auditPoints?.point_42 === 'होय' || p.auditPoints?.point_41 === 'होय' || p.tenancy89ARecords?.[0]?.isGenuineIndustrialUse || p.metadata?.auditPoints?.point_41 === 'होय') ? 'होय' : 'नाही' },
       { key: 'usageBreach', label: isMarathi ? 'वापराबाबत शर्तभंग झालेला आहे काय?' : 'Usage Condition Breach?', minW: 'min-w-[150px]', align: 'center', isBadge: true, isAlertVal: val => val === 'होय', getValue: p => (p.metadata?.auditPoints?.point_44 === 'नाही' || p.metadata?.auditPoints?.point_45_usage === 'होय' || (p.forwardCases?.some(fc => fc.violationType === 'UNAUTHORIZED_NA_CONVERSION'))) ? 'होय' : 'नाही' },
-      { key: 'transferBreach', label: isMarathi ? 'हस्तांतरनाबाबत शर्तभंग आहे काय?' : 'Transfer Condition Breach?', minW: 'min-w-[150px]', align: 'center', isBadge: true, isAlertVal: val => val === 'होय', getValue: p => (p.metadata?.auditPoints?.point_45_transfer === 'होय' || p.tenancy89ARecords?.[0]?.unauthorizedTransfer || (p.forwardCases?.some(fc => fc.violationType === 'SHARTBHANG' || fc.violationType === 'TRIBAL_LAND_VIOLATION'))) ? 'होय' : 'नाही' },
+      { key: 'transferBreach', label: isMarathi ? 'हस्तांतरणाबाबत शर्तभंग आहे काय?' : 'Transfer Condition Breach?', minW: 'min-w-[150px]', align: 'center', isBadge: true, isAlertVal: val => val === 'होय', getValue: p => (p.metadata?.auditPoints?.point_45_transfer === 'होय' || p.tenancy89ARecords?.[0]?.unauthorizedTransfer || (p.forwardCases?.some(fc => fc.violationType === 'SHARTBHANG' || fc.violationType === 'TRIBAL_LAND_VIOLATION'))) ? 'होय' : 'नाही' },
       { key: 'otherRightsNoted', label: isMarathi ? 'इतर अधिकारात नोंद घेतलेली आहे काय?' : 'Other Rights Noted?', minW: 'w-32', align: 'center', isBadge: true, getValue: p => (p.auditPoints?.point_40 === 'होय' || p.auditPoints?.point_39 === 'होय' || (p.metadata?.otherRights && p.metadata?.otherRights !== '-' && p.metadata?.otherRights !== '....')) ? 'होय' : 'नाही' }
     ];
   }
@@ -291,11 +291,11 @@ export function getDetailedColumnsForBooklet(catId, isMarathi = true) {
   return [
     { key: 'village', label: isMarathi ? 'गावाचे नाव' : 'Village Name', minW: 'min-w-[150px]', align: 'left', getValue: p => p.villageName },
     { key: 'surveyNo', label: isMarathi ? 'सर्व्हे क्रमांक' : 'Survey No.', minW: 'w-24', align: 'center', isMono: true, getValue: p => p.gatNumber || p.oldSurveyNo || '-' },
-    { key: 'area', label: isMarathi ? 'क्षेत्र (हे.आर.)' : 'Area (Ha)', minW: 'w-24', align: 'right', isArea: true, getValue: p => Number(p.totalAreaHa || 0).toFixed(4) },
+    { key: 'area', label: isMarathi ? 'क्षेत्र' : 'Area (Ha)', minW: 'w-24', align: 'right', isArea: true, getValue: p => Number(p.totalAreaHa || 0).toFixed(4) },
     { key: 'owner', label: isMarathi ? 'भोगवटदाराचे नाव' : 'Occupant Name', minW: 'min-w-[180px]', align: 'left', isOwner: true, getValue: p => p.currentOwner || p.metadata?.ownerName || '-' },
     { key: 'tenureClass', label: isMarathi ? 'भोगवट्दार वर्ग' : 'Occupant Class', minW: 'w-24', align: 'center', isTenureBadge: true, getValue: p => p.tenureDisplay || (p.tenureClass === 'BHOGVATDAR_CLASS_1' ? 'वर्ग १' : 'वर्ग २') },
     { key: 'shartbhang', label: isMarathi ? 'शर्तभंग झालेला आहे काय?' : 'Condition Breach Occurred?', minW: 'w-32', align: 'center', isBadge: true, isAlertVal: val => val === 'होय', getValue: p => getShartbhang(p) ? 'होय' : 'नाही' },
-    { key: 'illegalConv', label: isMarathi ? 'अवैधरित्या वर्ग 2 मधून वर्ग 1' : 'Illegal Class 2 to 1?', minW: 'w-32', align: 'center', isBadge: true, isAlertVal: val => val === 'होय', getValue: p => getIllegalConv(p) ? 'होय' : 'नाही' },
+    { key: 'illegalConv', label: isMarathi ? 'अवैधरित्या वर्ग 2 मधून वर्ग 1 मध्ये रूपांतरण केलेले आहे काय?' : 'Illegal Class 2 to 1?', minW: 'min-w-[180px]', align: 'center', isBadge: true, isAlertVal: val => val === 'होय', getValue: p => getIllegalConv(p) ? 'होय' : 'नाही' },
     { key: 'otherRightsNoted', label: isMarathi ? 'इतर अधिकारात नोंद घेतलेली आहे काय?' : 'Other Rights Noted?', minW: 'w-32', align: 'center', isBadge: true, getValue: p => getOtherRights(p) ? 'होय' : 'नाही' },
     { key: 'illegalDel', label: isMarathi ? 'अवैधरित्या इतर अधिकारातील नोंदी कमी केलेल्या आहे काय?' : 'Other Rights Illegally Deleted?', minW: 'min-w-[160px]', align: 'center', isBadge: true, isAlertVal: val => val === 'होय', getValue: p => getIllegalDel(p) ? 'होय' : 'नाही' }
   ];

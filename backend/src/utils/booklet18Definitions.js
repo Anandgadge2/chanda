@@ -14,7 +14,7 @@ export const BOOKLET_18_CATEGORIES = [
   },
   {
     id: 2,
-    nameMr: 'कुळ वहिवाट व शेतजमीन कायदा',
+    nameMr: 'कुळ वहिवाट व शेतजमीन (विदर्भ/हैदराबाद) कायदा अन्वये कुळ घोषित केलेली जमीन जमिनी',
     nameEn: 'Tenancy & Agricultural Land Act',
     descMr: 'कुळ घोषित जमिनी, शर्तभंग व वर्ग-२ चे वर्ग-१ अवैध रूपांतरण',
     descEn: 'Declared tenant lands, breach & illegal conversion from Class-2 to Class-1',
@@ -22,7 +22,7 @@ export const BOOKLET_18_CATEGORIES = [
   },
   {
     id: 3,
-    nameMr: 'जमिन इनाम व वतन जमिनी',
+    nameMr: 'इनाम व वतन जमिनी (देवस्थान जमिनी वगळून) प्रकारातील जमिनी',
     nameEn: 'Inam & Watan Lands',
     descMr: 'मदद माश/खिदमत माश इनाम वतन जमिनी व शर्तभंग',
     descEn: 'Madad Mash/Khidmat Mash Inam Watan lands & condition breaches',
@@ -54,7 +54,7 @@ export const BOOKLET_18_CATEGORIES = [
   },
   {
     id: 7,
-    nameMr: 'विकास आराखडा व गुरचरण जमिनी',
+    nameMr: 'महानगरपालिका, नगर पालिका व विविध प्राधिकरण यांच्या विकास आराखडयात समाविष्ट असलेल्या जमिनी अथवा ग्रामपंचायतकडे गुरचरण अथवा इतर प्रयोजनासाठी वर्ग केलेल्या जमिनी',
     nameEn: 'Development Plan & Gurcharan Lands',
     descMr: 'महानगरपालिका/प्राधिकरण विकास आराखडा व ग्रामपंचायत गुरचरण',
     descEn: 'Municipal/Authority DP and Gram Panchayat grazing lands',
@@ -228,7 +228,7 @@ export function getDetailedColumnsForBooklet(catId) {
       { key: 'srNo', label: 'अ.क्र.', width: 6, align: 'center', getValue: getSr },
       { key: 'village', label: 'गावाचे नाव', width: 22, align: 'left', getValue: getVillage },
       { key: 'surveyNo', label: 'सर्व्हे क्रमांक', width: 16, align: 'center', getValue: getSurvey },
-      { key: 'area', label: 'क्षेत्र (हे.आर.)', width: 14, align: 'right', isArea: true, getValue: getArea },
+      { key: 'area', label: 'क्षेत्र', width: 14, align: 'right', isArea: true, getValue: getArea },
       { key: 'owner', label: 'भोगवटदाराचे नाव', width: 28, align: 'left', isOwner: true, getValue: getOwner },
       { key: 'tenureClass', label: 'भोगवट्दार वर्ग', width: 16, align: 'center', getValue: getTenureClass },
       { key: 'authorityName', label: 'प्राधिकरणाचे नाव', width: 24, align: 'left', getValue: (p) => p.metadata?.authorityName || (p.metadata?.otherRights?.includes('मनपा') ? 'महानगरपालिका' : (p.metadata?.otherRights?.includes('ग्रामपंचायत') ? 'ग्रामपंचायत' : (p.metadata?.otherRights?.includes('प्राधिकरण') ? 'नियोजन प्राधिकरण' : 'स्थानिक स्वराज्य संस्था'))) },
@@ -244,14 +244,14 @@ export function getDetailedColumnsForBooklet(catId) {
       { key: 'srNo', label: 'अ.क्र.', width: 6, align: 'center', getValue: getSr },
       { key: 'village', label: 'गावाचे नाव', width: 22, align: 'left', getValue: getVillage },
       { key: 'surveyNo', label: 'सर्व्हे क्रमांक', width: 16, align: 'center', getValue: getSurvey },
-      { key: 'area', label: 'क्षेत्र (हे.आर.)', width: 14, align: 'right', isArea: true, getValue: getArea },
+      { key: 'area', label: 'क्षेत्र', width: 14, align: 'right', isArea: true, getValue: getArea },
       { key: 'owner', label: 'भोगवटदाराचे नाव', width: 28, align: 'left', isOwner: true, getValue: getOwner },
       { key: 'tenureClass', label: 'भोगवट्दार वर्ग', width: 16, align: 'center', getValue: getTenureClass },
       { key: 'illegalConv', label: 'अवैधरित्या वर्ग 2 मधून वर्ग 1 मध्ये रूपांतरण केलेले आहे काय?', width: 24, align: 'center', isAlert: true, getValue: getIllegalConv },
       { key: 'otherRightsNoted', label: 'इतर अधिकारात नोंद घेतलेली आहे काय?', width: 20, align: 'center', getValue: getOtherRightsNoted },
       { key: 'illegalDel', label: 'अवैधरित्या इतर अधिकारातील नोंदी कमी केलेल्या आहे काय?', width: 22, align: 'center', isAlert: true, getValue: getIllegalDel },
       { key: 'tribalToTribal', label: 'अवैधरित्या आदिवासी ते आदिवासी हस्तांतरण झालेले आहे काय?', width: 24, align: 'center', isAlert: true, getValue: getTribalToTribal },
-      { key: 'tribalToNonTribal', label: 'अवैधरित्या आदिवासी ते गैर- आदिवासी हस्तांतरण झालेले आहे काय?', width: 26, align: 'center', isAlert: true, getValue: getTribalToNonTribal }
+      { key: 'tribalToNonTribal', label: 'अवैधरित्या आदिवासी ते गैर-आदिवासी हस्तांतरण झालेले आहे काय?', width: 26, align: 'center', isAlert: true, getValue: getTribalToNonTribal }
     ];
   }
 
@@ -261,10 +261,10 @@ export function getDetailedColumnsForBooklet(catId) {
       { key: 'srNo', label: 'अ.क्र.', width: 6, align: 'center', getValue: getSr },
       { key: 'village', label: 'गावाचे नाव', width: 22, align: 'left', getValue: getVillage },
       { key: 'surveyNo', label: 'सर्व्हे क्रमांक', width: 16, align: 'center', getValue: getSurvey },
-      { key: 'area', label: 'क्षेत्र (हे.आर.)', width: 14, align: 'right', isArea: true, getValue: getArea },
+      { key: 'area', label: 'क्षेत्र', width: 14, align: 'right', isArea: true, getValue: getArea },
       { key: 'owner', label: 'भोगवटदाराचे नाव', width: 28, align: 'left', isOwner: true, getValue: getOwner },
       { key: 'tenureClass', label: 'भोगवट्दार वर्ग', width: 16, align: 'center', getValue: getTenureClass },
-      { key: 'illegalConv', label: 'अवैधरित्या वर्ग 2 मधून वर्ग 1', width: 20, align: 'center', isAlert: true, getValue: getIllegalConv },
+      { key: 'illegalConv', label: 'अवैधरित्या वर्ग 2 मधून वर्ग 1 मध्ये रूपांतरण केलेले आहे काय?', width: 24, align: 'center', isAlert: true, getValue: getIllegalConv },
       { key: 'otherRightsNoted', label: 'इतर अधिकारात नोंद घेतलेली आहे काय?', width: 20, align: 'center', getValue: getOtherRightsNoted },
       { key: 'illegalDel', label: 'अवैधरित्या इतर अधिकारातील नोंदी कमी केलेल्या आहे काय?', width: 22, align: 'center', isAlert: true, getValue: getIllegalDel }
     ];
@@ -276,10 +276,10 @@ export function getDetailedColumnsForBooklet(catId) {
       { key: 'srNo', label: 'अ.क्र.', width: 6, align: 'center', getValue: getSr },
       { key: 'village', label: 'गावाचे नाव', width: 22, align: 'left', getValue: getVillage },
       { key: 'surveyNo', label: 'सर्व्हे क्रमांक', width: 16, align: 'center', getValue: getSurvey },
-      { key: 'area', label: 'क्षेत्र (हे.आर.)', width: 14, align: 'right', isArea: true, getValue: getArea },
+      { key: 'area', label: 'क्षेत्र', width: 14, align: 'right', isArea: true, getValue: getArea },
       { key: 'owner', label: 'भोगवटदाराचे नाव', width: 28, align: 'left', isOwner: true, getValue: getOwner },
       { key: 'tenureClass', label: 'भोगवट्दार वर्ग', width: 16, align: 'center', getValue: getTenureClass },
-      { key: 'illegalConv', label: 'अवैधरित्या वर्ग 2 मधून वर्ग 1', width: 20, align: 'center', isAlert: true, getValue: getIllegalConv },
+      { key: 'illegalConv', label: 'अवैधरित्या वर्ग 2 मधून वर्ग 1 मध्ये रूपांतरण केलेले आहे काय?', width: 24, align: 'center', isAlert: true, getValue: getIllegalConv },
       { key: 'otherRightsNoted', label: 'इतर अधिकारात नोंद घेतलेली आहे काय?', width: 20, align: 'center', getValue: getOtherRightsNoted },
       { key: 'illegalDel', label: 'अवैधरित्या इतर अधिकारातील नोंदी कमी केलेल्या आहे काय?', width: 22, align: 'center', isAlert: true, getValue: getIllegalDel },
       { key: 'illegalTransfer', label: 'अवैधरित्या हस्तांतरण झालेले आहे काय?', width: 22, align: 'center', isAlert: true, getValue: (p) => p.metadata?.flags?.isUnauthorizedTransfer || (p.metadata?.otherRights?.includes('हस्तांतरण') || p.bhudanRecords?.some(br => br.unauthorizedAlienation)) ? 'होय' : 'नाही' }
@@ -292,7 +292,7 @@ export function getDetailedColumnsForBooklet(catId) {
       { key: 'srNo', label: 'अ.क्र.', width: 6, align: 'center', getValue: getSr },
       { key: 'village', label: 'गावाचे नाव', width: 22, align: 'left', getValue: getVillage },
       { key: 'surveyNo', label: 'सर्व्हे क्रमांक', width: 16, align: 'center', getValue: getSurvey },
-      { key: 'area', label: 'क्षेत्र (हे.आर.)', width: 14, align: 'right', isArea: true, getValue: getArea },
+      { key: 'area', label: 'क्षेत्र', width: 14, align: 'right', isArea: true, getValue: getArea },
       { key: 'owner', label: 'भोगवटदाराचे नाव', width: 28, align: 'left', isOwner: true, getValue: getOwner },
       { key: 'tenureClass', label: 'भोगवट्दार वर्ग', width: 16, align: 'center', getValue: getTenureClass },
       { key: 'otherRightsNoted', label: 'इतर अधिकारात नोंद घेतलेली आहे काय?', width: 22, align: 'center', getValue: getOtherRightsNoted },
@@ -306,10 +306,10 @@ export function getDetailedColumnsForBooklet(catId) {
       { key: 'srNo', label: 'अ.क्र.', width: 6, align: 'center', getValue: getSr },
       { key: 'village', label: 'गावाचे नाव', width: 22, align: 'left', getValue: getVillage },
       { key: 'surveyNo', label: 'सर्व्हे क्रमांक', width: 16, align: 'center', getValue: getSurvey },
-      { key: 'area', label: 'क्षेत्र (हे.आर.)', width: 14, align: 'right', isArea: true, getValue: getArea },
+      { key: 'area', label: 'क्षेत्र', width: 14, align: 'right', isArea: true, getValue: getArea },
       { key: 'owner', label: 'भोगवटदाराचे नाव', width: 28, align: 'left', isOwner: true, getValue: getOwner },
       { key: 'tenureClass', label: 'भोगवट्दार वर्ग', width: 16, align: 'center', getValue: getTenureClass },
-      { key: 'illegalConv', label: 'अवैधरित्या वर्ग 2 मधून वर्ग 1', width: 20, align: 'center', isAlert: true, getValue: getIllegalConv },
+      { key: 'illegalConv', label: 'अवैधरित्या वर्ग 2 मधून वर्ग 1 मध्ये रूपांतरण केलेले आहे काय?', width: 24, align: 'center', isAlert: true, getValue: getIllegalConv },
       { key: 'otherRightsNoted', label: 'इतर अधिकारात नोंद घेतलेली आहे काय?', width: 20, align: 'center', getValue: getOtherRightsNoted },
       { key: 'illegalDel', label: 'अवैधरित्या इतर अधिकारातील नोंदी कमी केलेल्या आहे काय?', width: 22, align: 'center', isAlert: true, getValue: getIllegalDel },
       { key: 'shartbhang', label: 'शर्तभंग झालेला आहे काय?', width: 18, align: 'center', isAlert: true, getValue: getShartbhang }
@@ -322,12 +322,12 @@ export function getDetailedColumnsForBooklet(catId) {
       { key: 'srNo', label: 'अ.क्र.', width: 6, align: 'center', getValue: getSr },
       { key: 'village', label: 'गावाचे नाव', width: 22, align: 'left', getValue: getVillage },
       { key: 'surveyNo', label: 'सर्व्हे क्रमांक', width: 16, align: 'center', getValue: getSurvey },
-      { key: 'area', label: 'क्षेत्र (हे.आर.)', width: 14, align: 'right', isArea: true, getValue: getArea },
+      { key: 'area', label: 'क्षेत्र', width: 14, align: 'right', isArea: true, getValue: getArea },
       { key: 'owner', label: 'भोगवटदाराचे नाव', width: 28, align: 'left', isOwner: true, getValue: getOwner },
       { key: 'tenureClass', label: 'भोगवट्दार वर्ग', width: 16, align: 'center', getValue: getTenureClass },
       { key: 'hasPermit', label: 'कंपनीने धारण करताना परवानगी घेतलेली आहे काय?', width: 24, align: 'center', getValue: (p, pt) => pt[42] === 'होय' || pt[41] === 'होय' || p.tenancy89ARecords?.[0]?.isGenuineIndustrialUse || p.metadata?.auditPoints?.point_41 === 'होय' ? 'होय' : 'नाही' },
       { key: 'usageBreach', label: 'वापराबाबत शर्तभंग झालेला आहे काय?', width: 22, align: 'center', isAlert: true, getValue: (p) => p.metadata?.auditPoints?.point_44 === 'नाही' || p.metadata?.auditPoints?.point_45_usage === 'होय' || (p.forwardCases?.some(fc => fc.violationType === 'UNAUTHORIZED_NA_CONVERSION')) ? 'होय' : 'नाही' },
-      { key: 'transferBreach', label: 'हस्तांतरनाबाबत शर्तभंग आहे काय?', width: 22, align: 'center', isAlert: true, getValue: (p) => p.metadata?.auditPoints?.point_45_transfer === 'होय' || p.tenancy89ARecords?.[0]?.unauthorizedTransfer || (p.forwardCases?.some(fc => fc.violationType === 'SHARTBHANG' || fc.violationType === 'TRIBAL_LAND_VIOLATION')) ? 'होय' : 'नाही' },
+      { key: 'transferBreach', label: 'हस्तांतरणाबाबत शर्तभंग आहे काय?', width: 22, align: 'center', isAlert: true, getValue: (p) => p.metadata?.auditPoints?.point_45_transfer === 'होय' || p.tenancy89ARecords?.[0]?.unauthorizedTransfer || (p.forwardCases?.some(fc => fc.violationType === 'SHARTBHANG' || fc.violationType === 'TRIBAL_LAND_VIOLATION')) ? 'होय' : 'नाही' },
       { key: 'otherRightsNoted', label: 'इतर अधिकारात नोंद घेतलेली आहे काय?', width: 20, align: 'center', getValue: (p, pt) => pt[40] === 'होय' || (p.metadata?.otherRights && p.metadata.otherRights !== '-' && p.metadata.otherRights !== '....') ? 'होय' : 'नाही' }
     ];
   }
@@ -337,11 +337,11 @@ export function getDetailedColumnsForBooklet(catId) {
     { key: 'srNo', label: 'अ.क्र.', width: 6, align: 'center', getValue: getSr },
     { key: 'village', label: 'गावाचे नाव', width: 22, align: 'left', getValue: getVillage },
     { key: 'surveyNo', label: 'सर्व्हे क्रमांक', width: 16, align: 'center', getValue: getSurvey },
-    { key: 'area', label: 'क्षेत्र (हे.आर.)', width: 14, align: 'right', isArea: true, getValue: getArea },
+    { key: 'area', label: 'क्षेत्र', width: 14, align: 'right', isArea: true, getValue: getArea },
     { key: 'owner', label: 'भोगवटदाराचे नाव', width: 28, align: 'left', isOwner: true, getValue: getOwner },
     { key: 'tenureClass', label: 'भोगवट्दार वर्ग', width: 16, align: 'center', getValue: getTenureClass },
     { key: 'shartbhang', label: 'शर्तभंग झालेला आहे काय?', width: 18, align: 'center', isAlert: true, getValue: getShartbhang },
-    { key: 'illegalConv', label: 'अवैधरित्या वर्ग 2 मधून वर्ग 1', width: 20, align: 'center', isAlert: true, getValue: getIllegalConv },
+    { key: 'illegalConv', label: 'अवैधरित्या वर्ग 2 मधून वर्ग 1 मध्ये रूपांतरण केलेले आहे काय?', width: 24, align: 'center', isAlert: true, getValue: getIllegalConv },
     { key: 'otherRightsNoted', label: 'इतर अधिकारात नोंद घेतलेली आहे काय?', width: 20, align: 'center', getValue: getOtherRightsNoted },
     { key: 'illegalDel', label: 'अवैधरित्या इतर अधिकारातील नोंदी कमी केलेल्या आहे काय?', width: 22, align: 'center', isAlert: true, getValue: getIllegalDel }
   ];
