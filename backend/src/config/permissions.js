@@ -1,0 +1,349 @@
+/**
+ * Central RBAC Permission Catalog & Default Role Presets
+ * Machine keys (slugs / permission keys) stay immutable; role display names (name / nameMr)
+ * and role-permission assignments are stored in PostgreSQL and editable by Superadmin/Admin.
+ */
+
+export const PERMISSION_CATALOG = [
+  // 1. Land Parcels & Data Editing
+  {
+    key: 'parcel.view',
+    module: 'parcels',
+    labelEn: 'View Land Parcels & 360° Trace',
+    labelMr: 'भूखंड नोंदवही व ३६०° इतिहास पाहणे',
+    description: 'View land parcel registry, 360-degree history trace, and download parcel dossier PDFs.',
+    sortOrder: 10,
+  },
+  {
+    key: 'parcel.create',
+    module: 'parcels',
+    labelEn: 'Create New Land Parcel',
+    labelMr: 'नवीन भूखंड नोंद तयार करणे',
+    description: 'Manually register a new land parcel record.',
+    sortOrder: 20,
+  },
+  {
+    key: 'parcel.edit',
+    module: 'parcels',
+    labelEn: 'Edit Land Parcel & Audit Checkpoints',
+    labelMr: 'भूखंड व ४६ तपासणी मुद्दे संपादित करणे',
+    description: 'Edit owner name, tenure, area, 46 checkpoints, and 1950-1995 historical timeline.',
+    sortOrder: 30,
+  },
+
+  // 2. Prapatra, Booklets & Excel Ingestion
+  {
+    key: 'prapatra.view',
+    module: 'prapatra',
+    labelEn: 'View Prapatra 1–18, Goshwara & Parcha',
+    labelMr: 'प्रपत्र १–१८, गोषवारा व पर्चा पाहणे',
+    description: 'View statutory Prapatra reports, Goshwara summaries, and Renumbering Parcha.',
+    sortOrder: 40,
+  },
+  {
+    key: 'prapatra.export',
+    module: 'prapatra',
+    labelEn: 'Export Reports (Excel / PDF)',
+    labelMr: 'अहवाल एक्सेल / पीडीएफ निर्यात करणे',
+    description: 'Download Prapatra, Goshwara, Renumbering Parcha, and Booklet Excel/PDF exports.',
+    sortOrder: 50,
+  },
+  {
+    key: 'prapatra.upload',
+    module: 'prapatra',
+    labelEn: 'Upload Village Excel & Inspect Diff',
+    labelMr: 'गाव एक्सेल अपलोड व फरक तपासणी',
+    description: 'Run pre-flight diff inspection and upload 1–45 Excel workbooks or parcel lists.',
+    sortOrder: 60,
+  },
+  {
+    key: 'prapatra.rollup_edit',
+    module: 'prapatra',
+    labelEn: 'Edit Village Rollups & Goshwara',
+    labelMr: 'गाव गोषवारा व सारांश आकडेवारी संपादित करणे',
+    description: 'Modify Prapatra rollup counts and Goshwara summary overrides.',
+    sortOrder: 70,
+  },
+  {
+    key: 'booklet.edit',
+    module: 'prapatra',
+    labelEn: 'Edit Statutory Booklet Records',
+    labelMr: 'वैधानिक पुस्तिका (Booklets 1–4) नोंदी संपादित करणे',
+    description: 'Create or update Ceiling, Bhudan, Tribal, and Tenancy 89A records.',
+    sortOrder: 80,
+  },
+  {
+    key: 'village.purge',
+    module: 'prapatra',
+    labelEn: 'Wipe & Purge Village Data (Destructive)',
+    labelMr: 'गावाचा संपूर्ण डेटा हटवणे / पुनर्स्थापना (Purge)',
+    description: 'Purge or clean-slate replace all parcel and case records for a village.',
+    sortOrder: 90,
+  },
+
+  // 3. Google Drive Sync
+  {
+    key: 'drive.view',
+    module: 'drive_sync',
+    labelEn: 'View Google Drive Status & Scan Folders',
+    labelMr: 'गुगल ड्राइव्ह जोडणी व फोल्डर स्कॅन पाहणे',
+    description: 'Check Drive API connection and scan Taluka/Circle/Village sheet hierarchy.',
+    sortOrder: 100,
+  },
+  {
+    key: 'drive.pull',
+    module: 'drive_sync',
+    labelEn: 'Pull Village Data from Google Drive',
+    labelMr: 'गुगल ड्राइव्हवरून पोर्टलमध्ये डेटा आणणे (Pull)',
+    description: 'Pull and reconcile village Excel sheets from Google Drive into Portal DB.',
+    sortOrder: 110,
+  },
+  {
+    key: 'drive.push',
+    module: 'drive_sync',
+    labelEn: 'Push Portal Changes to Google Drive',
+    labelMr: 'पोर्टलवरील बदल गुगल ड्राइव्हवर सेव्ह करणे (Push)',
+    description: 'Write portal parcel updates back to Google Drive Excel files.',
+    sortOrder: 120,
+  },
+  {
+    key: 'drive.edit_sheet',
+    module: 'drive_sync',
+    labelEn: 'Modify Google Drive Sheet Columns / Rows',
+    labelMr: 'गुगल ड्राइव्ह शीटमध्ये कॉलम / रो जोडणे',
+    description: 'Append custom columns or new parcel rows directly into Google Drive sheets.',
+    sortOrder: 130,
+  },
+
+  // 4. Quasi-Judicial Cases & Documents
+  {
+    key: 'case.view',
+    module: 'cases',
+    labelEn: 'View Enforcement Cases & Hearings',
+    labelMr: 'कायदेशीर प्रकरणे व सुनावणी पाहणे',
+    description: 'View enforcement cases, hearings, and Shasan Jama status.',
+    sortOrder: 140,
+  },
+  {
+    key: 'case.create',
+    module: 'cases',
+    labelEn: 'Register New Enforcement Case',
+    labelMr: 'नवीन कायदेशीर प्रकरण दाखल करणे',
+    description: 'Open new enforcement/violation cases against land parcels.',
+    sortOrder: 150,
+  },
+  {
+    key: 'case.hearing',
+    module: 'cases',
+    labelEn: 'Record Case Hearing Proceedings',
+    labelMr: 'प्रकरणाची सुनावणी नोंद करणे',
+    description: 'Add hearing logs and schedule next hearing dates.',
+    sortOrder: 160,
+  },
+  {
+    key: 'case.order',
+    module: 'cases',
+    labelEn: 'Pass Final Order / Mark Shasan Jama',
+    labelMr: 'अंतिम आदेश पारित करणे / शासन जमा करणे',
+    description: 'Update case final status and mark land as repossessed to Government.',
+    sortOrder: 170,
+  },
+  {
+    key: 'document.view',
+    module: 'documents',
+    labelEn: 'View & Download Archival Documents',
+    labelMr: 'दस्तऐवज (DMS) पाहणे व डाउनलोड करणे',
+    description: 'View DMS documents and generate signed download URLs.',
+    sortOrder: 180,
+  },
+  {
+    key: 'document.upload',
+    module: 'documents',
+    labelEn: 'Upload Archival Documents',
+    labelMr: 'दस्तऐवज अपलोड करणे',
+    description: 'Upload 7/12 extracts, notices, panchnamas, and SDO/Collector orders.',
+    sortOrder: 190,
+  },
+
+  // 5. Administration & Governance
+  {
+    key: 'user.view',
+    module: 'admin',
+    labelEn: 'View Users Directory',
+    labelMr: 'अधिकारी / वापरकर्ता यादी पाहणे',
+    description: 'View registered portal accounts, assigned roles, and Taluka scopes.',
+    sortOrder: 200,
+  },
+  {
+    key: 'user.manage',
+    module: 'admin',
+    labelEn: 'Manage Users & Custom User Permissions',
+    labelMr: 'वापरकर्ते व वैयक्तिक विशेष अधिकार व्यवस्थापित करणे',
+    description: 'Create/edit/deactivate user accounts, change roles, set Taluka scope, and grant/revoke per-user permissions.',
+    sortOrder: 210,
+  },
+  {
+    key: 'role.view',
+    module: 'admin',
+    labelEn: 'View Roles & Permission Matrix',
+    labelMr: 'भूमिका व अधिकार तक्ता पाहणे',
+    description: 'Inspect configured roles and their assigned permissions.',
+    sortOrder: 220,
+  },
+  {
+    key: 'role.manage',
+    module: 'admin',
+    labelEn: 'Create Roles, Edit Role Names & Permissions',
+    labelMr: 'भूमिका तयार करणे, नावे बदलणे व अधिकार निश्चित करणे',
+    description: 'Create extra roles, rename roles (e.g. Admin / Officer), and configure role permission matrices.',
+    sortOrder: 230,
+  },
+  {
+    key: 'audit.view',
+    module: 'admin',
+    labelEn: 'View System & RBAC Audit Logs',
+    labelMr: 'प्रणाली व सुरक्षा ऑडिट नोंदी पाहणे',
+    description: 'View tamper-evident logs of edits, Drive syncs, purges, and role changes.',
+    sortOrder: 240,
+  },
+  {
+    key: 'district.all_talukas',
+    module: 'admin',
+    labelEn: 'Cross-Taluka District-Wide Access',
+    labelMr: 'संपूर्ण जिल्हा (सर्व १५ तालुके) प्रवेश',
+    description: 'Bypass single-Taluka jurisdiction restrictions across all 15 talukas.',
+    sortOrder: 250,
+  },
+];
+
+export const ALL_PERMISSION_KEYS = PERMISSION_CATALOG.map((p) => p.key);
+
+export const DEFAULT_ROLES = [
+  {
+    slug: 'superadmin',
+    name: 'Collector (Superadmin)',
+    nameMr: 'जिल्हाधिकारी (सुपरअॅडमिन)',
+    description: 'Apex District Collector authority with full unrestricted system, data, sync, and RBAC control.',
+    hierarchyLevel: 100,
+    isSystem: true,
+    isWildcard: true,
+    permissions: ALL_PERMISSION_KEYS,
+  },
+  {
+    slug: 'admin',
+    name: 'Admin',
+    nameMr: 'प्रशासक',
+    description: 'District / HQ Administrator (e.g. Sub-Collector / Addl. Collector). Manages officers, data edits, reports, and Drive sync.',
+    hierarchyLevel: 80,
+    isSystem: true,
+    isWildcard: false,
+    permissions: [
+      'parcel.view',
+      'parcel.create',
+      'parcel.edit',
+      'prapatra.view',
+      'prapatra.export',
+      'prapatra.upload',
+      'prapatra.rollup_edit',
+      'booklet.edit',
+      'drive.view',
+      'drive.pull',
+      'drive.push',
+      'case.view',
+      'case.create',
+      'case.hearing',
+      'case.order',
+      'document.view',
+      'document.upload',
+      'user.view',
+      'user.manage',
+      'role.view',
+      'role.manage',
+      'audit.view',
+      'district.all_talukas',
+    ],
+  },
+  {
+    slug: 'officer',
+    name: 'Officer',
+    nameMr: 'अधिकारी',
+    description: 'Revenue field/sub-divisional officer (SDO, Tehsildar, Naib Tehsildar, Circle Officer, Talathi).',
+    hierarchyLevel: 50,
+    isSystem: true,
+    isWildcard: false,
+    permissions: [
+      'parcel.view',
+      'prapatra.view',
+      'prapatra.export',
+      'case.view',
+      'case.hearing',
+      'document.view',
+      'document.upload',
+    ],
+  },
+  {
+    slug: 'data_operator',
+    name: 'Data Operator',
+    nameMr: 'डेटा ऑपरेटर',
+    description: 'Data entry and Excel ingestion operator for taluka/village records.',
+    hierarchyLevel: 30,
+    isSystem: false,
+    isWildcard: false,
+    permissions: [
+      'parcel.view',
+      'parcel.create',
+      'parcel.edit',
+      'prapatra.view',
+      'prapatra.export',
+      'prapatra.upload',
+      'drive.view',
+      'drive.pull',
+      'case.view',
+      'document.view',
+      'document.upload',
+    ],
+  },
+  {
+    slug: 'viewer',
+    name: 'Auditor / Viewer',
+    nameMr: 'लेखापरीक्षक (केवळ वाचन)',
+    description: 'Read-only access to dashboards, parcels, reports, cases, and audit logs.',
+    hierarchyLevel: 10,
+    isSystem: false,
+    isWildcard: false,
+    permissions: [
+      'parcel.view',
+      'prapatra.view',
+      'prapatra.export',
+      'case.view',
+      'document.view',
+      'audit.view',
+      'district.all_talukas',
+    ],
+  },
+];
+
+/**
+ * Map legacy UserRole enum values to dynamic role slugs during migration/fallback.
+ */
+export const LEGACY_ROLE_TO_SLUG = {
+  SUPERADMIN: 'superadmin',
+  COLLECTOR: 'superadmin',
+  SUB_COLLECTOR: 'admin',
+  SDO: 'officer',
+  TEHSILDAR: 'officer',
+  NAIB_TEHSILDAR: 'officer',
+  CIRCLE_OFFICER: 'officer',
+  TALATHI: 'officer',
+  CITIZEN: 'viewer',
+};
+
+/**
+ * Extra per-user overrides for legacy seeded SDO/Tehsildar accounts so existing
+ * quasi-judicial workflows remain intact after migration.
+ */
+export const LEGACY_ROLE_DEFAULT_GRANTS = {
+  SDO: ['case.create', 'case.order', 'parcel.edit', 'booklet.edit'],
+  TEHSILDAR: ['case.create', 'parcel.edit', 'prapatra.upload', 'booklet.edit'],
+  NAIB_TEHSILDAR: ['booklet.edit'],
+};

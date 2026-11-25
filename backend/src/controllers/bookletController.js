@@ -2,6 +2,7 @@ import prisma from '../config/prisma.js';
 import { generateBookletExcel, getRowData } from '../utils/bookletExcelGenerator.js';
 import { generateBookletPdf } from '../utils/pdfGenerator.js';
 import { getVillageVariants } from '../utils/prapatraGenerator.js';
+import { userCanAccessTaluka } from '../services/rbacService.js';
 
 const modelMap = {
   ceiling: 'ceilingRecord',
@@ -141,6 +142,20 @@ export const createOrUpdateBookletRecord = async (req, res) => {
     const specificModel = modelMap[type];
     if (!specificModel || !prisma[specificModel]) {
       return res.status(400).json({ success: false, error: `Invalid booklet type: ${type}` });
+    }
+
+    const parcel = await prisma.landParcel.findUnique({
+      where: { id: parcelId },
+      select: { taluka: true },
+    });
+    if (!parcel) {
+      return res.status(404).json({ success: false, error: 'Parcel not found' });
+    }
+    if (!userCanAccessTaluka(req.user, parcel.taluka)) {
+      return res.status(403).json({
+        success: false,
+        error: `आपल्याकडे '${parcel.taluka}' तालुक्यातील पुस्तिका संपादित करण्याचे अधिकार नाहीत. (Taluka scope restricted to ${req.user.taluka})`,
+      });
     }
 
     const existing = await prisma[specificModel].findFirst({

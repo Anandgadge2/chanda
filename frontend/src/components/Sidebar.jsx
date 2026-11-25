@@ -22,6 +22,7 @@ import {
 import clsx from 'clsx';
 import { useFocusTrap } from '../hooks/useFocusTrap';
 import { useTranslation } from './LanguageContext';
+import { useAuth } from './AuthContext';
 
 export const navItems = [
   {
@@ -29,30 +30,35 @@ export const navItems = [
     labelMr: 'महसूल डॅशबोर्ड',
     labelEn: 'Revenue Dashboard',
     icon: LayoutGrid,
+    anyPermissions: [],
   },
   {
     href: '/parcels',
     labelMr: 'भूखंड नोंदवही (७/१२)',
     labelEn: 'Land Parcel Register',
     icon: MapPin,
+    anyPermissions: ['parcel.view'],
   },
   {
     href: '/bulk-upload',
     labelMr: 'गाव एक्सेल अपलोड',
     labelEn: 'Village Excel Upload',
     icon: UploadCloud,
+    anyPermissions: ['prapatra.upload', 'drive.view', 'drive.pull', 'drive.push', 'drive.edit_sheet'],
   },
   {
     href: '/reports',
     labelMr: 'अहवाल व प्रपत्र जनरेशन',
     labelEn: 'Reports & Prapatra',
     icon: FileSpreadsheet,
+    anyPermissions: ['prapatra.view'],
   },
   {
     href: '/settings',
     labelMr: 'खाते व सुरक्षा सेटिंग्ज',
     labelEn: 'Account & Security Settings',
     icon: Settings,
+    anyPermissions: [],
   },
 ];
 
@@ -66,6 +72,11 @@ export default function Sidebar({
   const pathname = usePathname();
   const mobileTrapRef = useFocusTrap(mobileOpen);
   const { locale, setLocale, isMarathi } = useTranslation();
+  const { hasAnyPermission } = useAuth();
+
+  const visibleNavItems = navItems.filter(
+    (item) => !item.anyPermissions || item.anyPermissions.length === 0 || hasAnyPermission(...item.anyPermissions)
+  );
 
   // Handle ESC key to close mobile drawer
   useEffect(() => {
@@ -86,7 +97,7 @@ export default function Sidebar({
     '/bulk-upload',
     '/reports',
   ]
-    .map((href) => navItems.find((n) => n.href === href))
+    .map((href) => visibleNavItems.find((n) => n.href === href))
     .filter(Boolean)
     .slice(0, 4);
 
@@ -159,7 +170,7 @@ export default function Sidebar({
               collapsed ? 'space-y-1.5 items-center w-full' : 'space-y-1 w-full flex-1'
             )}
           >
-            {navItems.map((item) => {
+            {visibleNavItems.map((item) => {
               const Icon = item.icon;
               const isActive =
                 item.href === '/'
@@ -377,7 +388,7 @@ export default function Sidebar({
 
           {/* Navigation Links in Mobile Drawer */}
           <nav className="space-y-1.5 flex-1 py-3">
-            {navItems.map((item) => {
+            {visibleNavItems.map((item) => {
               const Icon = item.icon;
               const isActive = pathname === item.href;
               const label = isMarathi ? item.labelMr : item.labelEn;

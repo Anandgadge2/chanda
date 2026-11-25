@@ -36,10 +36,14 @@ import ArchivalDocumentViewer from './ArchivalDocumentViewer';
 import RevenueShortcutGuideModal from './RevenueShortcutGuideModal';
 import { useFocusTrap } from '../hooks/useFocusTrap';
 import { useTranslation } from './LanguageContext';
+import { useAuth } from './AuthContext';
 import { formatVillageName, formatTalukaName } from '../lib/villageUtils';
 
 export default function ParcelTraceDrawer({ upi, onClose, onRefresh }) {
   const { locale, isMarathi } = useTranslation();
+  const { hasPermission } = useAuth();
+  const canEditParcel = hasPermission('parcel.edit');
+  const canUploadDoc = hasPermission('document.upload');
   const trapRef = useFocusTrap(Boolean(upi));
   const [mounted, setMounted] = useState(false);
   const [data, setData] = useState(null);
@@ -243,15 +247,17 @@ export default function ParcelTraceDrawer({ upi, onClose, onRefresh }) {
             </button>
 
             {/* Edit / Rectification Button */}
-            <button
-              type="button"
-              onClick={() => setEditModalOpen(true)}
-              className="px-2 sm:px-2.5 py-1.5 rounded-lg text-xs font-semibold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 transition flex items-center gap-1 sm:gap-1.5 cursor-pointer shadow-2xs active:scale-95"
-              title={isMarathi ? 'अभिलेख दुरुस्ती करा (Edit Parcel & Timeline)' : 'Edit Parcel & Timeline'}
-            >
-              <Edit3 className="w-3.5 h-3.5 text-emerald-600" />
-              <span className="hidden xs:inline">{isMarathi ? 'दुरुस्ती' : 'Edit'}</span>
-            </button>
+            {canEditParcel && (
+              <button
+                type="button"
+                onClick={() => setEditModalOpen(true)}
+                className="px-2 sm:px-2.5 py-1.5 rounded-lg text-xs font-semibold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 transition flex items-center gap-1 sm:gap-1.5 cursor-pointer shadow-2xs active:scale-95"
+                title={isMarathi ? 'अभिलेख दुरुस्ती करा (Edit Parcel & Timeline)' : 'Edit Parcel & Timeline'}
+              >
+                <Edit3 className="w-3.5 h-3.5 text-emerald-600" />
+                <span className="hidden xs:inline">{isMarathi ? 'दुरुस्ती' : 'Edit'}</span>
+              </button>
+            )}
 
             {/* Print / Export Dossier PDF */}
             <button
@@ -726,14 +732,16 @@ export default function ParcelTraceDrawer({ upi, onClose, onRefresh }) {
                             {isMarathi ? 'डिजिटल स्कॅन व भौतिक कपाट संदर्भ' : 'Digital scans & physical room bundle reference'}
                           </p>
                         </div>
-                        <button
-                          type="button"
-                          onClick={() => setUploadModalOpen(true)}
-                          className="inline-flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium px-2.5 py-1.5 rounded-lg transition shadow-xs cursor-pointer"
-                        >
-                          <Plus className="w-3.5 h-3.5" />
-                          <span>{isMarathi ? 'नवीन जोडा' : 'Attach New'}</span>
-                        </button>
+                        {canUploadDoc && (
+                          <button
+                            type="button"
+                            onClick={() => setUploadModalOpen(true)}
+                            className="inline-flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium px-2.5 py-1.5 rounded-lg transition shadow-xs cursor-pointer"
+                          >
+                            <Plus className="w-3.5 h-3.5" />
+                            <span>{isMarathi ? 'नवीन जोडा' : 'Attach New'}</span>
+                          </button>
+                        )}
                       </div>
 
                       {parcel.documents?.length === 0 ? (
@@ -816,16 +824,19 @@ export default function ParcelTraceDrawer({ upi, onClose, onRefresh }) {
         {/* Minimalist Footer Bar */}
         <div className="px-5 py-3 bg-slate-50/80 border-t border-slate-200/80 flex flex-wrap justify-between items-center gap-3 shrink-0">
           <div className="flex items-center gap-3">
-            <button
-              type="button"
-              onClick={() => setUploadModalOpen(true)}
-              className="inline-flex items-center gap-1.5 text-xs text-blue-700 hover:text-blue-800 font-medium transition cursor-pointer"
-            >
-              <Plus className="w-3.5 h-3.5" />
-              <span>{isMarathi ? 'दस्तऐवज संलग्न करा (Attach Document)' : 'Attach Archival Document'}</span>
-            </button>
-
-            <span className="text-slate-300 hidden sm:inline">•</span>
+            {canUploadDoc && (
+              <>
+                <button
+                  type="button"
+                  onClick={() => setUploadModalOpen(true)}
+                  className="inline-flex items-center gap-1.5 text-xs text-blue-700 hover:text-blue-800 font-medium transition cursor-pointer"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>{isMarathi ? 'दस्तऐवज संलग्न करा (Attach Document)' : 'Attach Archival Document'}</span>
+                </button>
+                <span className="text-slate-300 hidden sm:inline">•</span>
+              </>
+            )}
 
             <span className="text-xs text-slate-400 hidden md:inline">
               {isMarathi ? 'जिल्हाधिकारी कार्यालय चंद्रपूर • ई-अभिलेख कक्ष' : 'Collectorate Chandrapur • e-Records Cell'}

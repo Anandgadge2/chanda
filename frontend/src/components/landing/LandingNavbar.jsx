@@ -24,13 +24,13 @@ export default function LandingNavbar({ onOpenAuth }) {
   const displayOfficerName = () => {
     if (!user) return '';
     if (!isMarathi) {
-      if (user.role === 'COLLECTOR' || user.fullName?.includes('जिल्हाधिकारी')) {
-        return 'District Collector, Chandrapur';
+      if (user.roleSlug === 'superadmin' || user.role === 'COLLECTOR' || user.fullName?.includes('जिल्हाधिकारी')) {
+        return user.roleName || 'District Collector, Chandrapur';
       }
       if (user.role === 'SDO' || user.fullName?.includes('उपविभागीय')) {
         return 'Sub-Divisional Officer (SDO)';
       }
-      if (user.role === 'TAHSILDAR' || user.fullName?.includes('तहसीलदार')) {
+      if (user.role === 'TEHSILDAR' || user.role === 'TAHSILDAR' || user.fullName?.includes('तहसीलदार')) {
         return 'Tahsildar';
       }
       return user.fullNameEn || user.fullName || 'Revenue Officer';
@@ -41,14 +41,13 @@ export default function LandingNavbar({ onOpenAuth }) {
   const displayOfficerDesignation = () => {
     if (!user) return '';
     if (!isMarathi) {
-      if (user.role === 'COLLECTOR' || user.designation?.includes('जिल्हाधिकारी')) {
-        return 'District Collector';
-      }
-      if (user.role === 'SDO') return 'Sub-Divisional Officer';
-      if (user.role === 'TAHSILDAR') return 'Tahsildar';
-      return 'Revenue Officer';
+      return user.roleName || user.designation || 'Revenue Officer';
     }
-    return (user.designation || (user.role === 'COLLECTOR' ? t('roles.collector') : user.role))
+    return (
+      user.roleNameMr ||
+      user.designation ||
+      (user.role === 'COLLECTOR' ? t('roles.collector') : user.role)
+    )
       .replace(/\s*\([^)]*[a-zA-Z][^)]*\)/g, '')
       .trim();
   };

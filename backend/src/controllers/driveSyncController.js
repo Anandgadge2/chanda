@@ -8,6 +8,8 @@ import {
   ROOT_FOLDER_ID
 } from '../services/googleDriveService.js';
 import { logger } from '../utils/logger.js';
+import { logAudit } from '../middleware/auditMiddleware.js';
+import { userCanAccessTaluka } from '../services/rbacService.js';
 
 /**
  * Test and return Drive API connection status
@@ -62,7 +64,21 @@ export async function pullVillage(req, res) {
       });
     }
 
+    if (taluka && !userCanAccessTaluka(req.user, taluka)) {
+      return res.status(403).json({
+        success: false,
+        error: `आपल्याकडे '${taluka}' तालुक्यासाठी गुगल ड्राइव्ह सिंक अधिकार नाहीत. (Taluka scope restricted to ${req.user.taluka})`
+      });
+    }
+
     const result = await pullVillageFromDrive({ fileId, mimeType, taluka, villageName, circle });
+    await logAudit({
+      userId: req.user?.id || null,
+      action: 'DRIVE_PULL_VILLAGE',
+      entityType: 'DriveSync',
+      newData: { fileId, taluka: result.taluka, villageName: result.villageName },
+      req,
+    });
     res.json({
       success: true,
       message: `${result.villageName} (${result.taluka}) चा डेटा यशस्वीरीत्या पोर्टलमध्ये सिंक झाला.`,
@@ -91,7 +107,21 @@ export async function pushVillage(req, res) {
       });
     }
 
+    if (taluka && !userCanAccessTaluka(req.user, taluka)) {
+      return res.status(403).json({
+        success: false,
+        error: `आपल्याकडे '${taluka}' तालुक्यासाठी गुगल ड्राइव्हवर सेव्ह करण्याचे अधिकार नाहीत. (Taluka scope restricted to ${req.user.taluka})`
+      });
+    }
+
     const result = await pushPortalVillageToDrive({ fileId, mimeType, taluka, villageName });
+    await logAudit({
+      userId: req.user?.id || null,
+      action: 'DRIVE_PUSH_VILLAGE',
+      entityType: 'DriveSync',
+      newData: { fileId, taluka, villageName: result.villageName },
+      req,
+    });
     res.json({
       success: true,
       message: `${result.villageName} मधील बदल गुगल ड्राइव्ह शीटवर यशस्वीरीत्या अपडेट झाले.`,
@@ -121,6 +151,13 @@ export async function addColumn(req, res) {
     }
 
     const result = await addColumnToDriveFile({ fileId, mimeType, columnName, defaultValue });
+    await logAudit({
+      userId: req.user?.id || null,
+      action: 'DRIVE_ADD_COLUMN',
+      entityType: 'DriveSync',
+      newData: { fileId, columnName },
+      req,
+    });
     res.json({
       success: true,
       message: `कॉलम '${columnName}' ड्राइव्ह फाईलमध्ये यशस्वीपणे जोडला गेला.`,
@@ -149,7 +186,21 @@ export async function addRow(req, res) {
       });
     }
 
+    if (taluka && !userCanAccessTaluka(req.user, taluka)) {
+      return res.status(403).json({
+        success: false,
+        error: `आपल्याकडे '${taluka}' तालुक्यासाठी गुगल ड्राइव्हमध्ये नोंद जोडण्याचे अधिकार नाहीत. (Taluka scope restricted to ${req.user.taluka})`
+      });
+    }
+
     const result = await addRowToDriveFile({ fileId, mimeType, taluka, villageName, rowData });
+    await logAudit({
+      userId: req.user?.id || null,
+      action: 'DRIVE_ADD_ROW',
+      entityType: 'DriveSync',
+      newData: { fileId, taluka, villageName, gatNumber: rowData?.gatNumber },
+      req,
+    });
     res.json({
       success: true,
       message: `नवीन नोंद (Row) ड्राइव्ह फाईलमध्ये यशस्वीपणे जोडली गेली.`,

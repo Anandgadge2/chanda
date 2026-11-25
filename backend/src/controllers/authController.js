@@ -2,12 +2,20 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import prisma from '../config/prisma.js';
 import { logAudit } from '../middleware/auditMiddleware.js';
+import { invalidateUserCache } from '../middleware/authMiddleware.js';
+import {
+  ensureRbacSeeded,
+  loadUserWithRbac,
+  buildUserAuthContext,
+  userHasPermission,
+} from '../services/rbacService.js';
+import { LEGACY_ROLE_TO_SLUG } from '../config/permissions.js';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'chandrapur-collectorate-secure-jwt-secret-key-2026';
 
 /**
  * POST /api/auth/login
- * Officer & Citizen login with email and password
+ * Officer & Admin login with email and password
  */
 export const login = async (req, res) => {
   try {
@@ -20,26 +28,26 @@ export const login = async (req, res) => {
       });
     }
 
-    const normalizedEmail = email.trim().toLowerCase();
-    const user = await prisma.user.findUnique({
-      where: { email: normalizedEmail },
-    });
+    await ensureRbacSeeded();
 
-    if (!user) {
+    const normalizedEmail = email.trim().toLowerCase();
+    const dbUser = await loadUserWithRbac({ email: normalizedEmail });
+
+    if (!dbUser) {
       return res.status(401).json({
         success: false,
         error: 'अवैध ईमेल किंवा संकेतशब्द. (Invalid credentials)',
       });
     }
 
-    if (!user.isActive) {
+    if (!dbUser.isActive || dbUser.roleRef?.isActive === false) {
       return res.status(403).json({
         success: false,
-        error: 'हे खाते निष्क्रिय करण्यात आले आहे. कृपया प्रशासकाशी संपर्क साधा. (Account is inactive)',
+        error: 'हे खाते किंवा भूमिका निष्क्रिय करण्यात आली आहे. कृपया प्रशासकाशी संपर्क साधा. (Account or role is inactive)',
       });
     }
 
-    const isMatch = await bcrypt.compare(password, user.passwordHash);
+    const isMatch = await bcrypt.compare(password, dbUser.passwordHash);
     if (!isMatch) {
       return res.status(401).json({
         success: false,
@@ -47,37 +55,28 @@ export const login = async (req, res) => {
       });
     }
 
+    const userPayload = buildUserAuthContext(dbUser);
+
     // Determine expiry based on role
-    const isOfficer = user.role !== 'CITIZEN';
+    const isOfficer = userPayload.roleSlug !== 'viewer' && dbUser.role !== 'CITIZEN';
     const expiresIn = isOfficer ? '8h' : '24h';
     const expiresAt = new Date(Date.now() + (isOfficer ? 8 : 24) * 60 * 60 * 1000);
 
     const token = jwt.sign(
       {
-        id: user.id,
-        email: user.email,
-        role: user.role,
-        fullName: user.fullName,
-        designation: user.designation,
-        taluka: user.taluka,
+        id: userPayload.id,
+        email: userPayload.email,
+        role: userPayload.role,
+        roleId: userPayload.roleId,
+        roleSlug: userPayload.roleSlug,
+        tokenVersion: userPayload.tokenVersion,
+        fullName: userPayload.fullName,
+        designation: userPayload.designation,
+        taluka: userPayload.taluka,
       },
       JWT_SECRET,
       { expiresIn }
     );
-
-    // Prepare user payload
-    const userPayload = {
-      id: user.id,
-      fullName: user.fullName,
-      email: user.email,
-      mobile: user.mobile,
-      role: user.role,
-      taluka: user.taluka,
-      designation: user.designation,
-      consentGiven: user.consentGiven,
-      consentAt: user.consentAt,
-      consentVersion: user.consentVersion,
-    };
 
     // Return instant success response to client immediately
     res.json({
@@ -96,7 +95,7 @@ export const login = async (req, res) => {
     Promise.allSettled([
       prisma.session.create({
         data: {
-          userId: user.id,
+          userId: dbUser.id,
           token,
           ipAddress: ipAddress.slice(0, 64),
           userAgent: userAgent.slice(0, 512),
@@ -104,15 +103,15 @@ export const login = async (req, res) => {
         },
       }),
       prisma.user.update({
-        where: { id: user.id },
+        where: { id: dbUser.id },
         data: { lastLoginAt: new Date() },
       }),
       logAudit({
-        userId: user.id,
+        userId: dbUser.id,
         action: 'USER_LOGIN',
         entityType: 'User',
-        entityId: user.id,
-        newData: { email: user.email, role: user.role },
+        entityId: dbUser.id,
+        newData: { email: dbUser.email, role: dbUser.role, roleSlug: userPayload.roleSlug },
         req,
       }),
     ]).catch((err) => {
@@ -129,7 +128,7 @@ export const login = async (req, res) => {
 
 /**
  * GET /api/auth/me
- * Return currently authenticated user profile
+ * Return currently authenticated user profile with live role & permissions
  */
 export const getMe = async (req, res) => {
   try {
@@ -154,6 +153,10 @@ export const logout = async (req, res) => {
   try {
     const authHeader = req.headers.authorization;
     const token = authHeader && authHeader.startsWith('Bearer ') ? authHeader.split(' ')[1] : null;
+
+    if (req.user?.id) {
+      invalidateUserCache(req.user.id);
+    }
 
     // Return immediate success so logout is 100% instant
     res.json({
@@ -197,11 +200,22 @@ export const logout = async (req, res) => {
 
 /**
  * POST /api/auth/register
- * Admin or self-service user registration
+ * Provision a new officer account (requires user.manage permission)
  */
 export const register = async (req, res) => {
   try {
-    const { fullName, email, mobile, password, role = 'CITIZEN', taluka, designation, consentGiven } = req.body;
+    const {
+      fullName,
+      email,
+      mobile,
+      password,
+      role = 'TEHSILDAR',
+      roleId,
+      roleSlug,
+      taluka,
+      designation,
+      consentGiven = true,
+    } = req.body;
 
     if (!fullName || !email || !password) {
       return res.status(400).json({
@@ -210,13 +224,21 @@ export const register = async (req, res) => {
       });
     }
 
-    // DPDPA 2023 Sec 6: Explicit consent validation
     if (!consentGiven) {
       return res.status(400).json({
         success: false,
         error: 'गोपनीयता धोरण व डेटा संरक्षण संमती आवश्यक आहे. (Consent to privacy policy is mandatory under DPDPA 2023)',
       });
     }
+
+    if (!req.user || !userHasPermission(req.user, 'user.manage')) {
+      return res.status(403).json({
+        success: false,
+        error: 'हे पोर्टल केवळ अंतर्गत वापरासाठी आहे. नवीन खाते तयार करण्यासाठी user.manage अधिकार आवश्यक आहेत. (Requires user.manage permission)',
+      });
+    }
+
+    await ensureRbacSeeded();
 
     const normalizedEmail = email.trim().toLowerCase();
     const existing = await prisma.user.findUnique({
@@ -230,16 +252,39 @@ export const register = async (req, res) => {
       });
     }
 
-    // Internal portal: Open citizen registration is disabled.
-    // User accounts can only be provisioned internally by Collector or SuperAdmin.
-    if (!req.user || !['COLLECTOR', 'SUPERADMIN'].includes(req.user.role)) {
-      return res.status(403).json({
+    // Resolve dynamic Role record
+    let targetRole = null;
+    if (roleId) {
+      targetRole = await prisma.role.findUnique({ where: { id: roleId } });
+    } else if (roleSlug) {
+      targetRole = await prisma.role.findUnique({ where: { slug: roleSlug } });
+    } else {
+      const mappedSlug = LEGACY_ROLE_TO_SLUG[role] || String(role).toLowerCase();
+      targetRole = await prisma.role.findUnique({ where: { slug: mappedSlug } });
+    }
+
+    if (!targetRole || !targetRole.isActive) {
+      return res.status(400).json({
         success: false,
-        error: 'हे पोर्टल केवळ जिल्हाधिकारी कार्यालय व महसूल विभागाच्या अंतर्गत वापरासाठी आहे. नवीन अधिकारी खाती केवळ जिल्हाधिकारी यांच्या मान्यतेने तयार केली जाऊ शकतात. (Internal portal: Open registration disabled. Only Collector can provision officer accounts)',
+        error: 'अवैध किंवा निष्क्रिय भूमिका. (Invalid or inactive role)',
       });
     }
 
-    const validRoles = [
+    if (!req.user.isWildcard && targetRole.hierarchyLevel >= req.user.hierarchyLevel) {
+      return res.status(403).json({
+        success: false,
+        error: 'आपण आपल्यापेक्षा उच्च किंवा समकक्ष भूमिका असलेले खाते तयार करू शकत नाही. (Cannot provision account with equal or higher role hierarchy)',
+      });
+    }
+
+    const legacyEnumMap = {
+      superadmin: 'COLLECTOR',
+      admin: 'SUB_COLLECTOR',
+      officer: 'TEHSILDAR',
+      data_operator: 'TALATHI',
+      viewer: 'CITIZEN',
+    };
+    const validEnumRoles = [
       'SUPERADMIN',
       'COLLECTOR',
       'SUB_COLLECTOR',
@@ -248,57 +293,45 @@ export const register = async (req, res) => {
       'NAIB_TEHSILDAR',
       'CIRCLE_OFFICER',
       'TALATHI',
+      'CITIZEN',
     ];
-    if (!validRoles.includes(role)) {
-      return res.status(400).json({
-        success: false,
-        error: 'अवैध पद/भूमिका. (Invalid officer role)',
-      });
-    }
+    const resolvedLegacyRole = validEnumRoles.includes(role)
+      ? role
+      : (legacyEnumMap[targetRole.slug] || 'TEHSILDAR');
 
     const passwordHash = await bcrypt.hash(password, 12);
 
-    const newUser = await prisma.user.create({
+    const created = await prisma.user.create({
       data: {
-        fullName,
+        fullName: fullName.trim(),
         email: normalizedEmail,
         mobile: mobile || null,
         passwordHash,
-        role,
+        role: resolvedLegacyRole,
+        roleId: targetRole.id,
         taluka: taluka || null,
-        designation: designation || null,
+        designation: designation || targetRole.nameMr || targetRole.name,
         isActive: true,
         consentGiven: true,
         consentAt: new Date(),
         consentVersion: '1.0',
       },
-      select: {
-        id: true,
-        fullName: true,
-        email: true,
-        mobile: true,
-        role: true,
-        taluka: true,
-        designation: true,
-        consentGiven: true,
-        consentAt: true,
-        consentVersion: true,
-        createdAt: true,
-      },
     });
 
+    const enrichedUser = buildUserAuthContext(await loadUserWithRbac({ id: created.id }));
+
     await logAudit({
-      userId: req.user?.id || newUser.id,
+      userId: req.user.id,
       action: 'USER_REGISTER',
       entityType: 'User',
-      entityId: newUser.id,
-      newData: { email: newUser.email, role: newUser.role, consentVersion: '1.0' },
+      entityId: created.id,
+      newData: { email: created.email, roleSlug: targetRole.slug, roleName: targetRole.name, taluka: created.taluka },
       req,
     });
 
     return res.status(201).json({
       success: true,
-      user: newUser,
+      user: enrichedUser,
     });
   } catch (error) {
     console.error('Error in register:', error);
@@ -331,6 +364,13 @@ export const exportMyData = async (req, res) => {
         consentVersion: true,
         createdAt: true,
         updatedAt: true,
+        roleRef: {
+          select: {
+            slug: true,
+            name: true,
+            nameMr: true,
+          },
+        },
         sessions: {
           select: {
             id: true,
@@ -426,7 +466,6 @@ export const updateProfile = async (req, res) => {
     if (email && email.trim()) {
       const normalizedEmail = email.trim().toLowerCase();
       if (normalizedEmail !== req.user.email) {
-        // Check if email already in use
         const existing = await prisma.user.findUnique({
           where: { email: normalizedEmail },
         });
@@ -440,24 +479,13 @@ export const updateProfile = async (req, res) => {
       }
     }
 
-    const updatedUser = await prisma.user.update({
+    await prisma.user.update({
       where: { id: userId },
       data: dataToUpdate,
-      select: {
-        id: true,
-        fullName: true,
-        email: true,
-        mobile: true,
-        role: true,
-        taluka: true,
-        designation: true,
-        consentGiven: true,
-        consentAt: true,
-        consentVersion: true,
-        createdAt: true,
-        updatedAt: true,
-      },
     });
+
+    invalidateUserCache(userId);
+    const updatedUser = buildUserAuthContext(await loadUserWithRbac({ id: userId }));
 
     await logAudit({
       userId,
@@ -535,6 +563,8 @@ export const changePassword = async (req, res) => {
       },
     });
 
+    invalidateUserCache(userId);
+
     await logAudit({
       userId,
       action: 'USER_PASSWORD_CHANGED',
@@ -555,5 +585,3 @@ export const changePassword = async (req, res) => {
     });
   }
 };
-
-

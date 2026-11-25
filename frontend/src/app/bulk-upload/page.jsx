@@ -27,12 +27,17 @@ import { api } from '../../lib/api';
 import { CHANDRAPUR_TALUKAS } from '../../lib/constants';
 import SearchableSelect from '../../components/SearchableSelect';
 import { useTranslation } from '../../components/LanguageContext';
+import { useAuth } from '../../components/AuthContext';
 import { formatVillageName } from '../../lib/villageUtils';
 import GoogleDriveSyncPanel from '../../components/GoogleDriveSyncPanel';
 
 export default function BulkUploadPage() {
   const { isMarathi } = useTranslation();
-  const [activeTab, setActiveTab] = useState('prapatra'); // 'prapatra' | 'parcel'
+  const { hasPermission, hasAnyPermission } = useAuth();
+  const canUploadExcel = hasPermission('prapatra.upload');
+  const canDriveSync = hasAnyPermission('drive.view', 'drive.pull', 'drive.push', 'drive.edit_sheet');
+  const canPurge = hasPermission('village.purge');
+  const [activeTab, setActiveTab] = useState(canUploadExcel ? 'prapatra' : (canDriveSync ? 'drive' : 'prapatra')); // 'prapatra' | 'parcel' | 'drive'
   const [selectedTaluka, setSelectedTaluka] = useState('Warora');
   const [villageName, setVillageName] = useState('');
   const [villagesList, setVillagesList] = useState([]);
@@ -320,68 +325,74 @@ export default function BulkUploadPage() {
 
       {/* Modern Segmented Tabs Selector */}
       <div className="flex flex-col sm:inline-flex sm:flex-row p-1 rounded-2xl bg-slate-200/60 backdrop-blur-md border border-slate-300/60 gap-1.5 shadow-2xs w-full sm:w-auto">
-        <button
-          onClick={() => {
-            setActiveTab('prapatra');
-            clearForm();
-          }}
-          className={`py-2 px-3 sm:px-4 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all cursor-pointer w-full sm:w-auto ${
-            activeTab === 'prapatra'
-              ? 'bg-white text-emerald-950 shadow-sm'
-              : 'text-slate-600 hover:text-slate-900 hover:bg-white/40'
-          }`}
-        >
-          <FolderArchive className="w-4 h-4 text-emerald-700 shrink-0" />
-          <span className="truncate">
-            {isMarathi
-              ? '१ ते ४५ तपासणी प्रपत्र (Official Revenue Booklet)'
-              : '1 to 45 Checkpoint Audit Booklet (Official)'}
-          </span>
-          <span className="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-extrabold shrink-0">
-            {isMarathi ? 'शिफारस' : 'Recommended'}
-          </span>
-        </button>
+        {canUploadExcel && (
+          <>
+            <button
+              onClick={() => {
+                setActiveTab('prapatra');
+                clearForm();
+              }}
+              className={`py-2 px-3 sm:px-4 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all cursor-pointer w-full sm:w-auto ${
+                activeTab === 'prapatra'
+                  ? 'bg-white text-emerald-950 shadow-sm'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/40'
+              }`}
+            >
+              <FolderArchive className="w-4 h-4 text-emerald-700 shrink-0" />
+              <span className="truncate">
+                {isMarathi
+                  ? '१ ते ४५ तपासणी प्रपत्र (Official Revenue Booklet)'
+                  : '1 to 45 Checkpoint Audit Booklet (Official)'}
+              </span>
+              <span className="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-extrabold shrink-0">
+                {isMarathi ? 'शिफारस' : 'Recommended'}
+              </span>
+            </button>
 
-        <button
-          onClick={() => {
-            setActiveTab('parcel');
-            clearForm();
-          }}
-          className={`py-2 px-3 sm:px-4 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all cursor-pointer w-full sm:w-auto ${
-            activeTab === 'parcel'
-              ? 'bg-white text-blue-950 shadow-sm'
-              : 'text-slate-600 hover:text-slate-900 hover:bg-white/40'
-          }`}
-        >
-          <Layers className="w-4 h-4 text-blue-700 shrink-0" />
-          <span className="truncate">
-            {isMarathi
-              ? 'गाव भूखंड यादी नमुना (8-Column Parcel List)'
-              : 'Village Parcel List (8-Column Format)'}
-          </span>
-        </button>
+            <button
+              onClick={() => {
+                setActiveTab('parcel');
+                clearForm();
+              }}
+              className={`py-2 px-3 sm:px-4 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all cursor-pointer w-full sm:w-auto ${
+                activeTab === 'parcel'
+                  ? 'bg-white text-blue-950 shadow-sm'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/40'
+              }`}
+            >
+              <Layers className="w-4 h-4 text-blue-700 shrink-0" />
+              <span className="truncate">
+                {isMarathi
+                  ? 'गाव भूखंड यादी नमुना (8-Column Parcel List)'
+                  : 'Village Parcel List (8-Column Format)'}
+              </span>
+            </button>
+          </>
+        )}
 
-        <button
-          onClick={() => {
-            setActiveTab('drive');
-            clearForm();
-          }}
-          className={`py-2 px-3 sm:px-4 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all cursor-pointer w-full sm:w-auto ${
-            activeTab === 'drive'
-              ? 'bg-white text-indigo-950 shadow-sm'
-              : 'text-slate-600 hover:text-slate-900 hover:bg-white/40'
-          }`}
-        >
-          <HardDrive className="w-4 h-4 text-indigo-700 shrink-0" />
-          <span className="truncate">
-            {isMarathi
-              ? 'गुगल ड्राइव्ह ऑन-डिमांड सिंक'
-              : 'Google Drive On-Demand Sync'}
-          </span>
-          <span className="text-[10px] bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded-full font-extrabold shrink-0">
-            {isMarathi ? 'थेट जोडणी' : 'Direct Sync'}
-          </span>
-        </button>
+        {canDriveSync && (
+          <button
+            onClick={() => {
+              setActiveTab('drive');
+              clearForm();
+            }}
+            className={`py-2 px-3 sm:px-4 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all cursor-pointer w-full sm:w-auto ${
+              activeTab === 'drive'
+                ? 'bg-white text-indigo-950 shadow-sm'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-white/40'
+            }`}
+          >
+            <HardDrive className="w-4 h-4 text-indigo-700 shrink-0" />
+            <span className="truncate">
+              {isMarathi
+                ? 'गुगल ड्राइव्ह ऑन-डिमांड सिंक'
+                : 'Google Drive On-Demand Sync'}
+            </span>
+            <span className="text-[10px] bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded-full font-extrabold shrink-0">
+              {isMarathi ? 'थेट जोडणी' : 'Direct Sync'}
+            </span>
+          </button>
+        )}
       </div>
 
       {/* Main Upload Body */}
@@ -523,7 +534,8 @@ export default function BulkUploadPage() {
                   </div>
                 </div>
 
-                {/* Method 2: Clean Slate Wipe & Replace */}
+                {/* Method 2: Clean Slate Wipe & Replace (Requires village.purge) */}
+                {canPurge && (
                 <div
                   onClick={() => {
                     setUploadMode('replace');
@@ -555,6 +567,7 @@ export default function BulkUploadPage() {
                     </div>
                   </div>
                 </div>
+                )}
               </div>
 
               {/* Method 2 Warning & Explicit Confirmation Checkbox */}

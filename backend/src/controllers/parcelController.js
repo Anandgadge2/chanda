@@ -4,6 +4,7 @@ import { generateSampleVillageTemplate } from '../utils/excelGenerator.js';
 import { invalidateAnalyticsCache } from './analyticsController.js';
 import { syncTalukaTotalRollup, recalculateVillageRollup, uploadPrapatraExcel } from './prapatraController.js';
 import { logAudit } from '../middleware/auditMiddleware.js';
+import { userCanAccessTaluka } from '../services/rbacService.js';
 import { generateParcelDossierPdf } from '../utils/parcelDossierGenerator.js';
 import { getVillageVariants, cleanVillageName } from '../utils/prapatraGenerator.js';
 
@@ -97,6 +98,16 @@ export const bulkUpload = async (req, res) => {
 
     if (records.length === 0) {
       return res.status(400).json({ success: false, error: 'No valid records found to import', errors });
+    }
+
+    const unauthorizedTaluka = [...new Set(records.map((r) => r.taluka))].find(
+      (t) => !userCanAccessTaluka(req.user, t)
+    );
+    if (unauthorizedTaluka) {
+      return res.status(403).json({
+        success: false,
+        error: `आपल्याकडे '${unauthorizedTaluka}' तालुक्याचा डेटा अपलोड करण्याचे अधिकार नाहीत. (Taluka scope restricted to ${req.user.taluka})`,
+      });
     }
 
     const batchResult = await prisma.landParcel.createMany({
@@ -750,7 +761,15 @@ export const createParcel = async (req, res) => {
       metadata,
     } = req.body;
 
-    const talukaCode = (taluka || 'CHA').substring(0, 3).toUpperCase();
+    const targetTaluka = taluka || 'Chandrapur';
+    if (!userCanAccessTaluka(req.user, targetTaluka)) {
+      return res.status(403).json({
+        success: false,
+        error: `आपल्याकडे '${targetTaluka}' तालुक्यासाठी भूखंड तयार करण्याचे अधिकार नाहीत. (Taluka scope restricted to ${req.user.taluka})`,
+      });
+    }
+
+    const talukaCode = targetTaluka.substring(0, 3).toUpperCase();
     const upi = `MH-CHA-${talukaCode}-${villageCode || '001'}-${gatNumber}-${hissaNumber || '0'}`.replace(/\s+/g, '');
 
     const parcel = await prisma.landParcel.create({
@@ -820,6 +839,13 @@ export const updateParcel = async (req, res) => {
 
     if (!existing) {
       return res.status(404).json({ success: false, error: `Parcel with UPI ${upi} not found` });
+    }
+
+    if (!userCanAccessTaluka(req.user, existing.taluka)) {
+      return res.status(403).json({
+        success: false,
+        error: `आपल्याकडे '${existing.taluka}' तालुक्यातील भूखंड संपादित करण्याचे अधिकार नाहीत. (Taluka scope restricted to ${req.user.taluka})`,
+      });
     }
 
     const updateData = {};

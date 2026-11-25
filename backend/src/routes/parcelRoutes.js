@@ -10,24 +10,24 @@ import {
 } from '../controllers/parcelController.js';
 import { getTalukaVillages } from '../controllers/prapatraController.js';
 import { upload } from '../middleware/uploadMiddleware.js';
-import { authenticate, authorize } from '../middleware/authMiddleware.js';
+import { authenticate, requirePermission } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
 router.post(
   '/bulk-upload',
   authenticate,
-  authorize('SUPERADMIN', 'COLLECTOR', 'SUB_COLLECTOR', 'SDO', 'TEHSILDAR', 'NAIB_TEHSILDAR', 'CIRCLE_OFFICER', 'TALATHI'),
+  requirePermission('prapatra.upload'),
   upload.single('file'),
   bulkUpload
 );
 router.get('/sample-template', getSampleTemplate); // Publicly accessible template
 router.get('/villages', getTalukaVillages);
-router.get('/', authenticate, getParcels);
-router.post('/', authenticate, authorize('COLLECTOR', 'SDO', 'TEHSILDAR', 'NAIB_TEHSILDAR', 'TALATHI'), createParcel);
-router.get('/:upi/trace', authenticate, getParcelTrace);
-router.get('/:upi/export-pdf', authenticate, exportParcelDossierPdf);
-router.patch('/:upi', authenticate, authorize('SUPERADMIN', 'COLLECTOR', 'SUB_COLLECTOR', 'SDO', 'TEHSILDAR', 'NAIB_TEHSILDAR', 'CIRCLE_OFFICER', 'TALATHI'), updateParcel);
-router.put('/:upi', authenticate, authorize('SUPERADMIN', 'COLLECTOR', 'SUB_COLLECTOR', 'SDO', 'TEHSILDAR', 'NAIB_TEHSILDAR', 'CIRCLE_OFFICER', 'TALATHI'), updateParcel);
+router.get('/', authenticate, requirePermission('parcel.view'), getParcels);
+router.post('/', authenticate, requirePermission('parcel.create'), createParcel);
+router.get('/:upi/trace', authenticate, requirePermission('parcel.view'), getParcelTrace);
+router.get('/:upi/export-pdf', authenticate, requirePermission('parcel.view'), exportParcelDossierPdf);
+router.patch('/:upi', authenticate, requirePermission('parcel.edit'), updateParcel);
+router.put('/:upi', authenticate, requirePermission('parcel.edit'), updateParcel);
 
 export default router;

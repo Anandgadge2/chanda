@@ -1,18 +1,18 @@
 import express from 'express';
 import { uploadDocument, getDocuments, getDocumentSignedUrl } from '../controllers/documentController.js';
 import { upload } from '../middleware/uploadMiddleware.js';
-import { authenticate, authorize } from '../middleware/authMiddleware.js';
+import { authenticate, requirePermission } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
 router.post(
   '/upload',
   authenticate,
-  authorize('COLLECTOR', 'SDO', 'TEHSILDAR', 'NAIB_TEHSILDAR', 'TALATHI', 'CIRCLE_OFFICER'),
+  requirePermission('document.upload'),
   upload.single('document'),
   uploadDocument
 );
-router.get('/', authenticate, getDocuments);
-router.get('/:id/signed-url', authenticate, getDocumentSignedUrl);
+router.get('/', authenticate, requirePermission('document.view'), getDocuments);
+router.get('/:id/signed-url', authenticate, requirePermission('document.view'), getDocumentSignedUrl);
 
 export default router;

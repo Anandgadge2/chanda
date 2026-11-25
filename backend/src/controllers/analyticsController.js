@@ -1,7 +1,9 @@
 import prisma from '../config/prisma.js';
+import { logger } from '../utils/logger.js';
 
-// High-Performance In-Memory Cache with TTL & Request Deduplication
-const CACHE_TTL_MS = 60 * 1000; // 60 seconds TTL
+// High-Performance In-Memory Cache with Stale-While-Revalidate (SWR) & Request Deduplication
+const CACHE_FRESH_TTL_MS = 5 * 60 * 1000; // 5 minutes fresh (invalidated immediately on writes)
+const CACHE_STALE_TTL_MS = 60 * 60 * 1000; // 60 minutes stale-while-revalidate window
 const summaryCache = new Map();
 const inFlightRequests = new Map();
 
@@ -13,158 +15,172 @@ export const invalidateAnalyticsCache = () => {
 };
 
 /**
- * Internal worker: executes a single, hyper-optimized PostgreSQL query
- * that aggregates all rollup metrics, group-bys, and relations in one DB roundtrip.
+ * Internal worker: executes a single-pass CTE PostgreSQL query
+ * that avoids repeated full-table scans and large cross-table distinct joins.
  */
 const fetchSummaryFromDatabase = async (taluka) => {
   const talukaParam = taluka && taluka.trim() ? taluka.trim() : null;
 
   const rows = await prisma.$queryRaw`
+    WITH
+    lp_base AS (
+      SELECT
+        COUNT(*)::int AS total_parcels,
+        COUNT(DISTINCT village_name)::int AS total_villages,
+        COALESCE(SUM(total_area_ha), 0)::float AS total_area_ha,
+        COALESCE(SUM(potkharaba_area_ha), 0)::float AS total_potkharaba_ha,
+        COALESCE(SUM(total_area_ha - potkharaba_area_ha), 0)::float AS total_cultivable_ha
+      FROM land_parcels lp
+      WHERE (${talukaParam}::text IS NULL OR LOWER(lp.taluka) = LOWER(${talukaParam}))
+    ),
+    lp_tenure AS (
+      SELECT
+        lp.tenure_class::text AS tenure_class,
+        COUNT(*)::int AS cnt,
+        COALESCE(SUM(lp.total_area_ha), 0)::float AS total_area_ha
+      FROM land_parcels lp
+      WHERE (${talukaParam}::text IS NULL OR LOWER(lp.taluka) = LOWER(${talukaParam}))
+      GROUP BY lp.tenure_class
+    ),
+    fec_filtered AS (
+      SELECT
+        fec.id,
+        fec.violation_type::text AS violation_type,
+        fec.status::text AS status,
+        fec.encroached_area_ha,
+        fec.is_repossessed_to_govt,
+        lp.total_area_ha AS lp_total_area_ha
+      FROM forward_enforcement_cases fec
+      LEFT JOIN land_parcels lp ON fec.parcel_id = lp.id
+      WHERE (${talukaParam}::text IS NULL OR LOWER(lp.taluka) = LOWER(${talukaParam}))
+    ),
+    fec_summary AS (
+      SELECT
+        COUNT(*)::int AS total_violations,
+        COUNT(*) FILTER (WHERE status = 'HEARING_SCHEDULED')::int AS pending_hearings,
+        COALESCE(SUM(COALESCE(NULLIF(encroached_area_ha, 0), lp_total_area_ha, 0)) FILTER (WHERE is_repossessed_to_govt = true), 0)::float AS total_repossessed_ha,
+        COUNT(*) FILTER (WHERE is_repossessed_to_govt = true)::int AS total_repossessed_cases,
+        COUNT(*) FILTER (WHERE (is_repossessed_to_govt = false OR is_repossessed_to_govt IS NULL) AND status NOT IN ('FINAL_ORDER_PASSED', 'RECTIFIED_7_12', 'DISMISSED'))::int AS in_progress_cases,
+        COALESCE(SUM(COALESCE(NULLIF(encroached_area_ha, 0), lp_total_area_ha, 0)) FILTER (WHERE (is_repossessed_to_govt = false OR is_repossessed_to_govt IS NULL) AND status NOT IN ('FINAL_ORDER_PASSED', 'RECTIFIED_7_12', 'DISMISSED')), 0)::float AS in_progress_area_ha
+      FROM fec_filtered
+    ),
+    fec_by_type AS (
+      SELECT
+        violation_type,
+        COUNT(*)::int AS cnt,
+        COALESCE(SUM(encroached_area_ha), 0)::float AS total_encroached_ha
+      FROM fec_filtered
+      GROUP BY violation_type
+    ),
+    fec_by_status AS (
+      SELECT
+        status,
+        COUNT(*)::int AS cnt
+      FROM fec_filtered
+      GROUP BY status
+    ),
+    class2_to_1 AS (
+      SELECT
+        COUNT(*)::int AS cnt,
+        COALESCE(SUM(lp.total_area_ha), 0)::float AS area_ha
+      FROM land_parcels lp
+      WHERE lp.tenure_class = 'BHOGVATDAR_CLASS_1'
+        AND (${talukaParam}::text IS NULL OR LOWER(lp.taluka) = LOWER(${talukaParam}))
+        AND EXISTS (
+          SELECT 1 FROM backward_histories bh
+          WHERE bh.parcel_id = lp.id AND bh.tenure_class = 'BHOGVATDAR_CLASS_2'
+        )
+    ),
+    taluka_lp AS (
+      SELECT
+        lp.taluka,
+        COUNT(DISTINCT lp.village_name)::int AS village_cnt,
+        COUNT(*)::int AS parcel_cnt,
+        COALESCE(SUM(lp.total_area_ha), 0)::float AS total_area_ha,
+        COALESCE(SUM(lp.total_area_ha - lp.potkharaba_area_ha), 0)::float AS cultivable_area_ha,
+        COUNT(*) FILTER (WHERE lp.has_active_dispute)::int AS dispute_cnt
+      FROM land_parcels lp
+      GROUP BY lp.taluka
+    ),
+    taluka_fec AS (
+      SELECT
+        lp.taluka,
+        COALESCE(SUM(fec.encroached_area_ha), 0)::float AS disputed_area_ha,
+        COUNT(*)::int AS violation_cnt,
+        COUNT(*) FILTER (WHERE fec.is_repossessed_to_govt = true)::int AS repossessed_cnt,
+        COALESCE(SUM(CASE WHEN fec.is_repossessed_to_govt = true THEN COALESCE(NULLIF(fec.encroached_area_ha, 0), lp.total_area_ha, 0) ELSE 0 END), 0)::float AS repossessed_area_ha
+      FROM forward_enforcement_cases fec
+      JOIN land_parcels lp ON fec.parcel_id = lp.id
+      GROUP BY lp.taluka
+    ),
+    top_lp AS (
+      SELECT
+        lp.id,
+        lp.upi,
+        lp.gat_number,
+        lp.old_survey_no,
+        lp.village_name,
+        lp.taluka,
+        lp.tenure_class,
+        lp.total_area_ha,
+        lp.potkharaba_area_ha,
+        (lp.total_area_ha - lp.potkharaba_area_ha) AS cultivable_area_ha,
+        lp.has_active_dispute
+      FROM land_parcels lp
+      WHERE (${talukaParam}::text IS NULL OR LOWER(lp.taluka) = LOWER(${talukaParam}))
+      ORDER BY lp.total_area_ha DESC, lp.upi ASC
+      LIMIT 25
+    )
     SELECT
-      -- Total Master Parcels
-      (SELECT COUNT(*)::int FROM land_parcels lp 
-       WHERE (${talukaParam}::text IS NULL OR LOWER(lp.taluka) = LOWER(${talukaParam}))) as "totalParcels",
-
-      -- Total Distinct Villages
-      (SELECT COUNT(DISTINCT lp.village_name)::int FROM land_parcels lp 
-       WHERE (${talukaParam}::text IS NULL OR LOWER(lp.taluka) = LOWER(${talukaParam}))) as "totalVillages",
-
-      -- Total Distinct Talukas
-      (SELECT COUNT(DISTINCT lp.taluka)::int FROM land_parcels lp) as "totalTalukas",
-
-      -- Total Violations
-      (SELECT COUNT(*)::int FROM forward_enforcement_cases fec 
-       LEFT JOIN land_parcels lp ON fec.parcel_id = lp.id 
-       WHERE (${talukaParam}::text IS NULL OR LOWER(lp.taluka) = LOWER(${talukaParam}))) as "totalViolations",
-
-      -- Pending SDO Hearings
-      (SELECT COUNT(*)::int FROM forward_enforcement_cases fec 
-       LEFT JOIN land_parcels lp ON fec.parcel_id = lp.id 
-       WHERE fec.status = 'HEARING_SCHEDULED' AND (${talukaParam}::text IS NULL OR LOWER(lp.taluka) = LOWER(${talukaParam}))) as "pendingHearings",
-
-      -- Repossessed Government Land (Area in Ha)
-      (SELECT COALESCE(SUM(COALESCE(NULLIF(fec.encroached_area_ha, 0), lp.total_area_ha, 0)), 0)::float FROM forward_enforcement_cases fec 
-       LEFT JOIN land_parcels lp ON fec.parcel_id = lp.id 
-       WHERE fec.is_repossessed_to_govt = true AND (${talukaParam}::text IS NULL OR LOWER(lp.taluka) = LOWER(${talukaParam}))) as "totalRepossessedHa",
-
-      -- Repossessed Government Land (Cases Count)
-      (SELECT COUNT(*)::int FROM forward_enforcement_cases fec 
-       LEFT JOIN land_parcels lp ON fec.parcel_id = lp.id 
-       WHERE fec.is_repossessed_to_govt = true AND (${talukaParam}::text IS NULL OR LOWER(lp.taluka) = LOWER(${talukaParam}))) as "totalRepossessedCases",
-
-      -- In-Progress Enforcement Cases Under Inquiry
-      (SELECT COUNT(*)::int FROM forward_enforcement_cases fec 
-       LEFT JOIN land_parcels lp ON fec.parcel_id = lp.id 
-       WHERE (fec.is_repossessed_to_govt = false OR fec.is_repossessed_to_govt IS NULL)
-         AND fec.status NOT IN ('FINAL_ORDER_PASSED', 'RECTIFIED_7_12', 'DISMISSED')
-         AND (${talukaParam}::text IS NULL OR LOWER(lp.taluka) = LOWER(${talukaParam}))) as "inProgressCases",
-
-      -- In-Progress Enforcement Area (Ha) Under Inquiry
-      (SELECT COALESCE(SUM(COALESCE(NULLIF(fec.encroached_area_ha, 0), lp.total_area_ha, 0)), 0)::float FROM forward_enforcement_cases fec 
-       LEFT JOIN land_parcels lp ON fec.parcel_id = lp.id 
-       WHERE (fec.is_repossessed_to_govt = false OR fec.is_repossessed_to_govt IS NULL)
-         AND fec.status NOT IN ('FINAL_ORDER_PASSED', 'RECTIFIED_7_12', 'DISMISSED')
-         AND (${talukaParam}::text IS NULL OR LOWER(lp.taluka) = LOWER(${talukaParam}))) as "inProgressAreaHa",
-
-      -- Class 2 to Class 1 Conversions (Count)
-      (SELECT COUNT(DISTINCT lp.id)::int FROM land_parcels lp
-       JOIN backward_histories bh ON bh.parcel_id = lp.id
-       WHERE lp.tenure_class = 'BHOGVATDAR_CLASS_1'
-         AND bh.tenure_class = 'BHOGVATDAR_CLASS_2'
-         AND (${talukaParam}::text IS NULL OR LOWER(lp.taluka) = LOWER(${talukaParam}))) as "totalClass2To1Conversions",
-
-      -- Class 2 to Class 1 Converted Area (Ha)
-      (SELECT COALESCE(SUM(conv_sub.total_area_ha), 0)::float FROM (
-         SELECT DISTINCT lp.id, lp.total_area_ha
-         FROM land_parcels lp
-         JOIN backward_histories bh ON bh.parcel_id = lp.id
-         WHERE lp.tenure_class = 'BHOGVATDAR_CLASS_1'
-           AND bh.tenure_class = 'BHOGVATDAR_CLASS_2'
-           AND (${talukaParam}::text IS NULL OR LOWER(lp.taluka) = LOWER(${talukaParam}))
-       ) conv_sub) as "totalClass2To1AreaHa",
+      lb.total_parcels AS "totalParcels",
+      lb.total_villages AS "totalVillages",
+      (SELECT COUNT(*)::int FROM taluka_lp) AS "totalTalukas",
+      fs.total_violations AS "totalViolations",
+      fs.pending_hearings AS "pendingHearings",
+      fs.total_repossessed_ha AS "totalRepossessedHa",
+      fs.total_repossessed_cases AS "totalRepossessedCases",
+      fs.in_progress_cases AS "inProgressCases",
+      fs.in_progress_area_ha AS "inProgressAreaHa",
+      c21.cnt AS "totalClass2To1Conversions",
+      c21.area_ha AS "totalClass2To1AreaHa",
+      lb.total_potkharaba_ha AS "totalPotkharabaHa",
+      lb.total_cultivable_ha AS "totalCultivableHa",
 
       -- Violations Grouped by Statutory Category
       (SELECT COALESCE(json_agg(json_build_object(
-        'type', vt.violation_type,
-        'count', vt.cnt,
-        'encroachedAreaHa', vt.total_encroached_ha
-      )), '[]'::json)
-       FROM (
-         SELECT 
-           fec.violation_type::text as violation_type, 
-           COUNT(*)::int as cnt,
-           COALESCE(SUM(fec.encroached_area_ha), 0)::float as total_encroached_ha
-         FROM forward_enforcement_cases fec
-         LEFT JOIN land_parcels lp ON fec.parcel_id = lp.id
-         WHERE (${talukaParam}::text IS NULL OR LOWER(lp.taluka) = LOWER(${talukaParam}))
-         GROUP BY fec.violation_type
-       ) vt) as "violationsByType",
+        'type', violation_type,
+        'count', cnt,
+        'encroachedAreaHa', total_encroached_ha
+      ) ORDER BY cnt DESC), '[]'::json) FROM fec_by_type) AS "violationsByType",
 
       -- Land Tenure Distribution with Total Area (Ha)
       (SELECT COALESCE(json_agg(json_build_object(
-        'tenure', td.tenure_class,
-        'count', td.cnt,
-        'totalAreaHa', td.total_area_ha
-      )), '[]'::json)
-       FROM (
-         SELECT 
-           lp.tenure_class::text as tenure_class, 
-           COUNT(*)::int as cnt,
-           COALESCE(SUM(lp.total_area_ha), 0)::float as total_area_ha
-         FROM land_parcels lp
-         WHERE (${talukaParam}::text IS NULL OR LOWER(lp.taluka) = LOWER(${talukaParam}))
-         GROUP BY lp.tenure_class
-       ) td) as "tenureDistribution",
+        'tenure', tenure_class,
+        'count', cnt,
+        'totalAreaHa', total_area_ha
+      ) ORDER BY cnt DESC), '[]'::json) FROM lp_tenure) AS "tenureDistribution",
 
-      -- Taluka-wise Distribution & Comparative Analysis with Live Cultivable & Disputed Area (District-wide comparative rollup)
+      -- Taluka-wise Distribution & Comparative Analysis (District-wide comparative rollup)
       (SELECT COALESCE(json_agg(json_build_object(
-        'taluka', t.taluka,
-        'villageCount', t.village_cnt,
-        'parcelCount', t.parcel_cnt,
-        'totalAreaHa', t.total_area_ha,
-        'cultivableAreaHa', t.cultivable_area_ha,
-        'disputedAreaHa', t.disputed_area_ha,
-        'violationCount', t.violation_cnt,
-        'disputeCount', t.dispute_cnt,
-        'repossessedCount', t.repossessed_cnt,
-        'repossessedAreaHa', t.repossessed_area_ha
-      )), '[]'::json)
-       FROM (
-         SELECT 
-           lp.taluka,
-           COUNT(DISTINCT lp.village_name)::int as village_cnt,
-           COUNT(DISTINCT lp.id)::int as parcel_cnt,
-           COALESCE(SUM(lp.total_area_ha), 0)::float as total_area_ha,
-           COALESCE(SUM(lp.total_area_ha - lp.potkharaba_area_ha), 0)::float as cultivable_area_ha,
-           COALESCE(SUM(fec.encroached_area_ha), 0)::float as disputed_area_ha,
-           COUNT(DISTINCT fec.id)::int as violation_cnt,
-           COUNT(DISTINCT CASE WHEN lp.has_active_dispute THEN lp.id END)::int as dispute_cnt,
-           COUNT(DISTINCT CASE WHEN fec.is_repossessed_to_govt = true THEN fec.id END)::int as repossessed_cnt,
-           COALESCE(SUM(CASE WHEN fec.is_repossessed_to_govt = true THEN COALESCE(NULLIF(fec.encroached_area_ha, 0), lp.total_area_ha, 0) ELSE 0 END), 0)::float as repossessed_area_ha
-         FROM land_parcels lp
-         LEFT JOIN forward_enforcement_cases fec ON fec.parcel_id = lp.id
-         GROUP BY lp.taluka
-         ORDER BY parcel_cnt DESC, total_area_ha DESC
-       ) t) as "talukaDistribution",
+        'taluka', tl.taluka,
+        'villageCount', tl.village_cnt,
+        'parcelCount', tl.parcel_cnt,
+        'totalAreaHa', tl.total_area_ha,
+        'cultivableAreaHa', tl.cultivable_area_ha,
+        'disputedAreaHa', COALESCE(tf.disputed_area_ha, 0),
+        'violationCount', COALESCE(tf.violation_cnt, 0),
+        'disputeCount', tl.dispute_cnt,
+        'repossessedCount', COALESCE(tf.repossessed_cnt, 0),
+        'repossessedAreaHa', COALESCE(tf.repossessed_area_ha, 0)
+      ) ORDER BY tl.parcel_cnt DESC, tl.total_area_ha DESC), '[]'::json)
+       FROM taluka_lp tl
+       LEFT JOIN taluka_fec tf ON tf.taluka = tl.taluka) AS "talukaDistribution",
 
       -- Enforcement Pipeline Status Distribution
       (SELECT COALESCE(json_agg(json_build_object(
-        'status', es.status,
-        'count', es.cnt
-      )), '[]'::json)
-       FROM (
-         SELECT fec.status::text as status, COUNT(*)::int as cnt
-         FROM forward_enforcement_cases fec
-         LEFT JOIN land_parcels lp ON fec.parcel_id = lp.id
-         WHERE (${talukaParam}::text IS NULL OR LOWER(lp.taluka) = LOWER(${talukaParam}))
-         GROUP BY fec.status
-       ) es) as "statusDistribution",
-
-      -- Land Usability (Potkharaba vs Cultivable Area)
-      (SELECT COALESCE(SUM(lp.potkharaba_area_ha), 0)::float FROM land_parcels lp 
-       WHERE (${talukaParam}::text IS NULL OR LOWER(lp.taluka) = LOWER(${talukaParam}))) as "totalPotkharabaHa",
-      (SELECT COALESCE(SUM(lp.total_area_ha - lp.potkharaba_area_ha), 0)::float FROM land_parcels lp 
-       WHERE (${talukaParam}::text IS NULL OR LOWER(lp.taluka) = LOWER(${talukaParam}))) as "totalCultivableHa",
+        'status', status,
+        'count', cnt
+      ) ORDER BY cnt DESC), '[]'::json) FROM fec_by_status) AS "statusDistribution",
 
       -- Top Survey No & Gat Number Parcels Analysis
       (SELECT COALESCE(json_agg(json_build_object(
@@ -178,29 +194,11 @@ const fetchSummaryFromDatabase = async (taluka) => {
         'potkharabaAreaHa', g.potkharaba_area_ha::float,
         'cultivableAreaHa', g.cultivable_area_ha::float,
         'hasActiveDispute', g.has_active_dispute,
-        'violationType', g.violation_type,
-        'caseNumber', g.case_number
-      )), '[]'::json)
-       FROM (
-         SELECT 
-           lp.upi,
-           lp.gat_number,
-           lp.old_survey_no,
-           lp.village_name,
-           lp.taluka,
-           lp.tenure_class,
-           lp.total_area_ha,
-           lp.potkharaba_area_ha,
-           (lp.total_area_ha - lp.potkharaba_area_ha) as cultivable_area_ha,
-           lp.has_active_dispute,
-           fec.violation_type::text as violation_type,
-           fec.case_number
-         FROM land_parcels lp
-         LEFT JOIN forward_enforcement_cases fec ON fec.parcel_id = lp.id
-         WHERE (${talukaParam}::text IS NULL OR LOWER(lp.taluka) = LOWER(${talukaParam}))
-         ORDER BY lp.total_area_ha DESC
-         LIMIT 25
-       ) g) as "topGatParcels",
+        'violationType', fec.violation_type::text,
+        'caseNumber', fec.case_number
+      ) ORDER BY g.total_area_ha DESC, g.upi ASC), '[]'::json)
+       FROM top_lp g
+       LEFT JOIN forward_enforcement_cases fec ON fec.parcel_id = g.id) AS "topGatParcels",
 
       -- Historical Timeline Progression (Epochs from 1950 baseline to 2026 current status)
       (SELECT COALESCE(json_agg(json_build_object(
@@ -210,42 +208,41 @@ const fetchSummaryFromDatabase = async (taluka) => {
         'label', t.label
       )), '[]'::json)
        FROM (
-         -- 1950 (or historical epochs from backward_histories)
-         SELECT 
-           b.epoch_year, 
-           COUNT(*)::int as cnt, 
-           COALESCE(SUM(b.area_ha), 0)::float as total_area_ha,
-           '१९५० (मूळ सनद/बंदोबस्त)' as label
+         SELECT
+           b.epoch_year,
+           COUNT(*)::int AS cnt,
+           COALESCE(SUM(b.area_ha), 0)::float AS total_area_ha,
+           '१९५० (मूळ सनद/बंदोबस्त)' AS label
          FROM backward_histories b
-         LEFT JOIN land_parcels lp ON b.parcel_id = lp.id
-         WHERE (${talukaParam}::text IS NULL OR LOWER(lp.taluka) = LOWER(${talukaParam}))
+         WHERE (${talukaParam}::text IS NULL OR EXISTS (
+           SELECT 1 FROM land_parcels lp
+           WHERE lp.id = b.parcel_id AND LOWER(lp.taluka) = LOWER(${talukaParam})
+         ))
          GROUP BY b.epoch_year
 
          UNION ALL
 
-         -- 2026 (Current 7/12 Ground Audit Status)
-         SELECT 
-           2026 as epoch_year,
-           COUNT(*)::int as cnt,
-           COALESCE(SUM(lp.total_area_ha), 0)::float as total_area_ha,
-           '२०२६ (विद्यमान चालू ७/१२)' as label
-         FROM land_parcels lp
-         WHERE (${talukaParam}::text IS NULL OR LOWER(lp.taluka) = LOWER(${talukaParam}))
+         SELECT
+           2026 AS epoch_year,
+           lb2.total_parcels AS cnt,
+           lb2.total_area_ha AS total_area_ha,
+           '२०२६ (विद्यमान चालू ७/१२)' AS label
+         FROM lp_base lb2
 
          ORDER BY epoch_year ASC
-       ) t) as "historicalTimeline",
+       ) t) AS "historicalTimeline",
 
       -- Latest 5 Quasi-Judicial Hearings with Parcel and Case Context
       (SELECT COALESCE(json_agg(h), '[]'::json)
        FROM (
-         SELECT 
+         SELECT
            ch.id,
-           ch.case_id as "caseId",
-           ch.hearing_date as "hearingDate",
+           ch.case_id AS "caseId",
+           ch.hearing_date AS "hearingDate",
            ch.authority,
-           ch.proceedings_log as "proceedingsLog",
-           ch.next_hearing_date as "nextHearingDate",
-           ch.created_at as "createdAt",
+           ch.proceedings_log AS "proceedingsLog",
+           ch.next_hearing_date AS "nextHearingDate",
+           ch.created_at AS "createdAt",
            json_build_object(
              'id', fec.id,
              'caseNumber', fec.case_number,
@@ -257,38 +254,41 @@ const fetchSummaryFromDatabase = async (taluka) => {
                'villageName', lp.village_name,
                'gatNumber', lp.gat_number
              )
-           ) as "case"
+           ) AS "case"
          FROM case_hearings ch
          JOIN forward_enforcement_cases fec ON ch.case_id = fec.id
          JOIN land_parcels lp ON fec.parcel_id = lp.id
          WHERE (${talukaParam}::text IS NULL OR LOWER(lp.taluka) = LOWER(${talukaParam}))
          ORDER BY ch.hearing_date DESC
          LIMIT 5
-       ) h) as "recentHearings",
+       ) h) AS "recentHearings",
 
       -- Featured Authentic Flagged Dispute Parcel
       (SELECT row_to_json(fd) FROM (
-        SELECT 
+        SELECT
           lp.upi,
-          lp.village_name as "villageName",
+          lp.village_name AS "villageName",
           lp.taluka,
-          lp.gat_number as "gatNumber",
-          lp.old_survey_no as "oldSurveyNo",
-          lp.total_area_ha::float as "totalAreaHa",
-          lp.tenure_class::text as "currentTenure",
-          COALESCE(lp.metadata->>'ownerName', 'विद्यमान खातेदार (चालू ७/१२)') as "currentOwner",
-          COALESCE(bh.owner_name, 'मूळ सनद नोंदणीकृत खातेदार') as "baselineOwner",
-          'वर्ग-२ (नवीन व अविभाज्य शर्त)' as "baselineTenure",
-          fec.case_number as "caseNumber",
-          fec.violation_type::text as "violationType",
-          fec.status::text as "status"
+          lp.gat_number AS "gatNumber",
+          lp.old_survey_no AS "oldSurveyNo",
+          lp.total_area_ha::float AS "totalAreaHa",
+          lp.tenure_class::text AS "currentTenure",
+          COALESCE(lp.metadata->>'ownerName', 'विद्यमान खातेदार (चालू ७/१२)') AS "currentOwner",
+          COALESCE(bh.owner_name, 'मूळ सनद नोंदणीकृत खातेदार') AS "baselineOwner",
+          'वर्ग-२ (नवीन व अविभाज्य शर्त)' AS "baselineTenure",
+          fec.case_number AS "caseNumber",
+          fec.violation_type::text AS "violationType",
+          fec.status::text AS "status"
         FROM forward_enforcement_cases fec
         JOIN land_parcels lp ON fec.parcel_id = lp.id
         LEFT JOIN backward_histories bh ON bh.parcel_id = lp.id AND bh.epoch_year = 1950
         WHERE lp.has_active_dispute = true
         ORDER BY fec.encroached_area_ha DESC
         LIMIT 1
-      ) fd) as "featuredDispute"
+      ) fd) AS "featuredDispute"
+    FROM lp_base lb
+    CROSS JOIN fec_summary fs
+    CROSS JOIN class2_to_1 c21
   `;
 
   const row = rows[0] || {};
@@ -319,6 +319,40 @@ const fetchSummaryFromDatabase = async (taluka) => {
 };
 
 /**
+ * Trigger a deduplicated fetch and store the result in summaryCache.
+ */
+const refreshSummaryCache = (taluka, cacheKey) => {
+  let pending = inFlightRequests.get(cacheKey);
+  if (!pending) {
+    pending = fetchSummaryFromDatabase(taluka)
+      .then((data) => {
+        summaryCache.set(cacheKey, { data, timestamp: Date.now() });
+        inFlightRequests.delete(cacheKey);
+        return data;
+      })
+      .catch((err) => {
+        inFlightRequests.delete(cacheKey);
+        throw err;
+      });
+    inFlightRequests.set(cacheKey, pending);
+  }
+  return pending;
+};
+
+/**
+ * Pre-warm the district-wide analytics summary cache on server startup
+ */
+export const warmAnalyticsCache = async () => {
+  try {
+    const t0 = Date.now();
+    await refreshSummaryCache(null, '__ALL__');
+    logger.success(`Analytics summary cache warmed in ${Date.now() - t0}ms`, 'ANALYTICS');
+  } catch (err) {
+    logger.warn(`Analytics cache warmup skipped: ${err.message}`, 'ANALYTICS');
+  }
+};
+
+/**
  * Dashboard Analytical Rollup
  * GET /api/analytics/summary
  */
@@ -328,31 +362,26 @@ export const getSummary = async (req, res) => {
     const cacheKey = taluka ? taluka.trim().toLowerCase() : '__ALL__';
     const now = Date.now();
 
-    // 1. Check in-memory cache if not forced refresh
+    // 1. Check in-memory cache (fresh or stale-while-revalidate) if not forced refresh
     if (refresh !== 'true') {
       const cached = summaryCache.get(cacheKey);
-      if (cached && now - cached.timestamp < CACHE_TTL_MS) {
-        return res.json(cached.data);
+      if (cached) {
+        const age = now - cached.timestamp;
+        if (age < CACHE_FRESH_TTL_MS) {
+          return res.json(cached.data);
+        }
+        if (age < CACHE_STALE_TTL_MS) {
+          // Serve stale data immediately and revalidate in the background
+          refreshSummaryCache(taluka, cacheKey).catch((err) => {
+            logger.warn(`Background analytics refresh failed: ${err.message}`, 'ANALYTICS');
+          });
+          return res.json(cached.data);
+        }
       }
     }
 
-    // 2. Request deduplication: if an identical query is currently in-flight, await it
-    let pending = inFlightRequests.get(cacheKey);
-    if (!pending) {
-      pending = fetchSummaryFromDatabase(taluka)
-        .then((data) => {
-          summaryCache.set(cacheKey, { data, timestamp: Date.now() });
-          inFlightRequests.delete(cacheKey);
-          return data;
-        })
-        .catch((err) => {
-          inFlightRequests.delete(cacheKey);
-          throw err;
-        });
-      inFlightRequests.set(cacheKey, pending);
-    }
-
-    const data = await pending;
+    // 2. Cache miss / expired / forced refresh: await deduplicated DB fetch
+    const data = await refreshSummaryCache(taluka, cacheKey);
     res.json(data);
   } catch (err) {
     console.error('Analytics summary error:', err);

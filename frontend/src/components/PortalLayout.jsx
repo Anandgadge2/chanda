@@ -13,6 +13,13 @@ import { useTranslation } from './LanguageContext';
 
 const STANDALONE_PUBLIC_ROUTES = ['/', '/privacy-policy', '/terms', '/accessibility-statement'];
 
+const ROUTE_ANY_PERMISSIONS = {
+  '/parcels': ['parcel.view'],
+  '/cases': ['case.view'],
+  '/bulk-upload': ['prapatra.upload', 'drive.view', 'drive.pull', 'drive.push', 'drive.edit_sheet'],
+  '/reports': ['prapatra.view'],
+};
+
 export default function PortalLayout({ children }) {
   const pathname = usePathname();
   const { user, loading, isLoginModalOpen, closeLoginModal } = useAuth();
@@ -56,8 +63,9 @@ export default function PortalLayout({ children }) {
     });
   };
 
-  const isStandalone = STANDALONE_PUBLIC_ROUTES.includes(pathname);
-  const isGlossary = pathname === '/glossary';
+  const normalizedPathname = (pathname || '/').replace(/\/+$/, '') || '/';
+  const isStandalone = STANDALONE_PUBLIC_ROUTES.includes(normalizedPathname);
+  const isGlossary = normalizedPathname === '/glossary';
 
   // Public Landing / Legal Pages (No internal layout)
   if (isStandalone) {
@@ -142,7 +150,7 @@ export default function PortalLayout({ children }) {
           onToggleCollapse={handleToggleSidebar}
         />
         <main id="main-content" className="flex-1 min-w-0 w-full max-w-full overflow-x-hidden relative pb-20 lg:pb-4 pb-safe">
-          <RouteGuard>{children}</RouteGuard>
+          <RouteGuard anyPermissions={ROUTE_ANY_PERMISSIONS[normalizedPathname] || []}>{children}</RouteGuard>
         </main>
       </div>
 

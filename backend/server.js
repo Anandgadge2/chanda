@@ -2,6 +2,7 @@ import dotenv from 'dotenv';
 import app from './src/app.js';
 import prisma from './src/config/prisma.js';
 import { logger } from './src/utils/logger.js';
+import { warmAnalyticsCache } from './src/controllers/analyticsController.js';
 
 dotenv.config();
 
@@ -28,6 +29,7 @@ const server = app.listen({ port: PORT, host: '0.0.0.0', exclusive: false }, asy
   try {
     await prisma.$queryRaw`SELECT 1`;
     logger.success('PostgreSQL Database connected successfully (Neon Cloud)', 'PRISMA');
+    warmAnalyticsCache();
   } catch (err) {
     logger.error('PostgreSQL connection check failed', err, 'PRISMA');
   }

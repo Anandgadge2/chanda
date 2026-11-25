@@ -512,9 +512,14 @@ export const api = {
         }
       });
     }
-    const res = await dedupedFetch(`${BASE_URL}/api/prapatra/${id}?${params.toString()}`);
+    const res = await dedupedFetch(`${BASE_URL}/api/prapatra/${id}?${params.toString()}`, {
+      headers: {
+        ...getAuthHeaders(),
+      },
+    });
     if (!res.ok) {
-      throw new Error('प्रपत्र डेटा लोड करणे अयशस्वी झाले.');
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || 'प्रपत्र डेटा लोड करणे अयशस्वी झाले.');
     }
     return res.json();
   },
@@ -612,6 +617,8 @@ export const api = {
         }
       });
     }
+    const token = getAuthToken();
+    if (token) params.append('token', token);
     return `${BASE_URL}/api/prapatra/${id}?${params.toString()}`;
   },
 
@@ -627,6 +634,8 @@ export const api = {
         }
       });
     }
+    const token = getAuthToken();
+    if (token) params.append('token', token);
     return `${BASE_URL}/api/prapatra/${id}?${params.toString()}`;
   },
   getBookletCategories: async () => {
@@ -641,9 +650,14 @@ export const api = {
     const params = new URLSearchParams();
     if (taluka && taluka !== 'all') params.append('taluka', taluka);
     if (village && village !== 'all') params.append('village', village);
-    const res = await dedupedFetch(`${BASE_URL}/api/prapatra/renumbering-parcha/data?${params.toString()}`);
+    const res = await dedupedFetch(`${BASE_URL}/api/prapatra/renumbering-parcha/data?${params.toString()}`, {
+      headers: {
+        ...getAuthHeaders(),
+      },
+    });
     if (!res.ok) {
-      throw new Error('रिनंबरिंग पर्चा डेटा लोड करणे अयशस्वी झाले.');
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || 'रिनंबरिंग पर्चा डेटा लोड करणे अयशस्वी झाले.');
     }
     return res.json();
   },
@@ -829,6 +843,119 @@ export const api = {
     });
     const data = await res.json().catch(() => ({ error: 'रो जोडण्यात अयशस्वी' }));
     if (!res.ok) throw new Error(data.error || 'रो जोडण्यात अयशस्वी');
+    return data;
+  },
+
+  // ==========================================
+  // RBAC: ROLES, PERMISSIONS & USER MANAGEMENT
+  // ==========================================
+  getRbacPermissions: async () => {
+    const res = await fetch(`${BASE_URL}/api/rbac/permissions`, {
+      headers: { ...getAuthHeaders() },
+      cache: 'no-store',
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || 'अधिकार सूची लोड करणे अयशस्वी');
+    return data;
+  },
+
+  getRbacRoles: async () => {
+    const res = await fetch(`${BASE_URL}/api/rbac/roles`, {
+      headers: { ...getAuthHeaders() },
+      cache: 'no-store',
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || 'भूमिका यादी लोड करणे अयशस्वी');
+    return data;
+  },
+
+  createRbacRole: async (payload) => {
+    const res = await fetch(`${BASE_URL}/api/rbac/roles`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...getAuthHeaders(),
+      },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || 'भूमिका तयार करणे अयशस्वी');
+    return data;
+  },
+
+  updateRbacRole: async (id, payload) => {
+    const res = await fetch(`${BASE_URL}/api/rbac/roles/${id}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        ...getAuthHeaders(),
+      },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || 'भूमिका अद्यतन करणे अयशस्वी');
+    return data;
+  },
+
+  deleteRbacRole: async (id) => {
+    const res = await fetch(`${BASE_URL}/api/rbac/roles/${id}`, {
+      method: 'DELETE',
+      headers: { ...getAuthHeaders() },
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || 'भूमिका हटवणे अयशस्वी');
+    return data;
+  },
+
+  getRbacUsers: async () => {
+    const res = await fetch(`${BASE_URL}/api/rbac/users`, {
+      headers: { ...getAuthHeaders() },
+      cache: 'no-store',
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || 'वापरकर्ता यादी लोड करणे अयशस्वी');
+    return data;
+  },
+
+  createRbacUser: async (payload) => {
+    const res = await fetch(`${BASE_URL}/api/rbac/users`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...getAuthHeaders(),
+      },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || 'वापरकर्ता तयार करणे अयशस्वी');
+    return data;
+  },
+
+  updateRbacUser: async (id, payload) => {
+    const res = await fetch(`${BASE_URL}/api/rbac/users/${id}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        ...getAuthHeaders(),
+      },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || 'वापरकर्ता अद्यतन करणे अयशस्वी');
+    return data;
+  },
+
+  getRbacAuditLogs: async (params = {}) => {
+    const qs = new URLSearchParams();
+    Object.entries(params).forEach(([k, v]) => {
+      if (v !== undefined && v !== null && v !== '') qs.append(k, v);
+    });
+    const res = await fetch(`${BASE_URL}/api/rbac/audit-logs?${qs.toString()}`, {
+      headers: { ...getAuthHeaders() },
+      cache: 'no-store',
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || 'ऑडिट नोंदी लोड करणे अयशस्वी');
     return data;
   },
 };

@@ -13,7 +13,10 @@ const AuthContext = createContext({
   closeLoginModal: () => {},
   login: async () => {},
   logout: async () => {},
+  refreshUser: async () => {},
   hasRole: () => false,
+  hasPermission: () => false,
+  hasAnyPermission: () => false,
 });
 
 export function AuthProvider({ children }) {
@@ -24,6 +27,25 @@ export function AuthProvider({ children }) {
 
   const openLoginModal = useCallback(() => setIsLoginModalOpen(true), []);
   const closeLoginModal = useCallback(() => setIsLoginModalOpen(false), []);
+
+  const refreshUser = useCallback(async () => {
+    const storedToken = getAuthToken();
+    if (!storedToken) {
+      setUser(null);
+      setToken(null);
+      return null;
+    }
+    try {
+      const data = await api.getMe();
+      if (data.success && data.user) {
+        setUser(data.user);
+        return data.user;
+      }
+    } catch (err) {
+      console.warn('User refresh failed:', err.message);
+    }
+    return null;
+  }, []);
 
   // Check existing session on mount
   useEffect(() => {
@@ -87,11 +109,38 @@ export function AuthProvider({ children }) {
     }
   }, [router]);
 
-  const hasRole = (...roles) => {
-    if (!user || !user.role) return false;
-    if (roles.length === 0) return true;
-    return roles.includes(user.role);
-  };
+  const hasRole = useCallback(
+    (...roles) => {
+      if (!user) return false;
+      if (roles.length === 0) return true;
+      if (user.isWildcard) return true;
+      const lower = roles.map((r) => String(r).toLowerCase());
+      return (
+        roles.includes(user.role) ||
+        (user.roleSlug && lower.includes(String(user.roleSlug).toLowerCase()))
+      );
+    },
+    [user]
+  );
+
+  const hasPermission = useCallback(
+    (permKey) => {
+      if (!user) return false;
+      if (user.isWildcard) return true;
+      return Array.isArray(user.permissions) && user.permissions.includes(permKey);
+    },
+    [user]
+  );
+
+  const hasAnyPermission = useCallback(
+    (...permKeys) => {
+      if (!user) return false;
+      if (user.isWildcard) return true;
+      if (permKeys.length === 0) return true;
+      return permKeys.some((k) => Array.isArray(user.permissions) && user.permissions.includes(k));
+    },
+    [user]
+  );
 
   return (
     <AuthContext.Provider
@@ -104,7 +153,10 @@ export function AuthProvider({ children }) {
         closeLoginModal,
         login,
         logout,
+        refreshUser,
         hasRole,
+        hasPermission,
+        hasAnyPermission,
       }}
     >
       {children}

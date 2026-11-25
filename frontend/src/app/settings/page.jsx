@@ -22,14 +22,17 @@ import {
   Sparkles,
   ArrowRight,
   FileJson,
+  Shield,
 } from 'lucide-react';
 import { useAuth } from '../../components/AuthContext';
 import { api } from '../../lib/api';
 import { useTranslation } from '../../components/LanguageContext';
+import RbacManagementPanel from '../../components/RbacManagementPanel';
 
 export default function SettingsPage() {
-  const { user, login } = useAuth();
+  const { user, hasAnyPermission, refreshUser } = useAuth();
   const { isMarathi } = useTranslation();
+  const canAccessRbac = hasAnyPermission('role.view', 'role.manage', 'user.view', 'user.manage', 'audit.view');
 
   // Profile Form State
   const [fullName, setFullName] = useState('');
@@ -87,6 +90,7 @@ export default function SettingsPage() {
         designation,
       });
       setProfileSuccess(res.message || (isMarathi ? 'प्रोफाइल यशस्वीरित्या अद्यतनित करण्यात आले.' : 'Profile updated successfully.'));
+      await refreshUser();
     } catch (err) {
       setProfileError(err.message || (isMarathi ? 'प्रोफाइल अद्यतन करताना त्रुटी आली.' : 'Failed to update profile.'));
     } finally {
@@ -207,7 +211,7 @@ export default function SettingsPage() {
                   {user.fullName || (isMarathi ? 'महसूल अधिकारी' : 'Revenue Officer')}
                 </h1>
                 <span className="px-2 py-0.5 text-[10px] font-extrabold uppercase rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200/80">
-                  {user.role}
+                  {isMarathi ? (user.roleNameMr || user.roleName || user.role) : (user.roleName || user.role)}
                 </span>
                 <span className="px-2 py-0.5 text-[10px] font-extrabold rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200 flex items-center gap-1">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
@@ -276,6 +280,21 @@ export default function SettingsPage() {
           <ShieldCheck className="w-4 h-4 text-emerald-700" />
           <span>{isMarathi ? '३. DPDPA २०२३ डेटा अधिकार' : '3. DPDPA 2023 Data Rights'}</span>
         </button>
+
+        {canAccessRbac && (
+          <button
+            type="button"
+            onClick={() => setActiveTab('rbac')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all whitespace-nowrap cursor-pointer ${
+              activeTab === 'rbac'
+                ? 'bg-white text-indigo-950 shadow-sm'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-white/40'
+            }`}
+          >
+            <Shield className="w-4 h-4 text-indigo-700" />
+            <span>{isMarathi ? '४. भूमिका व अधिकार (RBAC)' : '4. Roles, Users & Permissions'}</span>
+          </button>
+        )}
       </div>
 
       {/* Tab 1: Profile & Contact Details */}
@@ -657,6 +676,11 @@ export default function SettingsPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Tab 4: Dynamic RBAC Roles, Permissions & User Management */}
+      {activeTab === 'rbac' && canAccessRbac && (
+        <RbacManagementPanel />
       )}
     </div>
   );

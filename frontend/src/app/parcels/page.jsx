@@ -36,6 +36,7 @@ const RevenueShortcutGuideModal = dynamic(() => import('../../components/Revenue
 import Pagination from '../../components/Pagination';
 import SearchableSelect from '../../components/SearchableSelect';
 import { useTranslation } from '../../components/LanguageContext';
+import { useAuth } from '../../components/AuthContext';
 import { formatVillageName, formatTalukaName } from '../../lib/villageUtils';
 import clsx from 'clsx';
 
@@ -66,6 +67,8 @@ export const BOOKLET_18_CATEGORIES = BOOKLET_17_CATEGORIES;
 
 export default function ParcelsPage() {
   const { isMarathi } = useTranslation();
+  const { hasPermission } = useAuth();
+  const canUploadDoc = hasPermission('document.upload');
   const [parcels, setParcels] = useState(() => {
     if (typeof window !== 'undefined') {
       try {
@@ -662,8 +665,8 @@ export default function ParcelsPage() {
           className={clsx(
             'gap-2 items-center',
             showMobileFilters
-              ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1.1fr_1.3fr_1fr_0.9fr_auto_auto] pt-2 border-t border-slate-100 lg:border-t-0 lg:pt-0'
-              : 'hidden lg:grid lg:grid-cols-[1.4fr_1fr_1.1fr_1.3fr_1fr_0.9fr_auto_auto]'
+              ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_minmax(0,1.1fr)_minmax(0,1.3fr)_minmax(0,1fr)_minmax(0,0.9fr)_auto_auto] pt-2 border-t border-slate-100 lg:border-t-0 lg:pt-0'
+              : 'hidden lg:grid lg:grid-cols-4 xl:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_minmax(0,1.1fr)_minmax(0,1.3fr)_minmax(0,1fr)_minmax(0,0.9fr)_auto_auto]'
           )}
         >
           {/* Desktop Search Input */}
@@ -771,38 +774,41 @@ export default function ParcelsPage() {
             />
           </div>
 
-          {/* Apply Button ("लागू करा" / "Apply") */}
-          <button
-            type="button"
-            onClick={handleApplyFilters}
-            disabled={loading}
-            className={clsx(
-              'h-9 px-3.5 rounded-lg font-bold text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95 shrink-0 shadow-xs cursor-pointer select-none w-full sm:w-auto',
-              isFilterPending
-                ? 'bg-emerald-600 hover:bg-emerald-700 text-white ring-2 ring-emerald-400/60 ring-offset-1 shadow-emerald-700/20'
-                : 'bg-slate-900 hover:bg-slate-800 text-white'
-            )}
-            title={isMarathi ? 'निवडलेले फिल्टर्स लागू करा (Enter)' : 'Apply Selected Filters (Enter)'}
-          >
-            <Filter className="w-3.5 h-3.5 shrink-0" />
-            <span>{isMarathi ? 'लागू करा' : 'Apply'}</span>
-            {isFilterPending && (
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-300 animate-pulse shrink-0" />
-            )}
-          </button>
+          {/* Action Buttons */}
+          <div className="flex items-center gap-2 sm:justify-end lg:col-span-2 lg:justify-end xl:contents">
+            {/* Apply Button ("लागू करा" / "Apply") */}
+            <button
+              type="button"
+              onClick={handleApplyFilters}
+              disabled={loading}
+              className={clsx(
+                'h-9 px-3.5 rounded-lg font-bold text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95 shrink-0 shadow-xs cursor-pointer select-none flex-1 sm:flex-initial xl:w-auto whitespace-nowrap',
+                isFilterPending
+                  ? 'bg-emerald-600 hover:bg-emerald-700 text-white ring-2 ring-emerald-400/60 ring-offset-1 shadow-emerald-700/20'
+                  : 'bg-slate-900 hover:bg-slate-800 text-white'
+              )}
+              title={isMarathi ? 'निवडलेले फिल्टर्स लागू करा (Enter)' : 'Apply Selected Filters (Enter)'}
+            >
+              <Filter className="w-3.5 h-3.5 shrink-0" />
+              <span>{isMarathi ? 'लागू करा' : 'Apply'}</span>
+              {isFilterPending && (
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-300 animate-pulse shrink-0" />
+              )}
+            </button>
 
-          {/* Reset Filters Button ("रीसेट" / "Reset") */}
-          <button
-            type="button"
-            onClick={handleResetFilters}
-            disabled={loading}
-            className="h-9 px-3 text-slate-800 hover:text-rose-700 bg-slate-100 hover:bg-rose-50 rounded-lg border border-slate-300 hover:border-rose-300 transition-all active:scale-95 shrink-0 cursor-pointer flex items-center justify-center gap-1.5 text-xs font-bold w-full sm:w-auto shadow-2xs"
-            title={isMarathi ? 'सर्व फिल्टर्स रीसेट करा' : 'Reset all filters'}
-            aria-label={isMarathi ? 'सर्व फिल्टर्स रीसेट करा' : 'Reset all filters'}
-          >
-            <RotateCcw className="w-3.5 h-3.5 text-rose-600 shrink-0" />
-            <span>{isMarathi ? 'रीसेट' : 'Reset'}</span>
-          </button>
+            {/* Reset Filters Button ("रीसेट" / "Reset") */}
+            <button
+              type="button"
+              onClick={handleResetFilters}
+              disabled={loading}
+              className="h-9 px-3 text-slate-800 hover:text-rose-700 bg-slate-100 hover:bg-rose-50 rounded-lg border border-slate-300 hover:border-rose-300 transition-all active:scale-95 shrink-0 cursor-pointer flex items-center justify-center gap-1.5 text-xs font-bold flex-1 sm:flex-initial xl:w-auto shadow-2xs whitespace-nowrap"
+              title={isMarathi ? 'सर्व फिल्टर्स रीसेट करा' : 'Reset all filters'}
+              aria-label={isMarathi ? 'सर्व फिल्टर्स रीसेट करा' : 'Reset all filters'}
+            >
+              <RotateCcw className="w-3.5 h-3.5 text-rose-600 shrink-0" />
+              <span>{isMarathi ? 'रीसेट' : 'Reset'}</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -1092,15 +1098,17 @@ export default function ParcelsPage() {
                           <span>{isMarathi ? '३६०° साखळी पहा' : 'View 360° Trace'}</span>
                         </button>
 
-                        <button
-                          type="button"
-                          onClick={() => setUploadModalParcelId(parcel.id)}
-                          className="h-11 w-11 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 transition active:scale-95 cursor-pointer flex items-center justify-center shrink-0"
-                          title={isMarathi ? 'दस्तऐवज जोडा' : 'Attach Document'}
-                          aria-label={isMarathi ? 'दस्तऐवज जोडा' : 'Attach Document'}
-                        >
-                          <Upload className="w-4 h-4" />
-                        </button>
+                        {canUploadDoc && (
+                          <button
+                            type="button"
+                            onClick={() => setUploadModalParcelId(parcel.id)}
+                            className="h-11 w-11 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 transition active:scale-95 cursor-pointer flex items-center justify-center shrink-0"
+                            title={isMarathi ? 'दस्तऐवज जोडा' : 'Attach Document'}
+                            aria-label={isMarathi ? 'दस्तऐवज जोडा' : 'Attach Document'}
+                          >
+                            <Upload className="w-4 h-4" />
+                          </button>
+                        )}
                       </div>
                     </div>
                   );
@@ -1446,15 +1454,17 @@ export default function ParcelsPage() {
                             <span>{isMarathi ? '३६०° साखळी' : '360° Trace'}</span>
                           </button>
 
-                          <button
-                            type="button"
-                            onClick={() => setUploadModalParcelId(parcel.id)}
-                            className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 transition active:scale-95 cursor-pointer"
-                            title={isMarathi ? 'दस्तऐवज जोडा' : 'Attach Document'}
-                            aria-label={isMarathi ? 'दस्तऐवज जोडा' : 'Attach Document'}
-                          >
-                            <Upload className="w-3.5 h-3.5" />
-                          </button>
+                          {canUploadDoc && (
+                            <button
+                              type="button"
+                              onClick={() => setUploadModalParcelId(parcel.id)}
+                              className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 transition active:scale-95 cursor-pointer"
+                              title={isMarathi ? 'दस्तऐवज जोडा' : 'Attach Document'}
+                              aria-label={isMarathi ? 'दस्तऐवज जोडा' : 'Attach Document'}
+                            >
+                              <Upload className="w-3.5 h-3.5" />
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>

@@ -2,6 +2,7 @@ import prisma from '../config/prisma.js';
 import { uploadToCloudinary } from '../config/cloudinary.js';
 import { uploadBufferToGCS, generateSignedUrl, isGCSConfigured } from '../config/gcs.js';
 import { logAudit } from '../middleware/auditMiddleware.js';
+import { userCanAccessTaluka } from '../services/rbacService.js';
 
 /**
  * Upload document to GCS (or Cloudinary fallback) and catalog physical record room coordinates
@@ -43,9 +44,26 @@ export const uploadDocument = async (req, res) => {
         select: { taluka: true, villageName: true, gatNumber: true },
       });
       if (p) {
+        if (!userCanAccessTaluka(req.user, p.taluka)) {
+          return res.status(403).json({
+            success: false,
+            error: `आपल्याकडे '${p.taluka}' तालुक्यासाठी दस्तऐवज अपलोड करण्याचे अधिकार नाहीत. (Taluka scope restricted to ${req.user.taluka})`,
+          });
+        }
         talukaFolder = p.taluka ? p.taluka.replace(/[^a-zA-Z0-9_-]/g, '_') : 'taluka';
         villageFolder = p.villageName ? p.villageName.replace(/[^a-zA-Z0-9_\u0900-\u097F-]/g, '_') : 'village';
         gatFolder = p.gatNumber ? String(p.gatNumber).replace(/[^a-zA-Z0-9_-]/g, '_') : 'gat';
+      }
+    } else if (caseId) {
+      const c = await prisma.forwardEnforcementCase.findUnique({
+        where: { id: caseId },
+        include: { parcel: { select: { taluka: true } } },
+      });
+      if (c?.parcel && !userCanAccessTaluka(req.user, c.parcel.taluka)) {
+        return res.status(403).json({
+          success: false,
+          error: `आपल्याकडे '${c.parcel.taluka}' तालुक्यासाठी दस्तऐवज अपलोड करण्याचे अधिकार नाहीत. (Taluka scope restricted to ${req.user.taluka})`,
+        });
       }
     }
 

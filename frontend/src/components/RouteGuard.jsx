@@ -8,9 +8,14 @@ import { useAuth } from './AuthContext';
 import { useTranslation } from './LanguageContext';
 import ChandrapurDistrictLogo from './landing/ChandrapurDistrictLogo';
 
-export default function RouteGuard({ children, allowedRoles = [] }) {
-  const { user, loading, openLoginModal } = useAuth();
-  const { locale, isMarathi } = useTranslation();
+export default function RouteGuard({
+  children,
+  allowedRoles = [],
+  requiredPermissions = [],
+  anyPermissions = [],
+}) {
+  const { user, loading, openLoginModal, hasRole, hasPermission, hasAnyPermission } = useAuth();
+  const { isMarathi } = useTranslation();
   const pathname = usePathname();
 
   if (pathname === '/glossary') {
@@ -46,7 +51,7 @@ export default function RouteGuard({ children, allowedRoles = [] }) {
             {isMarathi ? 'प्रवेश निर्बंधित' : 'Access Restricted'}
           </h2>
           <p className="text-xs sm:text-sm text-slate-600 mb-6 leading-relaxed">
-            {isMarathi ? 'हे पृष्ठ केवळ अधिकृत महसूल अधिकाऱ्यांसाठी (Collector / SDO / तहसीलदार / तलाठी) उपलब्ध आहे. कृपया पुढे जाण्यापूर्वी लॉगिन करा.' : 'This page is strictly reserved for authorized revenue officers (Collector / SDO / Tahsildar / Talathi). Please sign in to continue.'}
+            {isMarathi ? 'हे पृष्ठ केवळ अधिकृत महसूल अधिकाऱ्यांसाठी उपलब्ध आहे. कृपया पुढे जाण्यापूर्वी लॉगिन करा.' : 'This page is strictly reserved for authorized revenue officers. Please sign in to continue.'}
           </p>
 
           <div className="flex flex-col gap-3">
@@ -72,8 +77,15 @@ export default function RouteGuard({ children, allowedRoles = [] }) {
     );
   }
 
-  // Role check
-  if (allowedRoles.length > 0 && !allowedRoles.includes(user.role)) {
+  const missingAllPerms = requiredPermissions.filter((p) => !hasPermission(p));
+  const lacksAnyPerm = anyPermissions.length > 0 && !hasAnyPermission(...anyPermissions);
+  const lacksRole = allowedRoles.length > 0 && !hasRole(...allowedRoles);
+
+  if (missingAllPerms.length > 0 || lacksAnyPerm || lacksRole) {
+    const displayRole = isMarathi
+      ? (user.roleNameMr || user.roleName || user.role)
+      : (user.roleName || user.role);
+
     return (
       <div className="min-h-[60vh] flex items-center justify-center p-4">
         <div className="max-w-md w-full bg-white/95 backdrop-blur-xl rounded-2xl border border-rose-200 shadow-xl p-6 sm:p-8 text-center">
@@ -82,14 +94,20 @@ export default function RouteGuard({ children, allowedRoles = [] }) {
           </div>
 
           <h2 className="text-lg font-black text-slate-900 mb-2">
-            {isMarathi ? 'या कृतीसाठी आपणास अधिकार नाहीत' : 'Insufficient Privileges'}
+            {isMarathi ? 'या विभागासाठी आपणास अधिकार नाहीत' : 'Insufficient Privileges'}
           </h2>
           <p className="text-xs text-slate-600 mb-4">
-            {isMarathi ? 'आपली भूमिका:' : 'Your Role:'} <span className="font-bold text-slate-900">{user.role}</span> ({user.designation || (isMarathi ? 'अधिकारी' : 'Officer')})
+            {isMarathi ? 'आपली भूमिका:' : 'Your Role:'}{' '}
+            <span className="font-bold text-slate-900">{displayRole}</span>{' '}
+            ({user.designation || (isMarathi ? 'अधिकारी' : 'Officer')})
           </p>
           <p className="text-xs text-rose-700 bg-rose-50 p-3 rounded-xl border border-rose-100 mb-6">
-            {isMarathi ? 'हे मॉड्यूल वापरण्यासाठी खालीलपैकी एक पद असणे आवश्यक आहे:' : 'Accessing this module requires one of the following designations:'}
-            <span className="block font-bold mt-1">{allowedRoles.join(', ')}</span>
+            {isMarathi
+              ? 'हे मॉड्यूल वापरण्यासाठी जिल्हाधिकारी / प्रशासकाकडून संबंधित परवानगी असणे आवश्यक आहे:'
+              : 'Accessing this module requires one of the following permissions or roles:'}
+            <span className="block font-bold font-mono mt-1">
+              {[...requiredPermissions, ...anyPermissions, ...allowedRoles].join(', ')}
+            </span>
           </p>
 
           <Link

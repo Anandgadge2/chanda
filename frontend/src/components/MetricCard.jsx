@@ -109,6 +109,20 @@ const KPI_VARIANTS = {
     footer: 'border-slate-800 text-slate-300 group-hover:text-white',
     pulse: 'bg-white',
   },
+  purple: {
+    bg: 'bg-purple-600',
+    hoverBg: 'hover:bg-purple-700',
+    border: 'border-purple-500/80',
+    shadow: 'shadow-md shadow-purple-600/20 hover:shadow-xl hover:shadow-purple-600/30',
+    activeRing: 'ring-2 ring-inset ring-white shadow-xl shadow-purple-950/30',
+    title: 'text-purple-100 group-hover:text-white',
+    value: 'text-white',
+    subtext: 'text-purple-200/90',
+    badge: 'bg-white/15 text-white border-white/20 group-hover:bg-white/25',
+    actionBtn: 'bg-white/15 text-white border-white/20 hover:bg-white hover:text-purple-700',
+    footer: 'border-purple-500/60 text-purple-100/90 group-hover:text-white',
+    pulse: 'bg-white',
+  },
 };
 
 export default function MetricCard({

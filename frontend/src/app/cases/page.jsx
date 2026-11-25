@@ -50,7 +50,10 @@ import SearchableSelect from '../../components/SearchableSelect';
 import clsx from 'clsx';
 
 export default function CasesPage() {
-  const { hasRole } = useAuth();
+  const { hasPermission } = useAuth();
+  const canRecordHearing = hasPermission('case.hearing');
+  const canUploadDoc = hasPermission('document.upload');
+  const canPassOrder = hasPermission('case.order');
   const { t, locale, isMarathi } = useTranslation();
 
   const [cases, setCases] = useState([]);
@@ -587,7 +590,7 @@ export default function CasesPage() {
       <div className="relative z-20 bg-white/95 backdrop-blur-xl border border-slate-200/90 rounded-2xl p-3 sm:p-3.5 shadow-xs space-y-3">
         {/* Live Search Input & Mobile Filter Toggle Button */}
         <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
-          <div className="relative flex-1 min-w-[160px]">
+          <div className="relative flex-1 min-w-0">
             <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
             <input
               type="text"
@@ -643,10 +646,10 @@ export default function CasesPage() {
         {/* Filter Dropdowns Suite: Collapsible on mobile, clean row/grid on desktop */}
         <div
           className={clsx(
-            'gap-2.5 sm:gap-3',
+            'gap-2.5 sm:gap-3 items-end',
             showMobileFilters
-              ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[repeat(5,minmax(0,1fr))_auto_auto] pt-2.5 border-t border-slate-100 md:border-t-0 md:pt-0 items-end'
-              : 'hidden md:grid md:grid-cols-[repeat(5,minmax(0,1fr))_auto_auto] items-end'
+              ? 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-[repeat(5,minmax(0,1fr))_auto_auto] pt-2.5 border-t border-slate-100 md:border-t-0 md:pt-0'
+              : 'hidden md:grid md:grid-cols-3 xl:grid-cols-[repeat(5,minmax(0,1fr))_auto_auto]'
           )}
         >
           {/* Taluka Dropdown */}
@@ -730,38 +733,41 @@ export default function CasesPage() {
             />
           </div>
 
-          {/* Apply Button ("लागू करा" / "Apply") */}
-          <button
-            type="button"
-            onClick={handleApplyFilters}
-            disabled={loading}
-            className={clsx(
-              'h-11 px-5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all active:scale-95 shrink-0 shadow-xs cursor-pointer select-none w-full sm:w-auto',
-              isFilterPending
-                ? 'bg-blue-600 hover:bg-blue-700 text-white ring-2 ring-blue-400/60 ring-offset-1 shadow-blue-700/20'
-                : 'bg-[#242b6b] hover:bg-[#1a2053] text-white'
-            )}
-            title={isMarathi ? 'निवडलेले फिल्टर्स लागू करा (Enter)' : 'Apply Selected Filters (Enter)'}
-          >
-            <Filter className="w-4 h-4 shrink-0" />
-            <span>{isMarathi ? 'लागू करा' : 'Apply'}</span>
-            {isFilterPending && (
-              <span className="w-2 h-2 rounded-full bg-amber-300 animate-pulse shrink-0" />
-            )}
-          </button>
+          {/* Action Buttons */}
+          <div className="flex items-center gap-2 sm:justify-end md:justify-start xl:contents">
+            {/* Apply Button ("लागू करा" / "Apply") */}
+            <button
+              type="button"
+              onClick={handleApplyFilters}
+              disabled={loading}
+              className={clsx(
+                'h-11 px-5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all active:scale-95 shrink-0 shadow-xs cursor-pointer select-none flex-1 sm:flex-initial xl:w-auto whitespace-nowrap',
+                isFilterPending
+                  ? 'bg-blue-600 hover:bg-blue-700 text-white ring-2 ring-blue-400/60 ring-offset-1 shadow-blue-700/20'
+                  : 'bg-[#242b6b] hover:bg-[#1a2053] text-white'
+              )}
+              title={isMarathi ? 'निवडलेले फिल्टर्स लागू करा (Enter)' : 'Apply Selected Filters (Enter)'}
+            >
+              <Filter className="w-4 h-4 shrink-0" />
+              <span>{isMarathi ? 'लागू करा' : 'Apply'}</span>
+              {isFilterPending && (
+                <span className="w-2 h-2 rounded-full bg-amber-300 animate-pulse shrink-0" />
+              )}
+            </button>
 
-          {/* Reset Filters Button ("रीसेट" / "Reset") */}
-          <button
-            type="button"
-            onClick={handleResetFilters}
-            disabled={loading}
-            className="h-11 px-4 text-slate-800 hover:text-rose-700 bg-slate-100 hover:bg-rose-50 rounded-xl border border-slate-300 hover:border-rose-300 transition-all active:scale-95 shrink-0 cursor-pointer flex items-center justify-center gap-2 text-sm font-bold w-full sm:w-auto shadow-2xs"
-            title={isMarathi ? 'सर्व फिल्टर्स रीसेट करा' : 'Reset all filters'}
-            aria-label={isMarathi ? 'सर्व फिल्टर्स रीसेट करा' : 'Reset all filters'}
-          >
-            <RotateCcw className="w-4 h-4 text-rose-600 shrink-0" />
-            <span>{isMarathi ? 'रीसेट' : 'Reset'}</span>
-          </button>
+            {/* Reset Filters Button ("रीसेट" / "Reset") */}
+            <button
+              type="button"
+              onClick={handleResetFilters}
+              disabled={loading}
+              className="h-11 px-4 text-slate-800 hover:text-rose-700 bg-slate-100 hover:bg-rose-50 rounded-xl border border-slate-300 hover:border-rose-300 transition-all active:scale-95 shrink-0 cursor-pointer flex items-center justify-center gap-2 text-sm font-bold flex-1 sm:flex-initial xl:w-auto shadow-2xs whitespace-nowrap"
+              title={isMarathi ? 'सर्व फिल्टर्स रीसेट करा' : 'Reset all filters'}
+              aria-label={isMarathi ? 'सर्व फिल्टर्स रीसेट करा' : 'Reset all filters'}
+            >
+              <RotateCcw className="w-4 h-4 text-rose-600 shrink-0" />
+              <span>{isMarathi ? 'रीसेट' : 'Reset'}</span>
+            </button>
+          </div>
         </div>
       </div>
       {/* Enhanced Table Card (Modern Executive Grid) */}
@@ -960,7 +966,7 @@ export default function CasesPage() {
                       <button
                         type="button"
                         onClick={() => setSelectedCaseForHearing(c)}
-                        className="flex-1 min-w-0 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-xs shadow-indigo-600/20 active:scale-95 cursor-pointer"
+                        className={clsx("flex-1 min-w-0 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-xs shadow-indigo-600/20 active:scale-95 cursor-pointer", !canRecordHearing && "hidden")}
                         title={isMarathi ? 'सुनावणी / रोजनामा नोंदवा' : 'Record Hearing'}
                       >
                         <Scale className="w-3.5 h-3.5 text-white shrink-0" />
@@ -980,7 +986,7 @@ export default function CasesPage() {
                         <button
                           type="button"
                           onClick={() => setUploadDocCaseId(c.id)}
-                          className="relative w-8 h-8 rounded-xl border border-slate-200 hover:bg-slate-100 text-slate-600 flex items-center justify-center active:scale-95 cursor-pointer shadow-2xs"
+                          className={clsx("relative w-8 h-8 rounded-xl border border-slate-200 hover:bg-slate-100 text-slate-600 flex items-center justify-center active:scale-95 cursor-pointer shadow-2xs", !canUploadDoc && "hidden")}
                           title={isMarathi ? 'कागदपत्रे अपलोड' : 'Upload Documents'}
                         >
                           <Upload className="w-3.5 h-3.5" />
@@ -989,7 +995,7 @@ export default function CasesPage() {
                           )}
                         </button>
 
-                        {!c.isRepossessedToGovt && hasRole('COLLECTOR', 'SDO') && (
+                        {!c.isRepossessedToGovt && canPassOrder && (
                           <button
                             type="button"
                             onClick={() => setShasanJamaCase(c)}
@@ -1315,7 +1321,7 @@ export default function CasesPage() {
                             <button
                               type="button"
                               onClick={() => setSelectedCaseForHearing(c)}
-                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-xs shadow-indigo-600/20 hover:shadow transition-all active:scale-95 shrink-0 cursor-pointer"
+                              className={clsx("inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-xs shadow-indigo-600/20 hover:shadow transition-all active:scale-95 shrink-0 cursor-pointer", !canRecordHearing && "hidden")}
                               title={isMarathi ? 'सुनावणी / रोजनामा नोंदवा' : 'Record Hearing / Roznama'}
                             >
                               <Scale className="w-3.5 h-3.5 text-white" />
@@ -1334,7 +1340,7 @@ export default function CasesPage() {
                             <button
                               type="button"
                               onClick={() => setUploadDocCaseId(c.id)}
-                              className="relative w-8 h-8 rounded-xl border border-slate-200 hover:border-slate-300 hover:bg-slate-100/90 text-slate-500 hover:text-slate-900 flex items-center justify-center transition active:scale-95 cursor-pointer shadow-2xs"
+                              className={clsx("relative w-8 h-8 rounded-xl border border-slate-200 hover:border-slate-300 hover:bg-slate-100/90 text-slate-500 hover:text-slate-900 flex items-center justify-center transition active:scale-95 cursor-pointer shadow-2xs", !canUploadDoc && "hidden")}
                               title={
                                 isMarathi
                                   ? `कागदपत्रे / पुरावे अपलोड (${c.documents?.length || 0} उपलब्ध)`
@@ -1347,7 +1353,7 @@ export default function CasesPage() {
                               )}
                             </button>
 
-                            {!c.isRepossessedToGovt && hasRole('COLLECTOR', 'SDO') && (
+                            {!c.isRepossessedToGovt && canPassOrder && (
                               <button
                                 type="button"
                                 onClick={() => setShasanJamaCase(c)}

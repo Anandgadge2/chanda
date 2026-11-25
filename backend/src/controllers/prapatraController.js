@@ -7,6 +7,8 @@ import prisma from '../config/prisma.js';
 import { archiveExcelToGCS } from '../config/gcs.js';
 import { parsePrapatraBuffer } from '../parsers/prapatraParserJs.js';
 import { inspectVillageDiff, reconcileAndSeedVillage } from '../services/prapatraReconciliationService.js';
+import { logAudit } from '../middleware/auditMiddleware.js';
+import { userCanAccessTaluka, userHasPermission } from '../services/rbacService.js';
 
 const execAsync = promisify(exec);
 const execFileAsync = promisify(execFile);
@@ -2375,9 +2377,26 @@ export const updatePrapatraRollup = async (req, res) => {
       return res.status(404).json({ success: false, error: 'रेकॉर्ड सापडला नाही (Rollup record not found).' });
     }
 
+    if (!userCanAccessTaluka(req.user, existing.taluka)) {
+      return res.status(403).json({
+        success: false,
+        error: `आपल्याकडे '${existing.taluka}' तालुक्याचा गोषवारा संपादित करण्याचे अधिकार नाहीत. (Taluka scope restricted to ${req.user.taluka})`,
+      });
+    }
+
     const updated = await prisma.prapatraRollup.update({
       where: { id },
       data: updateData
+    });
+
+    await logAudit({
+      userId: req.user?.id || null,
+      action: 'UPDATE_PRAPATRA_ROLLUP',
+      entityType: 'PrapatraRollup',
+      entityId: id,
+      previousData: { taluka: existing.taluka, villageName: existing.villageName },
+      newData: updateData,
+      req,
     });
 
     // Recompute parent taluka totals
@@ -2533,6 +2552,21 @@ export const uploadPrapatraExcel = async (req, res) => {
 
   const talukaInput = req.body.taluka || 'Chandrapur';
   const targetTaluka = TALUKA_ALIASES[talukaInput.toLowerCase()] || talukaInput;
+
+  if (!userCanAccessTaluka(req.user, targetTaluka)) {
+    return res.status(403).json({
+      success: false,
+      error: `आपल्याकडे '${targetTaluka}' तालुक्यासाठी एक्सेल अपलोड करण्याचे अधिकार नाहीत. (Taluka scope restricted to ${req.user.taluka})`,
+    });
+  }
+
+  const isReplaceMode = req.body.uploadMode === 'replace' || req.body.replaceVillage === 'true';
+  if (isReplaceMode && !userHasPermission(req.user, 'village.purge')) {
+    return res.status(403).json({
+      success: false,
+      error: 'पद्धत २ (स्वच्छ पुनर्स्थापना / Wipe & Replace) वापरण्यासाठी village.purge अधिकार आवश्यक आहेत. (Missing permission: village.purge)',
+    });
+  }
 
   // Locate python parser script dynamically inside backend codebase
   const currentDir = path.dirname(new URL(import.meta.url).pathname.replace(/^\/([a-zA-Z]:)/, '$1'));
@@ -2835,6 +2869,13 @@ export const purgeVillageData = async (req, res) => {
     const targetTaluka = TALUKA_ALIASES[taluka.toLowerCase()] || taluka.trim();
     const cleanV = cleanVillageName(villageName.trim());
 
+    if (!userCanAccessTaluka(req.user, targetTaluka)) {
+      return res.status(403).json({
+        success: false,
+        error: `आपल्याकडे '${targetTaluka}' तालुक्यातील गाव डेटा हटवण्याचे अधिकार नाहीत. (Taluka scope restricted to ${req.user.taluka})`,
+      });
+    }
+
     // 1. Find all parcels for this village
     const existingParcels = await prisma.landParcel.findMany({
       where: {
@@ -2903,6 +2944,14 @@ export const purgeVillageData = async (req, res) => {
       const { invalidateAnalyticsCache } = await import('./analyticsController.js');
       invalidateAnalyticsCache();
     } catch (e) {}
+
+    await logAudit({
+      userId: req.user?.id || null,
+      action: 'VILLAGE_DATA_PURGED',
+      entityType: 'LandParcel',
+      newData: { taluka: targetTaluka, villageName: villageName.trim(), deletedCount: count },
+      req,
+    });
 
     return res.status(200).json({
       success: true,

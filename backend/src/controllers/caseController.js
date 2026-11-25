@@ -1,6 +1,7 @@
 import prisma from '../config/prisma.js';
 import { invalidateAnalyticsCache } from './analyticsController.js';
 import { logAudit } from '../middleware/auditMiddleware.js';
+import { userCanAccessTaluka } from '../services/rbacService.js';
 
 /**
  * Get forward quasi-judicial enforcement cases
@@ -149,6 +150,20 @@ export const createCase = async (req, res) => {
       });
     }
 
+    const targetParcel = await prisma.landParcel.findUnique({
+      where: { id: parcelId },
+      select: { taluka: true },
+    });
+    if (!targetParcel) {
+      return res.status(404).json({ success: false, error: 'Parcel not found' });
+    }
+    if (!userCanAccessTaluka(req.user, targetParcel.taluka)) {
+      return res.status(403).json({
+        success: false,
+        error: `आपल्याकडे '${targetParcel.taluka}' तालुक्यातील प्रकरण दाखल करण्याचे अधिकार नाहीत. (Taluka scope restricted to ${req.user.taluka})`,
+      });
+    }
+
     const newCase = await prisma.forwardEnforcementCase.create({
       data: {
         parcelId,
@@ -197,6 +212,20 @@ export const addHearing = async (req, res) => {
       });
     }
 
+    const existingCase = await prisma.forwardEnforcementCase.findUnique({
+      where: { id },
+      include: { parcel: { select: { taluka: true } } },
+    });
+    if (!existingCase) {
+      return res.status(404).json({ success: false, error: 'Case not found' });
+    }
+    if (existingCase.parcel && !userCanAccessTaluka(req.user, existingCase.parcel.taluka)) {
+      return res.status(403).json({
+        success: false,
+        error: `आपल्याकडे '${existingCase.parcel.taluka}' तालुक्यातील सुनावणी नोंदवण्याचे अधिकार नाहीत. (Taluka scope restricted to ${req.user.taluka})`,
+      });
+    }
+
     const hearing = await prisma.caseHearing.create({
       data: {
         caseId: id,
@@ -239,7 +268,17 @@ export const updateCaseStatus = async (req, res) => {
 
     const existingCase = await prisma.forwardEnforcementCase.findUnique({
       where: { id },
+      include: { parcel: { select: { taluka: true } } },
     });
+    if (!existingCase) {
+      return res.status(404).json({ success: false, error: 'Case not found' });
+    }
+    if (existingCase.parcel && !userCanAccessTaluka(req.user, existingCase.parcel.taluka)) {
+      return res.status(403).json({
+        success: false,
+        error: `आपल्याकडे '${existingCase.parcel.taluka}' तालुक्यातील प्रकरणावर आदेश पारित करण्याचे अधिकार नाहीत. (Taluka scope restricted to ${req.user.taluka})`,
+      });
+    }
 
     const updatedCase = await prisma.forwardEnforcementCase.update({
       where: { id },

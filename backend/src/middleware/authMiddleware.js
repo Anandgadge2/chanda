@@ -1,5 +1,11 @@
 import jwt from 'jsonwebtoken';
-import prisma from '../config/prisma.js';
+import {
+  loadUserWithRbac,
+  buildUserAuthContext,
+  userHasPermission,
+  userHasAnyPermission,
+} from '../services/rbacService.js';
+
 const JWT_SECRET = process.env.JWT_SECRET || 'chandrapur-collectorate-secure-jwt-secret-key-2026';
 
 // High-performance in-memory verified user cache (30-second TTL)
@@ -16,7 +22,7 @@ export const invalidateUserCache = (userId) => {
 };
 
 /**
- * Middleware: Verify JWT Bearer token and attach user to req.user
+ * Middleware: Verify JWT Bearer token and attach enriched RBAC user to req.user
  */
 export const authenticate = async (req, res, next) => {
   try {
@@ -44,21 +50,10 @@ export const authenticate = async (req, res, next) => {
     if (cached && Date.now() - cached.timestamp < USER_CACHE_TTL_MS) {
       user = cached.user;
     } else {
-      user = await prisma.user.findUnique({
-        where: { id: decoded.id },
-        select: {
-          id: true,
-          fullName: true,
-          email: true,
-          mobile: true,
-          role: true,
-          taluka: true,
-          designation: true,
-          isActive: true,
-        },
-      });
+      const dbUser = await loadUserWithRbac({ id: decoded.id });
+      user = buildUserAuthContext(dbUser);
 
-      if (user && user.isActive) {
+      if (user && user.isActive && user.roleObj?.isActive !== false) {
         userCache.set(decoded.id, {
           user,
           timestamp: Date.now(),
@@ -66,10 +61,20 @@ export const authenticate = async (req, res, next) => {
       }
     }
 
-    if (!user || !user.isActive) {
+    if (!user || !user.isActive || user.roleObj?.isActive === false) {
       return res.status(401).json({
         success: false,
         error: 'वापरकर्ता निष्क्रीय किंवा अस्तित्वात नाही. (User inactive or not found)',
+      });
+    }
+
+    // Immediate revocation check when role/permissions/status were changed
+    const tokenVersion = decoded.tokenVersion ?? 1;
+    if (tokenVersion !== user.tokenVersion) {
+      invalidateUserCache(user.id);
+      return res.status(401).json({
+        success: false,
+        error: 'आपले अधिकार अद्यतनित केले आहेत. कृपया पुन्हा लॉगिन करा. (Session invalidated due to role/permission update. Please login again.)',
       });
     }
 
@@ -90,8 +95,60 @@ export const authenticate = async (req, res, next) => {
 };
 
 /**
- * Middleware: Role-based access control
- * @param  {...string} roles Allowed UserRoles
+ * Middleware: Require ALL specified granular permissions
+ * @param  {...string} requiredPermissions
+ */
+export const requirePermission = (...requiredPermissions) => {
+  return (req, res, next) => {
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        error: 'अनधिकृत प्रवेश. (Authentication required)',
+      });
+    }
+
+    const missing = requiredPermissions.filter((perm) => !userHasPermission(req.user, perm));
+    if (missing.length > 0) {
+      return res.status(403).json({
+        success: false,
+        error: `या कृतीसाठी आपणास अधिकार नाहीत. (Access forbidden: Missing permission [${missing.join(', ')}])`,
+        missingPermissions: missing,
+      });
+    }
+
+    next();
+  };
+};
+
+/**
+ * Middleware: Require AT LEAST ONE of the specified permissions
+ * @param  {...string} allowedPermissions
+ */
+export const requireAnyPermission = (...allowedPermissions) => {
+  return (req, res, next) => {
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        error: 'अनधिकृत प्रवेश. (Authentication required)',
+      });
+    }
+
+    if (allowedPermissions.length > 0 && !userHasAnyPermission(req.user, allowedPermissions)) {
+      return res.status(403).json({
+        success: false,
+        error: `या कृतीसाठी आपणास अधिकार नाहीत. (Access forbidden: Requires any of [${allowedPermissions.join(', ')}])`,
+        requiredPermissions: allowedPermissions,
+      });
+    }
+
+    next();
+  };
+};
+
+/**
+ * Backward-compatible Role-based access control middleware.
+ * Matches legacy UserRole enum, dynamic roleSlug, or wildcard Superadmin.
+ * @param  {...string} roles Allowed UserRoles or role slugs
  */
 export const authorize = (...roles) => {
   return (req, res, next) => {
@@ -102,10 +159,18 @@ export const authorize = (...roles) => {
       });
     }
 
-    if (roles.length > 0 && !roles.includes(req.user.role)) {
+    if (req.user.isWildcard) {
+      return next();
+    }
+
+    const normalized = roles.map((r) => String(r).toLowerCase());
+    const matchesLegacy = roles.includes(req.user.role);
+    const matchesSlug = req.user.roleSlug && normalized.includes(req.user.roleSlug.toLowerCase());
+
+    if (roles.length > 0 && !matchesLegacy && !matchesSlug) {
       return res.status(403).json({
         success: false,
-        error: `या कृतीसाठी आपणास अधिकार नाहीत. (Access forbidden: Requires one of [${roles.join(', ')}], current role is ${req.user.role})`,
+        error: `या कृतीसाठी आपणास अधिकार नाहीत. (Access forbidden: Requires one of [${roles.join(', ')}], current role is ${req.user.roleName || req.user.role})`,
       });
     }
 

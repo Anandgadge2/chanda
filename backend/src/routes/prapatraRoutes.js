@@ -17,7 +17,7 @@ import {
   exportGoshwaraExcel,
   exportGoshwaraPdf
 } from '../controllers/prapatraController.js';
-import { authenticate, authorize } from '../middleware/authMiddleware.js';
+import { authenticate, requirePermission } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
@@ -54,7 +54,7 @@ router.get('/villages', getTalukaVillages);
 router.post(
   '/inspect-diff',
   authenticate,
-  authorize('SUPERADMIN', 'COLLECTOR', 'SUB_COLLECTOR', 'SDO', 'TEHSILDAR', 'NAIB_TEHSILDAR', 'CIRCLE_OFFICER', 'TALATHI'),
+  requirePermission('prapatra.upload'),
   upload.any(),
   inspectPrapatraDiff
 );
@@ -66,7 +66,7 @@ router.post(
 router.post(
   '/upload',
   authenticate,
-  authorize('SUPERADMIN', 'COLLECTOR', 'SUB_COLLECTOR', 'SDO', 'TEHSILDAR', 'NAIB_TEHSILDAR', 'CIRCLE_OFFICER', 'TALATHI'),
+  requirePermission('prapatra.upload'),
   upload.any(),
   uploadPrapatraExcel
 );
@@ -78,15 +78,15 @@ router.post(
 router.post(
   '/village/purge',
   authenticate,
-  authorize('SUPERADMIN', 'COLLECTOR', 'SUB_COLLECTOR', 'SDO', 'TEHSILDAR', 'NAIB_TEHSILDAR', 'CIRCLE_OFFICER', 'TALATHI'),
+  requirePermission('village.purge'),
   purgeVillageData
 );
 
 /**
  * @route   PUT /api/prapatra/rollup/:id
- * @desc    Update / Edit village rollup record for SuperAdmin or Collector
+ * @desc    Update / Edit village rollup record
  */
-router.put('/rollup/:id', updatePrapatraRollup);
+router.put('/rollup/:id', authenticate, requirePermission('prapatra.rollup_edit'), updatePrapatraRollup);
 
 /**
  * @route   GET /api/prapatra/categories
@@ -99,13 +99,17 @@ router.get('/categories', getBookletCategories);
  * @desc    Get Prapatra 1-17 or Master Checklist in JSON, Excel, or PDF format
  * @query   taluka, village, search, filterType, format ('json', 'excel', 'pdf')
  */
-router.get('/renumbering-parcha/data', getRenumberingParchaData);
-router.post('/renumbering-parcha/export-excel', exportRenumberingParchaExcel);
-router.post('/renumbering-parcha/export-pdf', exportRenumberingParchaPdf);
+router.get('/renumbering-parcha/data', authenticate, requirePermission('prapatra.view'), getRenumberingParchaData);
+router.post('/renumbering-parcha/export-excel', authenticate, requirePermission('prapatra.export'), exportRenumberingParchaExcel);
+router.post('/renumbering-parcha/export-pdf', authenticate, requirePermission('prapatra.export'), exportRenumberingParchaPdf);
 
-router.post('/goshwara/export-excel', exportGoshwaraExcel);
-router.post('/goshwara/export-pdf', exportGoshwaraPdf);
+router.post('/goshwara/export-excel', authenticate, requirePermission('prapatra.export'), exportGoshwaraExcel);
+router.post('/goshwara/export-pdf', authenticate, requirePermission('prapatra.export'), exportGoshwaraPdf);
 
-router.get('/:id', getPrapatraReport);
+router.get('/:id', authenticate, (req, res, next) => {
+  const fmt = String(req.query.format || 'json').toLowerCase();
+  const perm = (fmt === 'excel' || fmt === 'pdf') ? 'prapatra.export' : 'prapatra.view';
+  return requirePermission(perm)(req, res, next);
+}, getPrapatraReport);
 
 export default router;

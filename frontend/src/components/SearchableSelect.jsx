@@ -123,16 +123,16 @@ export default function SearchableSelect({
       if (!containerRef.current) return;
       const rect = containerRef.current.getBoundingClientRect();
       const viewportWidth = window.innerWidth;
-      const dropdownWidth = 280; // Estimated max width
+      const dropdownWidth = viewportWidth >= 768 ? 480 : viewportWidth >= 640 ? 420 : Math.min(320, viewportWidth - 32);
 
       if (align === 'right') {
-        if (rect.right - dropdownWidth < 8) {
+        if (rect.right - dropdownWidth < 8 && rect.left + dropdownWidth <= viewportWidth - 8) {
           setDropdownAlign('left');
         } else {
           setDropdownAlign('right');
         }
       } else {
-        if (rect.left + dropdownWidth > viewportWidth - 8) {
+        if (rect.left + dropdownWidth > viewportWidth - 8 && rect.right - dropdownWidth >= 8) {
           setDropdownAlign('right');
         } else {
           setDropdownAlign('left');
@@ -240,7 +240,7 @@ export default function SearchableSelect({
   return (
     <div
       ref={containerRef}
-      className={`relative inline-block w-full ${className} ${isOpen ? 'z-[60]' : ''}`}
+      className={`relative block w-full min-w-0 ${className} ${isOpen ? 'z-[60]' : ''}`}
       onKeyDown={handleKeyDown}
     >
       {/* Trigger Button */}
@@ -251,7 +251,7 @@ export default function SearchableSelect({
         aria-label={ariaLabel || placeholder}
         aria-expanded={isOpen}
         title={displayText}
-        className={`w-full ${
+        className={`w-full min-w-0 ${
           compact ? 'min-h-[36px] h-[36px] px-3 py-1 rounded-xl text-xs' : 'min-h-[44px] h-11 px-3.5 py-2 rounded-xl text-sm'
         } flex items-center justify-between gap-2 border transition cursor-pointer select-none disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none shadow-2xs ${
           isFiltered
@@ -325,7 +325,7 @@ export default function SearchableSelect({
           ref={dropdownRef}
           className={`absolute ${
             dropdownAlign === 'right' ? 'right-0' : 'left-0'
-          } mt-2 w-full min-w-[320px] sm:min-w-[420px] md:min-w-[480px] max-w-[min(600px,calc(100vw-1.5rem))] bg-white border border-slate-200 rounded-2xl shadow-2xl shadow-slate-900/15 z-[100] flex flex-col max-h-[360px] overflow-hidden animate-in fade-in zoom-in-95 duration-150 ${dropdownClassName}`}
+          } mt-2 w-full min-w-[min(280px,calc(100vw-2rem))] sm:min-w-[min(420px,calc(100vw-2rem))] md:min-w-[min(480px,calc(100vw-2rem))] max-w-[min(600px,calc(100vw-1.5rem))] bg-white border border-slate-200 rounded-2xl shadow-2xl shadow-slate-900/15 z-[100] flex flex-col max-h-[360px] overflow-hidden animate-in fade-in zoom-in-95 duration-150 ${dropdownClassName}`}
         >
           {/* Fixed Search Header */}
           <div className="p-3 border-b border-slate-100 bg-slate-50 shrink-0">

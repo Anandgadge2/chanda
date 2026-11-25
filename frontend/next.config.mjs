@@ -36,6 +36,14 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  webpack(config, { dev }) {
+    // Use in-memory webpack cache during development to prevent PackFileCacheStrategy
+    // gzip/pack corruption (incorrect header check / ENOENT) on Windows restarts.
+    if (dev) {
+      config.cache = { type: 'memory' };
+    }
+    return config;
+  },
   async headers() {
     return [
       {

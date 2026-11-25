@@ -21,9 +21,15 @@ import {
 } from 'lucide-react';
 import { api } from '../lib/api';
 import { useTranslation } from './LanguageContext';
+import { useAuth } from './AuthContext';
 
 export default function GoogleDriveSyncPanel() {
   const { isMarathi } = useTranslation();
+  const { hasPermission } = useAuth();
+  const canViewDrive = hasPermission('drive.view');
+  const canPullDrive = hasPermission('drive.pull');
+  const canPushDrive = hasPermission('drive.push');
+  const canEditDriveSheet = hasPermission('drive.edit_sheet');
 
   // Status & Scan state
   const [loadingStatus, setLoadingStatus] = useState(false);
@@ -37,7 +43,9 @@ export default function GoogleDriveSyncPanel() {
   const [selectedFile, setSelectedFile] = useState(null);
 
   // Operations state
-  const [activeSubTab, setActiveSubTab] = useState('pull'); // 'pull' | 'push' | 'add-column' | 'add-row'
+  const [activeSubTab, setActiveSubTab] = useState(
+    canPullDrive ? 'pull' : (canPushDrive ? 'push' : (canEditDriveSheet ? 'add-column' : 'pull'))
+  ); // 'pull' | 'push' | 'add-column' | 'add-row'
   const [actionLoading, setActionLoading] = useState(false);
   const [actionResult, setActionResult] = useState(null);
   const [actionError, setActionError] = useState(null);
@@ -56,8 +64,10 @@ export default function GoogleDriveSyncPanel() {
 
   // Check Drive status on mount
   useEffect(() => {
-    checkConnection();
-  }, []);
+    if (canViewDrive) {
+      checkConnection();
+    }
+  }, [canViewDrive]);
 
   const checkConnection = async () => {
     setLoadingStatus(true);
@@ -445,57 +455,73 @@ export default function GoogleDriveSyncPanel() {
             <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-6 shadow-sm space-y-6">
               {/* Tab Navigation */}
               <div className="flex flex-wrap gap-2 border-b border-slate-100 pb-4">
-                <button
-                  onClick={() => { setActiveSubTab('pull'); setActionResult(null); }}
-                  className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 cursor-pointer transition-all ${
-                    activeSubTab === 'pull'
-                      ? 'bg-indigo-600 text-white shadow-sm'
-                      : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                  }`}
-                >
-                  <DownloadCloud className="w-4 h-4" />
-                  <span>{isMarathi ? '१. ड्राइव्हवरून पोर्टलमध्ये सिंक करा (Pull)' : '1. Pull to Portal'}</span>
-                </button>
+                {canPullDrive && (
+                  <button
+                    onClick={() => { setActiveSubTab('pull'); setActionResult(null); }}
+                    className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 cursor-pointer transition-all ${
+                      activeSubTab === 'pull'
+                        ? 'bg-indigo-600 text-white shadow-sm'
+                        : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                    }`}
+                  >
+                    <DownloadCloud className="w-4 h-4" />
+                    <span>{isMarathi ? '१. ड्राइव्हवरून पोर्टलमध्ये सिंक करा (Pull)' : '1. Pull to Portal'}</span>
+                  </button>
+                )}
 
-                <button
-                  onClick={() => { setActiveSubTab('push'); setActionResult(null); }}
-                  className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 cursor-pointer transition-all ${
-                    activeSubTab === 'push'
-                      ? 'bg-emerald-700 text-white shadow-sm'
-                      : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                  }`}
-                >
-                  <UploadCloud className="w-4 h-4" />
-                  <span>{isMarathi ? '२. बदल ड्राइव्हमध्ये सेव्ह करा (Push)' : '2. Push to Drive'}</span>
-                </button>
+                {canPushDrive && (
+                  <button
+                    onClick={() => { setActiveSubTab('push'); setActionResult(null); }}
+                    className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 cursor-pointer transition-all ${
+                      activeSubTab === 'push'
+                        ? 'bg-emerald-700 text-white shadow-sm'
+                        : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                    }`}
+                  >
+                    <UploadCloud className="w-4 h-4" />
+                    <span>{isMarathi ? '२. बदल ड्राइव्हमध्ये सेव्ह करा (Push)' : '2. Push to Drive'}</span>
+                  </button>
+                )}
 
-                <button
-                  onClick={() => { setActiveSubTab('add-column'); setActionResult(null); }}
-                  className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 cursor-pointer transition-all ${
-                    activeSubTab === 'add-column'
-                      ? 'bg-amber-600 text-white shadow-sm'
-                      : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                  }`}
-                >
-                  <Columns className="w-4 h-4" />
-                  <span>{isMarathi ? '३. नवीन कॉलम जोडा (Add Column)' : '3. Add Column'}</span>
-                </button>
+                {canEditDriveSheet && (
+                  <>
+                    <button
+                      onClick={() => { setActiveSubTab('add-column'); setActionResult(null); }}
+                      className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 cursor-pointer transition-all ${
+                        activeSubTab === 'add-column'
+                          ? 'bg-amber-600 text-white shadow-sm'
+                          : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                      }`}
+                    >
+                      <Columns className="w-4 h-4" />
+                      <span>{isMarathi ? '३. नवीन कॉलम जोडा (Add Column)' : '3. Add Column'}</span>
+                    </button>
 
-                <button
-                  onClick={() => { setActiveSubTab('add-row'); setActionResult(null); }}
-                  className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 cursor-pointer transition-all ${
-                    activeSubTab === 'add-row'
-                      ? 'bg-purple-700 text-white shadow-sm'
-                      : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                  }`}
-                >
-                  <Table className="w-4 h-4" />
-                  <span>{isMarathi ? '४. नवीन रो जोडा (Add Row)' : '4. Add Row'}</span>
-                </button>
+                    <button
+                      onClick={() => { setActiveSubTab('add-row'); setActionResult(null); }}
+                      className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 cursor-pointer transition-all ${
+                        activeSubTab === 'add-row'
+                          ? 'bg-purple-700 text-white shadow-sm'
+                          : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                      }`}
+                    >
+                      <Table className="w-4 h-4" />
+                      <span>{isMarathi ? '४. नवीन रो जोडा (Add Row)' : '4. Add Row'}</span>
+                    </button>
+                  </>
+                )}
+
+                {!canPullDrive && !canPushDrive && !canEditDriveSheet && (
+                  <div className="w-full p-3 rounded-xl bg-amber-50 border border-amber-200 text-xs font-semibold text-amber-900">
+                    {isMarathi
+                      ? 'आपल्याला फक्त गुगल ड्राइव्ह फोल्डर व फाईल्स पाहण्याचा अधिकार (drive.view) आहे. Pull/Push/Edit करण्यासाठी प्रशासकाकडून परवानगी घ्या.'
+                      : 'You have read-only Drive inspection access (drive.view). Contact Collector/Admin for Pull, Push, or Sheet Edit permissions.'}
+                  </div>
+                )}
               </div>
 
               {/* Sub-tab 1: Pull from Drive */}
-              {activeSubTab === 'pull' && (
+              {activeSubTab === 'pull' && canPullDrive && (
                 <div className="space-y-4">
                   <div className="p-4 rounded-xl bg-indigo-50/70 border border-indigo-100 text-xs sm:text-sm text-indigo-950 space-y-2">
                     <p className="font-bold flex items-center gap-1.5">
@@ -523,7 +549,7 @@ export default function GoogleDriveSyncPanel() {
               )}
 
               {/* Sub-tab 2: Push to Drive */}
-              {activeSubTab === 'push' && (
+              {activeSubTab === 'push' && canPushDrive && (
                 <div className="space-y-4">
                   <div className="p-4 rounded-xl bg-emerald-50/70 border border-emerald-100 text-xs sm:text-sm text-emerald-950 space-y-2">
                     <p className="font-bold flex items-center gap-1.5">
@@ -551,7 +577,7 @@ export default function GoogleDriveSyncPanel() {
               )}
 
               {/* Sub-tab 3: Add Custom Column */}
-              {activeSubTab === 'add-column' && (
+              {activeSubTab === 'add-column' && canEditDriveSheet && (
                 <form onSubmit={handleAddColumn} className="space-y-4">
                   <div className="p-4 rounded-xl bg-amber-50/70 border border-amber-100 text-xs sm:text-sm text-amber-950 space-y-1">
                     <p className="font-bold">{isMarathi ? 'गुगल ड्राइव्ह एक्सेल शीटमध्ये नवीन कॉलम जोडा' : 'Add Custom Column to Drive Sheet'}</p>
@@ -605,7 +631,7 @@ export default function GoogleDriveSyncPanel() {
               )}
 
               {/* Sub-tab 4: Add Custom Row */}
-              {activeSubTab === 'add-row' && (
+              {activeSubTab === 'add-row' && canEditDriveSheet && (
                 <form onSubmit={handleAddRow} className="space-y-4">
                   <div className="p-4 rounded-xl bg-purple-50/70 border border-purple-100 text-xs sm:text-sm text-purple-950 space-y-1">
                     <p className="font-bold">{isMarathi ? 'गुगल ड्राइव्ह एक्सेल शीटमध्ये नवीन नोंद (Row) जोडा' : 'Add New Row to Drive Sheet'}</p>

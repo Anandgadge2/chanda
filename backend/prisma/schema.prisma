@@ -63,6 +63,11 @@ enum UserRole {
   CITIZEN            // नागरिक — Legacy (internal portal only)
 }
 
+enum PermissionEffect {
+  GRANT
+  REVOKE
+}
+
 // -------------------------------------------------------------
 // CORE PARCEL REGISTRY (Master Record)
 // -------------------------------------------------------------
@@ -332,34 +337,104 @@ model Tenancy89ARecord {
 // AUTHENTICATION, ROLES & AUDIT TRAILS (GIGW & Security)
 // -------------------------------------------------------------
 
-model User {
-  id             String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  fullName       String     @map("full_name") @db.VarChar(255)
-  email          String     @unique @db.VarChar(255)
-  mobile         String?    @db.VarChar(20)
-  passwordHash   String     @map("password_hash") @db.VarChar(512)
-  role           UserRole   @default(CITIZEN)
-  taluka         String?    @db.VarChar(64)        // Jurisdiction scope
-  designation    String?    @db.VarChar(128)       // Official title
-  isActive       Boolean    @default(true) @map("is_active")
-  lastLoginAt    DateTime?  @map("last_login_at") @db.Timestamptz
-  consentGiven   Boolean    @default(false) @map("consent_given")
-  consentAt      DateTime?  @map("consent_at") @db.Timestamptz
-  consentVersion String?    @map("consent_version") @db.VarChar(16)
-  createdAt      DateTime   @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt      DateTime   @updatedAt @map("updated_at") @db.Timestamptz
+model Role {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  slug           String   @unique @db.VarChar(64)
+  name           String   @db.VarChar(128)
+  nameMr         String?  @map("name_mr") @db.VarChar(128)
+  description    String?  @db.Text
+  hierarchyLevel Int      @default(50) @map("hierarchy_level")
+  isSystem       Boolean  @default(false) @map("is_system")
+  isWildcard     Boolean  @default(false) @map("is_wildcard")
+  isActive       Boolean  @default(true) @map("is_active")
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz
 
-  sessions       Session[]
-  auditLogs      AuditLog[]
+  users           User[]
+  rolePermissions RolePermission[]
+
+  @@index([slug], name: "idx_role_slug")
+  @@map("roles")
+}
+
+model Permission {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  key         String   @unique @db.VarChar(128)
+  module      String   @db.VarChar(64)
+  labelEn     String   @map("label_en") @db.VarChar(255)
+  labelMr     String?  @map("label_mr") @db.VarChar(255)
+  description String?  @db.Text
+  sortOrder   Int      @default(0) @map("sort_order")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  rolePermissions RolePermission[]
+  userOverrides   UserPermissionOverride[]
+
+  @@index([module], name: "idx_permission_module")
+  @@map("permissions")
+}
+
+model RolePermission {
+  id           String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  roleId       String     @map("role_id") @db.Uuid
+  permissionId String     @map("permission_id") @db.Uuid
+  createdAt    DateTime   @default(now()) @map("created_at") @db.Timestamptz
+
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@unique([roleId, permissionId], name: "idx_role_permission_unique")
+  @@map("role_permissions")
+}
+
+model UserPermissionOverride {
+  id           String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId       String           @map("user_id") @db.Uuid
+  permissionId String           @map("permission_id") @db.Uuid
+  effect       PermissionEffect @default(GRANT)
+  createdAt    DateTime         @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt    DateTime         @updatedAt @map("updated_at") @db.Timestamptz
+
+  user         User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  permission   Permission       @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, permissionId], name: "idx_user_permission_override_unique")
+  @@map("user_permission_overrides")
+}
+
+model User {
+  id                  String                   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  fullName            String                   @map("full_name") @db.VarChar(255)
+  email               String                   @unique @db.VarChar(255)
+  mobile              String?                  @db.VarChar(20)
+  passwordHash        String                   @map("password_hash") @db.VarChar(512)
+  role                UserRole                 @default(CITIZEN)
+  roleId              String?                  @map("role_id") @db.Uuid
+  tokenVersion        Int                      @default(1) @map("token_version")
+  taluka              String?                  @db.VarChar(64)        // Jurisdiction scope
+  designation         String?                  @db.VarChar(128)       // Official title
+  isActive            Boolean                  @default(true) @map("is_active")
+  lastLoginAt         DateTime?                @map("last_login_at") @db.Timestamptz
+  consentGiven        Boolean                  @default(false) @map("consent_given")
+  consentAt           DateTime?                @map("consent_at") @db.Timestamptz
+  consentVersion      String?                  @map("consent_version") @db.VarChar(16)
+  createdAt           DateTime                 @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt           DateTime                 @updatedAt @map("updated_at") @db.Timestamptz
+
+  roleRef             Role?                    @relation(fields: [roleId], references: [id], onDelete: SetNull)
+  permissionOverrides UserPermissionOverride[]
+  sessions            Session[]
+  auditLogs           AuditLog[]
 
   @@index([role], name: "idx_user_role")
+  @@index([roleId], name: "idx_user_role_id")
   @@map("users")
 }
 
 model Session {
   id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   userId       String   @map("user_id") @db.Uuid
-  token        String   @unique @db.VarChar(512)   // JWT or session token
+  token        String   @unique @db.Text   // JWT or session token
   ipAddress    String?  @map("ip_address") @db.VarChar(64)
   userAgent    String?  @map("user_agent") @db.VarChar(512)
   expiresAt    DateTime @map("expires_at") @db.Timestamptz

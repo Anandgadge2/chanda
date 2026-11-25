@@ -5,13 +5,13 @@ import {
   addHearing,
   updateCaseStatus,
 } from '../controllers/caseController.js';
-import { authenticate, authorize } from '../middleware/authMiddleware.js';
+import { authenticate, requirePermission } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-router.get('/', authenticate, getCases);
-router.post('/', authenticate, authorize('COLLECTOR', 'SDO', 'TEHSILDAR'), createCase);
-router.post('/:id/hearings', authenticate, authorize('COLLECTOR', 'SDO', 'TEHSILDAR', 'NAIB_TEHSILDAR'), addHearing);
-router.patch('/:id/status', authenticate, authorize('COLLECTOR', 'SDO'), updateCaseStatus);
+router.get('/', authenticate, requirePermission('case.view'), getCases);
+router.post('/', authenticate, requirePermission('case.create'), createCase);
+router.post('/:id/hearings', authenticate, requirePermission('case.hearing'), addHearing);
+router.patch('/:id/status', authenticate, requirePermission('case.order'), updateCaseStatus);
 
 export default router;

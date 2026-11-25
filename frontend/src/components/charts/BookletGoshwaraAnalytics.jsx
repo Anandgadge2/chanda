@@ -124,6 +124,10 @@ export default function BookletGoshwaraAnalytics({
     setMounted(true);
   }, []);
 
+  useEffect(() => {
+    setHoveredSlice(null);
+  }, [selectedCatId, taluka, village, pieMode]);
+
   // Compute base rows corresponding strictly to the user's active filter & tier
   const baseRows = useMemo(() => {
     const isSingleVillage = village && village !== 'all' && village !== 'सर्व गावे';
@@ -488,7 +492,7 @@ export default function BookletGoshwaraAnalytics({
     });
 
     const compliantCount = Math.max(0, totalSurveys - totalBreachCount);
-    const compliantPct = totalSurveys > 0 ? Number(((compliantCount / totalSurveys) * 100).toFixed(1)) : 100;
+    const compliantPct = totalSurveys > 0 ? Number(((compliantCount / totalSurveys) * 100).toFixed(1)) : 0;
     const breachPct = totalSurveys > 0 ? Number(((totalBreachCount / totalSurveys) * 100).toFixed(1)) : 0;
 
     // Alternative Pie: Compliance Status (Compliant vs Flagged)
@@ -832,26 +836,26 @@ export default function BookletGoshwaraAnalytics({
   if (!category) return null;
 
   return (
-    <div className="mb-6 bg-white rounded-2xl border border-slate-300/80 shadow-xs overflow-hidden transition-all">
-      {/* 1. Header Banner */}
-      <div className="p-3.5 sm:p-4 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white flex flex-col md:flex-row md:items-center justify-between gap-3 border-b-2 border-indigo-500/50">
+    <div className="mb-5 bg-white rounded-2xl border border-indigo-200/80 shadow-xs overflow-hidden transition-all">
+      {/* 1. Header Banner (Distinct Royal Indigo-Blue Portal Brand Header) */}
+      <div className="p-3.5 sm:p-4 bg-gradient-to-r from-indigo-700 via-indigo-600 to-blue-600 text-white flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-indigo-500">
         <div className="flex items-start sm:items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center shrink-0 shadow-md ring-2 ring-white/10">
+          <div className="w-10 h-10 rounded-xl bg-white/15 text-white flex items-center justify-center shrink-0 shadow-xs border border-white/25 backdrop-blur-xs">
             <Activity className="w-5 h-5 text-white" />
           </div>
           <div>
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="px-2.5 py-0.5 rounded-md text-[11px] font-black uppercase tracking-wider bg-indigo-500/30 text-indigo-200 border border-indigo-400/30">
+              <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider bg-white/20 text-white border border-white/30">
                 {isMarathi ? `पुस्तिका क्र. ${selectedCatId}` : `Booklet ${selectedCatId}`}
               </span>
-              <span className="text-[11px] font-semibold text-slate-300 flex items-center gap-1">
-                <MapPin className="w-3 h-3 text-amber-400" />
+              <span className="text-[11px] font-semibold text-indigo-100 flex items-center gap-1">
+                <MapPin className="w-3 h-3 text-amber-300" />
                 <span>{formatScopeText(activeScope, isMarathi) || (isMarathi ? 'चंद्रपूर जिल्हा' : 'Chandrapur District')}</span>
               </span>
             </div>
             <h2 className="text-base sm:text-lg font-black text-white tracking-tight mt-0.5">
               {isMarathi ? category.nameMr : category.nameEn}
-              <span className="text-xs sm:text-sm font-normal text-indigo-200 ml-2">
+              <span className="text-xs sm:text-sm font-medium text-indigo-100 ml-2">
                 — {isMarathi ? 'आलेख व वैधानिक गोषवारा विश्लेषण' : 'Analytics & Statutory Insights'}
               </span>
             </h2>
@@ -864,7 +868,7 @@ export default function BookletGoshwaraAnalytics({
           <button
             type="button"
             onClick={() => setIsExpanded(p => !p)}
-            className="px-3 py-1.5 rounded-xl bg-white/15 hover:bg-white/25 text-white transition-all cursor-pointer border border-white/20 flex items-center gap-1.5 text-xs font-bold shadow-xs active:scale-95"
+            className="px-3 py-1.5 rounded-xl bg-white hover:bg-indigo-50 text-indigo-700 transition-all cursor-pointer border border-white/60 flex items-center gap-1.5 text-xs font-extrabold shadow-xs active:scale-95"
             title={isExpanded ? (isMarathi ? 'आलेख व केपीआय संकुचित करा' : 'Collapse Graphics & KPIs') : (isMarathi ? 'आलेख व केपीआय उघडा' : 'Expand Graphics & KPIs')}
           >
             <span>
@@ -912,18 +916,34 @@ export default function BookletGoshwaraAnalytics({
                   </span>
                 </div>
                 <span className={clsx(
-                  'text-[10px] font-black px-2 py-0.5 rounded-full border shadow-2xs',
-                  analyticsData.breachPct > 15
+                  'inline-flex items-center gap-1.5 text-[10px] font-black px-2.5 py-0.5 rounded-full border shadow-2xs',
+                  analyticsData.totalSurveys === 0
+                    ? 'bg-slate-100 text-slate-700 border-slate-300'
+                    : analyticsData.breachPct > 15
                     ? 'bg-rose-100 text-rose-800 border-rose-300'
                     : analyticsData.breachPct > 5
                     ? 'bg-amber-100 text-amber-800 border-amber-300'
                     : 'bg-emerald-100 text-emerald-800 border-emerald-300'
                 )}>
-                  {analyticsData.breachPct > 15
-                    ? (isMarathi ? '🔴 उच्च महसूल जोखीम (तातडीने चौकशी आवश्यक)' : 'High Risk - Priority Inquiry')
-                    : analyticsData.breachPct > 5
-                    ? (isMarathi ? '🟡 मध्यम जोखीम (पडताळणी आवश्यक)' : 'Moderate Risk - Verification Needed')
-                    : (isMarathi ? '🟢 समाधानकारक स्थिती (अल्प जोखीम)' : 'Satisfactory - Low Risk')}
+                  <span className={clsx(
+                    'w-2 h-2 rounded-full shrink-0',
+                    analyticsData.totalSurveys === 0
+                      ? 'bg-slate-400'
+                      : analyticsData.breachPct > 15
+                      ? 'bg-rose-600'
+                      : analyticsData.breachPct > 5
+                      ? 'bg-amber-500'
+                      : 'bg-emerald-600'
+                  )} />
+                  <span>
+                    {analyticsData.totalSurveys === 0
+                      ? (isMarathi ? 'निरंक (० अभिलेख)' : 'No Records (0)')
+                      : analyticsData.breachPct > 15
+                      ? (isMarathi ? 'उच्च महसूल जोखीम (तातडीने चौकशी आवश्यक)' : 'High Risk - Priority Inquiry')
+                      : analyticsData.breachPct > 5
+                      ? (isMarathi ? 'मध्यम जोखीम (पडताळणी आवश्यक)' : 'Moderate Risk - Verification Needed')
+                      : (isMarathi ? 'समाधानकारक स्थिती (अल्प जोखीम)' : 'Satisfactory - Low Risk')}
+                  </span>
                 </span>
               </div>
               <div className="flex items-center gap-4 text-xs font-bold">
@@ -967,10 +987,12 @@ export default function BookletGoshwaraAnalytics({
           {/* 4. Two Primary Visual Charts: Mutually Exclusive Pie/Donut + Statutory Audit Bar */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
             {/* Left: Pure Mutually Exclusive Composition Pie / Donut Chart */}
-            <div className="lg:col-span-5 bg-white border border-slate-200 rounded-xl p-3.5 sm:p-4 shadow-2xs flex flex-col justify-between">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-2.5 mb-2">
+            <div className="lg:col-span-5 bg-white border border-slate-200/90 rounded-xl p-3.5 sm:p-4 shadow-2xs flex flex-col justify-between">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-2.5 mb-2 gap-2 flex-wrap">
                 <div className="flex items-center gap-2">
-                  <PieIcon className="w-4 h-4 text-indigo-600" />
+                  <div className="w-7 h-7 rounded-lg bg-indigo-50 border border-indigo-200/80 text-indigo-600 flex items-center justify-center shrink-0">
+                    <PieIcon className="w-3.5 h-3.5" />
+                  </div>
                   <h3 className="text-xs sm:text-sm font-black text-slate-900">
                     {pieMode === 'tenure'
                       ? (isMarathi ? 'भूधारणा वर्गवारी रचना (१००%)' : 'Tenure Composition (100%)')
@@ -1112,15 +1134,17 @@ export default function BookletGoshwaraAnalytics({
             </div>
 
             {/* Right: Statutory Audit Findings Horizontal Bar Chart (100% Graphical) */}
-            <div className="lg:col-span-7 bg-white border border-slate-200 rounded-xl p-3.5 sm:p-4 shadow-2xs flex flex-col justify-between">
+            <div className="lg:col-span-7 bg-white border border-slate-200/90 rounded-xl p-3.5 sm:p-4 shadow-2xs flex flex-col justify-between">
               <div className="flex items-center justify-between border-b border-slate-100 pb-2.5 mb-2 gap-2 flex-wrap">
                 <div className="flex items-center gap-2">
-                  <BarChart3 className="w-4 h-4 text-indigo-600 shrink-0" />
+                  <div className="w-7 h-7 rounded-lg bg-indigo-50 border border-indigo-200/80 text-indigo-600 flex items-center justify-center shrink-0">
+                    <BarChart3 className="w-3.5 h-3.5" />
+                  </div>
                   <div>
                     <h3 className="text-xs sm:text-sm font-black text-slate-900">
                       {isMarathi ? 'वैधानिक तपासणी व शर्तभंग आलेख' : 'Statutory Audit & Breach Chart'}
                     </h3>
-                    <span className="text-[10px] text-slate-400">
+                    <span className="text-[10px] text-slate-500 font-medium">
                       {isMarathi ? 'पुस्तिकेतील निकषनिहाय जोखीम व पूर्तता प्रमाण' : 'Rule-wise risk & compliance breakdown'}
                     </span>
                   </div>
@@ -1152,7 +1176,7 @@ export default function BookletGoshwaraAnalytics({
                     <BarChart
                       layout="vertical"
                       data={statutoryChartData}
-                      margin={{ top: 5, right: 75, left: 10, bottom: 5 }}
+                      margin={{ top: 5, right: 85, left: 10, bottom: 5 }}
                     >
                       <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f1f5f9" />
                       <XAxis
@@ -1170,7 +1194,7 @@ export default function BookletGoshwaraAnalytics({
                         fontSize={10}
                         tickLine={false}
                         axisLine={{ stroke: '#e2e8f0' }}
-                        width={130}
+                        width={145}
                         tick={{ fill: '#334155', fontWeight: 600 }}
                       />
                       <RechartsTooltip content={<CustomStatutoryTooltip />} cursor={{ fill: 'rgba(241, 245, 249, 0.4)' }} />
@@ -1205,10 +1229,12 @@ export default function BookletGoshwaraAnalytics({
 
           {/* 5. Regional Comparison Bar Chart (Talukas across District or Villages across Taluka) */}
           {comparisonBarData.length > 0 && (
-            <div className="bg-white border border-slate-200 rounded-xl p-3.5 sm:p-4 shadow-2xs space-y-3">
+            <div className="bg-white border border-slate-200/90 rounded-xl p-3.5 sm:p-4 shadow-2xs space-y-3">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-2.5 border-b border-slate-100 pb-2.5">
                 <div className="flex items-center gap-2">
-                  <BarChart3 className="w-4 h-4 text-indigo-600 shrink-0" />
+                  <div className="w-7 h-7 rounded-lg bg-indigo-50 border border-indigo-200/80 text-indigo-600 flex items-center justify-center shrink-0">
+                    <BarChart3 className="w-3.5 h-3.5" />
+                  </div>
                   <div>
                     <div className="flex items-center gap-2 flex-wrap">
                       <h3 className="text-xs sm:text-sm font-black text-slate-900">
@@ -1222,7 +1248,7 @@ export default function BookletGoshwaraAnalytics({
                           : (isMarathi ? 'तालुके' : 'Talukas')}
                       </span>
                     </div>
-                    <span className="text-[10px] text-slate-400">
+                    <span className="text-[10px] text-slate-500 font-medium">
                       {isMarathi ? 'या निवडलेल्या पुस्तिकेतील नोंदींचे प्रादेशिक वितरण व जोखीम वर्गीकरण' : 'Regional breakdown & risk distribution for this booklet'}
                     </span>
                   </div>
@@ -1259,20 +1285,22 @@ export default function BookletGoshwaraAnalytics({
                         )}
                         title={isMarathi ? 'सर्वाधिक शर्तभंग असलेले क्षेत्र आधी दाखवा' : 'Sort by highest breaches first'}
                       >
-                        <span>🔴 {isMarathi ? 'शर्तभंग प्रथम' : 'High Breach'}</span>
+                        <span className={clsx('w-1.5 h-1.5 rounded-full shrink-0', barSortMode === 'breach' ? 'bg-white' : 'bg-rose-500')} />
+                        <span>{isMarathi ? 'शर्तभंग प्रथम' : 'High Breach'}</span>
                       </button>
                       <button
                         type="button"
                         onClick={() => setBarSortMode('riskPct')}
                         className={clsx(
-                          'px-2 py-0.5 rounded-md font-bold transition cursor-pointer',
+                          'px-2 py-0.5 rounded-md font-bold transition cursor-pointer flex items-center gap-1',
                           barSortMode === 'riskPct'
                             ? 'bg-amber-600 text-white shadow-2xs font-extrabold'
                             : 'text-slate-600 hover:text-slate-900'
                         )}
                         title={isMarathi ? 'शर्तभंग टक्केवारीनुसार क्रमवारी' : 'Sort by breach percentage'}
                       >
-                        <span>⚠️ {isMarathi ? 'जोखीम %' : 'Risk %'}</span>
+                        <AlertTriangle className={clsx('w-2.5 h-2.5 shrink-0', barSortMode === 'riskPct' ? 'text-white' : 'text-amber-600')} />
+                        <span>{isMarathi ? 'जोखीम %' : 'Risk %'}</span>
                       </button>
                       <button
                         type="button"

@@ -12,6 +12,7 @@ import analyticsRoutes from './routes/analyticsRoutes.js';
 import bookletRoutes from './routes/bookletRoutes.js';
 import prapatraRoutes from './routes/prapatraRoutes.js';
 import driveSyncRoutes from './routes/driveSyncRoutes.js';
+import rbacRoutes from './routes/rbacRoutes.js';
 
 // Polyfill BigInt serialization for Prisma fileSizeBytes
 BigInt.prototype.toJSON = function () {
@@ -118,6 +119,7 @@ app.use('/api/documents', documentRoutes);
 app.use('/api/cases', caseRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/drive-sync', driveSyncRoutes);
+app.use('/api/rbac', rbacRoutes);
 
 
 // 404 Handler
