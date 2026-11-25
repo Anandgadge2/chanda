@@ -241,12 +241,15 @@ export default function BookletGoshwaraAnalytics({
       });
 
       if (forestCount === 0 && encroachedCount === 0 && parcels && parcels.length > 0) {
-        forestCount = parcels.filter(p => p.auditPoints?.point_13 === 'आहे' || p.tenureClass === 'FOREST_JANGAL').length;
-        forestArea = parcels.filter(p => p.auditPoints?.point_13 === 'आहे' || p.tenureClass === 'FOREST_JANGAL').reduce((acc, p) => acc + (parseFloat(p.totalAreaHa) || 0), 0);
-        encroachedCount = parcels.filter(p => p.auditPoints?.point_15 === 'आहे' || p.metadata?.flags?.isEncroached).length;
-        encroachedArea = parcels.filter(p => p.auditPoints?.point_15 === 'आहे' || p.metadata?.flags?.isEncroached).reduce((acc, p) => acc + (parseFloat(p.totalAreaHa) || 0), 0);
-        allottedCount = parcels.filter(p => p.auditPoints?.point_14 === 'होय' || p.metadata?.flags?.isCorpAllot).length;
-        allottedArea = parcels.filter(p => p.auditPoints?.point_14 === 'होय' || p.metadata?.flags?.isCorpAllot).reduce((acc, p) => acc + (parseFloat(p.totalAreaHa) || 0), 0);
+        const isForestP = (p) => p.points?.[13] === 'आहे' || p.auditPoints?.point_13 === 'आहे' || p.tenureClass === 'FOREST_JANGAL' || String(p.otherRights || p.metadata?.otherRights || '').includes('वन');
+        const isEncP = (p) => p.points?.[15] === 'आहे' || p.auditPoints?.point_15 === 'आहे' || p.metadata?.flags?.isEncroached;
+        const isAllotP = (p) => p.points?.[14] === 'होय' || p.auditPoints?.point_14 === 'होय' || p.metadata?.flags?.isCorpAllot || p.metadata?.flags?.isPrivateAllot;
+        forestCount = parcels.filter(isForestP).length;
+        forestArea = parcels.filter(isForestP).reduce((acc, p) => acc + (parseFloat(p.totalAreaHa) || 0), 0);
+        encroachedCount = parcels.filter(isEncP).length;
+        encroachedArea = parcels.filter(isEncP).reduce((acc, p) => acc + (parseFloat(p.totalAreaHa) || 0), 0);
+        allottedCount = parcels.filter(isAllotP).length;
+        allottedArea = parcels.filter(isAllotP).reduce((acc, p) => acc + (parseFloat(p.totalAreaHa) || 0), 0);
       }
 
       const otherGovtCount = Math.max(0, totalSurveys - (forestCount + encroachedCount + allottedCount));

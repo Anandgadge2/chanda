@@ -2,6 +2,8 @@ import ExcelJS from 'exceljs';
 import prisma from '../config/prisma.js';
 import { generateSampleVillageTemplate } from '../utils/excelGenerator.js';
 import { invalidateAnalyticsCache } from './analyticsController.js';
+import { invalidateCaseCache } from './caseController.js';
+import { logger } from '../utils/logger.js';
 import { syncTalukaTotalRollup, recalculateVillageRollup, uploadPrapatraExcel } from './prapatraController.js';
 import { logAudit } from '../middleware/auditMiddleware.js';
 import { userCanAccessTaluka } from '../services/rbacService.js';
@@ -191,6 +193,8 @@ export const bulkUpload = async (req, res) => {
       req,
     });
 
+    invalidateParcelCache();
+    invalidateCaseCache();
     invalidateAnalyticsCache();
 
     res.status(201).json({
@@ -223,18 +227,39 @@ export const getSampleTemplate = async (req, res) => {
   }
 };
 
-// High-Performance In-Memory Cache with TTL & Request Deduplication
-const TRACE_CACHE_TTL_MS = 60 * 1000; // 60 seconds TTL
+// High-Performance In-Memory Cache with Stale-While-Revalidate (SWR) & Request Deduplication
+const TRACE_CACHE_FRESH_TTL_MS = 5 * 60 * 1000;
+const TRACE_CACHE_STALE_TTL_MS = 30 * 60 * 1000;
 const traceCache = new Map();
 const inFlightTraces = new Map();
 
-const PARCEL_LIST_CACHE_TTL_MS = 3 * 60 * 1000; // 3 minutes TTL
+const PARCEL_LIST_FRESH_TTL_MS = 5 * 60 * 1000; // 5 minutes fresh
+const PARCEL_LIST_STALE_TTL_MS = 30 * 60 * 1000; // 30 minutes SWR
 const parcelListCache = new Map();
 const inFlightParcelLists = new Map();
+let cachedUnfilteredParcelTotal = null;
+
+const PARCEL_TALUKA_ALIASES = {
+  bramhapuri: 'Brahmapuri', brahmapuri: 'Brahmapuri',
+  saoli: 'Saoli', sawali: 'Saoli',
+  pombhurna: 'Pombhurna', ponbhurna: 'Pombhurna',
+  bhadravati: 'Bhadravati', bhadrawati: 'Bhadravati',
+  gondpipri: 'Gondpipri', chandrapur: 'Chandrapur',
+  warora: 'Warora', ballarpur: 'Ballarpur',
+  chimur: 'Chimur', nagbhid: 'Nagbhid',
+  sindewahi: 'Sindewahi', mul: 'Mul',
+  korpana: 'Korpana', rajura: 'Rajura', jivati: 'Jivati',
+  'चंद्रपूर': 'Chandrapur', 'बल्लारपूर': 'Ballarpur', 'वरोरा': 'Warora',
+  'भद्रावती': 'Bhadravati', 'राजुरा': 'Rajura', 'कोरपना': 'Korpana',
+  'जिवती': 'Jivati', 'मूल': 'Mul', 'सावली': 'Saoli',
+  'पोंभुर्णा': 'Pombhurna', 'ब्रह्मपुरी': 'Brahmapuri', 'नागभीड': 'Nagbhid',
+  'सिंदेवाही': 'Sindewahi', 'चिमूर': 'Chimur', 'गोंडपिपरी': 'Gondpipri',
+};
 
 export const invalidateParcelCache = () => {
   traceCache.clear();
   parcelListCache.clear();
+  cachedUnfilteredParcelTotal = null;
 };
 
 /**
@@ -446,8 +471,9 @@ export const getParcels = async (req, res) => {
 
     const where = {};
 
+    const canonicalTaluka = taluka ? (PARCEL_TALUKA_ALIASES[taluka.trim().toLowerCase()] || null) : null;
     if (taluka && taluka !== 'all' && taluka !== 'सर्व तालुके') {
-      where.taluka = { equals: taluka, mode: 'insensitive' };
+      where.taluka = canonicalTaluka ? canonicalTaluka : { equals: taluka, mode: 'insensitive' };
     }
     if (villageCode) where.villageCode = villageCode;
 
@@ -508,71 +534,89 @@ export const getParcels = async (req, res) => {
       orderBy = [{ taluka: 'asc' }, { villageName: 'asc' }, { gatNumber: orderDir }];
     }
 
-    const cacheKey = JSON.stringify({ taluka, villageCode, villageName: targetVillage, tenureClass, hasActiveDispute, targetBooklet, search, sortBy, orderDir, pageNum, take, isAll });
-    
-    // Instant cache return if available and within TTL
-    const now = Date.now();
-    const cachedEntry = parcelListCache.get(cacheKey);
-    if (cachedEntry && (now - cachedEntry.timestamp < PARCEL_LIST_CACHE_TTL_MS)) {
-      res.setHeader('Cache-Control', 'public, max-age=30, stale-while-revalidate=120');
-      res.setHeader('X-Cache-Status', 'HIT');
-      return res.json(cachedEntry.data);
-    }
+    const cacheKey = JSON.stringify({ taluka: canonicalTaluka || taluka, villageCode, villageName: targetVillage, tenureClass, hasActiveDispute, targetBooklet, search, sortBy, orderDir, pageNum, take, isAll });
+    const isUnfiltered = Object.keys(where).length === 0;
 
-    let pending = inFlightParcelLists.get(cacheKey);
+    const fetchAndCacheParcels = () => {
+      let pending = inFlightParcelLists.get(cacheKey);
+      if (!pending) {
+        const countPromise = (isUnfiltered && cachedUnfilteredParcelTotal !== null)
+          ? Promise.resolve(cachedUnfilteredParcelTotal)
+          : prisma.landParcel.count({ where }).then((cnt) => {
+              if (isUnfiltered) cachedUnfilteredParcelTotal = cnt;
+              return cnt;
+            });
 
-    if (!pending) {
-      pending = Promise.all([
-        prisma.landParcel.findMany({
-          where,
-          skip,
-          take,
-          orderBy,
-          include: {
-            _count: {
-              select: {
-                backwardHistories: true,
-                forwardCases: true,
-                documents: true,
+        pending = Promise.all([
+          prisma.landParcel.findMany({
+            where,
+            skip,
+            take,
+            orderBy,
+            include: {
+              _count: {
+                select: {
+                  backwardHistories: true,
+                  forwardCases: true,
+                  documents: true,
+                },
+              },
+              forwardCases: {
+                select: {
+                  id: true,
+                  caseNumber: true,
+                  violationType: true,
+                  status: true,
+                  isRepossessedToGovt: true,
+                },
               },
             },
-            forwardCases: {
-              select: {
-                id: true,
-                caseNumber: true,
-                violationType: true,
-                status: true,
-                isRepossessedToGovt: true,
-              },
+          }),
+          countPromise,
+        ]).then(([parcels, totalCount]) => {
+          const responsePayload = {
+            success: true,
+            parcels,
+            pagination: {
+              total: totalCount,
+              page: pageNum,
+              limit: isAll ? totalCount : take,
+              totalPages: isAll ? 1 : Math.ceil(totalCount / take),
             },
-          },
-        }),
-        prisma.landParcel.count({ where }),
-      ]).finally(() => {
-        inFlightParcelLists.delete(cacheKey);
-      });
-      inFlightParcelLists.set(cacheKey, pending);
-    }
-
-    const [parcels, totalCount] = await pending;
-
-    const responsePayload = {
-      success: true,
-      parcels,
-      pagination: {
-        total: totalCount,
-        page: pageNum,
-        limit: isAll ? totalCount : take,
-        totalPages: isAll ? 1 : Math.ceil(totalCount / take),
-      },
+          };
+          if (parcelListCache.size >= 150) {
+            const oldestKey = parcelListCache.keys().next().value;
+            parcelListCache.delete(oldestKey);
+          }
+          parcelListCache.set(cacheKey, { timestamp: Date.now(), data: responsePayload });
+          return responsePayload;
+        }).finally(() => {
+          inFlightParcelLists.delete(cacheKey);
+        });
+        inFlightParcelLists.set(cacheKey, pending);
+      }
+      return pending;
     };
 
-    // Store in cache (keep up to 150 entries)
-    if (parcelListCache.size >= 150) {
-      const oldestKey = parcelListCache.keys().next().value;
-      parcelListCache.delete(oldestKey);
+    // Instant SWR cache return if available
+    const now = Date.now();
+    const cachedEntry = parcelListCache.get(cacheKey);
+    if (cachedEntry && req.query.refresh !== 'true') {
+      const age = now - cachedEntry.timestamp;
+      if (age < PARCEL_LIST_FRESH_TTL_MS) {
+        res.setHeader('Cache-Control', 'public, max-age=30, stale-while-revalidate=120');
+        res.setHeader('X-Cache-Status', 'HIT');
+        return res.json(cachedEntry.data);
+      }
+      if (age < PARCEL_LIST_STALE_TTL_MS) {
+        fetchAndCacheParcels().catch(() => {});
+        res.setHeader('Cache-Control', 'public, max-age=30, stale-while-revalidate=120');
+        res.setHeader('X-Cache-Status', 'STALE');
+        return res.json(cachedEntry.data);
+      }
     }
-    parcelListCache.set(cacheKey, { timestamp: now, data: responsePayload });
+
+    const responsePayload = await fetchAndCacheParcels();
 
     res.setHeader('Cache-Control', 'public, max-age=30, stale-while-revalidate=120');
     res.setHeader('X-Cache-Status', 'MISS');
@@ -580,6 +624,17 @@ export const getParcels = async (req, res) => {
   } catch (err) {
     console.error('Get parcels error:', err);
     res.status(500).json({ success: false, error: err.message });
+  }
+};
+
+export const warmParcelsCache = async () => {
+  try {
+    const t0 = Date.now();
+    const mockRes = { setHeader() {}, json() {} };
+    await getParcels({ query: { page: 1, limit: 25 } }, mockRes);
+    logger.success(`Parcels page-1 cache warmed in ${Date.now() - t0}ms`, 'PARCELS');
+  } catch (err) {
+    logger.warn(`Parcels cache warmup skipped: ${err.message}`, 'PARCELS');
   }
 };
 
@@ -593,75 +648,89 @@ export const getParcelTrace = async (req, res) => {
     const { refresh } = req.query;
     const now = Date.now();
 
+    const fetchTrace = () => {
+      let pending = inFlightTraces.get(upi);
+      if (!pending) {
+        pending = (async () => {
+          const parcel = await prisma.landParcel.findUnique({
+            where: { upi },
+            include: {
+              backwardHistories: {
+                orderBy: { epochYear: 'asc' },
+                include: {
+                  documents: true,
+                },
+              },
+              forwardCases: {
+                orderBy: { createdAt: 'desc' },
+                include: {
+                  hearings: {
+                    orderBy: { hearingDate: 'desc' },
+                  },
+                  documents: true,
+                },
+              },
+              documents: {
+                orderBy: { uploadedAt: 'desc' },
+              },
+            },
+          });
+
+          if (!parcel) {
+            return null;
+          }
+
+          // Identify 1950 baseline and flag anomalies
+          const baseline1950 = parcel.backwardHistories.find((b) => b.epochYear === 1950);
+          const hasGovtHistoricalRoot = parcel.backwardHistories.some((b) => b.wasGovtLand || b.tenureClass === 'SARKAR_SHASAN');
+          const isCurrentlyPrivate = parcel.tenureClass === 'BHOGVATDAR_CLASS_1' || parcel.tenureClass === 'BHOGVATDAR_CLASS_2';
+
+          // Discrepancy detection: Was once government land but now private without legal order
+          const potentialIllegalAlienation = hasGovtHistoricalRoot && isCurrentlyPrivate && parcel.forwardCases.length === 0;
+
+          const result = {
+            success: true,
+            parcel,
+            intelligenceSummary: {
+              baseline1950Epoch: baseline1950 || null,
+              historicalEpochsCount: parcel.backwardHistories.length,
+              activeViolationsCount: parcel.forwardCases.filter((c) => c.status !== 'DISMISSED' && c.status !== 'RECTIFIED_7_12').length,
+              isRepossessedToGovt: parcel.forwardCases.some((c) => c.isRepossessedToGovt),
+              potentialIllegalAlienation,
+              totalDocumentsCount: parcel.documents.length,
+            },
+          };
+
+          if (traceCache.size >= 300) {
+            const oldestKey = traceCache.keys().next().value;
+            traceCache.delete(oldestKey);
+          }
+          traceCache.set(upi, { data: result, timestamp: Date.now() });
+          return result;
+        })().finally(() => {
+          inFlightTraces.delete(upi);
+        });
+
+        inFlightTraces.set(upi, pending);
+      }
+      return pending;
+    };
+
     if (refresh !== 'true') {
       const cached = traceCache.get(upi);
-      if (cached && now - cached.timestamp < TRACE_CACHE_TTL_MS) {
-        return res.json(cached.data);
+      if (cached) {
+        const age = now - cached.timestamp;
+        if (age < TRACE_CACHE_FRESH_TTL_MS) {
+          return res.json(cached.data);
+        }
+        if (age < TRACE_CACHE_STALE_TTL_MS) {
+          fetchTrace().catch(() => {});
+          return res.json(cached.data);
+        }
       }
     }
 
-    let pending = inFlightTraces.get(upi);
-    if (!pending) {
-      pending = (async () => {
-        const parcel = await prisma.landParcel.findUnique({
-          where: { upi },
-          include: {
-            backwardHistories: {
-              orderBy: { epochYear: 'asc' },
-              include: {
-                documents: true,
-              },
-            },
-            forwardCases: {
-              orderBy: { createdAt: 'desc' },
-              include: {
-                hearings: {
-                  orderBy: { hearingDate: 'desc' },
-                },
-                documents: true,
-              },
-            },
-            documents: {
-              orderBy: { uploadedAt: 'desc' },
-            },
-          },
-        });
-
-        if (!parcel) {
-          return null;
-        }
-
-        // Identify 1950 baseline and flag anomalies
-        const baseline1950 = parcel.backwardHistories.find((b) => b.epochYear === 1950);
-        const hasGovtHistoricalRoot = parcel.backwardHistories.some((b) => b.wasGovtLand || b.tenureClass === 'SARKAR_SHASAN');
-        const isCurrentlyPrivate = parcel.tenureClass === 'BHOGVATDAR_CLASS_1' || parcel.tenureClass === 'BHOGVATDAR_CLASS_2';
-
-        // Discrepancy detection: Was once government land but now private without legal order
-        const potentialIllegalAlienation = hasGovtHistoricalRoot && isCurrentlyPrivate && parcel.forwardCases.length === 0;
-
-        const result = {
-          success: true,
-          parcel,
-          intelligenceSummary: {
-            baseline1950Epoch: baseline1950 || null,
-            historicalEpochsCount: parcel.backwardHistories.length,
-            activeViolationsCount: parcel.forwardCases.filter((c) => c.status !== 'DISMISSED' && c.status !== 'RECTIFIED_7_12').length,
-            isRepossessedToGovt: parcel.forwardCases.some((c) => c.isRepossessedToGovt),
-            potentialIllegalAlienation,
-            totalDocumentsCount: parcel.documents.length,
-          },
-        };
-
-        traceCache.set(upi, { data: result, timestamp: Date.now() });
-        return result;
-      })().finally(() => {
-        inFlightTraces.delete(upi);
-      });
-
-      inFlightTraces.set(upi, pending);
-    }
-
-    const data = await pending;
+    const data = await fetchTrace();
     if (!data) {
       return res.status(404).json({ success: false, error: `Parcel with UPI ${upi} not found` });
     }
@@ -799,6 +868,9 @@ export const createParcel = async (req, res) => {
       req,
     });
 
+    invalidateParcelCache();
+    invalidateParcelCache();
+    invalidateCaseCache();
     invalidateAnalyticsCache();
 
     res.status(201).json({ success: true, parcel });
@@ -973,6 +1045,7 @@ export const updateParcel = async (req, res) => {
     await recalculateVillageRollup(existing.district, existing.taluka, existing.villageName);
 
     invalidateParcelCache();
+    invalidateCaseCache();
     invalidateAnalyticsCache();
 
     await logAudit({

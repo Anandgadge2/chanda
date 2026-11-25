@@ -498,8 +498,11 @@ export default function ReportsPage() {
     loadVillages();
   }, [draftTaluka]);
 
+  const reportRequestSeqRef = useRef(0);
+
   // Load report data (triggers ONLY when appliedFilters change, tabs change, or pagination changes)
-  const loadData = useCallback(async (targetPage = page, targetPageSize = pageSize, forceParcels = false, viewOverride = null) => {
+  const loadData = useCallback(async (targetPage = page, targetPageSize = pageSize, forceParcels = false, viewOverride = null, forceRefresh = false) => {
+    const seq = ++reportRequestSeqRef.current;
     setLoading(true);
     try {
       const reportId = activeTab === 'checklist'
@@ -509,7 +512,7 @@ export default function ReportsPage() {
       const effectiveView = viewOverride || activeView;
       const isGoshwara = activeTab === 'categories' && effectiveView === 'categorySummary' && !forceParcels;
 
-      const res = await api.getPrapatraReport(reportId, {
+      const queryParams = {
         taluka: appliedFilters.taluka,
         village: appliedFilters.village,
         search: appliedFilters.search,
@@ -520,7 +523,11 @@ export default function ReportsPage() {
         page: targetPageSize === 'all' ? 1 : targetPage,
         pageSize: targetPageSize === 'all' ? 'all' : (Number(targetPageSize) || 25),
         includeParcels: isGoshwara ? 'false' : 'true'
-      });
+      };
+
+      const res = await api.getPrapatraReport(reportId, queryParams, { forceRefresh });
+      if (seq !== reportRequestSeqRef.current) return;
+
       setSummaryData(res.data || []);
       setParcels(res.parcels || []);
       setServerRollup(res.rollup || null);
@@ -528,10 +535,23 @@ export default function ReportsPage() {
       setActiveScope(res.scope || '');
       const sCount = res.pagination?.totalCount || res.totalCount || (res.parcels?.length ?? 0);
       setServerTotalCount(sCount);
+
+      // Prefetch next page in background for instant pagination
+      const nextTotalPages = res.pagination?.totalPages || 1;
+      if (targetPageSize !== 'all' && !isGoshwara && targetPage < nextTotalPages) {
+        api.prefetchPrapatraReport(reportId, {
+          ...queryParams,
+          page: targetPage + 1,
+        });
+      }
     } catch (err) {
-      console.error('Failed to load report data:', err);
+      if (seq === reportRequestSeqRef.current) {
+        console.error('Failed to load report data:', err);
+      }
     } finally {
-      setLoading(false);
+      if (seq === reportRequestSeqRef.current) {
+        setLoading(false);
+      }
     }
   }, [activeTab, selectedCatId, selectedPrapatraId, appliedFilters, activeView, page, pageSize]);
 
@@ -539,6 +559,31 @@ export default function ReportsPage() {
     setPage(1);
     loadData(1, pageSize);
   }, [activeTab, selectedCatId, selectedPrapatraId, appliedFilters]);
+
+  // Prefetch draft report filter / dropdown changes in background before Apply is clicked
+  useEffect(() => {
+    if (activeTab === 'renumbering') return;
+    const timer = setTimeout(() => {
+      const reportId = activeTab === 'checklist'
+        ? 'checklist'
+        : (activeTab === 'prapatra5' ? draftPrapatraId : draftCatId);
+      const isBooklet = activeTab === 'categories';
+      const isGoshwara = activeTab === 'categories' && activeView === 'categorySummary';
+      api.prefetchPrapatraReport(reportId, {
+        taluka: draftTaluka,
+        village: draftVillage,
+        search: draftSearch.trim(),
+        tenure: draftTenure,
+        violation: draftViolation,
+        booklet: isBooklet ? 'true' : 'false',
+        view: activeView,
+        page: 1,
+        pageSize: pageSize === 'all' ? 'all' : (Number(pageSize) || 25),
+        includeParcels: isGoshwara ? 'false' : 'true'
+      });
+    }, 120);
+    return () => clearTimeout(timer);
+  }, [activeTab, draftCatId, draftPrapatraId, draftTaluka, draftVillage, draftTenure, draftViolation, draftSearch, activeView, pageSize]);
 
 
   // Reset KPI filter on tab or category switch
@@ -2926,12 +2971,10 @@ export default function ReportsPage() {
               <button
                 type="button"
                 onClick={handleApplyFilters}
-                disabled={activeTab === 'renumbering' ? (!isDraftTalukaSelected || !isDraftVillageSelected || loading) : loading}
+                disabled={activeTab === 'renumbering' && (!isDraftTalukaSelected || !isDraftVillageSelected)}
                 className={clsx(
                   'h-[36px] flex-1 sm:flex-initial px-4 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95 shrink-0 shadow-xs cursor-pointer select-none whitespace-nowrap',
-                  loading
-                    ? 'bg-indigo-800 text-white cursor-wait opacity-90 shadow-inner'
-                    : isFilterPending
+                  isFilterPending
                     ? 'bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white ring-2 ring-indigo-500/30'
                     : 'bg-indigo-700 hover:bg-indigo-800 text-white'
                 )}
@@ -2950,7 +2993,6 @@ export default function ReportsPage() {
               <button
                 type="button"
                 onClick={handleResetFilters}
-                disabled={loading}
                 className="h-[36px] flex-1 sm:flex-initial px-3 bg-slate-100 hover:bg-rose-50 text-slate-700 hover:text-rose-700 border border-slate-300 hover:border-rose-300 rounded-xl font-bold text-xs transition-all active:scale-95 shadow-2xs cursor-pointer shrink-0 flex items-center justify-center gap-1 whitespace-nowrap"
                 title={isMarathi ? 'सर्व फिल्टर्स रीसेट करा' : 'Reset all filters'}
               >
@@ -2960,7 +3002,7 @@ export default function ReportsPage() {
 
               <button
                 type="button"
-                onClick={loadData}
+                onClick={() => loadData(page, pageSize, false, null, true)}
                 disabled={loading}
                 className="h-[36px] w-[36px] text-slate-700 hover:text-indigo-900 bg-slate-100 hover:bg-slate-200 border border-slate-300 rounded-xl transition-all active:scale-95 shadow-2xs cursor-pointer shrink-0 flex items-center justify-center"
                 title={isMarathi ? 'डेटा रिफ्रेश करा' : 'Refresh data'}
@@ -3014,7 +3056,6 @@ export default function ReportsPage() {
             <button
               type="button"
               onClick={handleApplyFilters}
-              disabled={loading}
               className="px-3 py-1 bg-amber-600 hover:bg-amber-700 text-white rounded-lg font-bold text-xs shrink-0 cursor-pointer shadow-2xs transition active:scale-95"
             >
               {isMarathi ? 'आता लागू करा (Apply)' : 'Apply Now'}
@@ -4488,15 +4529,27 @@ export default function ReportsPage() {
                               </tr>
                             ) : (
                               paginatedParcels.map((p, idx) => {
-                                const isBreach = p.metadata?.flags?.isShartbhang || p.auditPoints?.point_37 === 'होय' || (p.forwardCases?.some(fc => fc.violationType === 'SHARTBHANG'));
+                                const isBreach =
+                                  p.metadata?.flags?.isShartbhang ||
+                                  p.auditPoints?.point_37 === 'होय' ||
+                                  p.points?.[37] === 'होय' ||
+                                  p.points?.[36] === 'होय' ||
+                                  p.points?.[18] === 'होय' ||
+                                  p.points?.[15] === 'आहे' ||
+                                  p.points?.[39] === 'होय' ||
+                                  String(p.statusFinding || '').includes('शर्तभंग') ||
+                                  String(p.statusFinding || '').includes('अवैध') ||
+                                  String(p.statusFinding || '').includes('अतिक्रमण') ||
+                                  (p.forwardCases?.some(fc => fc.violationType === 'SHARTBHANG'));
 
                                 return (
-                                  <tr key={p.id || idx} className={`hover:bg-slate-50/80 transition ${isBreach ? 'bg-rose-50/25' : ''}`}>
+                                  <tr key={p.id || idx} className={`hover:bg-slate-50/80 transition ${isBreach ? 'bg-rose-50/35' : ''}`}>
                                     <td className="py-3 px-2 text-center border-r border-slate-200 font-mono text-xs sm:text-[13px] text-slate-600">
                                       {(page - 1) * effectivePageSize + idx + 1}
                                     </td>
                                     {detailedCols.map((col, cIdx) => {
                                       const val = col.getValue ? col.getValue(p) : p[col.key];
+                                      const strVal = String(val ?? '').trim();
 
                                       // 1. Tenure badge
                                       if (col.isTenureBadge) {
@@ -4512,21 +4565,49 @@ export default function ReportsPage() {
                                         );
                                       }
 
-                                      // 2. Badge (Alert / Boolean Yes-No)
+                                      // 2. Badge (Alert / Affirmative / Different Data vs quiet नाही)
                                       if (col.isBadge) {
-                                        const isAlert = col.isAlertVal ? col.isAlertVal(val) : false;
-                                        const isPositive = val === 'होय' || val === 'आहे' || val === 'Yes';
+                                        const isNo = !strVal || strVal === 'नाही' || strVal === 'No' || strVal === '-';
+                                        const isAlert = !isNo && (col.isAlertVal ? col.isAlertVal(strVal) : false);
+                                        const isPositive = !isNo && (
+                                          strVal === 'होय' || strVal === 'आहे' || strVal === 'Yes' ||
+                                          strVal.startsWith('होय') || strVal.startsWith('आहे')
+                                        );
+                                        const isDifferentData = !isNo && !isAlert && !isPositive;
+
                                         return (
-                                          <td key={`cell-${idx}-${cIdx}`} className="py-3 px-3 border-r border-slate-200 text-center">
-                                            <span className={`inline-block px-2.5 py-1 rounded-md text-xs font-bold ${
+                                          <td
+                                            key={`cell-${idx}-${cIdx}`}
+                                            className={clsx(
+                                              'py-3 px-3 border-r border-slate-200 text-center',
                                               isAlert
-                                                ? 'bg-rose-100 text-rose-800 shadow-2xs border border-rose-200'
+                                                ? 'bg-rose-50/70'
                                                 : isPositive
-                                                ? 'bg-emerald-100 text-emerald-800'
-                                                : 'bg-slate-100 text-slate-600'
-                                            }`}>
-                                              {val || (isMarathi ? 'नाही' : 'No')}
-                                            </span>
+                                                ? 'bg-emerald-50/50'
+                                                : isDifferentData
+                                                ? 'bg-amber-50/50'
+                                                : ''
+                                            )}
+                                          >
+                                            {isNo ? (
+                                              <span className="text-xs font-medium text-slate-400">
+                                                {strVal || (isMarathi ? 'नाही' : 'No')}
+                                              </span>
+                                            ) : isAlert ? (
+                                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-black bg-rose-100 text-rose-800 shadow-2xs border border-rose-300">
+                                                <span className="w-1.5 h-1.5 rounded-full bg-rose-600 shrink-0" />
+                                                <span>{strVal}</span>
+                                              </span>
+                                            ) : isPositive ? (
+                                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-extrabold bg-emerald-100 text-emerald-900 shadow-2xs border border-emerald-300">
+                                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 shrink-0" />
+                                                <span>{strVal}</span>
+                                              </span>
+                                            ) : (
+                                              <span className="inline-block px-2.5 py-1 rounded-md text-xs font-bold bg-amber-100 text-amber-900 border border-amber-300 shadow-2xs">
+                                                {strVal}
+                                              </span>
+                                            )}
                                           </td>
                                         );
                                       }

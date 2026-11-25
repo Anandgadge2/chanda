@@ -8,10 +8,33 @@ import {
 
 const JWT_SECRET = process.env.JWT_SECRET || 'chandrapur-collectorate-secure-jwt-secret-key-2026';
 
-// High-performance in-memory verified user cache (30-second TTL)
-// Eliminates redundant DB queries when frontend fires parallel API requests
+// High-performance in-memory verified user cache with Stale-While-Revalidate (SWR)
+// Eliminates redundant DB auth queries when frontend fires requests or clicks filters
 const userCache = new Map();
-const USER_CACHE_TTL_MS = 30 * 1000;
+const inFlightUserLoads = new Map();
+const USER_CACHE_FRESH_TTL_MS = 2 * 60 * 1000; // 2 minutes fresh
+const USER_CACHE_STALE_TTL_MS = 15 * 60 * 1000; // 15 minutes SWR
+
+const fetchAndCacheUser = (userId) => {
+  let pending = inFlightUserLoads.get(userId);
+  if (!pending) {
+    pending = loadUserWithRbac({ id: userId })
+      .then((dbUser) => {
+        const ctx = buildUserAuthContext(dbUser);
+        if (ctx && ctx.isActive && ctx.roleObj?.isActive !== false) {
+          userCache.set(userId, { user: ctx, timestamp: Date.now() });
+        } else {
+          userCache.delete(userId);
+        }
+        return ctx;
+      })
+      .finally(() => {
+        inFlightUserLoads.delete(userId);
+      });
+    inFlightUserLoads.set(userId, pending);
+  }
+  return pending;
+};
 
 export const invalidateUserCache = (userId) => {
   if (userId) {
@@ -43,22 +66,22 @@ export const authenticate = async (req, res, next) => {
 
     const decoded = jwt.verify(token, JWT_SECRET);
 
-    // Check in-memory cache first
+    // Check in-memory cache first (fresh or stale-while-revalidate)
     const cached = userCache.get(decoded.id);
     let user = null;
 
-    if (cached && Date.now() - cached.timestamp < USER_CACHE_TTL_MS) {
-      user = cached.user;
-    } else {
-      const dbUser = await loadUserWithRbac({ id: decoded.id });
-      user = buildUserAuthContext(dbUser);
-
-      if (user && user.isActive && user.roleObj?.isActive !== false) {
-        userCache.set(decoded.id, {
-          user,
-          timestamp: Date.now(),
-        });
+    if (cached) {
+      const age = Date.now() - cached.timestamp;
+      if (age < USER_CACHE_FRESH_TTL_MS) {
+        user = cached.user;
+      } else if (age < USER_CACHE_STALE_TTL_MS) {
+        user = cached.user;
+        fetchAndCacheUser(decoded.id).catch(() => {});
       }
+    }
+
+    if (!user) {
+      user = await fetchAndCacheUser(decoded.id);
     }
 
     if (!user || !user.isActive || user.roleObj?.isActive === false) {

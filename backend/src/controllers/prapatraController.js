@@ -40,16 +40,22 @@ import {
 } from '../utils/masterBookletGenerator.js';
 
 
-// High-performance in-memory cache for instant report delivery
+// High-performance in-memory cache with Stale-While-Revalidate (SWR) & request deduplication
 const prapatraReportCache = new Map();
 const dynamicRollupCache = new Map();
-const CACHE_TTL_MS = 15 * 60 * 1000; // 15 minutes (High-performance enterprise in-memory cache)
+const inFlightRollups = new Map();
+const inFlightReports = new Map();
+const CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutes fresh
+const CACHE_STALE_TTL_MS = 60 * 60 * 1000; // 60 minutes stale-while-revalidate
 
 export function invalidatePrapatraCache() {
   prapatraReportCache.clear();
   dynamicRollupCache.clear();
   if (typeof prapatra1to5RollupCache !== 'undefined') {
     prapatra1to5RollupCache.clear();
+  }
+  if (typeof talukaVillagesCache !== 'undefined') {
+    talukaVillagesCache.clear();
   }
 }
 
@@ -294,21 +300,41 @@ export async function recalculateVillageRollup(district = 'Chandrapur', taluka, 
  * Accurately aggregates across all 43,545+ database records with any active filters
  */
 export async function calculateDynamicGoshwaraRollup(filters = {}) {
-  const rollupCacheKey = JSON.stringify(filters);
+  const { skipDistrictTotal = false, ...cacheableFilters } = filters;
+  const rollupCacheKey = JSON.stringify({ ...cacheableFilters, skipDistrictTotal: Boolean(skipDistrictTotal) });
   const cachedRollup = dynamicRollupCache.get(rollupCacheKey);
-  if (cachedRollup && (Date.now() - cachedRollup.timestamp < CACHE_TTL_MS)) {
-    return cachedRollup.data;
+  if (cachedRollup) {
+    const age = Date.now() - cachedRollup.timestamp;
+    if (age < CACHE_TTL_MS) {
+      return cachedRollup.data;
+    }
+    if (age < CACHE_STALE_TTL_MS) {
+      if (!inFlightRollups.has(rollupCacheKey)) {
+        computeDynamicGoshwaraRollup(filters, rollupCacheKey).catch(() => {});
+      }
+      return cachedRollup.data;
+    }
   }
-  const {
-    taluka = 'all',
-    village = 'all',
-    search = '',
-    tenure = 'all',
-    violation = 'all',
-    areaRange = 'all',
-    prapatraNum = 0,
-    booklet = 'false'
-  } = filters;
+  let pending = inFlightRollups.get(rollupCacheKey);
+  if (!pending) {
+    pending = computeDynamicGoshwaraRollup(filters, rollupCacheKey);
+  }
+  return pending;
+}
+
+async function computeDynamicGoshwaraRollup(filters = {}, rollupCacheKey) {
+  const promise = (async () => {
+    const {
+      taluka = 'all',
+      village = 'all',
+      search = '',
+      tenure = 'all',
+      violation = 'all',
+      areaRange = 'all',
+      prapatraNum = 0,
+      booklet = 'false',
+      skipDistrictTotal = false
+    } = filters;
 
   const targetTaluka = TALUKA_ALIASES[taluka?.toLowerCase()] || taluka;
   const isAllTalukas = !taluka || taluka === 'all' || taluka === 'सर्व तालुके' || taluka === 'सर्व तालुके (१५)';
@@ -896,21 +922,34 @@ export async function calculateDynamicGoshwaraRollup(filters = {}) {
         remarks: 'माहिती उपलब्ध नाही'
       };
     }
-  } else {
-    // When a single taluka or village is selected, calculate or reuse the true district-wide aggregate for Chandrapur across all 15 talukas
+  } else if (!skipDistrictTotal) {
+    // When a single taluka or village is selected and districtTotal is explicitly needed (e.g. exports),
+    // calculate or reuse the true district-wide aggregate for Chandrapur across all 15 talukas
     const districtRollup = await calculateDynamicGoshwaraRollup({
       ...filters,
+      skipDistrictTotal: false,
       taluka: 'all',
       village: 'all'
     });
     distTotal = districtRollup.districtTotal;
   }
 
-  return {
+  const result = {
     districtTotal: distTotal,
     byTaluka,
     byVillage
   };
+  if (dynamicRollupCache.size >= 150) {
+    const oldestKey = dynamicRollupCache.keys().next().value;
+    dynamicRollupCache.delete(oldestKey);
+  }
+  dynamicRollupCache.set(rollupCacheKey, { timestamp: Date.now(), data: result });
+  return result;
+  })().finally(() => {
+    inFlightRollups.delete(rollupCacheKey);
+  });
+  inFlightRollups.set(rollupCacheKey, promise);
+  return promise;
 }
 
 /**
@@ -1253,55 +1292,96 @@ export const getPrapatraReport = async (req, res) => {
       (includeParcels !== 'false' && view !== 'categorySummary' && view !== 'summary');
 
     const reportCacheKey = `${id}::${taluka}::${village}::${search}::${tenure}::${violation}::${areaRange}::${booklet}::${view}::${tier}::p${page}::ps${isAll ? 'all' : pageSize}::incP${shouldIncludeParcels}`;
-    if (!isExport) {
+    if (!isExport && req.query.refresh !== 'true') {
       const cached = prapatraReportCache.get(reportCacheKey);
-      if (cached && (Date.now() - cached.timestamp < CACHE_TTL_MS)) {
-        return res.status(200).json(cached.data);
+      if (cached) {
+        const age = Date.now() - cached.timestamp;
+        if (age < CACHE_TTL_MS) {
+          res.setHeader('X-Cache-Status', 'HIT');
+          return res.status(200).json(cached.data);
+        }
+        if (age < CACHE_STALE_TTL_MS) {
+          if (!inFlightReports.has(reportCacheKey)) {
+            buildPrapatraReportPayload(req, reportCacheKey).catch(() => {});
+          }
+          res.setHeader('X-Cache-Status', 'STALE');
+          return res.status(200).json(cached.data);
+        }
       }
     }
+
+    if (!isExport) {
+      let pending = inFlightReports.get(reportCacheKey);
+      if (!pending) {
+        pending = buildPrapatraReportPayload(req, reportCacheKey);
+      }
+      const payload = await pending;
+      if (payload?.__errorStatus) {
+        return res.status(payload.__errorStatus).json(payload.body);
+      }
+      res.setHeader('X-Cache-Status', 'MISS');
+      return res.status(200).json(payload);
+    }
+    return await buildPrapatraReportPayload(req, reportCacheKey, res);
+  } catch (err) {
+    console.error('getPrapatraReport error:', err);
+    return res.status(500).json({ success: false, error: 'अहवाल तयार करताना त्रुटी आली.' });
+  }
+};
+
+async function buildPrapatraReportPayload(req, reportCacheKey, exportRes = null) {
+  const isExportMode = Boolean(exportRes);
+  const run = async () => {
+    const { id } = req.params;
+    const {
+      taluka = 'all',
+      village = 'all',
+      search = '',
+      filterType = 'all',
+      tenure = 'all',
+      violation = 'all',
+      landStatus = 'all',
+      areaRange = 'all',
+      format = 'json',
+      booklet = 'false',
+      view = 'timeline',
+      tier = 'all',
+      includeParcels = 'true'
+    } = req.query;
+
+    const isAll = req.query.pageSize === 'all' || req.query.pageSize === 'ALL' || req.query.limit === 'all' || req.query.limit === 'ALL';
+    const page = Math.max(1, parseInt(req.query.page, 10) || 1);
+    const parsedPageSize = parseInt(req.query.pageSize || req.query.limit, 10);
+    const pageSize = isAll
+      ? 10000
+      : (isNaN(parsedPageSize) ? 25 : Math.min(1000, Math.max(1, parsedPageSize)));
+    const isExport = isExportMode || format === 'excel' || format === 'xlsx' || format === 'pdf';
+    const shouldIncludeParcels = includeParcels === 'true' ||
+      (includeParcels !== 'false' && view !== 'categorySummary' && view !== 'summary');
 
     const isChecklist = id === 'checklist' || id === 'master' || id === '46';
     const prapatraNum = isChecklist ? 0 : parseInt(id, 10);
 
     if (!isChecklist && (isNaN(prapatraNum) || prapatraNum < 1 || prapatraNum > 18)) {
-      return res.status(400).json({ success: false, error: 'अवैध प्रपत्र क्रमांक (१ ते १८ किंवा checklist)' });
+      return { __errorStatus: 400, body: { success: false, error: 'अवैध प्रपत्र क्रमांक (१ ते १८ किंवा checklist)' } };
     }
 
     const targetTaluka = TALUKA_ALIASES[taluka?.toLowerCase()] || taluka;
     const isAllTalukas = !taluka || taluka === 'all' || taluka === 'सर्व तालुके';
     const isAllVillages = !village || village === 'all' || village === 'सर्व गावे';
 
-    let records = [];
     let scopeName = 'संपूर्ण चंद्रपूर जिल्हा (All 15 Talukas)';
-
-    const where = {};
 
     if (isAllTalukas) {
       if (isAllVillages) {
         scopeName = 'संपूर्ण चंद्रपूर जिल्हा (१५ तालुके गोषवारा)';
-        if (tier === 'taluka' || tier === 'district') {
-          where.villageName = 'संपूर्ण तालुका (All Villages)';
-        } else if (tier === 'village') {
-          where.villageName = { not: 'संपूर्ण तालुका (All Villages)' };
-        }
-        // If tier === 'all' or default: do NOT restrict villageName, return all taluka totals + all village rollups
       } else {
-        // District-wide specific village search
-        where.villageName = { in: getVillageVariants(village), mode: 'insensitive' };
         scopeName = `चंद्रपूर जिल्हा | गाव: ${cleanVillageName(village)}`;
       }
     } else {
-      where.taluka = { equals: targetTaluka, mode: 'insensitive' };
       if (isAllVillages) {
         scopeName = `तालुका: ${targetTaluka} (सर्व गावे)`;
-        if (tier === 'taluka') {
-          where.villageName = 'संपूर्ण तालुका (All Villages)';
-        } else if (tier === 'village') {
-          where.villageName = { not: 'संपूर्ण तालुका (All Villages)' };
-        }
-        // If tier === 'all' or default: do NOT restrict villageName, return both taluka summary and village rollups for this taluka
       } else {
-        where.villageName = { in: getVillageVariants(village), mode: 'insensitive' };
         scopeName = `तालुका: ${targetTaluka} | गाव: ${cleanVillageName(village)}`;
       }
     }
@@ -1378,57 +1458,17 @@ export const getPrapatraReport = async (req, res) => {
         stats,
         parcels: []
       };
+      if (prapatraReportCache.size >= 200) {
+        const oldestKey = prapatraReportCache.keys().next().value;
+        prapatraReportCache.delete(oldestKey);
+      }
       prapatraReportCache.set(reportCacheKey, { timestamp: Date.now(), data: responseData });
-      return res.status(200).json(responseData);
+      return responseData;
     }
 
-    // Text search filter (match villageName or taluka)
+    // Text search scope annotation
     if (search && search.trim()) {
-      const s = search.trim();
-      where.OR = [
-        { villageName: { contains: s, mode: 'insensitive' } },
-        { taluka: { contains: s, mode: 'insensitive' } }
-      ];
-      scopeName += ` | शोध: "${s}"`;
-    }
-
-    // Alert / Violation Category filters (accept either filterType or violation param)
-    const activeViolation = (violation && violation !== 'all') ? violation : filterType;
-    if (activeViolation === 'illegalDeletions' || activeViolation === 'illegalDeletion') {
-      where.illegalDeletionsCount = { gt: 0 };
-    } else if (activeViolation === 'illegalConversion') {
-      where.OR = [
-        { illegalDeletionsCount: { gt: 0 } },
-        { govtDeptsShartbhang: { gt: 0 } },
-        { privateShartbhang: { gt: 0 } },
-        { govtShartbhangCount: { gt: 0 } }
-      ];
-    } else if (activeViolation === 'pokalist') {
-      where.pokalistCount = { gt: 0 };
-    } else if (activeViolation === 'shartbhang') {
-      where.OR = [
-        { govtDeptsShartbhang: { gt: 0 } },
-        { privateShartbhang: { gt: 0 } },
-        { govtShartbhangCount: { gt: 0 } }
-      ];
-    } else if (activeViolation === 'encroachment') {
-      where.govtEncroachedCount = { gt: 0 };
-    } else if (activeViolation === 'allotted') {
-      where.govtAllottedCount = { gt: 0 };
-    } else if (activeViolation === 'mojani') {
-      where.govtMojaniDoneCount = { gt: 0 };
-    }
-
-    records = await prisma.prapatraRollup.findMany({
-      where,
-      orderBy: isAllTalukas && isAllVillages ? [{ taluka: 'asc' }, { villageName: 'asc' }] : [{ villageName: 'asc' }]
-    });
-
-    // If query returned 0 rows and a single taluka was asked, fallback to its summary ONLY if no specific violation/search was applied
-    if (records.length === 0 && !isAllTalukas && isAllVillages && (!search || !search.trim()) && activeViolation === 'all') {
-      records = await prisma.prapatraRollup.findMany({
-        where: { taluka: { equals: targetTaluka, mode: 'insensitive' } }
-      });
+      scopeName += ` | शोध: "${search.trim()}"`;
     }
 
     // -------------------------------------------------------------
@@ -1436,7 +1476,7 @@ export const getPrapatraReport = async (req, res) => {
     // -------------------------------------------------------------
     const parcelWhere = {};
     if (!isAllTalukas) {
-      parcelWhere.taluka = { equals: targetTaluka, mode: 'insensitive' };
+      parcelWhere.taluka = targetTaluka;
     }
     if (!isAllVillages) {
       const cleanV = cleanVillageName(village);
@@ -2069,7 +2109,8 @@ export const getPrapatraReport = async (req, res) => {
         violation,
         areaRange,
         prapatraNum: rollupPrapatraNum,
-        booklet: rollupBooklet
+        booklet: rollupBooklet,
+        skipDistrictTotal: !isExport && !isAllTalukas
       });
 
       summaryExportRows = [
@@ -2081,6 +2122,7 @@ export const getPrapatraReport = async (req, res) => {
 
     // If Excel export requested
     if (format === 'excel' || format === 'xlsx') {
+      const res = exportRes;
       const timestamp = new Date().toISOString().slice(0, 10);
       const safeScope = (targetTaluka || 'Chandrapur').replace(/[^a-zA-Z0-9]/g, '_');
       res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
@@ -2115,6 +2157,7 @@ export const getPrapatraReport = async (req, res) => {
 
     // If PDF export requested
     if (format === 'pdf') {
+      const res = exportRes;
       const timestamp = new Date().toISOString().slice(0, 10);
       const safeScope = (targetTaluka || 'Chandrapur').replace(/[^a-zA-Z0-9]/g, '_');
       res.setHeader('Content-Type', 'application/pdf');
@@ -2221,13 +2264,23 @@ export const getPrapatraReport = async (req, res) => {
       parcels: formattedParcels,
       checklistPoints: isChecklist ? CHECKLIST_46_POINTS : undefined
     };
+    if (prapatraReportCache.size >= 200) {
+      const oldestKey = prapatraReportCache.keys().next().value;
+      prapatraReportCache.delete(oldestKey);
+    }
     prapatraReportCache.set(reportCacheKey, { data: jsonResponse, timestamp: Date.now() });
-    return res.status(200).json(jsonResponse);
-  } catch (err) {
-    console.error('getPrapatraReport error:', err);
-    return res.status(500).json({ success: false, error: 'अहवाल तयार करताना त्रुटी आली.' });
+    return jsonResponse;
+  };
+
+  if (isExportMode) {
+    return await run();
   }
-};
+  const promise = run().finally(() => {
+    inFlightReports.delete(reportCacheKey);
+  });
+  inFlightReports.set(reportCacheKey, promise);
+  return promise;
+}
 
 /**
  * Get the 18 official statutory categories and 46 checklist points
@@ -2240,9 +2293,98 @@ export const getBookletCategories = async (req, res) => {
   });
 };
 
-// Cache for getTalukaVillages (15 min TTL)
+// Cache for getTalukaVillages (15 min fresh, 60 min SWR)
 const talukaVillagesCache = new Map();
+const inFlightVillages = new Map();
 const TALUKA_VILLAGES_CACHE_TTL = 15 * 60 * 1000;
+const TALUKA_VILLAGES_STALE_TTL = 60 * 60 * 1000;
+
+const fetchTalukaVillagesData = (taluka, targetTaluka, cacheKey) => {
+  let pending = inFlightVillages.get(cacheKey);
+  if (!pending) {
+    pending = (async () => {
+      const rollupWhere = {
+        villageName: { not: 'संपूर्ण तालुका (All Villages)' }
+      };
+
+      if (taluka && taluka !== 'all' && taluka !== 'सर्व तालुके') {
+        rollupWhere.taluka = { equals: targetTaluka, mode: 'insensitive' };
+      }
+
+      const rollupQuery = prisma.prapatraRollup.findMany({
+        where: rollupWhere,
+        select: {
+          id: true,
+          taluka: true,
+          villageName: true,
+          total712Count: true,
+          govtFound1950Count: true,
+          illegalDeletionsCount: true,
+          pokalistCount: true,
+          govtEncroachedCount: true,
+          govtShartbhangCount: true
+        },
+        orderBy: [{ villageName: 'asc' }]
+      });
+
+      const isSpecificTaluka = taluka && taluka !== 'all' && taluka !== 'सर्व तालुके';
+      const parcelQuery = isSpecificTaluka
+        ? prisma.$queryRawUnsafe(
+            `SELECT DISTINCT village_name as "villageName", taluka FROM land_parcels WHERE taluka ILIKE $1 AND village_name IS NOT NULL`,
+            targetTaluka
+          ).catch(() => [])
+        : prisma.$queryRawUnsafe(
+            `SELECT DISTINCT village_name as "villageName", taluka FROM land_parcels WHERE village_name IS NOT NULL`
+          ).catch(() => []);
+
+      const [rollupRecords, parcelRecords] = await Promise.all([rollupQuery, parcelQuery]);
+
+      const cleanVillagesMap = new Map();
+      const allRecords = [...parcelRecords, ...rollupRecords];
+
+      for (const r of allRecords) {
+        if (!r.villageName || r.villageName === 'Unspecified') continue;
+        const cName = cleanVillageName(r.villageName);
+        if (!cName || cName === 'अज्ञात गाव') continue;
+
+        const recordTaluka = r.taluka || targetTaluka;
+        const normKey = `${recordTaluka.toLowerCase()}:::${cName.toLowerCase().replace(/[.,_)\-–—\s]/g, '')}`;
+
+        if (!cleanVillagesMap.has(normKey)) {
+          cleanVillagesMap.set(normKey, {
+            id: r.id || `${recordTaluka}-${cName}`,
+            taluka: recordTaluka,
+            villageName: cName,
+            originalVillageName: r.villageName,
+            total712Count: r.total712Count || 0
+          });
+        } else {
+          const item = cleanVillagesMap.get(normKey);
+          if (r.total712Count && r.total712Count > item.total712Count) {
+            item.total712Count = r.total712Count;
+          }
+        }
+      }
+
+      const cleanVillages = Array.from(cleanVillagesMap.values());
+      cleanVillages.sort((a, b) => a.villageName.localeCompare(b.villageName, 'mr'));
+
+      const responseData = {
+        success: true,
+        taluka: targetTaluka,
+        count: cleanVillages.length,
+        villages: cleanVillages
+      };
+
+      talukaVillagesCache.set(cacheKey, { timestamp: Date.now(), data: responseData });
+      return responseData;
+    })().finally(() => {
+      inFlightVillages.delete(cacheKey);
+    });
+    inFlightVillages.set(cacheKey, pending);
+  }
+  return pending;
+};
 
 /**
  * Get dynamic list of real villages for dropdown filtering
@@ -2253,93 +2395,24 @@ export const getTalukaVillages = async (req, res) => {
     const targetTaluka = TALUKA_ALIASES[taluka?.toLowerCase()] || taluka;
     const cacheKey = (targetTaluka || 'all').toLowerCase();
 
-    // Check in-memory cache for instant <1ms response
     const now = Date.now();
     const cached = talukaVillagesCache.get(cacheKey);
-    if (cached && (now - cached.timestamp < TALUKA_VILLAGES_CACHE_TTL)) {
-      res.setHeader('Cache-Control', 'public, max-age=300, stale-while-revalidate=600');
-      res.setHeader('X-Cache-Status', 'HIT');
-      return res.status(200).json(cached.data);
-    }
-
-    const rollupWhere = {
-      villageName: { not: 'संपूर्ण तालुका (All Villages)' }
-    };
-
-    if (taluka && taluka !== 'all' && taluka !== 'सर्व तालुके') {
-      rollupWhere.taluka = { equals: targetTaluka, mode: 'insensitive' };
-    }
-
-    // High performance query: prapatraRollup + indexed raw distinct SQL query
-    // (Bypasses Prisma findMany(distinct) which does slow in-memory JS deserialization over 133k rows)
-    const rollupQuery = prisma.prapatraRollup.findMany({
-      where: rollupWhere,
-      select: {
-        id: true,
-        taluka: true,
-        villageName: true,
-        total712Count: true,
-        govtFound1950Count: true,
-        illegalDeletionsCount: true,
-        pokalistCount: true,
-        govtEncroachedCount: true,
-        govtShartbhangCount: true
-      },
-      orderBy: [{ villageName: 'asc' }]
-    });
-
-    const isSpecificTaluka = taluka && taluka !== 'all' && taluka !== 'सर्व तालुके';
-    const parcelQuery = isSpecificTaluka
-      ? prisma.$queryRawUnsafe(
-          `SELECT DISTINCT village_name as "villageName", taluka FROM land_parcels WHERE taluka ILIKE $1 AND village_name IS NOT NULL`,
-          targetTaluka
-        ).catch(() => [])
-      : prisma.$queryRawUnsafe(
-          `SELECT DISTINCT village_name as "villageName", taluka FROM land_parcels WHERE village_name IS NOT NULL`
-        ).catch(() => []);
-
-    const [rollupRecords, parcelRecords] = await Promise.all([rollupQuery, parcelQuery]);
-
-    // Clean village names and deduplicate using robust normalized map
-    const cleanVillagesMap = new Map();
-    const allRecords = [...parcelRecords, ...rollupRecords];
-
-    for (const r of allRecords) {
-      if (!r.villageName || r.villageName === 'Unspecified') continue;
-      const cName = cleanVillageName(r.villageName);
-      if (!cName || cName === 'अज्ञात गाव') continue;
-
-      const recordTaluka = r.taluka || targetTaluka;
-      const normKey = `${recordTaluka.toLowerCase()}:::${cName.toLowerCase().replace(/[.,_)\-–—\s]/g, '')}`;
-
-      if (!cleanVillagesMap.has(normKey)) {
-        cleanVillagesMap.set(normKey, {
-          id: r.id || `${recordTaluka}-${cName}`,
-          taluka: recordTaluka,
-          villageName: cName,
-          originalVillageName: r.villageName,
-          total712Count: r.total712Count || 0
-        });
-      } else {
-        const item = cleanVillagesMap.get(normKey);
-        if (r.total712Count && r.total712Count > item.total712Count) {
-          item.total712Count = r.total712Count;
-        }
+    if (cached) {
+      const age = now - cached.timestamp;
+      if (age < TALUKA_VILLAGES_CACHE_TTL) {
+        res.setHeader('Cache-Control', 'public, max-age=300, stale-while-revalidate=600');
+        res.setHeader('X-Cache-Status', 'HIT');
+        return res.status(200).json(cached.data);
+      }
+      if (age < TALUKA_VILLAGES_STALE_TTL) {
+        fetchTalukaVillagesData(taluka, targetTaluka, cacheKey).catch(() => {});
+        res.setHeader('Cache-Control', 'public, max-age=300, stale-while-revalidate=600');
+        res.setHeader('X-Cache-Status', 'STALE');
+        return res.status(200).json(cached.data);
       }
     }
 
-    const cleanVillages = Array.from(cleanVillagesMap.values());
-    // Sort Marathi village names alphabetically
-    cleanVillages.sort((a, b) => a.villageName.localeCompare(b.villageName, 'mr'));
-
-    const responseData = {
-      success: true,
-      taluka: targetTaluka,
-      count: cleanVillages.length,
-      villages: cleanVillages
-    };
-
-    talukaVillagesCache.set(cacheKey, { timestamp: now, data: responseData });
+    const responseData = await fetchTalukaVillagesData(taluka, targetTaluka, cacheKey);
 
     res.setHeader('Cache-Control', 'public, max-age=300, stale-while-revalidate=600');
     res.setHeader('X-Cache-Status', 'MISS');
@@ -3626,9 +3699,12 @@ export const exportGoshwaraPdf = async (req, res) => {
  */
 export async function prewarmPrapatraCache() {
   try {
-    // Warm up Category 1 (Govt Lands) and Checklist District Rollups in memory
-    await calculateDynamicGoshwaraRollup({ taluka: 'all', village: 'all', prapatraNum: 1, booklet: 'true' });
-    await getPrapatra1to5RollupData({ taluka: 'all', village: 'all', prapatraNum: 1 });
+    const noopRes = { setHeader() {}, status() { return this; }, json() { return this; } };
+    // Warm up villages list, default checklist, Prapatra 1-5 rollups, and Category 1 booklet
+    await fetchTalukaVillagesData('all', 'all', 'all').catch(() => {});
+    await getPrapatraReport({ params: { id: 'checklist' }, query: { page: '1', pageSize: '25', booklet: 'false', view: 'timeline', includeParcels: 'true' } }, noopRes).catch(() => {});
+    await getPrapatra1to5RollupData({ taluka: 'all', village: 'all', prapatraNum: 1 }).catch(() => {});
+    await calculateDynamicGoshwaraRollup({ taluka: 'all', village: 'all', prapatraNum: 1, booklet: 'true' }).catch(() => {});
   } catch (err) {
     // Ignore non-fatal prewarm background errors
   }

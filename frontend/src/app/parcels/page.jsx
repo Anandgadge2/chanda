@@ -145,26 +145,42 @@ export default function ParcelsPage() {
   const [uploadModalParcelId, setUploadModalParcelId] = useState(null);
   const [glossaryModalOpen, setGlossaryModalOpen] = useState(false);
 
+  const requestSeqRef = useRef(0);
+
+  const buildParcelParams = (targetPage, filtersToUse, targetLimit) => {
+    const params = { page: targetPage, limit: targetLimit };
+    if (filtersToUse.taluka) params.taluka = filtersToUse.taluka;
+    if (filtersToUse.village && filtersToUse.village !== 'all') params.village = filtersToUse.village;
+    if (filtersToUse.bookletCategory) params.bookletCategory = filtersToUse.bookletCategory;
+    if (filtersToUse.tenureClass) params.tenureClass = filtersToUse.tenureClass;
+    if (filtersToUse.hasActiveDispute !== '') params.hasActiveDispute = filtersToUse.hasActiveDispute;
+    if (filtersToUse.search && filtersToUse.search.trim()) params.search = filtersToUse.search.trim();
+    return params;
+  };
+
   // Fetch Parcels with specified target page, filters and limit
   const fetchParcels = async (
     targetPage = page,
     filtersToUse = appliedFilters,
-    targetLimit = limit
+    targetLimit = limit,
+    forceRefresh = false
   ) => {
+    const seq = ++requestSeqRef.current;
     setLoading(true);
     try {
-      const params = { page: targetPage, limit: targetLimit };
-      if (filtersToUse.taluka) params.taluka = filtersToUse.taluka;
-      if (filtersToUse.village && filtersToUse.village !== 'all') params.village = filtersToUse.village;
-      if (filtersToUse.bookletCategory) params.bookletCategory = filtersToUse.bookletCategory;
-      if (filtersToUse.tenureClass) params.tenureClass = filtersToUse.tenureClass;
-      if (filtersToUse.hasActiveDispute !== '') params.hasActiveDispute = filtersToUse.hasActiveDispute;
-      if (filtersToUse.search && filtersToUse.search.trim()) params.search = filtersToUse.search.trim();
+      const params = buildParcelParams(targetPage, filtersToUse, targetLimit);
+      const data = await api.getParcels(params, { forceRefresh });
+      if (seq !== requestSeqRef.current) return;
 
-      const data = await api.getParcels(params);
       setParcels(data.parcels || []);
       setTotalCount(data.pagination?.total || 0);
-      setTotalPages(data.pagination?.totalPages || 1);
+      const nextTotalPages = data.pagination?.totalPages || 1;
+      setTotalPages(nextTotalPages);
+
+      // Prefetch next page silently for instant pagination clicks
+      if (targetLimit !== 'all' && targetPage < nextTotalPages) {
+        api.prefetchParcels(buildParcelParams(targetPage + 1, filtersToUse, targetLimit));
+      }
 
       // Cache page 1 baseline in sessionStorage for zero-latency warm visits
       if (targetPage === 1 && !filtersToUse.taluka && !filtersToUse.village && !filtersToUse.search && !filtersToUse.bookletCategory && !filtersToUse.tenureClass && filtersToUse.hasActiveDispute === '') {
@@ -177,9 +193,13 @@ export default function ParcelsPage() {
         } catch {}
       }
     } catch (err) {
-      console.error('Failed to load parcels:', err);
+      if (seq === requestSeqRef.current) {
+        console.error('Failed to load parcels:', err);
+      }
     } finally {
-      setLoading(false);
+      if (seq === requestSeqRef.current) {
+        setLoading(false);
+      }
     }
   };
 
@@ -262,6 +282,24 @@ export default function ParcelsPage() {
     );
   }, [taluka, village, bookletCategory, tenureClass, hasActiveDispute, search, appliedFilters]);
 
+  // Prefetch draft dropdown filter combination before Apply is clicked
+  useEffect(() => {
+    if (!isFilterPending) return;
+    const timer = setTimeout(() => {
+      api.prefetchParcels(
+        buildParcelParams(1, {
+          taluka,
+          village,
+          bookletCategory,
+          tenureClass,
+          hasActiveDispute,
+          search: search.trim(),
+        }, limit)
+      );
+    }, 120);
+    return () => clearTimeout(timer);
+  }, [taluka, village, bookletCategory, tenureClass, hasActiveDispute, search, limit, isFilterPending]);
+
   // Apply filters button handler
   const handleApplyFilters = () => {
     const nextFilters = {
@@ -308,13 +346,13 @@ export default function ParcelsPage() {
 
   const handlePageChange = (newPage) => {
     setPage(newPage);
-    fetchParcels(newPage, appliedFilters, limit, sortColumn, sortDirection);
+    fetchParcels(newPage, appliedFilters, limit);
   };
 
   const handlePageSizeChange = (newLimit) => {
     setLimit(newLimit);
     setPage(1);
-    fetchParcels(1, appliedFilters, newLimit, sortColumn, sortDirection);
+    fetchParcels(1, appliedFilters, newLimit);
   };
 
   // Copy to clipboard
@@ -593,7 +631,7 @@ export default function ParcelsPage() {
           </button>
 
           <button
-            onClick={() => fetchParcels(page, appliedFilters, limit)}
+            onClick={() => fetchParcels(page, appliedFilters, limit, true)}
             disabled={loading}
             className="p-1.5 rounded-lg bg-white hover:bg-emerald-50 text-slate-800 hover:text-slate-950 border border-slate-300 text-xs transition-all active:scale-95 shadow-2xs cursor-pointer"
             title={isMarathi ? 'तक्ता रीफ्रेश करा' : 'Refresh Table'}
@@ -780,7 +818,6 @@ export default function ParcelsPage() {
             <button
               type="button"
               onClick={handleApplyFilters}
-              disabled={loading}
               className={clsx(
                 'h-9 px-3.5 rounded-lg font-bold text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95 shrink-0 shadow-xs cursor-pointer select-none flex-1 sm:flex-initial xl:w-auto whitespace-nowrap',
                 isFilterPending
@@ -800,7 +837,6 @@ export default function ParcelsPage() {
             <button
               type="button"
               onClick={handleResetFilters}
-              disabled={loading}
               className="h-9 px-3 text-slate-800 hover:text-rose-700 bg-slate-100 hover:bg-rose-50 rounded-lg border border-slate-300 hover:border-rose-300 transition-all active:scale-95 shrink-0 cursor-pointer flex items-center justify-center gap-1.5 text-xs font-bold flex-1 sm:flex-initial xl:w-auto shadow-2xs whitespace-nowrap"
               title={isMarathi ? 'सर्व फिल्टर्स रीसेट करा' : 'Reset all filters'}
               aria-label={isMarathi ? 'सर्व फिल्टर्स रीसेट करा' : 'Reset all filters'}
@@ -932,7 +968,7 @@ export default function ParcelsPage() {
         </div>
 
         {/* Table Content */}
-        {loading ? (
+        {loading && sortedParcels.length === 0 ? (
           <div className="py-24 text-center">
             <div className="w-8 h-8 border-2 border-indigo-100 border-t-indigo-600 rounded-full animate-spin mx-auto mb-2.5" />
             <p className="text-xs font-bold text-slate-600">

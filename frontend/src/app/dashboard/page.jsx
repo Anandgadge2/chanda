@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import Link from 'next/link';
 import {
   FileSpreadsheet,
@@ -80,15 +80,24 @@ export default function DashboardPage() {
     recentHearings: [],
   });
 
+  const requestSeqRef = useRef(0);
+
   const loadData = async (selectedTaluka = taluka, forceRefresh = false) => {
+    const seq = ++requestSeqRef.current;
     setLoading(true);
     try {
       const data = await api.getAnalyticsSummary(selectedTaluka, forceRefresh);
-      setAnalytics(data);
+      if (seq === requestSeqRef.current) {
+        setAnalytics(data);
+      }
     } catch (err) {
-      console.error('Failed to load dashboard data:', err);
+      if (seq === requestSeqRef.current) {
+        console.error('Failed to load dashboard data:', err);
+      }
     } finally {
-      setLoading(false);
+      if (seq === requestSeqRef.current) {
+        setLoading(false);
+      }
     }
   };
 
@@ -108,6 +117,9 @@ export default function DashboardPage() {
       }
     }
     loadData(initialTaluka);
+    if (initialTaluka) {
+      api.prefetchAnalyticsSummary('');
+    }
   }, []);
 
   const isFilterPending = draftTaluka !== taluka;
@@ -189,7 +201,11 @@ export default function DashboardPage() {
             <SearchableSelect
               options={talukaSelectOptions}
               value={draftTaluka}
-              onChange={(val) => setDraftTaluka(val || '')}
+              onChange={(val) => {
+                const next = val || '';
+                setDraftTaluka(next);
+                api.prefetchAnalyticsSummary(next);
+              }}
               placeholder={isMarathi ? 'सर्व तालुके' : 'All Talukas'}
               searchPlaceholder={isMarathi ? 'तालुका शोधा...' : 'Search taluka...'}
               icon={Filter}
@@ -202,7 +218,6 @@ export default function DashboardPage() {
           <button
             type="button"
             onClick={handleApplyFilters}
-            disabled={loading}
             className={clsx(
               'h-9 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95 shrink-0 shadow-xs cursor-pointer select-none',
               isFilterPending
@@ -222,7 +237,6 @@ export default function DashboardPage() {
           <button
             type="button"
             onClick={handleResetFilters}
-            disabled={loading}
             className="h-9 px-3 text-slate-700 hover:text-rose-700 bg-slate-100 hover:bg-rose-50 rounded-xl border border-slate-300 hover:border-rose-300 transition-all active:scale-95 shrink-0 cursor-pointer flex items-center justify-center gap-1 text-xs font-bold shadow-2xs"
             title={isMarathi ? 'सर्व फिल्टर्स रीसेट करा' : 'Reset all filters'}
             aria-label={isMarathi ? 'सर्व फिल्टर्स रीसेट करा' : 'Reset all filters'}

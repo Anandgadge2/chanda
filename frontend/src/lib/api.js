@@ -34,6 +34,103 @@ const getAuthHeaders = () => {
 // In-flight GET request deduplication for React dev mode & parallel triggers
 const inFlightRequests = new Map();
 
+// Client-side Stale-While-Revalidate (SWR) response cache for instant button/filter/tab clicks
+const CLIENT_FRESH_TTL_MS = 2 * 60 * 1000; // 2 minutes fresh
+const CLIENT_STALE_TTL_MS = 15 * 60 * 1000; // 15 minutes stale-while-revalidate
+const MAX_CLIENT_CACHE_ENTRIES = 200;
+const clientResponseCache = new Map();
+
+export const invalidateClientCache = () => {
+  clientResponseCache.clear();
+};
+
+function setClientCacheEntry(key, data) {
+  if (clientResponseCache.size >= MAX_CLIENT_CACHE_ENTRIES) {
+    const oldestKey = clientResponseCache.keys().next().value;
+    clientResponseCache.delete(oldestKey);
+  }
+  clientResponseCache.set(key, { timestamp: Date.now(), data });
+}
+
+function buildSortedQuery(params = {}) {
+  const sp = new URLSearchParams();
+  Object.keys(params)
+    .sort()
+    .forEach((k) => {
+      const v = params[k];
+      if (v !== undefined && v !== null && v !== '') {
+        sp.set(k, String(v));
+      }
+    });
+  return sp.toString();
+}
+
+function buildPrapatraUrl(id, query = {}) {
+  const params = new URLSearchParams();
+  if (typeof query === 'string') {
+    if (query) params.append('taluka', query);
+  } else {
+    Object.keys(query)
+      .sort()
+      .forEach((k) => {
+        const v = query[k];
+        if (v !== undefined && v !== null && v !== '') {
+          if (v === 'all' && k !== 'pageSize' && k !== 'limit') return;
+          params.append(k, String(v));
+        }
+      });
+  }
+  const qs = params.toString();
+  return `${BASE_URL}/api/prapatra/${id}${qs ? `?${qs}` : ''}`;
+}
+
+async function cachedJsonFetch(url, options = {}, { forceRefresh = false, freshMs = CLIENT_FRESH_TTL_MS, staleMs = CLIENT_STALE_TTL_MS, errorMessage = 'Request failed' } = {}) {
+  const authHeader = options.headers?.Authorization || '';
+  const cacheKey = `${url}::${authHeader}`;
+  const now = Date.now();
+
+  if (!forceRefresh) {
+    const cached = clientResponseCache.get(cacheKey);
+    if (cached) {
+      const age = now - cached.timestamp;
+      if (age < freshMs) {
+        return cached.data;
+      }
+      if (age < staleMs) {
+        // Return cached data immediately and refresh silently in background
+        dedupedFetch(url, options)
+          .then(async (res) => {
+            if (res.ok) {
+              const freshData = await res.json();
+              setClientCacheEntry(cacheKey, freshData);
+            }
+          })
+          .catch(() => {});
+        return cached.data;
+      }
+    }
+  }
+
+  const res = await dedupedFetch(url, options);
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || errorMessage);
+  }
+  const data = await res.json();
+  setClientCacheEntry(cacheKey, data);
+  return data;
+}
+
+function prefetchJson(url, options = {}, freshMs = CLIENT_FRESH_TTL_MS) {
+  const authHeader = options.headers?.Authorization || '';
+  const cacheKey = `${url}::${authHeader}`;
+  const cached = clientResponseCache.get(cacheKey);
+  if (cached && Date.now() - cached.timestamp < freshMs) {
+    return;
+  }
+  cachedJsonFetch(url, options, { freshMs }).catch(() => {});
+}
+
 async function dedupedFetch(url, options = {}) {
   const method = (options.method || 'GET').toUpperCase();
   if (method !== 'GET') {
@@ -77,6 +174,7 @@ export const api = {
     if (data.token) {
       setAuthToken(data.token);
     }
+    invalidateClientCache();
     return data;
   },
 
@@ -118,6 +216,7 @@ export const api = {
       // Ignore errors on logout
     } finally {
       setAuthToken(null);
+      invalidateClientCache();
     }
   },
 
@@ -155,27 +254,33 @@ export const api = {
     if (taluka) params.set('taluka', taluka);
     if (forceRefresh) params.set('refresh', 'true');
     const q = params.toString() ? `?${params.toString()}` : '';
-    const res = await dedupedFetch(`${BASE_URL}/api/analytics/summary${q}`, {
-      headers: {
-        ...getAuthHeaders(),
-      },
-      cache: 'no-store',
-    });
-    if (!res.ok) throw new Error('Failed to fetch analytics summary');
-    return res.json();
+    return cachedJsonFetch(
+      `${BASE_URL}/api/analytics/summary${q}`,
+      { headers: { ...getAuthHeaders() }, cache: 'no-store' },
+      { forceRefresh, errorMessage: 'Failed to fetch analytics summary' }
+    );
+  },
+
+  prefetchAnalyticsSummary: (taluka = '') => {
+    const params = new URLSearchParams();
+    if (taluka) params.set('taluka', taluka);
+    const q = params.toString() ? `?${params.toString()}` : '';
+    prefetchJson(`${BASE_URL}/api/analytics/summary${q}`, { headers: { ...getAuthHeaders() }, cache: 'no-store' });
   },
 
   // Parcels
-  getParcels: async (params = {}) => {
-    const query = new URLSearchParams(params).toString();
-    const res = await dedupedFetch(`${BASE_URL}/api/parcels?${query}`, {
-      headers: {
-        ...getAuthHeaders(),
-      },
-      cache: 'no-store',
-    });
-    if (!res.ok) throw new Error('Failed to fetch parcels');
-    return res.json();
+  getParcels: async (params = {}, { forceRefresh = false } = {}) => {
+    const query = buildSortedQuery(params);
+    return cachedJsonFetch(
+      `${BASE_URL}/api/parcels${query ? `?${query}` : ''}`,
+      { headers: { ...getAuthHeaders() }, cache: 'no-store' },
+      { forceRefresh, errorMessage: 'Failed to fetch parcels' }
+    );
+  },
+
+  prefetchParcels: (params = {}) => {
+    const query = buildSortedQuery(params);
+    prefetchJson(`${BASE_URL}/api/parcels${query ? `?${query}` : ''}`, { headers: { ...getAuthHeaders() }, cache: 'no-store' });
   },
 
   updateParcel: async (upi, payload) => {
@@ -189,18 +294,16 @@ export const api = {
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Failed to update parcel');
+    invalidateClientCache();
     return data;
   },
 
-  getParcelTrace: async (upi) => {
-    const res = await dedupedFetch(`${BASE_URL}/api/parcels/${encodeURIComponent(upi)}/trace`, {
-      headers: {
-        ...getAuthHeaders(),
-      },
-      cache: 'no-store',
-    });
-    if (!res.ok) throw new Error(`Failed to fetch trace for parcel ${upi}`);
-    return res.json();
+  getParcelTrace: async (upi, forceRefresh = false) => {
+    return cachedJsonFetch(
+      `${BASE_URL}/api/parcels/${encodeURIComponent(upi)}/trace`,
+      { headers: { ...getAuthHeaders() }, cache: 'no-store' },
+      { forceRefresh, errorMessage: `Failed to fetch trace for parcel ${upi}` }
+    );
   },
 
   downloadParcelDossierPdf: async (upi) => {
@@ -235,20 +338,23 @@ export const api = {
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Failed to bulk upload Excel');
+    invalidateClientCache();
     return data;
   },
 
   // Cases & Hearings
-  getCases: async (params = {}) => {
-    const query = new URLSearchParams(params).toString();
-    const res = await dedupedFetch(`${BASE_URL}/api/cases?${query}`, {
-      headers: {
-        ...getAuthHeaders(),
-      },
-      cache: 'no-store',
-    });
-    if (!res.ok) throw new Error('Failed to fetch cases');
-    return res.json();
+  getCases: async (params = {}, { forceRefresh = false } = {}) => {
+    const query = buildSortedQuery(params);
+    return cachedJsonFetch(
+      `${BASE_URL}/api/cases${query ? `?${query}` : ''}`,
+      { headers: { ...getAuthHeaders() }, cache: 'no-store' },
+      { forceRefresh, errorMessage: 'Failed to fetch cases' }
+    );
+  },
+
+  prefetchCases: (params = {}) => {
+    const query = buildSortedQuery(params);
+    prefetchJson(`${BASE_URL}/api/cases${query ? `?${query}` : ''}`, { headers: { ...getAuthHeaders() }, cache: 'no-store' });
   },
 
   createCase: async (payload) => {
@@ -262,6 +368,7 @@ export const api = {
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Failed to create case');
+    invalidateClientCache();
     return data;
   },
 
@@ -276,6 +383,7 @@ export const api = {
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Failed to schedule hearing');
+    invalidateClientCache();
     return data;
   },
 
@@ -290,6 +398,7 @@ export const api = {
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Failed to update case status');
+    invalidateClientCache();
     return data;
   },
 
@@ -500,38 +609,29 @@ export const api = {
     return data;
   },
 
-  getPrapatraReport: async (id, query = {}) => {
-    const params = new URLSearchParams();
-    if (typeof query === 'string') {
-      params.append('taluka', query);
-    } else {
-      Object.entries(query).forEach(([k, v]) => {
-        if (v !== undefined && v !== null && v !== '') {
-          if (v === 'all' && k !== 'pageSize' && k !== 'limit') return;
-          params.append(k, v);
-        }
-      });
-    }
-    const res = await dedupedFetch(`${BASE_URL}/api/prapatra/${id}?${params.toString()}`, {
-      headers: {
-        ...getAuthHeaders(),
-      },
-    });
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error(err.error || 'प्रपत्र डेटा लोड करणे अयशस्वी झाले.');
-    }
-    return res.json();
+  getPrapatraReport: async (id, query = {}, { forceRefresh = false } = {}) => {
+    const url = buildPrapatraUrl(id, query);
+    return cachedJsonFetch(
+      url,
+      { headers: { ...getAuthHeaders() } },
+      { forceRefresh, freshMs: 5 * 60 * 1000, staleMs: 30 * 60 * 1000, errorMessage: 'प्रपत्र डेटा लोड करणे अयशस्वी झाले.' }
+    );
+  },
+
+  prefetchPrapatraReport: (id, query = {}) => {
+    const url = buildPrapatraUrl(id, query);
+    prefetchJson(url, { headers: { ...getAuthHeaders() } }, 5 * 60 * 1000);
   },
 
   getTalukaVillages: async (taluka = 'all') => {
     const params = new URLSearchParams();
     if (taluka && taluka !== 'all') params.append('taluka', taluka);
-    const res = await dedupedFetch(`${BASE_URL}/api/prapatra/villages?${params.toString()}`);
-    if (!res.ok) {
-      throw new Error('गावांची यादी लोड करणे अयशस्वी झाले.');
-    }
-    return res.json();
+    const qs = params.toString();
+    return cachedJsonFetch(
+      `${BASE_URL}/api/prapatra/villages${qs ? `?${qs}` : ''}`,
+      {},
+      { freshMs: 10 * 60 * 1000, staleMs: 60 * 60 * 1000, errorMessage: 'गावांची यादी लोड करणे अयशस्वी झाले.' }
+    );
   },
 
   updatePrapatraRollup: async (id, data) => {
@@ -547,6 +647,7 @@ export const api = {
     if (!res.ok) {
       throw new Error(resData.error || 'अभिलेख अद्ययावत करणे अयशस्वी झाले.');
     }
+    invalidateClientCache();
     return resData;
   },
 
@@ -578,6 +679,7 @@ export const api = {
     if (!res.ok) {
       throw new Error(resData.error || 'एक्सेल फाईल अपलोड करणे अयशस्वी झाले.');
     }
+    invalidateClientCache();
     return resData;
   },
 
@@ -594,6 +696,7 @@ export const api = {
     if (!res.ok) {
       throw new Error(resData.error || 'गाव डेटा हटवणे अयशस्वी झाले.');
     }
+    invalidateClientCache();
     return resData;
   },
 
@@ -650,16 +753,12 @@ export const api = {
     const params = new URLSearchParams();
     if (taluka && taluka !== 'all') params.append('taluka', taluka);
     if (village && village !== 'all') params.append('village', village);
-    const res = await dedupedFetch(`${BASE_URL}/api/prapatra/renumbering-parcha/data?${params.toString()}`, {
-      headers: {
-        ...getAuthHeaders(),
-      },
-    });
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error(err.error || 'रिनंबरिंग पर्चा डेटा लोड करणे अयशस्वी झाले.');
-    }
-    return res.json();
+    const qs = params.toString();
+    return cachedJsonFetch(
+      `${BASE_URL}/api/prapatra/renumbering-parcha/data${qs ? `?${qs}` : ''}`,
+      { headers: { ...getAuthHeaders() } },
+      { freshMs: 5 * 60 * 1000, staleMs: 30 * 60 * 1000, errorMessage: 'रिनंबरिंग पर्चा डेटा लोड करणे अयशस्वी झाले.' }
+    );
   },
 
   exportRenumberingParchaExcel: async (payload = {}) => {

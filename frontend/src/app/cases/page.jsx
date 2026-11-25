@@ -197,21 +197,35 @@ export default function CasesPage() {
     );
   }, [draftTaluka, draftVillage, draftViolationType, draftStatus, draftIsRepossessedToGovt, draftSearch, appliedFilters]);
 
-  const fetchCases = async (targetPage = page, filtersToUse = appliedFilters, targetLimit = limit) => {
+  const requestSeqRef = useRef(0);
+
+  const buildCaseParams = (targetPage, filtersToUse, targetLimit) => {
+    const params = { page: targetPage, limit: targetLimit };
+    if (filtersToUse.search && filtersToUse.search.trim()) params.search = filtersToUse.search.trim();
+    if (filtersToUse.taluka) params.taluka = filtersToUse.taluka;
+    if (filtersToUse.village && filtersToUse.village !== 'all') params.village = filtersToUse.village;
+    if (filtersToUse.violationType) params.violationType = filtersToUse.violationType;
+    if (filtersToUse.status) params.status = filtersToUse.status;
+    if (filtersToUse.isRepossessedToGovt !== '') params.isRepossessedToGovt = filtersToUse.isRepossessedToGovt;
+    return params;
+  };
+
+  const fetchCases = async (targetPage = page, filtersToUse = appliedFilters, targetLimit = limit, forceRefresh = false) => {
+    const seq = ++requestSeqRef.current;
     setLoading(true);
     try {
-      const params = { page: targetPage, limit: targetLimit };
-      if (filtersToUse.search && filtersToUse.search.trim()) params.search = filtersToUse.search.trim();
-      if (filtersToUse.taluka) params.taluka = filtersToUse.taluka;
-      if (filtersToUse.village && filtersToUse.village !== 'all') params.village = filtersToUse.village;
-      if (filtersToUse.violationType) params.violationType = filtersToUse.violationType;
-      if (filtersToUse.status) params.status = filtersToUse.status;
-      if (filtersToUse.isRepossessedToGovt !== '') params.isRepossessedToGovt = filtersToUse.isRepossessedToGovt;
+      const params = buildCaseParams(targetPage, filtersToUse, targetLimit);
+      const data = await api.getCases(params, { forceRefresh });
+      if (seq !== requestSeqRef.current) return;
 
-      const data = await api.getCases(params);
       setCases(data.cases || []);
       setTotalCount(data.pagination?.total || 0);
-      setTotalPages(data.pagination?.totalPages || 1);
+      const nextTotalPages = data.pagination?.totalPages || 1;
+      setTotalPages(nextTotalPages);
+
+      if (targetLimit !== 'all' && targetPage < nextTotalPages) {
+        api.prefetchCases(buildCaseParams(targetPage + 1, filtersToUse, targetLimit));
+      }
 
       if (data.stats) {
         setStats(data.stats);
@@ -222,11 +236,32 @@ export default function CasesPage() {
         }));
       }
     } catch (err) {
-      console.error('Failed to load cases:', err);
+      if (seq === requestSeqRef.current) {
+        console.error('Failed to load cases:', err);
+      }
     } finally {
-      setLoading(false);
+      if (seq === requestSeqRef.current) {
+        setLoading(false);
+      }
     }
   };
+
+  useEffect(() => {
+    if (!isFilterPending) return;
+    const timer = setTimeout(() => {
+      api.prefetchCases(
+        buildCaseParams(1, {
+          search: draftSearch.trim(),
+          taluka: draftTaluka,
+          village: draftVillage,
+          violationType: draftViolationType,
+          status: draftStatus,
+          isRepossessedToGovt: draftIsRepossessedToGovt,
+        }, limit)
+      );
+    }, 120);
+    return () => clearTimeout(timer);
+  }, [draftTaluka, draftVillage, draftViolationType, draftStatus, draftIsRepossessedToGovt, draftSearch, limit, isFilterPending]);
 
   const handleApplyFilters = () => {
     const nextFilters = {
@@ -410,7 +445,7 @@ export default function CasesPage() {
 
           <button
             type="button"
-            onClick={() => fetchCases(page)}
+            onClick={() => fetchCases(page, appliedFilters, limit, true)}
             disabled={loading}
             className="p-1.5 rounded-lg bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 border border-slate-300 text-xs transition-all active:scale-95 shadow-2xs cursor-pointer"
             title={isMarathi ? 'प्रकरणे रीफ्रेश करा' : 'Refresh cases'}
@@ -739,7 +774,6 @@ export default function CasesPage() {
             <button
               type="button"
               onClick={handleApplyFilters}
-              disabled={loading}
               className={clsx(
                 'h-11 px-5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all active:scale-95 shrink-0 shadow-xs cursor-pointer select-none flex-1 sm:flex-initial xl:w-auto whitespace-nowrap',
                 isFilterPending
@@ -759,7 +793,6 @@ export default function CasesPage() {
             <button
               type="button"
               onClick={handleResetFilters}
-              disabled={loading}
               className="h-11 px-4 text-slate-800 hover:text-rose-700 bg-slate-100 hover:bg-rose-50 rounded-xl border border-slate-300 hover:border-rose-300 transition-all active:scale-95 shrink-0 cursor-pointer flex items-center justify-center gap-2 text-sm font-bold flex-1 sm:flex-initial xl:w-auto shadow-2xs whitespace-nowrap"
               title={isMarathi ? 'सर्व फिल्टर्स रीसेट करा' : 'Reset all filters'}
               aria-label={isMarathi ? 'सर्व फिल्टर्स रीसेट करा' : 'Reset all filters'}
@@ -807,7 +840,7 @@ export default function CasesPage() {
         </div>
 
         {/* Table Content */}
-        {loading ? (
+        {loading && cases.length === 0 ? (
           <div className="py-24 text-center">
             <div className="w-8 h-8 border-2 border-indigo-100 border-t-indigo-600 rounded-full animate-spin mx-auto mb-2.5" />
             <p className="text-xs font-bold text-slate-600">

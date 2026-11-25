@@ -340,13 +340,35 @@ const refreshSummaryCache = (taluka, cacheKey) => {
 };
 
 /**
- * Pre-warm the district-wide analytics summary cache on server startup
+ * Pre-warm the district-wide and all 15 taluka analytics caches on server startup
  */
+const CHANDRAPUR_TALUKA_NAMES = [
+  'Ballarpur', 'Bhadravati', 'Brahmapuri', 'Chandrapur', 'Chimur',
+  'Gondpipri', 'Jivati', 'Korpana', 'Mul', 'Nagbhid',
+  'Pombhurna', 'Rajura', 'Saoli', 'Sindewahi', 'Warora',
+];
+
 export const warmAnalyticsCache = async () => {
   try {
     const t0 = Date.now();
     await refreshSummaryCache(null, '__ALL__');
     logger.success(`Analytics summary cache warmed in ${Date.now() - t0}ms`, 'ANALYTICS');
+
+    // Warm individual taluka summaries gently in background (1 at a time)
+    // so every taluka filter click on the Dashboard responds in <2ms.
+    (async () => {
+      for (const talukaName of CHANDRAPUR_TALUKA_NAMES) {
+        const key = talukaName.toLowerCase();
+        if (!summaryCache.has(key)) {
+          try {
+            await refreshSummaryCache(talukaName, key);
+          } catch {
+            // Non-fatal background warmup error
+          }
+        }
+      }
+      logger.debug('All 15 taluka analytics summaries pre-warmed', 'ANALYTICS');
+    })();
   } catch (err) {
     logger.warn(`Analytics cache warmup skipped: ${err.message}`, 'ANALYTICS');
   }

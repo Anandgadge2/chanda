@@ -158,15 +158,67 @@ export function getBookletCategory(id) {
 /**
  * Detailed 7/12 Table Columns Schema for each booklet
  */
+const getPointVal = (p, num) => {
+  const v = p?.points?.[num] ?? p?.points?.[String(num)] ?? p?.auditPoints?.[`point_${num}`] ?? p?.metadata?.auditPoints?.[`point_${num}`];
+  return v !== undefined && v !== null ? String(v).trim() : '';
+};
+
+const isAffirmativeVal = (val) => {
+  const s = String(val || '').trim();
+  return s === 'होय' || s === 'आहे' || s === 'Yes' || s.startsWith('होय') || s.startsWith('आहे');
+};
+
+const isDifferentFromNo = (val) => {
+  const s = String(val || '').trim();
+  return Boolean(s && s !== 'नाही' && s !== 'No' && s !== '-' && s !== '....');
+};
+
+const getOtherRightsStr = (p) => {
+  const raw = p?.otherRights ?? p?.metadata?.otherRights ?? p?.remarks ?? '';
+  const s = String(raw || '').trim();
+  return (s && s !== '-' && s !== '....') ? s : '';
+};
+
 export function getDetailedColumnsForBooklet(catId, isMarathi = true) {
   const num = parseInt(catId, 10);
 
-  const getShartbhang = (p) => p.auditPoints?.point_37 === 'होय' || p.metadata?.auditPoints?.point_37 === 'होय' || p.metadata?.flags?.isShartbhang || (p.forwardCases?.some(fc => fc.violationType === 'SHARTBHANG'));
-  const getIllegalConv = (p) => p.auditPoints?.point_36 === 'होय' || p.metadata?.auditPoints?.point_36 === 'होय' || p.metadata?.flags?.isIllegalConversion || (p.tenureClass === 'BHOGVATDAR_CLASS_1' && p.metadata?.flags?.isShartbhang);
-  const getOtherRights = (p) => p.auditPoints?.point_40 === 'होय' || p.metadata?.auditPoints?.point_40 === 'होय' || (p.metadata?.otherRights && p.metadata.otherRights !== '-' && p.metadata.otherRights !== '....');
-  const getIllegalDel = (p) => p.auditPoints?.point_41 === 'होय' || p.metadata?.auditPoints?.point_41 === 'होय' || p.metadata?.flags?.isIllegalDeletion || (p.forwardCases?.some(fc => fc.violationType === 'GOVERNMENT_NAME_MISSING'));
-  const getTribalToTribal = (p) => p.auditPoints?.point_38 === 'होय' || p.metadata?.auditPoints?.point_38 === 'होय' || p.metadata?.tribalToTribal || (p.metadata?.flags?.isTribal && p.metadata?.otherRights?.includes('हस्तांतरण'));
-  const getTribalToNonTribal = (p) => p.auditPoints?.point_39 === 'होय' || p.metadata?.auditPoints?.point_39 === 'होय' || p.metadata?.tribalToNonTribalIllegal || (p.metadata?.flags?.isTribal && (p.forwardCases?.some(fc => fc.violationType === 'TRIBAL_LAND_VIOLATION') || p.metadata?.otherRights?.includes('गैर-आदिवासी')));
+  const getShartbhang = (p) =>
+    isAffirmativeVal(getPointVal(p, 37)) ||
+    p?.metadata?.flags?.isShartbhang ||
+    String(p?.statusFinding || '').includes('शर्तभंग') ||
+    Boolean(p?.forwardCases?.some(fc => fc.violationType === 'SHARTBHANG'));
+
+  const getIllegalConv = (p) =>
+    isAffirmativeVal(getPointVal(p, 36)) ||
+    p?.metadata?.flags?.isIllegalConversion ||
+    String(p?.statusFinding || '').includes('रूपांतर') ||
+    (p?.tenureClass === 'BHOGVATDAR_CLASS_1' && p?.metadata?.flags?.isShartbhang);
+
+  const getOtherRights = (p) => {
+    const pt40 = getPointVal(p, 40);
+    if (pt40 === 'ईतर अधिकारात नोंद नाही') return false;
+    return isAffirmativeVal(pt40) || Boolean(getOtherRightsStr(p));
+  };
+
+  const getIllegalDel = (p) =>
+    isAffirmativeVal(getPointVal(p, 41)) ||
+    p?.metadata?.flags?.isIllegalDeletion ||
+    String(p?.statusFinding || '').includes('वगळ') ||
+    String(p?.statusFinding || '').includes('कमी') ||
+    Boolean(p?.forwardCases?.some(fc => fc.violationType === 'GOVERNMENT_NAME_MISSING'));
+
+  const getTribalToTribal = (p) =>
+    isAffirmativeVal(getPointVal(p, 38)) ||
+    Boolean(p?.metadata?.tribalToTribal) ||
+    Boolean(p?.metadata?.flags?.isTribal && getOtherRightsStr(p).includes('हस्तांतरण'));
+
+  const getTribalToNonTribal = (p) =>
+    isAffirmativeVal(getPointVal(p, 39)) ||
+    Boolean(p?.metadata?.tribalToNonTribalIllegal) ||
+    Boolean(p?.forwardCases?.some(fc => fc.violationType === 'TRIBAL_LAND_VIOLATION')) ||
+    getOtherRightsStr(p).includes('गैर-आदिवासी');
+
+  const isAlertYes = (val) => isAffirmativeVal(val);
 
   if (num === 1) {
     // 1) सरकारी जमीन
@@ -176,11 +228,69 @@ export function getDetailedColumnsForBooklet(catId, isMarathi = true) {
       { key: 'area', label: isMarathi ? 'क्षेत्र (हे.आर.)' : 'Area (Ha)', minW: 'w-24', align: 'right', isArea: true, getValue: p => Number(p.totalAreaHa || 0).toFixed(4) },
       { key: 'tenureType', label: isMarathi ? 'भूधारणा पद्धती' : 'Tenure Type', minW: 'w-28', align: 'center', getValue: p => p.tenureDisplay || (p.tenureClass === 'SARKAR_SHASAN' ? 'सरकार' : 'भोगवटदार') },
       { key: 'owner', label: isMarathi ? 'भोगवटदाराचे नाव' : 'Occupant Name', minW: 'min-w-[180px]', align: 'left', isOwner: true, getValue: p => p.currentOwner || p.metadata?.ownerName || (isMarathi ? 'महाराष्ट्र शासन' : 'Govt of Maharashtra') },
-      { key: 'landQuality', label: isMarathi ? 'जमिनीचा दर्जा' : 'Land Quality', minW: 'w-28', align: 'center', getValue: p => p.auditPoints?.point_11 || p.metadata?.auditPoints?.point_11 || (p.tenureClass === 'SARKAR_SHASAN' ? (isMarathi ? 'शासकीय जमीन' : 'Govt Land') : (isMarathi ? 'खाजगी' : 'Private')) },
-      { key: 'isForest', label: isMarathi ? 'वन/झुडपी जमीन' : 'Forest / Scrub', minW: 'w-28', align: 'center', isBadge: true, getValue: p => (p.auditPoints?.point_13 === 'आहे' || p.metadata?.auditPoints?.point_13 === 'आहे' || p.tenureClass === 'FOREST_JANGAL' || p.metadata?.otherRights?.includes('वन')) ? 'आहे' : 'नाही' },
-      { key: 'isEncroached', label: isMarathi ? 'अतिक्रमण आहे काय?' : 'Encroached?', minW: 'w-28', align: 'center', isBadge: true, isAlertVal: val => val === 'आहे' || val === 'होय', getValue: p => (p.auditPoints?.point_15 === 'आहे' || p.metadata?.auditPoints?.point_15 === 'आहे' || p.metadata?.flags?.isEncroached) ? 'आहे' : 'नाही' },
-      { key: 'isAllotted', label: isMarathi ? 'वाटप झालेली आहे काय?' : 'Allotted?', minW: 'w-28', align: 'center', isBadge: true, getValue: p => (p.auditPoints?.point_14 === 'होय' || p.metadata?.auditPoints?.point_14 === 'होय' || p.metadata?.flags?.isCorpAllot || p.metadata?.flags?.isPrivateAllot) ? 'होय' : 'नाही' },
-      { key: 'isGovtDeleted', label: isMarathi ? 'अवैधरित्या सरकार किंवा शासन नोंद कमी केली आहे काय?' : 'Govt Name Illegally Deleted?', minW: 'min-w-[180px]', align: 'center', isBadge: true, isAlertVal: val => val === 'होय', getValue: p => (p.auditPoints?.point_18 === 'होय' || p.metadata?.auditPoints?.point_18 === 'होय' || p.metadata?.flags?.isIllegalDeletion) ? 'होय' : 'नाही' }
+      {
+        key: 'landQuality',
+        label: isMarathi ? 'जमिनीचा दर्जा' : 'Land Quality',
+        minW: 'w-32',
+        align: 'center',
+        getValue: p => {
+          const pt11 = getPointVal(p, 11);
+          if (isDifferentFromNo(pt11)) return pt11;
+          return p.tenureClass === 'SARKAR_SHASAN' ? (isMarathi ? 'शासकीय जमीन' : 'Govt Land') : (isMarathi ? 'खाजगी' : 'Private');
+        }
+      },
+      {
+        key: 'isForest',
+        label: isMarathi ? 'वन/झुडपी जमीन' : 'Forest / Scrub',
+        minW: 'w-28',
+        align: 'center',
+        isBadge: true,
+        getValue: p => {
+          const pt13 = getPointVal(p, 13);
+          if (isDifferentFromNo(pt13)) return pt13;
+          const or = getOtherRightsStr(p);
+          const owner = String(p.currentOwner || '');
+          return (p.tenureClass === 'FOREST_JANGAL' || or.includes('वन') || or.includes('जंगल') || owner.includes('वनविभाग') || owner.includes('वन विभाग')) ? 'आहे' : 'नाही';
+        }
+      },
+      {
+        key: 'isEncroached',
+        label: isMarathi ? 'अतिक्रमण आहे काय?' : 'Encroached?',
+        minW: 'w-28',
+        align: 'center',
+        isBadge: true,
+        isAlertVal: isAlertYes,
+        getValue: p => {
+          const pt15 = getPointVal(p, 15);
+          if (isDifferentFromNo(pt15)) return pt15;
+          return (p.metadata?.flags?.isEncroached || String(p.statusFinding || '').includes('अतिक्रमण')) ? 'आहे' : 'नाही';
+        }
+      },
+      {
+        key: 'isAllotted',
+        label: isMarathi ? 'वाटप झालेली आहे काय?' : 'Allotted?',
+        minW: 'w-28',
+        align: 'center',
+        isBadge: true,
+        getValue: p => {
+          const pt14 = getPointVal(p, 14);
+          if (isDifferentFromNo(pt14)) return pt14;
+          return (p.metadata?.flags?.isCorpAllot || p.metadata?.flags?.isPrivateAllot || String(p.statusFinding || '').includes('वाटप')) ? 'होय' : 'नाही';
+        }
+      },
+      {
+        key: 'isGovtDeleted',
+        label: isMarathi ? 'अवैधरित्या सरकार किंवा शासन नोंद कमी केली आहे काय?' : 'Govt Name Illegally Deleted?',
+        minW: 'min-w-[180px]',
+        align: 'center',
+        isBadge: true,
+        isAlertVal: isAlertYes,
+        getValue: p => {
+          const pt18 = getPointVal(p, 18);
+          if (isDifferentFromNo(pt18)) return pt18;
+          return getIllegalDel(p) ? 'होय' : 'नाही';
+        }
+      }
     ];
   }
 
@@ -192,10 +302,10 @@ export function getDetailedColumnsForBooklet(catId, isMarathi = true) {
       { key: 'area', label: isMarathi ? 'क्षेत्र' : 'Area (Ha)', minW: 'w-24', align: 'right', isArea: true, getValue: p => Number(p.totalAreaHa || 0).toFixed(4) },
       { key: 'owner', label: isMarathi ? 'भोगवटदाराचे नाव' : 'Occupant Name', minW: 'min-w-[180px]', align: 'left', isOwner: true, getValue: p => p.currentOwner || p.metadata?.ownerName || '-' },
       { key: 'tenureClass', label: isMarathi ? 'भोगवट्दार वर्ग' : 'Occupant Class', minW: 'w-24', align: 'center', isTenureBadge: true, getValue: p => p.tenureDisplay || (p.tenureClass === 'BHOGVATDAR_CLASS_1' ? 'वर्ग १' : 'वर्ग २') },
-      { key: 'authorityName', label: isMarathi ? 'प्राधिकरणाचे नाव' : 'Authority Name', minW: 'min-w-[160px]', align: 'left', getValue: p => p.metadata?.authorityName || (p.metadata?.otherRights?.includes('मनपा') ? 'महानगरपालिका' : (p.metadata?.otherRights?.includes('ग्रामपंचायत') ? 'ग्रामपंचायत' : (p.metadata?.otherRights?.includes('प्राधिकरण') ? 'नियोजन प्राधिकरण' : 'स्थानिक संस्था'))) },
-      { key: 'purpose', label: isMarathi ? 'प्रयोजन' : 'Reservation Purpose', minW: 'min-w-[150px]', align: 'left', getValue: p => p.metadata?.reservationPurpose || (p.metadata?.otherRights?.includes('गुरचरण') ? 'गुरचरण' : (p.metadata?.otherRights?.includes('चराई') ? 'चराई' : 'सार्वजनिक आरक्षण')) },
+      { key: 'authorityName', label: isMarathi ? 'प्राधिकरणाचे नाव' : 'Authority Name', minW: 'min-w-[160px]', align: 'left', getValue: p => p.metadata?.authorityName || (getOtherRightsStr(p).includes('मनपा') ? 'महानगरपालिका' : (getOtherRightsStr(p).includes('ग्रामपंचायत') ? 'ग्रामपंचायत' : (getOtherRightsStr(p).includes('प्राधिकरण') ? 'नियोजन प्राधिकरण' : 'स्थानिक संस्था'))) },
+      { key: 'purpose', label: isMarathi ? 'प्रयोजन' : 'Reservation Purpose', minW: 'min-w-[150px]', align: 'left', getValue: p => p.metadata?.reservationPurpose || (getOtherRightsStr(p).includes('गुरचरण') ? 'गुरचरण' : (getOtherRightsStr(p).includes('चराई') ? 'चराई' : 'सार्वजनिक आरक्षण')) },
       { key: 'otherRightsNoted', label: isMarathi ? 'इतर अधिकारात नोंद घेतलेली आहे काय?' : 'Other Rights Noted?', minW: 'w-32', align: 'center', isBadge: true, getValue: p => getOtherRights(p) ? 'होय' : 'नाही' },
-      { key: 'illegalDel', label: isMarathi ? 'अवैधरित्या इतर अधिकारातील नोंदी कमी केलेल्या आहे काय?' : 'Other Rights Illegally Deleted?', minW: 'min-w-[160px]', align: 'center', isBadge: true, isAlertVal: val => val === 'होय', getValue: p => getIllegalDel(p) ? 'होय' : 'नाही' }
+      { key: 'illegalDel', label: isMarathi ? 'अवैधरित्या इतर अधिकारातील नोंदी कमी केलेल्या आहे काय?' : 'Other Rights Illegally Deleted?', minW: 'min-w-[160px]', align: 'center', isBadge: true, isAlertVal: isAlertYes, getValue: p => { const v = getPointVal(p, 41); return isDifferentFromNo(v) ? v : (getIllegalDel(p) ? 'होय' : 'नाही'); } }
     ];
   }
 
@@ -207,11 +317,11 @@ export function getDetailedColumnsForBooklet(catId, isMarathi = true) {
       { key: 'area', label: isMarathi ? 'क्षेत्र' : 'Area (Ha)', minW: 'w-24', align: 'right', isArea: true, getValue: p => Number(p.totalAreaHa || 0).toFixed(4) },
       { key: 'owner', label: isMarathi ? 'भोगवटदाराचे नाव' : 'Occupant Name', minW: 'min-w-[180px]', align: 'left', isOwner: true, getValue: p => p.currentOwner || p.metadata?.ownerName || '-' },
       { key: 'tenureClass', label: isMarathi ? 'भोगवट्दार वर्ग' : 'Occupant Class', minW: 'w-24', align: 'center', isTenureBadge: true, getValue: p => p.tenureDisplay || (p.tenureClass === 'BHOGVATDAR_CLASS_1' ? 'वर्ग १' : 'वर्ग २') },
-      { key: 'illegalConv', label: isMarathi ? 'अवैधरित्या वर्ग 2 मधून वर्ग 1 मध्ये रूपांतरण केलेले आहे काय?' : 'Illegal Class 2 to 1?', minW: 'min-w-[180px]', align: 'center', isBadge: true, isAlertVal: val => val === 'होय', getValue: p => getIllegalConv(p) ? 'होय' : 'नाही' },
+      { key: 'illegalConv', label: isMarathi ? 'अवैधरित्या वर्ग 2 मधून वर्ग 1 मध्ये रूपांतरण केलेले आहे काय?' : 'Illegal Class 2 to 1?', minW: 'min-w-[180px]', align: 'center', isBadge: true, isAlertVal: isAlertYes, getValue: p => { const v = getPointVal(p, 36); return isDifferentFromNo(v) ? v : (getIllegalConv(p) ? 'होय' : 'नाही'); } },
       { key: 'otherRightsNoted', label: isMarathi ? 'इतर अधिकारात नोंद घेतलेली आहे काय?' : 'Other Rights Noted?', minW: 'w-32', align: 'center', isBadge: true, getValue: p => getOtherRights(p) ? 'होय' : 'नाही' },
-      { key: 'illegalDel', label: isMarathi ? 'अवैधरित्या इतर अधिकारातील नोंदी कमी केलेल्या आहे काय?' : 'Other Rights Illegally Deleted?', minW: 'min-w-[160px]', align: 'center', isBadge: true, isAlertVal: val => val === 'होय', getValue: p => getIllegalDel(p) ? 'होय' : 'नाही' },
-      { key: 'tribalToTribal', label: isMarathi ? 'अवैधरित्या आदिवासी ते आदिवासी हस्तांतरण झालेले आहे काय?' : 'Illegal Tribal to Tribal?', minW: 'min-w-[180px]', align: 'center', isBadge: true, isAlertVal: val => val === 'होय', getValue: p => getTribalToTribal(p) ? 'होय' : 'नाही' },
-      { key: 'tribalToNonTribal', label: isMarathi ? 'अवैधरित्या आदिवासी ते गैर-आदिवासी हस्तांतरण झालेले आहे काय?' : 'Illegal Tribal to Non-Tribal Transfer?', minW: 'min-w-[180px]', align: 'center', isBadge: true, isAlertVal: val => val === 'होय', getValue: p => getTribalToNonTribal(p) ? 'होय' : 'नाही' }
+      { key: 'illegalDel', label: isMarathi ? 'अवैधरित्या इतर अधिकारातील नोंदी कमी केलेल्या आहे काय?' : 'Other Rights Illegally Deleted?', minW: 'min-w-[160px]', align: 'center', isBadge: true, isAlertVal: isAlertYes, getValue: p => { const v = getPointVal(p, 41); return isDifferentFromNo(v) ? v : (getIllegalDel(p) ? 'होय' : 'नाही'); } },
+      { key: 'tribalToTribal', label: isMarathi ? 'अवैधरित्या आदिवासी ते आदिवासी हस्तांतरण झालेले आहे काय?' : 'Illegal Tribal to Tribal?', minW: 'min-w-[180px]', align: 'center', isBadge: true, isAlertVal: isAlertYes, getValue: p => { const v = getPointVal(p, 38); return isDifferentFromNo(v) ? v : (getTribalToTribal(p) ? 'होय' : 'नाही'); } },
+      { key: 'tribalToNonTribal', label: isMarathi ? 'अवैधरित्या आदिवासी ते गैर-आदिवासी हस्तांतरण झालेले आहे काय?' : 'Illegal Tribal to Non-Tribal Transfer?', minW: 'min-w-[180px]', align: 'center', isBadge: true, isAlertVal: isAlertYes, getValue: p => { const v = getPointVal(p, 39); return isDifferentFromNo(v) ? v : (getTribalToNonTribal(p) ? 'होय' : 'नाही'); } }
     ];
   }
 
@@ -223,9 +333,9 @@ export function getDetailedColumnsForBooklet(catId, isMarathi = true) {
       { key: 'area', label: isMarathi ? 'क्षेत्र' : 'Area (Ha)', minW: 'w-24', align: 'right', isArea: true, getValue: p => Number(p.totalAreaHa || 0).toFixed(4) },
       { key: 'owner', label: isMarathi ? 'भोगवटदाराचे नाव' : 'Occupant Name', minW: 'min-w-[180px]', align: 'left', isOwner: true, getValue: p => p.currentOwner || p.metadata?.ownerName || '-' },
       { key: 'tenureClass', label: isMarathi ? 'भोगवट्दार वर्ग' : 'Occupant Class', minW: 'w-24', align: 'center', isTenureBadge: true, getValue: p => p.tenureDisplay || (p.tenureClass === 'BHOGVATDAR_CLASS_1' ? 'वर्ग १' : 'वर्ग २') },
-      { key: 'illegalConv', label: isMarathi ? 'अवैधरित्या वर्ग 2 मधून वर्ग 1 मध्ये रूपांतरण केलेले आहे काय?' : 'Illegal Class 2 to 1?', minW: 'min-w-[180px]', align: 'center', isBadge: true, isAlertVal: val => val === 'होय', getValue: p => getIllegalConv(p) ? 'होय' : 'नाही' },
+      { key: 'illegalConv', label: isMarathi ? 'अवैधरित्या वर्ग 2 मधून वर्ग 1 मध्ये रूपांतरण केलेले आहे काय?' : 'Illegal Class 2 to 1?', minW: 'min-w-[180px]', align: 'center', isBadge: true, isAlertVal: isAlertYes, getValue: p => { const v = getPointVal(p, 36); return isDifferentFromNo(v) ? v : (getIllegalConv(p) ? 'होय' : 'नाही'); } },
       { key: 'otherRightsNoted', label: isMarathi ? 'इतर अधिकारात नोंद घेतलेली आहे काय?' : 'Other Rights Noted?', minW: 'w-32', align: 'center', isBadge: true, getValue: p => getOtherRights(p) ? 'होय' : 'नाही' },
-      { key: 'illegalDel', label: isMarathi ? 'अवैधरित्या इतर अधिकारातील नोंदी कमी केलेल्या आहे काय?' : 'Other Rights Illegally Deleted?', minW: 'min-w-[160px]', align: 'center', isBadge: true, isAlertVal: val => val === 'होय', getValue: p => getIllegalDel(p) ? 'होय' : 'नाही' }
+      { key: 'illegalDel', label: isMarathi ? 'अवैधरित्या इतर अधिकारातील नोंदी कमी केलेल्या आहे काय?' : 'Other Rights Illegally Deleted?', minW: 'min-w-[160px]', align: 'center', isBadge: true, isAlertVal: isAlertYes, getValue: p => { const v = getPointVal(p, 41); return isDifferentFromNo(v) ? v : (getIllegalDel(p) ? 'होय' : 'नाही'); } }
     ];
   }
 
@@ -237,10 +347,10 @@ export function getDetailedColumnsForBooklet(catId, isMarathi = true) {
       { key: 'area', label: isMarathi ? 'क्षेत्र' : 'Area (Ha)', minW: 'w-24', align: 'right', isArea: true, getValue: p => Number(p.totalAreaHa || 0).toFixed(4) },
       { key: 'owner', label: isMarathi ? 'भोगवटदाराचे नाव' : 'Occupant Name', minW: 'min-w-[180px]', align: 'left', isOwner: true, getValue: p => p.currentOwner || p.metadata?.ownerName || '-' },
       { key: 'tenureClass', label: isMarathi ? 'भोगवट्दार वर्ग' : 'Occupant Class', minW: 'w-24', align: 'center', isTenureBadge: true, getValue: p => p.tenureDisplay || (p.tenureClass === 'BHOGVATDAR_CLASS_1' ? 'वर्ग १' : 'वर्ग २') },
-      { key: 'illegalConv', label: isMarathi ? 'अवैधरित्या वर्ग 2 मधून वर्ग 1 मध्ये रूपांतरण केलेले आहे काय?' : 'Illegal Class 2 to 1?', minW: 'min-w-[180px]', align: 'center', isBadge: true, isAlertVal: val => val === 'होय', getValue: p => getIllegalConv(p) ? 'होय' : 'नाही' },
+      { key: 'illegalConv', label: isMarathi ? 'अवैधरित्या वर्ग 2 मधून वर्ग 1 मध्ये रूपांतरण केलेले आहे काय?' : 'Illegal Class 2 to 1?', minW: 'min-w-[180px]', align: 'center', isBadge: true, isAlertVal: isAlertYes, getValue: p => { const v = getPointVal(p, 36); return isDifferentFromNo(v) ? v : (getIllegalConv(p) ? 'होय' : 'नाही'); } },
       { key: 'otherRightsNoted', label: isMarathi ? 'इतर अधिकारात नोंद घेतलेली आहे काय?' : 'Other Rights Noted?', minW: 'w-32', align: 'center', isBadge: true, getValue: p => getOtherRights(p) ? 'होय' : 'नाही' },
-      { key: 'illegalDel', label: isMarathi ? 'अवैधरित्या इतर अधिकारातील नोंदी कमी केलेल्या आहे काय?' : 'Other Rights Illegally Deleted?', minW: 'min-w-[160px]', align: 'center', isBadge: true, isAlertVal: val => val === 'होय', getValue: p => getIllegalDel(p) ? 'होय' : 'नाही' },
-      { key: 'illegalTransfer', label: isMarathi ? 'अवैधरित्या हस्तांतरण झालेले आहे काय?' : 'Illegal Transfer Occurred?', minW: 'min-w-[150px]', align: 'center', isBadge: true, isAlertVal: val => val === 'होय', getValue: p => (p.metadata?.flags?.isUnauthorizedTransfer || p.metadata?.otherRights?.includes('हस्तांतरण') || p.bhudanRecords?.some(br => br.unauthorizedAlienation)) ? 'होय' : 'नाही' }
+      { key: 'illegalDel', label: isMarathi ? 'अवैधरित्या इतर अधिकारातील नोंदी कमी केलेल्या आहे काय?' : 'Other Rights Illegally Deleted?', minW: 'min-w-[160px]', align: 'center', isBadge: true, isAlertVal: isAlertYes, getValue: p => { const v = getPointVal(p, 41); return isDifferentFromNo(v) ? v : (getIllegalDel(p) ? 'होय' : 'नाही'); } },
+      { key: 'illegalTransfer', label: isMarathi ? 'अवैधरित्या हस्तांतरण झालेले आहे काय?' : 'Illegal Transfer Occurred?', minW: 'min-w-[150px]', align: 'center', isBadge: true, isAlertVal: isAlertYes, getValue: p => (p.metadata?.flags?.isUnauthorizedTransfer || getOtherRightsStr(p).includes('हस्तांतरण') || p.bhudanRecords?.some(br => br.unauthorizedAlienation)) ? 'होय' : 'नाही' }
     ];
   }
 
@@ -253,7 +363,7 @@ export function getDetailedColumnsForBooklet(catId, isMarathi = true) {
       { key: 'owner', label: isMarathi ? 'भोगवटदाराचे नाव' : 'Occupant Name', minW: 'min-w-[180px]', align: 'left', isOwner: true, getValue: p => p.currentOwner || p.metadata?.ownerName || '-' },
       { key: 'tenureClass', label: isMarathi ? 'भोगवट्दार वर्ग' : 'Occupant Class', minW: 'w-24', align: 'center', isTenureBadge: true, getValue: p => p.tenureDisplay || (p.tenureClass === 'BHOGVATDAR_CLASS_1' ? 'वर्ग १' : 'वर्ग २') },
       { key: 'otherRightsNoted', label: isMarathi ? 'इतर अधिकारात नोंद घेतलेली आहे काय?' : 'Other Rights Noted?', minW: 'w-32', align: 'center', isBadge: true, getValue: p => getOtherRights(p) ? 'होय' : 'नाही' },
-      { key: 'illegalDel', label: isMarathi ? 'अवैधरित्या इतर अधिकारातील नोंदी कमी केलेल्या आहे काय?' : 'Other Rights Illegally Deleted?', minW: 'min-w-[160px]', align: 'center', isBadge: true, isAlertVal: val => val === 'होय', getValue: p => getIllegalDel(p) ? 'होय' : 'नाही' }
+      { key: 'illegalDel', label: isMarathi ? 'अवैधरित्या इतर अधिकारातील नोंदी कमी केलेल्या आहे काय?' : 'Other Rights Illegally Deleted?', minW: 'min-w-[160px]', align: 'center', isBadge: true, isAlertVal: isAlertYes, getValue: p => { const v = getPointVal(p, 41); return isDifferentFromNo(v) ? v : (getIllegalDel(p) ? 'होय' : 'नाही'); } }
     ];
   }
 
@@ -265,10 +375,10 @@ export function getDetailedColumnsForBooklet(catId, isMarathi = true) {
       { key: 'area', label: isMarathi ? 'क्षेत्र' : 'Area (Ha)', minW: 'w-24', align: 'right', isArea: true, getValue: p => Number(p.totalAreaHa || 0).toFixed(4) },
       { key: 'owner', label: isMarathi ? 'भोगवटदाराचे नाव' : 'Occupant Name', minW: 'min-w-[180px]', align: 'left', isOwner: true, getValue: p => p.currentOwner || p.metadata?.ownerName || '-' },
       { key: 'tenureClass', label: isMarathi ? 'भोगवट्दार वर्ग' : 'Occupant Class', minW: 'w-24', align: 'center', isTenureBadge: true, getValue: p => p.tenureDisplay || (p.tenureClass === 'BHOGVATDAR_CLASS_1' ? 'वर्ग १' : 'वर्ग २') },
-      { key: 'illegalConv', label: isMarathi ? 'अवैधरित्या वर्ग 2 मधून वर्ग 1 मध्ये रूपांतरण केलेले आहे काय?' : 'Illegal Class 2 to 1?', minW: 'min-w-[180px]', align: 'center', isBadge: true, isAlertVal: val => val === 'होय', getValue: p => getIllegalConv(p) ? 'होय' : 'नाही' },
+      { key: 'illegalConv', label: isMarathi ? 'अवैधरित्या वर्ग 2 मधून वर्ग 1 मध्ये रूपांतरण केलेले आहे काय?' : 'Illegal Class 2 to 1?', minW: 'min-w-[180px]', align: 'center', isBadge: true, isAlertVal: isAlertYes, getValue: p => { const v = getPointVal(p, 36); return isDifferentFromNo(v) ? v : (getIllegalConv(p) ? 'होय' : 'नाही'); } },
       { key: 'otherRightsNoted', label: isMarathi ? 'इतर अधिकारात नोंद घेतलेली आहे काय?' : 'Other Rights Noted?', minW: 'w-32', align: 'center', isBadge: true, getValue: p => getOtherRights(p) ? 'होय' : 'नाही' },
-      { key: 'illegalDel', label: isMarathi ? 'अवैधरित्या इतर अधिकारातील नोंदी कमी केलेल्या आहे काय?' : 'Other Rights Illegally Deleted?', minW: 'min-w-[160px]', align: 'center', isBadge: true, isAlertVal: val => val === 'होय', getValue: p => getIllegalDel(p) ? 'होय' : 'नाही' },
-      { key: 'shartbhang', label: isMarathi ? 'शर्तभंग झालेला आहे काय?' : 'Condition Breach Occurred?', minW: 'w-32', align: 'center', isBadge: true, isAlertVal: val => val === 'होय', getValue: p => getShartbhang(p) ? 'होय' : 'नाही' }
+      { key: 'illegalDel', label: isMarathi ? 'अवैधरित्या इतर अधिकारातील नोंदी कमी केलेल्या आहे काय?' : 'Other Rights Illegally Deleted?', minW: 'min-w-[160px]', align: 'center', isBadge: true, isAlertVal: isAlertYes, getValue: p => { const v = getPointVal(p, 41); return isDifferentFromNo(v) ? v : (getIllegalDel(p) ? 'होय' : 'नाही'); } },
+      { key: 'shartbhang', label: isMarathi ? 'शर्तभंग झालेला आहे काय?' : 'Condition Breach Occurred?', minW: 'w-32', align: 'center', isBadge: true, isAlertVal: isAlertYes, getValue: p => { const v = getPointVal(p, 37); return isDifferentFromNo(v) ? v : (getShartbhang(p) ? 'होय' : 'नाही'); } }
     ];
   }
 
@@ -280,10 +390,10 @@ export function getDetailedColumnsForBooklet(catId, isMarathi = true) {
       { key: 'area', label: isMarathi ? 'क्षेत्र' : 'Area (Ha)', minW: 'w-24', align: 'right', isArea: true, getValue: p => Number(p.totalAreaHa || 0).toFixed(4) },
       { key: 'owner', label: isMarathi ? 'भोगवटदाराचे नाव' : 'Occupant Name', minW: 'min-w-[180px]', align: 'left', isOwner: true, getValue: p => p.currentOwner || p.metadata?.ownerName || '-' },
       { key: 'tenureClass', label: isMarathi ? 'भोगवट्दार वर्ग' : 'Occupant Class', minW: 'w-24', align: 'center', isTenureBadge: true, getValue: p => p.tenureDisplay || (p.tenureClass === 'BHOGVATDAR_CLASS_1' ? 'वर्ग १' : 'वर्ग २') },
-      { key: 'hasPermit', label: isMarathi ? 'कंपनीने धारण करताना परवानगी घेतलेली आहे काय?' : 'Company Permit Taken?', minW: 'min-w-[150px]', align: 'center', isBadge: true, getValue: p => (p.auditPoints?.point_42 === 'होय' || p.auditPoints?.point_41 === 'होय' || p.tenancy89ARecords?.[0]?.isGenuineIndustrialUse || p.metadata?.auditPoints?.point_41 === 'होय') ? 'होय' : 'नाही' },
-      { key: 'usageBreach', label: isMarathi ? 'वापराबाबत शर्तभंग झालेला आहे काय?' : 'Usage Condition Breach?', minW: 'min-w-[150px]', align: 'center', isBadge: true, isAlertVal: val => val === 'होय', getValue: p => (p.metadata?.auditPoints?.point_44 === 'नाही' || p.metadata?.auditPoints?.point_45_usage === 'होय' || (p.forwardCases?.some(fc => fc.violationType === 'UNAUTHORIZED_NA_CONVERSION'))) ? 'होय' : 'नाही' },
-      { key: 'transferBreach', label: isMarathi ? 'हस्तांतरणाबाबत शर्तभंग आहे काय?' : 'Transfer Condition Breach?', minW: 'min-w-[150px]', align: 'center', isBadge: true, isAlertVal: val => val === 'होय', getValue: p => (p.metadata?.auditPoints?.point_45_transfer === 'होय' || p.tenancy89ARecords?.[0]?.unauthorizedTransfer || (p.forwardCases?.some(fc => fc.violationType === 'SHARTBHANG' || fc.violationType === 'TRIBAL_LAND_VIOLATION'))) ? 'होय' : 'नाही' },
-      { key: 'otherRightsNoted', label: isMarathi ? 'इतर अधिकारात नोंद घेतलेली आहे काय?' : 'Other Rights Noted?', minW: 'w-32', align: 'center', isBadge: true, getValue: p => (p.auditPoints?.point_40 === 'होय' || p.auditPoints?.point_39 === 'होय' || (p.metadata?.otherRights && p.metadata?.otherRights !== '-' && p.metadata?.otherRights !== '....')) ? 'होय' : 'नाही' }
+      { key: 'hasPermit', label: isMarathi ? 'कंपनीने धारण करताना परवानगी घेतलेली आहे काय?' : 'Company Permit Taken?', minW: 'min-w-[150px]', align: 'center', isBadge: true, getValue: p => (isAffirmativeVal(getPointVal(p, 42)) || isAffirmativeVal(getPointVal(p, 41)) || p.tenancy89ARecords?.[0]?.isGenuineIndustrialUse) ? 'होय' : 'नाही' },
+      { key: 'usageBreach', label: isMarathi ? 'वापराबाबत शर्तभंग झालेला आहे काय?' : 'Usage Condition Breach?', minW: 'min-w-[150px]', align: 'center', isBadge: true, isAlertVal: isAlertYes, getValue: p => (getPointVal(p, 44) === 'नाही' || isAffirmativeVal(getPointVal(p, 45)) || p.metadata?.auditPoints?.point_45_usage === 'होय' || (p.forwardCases?.some(fc => fc.violationType === 'UNAUTHORIZED_NA_CONVERSION'))) ? 'होय' : 'नाही' },
+      { key: 'transferBreach', label: isMarathi ? 'हस्तांतरणाबाबत शर्तभंग आहे काय?' : 'Transfer Condition Breach?', minW: 'min-w-[150px]', align: 'center', isBadge: true, isAlertVal: isAlertYes, getValue: p => (isAffirmativeVal(getPointVal(p, 45)) || p.metadata?.auditPoints?.point_45_transfer === 'होय' || p.tenancy89ARecords?.[0]?.unauthorizedTransfer || (p.forwardCases?.some(fc => fc.violationType === 'SHARTBHANG' || fc.violationType === 'TRIBAL_LAND_VIOLATION'))) ? 'होय' : 'नाही' },
+      { key: 'otherRightsNoted', label: isMarathi ? 'इतर अधिकारात नोंद घेतलेली आहे काय?' : 'Other Rights Noted?', minW: 'w-32', align: 'center', isBadge: true, getValue: p => getOtherRights(p) ? 'होय' : 'नाही' }
     ];
   }
 
@@ -294,10 +404,10 @@ export function getDetailedColumnsForBooklet(catId, isMarathi = true) {
     { key: 'area', label: isMarathi ? 'क्षेत्र' : 'Area (Ha)', minW: 'w-24', align: 'right', isArea: true, getValue: p => Number(p.totalAreaHa || 0).toFixed(4) },
     { key: 'owner', label: isMarathi ? 'भोगवटदाराचे नाव' : 'Occupant Name', minW: 'min-w-[180px]', align: 'left', isOwner: true, getValue: p => p.currentOwner || p.metadata?.ownerName || '-' },
     { key: 'tenureClass', label: isMarathi ? 'भोगवट्दार वर्ग' : 'Occupant Class', minW: 'w-24', align: 'center', isTenureBadge: true, getValue: p => p.tenureDisplay || (p.tenureClass === 'BHOGVATDAR_CLASS_1' ? 'वर्ग १' : 'वर्ग २') },
-    { key: 'shartbhang', label: isMarathi ? 'शर्तभंग झालेला आहे काय?' : 'Condition Breach Occurred?', minW: 'w-32', align: 'center', isBadge: true, isAlertVal: val => val === 'होय', getValue: p => getShartbhang(p) ? 'होय' : 'नाही' },
-    { key: 'illegalConv', label: isMarathi ? 'अवैधरित्या वर्ग 2 मधून वर्ग 1 मध्ये रूपांतरण केलेले आहे काय?' : 'Illegal Class 2 to 1?', minW: 'min-w-[180px]', align: 'center', isBadge: true, isAlertVal: val => val === 'होय', getValue: p => getIllegalConv(p) ? 'होय' : 'नाही' },
+    { key: 'shartbhang', label: isMarathi ? 'शर्तभंग झालेला आहे काय?' : 'Condition Breach Occurred?', minW: 'w-32', align: 'center', isBadge: true, isAlertVal: isAlertYes, getValue: p => { const v = getPointVal(p, 37); return isDifferentFromNo(v) ? v : (getShartbhang(p) ? 'होय' : 'नाही'); } },
+    { key: 'illegalConv', label: isMarathi ? 'अवैधरित्या वर्ग 2 मधून वर्ग 1 मध्ये रूपांतरण केलेले आहे काय?' : 'Illegal Class 2 to 1?', minW: 'min-w-[180px]', align: 'center', isBadge: true, isAlertVal: isAlertYes, getValue: p => { const v = getPointVal(p, 36); return isDifferentFromNo(v) ? v : (getIllegalConv(p) ? 'होय' : 'नाही'); } },
     { key: 'otherRightsNoted', label: isMarathi ? 'इतर अधिकारात नोंद घेतलेली आहे काय?' : 'Other Rights Noted?', minW: 'w-32', align: 'center', isBadge: true, getValue: p => getOtherRights(p) ? 'होय' : 'नाही' },
-    { key: 'illegalDel', label: isMarathi ? 'अवैधरित्या इतर अधिकारातील नोंदी कमी केलेल्या आहे काय?' : 'Other Rights Illegally Deleted?', minW: 'min-w-[160px]', align: 'center', isBadge: true, isAlertVal: val => val === 'होय', getValue: p => getIllegalDel(p) ? 'होय' : 'नाही' }
+    { key: 'illegalDel', label: isMarathi ? 'अवैधरित्या इतर अधिकारातील नोंदी कमी केलेल्या आहे काय?' : 'Other Rights Illegally Deleted?', minW: 'min-w-[160px]', align: 'center', isBadge: true, isAlertVal: isAlertYes, getValue: p => { const v = getPointVal(p, 41); return isDifferentFromNo(v) ? v : (getIllegalDel(p) ? 'होय' : 'नाही'); } }
   ];
 }
 
@@ -412,12 +522,34 @@ export function getGoshwaraConfigForBooklet(catId, isMarathi = true) {
 export function getBookletKpiSpecs(catId, isMarathi = true) {
   const num = parseInt(catId, 10);
 
-  // Common parcel predicates for client-side filtering
-  const getShartbhang = (p) => p.auditPoints?.point_37 === 'होय' || p.metadata?.auditPoints?.point_37 === 'होय' || p.metadata?.flags?.isShartbhang || (p.forwardCases?.some(fc => fc.violationType === 'SHARTBHANG'));
-  const getIllegalConv = (p) => p.auditPoints?.point_36 === 'होय' || p.metadata?.auditPoints?.point_36 === 'होय' || p.metadata?.flags?.isIllegalConversion || (p.tenureClass === 'BHOGVATDAR_CLASS_1' && p.metadata?.flags?.isShartbhang);
-  const getOtherRightsMissing = (p) => !p.auditPoints?.point_40 || p.auditPoints?.point_40 === 'नाही' || !p.metadata?.otherRights || p.metadata?.otherRights === '-' || p.metadata?.otherRights === '....';
-  const getIllegalDel = (p) => p.auditPoints?.point_41 === 'होय' || p.metadata?.auditPoints?.point_41 === 'होय' || p.metadata?.flags?.isIllegalDeletion || (p.forwardCases?.some(fc => fc.violationType === 'GOVERNMENT_NAME_MISSING'));
-  const isClass2 = (p) => p.tenureClass === 'BHOGVATDAR_CLASS_2' || String(p.tenureDisplay || '').includes('वर्ग-२') || String(p.tenureDisplay || '').includes('वर्ग २');
+  // Common parcel predicates for client-side filtering (works with both p.points and p.auditPoints)
+  const getShartbhang = (p) =>
+    isAffirmativeVal(getPointVal(p, 37)) ||
+    p?.metadata?.flags?.isShartbhang ||
+    String(p?.statusFinding || '').includes('शर्तभंग') ||
+    Boolean(p?.forwardCases?.some(fc => fc.violationType === 'SHARTBHANG'));
+
+  const getIllegalConv = (p) =>
+    isAffirmativeVal(getPointVal(p, 36)) ||
+    p?.metadata?.flags?.isIllegalConversion ||
+    String(p?.statusFinding || '').includes('रूपांतर') ||
+    (p?.tenureClass === 'BHOGVATDAR_CLASS_1' && p?.metadata?.flags?.isShartbhang);
+
+  const getOtherRightsMissing = (p) => {
+    const pt40 = getPointVal(p, 40);
+    if (pt40 === 'ईतर अधिकारात नोंद नाही' || pt40 === 'नाही') return true;
+    if (isAffirmativeVal(pt40)) return false;
+    return !getOtherRightsStr(p);
+  };
+
+  const getIllegalDel = (p) =>
+    isAffirmativeVal(getPointVal(p, 41)) ||
+    p?.metadata?.flags?.isIllegalDeletion ||
+    String(p?.statusFinding || '').includes('वगळ') ||
+    String(p?.statusFinding || '').includes('कमी') ||
+    Boolean(p?.forwardCases?.some(fc => fc.violationType === 'GOVERNMENT_NAME_MISSING'));
+
+  const isClass2 = (p) => p?.tenureClass === 'BHOGVATDAR_CLASS_2' || String(p?.tenureDisplay || '').includes('वर्ग-२') || String(p?.tenureDisplay || '').includes('वर्ग २');
 
   if (num === 1) {
     // 1) सरकारी जमीन (Government Land)
@@ -444,7 +576,7 @@ export function getBookletKpiSpecs(catId, isMarathi = true) {
         icon: 'Trees',
         countKey: 'forestCount',
         areaKey: 'forestArea',
-        filterPredicate: (p) => p.auditPoints?.point_13 === 'आहे' || p.metadata?.auditPoints?.point_13 === 'आहे' || p.tenureClass === 'FOREST_JANGAL' || p.metadata?.otherRights?.includes('वन')
+        filterPredicate: (p) => isAffirmativeVal(getPointVal(p, 13)) || p.tenureClass === 'FOREST_JANGAL' || getOtherRightsStr(p).includes('वन') || String(p.currentOwner || '').includes('वन')
       },
       {
         key: 'encroached',
@@ -457,7 +589,7 @@ export function getBookletKpiSpecs(catId, isMarathi = true) {
         isAlert: true,
         countKey: 'encroachedCount',
         areaKey: 'encroachedArea',
-        filterPredicate: (p) => p.auditPoints?.point_15 === 'आहे' || p.metadata?.auditPoints?.point_15 === 'आहे' || p.metadata?.flags?.isEncroached === true
+        filterPredicate: (p) => isAffirmativeVal(getPointVal(p, 15)) || p.metadata?.flags?.isEncroached === true || String(p.statusFinding || '').includes('अतिक्रमण')
       },
       {
         key: 'allotted',
@@ -469,7 +601,7 @@ export function getBookletKpiSpecs(catId, isMarathi = true) {
         icon: 'CheckCircle2',
         countKey: 'allottedCount',
         areaKey: 'allottedArea',
-        filterPredicate: (p) => p.auditPoints?.point_14 === 'होय' || p.metadata?.auditPoints?.point_14 === 'होय' || p.metadata?.flags?.isCorpAllot || p.metadata?.flags?.isPrivateAllot
+        filterPredicate: (p) => isAffirmativeVal(getPointVal(p, 14)) || p.metadata?.flags?.isCorpAllot || p.metadata?.flags?.isPrivateAllot || String(p.statusFinding || '').includes('वाटप')
       },
       {
         key: 'govtDeleted',
@@ -482,7 +614,7 @@ export function getBookletKpiSpecs(catId, isMarathi = true) {
         isAlert: true,
         countKey: 'delCount',
         areaKey: 'delArea',
-        filterPredicate: (p) => p.auditPoints?.point_18 === 'होय' || p.metadata?.auditPoints?.point_18 === 'होय' || p.metadata?.flags?.isIllegalDeletion
+        filterPredicate: (p) => isAffirmativeVal(getPointVal(p, 18)) || getIllegalDel(p)
       }
     ];
   }
@@ -512,7 +644,7 @@ export function getBookletKpiSpecs(catId, isMarathi = true) {
         icon: 'Building2',
         countKey: 'c1Count',
         areaKey: 'c1Area',
-        filterPredicate: (p) => p.metadata?.otherRights?.includes('मनपा') || p.metadata?.otherRights?.includes('प्राधिकरण') || p.metadata?.authorityName
+        filterPredicate: (p) => getOtherRightsStr(p).includes('मनपा') || getOtherRightsStr(p).includes('प्राधिकरण') || p.metadata?.authorityName
       },
       {
         key: 'gurcharan',
@@ -524,7 +656,7 @@ export function getBookletKpiSpecs(catId, isMarathi = true) {
         icon: 'LandPlot',
         countKey: 'c2Count',
         areaKey: 'c2Area',
-        filterPredicate: (p) => p.metadata?.otherRights?.includes('गुरचरण') || p.metadata?.otherRights?.includes('चराई') || p.metadata?.reservationPurpose?.includes('गुरचरण')
+        filterPredicate: (p) => getOtherRightsStr(p).includes('गुरचरण') || getOtherRightsStr(p).includes('चराई') || p.metadata?.reservationPurpose?.includes('गुरचरण')
       },
       {
         key: 'noOther',
@@ -537,7 +669,7 @@ export function getBookletKpiSpecs(catId, isMarathi = true) {
         isAlert: true,
         countKey: 'noOtherCount',
         areaKey: 'noOtherArea',
-        filterPredicate: (p) => !p.metadata?.otherRights || p.metadata?.otherRights === '-' || p.metadata?.otherRights === '....'
+        filterPredicate: getOtherRightsMissing
       },
       {
         key: 'del',
@@ -581,7 +713,7 @@ export function getBookletKpiSpecs(catId, isMarathi = true) {
         isAlert: true,
         countKey: 'tribalToNonTribalCount',
         areaKey: 'tribalToNonTribalArea',
-        filterPredicate: (p) => p.auditPoints?.point_39 === 'होय' || p.metadata?.auditPoints?.point_39 === 'होय' || p.metadata?.tribalToNonTribalIllegal || (p.metadata?.flags?.isTribal && (p.forwardCases?.some(fc => fc.violationType === 'TRIBAL_LAND_VIOLATION') || p.metadata?.otherRights?.includes('गैर-आदिवासी')))
+        filterPredicate: (p) => isAffirmativeVal(getPointVal(p, 39)) || getOtherRightsStr(p).includes('गैर-आदिवासी') || (p.forwardCases?.some(fc => fc.violationType === 'TRIBAL_LAND_VIOLATION'))
       },
       {
         key: 'tribalToTribal',
@@ -593,7 +725,7 @@ export function getBookletKpiSpecs(catId, isMarathi = true) {
         icon: 'Scale',
         countKey: 'tribalToTribalCount',
         areaKey: 'tribalToTribalArea',
-        filterPredicate: (p) => p.auditPoints?.point_38 === 'होय' || p.metadata?.auditPoints?.point_38 === 'होय' || (p.metadata?.flags?.isTribal && p.metadata?.otherRights?.includes('हस्तांतरण'))
+        filterPredicate: (p) => isAffirmativeVal(getPointVal(p, 38)) || getOtherRightsStr(p).includes('हस्तांतरण')
       },
       {
         key: 'conv',
@@ -650,7 +782,7 @@ export function getBookletKpiSpecs(catId, isMarathi = true) {
         isAlert: true,
         countKey: 'bhudanTransferCount',
         areaKey: 'bhudanTransferArea',
-        filterPredicate: (p) => p.metadata?.flags?.isUnauthorizedTransfer || p.metadata?.otherRights?.includes('हस्तांतरण') || p.bhudanRecords?.some(br => br.unauthorizedAlienation)
+        filterPredicate: (p) => p.metadata?.flags?.isUnauthorizedTransfer || getOtherRightsStr(p).includes('हस्तांतरण') || p.bhudanRecords?.some(br => br.unauthorizedAlienation)
       },
       {
         key: 'conv',
@@ -675,7 +807,7 @@ export function getBookletKpiSpecs(catId, isMarathi = true) {
         icon: 'FileText',
         countKey: 'noOtherCount',
         areaKey: 'noOtherArea',
-        filterPredicate: (p) => !p.metadata?.otherRights || p.metadata?.otherRights === '-' || p.metadata?.otherRights === '....'
+        filterPredicate: getOtherRightsMissing
       },
       {
         key: 'del',
@@ -718,7 +850,7 @@ export function getBookletKpiSpecs(catId, isMarathi = true) {
         icon: 'CheckCircle2',
         countKey: 'companyPermittedCount',
         areaKey: 'companyPermittedArea',
-        filterPredicate: (p) => p.auditPoints?.point_42 === 'होय' || p.auditPoints?.point_41 === 'होय' || p.tenancy89ARecords?.[0]?.isGenuineIndustrialUse || p.metadata?.auditPoints?.point_41 === 'होय'
+        filterPredicate: (p) => isAffirmativeVal(getPointVal(p, 42)) || isAffirmativeVal(getPointVal(p, 41)) || p.tenancy89ARecords?.[0]?.isGenuineIndustrialUse
       },
       {
         key: 'companyUnpermitted',
@@ -731,7 +863,7 @@ export function getBookletKpiSpecs(catId, isMarathi = true) {
         isAlert: true,
         countKey: 'companyUnpermittedCount',
         areaKey: 'companyUnpermittedArea',
-        filterPredicate: (p) => (p.auditPoints?.point_42 === 'नाही' || p.metadata?.auditPoints?.point_41 === 'नाही') && (p.currentOwner?.includes('कंपनी') || p.currentOwner?.includes('प्रा.लि') || p.currentOwner?.includes('उद्योग'))
+        filterPredicate: (p) => (getPointVal(p, 42) === 'नाही' || getPointVal(p, 41) === 'नाही') && (p.currentOwner?.includes('कंपनी') || p.currentOwner?.includes('प्रा.लि') || p.currentOwner?.includes('उद्योग'))
       },
       {
         key: 'usageBreach',
@@ -744,7 +876,7 @@ export function getBookletKpiSpecs(catId, isMarathi = true) {
         isAlert: true,
         countKey: 'usageBreachCount',
         areaKey: 'usageBreachArea',
-        filterPredicate: (p) => p.metadata?.auditPoints?.point_44 === 'नाही' || p.metadata?.auditPoints?.point_45_usage === 'होय' || (p.forwardCases?.some(fc => fc.violationType === 'UNAUTHORIZED_NA_CONVERSION'))
+        filterPredicate: (p) => getPointVal(p, 44) === 'नाही' || isAffirmativeVal(getPointVal(p, 45)) || p.metadata?.auditPoints?.point_45_usage === 'होय' || (p.forwardCases?.some(fc => fc.violationType === 'UNAUTHORIZED_NA_CONVERSION'))
       },
       {
         key: 'transferBreach',
@@ -757,7 +889,7 @@ export function getBookletKpiSpecs(catId, isMarathi = true) {
         isAlert: true,
         countKey: 'transferBreachCount',
         areaKey: 'transferBreachArea',
-        filterPredicate: (p) => p.metadata?.auditPoints?.point_45_transfer === 'होय' || p.tenancy89ARecords?.[0]?.unauthorizedTransfer || (p.forwardCases?.some(fc => fc.violationType === 'SHARTBHANG' || fc.violationType === 'TRIBAL_LAND_VIOLATION'))
+        filterPredicate: (p) => isAffirmativeVal(getPointVal(p, 45)) || p.metadata?.auditPoints?.point_45_transfer === 'होय' || p.tenancy89ARecords?.[0]?.unauthorizedTransfer || (p.forwardCases?.some(fc => fc.violationType === 'SHARTBHANG' || fc.violationType === 'TRIBAL_LAND_VIOLATION'))
       }
     ];
   }
