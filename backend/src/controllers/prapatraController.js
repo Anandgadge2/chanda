@@ -8,7 +8,7 @@ import { archiveExcelToGCS } from '../config/gcs.js';
 import { parsePrapatraBuffer } from '../parsers/prapatraParserJs.js';
 import { inspectVillageDiff, reconcileAndSeedVillage } from '../services/prapatraReconciliationService.js';
 import { logAudit } from '../middleware/auditMiddleware.js';
-import { userCanAccessTaluka, userHasPermission } from '../services/rbacService.js';
+import { buildParcelJurisdictionWhere, getJurisdictionCacheKey, getUserJurisdiction, userCanAccessParcel, userCanAccessTaluka, userHasPermission } from '../services/rbacService.js';
 
 const execAsync = promisify(exec);
 const execFileAsync = promisify(execFile);
@@ -56,6 +56,9 @@ export function invalidatePrapatraCache() {
   }
   if (typeof talukaVillagesCache !== 'undefined') {
     talukaVillagesCache.clear();
+  }
+  if (typeof talukaCirclesCache !== 'undefined') {
+    talukaCirclesCache.clear();
   }
 }
 
@@ -1291,7 +1294,7 @@ export const getPrapatraReport = async (req, res) => {
     const shouldIncludeParcels = includeParcels === 'true' || 
       (includeParcels !== 'false' && view !== 'categorySummary' && view !== 'summary');
 
-    const reportCacheKey = `${id}::${taluka}::${village}::${search}::${tenure}::${violation}::${areaRange}::${booklet}::${view}::${tier}::p${page}::ps${isAll ? 'all' : pageSize}::incP${shouldIncludeParcels}`;
+    const reportCacheKey = `${id}::${taluka}::${village}::${search}::${tenure}::${violation}::${areaRange}::${booklet}::${view}::${tier}::p${page}::ps${isAll ? 'all' : pageSize}::incP${shouldIncludeParcels}::j${getJurisdictionCacheKey(req.user)}`;
     if (!isExport && req.query.refresh !== 'true') {
       const cached = prapatraReportCache.get(reportCacheKey);
       if (cached) {
@@ -1388,6 +1391,8 @@ async function buildPrapatraReportPayload(req, reportCacheKey, exportRes = null)
 
     const isPrapatra1to5 = !isChecklist && prapatraNum >= 1 && prapatraNum <= 5 && booklet !== 'true';
 
+    const userJurisdiction = getUserJurisdiction(req.user);
+
     // LIGHTNING-FAST PATH FOR PRAPATRAS 1 TO 5:
     // When requesting official booklet 1 to 5 data for UI, return the authoritative
     // rollup records immediately without scanning 133k individual parcels.
@@ -1400,10 +1405,28 @@ async function buildPrapatraReportPayload(req, reportCacheKey, exportRes = null)
         prapatraNum
       });
 
+      if (!userJurisdiction.isDistrictWide && rollup) {
+        if (Array.isArray(rollup.byTaluka)) {
+          rollup.byTaluka = rollup.byTaluka.filter((r) => userCanAccessTaluka(req.user, r.taluka));
+        }
+        if (Array.isArray(rollup.byVillage)) {
+          rollup.byVillage = rollup.byVillage.filter((r) =>
+            userCanAccessParcel(req.user, {
+              taluka: r.taluka,
+              villageName: r.villageName,
+              villageCode: r.villageCode,
+              revenueCircle: r.revenueCircle,
+            })
+          );
+        }
+      }
+
       // Display rows: strictly 15 talukas for Whole District, or villages for Taluka/Village scope
       let displayRows = [];
       if (isAllTalukas && isAllVillages) {
-        displayRows = rollup.byTaluka || [];
+        displayRows = !userJurisdiction.isDistrictWide && userJurisdiction.villages.length > 0
+          ? (rollup.byVillage || [])
+          : (rollup.byTaluka || []);
       } else {
         displayRows = rollup.byVillage || [];
       }
@@ -1497,6 +1520,11 @@ async function buildPrapatraReportPayload(req, reportCacheKey, exportRes = null)
     // Tenure Class Filter
     if (tenure && tenure !== 'all') {
       parcelWhere.tenureClass = tenure;
+    }
+
+    const jurisdictionWhere = buildParcelJurisdictionWhere(req.user);
+    if (jurisdictionWhere) {
+      parcelWhere.AND = parcelWhere.AND ? [...parcelWhere.AND, jurisdictionWhere] : [jurisdictionWhere];
     }
 
     // Area Range Filter
@@ -2293,11 +2321,11 @@ export const getBookletCategories = async (req, res) => {
   });
 };
 
-// Cache for getTalukaVillages (15 min fresh, 60 min SWR)
+// Cache for getTalukaVillages (60 min fresh, 6 hr SWR)
 const talukaVillagesCache = new Map();
 const inFlightVillages = new Map();
-const TALUKA_VILLAGES_CACHE_TTL = 15 * 60 * 1000;
-const TALUKA_VILLAGES_STALE_TTL = 60 * 60 * 1000;
+const TALUKA_VILLAGES_CACHE_TTL = 60 * 60 * 1000;
+const TALUKA_VILLAGES_STALE_TTL = 6 * 60 * 60 * 1000;
 
 const fetchTalukaVillagesData = (taluka, targetTaluka, cacheKey) => {
   let pending = inFlightVillages.get(cacheKey);
@@ -2423,6 +2451,138 @@ export const getTalukaVillages = async (req, res) => {
   }
 };
 
+const talukaCirclesCache = new Map();
+const inFlightCircles = new Map();
+
+/**
+ * Pre-warms ALL 15 talukas' villages and revenue circles in 2 parallel queries so
+ * every lookup (?taluka=..., ?taluka=all) serves in <1ms from memory.
+ */
+export async function warmGeoDirectoryCache() {
+  const start = Date.now();
+  try {
+    const [allVillagesRes, allCirclesRows] = await Promise.all([
+      fetchTalukaVillagesData('all', 'all', 'all'),
+      prisma.$queryRawUnsafe(
+        `SELECT DISTINCT taluka, revenue_circle AS "revenueCircle", COUNT(*)::int AS "parcelCount"
+         FROM land_parcels
+         WHERE revenue_circle IS NOT NULL AND revenue_circle <> ''
+         GROUP BY taluka, revenue_circle
+         ORDER BY taluka ASC, revenue_circle ASC`
+      ),
+    ]);
+
+    const now = Date.now();
+    const allVillages = allVillagesRes?.villages || [];
+    const groupedVillages = new Map();
+    for (const key of Object.keys(TALUKA_EN_TO_MR)) {
+      groupedVillages.set(key.toLowerCase(), []);
+    }
+    for (const v of allVillages) {
+      const canonical = (TALUKA_ALIASES[v.taluka?.toLowerCase()] || v.taluka || '').toLowerCase();
+      if (!canonical) continue;
+      if (!groupedVillages.has(canonical)) groupedVillages.set(canonical, []);
+      groupedVillages.get(canonical).push(v);
+    }
+    for (const [k, list] of groupedVillages.entries()) {
+      const displayTaluka = TALUKA_ALIASES[k] || k.charAt(0).toUpperCase() + k.slice(1);
+      talukaVillagesCache.set(k, {
+        timestamp: now,
+        data: { success: true, taluka: displayTaluka, count: list.length, villages: list },
+      });
+    }
+
+    const groupedCircles = new Map();
+    for (const key of Object.keys(TALUKA_EN_TO_MR)) {
+      groupedCircles.set(key.toLowerCase(), []);
+    }
+    for (const c of allCirclesRows || []) {
+      const canonical = (TALUKA_ALIASES[c.taluka?.toLowerCase()] || c.taluka || '').toLowerCase();
+      if (!canonical) continue;
+      if (!groupedCircles.has(canonical)) groupedCircles.set(canonical, []);
+      groupedCircles.get(canonical).push(c);
+    }
+    talukaCirclesCache.set('all', {
+      timestamp: now,
+      data: { success: true, taluka: 'all', count: (allCirclesRows || []).length, circles: allCirclesRows || [] },
+    });
+    for (const [k, list] of groupedCircles.entries()) {
+      const displayTaluka = TALUKA_ALIASES[k] || k.charAt(0).toUpperCase() + k.slice(1);
+      talukaCirclesCache.set(k, {
+        timestamp: now,
+        data: { success: true, taluka: displayTaluka, count: list.length, circles: list },
+      });
+    }
+
+    console.log(`[GEO] Pre-warmed all 15 talukas (${allVillages.length} villages, ${(allCirclesRows || []).length} circles) in ${Date.now() - start}ms`);
+  } catch (err) {
+    console.warn(`[GEO] warmGeoDirectoryCache failed: ${err.message}`);
+  }
+}
+
+/**
+ * Get distinct Revenue Circles (महसूल मंडळे) for a taluka or district
+ * GET /api/prapatra/circles?taluka=...
+ */
+export const getTalukaCircles = async (req, res) => {
+  try {
+    const { taluka = 'all' } = req.query;
+    const targetTaluka = TALUKA_ALIASES[taluka?.toLowerCase()] || taluka;
+    const cacheKey = (targetTaluka || 'all').toLowerCase();
+
+    const cached = talukaCirclesCache.get(cacheKey);
+    if (cached && Date.now() - cached.timestamp < 60 * 60 * 1000) {
+      res.setHeader('Cache-Control', 'public, max-age=300, stale-while-revalidate=600');
+      res.setHeader('X-Cache-Status', 'HIT');
+      return res.status(200).json(cached.data);
+    }
+
+    let pending = inFlightCircles.get(cacheKey);
+    if (!pending) {
+      const isSpecificTaluka = taluka && taluka !== 'all' && taluka !== 'सर्व तालुके';
+      pending = (isSpecificTaluka
+        ? prisma.$queryRawUnsafe(
+            `SELECT DISTINCT taluka, revenue_circle AS "revenueCircle", COUNT(*)::int AS "parcelCount"
+             FROM land_parcels
+             WHERE taluka ILIKE $1 AND revenue_circle IS NOT NULL AND revenue_circle <> ''
+             GROUP BY taluka, revenue_circle
+             ORDER BY revenue_circle ASC`,
+            targetTaluka
+          )
+        : prisma.$queryRawUnsafe(
+            `SELECT DISTINCT taluka, revenue_circle AS "revenueCircle", COUNT(*)::int AS "parcelCount"
+             FROM land_parcels
+             WHERE revenue_circle IS NOT NULL AND revenue_circle <> ''
+             GROUP BY taluka, revenue_circle
+             ORDER BY taluka ASC, revenue_circle ASC`
+          )
+      )
+        .then((rows) => {
+          const responseData = {
+            success: true,
+            taluka: targetTaluka,
+            count: rows.length,
+            circles: rows,
+          };
+          talukaCirclesCache.set(cacheKey, { timestamp: Date.now(), data: responseData });
+          return responseData;
+        })
+        .finally(() => {
+          inFlightCircles.delete(cacheKey);
+        });
+      inFlightCircles.set(cacheKey, pending);
+    }
+
+    const responseData = await pending;
+    res.setHeader('Cache-Control', 'public, max-age=300, stale-while-revalidate=600');
+    res.setHeader('X-Cache-Status', 'MISS');
+    return res.status(200).json(responseData);
+  } catch (err) {
+    console.error('getTalukaCircles error:', err);
+    return res.status(500).json({ success: false, error: err.message });
+  }
+};
+
 /**
  * Edit / Update Prapatra Rollup for Collector or SuperAdmin
  */
@@ -2450,10 +2610,10 @@ export const updatePrapatraRollup = async (req, res) => {
       return res.status(404).json({ success: false, error: 'रेकॉर्ड सापडला नाही (Rollup record not found).' });
     }
 
-    if (!userCanAccessTaluka(req.user, existing.taluka)) {
+    if (!userCanAccessParcel(req.user, existing)) {
       return res.status(403).json({
         success: false,
-        error: `आपल्याकडे '${existing.taluka}' तालुक्याचा गोषवारा संपादित करण्याचे अधिकार नाहीत. (Taluka scope restricted to ${req.user.taluka})`,
+        error: `आपल्याकडे '${existing.taluka}' / '${existing.villageName}' कार्यक्षेत्रातील गोषवारा संपादित करण्याचे अधिकार नाहीत.`,
       });
     }
 
@@ -2626,10 +2786,14 @@ export const uploadPrapatraExcel = async (req, res) => {
   const talukaInput = req.body.taluka || 'Chandrapur';
   const targetTaluka = TALUKA_ALIASES[talukaInput.toLowerCase()] || talukaInput;
 
-  if (!userCanAccessTaluka(req.user, targetTaluka)) {
+  if (!userCanAccessParcel(req.user, {
+    taluka: targetTaluka,
+    villageName: req.body.villageName,
+    revenueCircle: req.body.revenueCircle,
+  })) {
     return res.status(403).json({
       success: false,
-      error: `आपल्याकडे '${targetTaluka}' तालुक्यासाठी एक्सेल अपलोड करण्याचे अधिकार नाहीत. (Taluka scope restricted to ${req.user.taluka})`,
+      error: `आपल्याकडे '${targetTaluka}' तालुक्यासाठी एक्सेल अपलोड करण्याचे अधिकार नाहीत.`,
     });
   }
 
@@ -2942,10 +3106,13 @@ export const purgeVillageData = async (req, res) => {
     const targetTaluka = TALUKA_ALIASES[taluka.toLowerCase()] || taluka.trim();
     const cleanV = cleanVillageName(villageName.trim());
 
-    if (!userCanAccessTaluka(req.user, targetTaluka)) {
+    if (!userCanAccessParcel(req.user, {
+      taluka: targetTaluka,
+      villageName: cleanV || villageName.trim(),
+    })) {
       return res.status(403).json({
         success: false,
-        error: `आपल्याकडे '${targetTaluka}' तालुक्यातील गाव डेटा हटवण्याचे अधिकार नाहीत. (Taluka scope restricted to ${req.user.taluka})`,
+        error: `आपल्याकडे '${targetTaluka}' / '${cleanV}' कार्यक्षेत्रातील गाव डेटा हटवण्याचे अधिकार नाहीत.`,
       });
     }
 

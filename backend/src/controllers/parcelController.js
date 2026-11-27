@@ -6,7 +6,7 @@ import { invalidateCaseCache } from './caseController.js';
 import { logger } from '../utils/logger.js';
 import { syncTalukaTotalRollup, recalculateVillageRollup, uploadPrapatraExcel } from './prapatraController.js';
 import { logAudit } from '../middleware/auditMiddleware.js';
-import { userCanAccessTaluka } from '../services/rbacService.js';
+import { buildParcelJurisdictionWhere, getJurisdictionCacheKey, userCanAccessParcel, userCanAccessTaluka } from '../services/rbacService.js';
 import { generateParcelDossierPdf } from '../utils/parcelDossierGenerator.js';
 import { getVillageVariants, cleanVillageName } from '../utils/prapatraGenerator.js';
 
@@ -508,6 +508,11 @@ export const getParcels = async (req, res) => {
       }
     }
 
+    const jurisdictionWhere = buildParcelJurisdictionWhere(req.user);
+    if (jurisdictionWhere) {
+      andClauses.push(jurisdictionWhere);
+    }
+
     if (andClauses.length > 0) {
       where.AND = andClauses;
     }
@@ -534,7 +539,8 @@ export const getParcels = async (req, res) => {
       orderBy = [{ taluka: 'asc' }, { villageName: 'asc' }, { gatNumber: orderDir }];
     }
 
-    const cacheKey = JSON.stringify({ taluka: canonicalTaluka || taluka, villageCode, villageName: targetVillage, tenureClass, hasActiveDispute, targetBooklet, search, sortBy, orderDir, pageNum, take, isAll });
+    const jurisdictionKey = getJurisdictionCacheKey(req.user);
+    const cacheKey = JSON.stringify({ taluka: canonicalTaluka || taluka, villageCode, villageName: targetVillage, tenureClass, hasActiveDispute, targetBooklet, search, sortBy, orderDir, pageNum, take, isAll, jurisdictionKey });
     const isUnfiltered = Object.keys(where).length === 0;
 
     const fetchAndCacheParcels = () => {
@@ -719,6 +725,12 @@ export const getParcelTrace = async (req, res) => {
     if (refresh !== 'true') {
       const cached = traceCache.get(upi);
       if (cached) {
+        if (cached.data?.parcel && !userCanAccessParcel(req.user, cached.data.parcel)) {
+          return res.status(403).json({
+            success: false,
+            error: `आपल्याकडे '${cached.data.parcel.taluka}' / '${cached.data.parcel.villageName}' कार्यक्षेत्रातील भूखंड पाहण्याचे अधिकार नाहीत.`,
+          });
+        }
         const age = now - cached.timestamp;
         if (age < TRACE_CACHE_FRESH_TTL_MS) {
           return res.json(cached.data);
@@ -733,6 +745,12 @@ export const getParcelTrace = async (req, res) => {
     const data = await fetchTrace();
     if (!data) {
       return res.status(404).json({ success: false, error: `Parcel with UPI ${upi} not found` });
+    }
+    if (data.parcel && !userCanAccessParcel(req.user, data.parcel)) {
+      return res.status(403).json({
+        success: false,
+        error: `आपल्याकडे '${data.parcel.taluka}' / '${data.parcel.villageName}' कार्यक्षेत्रातील भूखंड पाहण्याचे अधिकार नाहीत.`,
+      });
     }
 
     res.json(data);
@@ -776,6 +794,12 @@ export const exportParcelDossierPdf = async (req, res) => {
 
     if (!parcel) {
       return res.status(404).json({ success: false, error: `Parcel with UPI ${upi} not found` });
+    }
+    if (!userCanAccessParcel(req.user, parcel)) {
+      return res.status(403).json({
+        success: false,
+        error: `आपल्याकडे '${parcel.taluka}' / '${parcel.villageName}' कार्यक्षेत्रातील PDF डाउनलोड करण्याचे अधिकार नाहीत.`,
+      });
     }
 
     const baseline1950 = parcel.backwardHistories.find((b) => b.epochYear === 1950);
@@ -831,10 +855,10 @@ export const createParcel = async (req, res) => {
     } = req.body;
 
     const targetTaluka = taluka || 'Chandrapur';
-    if (!userCanAccessTaluka(req.user, targetTaluka)) {
+    if (!userCanAccessParcel(req.user, { taluka: targetTaluka, villageName, villageCode, revenueCircle })) {
       return res.status(403).json({
         success: false,
-        error: `आपल्याकडे '${targetTaluka}' तालुक्यासाठी भूखंड तयार करण्याचे अधिकार नाहीत. (Taluka scope restricted to ${req.user.taluka})`,
+        error: `आपल्याकडे '${targetTaluka}' / '${villageName || ''}' कार्यक्षेत्रात भूखंड तयार करण्याचे अधिकार नाहीत.`,
       });
     }
 
@@ -913,10 +937,10 @@ export const updateParcel = async (req, res) => {
       return res.status(404).json({ success: false, error: `Parcel with UPI ${upi} not found` });
     }
 
-    if (!userCanAccessTaluka(req.user, existing.taluka)) {
+    if (!userCanAccessParcel(req.user, existing)) {
       return res.status(403).json({
         success: false,
-        error: `आपल्याकडे '${existing.taluka}' तालुक्यातील भूखंड संपादित करण्याचे अधिकार नाहीत. (Taluka scope restricted to ${req.user.taluka})`,
+        error: `आपल्याकडे '${existing.taluka}' / '${existing.villageName}' कार्यक्षेत्रातील भूखंड संपादित करण्याचे अधिकार नाहीत.`,
       });
     }
 

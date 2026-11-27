@@ -27,7 +27,7 @@ import {
 } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { api } from '../../lib/api';
-import { CHANDRAPUR_TALUKAS, TENURE_CLASSES } from '../../lib/constants';
+import { CHANDRAPUR_TALUKAS, TENURE_CLASSES, getUserScopedTalukas, filterVillagesByUserScope } from '../../lib/constants';
 
 const ParcelTraceDrawer = dynamic(() => import('../../components/ParcelTraceDrawer'), { ssr: false });
 const DocUploadModal = dynamic(() => import('../../components/DocUploadModal'), { ssr: false });
@@ -67,7 +67,8 @@ export const BOOKLET_18_CATEGORIES = BOOKLET_17_CATEGORIES;
 
 export default function ParcelsPage() {
   const { isMarathi } = useTranslation();
-  const { hasPermission } = useAuth();
+  const { user, hasPermission } = useAuth();
+  const scopedTalukaInfo = useMemo(() => getUserScopedTalukas(user), [user]);
   const canUploadDoc = hasPermission('document.upload');
   const [parcels, setParcels] = useState(() => {
     if (typeof window !== 'undefined') {
@@ -242,6 +243,12 @@ export default function ParcelsPage() {
     setAppliedFilters(initialFilters);
     fetchParcels(1, initialFilters, limit);
   }, []);
+
+  useEffect(() => {
+    if (scopedTalukaInfo.defaultTaluka && !taluka && !appliedFilters.taluka) {
+      setTaluka(scopedTalukaInfo.defaultTaluka);
+    }
+  }, [scopedTalukaInfo.defaultTaluka]);
 
   // Dynamically load villages for selected taluka
   useEffect(() => {
@@ -503,31 +510,40 @@ export default function ParcelsPage() {
     }))
   ], [isMarathi]);
 
-  const talukaSelectOptions = useMemo(() => [
-    { value: '', label: isMarathi ? `सर्व तालुके (${CHANDRAPUR_TALUKAS.length})` : `All Talukas (${CHANDRAPUR_TALUKAS.length})` },
-    ...CHANDRAPUR_TALUKAS.map((t) => ({
-      value: t.id,
-      label: isMarathi ? t.nameMr : t.nameEn
-    }))
-  ], [isMarathi]);
+  const talukaSelectOptions = useMemo(() => {
+    const list = scopedTalukaInfo.talukas;
+    const allOption = list.length === 1
+      ? []
+      : [{ value: '', label: isMarathi ? `सर्व तालुके (${list.length})` : `All Talukas (${list.length})` }];
+    return [
+      ...allOption,
+      ...list.map((t) => ({
+        value: t.id,
+        label: isMarathi ? t.nameMr : t.nameEn
+      })),
+    ];
+  }, [scopedTalukaInfo, isMarathi]);
 
-  const villageSelectOptions = useMemo(() => [
-    {
-      value: '',
-      label: villageOptions.length > 0
-        ? (isMarathi ? `सर्व गावे (${villageOptions.length})` : `All Villages (${villageOptions.length})`)
-        : (isMarathi ? 'सर्व गावे' : 'All Villages')
-    },
-    ...villageOptions.map((v) => {
-      const vName = typeof v === 'object' ? (v.villageName || v.name) : v;
-      const count = typeof v === 'object' && v.total712Count ? `${v.total712Count}` : undefined;
-      return {
-        value: vName,
-        label: formatVillageName(vName, isMarathi),
-        count
-      };
-    })
-  ], [villageOptions, taluka, isMarathi]);
+  const villageSelectOptions = useMemo(() => {
+    const scopedVillages = filterVillagesByUserScope(user, villageOptions);
+    return [
+      {
+        value: '',
+        label: scopedVillages.length > 0
+          ? (isMarathi ? `सर्व गावे (${scopedVillages.length})` : `All Villages (${scopedVillages.length})`)
+          : (isMarathi ? 'सर्व गावे' : 'All Villages')
+      },
+      ...scopedVillages.map((v) => {
+        const vName = typeof v === 'object' ? (v.villageName || v.name) : v;
+        const count = typeof v === 'object' && v.total712Count ? `${v.total712Count}` : undefined;
+        return {
+          value: vName,
+          label: formatVillageName(vName, isMarathi),
+          count
+        };
+      })
+    ];
+  }, [villageOptions, user, taluka, isMarathi]);
 
   const tenureSelectOptions = useMemo(() => [
     { value: '', label: isMarathi ? 'सर्व धारणा प्रकार' : 'All Tenure Types' },

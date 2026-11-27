@@ -1,5 +1,6 @@
 import express from 'express';
 import {
+  getRbacBootstrap,
   getPermissionsCatalog,
   listRoles,
   createRole,
@@ -8,15 +9,26 @@ import {
   listUsers,
   createUser,
   updateUser,
+  approveUser,
+  rejectUser,
   getAuditLogs,
 } from '../controllers/rbacController.js';
 import {
   authenticate,
   requirePermission,
   requireAnyPermission,
+  requireSuperadmin,
 } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
+
+// Single fast bootstrap endpoint (Permissions + Roles + Users)
+router.get(
+  '/bootstrap',
+  authenticate,
+  requireAnyPermission('role.view', 'role.manage', 'user.view', 'user.manage'),
+  getRbacBootstrap
+);
 
 // Permissions catalog
 router.get(
@@ -46,6 +58,8 @@ router.get(
 );
 router.post('/users', authenticate, requirePermission('user.manage'), createUser);
 router.patch('/users/:id', authenticate, requirePermission('user.manage'), updateUser);
+router.post('/users/:id/approve', authenticate, requireSuperadmin, approveUser);
+router.post('/users/:id/reject', authenticate, requireSuperadmin, rejectUser);
 
 // Security & Governance Audit Trail
 router.get('/audit-logs', authenticate, requirePermission('audit.view'), getAuditLogs);

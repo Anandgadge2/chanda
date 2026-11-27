@@ -4,6 +4,8 @@ import {
   getMe,
   logout,
   register,
+  selfRegister,
+  getRegistrationOptions,
   exportMyData,
   requestErasure,
   updateProfile,
@@ -15,6 +17,8 @@ const router = Router();
 
 // Public routes
 router.post('/login', login);
+router.get('/registration-options', getRegistrationOptions);
+router.post('/self-register', selfRegister);
 
 // Authenticated routes
 router.post('/register', authenticate, register);

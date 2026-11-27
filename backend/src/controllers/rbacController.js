@@ -2,14 +2,177 @@ import bcrypt from 'bcrypt';
 import prisma from '../config/prisma.js';
 import { logAudit } from '../middleware/auditMiddleware.js';
 import { invalidateUserCache } from '../middleware/authMiddleware.js';
+import { invalidateRegistrationOptionsCache } from './authController.js';
 import {
   ensureRbacSeeded,
   buildUserAuthContext,
   loadUserWithRbac,
   slugifyRoleName,
   userHasPermission,
+  normalizeMobileNumber,
 } from '../services/rbacService.js';
-import { ALL_PERMISSION_KEYS } from '../config/permissions.js';
+import { ALL_PERMISSION_KEYS, VALID_JURISDICTION_SCOPES, CHANDRAPUR_SUBDIVISIONS } from '../config/permissions.js';
+
+const RBAC_CACHE_TTL_MS = 5 * 60 * 1000;
+const rbacCache = {
+  permissions: null,
+  permissionsTs: 0,
+  roles: null,
+  rolesTs: 0,
+  users: null,
+  usersTs: 0,
+};
+
+export const invalidateRbacCaches = (includeRegistration = true) => {
+  rbacCache.permissions = null;
+  rbacCache.permissionsTs = 0;
+  rbacCache.roles = null;
+  rbacCache.rolesTs = 0;
+  rbacCache.users = null;
+  rbacCache.usersTs = 0;
+  if (includeRegistration) {
+    invalidateRegistrationOptionsCache();
+  }
+};
+
+async function fetchFormattedPermissions(forceRefresh = false) {
+  const now = Date.now();
+  if (!forceRefresh && rbacCache.permissions && now - rbacCache.permissionsTs < RBAC_CACHE_TTL_MS) {
+    return { data: rbacCache.permissions, hit: true };
+  }
+  await ensureRbacSeeded();
+  const permissions = await prisma.permission.findMany({
+    orderBy: [{ sortOrder: 'asc' }, { key: 'asc' }],
+  });
+  rbacCache.permissions = permissions;
+  rbacCache.permissionsTs = Date.now();
+  return { data: permissions, hit: false };
+}
+
+async function fetchFormattedRoles(forceRefresh = false) {
+  const now = Date.now();
+  if (!forceRefresh && rbacCache.roles && now - rbacCache.rolesTs < RBAC_CACHE_TTL_MS) {
+    return { data: rbacCache.roles, hit: true };
+  }
+  await ensureRbacSeeded();
+  const roles = await prisma.role.findMany({
+    orderBy: [{ hierarchyLevel: 'desc' }, { createdAt: 'asc' }],
+    include: {
+      rolePermissions: {
+        include: {
+          permission: {
+            select: { key: true },
+          },
+        },
+      },
+      _count: {
+        select: { users: true },
+      },
+    },
+  });
+
+  const formatted = roles.map((r) => ({
+    id: r.id,
+    slug: r.slug,
+    name: r.name,
+    nameMr: r.nameMr,
+    description: r.description,
+    hierarchyLevel: r.hierarchyLevel,
+    jurisdictionScope: r.jurisdictionScope || 'TALUKA',
+    isSystem: r.isSystem,
+    isWildcard: r.isWildcard,
+    isActive: r.isActive,
+    userCount: r._count.users,
+    permissions: r.isWildcard
+      ? [...ALL_PERMISSION_KEYS]
+      : r.rolePermissions.map((rp) => rp.permission.key),
+    createdAt: r.createdAt,
+    updatedAt: r.updatedAt,
+  }));
+
+  rbacCache.roles = formatted;
+  rbacCache.rolesTs = Date.now();
+  return { data: formatted, hit: false };
+}
+
+async function fetchFormattedUsers(forceRefresh = false) {
+  const now = Date.now();
+  if (!forceRefresh && rbacCache.users && now - rbacCache.usersTs < RBAC_CACHE_TTL_MS) {
+    return { data: rbacCache.users, hit: true };
+  }
+  await ensureRbacSeeded();
+  const users = await prisma.user.findMany({
+    orderBy: [{ createdAt: 'desc' }],
+    include: {
+      roleRef: {
+        include: {
+          rolePermissions: { include: { permission: { select: { key: true } } } },
+        },
+      },
+      permissionOverrides: {
+        include: { permission: { select: { key: true } } },
+      },
+    },
+  });
+
+  const formatted = users.map((u) => {
+    const ctx = buildUserAuthContext(u);
+    return {
+      ...ctx,
+      lastLoginAt: u.lastLoginAt,
+      createdAt: u.createdAt,
+      overrides: (u.permissionOverrides || []).map((ov) => ({
+        key: ov.permission.key,
+        effect: ov.effect,
+      })),
+    };
+  });
+
+  rbacCache.users = formatted;
+  rbacCache.usersTs = Date.now();
+  return { data: formatted, hit: false };
+}
+
+export async function warmRbacCache() {
+  try {
+    await ensureRbacSeeded();
+    await Promise.all([
+      fetchFormattedPermissions(true),
+      fetchFormattedRoles(true),
+      fetchFormattedUsers(true),
+    ]);
+  } catch (err) {
+    console.warn('warmRbacCache error:', err.message);
+  }
+}
+
+/**
+ * GET /api/rbac/bootstrap
+ * Single fast endpoint returning permissions, roles, and (if permitted) users in parallel.
+ */
+export const getRbacBootstrap = async (req, res) => {
+  try {
+    const force = req.query.refresh === 'true';
+    const canUsers = userHasPermission(req.user, 'user.view') || userHasPermission(req.user, 'user.manage');
+    const [permRes, roleRes, userRes] = await Promise.all([
+      fetchFormattedPermissions(force),
+      fetchFormattedRoles(force),
+      canUsers ? fetchFormattedUsers(force) : Promise.resolve({ data: [], hit: true }),
+    ]);
+
+    const allHit = permRes.hit && roleRes.hit && userRes.hit;
+    res.setHeader('X-Cache-Status', allHit ? 'HIT' : 'MISS');
+    return res.json({
+      success: true,
+      permissions: permRes.data,
+      roles: roleRes.data,
+      users: userRes.data,
+    });
+  } catch (err) {
+    console.error('getRbacBootstrap error:', err);
+    return res.status(500).json({ success: false, error: 'RBAC माहिती लोड करताना त्रुटी.' });
+  }
+};
 
 /**
  * GET /api/rbac/permissions
@@ -17,14 +180,11 @@ import { ALL_PERMISSION_KEYS } from '../config/permissions.js';
  */
 export const getPermissionsCatalog = async (req, res) => {
   try {
-    await ensureRbacSeeded();
-    const permissions = await prisma.permission.findMany({
-      orderBy: [{ sortOrder: 'asc' }, { key: 'asc' }],
-    });
-
+    const { data, hit } = await fetchFormattedPermissions(req.query.refresh === 'true');
+    res.setHeader('X-Cache-Status', hit ? 'HIT' : 'MISS');
     return res.json({
       success: true,
-      permissions,
+      permissions: data,
     });
   } catch (err) {
     console.error('getPermissionsCatalog error:', err);
@@ -38,44 +198,11 @@ export const getPermissionsCatalog = async (req, res) => {
  */
 export const listRoles = async (req, res) => {
   try {
-    await ensureRbacSeeded();
-    const roles = await prisma.role.findMany({
-      orderBy: [{ hierarchyLevel: 'desc' }, { createdAt: 'asc' }],
-      include: {
-        rolePermissions: {
-          include: {
-            permission: {
-              select: { id: true, key: true, module: true, labelEn: true, labelMr: true },
-            },
-          },
-        },
-        _count: {
-          select: { users: true },
-        },
-      },
-    });
-
-    const formatted = roles.map((r) => ({
-      id: r.id,
-      slug: r.slug,
-      name: r.name,
-      nameMr: r.nameMr,
-      description: r.description,
-      hierarchyLevel: r.hierarchyLevel,
-      isSystem: r.isSystem,
-      isWildcard: r.isWildcard,
-      isActive: r.isActive,
-      userCount: r._count.users,
-      permissions: r.isWildcard
-        ? [...ALL_PERMISSION_KEYS]
-        : r.rolePermissions.map((rp) => rp.permission.key),
-      createdAt: r.createdAt,
-      updatedAt: r.updatedAt,
-    }));
-
+    const { data, hit } = await fetchFormattedRoles(req.query.refresh === 'true');
+    res.setHeader('X-Cache-Status', hit ? 'HIT' : 'MISS');
     return res.json({
       success: true,
-      roles: formatted,
+      roles: data,
     });
   } catch (err) {
     console.error('listRoles error:', err);
@@ -95,6 +222,7 @@ export const createRole = async (req, res) => {
       nameMr,
       description = '',
       hierarchyLevel = 40,
+      jurisdictionScope = 'TALUKA',
       permissionKeys = [],
     } = req.body;
 
@@ -147,6 +275,7 @@ export const createRole = async (req, res) => {
         nameMr: nameMr ? String(nameMr).trim() : String(name).trim(),
         description: description ? String(description).trim() : null,
         hierarchyLevel: level,
+        jurisdictionScope: VALID_JURISDICTION_SCOPES.includes(jurisdictionScope) ? jurisdictionScope : 'TALUKA',
         isSystem: false,
         isWildcard: false,
         isActive: true,
@@ -168,6 +297,8 @@ export const createRole = async (req, res) => {
       newData: { slug: created.slug, name: created.name, nameMr: created.nameMr, hierarchyLevel: level, permissionKeys: validKeys },
       req,
     });
+
+    invalidateRbacCaches(true);
 
     return res.status(201).json({
       success: true,
@@ -192,7 +323,7 @@ export const updateRole = async (req, res) => {
   try {
     await ensureRbacSeeded();
     const { id } = req.params;
-    const { name, nameMr, description, hierarchyLevel, isActive, permissionKeys } = req.body;
+    const { name, nameMr, description, hierarchyLevel, jurisdictionScope, isActive, permissionKeys } = req.body;
 
     const existing = await prisma.role.findUnique({
       where: { id },
@@ -237,6 +368,9 @@ export const updateRole = async (req, res) => {
 
     if (isActive !== undefined && existing.slug !== 'superadmin') {
       updateData.isActive = Boolean(isActive);
+    }
+    if (jurisdictionScope !== undefined && !existing.isWildcard && VALID_JURISDICTION_SCOPES.includes(jurisdictionScope)) {
+      updateData.jurisdictionScope = jurisdictionScope;
     }
 
     let nextKeys = existing.rolePermissions.map((rp) => rp.permission.key);
@@ -300,10 +434,13 @@ export const updateRole = async (req, res) => {
         name: updatedRole.name,
         nameMr: updatedRole.nameMr,
         isActive: updatedRole.isActive,
+        jurisdictionScope: updatedRole.jurisdictionScope,
         permissions: existing.isWildcard ? ALL_PERMISSION_KEYS : nextKeys,
       },
       req,
     });
+
+    invalidateRbacCaches(true);
 
     return res.json({
       success: true,
@@ -356,6 +493,7 @@ export const deleteRole = async (req, res) => {
     }
 
     await prisma.role.delete({ where: { id } });
+    invalidateRbacCaches(true);
     invalidateUserCache();
 
     await logAudit({
@@ -366,6 +504,8 @@ export const deleteRole = async (req, res) => {
       previousData: { slug: existing.slug, name: existing.name },
       req,
     });
+
+    invalidateRbacCaches(true);
 
     return res.json({
       success: true,
@@ -383,37 +523,11 @@ export const deleteRole = async (req, res) => {
  */
 export const listUsers = async (req, res) => {
   try {
-    await ensureRbacSeeded();
-    const users = await prisma.user.findMany({
-      orderBy: [{ createdAt: 'desc' }],
-      include: {
-        roleRef: {
-          include: {
-            rolePermissions: { include: { permission: true } },
-          },
-        },
-        permissionOverrides: {
-          include: { permission: true },
-        },
-      },
-    });
-
-    const formatted = users.map((u) => {
-      const ctx = buildUserAuthContext(u);
-      return {
-        ...ctx,
-        lastLoginAt: u.lastLoginAt,
-        createdAt: u.createdAt,
-        overrides: (u.permissionOverrides || []).map((ov) => ({
-          key: ov.permission.key,
-          effect: ov.effect,
-        })),
-      };
-    });
-
+    const { data, hit } = await fetchFormattedUsers(req.query.refresh === 'true');
+    res.setHeader('X-Cache-Status', hit ? 'HIT' : 'MISS');
     return res.json({
       success: true,
-      users: formatted,
+      users: data,
     });
   } catch (err) {
     console.error('listUsers error:', err);
@@ -435,6 +549,10 @@ export const createUser = async (req, res) => {
       password,
       roleId,
       taluka,
+      subdivision,
+      assignedTalukas,
+      assignedCircles,
+      assignedVillages,
       designation,
       overrides = [],
     } = req.body;
@@ -460,6 +578,17 @@ export const createUser = async (req, res) => {
         success: false,
         error: 'हा ईमेल आधीपासून नोंदणीकृत आहे. (Email already registered)',
       });
+    }
+
+    const normalizedMobile = normalizeMobileNumber(mobile);
+    if (normalizedMobile) {
+      const existingMobile = await prisma.user.findUnique({ where: { mobile: normalizedMobile } });
+      if (existingMobile) {
+        return res.status(409).json({
+          success: false,
+          error: 'हा मोबाईल क्रमांक आधीपासून नोंदणीकृत आहे. (Mobile number already registered)',
+        });
+      }
     }
 
     const targetRole = await prisma.role.findUnique({ where: { id: roleId } });
@@ -499,10 +628,28 @@ export const createUser = async (req, res) => {
     const legacyEnumMap = {
       superadmin: 'COLLECTOR',
       admin: 'SUB_COLLECTOR',
+      sdo: 'SDO',
       officer: 'TEHSILDAR',
+      naib_tahasildar: 'NAIB_TEHSILDAR',
+      circle_officer: 'CIRCLE_OFFICER',
+      talathi: 'TALATHI',
       data_operator: 'TALATHI',
       viewer: 'CITIZEN',
     };
+
+    let talukasList = Array.isArray(assignedTalukas)
+      ? [...new Set(assignedTalukas.map((t) => String(t).trim()).filter(Boolean))]
+      : (taluka ? [String(taluka).trim()] : []);
+    if (targetRole.jurisdictionScope === 'SUBDIVISION' && subdivision && talukasList.length === 0) {
+      const subObj = CHANDRAPUR_SUBDIVISIONS.find((s) => s.id.toLowerCase() === String(subdivision).trim().toLowerCase());
+      if (subObj) talukasList = [...subObj.talukas];
+    }
+    const circlesList = Array.isArray(assignedCircles)
+      ? [...new Set(assignedCircles.map((c) => String(c).trim()).filter(Boolean))]
+      : [];
+    const villagesList = Array.isArray(assignedVillages)
+      ? [...new Set(assignedVillages.map((v) => String(v).trim()).filter(Boolean))]
+      : [];
 
     const passwordHash = await bcrypt.hash(password, 12);
     const permsInDb = validOverrides.length > 0
@@ -521,13 +668,20 @@ export const createUser = async (req, res) => {
       data: {
         fullName: fullName.trim(),
         email: normalizedEmail,
-        mobile: mobile ? String(mobile).trim() : null,
+        mobile: normalizedMobile,
         passwordHash,
         role: legacyEnumMap[targetRole.slug] || 'TEHSILDAR',
         roleId: targetRole.id,
-        taluka: taluka ? String(taluka).trim() : null,
+        taluka: talukasList[0] || (taluka ? String(taluka).trim() : null),
+        subdivision: subdivision ? String(subdivision).trim() : null,
+        assignedTalukas: talukasList,
+        assignedCircles: circlesList,
+        assignedVillages: villagesList,
         designation: designation ? String(designation).trim() : (targetRole.nameMr || targetRole.name),
         isActive: true,
+        approvalStatus: 'APPROVED',
+        approvedById: req.user.id,
+        approvedAt: new Date(),
         consentGiven: true,
         consentAt: new Date(),
         consentVersion: '1.0',
@@ -558,6 +712,8 @@ export const createUser = async (req, res) => {
       req,
     });
 
+    invalidateRbacCaches(true);
+
     return res.status(201).json({
       success: true,
       message: `वापरकर्ता '${createdUser.fullName}' यशस्वीरीत्या तयार करण्यात आला.`,
@@ -585,8 +741,14 @@ export const updateUser = async (req, res) => {
       mobile,
       designation,
       taluka,
+      subdivision,
+      assignedTalukas,
+      assignedCircles,
+      assignedVillages,
       roleId,
       isActive,
+      approvalStatus,
+      rejectionReason,
       newPassword,
       overrides,
     } = req.body;
@@ -604,6 +766,22 @@ export const updateUser = async (req, res) => {
       });
     }
 
+    // Only Superadmin can approve/reject pending users or edit jurisdiction mappings
+    if (
+      !req.user.isWildcard &&
+      (existing.approvalStatus === 'PENDING' ||
+        approvalStatus !== undefined ||
+        subdivision !== undefined ||
+        assignedTalukas !== undefined ||
+        assignedCircles !== undefined ||
+        assignedVillages !== undefined)
+    ) {
+      return res.status(403).json({
+        success: false,
+        error: 'नोंदणी मंजुरी व तालुका/मंडळ/गाव मॅपिंग केवळ सुपरअॅडमिन (जिल्हाधिकारी) करू शकतात. (Only Superadmin can approve accounts and edit jurisdiction mappings)',
+      });
+    }
+
     if (id === req.user.id && isActive === false) {
       return res.status(400).json({
         success: false,
@@ -615,10 +793,55 @@ export const updateUser = async (req, res) => {
     let shouldRevokeToken = false;
 
     if (fullName !== undefined && String(fullName).trim()) updateData.fullName = String(fullName).trim();
-    if (mobile !== undefined) updateData.mobile = mobile ? String(mobile).trim() : null;
+    if (mobile !== undefined) {
+      const normMob = normalizeMobileNumber(mobile);
+      if (normMob) {
+        const dupMob = await prisma.user.findFirst({ where: { mobile: normMob, id: { not: id } } });
+        if (dupMob) {
+          return res.status(409).json({
+            success: false,
+            error: 'हा मोबाईल क्रमांक आधीपासून दुसऱ्या खात्याशी जोडलेला आहे. (Mobile number already registered)',
+          });
+        }
+      }
+      updateData.mobile = normMob;
+    }
     if (designation !== undefined) updateData.designation = designation ? String(designation).trim() : null;
-    if (taluka !== undefined) {
-      updateData.taluka = taluka ? String(taluka).trim() : null;
+    if (subdivision !== undefined) {
+      updateData.subdivision = subdivision ? String(subdivision).trim() : null;
+      shouldRevokeToken = true;
+    }
+    if (Array.isArray(assignedTalukas)) {
+      const cleanT = [...new Set(assignedTalukas.map((t) => String(t).trim()).filter(Boolean))];
+      updateData.assignedTalukas = cleanT;
+      updateData.taluka = cleanT[0] || null;
+      shouldRevokeToken = true;
+    } else if (taluka !== undefined) {
+      const cleanOne = taluka ? String(taluka).trim() : null;
+      updateData.taluka = cleanOne;
+      updateData.assignedTalukas = cleanOne ? [cleanOne] : [];
+      shouldRevokeToken = true;
+    }
+    if (Array.isArray(assignedCircles)) {
+      updateData.assignedCircles = [...new Set(assignedCircles.map((c) => String(c).trim()).filter(Boolean))];
+      shouldRevokeToken = true;
+    }
+    if (Array.isArray(assignedVillages)) {
+      updateData.assignedVillages = [...new Set(assignedVillages.map((v) => String(v).trim()).filter(Boolean))];
+      shouldRevokeToken = true;
+    }
+
+    if (approvalStatus && ['PENDING', 'APPROVED', 'REJECTED'].includes(approvalStatus)) {
+      updateData.approvalStatus = approvalStatus;
+      if (approvalStatus === 'APPROVED') {
+        updateData.isActive = true;
+        updateData.approvedById = req.user.id;
+        updateData.approvedAt = new Date();
+        updateData.rejectionReason = null;
+      } else if (approvalStatus === 'REJECTED') {
+        updateData.isActive = false;
+        updateData.rejectionReason = rejectionReason ? String(rejectionReason).trim() : null;
+      }
       shouldRevokeToken = true;
     }
 
@@ -649,7 +872,11 @@ export const updateUser = async (req, res) => {
       const legacyEnumMap = {
         superadmin: 'COLLECTOR',
         admin: 'SUB_COLLECTOR',
+        sdo: 'SDO',
         officer: 'TEHSILDAR',
+        naib_tahasildar: 'NAIB_TEHSILDAR',
+        circle_officer: 'CIRCLE_OFFICER',
+        talathi: 'TALATHI',
         data_operator: 'TALATHI',
         viewer: 'CITIZEN',
       };
@@ -772,6 +999,8 @@ export const updateUser = async (req, res) => {
       req,
     });
 
+    invalidateRbacCaches(true);
+
     return res.json({
       success: true,
       message: `वापरकर्ता '${ctx.fullName}' ची माहिती व अधिकार यशस्वीरीत्या अद्यतनित केले.`,
@@ -787,6 +1016,159 @@ export const updateUser = async (req, res) => {
   } catch (err) {
     console.error('updateUser error:', err);
     return res.status(500).json({ success: false, error: 'वापरकर्ता अद्यतन करताना त्रुटी: ' + err.message });
+  }
+};
+
+/**
+ * POST /api/rbac/users/:id/approve
+ * Superadmin-only: Approve & activate a pending user registration (optionally adjusting role & jurisdiction mapping)
+ */
+export const approveUser = async (req, res) => {
+  try {
+    await ensureRbacSeeded();
+    if (!req.user?.isWildcard) {
+      return res.status(403).json({
+        success: false,
+        error: 'केवळ सुपरअॅडमिन (जिल्हाधिकारी) नोंदणी मंजूर करू शकतात. (Only Superadmin can approve registrations)',
+      });
+    }
+
+    const { id } = req.params;
+    const {
+      roleId,
+      designation,
+      subdivision,
+      assignedTalukas,
+      assignedCircles,
+      assignedVillages,
+    } = req.body || {};
+
+    const existing = await loadUserWithRbac({ id });
+    if (!existing) {
+      return res.status(404).json({ success: false, error: 'वापरकर्ता सापडला नाही.' });
+    }
+
+    const updateData = {
+      isActive: true,
+      approvalStatus: 'APPROVED',
+      approvedById: req.user.id,
+      approvedAt: new Date(),
+      rejectionReason: null,
+      tokenVersion: (existing.tokenVersion || 1) + 1,
+    };
+
+    if (designation !== undefined) updateData.designation = designation ? String(designation).trim() : null;
+    if (subdivision !== undefined) updateData.subdivision = subdivision ? String(subdivision).trim() : null;
+    if (Array.isArray(assignedTalukas)) {
+      const cleanT = [...new Set(assignedTalukas.map((t) => String(t).trim()).filter(Boolean))];
+      updateData.assignedTalukas = cleanT;
+      updateData.taluka = cleanT[0] || null;
+    }
+    if (Array.isArray(assignedCircles)) {
+      updateData.assignedCircles = [...new Set(assignedCircles.map((c) => String(c).trim()).filter(Boolean))];
+    }
+    if (Array.isArray(assignedVillages)) {
+      updateData.assignedVillages = [...new Set(assignedVillages.map((v) => String(v).trim()).filter(Boolean))];
+    }
+
+    if (roleId && roleId !== existing.roleId) {
+      const targetRole = await prisma.role.findUnique({ where: { id: roleId } });
+      if (!targetRole || !targetRole.isActive) {
+        return res.status(400).json({ success: false, error: 'निवडलेली भूमिका अवैध किंवा निष्क्रिय आहे.' });
+      }
+      updateData.roleId = targetRole.id;
+    }
+
+    await prisma.user.update({ where: { id }, data: updateData });
+    invalidateUserCache(id);
+
+    const refreshed = await loadUserWithRbac({ id });
+    const ctx = buildUserAuthContext(refreshed);
+
+    await logAudit({
+      userId: req.user.id,
+      action: 'USER_APPROVED',
+      entityType: 'User',
+      entityId: id,
+      newData: {
+        email: ctx.email,
+        roleSlug: ctx.roleSlug,
+        subdivision: ctx.subdivision,
+        assignedTalukas: ctx.assignedTalukas,
+        assignedCircles: ctx.assignedCircles,
+        assignedVillages: ctx.assignedVillages,
+      },
+      req,
+    });
+
+    invalidateRbacCaches(true);
+
+    return res.json({
+      success: true,
+      message: `वापरकर्ता '${ctx.fullName}' ची नोंदणी मंजूर करून खाते सक्रिय करण्यात आले.`,
+      user: ctx,
+    });
+  } catch (err) {
+    console.error('approveUser error:', err);
+    return res.status(500).json({ success: false, error: 'नोंदणी मंजूर करताना त्रुटी: ' + err.message });
+  }
+};
+
+/**
+ * POST /api/rbac/users/:id/reject
+ * Superadmin-only: Reject a pending user registration
+ */
+export const rejectUser = async (req, res) => {
+  try {
+    if (!req.user?.isWildcard) {
+      return res.status(403).json({
+        success: false,
+        error: 'केवळ सुपरअॅडमिन नोंदणी नाकारू शकतात. (Only Superadmin can reject registrations)',
+      });
+    }
+
+    const { id } = req.params;
+    const { reason = '' } = req.body || {};
+
+    const existing = await loadUserWithRbac({ id });
+    if (!existing) {
+      return res.status(404).json({ success: false, error: 'वापरकर्ता सापडला नाही.' });
+    }
+    if (existing.roleRef?.isWildcard) {
+      return res.status(400).json({ success: false, error: 'Superadmin खाते नाकारता येत नाही.' });
+    }
+
+    await prisma.user.update({
+      where: { id },
+      data: {
+        isActive: false,
+        approvalStatus: 'REJECTED',
+        rejectionReason: reason ? String(reason).trim() : null,
+        approvedById: req.user.id,
+        approvedAt: new Date(),
+        tokenVersion: (existing.tokenVersion || 1) + 1,
+      },
+    });
+    invalidateUserCache(id);
+
+    await logAudit({
+      userId: req.user.id,
+      action: 'USER_REJECTED',
+      entityType: 'User',
+      entityId: id,
+      newData: { email: existing.email, reason: reason || null },
+      req,
+    });
+
+    invalidateRbacCaches(true);
+
+    return res.json({
+      success: true,
+      message: `वापरकर्ता '${existing.fullName}' ची नोंदणी नाकारण्यात आली.`,
+    });
+  } catch (err) {
+    console.error('rejectUser error:', err);
+    return res.status(500).json({ success: false, error: 'नोंदणी नाकारताना त्रुटी: ' + err.message });
   }
 };
 

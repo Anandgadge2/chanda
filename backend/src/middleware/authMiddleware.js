@@ -36,6 +36,12 @@ const fetchAndCacheUser = (userId) => {
   return pending;
 };
 
+export const seedUserCache = (userCtx) => {
+  if (userCtx && userCtx.id && userCtx.isActive && userCtx.roleObj?.isActive !== false) {
+    userCache.set(userCtx.id, { user: userCtx, timestamp: Date.now() });
+  }
+};
+
 export const invalidateUserCache = (userId) => {
   if (userId) {
     userCache.delete(userId);
@@ -115,6 +121,25 @@ export const authenticate = async (req, res, next) => {
       error: 'अवैध टोकन. (Invalid authentication token)',
     });
   }
+};
+
+/**
+ * Middleware: Require Superadmin (wildcard Collector/Superadmin role)
+ */
+export const requireSuperadmin = (req, res, next) => {
+  if (!req.user) {
+    return res.status(401).json({
+      success: false,
+      error: 'अनधिकृत प्रवेश. (Authentication required)',
+    });
+  }
+  if (!req.user.isWildcard) {
+    return res.status(403).json({
+      success: false,
+      error: 'ही कृती केवळ सुपरअॅडमिन (जिल्हाधिकारी) करू शकतात. (Only Superadmin can perform this action)',
+    });
+  }
+  next();
 };
 
 /**

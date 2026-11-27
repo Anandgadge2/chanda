@@ -81,11 +81,12 @@ export function AuthProvider({ children }) {
 
   const router = useRouter();
 
-  const login = async (email, password) => {
-    const data = await api.login(email, password);
+  const login = async (identifier, password) => {
+    const data = await api.login(identifier, password);
     if (data.success && data.token) {
       try {
         localStorage.setItem('chanda_sidebar_collapsed', 'true');
+        sessionStorage.removeItem('chanda_parcels_cache_v1');
       } catch {}
       setToken(data.token);
       setUser(data.user);
@@ -96,6 +97,9 @@ export function AuthProvider({ children }) {
 
   const logout = useCallback(() => {
     // 1. Immediately reset client state and token for zero-delay UI update
+    try {
+      sessionStorage.removeItem('chanda_parcels_cache_v1');
+    } catch {}
     setToken(null);
     setUser(null);
     setAuthToken(null);

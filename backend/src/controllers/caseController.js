@@ -2,7 +2,7 @@ import prisma from '../config/prisma.js';
 import { invalidateAnalyticsCache } from './analyticsController.js';
 import { invalidateParcelCache } from './parcelController.js';
 import { logAudit } from '../middleware/auditMiddleware.js';
-import { userCanAccessTaluka } from '../services/rbacService.js';
+import { buildParcelJurisdictionWhere, getJurisdictionCacheKey, userCanAccessParcel, userCanAccessTaluka } from '../services/rbacService.js';
 import { logger } from '../utils/logger.js';
 
 const CASE_FRESH_TTL_MS = 5 * 60 * 1000; // 5 minutes fresh
@@ -37,8 +37,12 @@ export const invalidateCaseCache = () => {
   caseListCache.clear();
 };
 
-const fetchCasesPayload = async ({ search, violationType, status, taluka, village, villageName, isRepossessedToGovt, pageNum, take, isAll, skip }) => {
+const fetchCasesPayload = async ({ search, violationType, status, taluka, village, villageName, isRepossessedToGovt, pageNum, take, isAll, skip, user }) => {
   const andConditions = [];
+  const jurisdictionWhere = buildParcelJurisdictionWhere(user);
+  if (jurisdictionWhere) {
+    andConditions.push({ parcel: jurisdictionWhere });
+  }
 
   if (violationType) andConditions.push({ violationType });
   if (status) andConditions.push({ status });
@@ -200,6 +204,7 @@ export const getCases = async (req, res) => {
     const skip = isAll ? 0 : (pageNum - 1) * take;
 
     const targetVillage = village || villageName;
+    const jurisdictionKey = getJurisdictionCacheKey(req.user);
     const cacheKey = JSON.stringify({
       search: search?.trim() || undefined,
       violationType: violationType || undefined,
@@ -210,9 +215,10 @@ export const getCases = async (req, res) => {
       pageNum,
       take,
       isAll,
+      jurisdictionKey,
     });
 
-    const params = { search, violationType, status, taluka, village, villageName, isRepossessedToGovt, pageNum, take, isAll, skip };
+    const params = { search, violationType, status, taluka, village, villageName, isRepossessedToGovt, pageNum, take, isAll, skip, user: req.user };
 
     if (refresh !== 'true') {
       const cached = caseListCache.get(cacheKey);
@@ -265,15 +271,15 @@ export const createCase = async (req, res) => {
 
     const targetParcel = await prisma.landParcel.findUnique({
       where: { id: parcelId },
-      select: { taluka: true },
+      select: { taluka: true, revenueCircle: true, villageName: true, villageCode: true },
     });
     if (!targetParcel) {
       return res.status(404).json({ success: false, error: 'Parcel not found' });
     }
-    if (!userCanAccessTaluka(req.user, targetParcel.taluka)) {
+    if (!userCanAccessParcel(req.user, targetParcel)) {
       return res.status(403).json({
         success: false,
-        error: `आपल्याकडे '${targetParcel.taluka}' तालुक्यातील प्रकरण दाखल करण्याचे अधिकार नाहीत. (Taluka scope restricted to ${req.user.taluka})`,
+        error: `आपल्याकडे '${targetParcel.taluka}' / '${targetParcel.villageName}' कार्यक्षेत्रातील प्रकरण दाखल करण्याचे अधिकार नाहीत.`,
       });
     }
 
@@ -329,15 +335,15 @@ export const addHearing = async (req, res) => {
 
     const existingCase = await prisma.forwardEnforcementCase.findUnique({
       where: { id },
-      include: { parcel: { select: { taluka: true } } },
+      include: { parcel: { select: { taluka: true, revenueCircle: true, villageName: true, villageCode: true } } },
     });
     if (!existingCase) {
       return res.status(404).json({ success: false, error: 'Case not found' });
     }
-    if (existingCase.parcel && !userCanAccessTaluka(req.user, existingCase.parcel.taluka)) {
+    if (existingCase.parcel && !userCanAccessParcel(req.user, existingCase.parcel)) {
       return res.status(403).json({
         success: false,
-        error: `आपल्याकडे '${existingCase.parcel.taluka}' तालुक्यातील सुनावणी नोंदवण्याचे अधिकार नाहीत. (Taluka scope restricted to ${req.user.taluka})`,
+        error: `आपल्याकडे '${existingCase.parcel.taluka}' / '${existingCase.parcel.villageName}' कार्यक्षेत्रातील सुनावणी नोंदवण्याचे अधिकार नाहीत.`,
       });
     }
 
@@ -385,15 +391,15 @@ export const updateCaseStatus = async (req, res) => {
 
     const existingCase = await prisma.forwardEnforcementCase.findUnique({
       where: { id },
-      include: { parcel: { select: { taluka: true } } },
+      include: { parcel: { select: { taluka: true, revenueCircle: true, villageName: true, villageCode: true } } },
     });
     if (!existingCase) {
       return res.status(404).json({ success: false, error: 'Case not found' });
     }
-    if (existingCase.parcel && !userCanAccessTaluka(req.user, existingCase.parcel.taluka)) {
+    if (existingCase.parcel && !userCanAccessParcel(req.user, existingCase.parcel)) {
       return res.status(403).json({
         success: false,
-        error: `आपल्याकडे '${existingCase.parcel.taluka}' तालुक्यातील प्रकरणावर आदेश पारित करण्याचे अधिकार नाहीत. (Taluka scope restricted to ${req.user.taluka})`,
+        error: `आपल्याकडे '${existingCase.parcel.taluka}' / '${existingCase.parcel.villageName}' कार्यक्षेत्रातील प्रकरणावर आदेश पारित करण्याचे अधिकार नाहीत.`,
       });
     }
 

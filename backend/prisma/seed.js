@@ -17,6 +17,19 @@ async function main() {
 
   const officialUsers = [
     {
+      fullName: 'District Collector (Superadmin)',
+      email: 'admin@gmail.com',
+      mobile: '9172251111',
+      passwordHash: defaultPasswordHash,
+      role: 'COLLECTOR',
+      roleId: superadminRole?.id || null,
+      designation: 'जिल्हाधिकारी (Superadmin)',
+      isActive: true,
+      consentGiven: true,
+      consentAt: new Date(),
+      consentVersion: '1.0',
+    },
+    {
       fullName: 'जिल्हाधिकारी, चंद्रपूर',
       email: 'collector.chandrapur@maharashtra.gov.in',
       mobile: '9172251100',

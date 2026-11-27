@@ -2,7 +2,7 @@ import prisma from '../config/prisma.js';
 import { generateBookletExcel, getRowData } from '../utils/bookletExcelGenerator.js';
 import { generateBookletPdf } from '../utils/pdfGenerator.js';
 import { getVillageVariants } from '../utils/prapatraGenerator.js';
-import { userCanAccessTaluka } from '../services/rbacService.js';
+import { buildParcelJurisdictionWhere, userCanAccessParcel } from '../services/rbacService.js';
 
 const modelMap = {
   ceiling: 'ceilingRecord',
@@ -11,7 +11,7 @@ const modelMap = {
   tenancy89a: 'tenancy89ARecord',
 };
 
-async function getBookletData(type, query, isExport = false) {
+async function getBookletData(type, query, isExport = false, user = null) {
   const { taluka, village, surveyNo, gatNo, tenure, limit = 50 } = query;
 
   const parcelWhere = {};
@@ -20,6 +20,10 @@ async function getBookletData(type, query, isExport = false) {
   if (surveyNo) parcelWhere.oldSurveyNo = { contains: surveyNo, mode: 'insensitive' };
   if (gatNo) parcelWhere.gatNumber = { contains: gatNo, mode: 'insensitive' };
   if (tenure) parcelWhere.tenureClass = tenure;
+  const jWhere = buildParcelJurisdictionWhere(user);
+  if (jWhere) {
+    parcelWhere.AND = [jWhere];
+  }
 
   const specificModel = modelMap[type];
   let items = [];
@@ -67,7 +71,7 @@ async function getBookletData(type, query, isExport = false) {
 export const getBookletPreview = async (req, res) => {
   try {
     const { type = 'ceiling' } = req.query;
-    const items = await getBookletData(type, req.query, false);
+    const items = await getBookletData(type, req.query, false, req.user);
     const rows = items.map((item, idx) => getRowData(type, item, idx));
 
     // Calculate summary statistics
@@ -101,7 +105,7 @@ export const getBookletPreview = async (req, res) => {
 export const exportBookletExcel = async (req, res) => {
   try {
     const { type = 'ceiling', taluka, village } = req.query;
-    const items = await getBookletData(type, req.query, true);
+    const items = await getBookletData(type, req.query, true, req.user);
 
     const timestamp = new Date().toISOString().slice(0, 10);
     const talukaSuffix = taluka ? `_${taluka}` : '';
@@ -118,7 +122,7 @@ export const exportBookletExcel = async (req, res) => {
 export const exportBookletPdf = async (req, res) => {
   try {
     const { type = 'ceiling', taluka, village } = req.query;
-    const items = await getBookletData(type, req.query, true);
+    const items = await getBookletData(type, req.query, true, req.user);
 
     const timestamp = new Date().toISOString().slice(0, 10);
     const talukaSuffix = taluka ? `_${taluka}` : '';
@@ -146,15 +150,15 @@ export const createOrUpdateBookletRecord = async (req, res) => {
 
     const parcel = await prisma.landParcel.findUnique({
       where: { id: parcelId },
-      select: { taluka: true },
+      select: { taluka: true, revenueCircle: true, villageName: true, villageCode: true },
     });
     if (!parcel) {
       return res.status(404).json({ success: false, error: 'Parcel not found' });
     }
-    if (!userCanAccessTaluka(req.user, parcel.taluka)) {
+    if (!userCanAccessParcel(req.user, parcel)) {
       return res.status(403).json({
         success: false,
-        error: `आपल्याकडे '${parcel.taluka}' तालुक्यातील पुस्तिका संपादित करण्याचे अधिकार नाहीत. (Taluka scope restricted to ${req.user.taluka})`,
+        error: `आपल्याकडे '${parcel.taluka}' / '${parcel.villageName}' कार्यक्षेत्रातील पुस्तिका संपादित करण्याचे अधिकार नाहीत.`,
       });
     }
 

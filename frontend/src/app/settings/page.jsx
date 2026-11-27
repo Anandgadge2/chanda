@@ -65,15 +65,18 @@ export default function SettingsPage() {
   // Active Tab
   const [activeTab, setActiveTab] = useState('profile'); // 'profile' | 'security' | 'dpdpa'
 
-  // Pre-fill profile data from current user
+  // Pre-fill profile data from current user & prefetch RBAC data immediately if authorized
   useEffect(() => {
     if (user) {
       setFullName(user.fullName || '');
       setEmail(user.email || '');
       setMobile(user.mobile || '');
       setDesignation(user.designation || '');
+      if (canAccessRbac) {
+        api.prefetchRbacBootstrap();
+      }
     }
-  }, [user]);
+  }, [user, canAccessRbac]);
 
   // Handle Profile Update
   const handleUpdateProfile = async (e) => {

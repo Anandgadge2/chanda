@@ -163,11 +163,11 @@ async function dedupedFetch(url, options = {}) {
 
 export const api = {
   // Authentication
-  login: async (email, password) => {
+  login: async (identifier, password) => {
     const res = await fetch(`${BASE_URL}/api/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ identifier, email: identifier, password }),
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'लॉगिन अयशस्वी झाले. (Login failed)');
@@ -175,6 +175,25 @@ export const api = {
       setAuthToken(data.token);
     }
     invalidateClientCache();
+    return data;
+  },
+
+  getRegistrationOptions: async (forceRefresh = false) => {
+    return cachedJsonFetch(
+      `${BASE_URL}/api/auth/registration-options${forceRefresh ? '?refresh=true' : ''}`,
+      {},
+      { forceRefresh, freshMs: 10 * 60 * 1000, staleMs: 60 * 60 * 1000, errorMessage: 'नोंदणी पर्याय लोड करणे अयशस्वी झाले.' }
+    );
+  },
+
+  selfRegister: async (payload) => {
+    const res = await fetch(`${BASE_URL}/api/auth/self-register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || 'अधिकारी नोंदणी अयशस्वी झाली.');
     return data;
   },
 
@@ -623,14 +642,83 @@ export const api = {
     prefetchJson(url, { headers: { ...getAuthHeaders() } }, 5 * 60 * 1000);
   },
 
+  prefetchGeoDirectory: () => {
+    prefetchJson(`${BASE_URL}/api/auth/registration-options`, {}, 15 * 60 * 1000);
+    prefetchJson(`${BASE_URL}/api/prapatra/villages`, {}, 30 * 60 * 1000);
+    prefetchJson(`${BASE_URL}/api/prapatra/circles`, {}, 30 * 60 * 1000);
+  },
+
   getTalukaVillages: async (taluka = 'all') => {
+    const allKey = `${BASE_URL}/api/prapatra/villages::`;
+    const allCached = clientResponseCache.get(allKey);
+    const talukaList = Array.isArray(taluka)
+      ? taluka.map((t) => String(t).trim().toLowerCase()).filter(Boolean)
+      : taluka && taluka !== 'all' && taluka !== 'सर्व तालुके'
+      ? [String(taluka).trim().toLowerCase()]
+      : [];
+
+    if (allCached && Date.now() - allCached.timestamp < 30 * 60 * 1000) {
+      const allV = allCached.data?.villages || [];
+      if (talukaList.length === 0) return allCached.data;
+      const filtered = allV.filter((v) => talukaList.includes(String(v.taluka || '').trim().toLowerCase()));
+      return { success: true, taluka, count: filtered.length, villages: filtered };
+    }
+
+    if (Array.isArray(taluka)) {
+      const res = await cachedJsonFetch(
+        `${BASE_URL}/api/prapatra/villages`,
+        {},
+        { freshMs: 30 * 60 * 1000, staleMs: 60 * 60 * 1000, errorMessage: 'गावांची यादी लोड करणे अयशस्वी झाले.' }
+      );
+      if (talukaList.length === 0) return res;
+      const filtered = (res?.villages || []).filter((v) => talukaList.includes(String(v.taluka || '').trim().toLowerCase()));
+      return { success: true, taluka, count: filtered.length, villages: filtered };
+    }
+
     const params = new URLSearchParams();
     if (taluka && taluka !== 'all') params.append('taluka', taluka);
     const qs = params.toString();
     return cachedJsonFetch(
       `${BASE_URL}/api/prapatra/villages${qs ? `?${qs}` : ''}`,
       {},
-      { freshMs: 10 * 60 * 1000, staleMs: 60 * 60 * 1000, errorMessage: 'गावांची यादी लोड करणे अयशस्वी झाले.' }
+      { freshMs: 30 * 60 * 1000, staleMs: 60 * 60 * 1000, errorMessage: 'गावांची यादी लोड करणे अयशस्वी झाले.' }
+    );
+  },
+
+  getTalukaCircles: async (taluka = 'all') => {
+    const allKey = `${BASE_URL}/api/prapatra/circles::`;
+    const allCached = clientResponseCache.get(allKey);
+    const talukaList = Array.isArray(taluka)
+      ? taluka.map((t) => String(t).trim().toLowerCase()).filter(Boolean)
+      : taluka && taluka !== 'all' && taluka !== 'सर्व तालुके'
+      ? [String(taluka).trim().toLowerCase()]
+      : [];
+
+    if (allCached && Date.now() - allCached.timestamp < 30 * 60 * 1000) {
+      const allC = allCached.data?.circles || [];
+      if (talukaList.length === 0) return allCached.data;
+      const filtered = allC.filter((c) => talukaList.includes(String(c.taluka || '').trim().toLowerCase()));
+      return { success: true, taluka, count: filtered.length, circles: filtered };
+    }
+
+    if (Array.isArray(taluka)) {
+      const res = await cachedJsonFetch(
+        `${BASE_URL}/api/prapatra/circles`,
+        {},
+        { freshMs: 30 * 60 * 1000, staleMs: 60 * 60 * 1000, errorMessage: 'महसूल मंडळांची यादी लोड करणे अयशस्वी झाले.' }
+      );
+      if (talukaList.length === 0) return res;
+      const filtered = (res?.circles || []).filter((c) => talukaList.includes(String(c.taluka || '').trim().toLowerCase()));
+      return { success: true, taluka, count: filtered.length, circles: filtered };
+    }
+
+    const params = new URLSearchParams();
+    if (taluka && taluka !== 'all') params.append('taluka', taluka);
+    const qs = params.toString();
+    return cachedJsonFetch(
+      `${BASE_URL}/api/prapatra/circles${qs ? `?${qs}` : ''}`,
+      {},
+      { freshMs: 30 * 60 * 1000, staleMs: 60 * 60 * 1000, errorMessage: 'महसूल मंडळांची यादी लोड करणे अयशस्वी झाली.' }
     );
   },
 
@@ -948,24 +1036,40 @@ export const api = {
   // ==========================================
   // RBAC: ROLES, PERMISSIONS & USER MANAGEMENT
   // ==========================================
-  getRbacPermissions: async () => {
-    const res = await fetch(`${BASE_URL}/api/rbac/permissions`, {
-      headers: { ...getAuthHeaders() },
-      cache: 'no-store',
-    });
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error(data.error || 'अधिकार सूची लोड करणे अयशस्वी');
-    return data;
+  prefetchRbacBootstrap: () => {
+    const headers = { ...getAuthHeaders() };
+    if (!headers.Authorization) return;
+    prefetchJson(`${BASE_URL}/api/rbac/bootstrap`, { headers }, 3 * 60 * 1000);
   },
 
-  getRbacRoles: async () => {
-    const res = await fetch(`${BASE_URL}/api/rbac/roles`, {
-      headers: { ...getAuthHeaders() },
-      cache: 'no-store',
-    });
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error(data.error || 'भूमिका यादी लोड करणे अयशस्वी');
-    return data;
+  getRbacBootstrap: async (forceRefresh = false) => {
+    const url = forceRefresh ? `${BASE_URL}/api/rbac/bootstrap?refresh=true` : `${BASE_URL}/api/rbac/bootstrap`;
+    return cachedJsonFetch(
+      url,
+      { headers: { ...getAuthHeaders() } },
+      {
+        forceRefresh,
+        freshMs: 3 * 60 * 1000,
+        staleMs: 15 * 60 * 1000,
+        errorMessage: 'RBAC माहिती लोड करणे अयशस्वी',
+      }
+    );
+  },
+
+  getRbacPermissions: async (forceRefresh = false) => {
+    return cachedJsonFetch(
+      `${BASE_URL}/api/rbac/permissions`,
+      { headers: { ...getAuthHeaders() } },
+      { forceRefresh, freshMs: 5 * 60 * 1000, staleMs: 30 * 60 * 1000, errorMessage: 'अधिकार सूची लोड करणे अयशस्वी' }
+    );
+  },
+
+  getRbacRoles: async (forceRefresh = false) => {
+    return cachedJsonFetch(
+      `${BASE_URL}/api/rbac/roles`,
+      { headers: { ...getAuthHeaders() } },
+      { forceRefresh, freshMs: 3 * 60 * 1000, staleMs: 15 * 60 * 1000, errorMessage: 'भूमिका यादी लोड करणे अयशस्वी' }
+    );
   },
 
   createRbacRole: async (payload) => {
@@ -979,6 +1083,7 @@ export const api = {
     });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.error || 'भूमिका तयार करणे अयशस्वी');
+    invalidateClientCache();
     return data;
   },
 
@@ -993,6 +1098,7 @@ export const api = {
     });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.error || 'भूमिका अद्यतन करणे अयशस्वी');
+    invalidateClientCache();
     return data;
   },
 
@@ -1003,17 +1109,16 @@ export const api = {
     });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.error || 'भूमिका हटवणे अयशस्वी');
+    invalidateClientCache();
     return data;
   },
 
-  getRbacUsers: async () => {
-    const res = await fetch(`${BASE_URL}/api/rbac/users`, {
-      headers: { ...getAuthHeaders() },
-      cache: 'no-store',
-    });
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error(data.error || 'वापरकर्ता यादी लोड करणे अयशस्वी');
-    return data;
+  getRbacUsers: async (forceRefresh = false) => {
+    return cachedJsonFetch(
+      `${BASE_URL}/api/rbac/users`,
+      { headers: { ...getAuthHeaders() } },
+      { forceRefresh, freshMs: 3 * 60 * 1000, staleMs: 15 * 60 * 1000, errorMessage: 'वापरकर्ता यादी लोड करणे अयशस्वी' }
+    );
   },
 
   createRbacUser: async (payload) => {
@@ -1027,6 +1132,7 @@ export const api = {
     });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.error || 'वापरकर्ता तयार करणे अयशस्वी');
+    invalidateClientCache();
     return data;
   },
 
@@ -1041,20 +1147,49 @@ export const api = {
     });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.error || 'वापरकर्ता अद्यतन करणे अयशस्वी');
+    invalidateClientCache();
     return data;
   },
 
-  getRbacAuditLogs: async (params = {}) => {
+  approveRbacUser: async (id, payload = {}) => {
+    const res = await fetch(`${BASE_URL}/api/rbac/users/${id}/approve`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...getAuthHeaders(),
+      },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || 'वापरकर्ता मंजुरी अयशस्वी');
+    invalidateClientCache();
+    return data;
+  },
+
+  rejectRbacUser: async (id, reason = '') => {
+    const res = await fetch(`${BASE_URL}/api/rbac/users/${id}/reject`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...getAuthHeaders(),
+      },
+      body: JSON.stringify({ reason }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || 'वापरकर्ता नाकारणे अयशस्वी');
+    invalidateClientCache();
+    return data;
+  },
+
+  getRbacAuditLogs: async (params = {}, forceRefresh = false) => {
     const qs = new URLSearchParams();
     Object.entries(params).forEach(([k, v]) => {
       if (v !== undefined && v !== null && v !== '') qs.append(k, v);
     });
-    const res = await fetch(`${BASE_URL}/api/rbac/audit-logs?${qs.toString()}`, {
-      headers: { ...getAuthHeaders() },
-      cache: 'no-store',
-    });
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error(data.error || 'ऑडिट नोंदी लोड करणे अयशस्वी');
-    return data;
+    return cachedJsonFetch(
+      `${BASE_URL}/api/rbac/audit-logs?${qs.toString()}`,
+      { headers: { ...getAuthHeaders() } },
+      { forceRefresh, freshMs: 60 * 1000, staleMs: 5 * 60 * 1000, errorMessage: 'ऑडिट नोंदी लोड करणे अयशस्वी' }
+    );
   },
 };

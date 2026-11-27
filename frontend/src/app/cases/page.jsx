@@ -33,6 +33,8 @@ import {
   CHANDRAPUR_TALUKAS,
   VIOLATION_TYPES,
   ENFORCEMENT_STATUSES,
+  getUserScopedTalukas,
+  filterVillagesByUserScope,
 } from '../../lib/constants';
 import dynamic from 'next/dynamic';
 
@@ -50,7 +52,8 @@ import SearchableSelect from '../../components/SearchableSelect';
 import clsx from 'clsx';
 
 export default function CasesPage() {
-  const { hasPermission } = useAuth();
+  const { user, hasPermission } = useAuth();
+  const scopedTalukaInfo = useMemo(() => getUserScopedTalukas(user), [user]);
   const canRecordHearing = hasPermission('case.hearing');
   const canUploadDoc = hasPermission('document.upload');
   const canPassOrder = hasPermission('case.order');
@@ -153,6 +156,12 @@ export default function CasesPage() {
     setAppliedFilters(initialFilters);
     fetchCases(1, initialFilters);
   }, []);
+
+  useEffect(() => {
+    if (scopedTalukaInfo.defaultTaluka && !draftTaluka && !appliedFilters.taluka) {
+      setDraftTaluka(scopedTalukaInfo.defaultTaluka);
+    }
+  }, [scopedTalukaInfo.defaultTaluka]);
 
   // Dynamically load villages for selected taluka
   useEffect(() => {
@@ -349,36 +358,43 @@ export default function CasesPage() {
     (appliedFilters.isRepossessedToGovt !== '' ? 1 : 0) +
     (appliedFilters.search ? 1 : 0);
 
-  const talukaSelectOptions = useMemo(() => [
-    {
-      value: '',
-      label: isMarathi
-        ? `सर्व तालुके (${CHANDRAPUR_TALUKAS.length})`
-        : `All Talukas (${CHANDRAPUR_TALUKAS.length})`,
-    },
-    ...CHANDRAPUR_TALUKAS.map((t) => ({
-      value: t.id,
-      label: isMarathi ? t.nameMr : t.nameEn,
-    })),
-  ], [isMarathi]);
+  const talukaSelectOptions = useMemo(() => {
+    const list = scopedTalukaInfo.talukas;
+    const allOption = list.length === 1
+      ? []
+      : [{
+          value: '',
+          label: isMarathi ? `सर्व तालुके (${list.length})` : `All Talukas (${list.length})`,
+        }];
+    return [
+      ...allOption,
+      ...list.map((t) => ({
+        value: t.id,
+        label: isMarathi ? t.nameMr : t.nameEn,
+      })),
+    ];
+  }, [scopedTalukaInfo, isMarathi]);
 
-  const villageSelectOptions = useMemo(() => [
-    {
-      value: '',
-      label: villageOptions.length > 0
-        ? (isMarathi ? `सर्व गावे (${villageOptions.length})` : `All Villages (${villageOptions.length})`)
-        : (isMarathi ? 'सर्व गावे' : 'All Villages'),
-    },
-    ...villageOptions.map((v) => {
-      const vName = typeof v === 'object' ? (v.villageName || v.name) : v;
-      const count = typeof v === 'object' && v.total712Count ? `${v.total712Count}` : undefined;
-      return {
-        value: vName,
-        label: formatVillageName(vName, isMarathi),
-        count,
-      };
-    }),
-  ], [villageOptions, isMarathi]);
+  const villageSelectOptions = useMemo(() => {
+    const scopedVillages = filterVillagesByUserScope(user, villageOptions);
+    return [
+      {
+        value: '',
+        label: scopedVillages.length > 0
+          ? (isMarathi ? `सर्व गावे (${scopedVillages.length})` : `All Villages (${scopedVillages.length})`)
+          : (isMarathi ? 'सर्व गावे' : 'All Villages'),
+      },
+      ...scopedVillages.map((v) => {
+        const vName = typeof v === 'object' ? (v.villageName || v.name) : v;
+        const count = typeof v === 'object' && v.total712Count ? `${v.total712Count}` : undefined;
+        return {
+          value: vName,
+          label: formatVillageName(vName, isMarathi),
+          count,
+        };
+      }),
+    ];
+  }, [villageOptions, user, isMarathi]);
 
   const violationSelectOptions = useMemo(() => [
     { value: '', label: isMarathi ? 'सर्व उल्लंघन प्रकार' : 'All Violation Types' },

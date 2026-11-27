@@ -40,6 +40,7 @@ const authLimiter = rateLimit({
   },
 });
 app.use('/api/auth/login', authLimiter);
+app.use('/api/auth/self-register', authLimiter);
 
 // High-performance Rate Limiter for Report & Prapatra Endpoints (Protection against connection pool exhaustion & rapid polling)
 const reportsLimiter = rateLimit({

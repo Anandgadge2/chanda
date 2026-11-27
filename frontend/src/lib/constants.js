@@ -16,6 +16,67 @@ export const CHANDRAPUR_TALUKAS = [
   { id: 'Jivati', nameMr: 'जिवती', nameEn: 'Jivati' },
 ];
 
+export const CHANDRAPUR_SUBDIVISIONS = [
+  { id: 'Chandrapur', nameEn: 'Chandrapur Sub-Division', nameMr: 'चंद्रपूर उपविभाग', talukas: ['Chandrapur', 'Ballarpur'] },
+  { id: 'Warora', nameEn: 'Warora Sub-Division', nameMr: 'वरोरा उपविभाग', talukas: ['Warora', 'Bhadravati'] },
+  { id: 'Rajura', nameEn: 'Rajura Sub-Division', nameMr: 'राजुरा उपविभाग', talukas: ['Rajura', 'Korpana', 'Jivati'] },
+  { id: 'Brahmapuri', nameEn: 'Brahmapuri Sub-Division', nameMr: 'ब्रह्मपुरी उपविभाग', talukas: ['Brahmapuri', 'Nagbhid', 'Sindewahi'] },
+  { id: 'Chimur', nameEn: 'Chimur Sub-Division', nameMr: 'चिमूर उपविभाग', talukas: ['Chimur'] },
+  { id: 'Mul', nameEn: 'Mul Sub-Division', nameMr: 'मूल उपविभाग', talukas: ['Mul', 'Saoli'] },
+  { id: 'Gondpipri', nameEn: 'Gondpipri Sub-Division', nameMr: 'गोंडपिपरी उपविभाग', talukas: ['Gondpipri', 'Pombhurna'] },
+];
+
+export const DEFAULT_OFFICER_ROLES = [
+  { id: 'role_sdo', slug: 'sdo', name: 'SDO', nameMr: 'उपविभागीय अधिकारी (SDO)', jurisdictionScope: 'SUBDIVISION' },
+  { id: 'role_officer', slug: 'officer', name: 'Tahasildar', nameMr: 'तहसीलदार', jurisdictionScope: 'TALUKA' },
+  { id: 'role_naib', slug: 'naib_tahasildar', name: 'Naib Tahasildar', nameMr: 'नायब तहसीलदार', jurisdictionScope: 'TALUKA' },
+  { id: 'role_circle', slug: 'circle_officer', name: 'Circle Officer', nameMr: 'महसूल मंडळ अधिकारी', jurisdictionScope: 'CIRCLE' },
+  { id: 'role_talathi', slug: 'talathi', name: 'Talathi', nameMr: 'तलाठी', jurisdictionScope: 'VILLAGE' },
+];
+
+export const JURISDICTION_SCOPE_OPTIONS = [
+  { value: 'DISTRICT', labelEn: 'Entire District (All Talukas)', labelMr: 'संपूर्ण जिल्हा (सर्व १५ तालुके)' },
+  { value: 'SUBDIVISION', labelEn: 'Assigned Sub-Division (Talukas)', labelMr: 'नियुक्त उपविभाग (तालुके)' },
+  { value: 'TALUKA', labelEn: 'Assigned Taluka', labelMr: 'नियुक्त तालुका' },
+  { value: 'CIRCLE', labelEn: 'Assigned Revenue Circles', labelMr: 'नियुक्त महसूल मंडळे' },
+  { value: 'VILLAGE', labelEn: 'Assigned Villages', labelMr: 'नियुक्त गावे / सझा' },
+];
+
+export const getUserScopedTalukas = (user) => {
+  if (!user || user.isWildcard) {
+    return { isScoped: false, talukas: CHANDRAPUR_TALUKAS, defaultTaluka: '' };
+  }
+  const rawList = Array.isArray(user.assignedTalukas) && user.assignedTalukas.length > 0
+    ? user.assignedTalukas
+    : (user.taluka ? [user.taluka] : []);
+  if (rawList.length === 0 || user.jurisdictionScope === 'DISTRICT') {
+    return { isScoped: false, talukas: CHANDRAPUR_TALUKAS, defaultTaluka: '' };
+  }
+  const lowerSet = new Set(rawList.map((t) => String(t).trim().toLowerCase()));
+  const matched = CHANDRAPUR_TALUKAS.filter(
+    (t) => lowerSet.has(t.id.toLowerCase()) || lowerSet.has(t.nameEn.toLowerCase())
+  );
+  if (matched.length === 0) {
+    return { isScoped: false, talukas: CHANDRAPUR_TALUKAS, defaultTaluka: '' };
+  }
+  return {
+    isScoped: true,
+    talukas: matched,
+    defaultTaluka: matched.length === 1 ? matched[0].id : '',
+  };
+};
+
+export const filterVillagesByUserScope = (user, villageList = []) => {
+  if (!user || user.isWildcard || !Array.isArray(user.assignedVillages) || user.assignedVillages.length === 0) {
+    return villageList;
+  }
+  const allowed = new Set(user.assignedVillages.map((v) => String(v).trim().toLowerCase()));
+  return villageList.filter((v) => {
+    const name = typeof v === 'object' ? (v.villageName || v.name || '') : String(v || '');
+    return allowed.has(name.trim().toLowerCase());
+  });
+};
+
 /**
  * Revenue Administration Hierarchy of Collectorate (Apex to Grassroots)
  */

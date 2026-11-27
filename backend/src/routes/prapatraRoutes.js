@@ -6,6 +6,7 @@ import {
   getPrapatraReport,
   getDistrictSummary,
   getTalukaVillages,
+  getTalukaCircles,
   getBookletCategories,
   updatePrapatraRollup,
   uploadPrapatraExcel,
@@ -46,6 +47,7 @@ router.get('/summary', getDistrictSummary);
  * @query   taluka (e.g. 'Warora', 'all')
  */
 router.get('/villages', getTalukaVillages);
+router.get('/circles', getTalukaCircles);
 
 /**
  * @route   POST /api/prapatra/inspect-diff

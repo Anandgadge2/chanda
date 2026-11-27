@@ -48,12 +48,15 @@ const TalukaMountainChart = dynamic(
 );
 
 import { api } from '../../lib/api';
-import { CHANDRAPUR_TALUKAS } from '../../lib/constants';
+import { CHANDRAPUR_TALUKAS, getUserScopedTalukas } from '../../lib/constants';
 import SearchableSelect from '../../components/SearchableSelect';
 import { useTranslation } from '../../components/LanguageContext';
+import { useAuth } from '../../components/AuthContext';
 
 export default function DashboardPage() {
   const { isMarathi } = useTranslation();
+  const { user } = useAuth();
+  const scopedTalukaInfo = useMemo(() => getUserScopedTalukas(user), [user]);
   const [draftTaluka, setDraftTaluka] = useState('');
   const [taluka, setTaluka] = useState('');
   const [activeKpi, setActiveKpi] = useState(null); // null | 'parcels' | 'violations' | 'villages' | 'conversions'
@@ -122,6 +125,14 @@ export default function DashboardPage() {
     }
   }, []);
 
+  useEffect(() => {
+    if (scopedTalukaInfo.defaultTaluka && !taluka && !draftTaluka) {
+      setDraftTaluka(scopedTalukaInfo.defaultTaluka);
+      setTaluka(scopedTalukaInfo.defaultTaluka);
+      loadData(scopedTalukaInfo.defaultTaluka);
+    }
+  }, [scopedTalukaInfo.defaultTaluka]);
+
   const isFilterPending = draftTaluka !== taluka;
 
   const handleApplyFilters = () => {
@@ -151,13 +162,19 @@ export default function DashboardPage() {
     });
   };
 
-  const talukaSelectOptions = useMemo(() => [
-    { value: '', label: isMarathi ? 'सर्व तालुके (१५)' : 'All Talukas (15)' },
-    ...CHANDRAPUR_TALUKAS.map((t) => ({
-      value: t.id,
-      label: isMarathi ? t.nameMr : t.nameEn
-    }))
-  ], [isMarathi]);
+  const talukaSelectOptions = useMemo(() => {
+    const list = scopedTalukaInfo.talukas;
+    const allOption = list.length === 1
+      ? []
+      : [{ value: '', label: isMarathi ? `सर्व तालुके (${list.length})` : `All Talukas (${list.length})` }];
+    return [
+      ...allOption,
+      ...list.map((t) => ({
+        value: t.id,
+        label: isMarathi ? t.nameMr : t.nameEn
+      }))
+    ];
+  }, [scopedTalukaInfo, isMarathi]);
 
   const handleExport = () => {
     window.location.href = api.getPrapatra3DownloadUrl(taluka);

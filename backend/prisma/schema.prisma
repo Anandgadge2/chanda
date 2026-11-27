@@ -68,6 +68,14 @@ enum PermissionEffect {
   REVOKE
 }
 
+enum JurisdictionScope {
+  DISTRICT
+  SUBDIVISION
+  TALUKA
+  CIRCLE
+  VILLAGE
+}
+
 // -------------------------------------------------------------
 // CORE PARCEL REGISTRY (Master Record)
 // -------------------------------------------------------------
@@ -338,17 +346,18 @@ model Tenancy89ARecord {
 // -------------------------------------------------------------
 
 model Role {
-  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  slug           String   @unique @db.VarChar(64)
-  name           String   @db.VarChar(128)
-  nameMr         String?  @map("name_mr") @db.VarChar(128)
-  description    String?  @db.Text
-  hierarchyLevel Int      @default(50) @map("hierarchy_level")
-  isSystem       Boolean  @default(false) @map("is_system")
-  isWildcard     Boolean  @default(false) @map("is_wildcard")
-  isActive       Boolean  @default(true) @map("is_active")
-  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz
+  id                String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  slug              String            @unique @db.VarChar(64)
+  name              String            @db.VarChar(128)
+  nameMr            String?           @map("name_mr") @db.VarChar(128)
+  description       String?           @db.Text
+  hierarchyLevel    Int               @default(50) @map("hierarchy_level")
+  jurisdictionScope JurisdictionScope @default(TALUKA) @map("jurisdiction_scope")
+  isSystem          Boolean           @default(false) @map("is_system")
+  isWildcard        Boolean           @default(false) @map("is_wildcard")
+  isActive          Boolean           @default(true) @map("is_active")
+  createdAt         DateTime          @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt         DateTime          @updatedAt @map("updated_at") @db.Timestamptz
 
   users           User[]
   rolePermissions RolePermission[]
@@ -406,14 +415,22 @@ model User {
   id                  String                   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   fullName            String                   @map("full_name") @db.VarChar(255)
   email               String                   @unique @db.VarChar(255)
-  mobile              String?                  @db.VarChar(20)
+  mobile              String?                  @unique @db.VarChar(20)
   passwordHash        String                   @map("password_hash") @db.VarChar(512)
   role                UserRole                 @default(CITIZEN)
   roleId              String?                  @map("role_id") @db.Uuid
   tokenVersion        Int                      @default(1) @map("token_version")
-  taluka              String?                  @db.VarChar(64)        // Jurisdiction scope
+  taluka              String?                  @db.VarChar(64)        // Primary Taluka jurisdiction scope
+  subdivision         String?                  @db.VarChar(128)       // Assigned Sub-Division (for SDO)
+  assignedTalukas     String[]                 @default([]) @map("assigned_talukas")
+  assignedCircles     String[]                 @default([]) @map("assigned_circles")
+  assignedVillages    String[]                 @default([]) @map("assigned_villages")
   designation         String?                  @db.VarChar(128)       // Official title
   isActive            Boolean                  @default(true) @map("is_active")
+  approvalStatus      String                   @default("APPROVED") @map("approval_status") @db.VarChar(24) // PENDING | APPROVED | REJECTED
+  approvedById        String?                  @map("approved_by_id") @db.Uuid
+  approvedAt          DateTime?                @map("approved_at") @db.Timestamptz
+  rejectionReason     String?                  @map("rejection_reason") @db.Text
   lastLoginAt         DateTime?                @map("last_login_at") @db.Timestamptz
   consentGiven        Boolean                  @default(false) @map("consent_given")
   consentAt           DateTime?                @map("consent_at") @db.Timestamptz
@@ -428,6 +445,7 @@ model User {
 
   @@index([role], name: "idx_user_role")
   @@index([roleId], name: "idx_user_role_id")
+  @@index([approvalStatus], name: "idx_user_approval_status")
   @@map("users")
 }
 

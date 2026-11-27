@@ -2,7 +2,7 @@ import prisma from '../config/prisma.js';
 import { uploadToCloudinary } from '../config/cloudinary.js';
 import { uploadBufferToGCS, generateSignedUrl, isGCSConfigured } from '../config/gcs.js';
 import { logAudit } from '../middleware/auditMiddleware.js';
-import { userCanAccessTaluka } from '../services/rbacService.js';
+import { userCanAccessParcel } from '../services/rbacService.js';
 
 /**
  * Upload document to GCS (or Cloudinary fallback) and catalog physical record room coordinates
@@ -41,13 +41,13 @@ export const uploadDocument = async (req, res) => {
     if (parcelId) {
       const p = await prisma.landParcel.findUnique({
         where: { id: parcelId },
-        select: { taluka: true, villageName: true, gatNumber: true },
+        select: { taluka: true, revenueCircle: true, villageName: true, villageCode: true, gatNumber: true },
       });
       if (p) {
-        if (!userCanAccessTaluka(req.user, p.taluka)) {
+        if (!userCanAccessParcel(req.user, p)) {
           return res.status(403).json({
             success: false,
-            error: `आपल्याकडे '${p.taluka}' तालुक्यासाठी दस्तऐवज अपलोड करण्याचे अधिकार नाहीत. (Taluka scope restricted to ${req.user.taluka})`,
+            error: `आपल्याकडे '${p.taluka}' / '${p.villageName}' कार्यक्षेत्रासाठी दस्तऐवज अपलोड करण्याचे अधिकार नाहीत.`,
           });
         }
         talukaFolder = p.taluka ? p.taluka.replace(/[^a-zA-Z0-9_-]/g, '_') : 'taluka';
@@ -57,12 +57,12 @@ export const uploadDocument = async (req, res) => {
     } else if (caseId) {
       const c = await prisma.forwardEnforcementCase.findUnique({
         where: { id: caseId },
-        include: { parcel: { select: { taluka: true } } },
+        include: { parcel: { select: { taluka: true, revenueCircle: true, villageName: true, villageCode: true } } },
       });
-      if (c?.parcel && !userCanAccessTaluka(req.user, c.parcel.taluka)) {
+      if (c?.parcel && !userCanAccessParcel(req.user, c.parcel)) {
         return res.status(403).json({
           success: false,
-          error: `आपल्याकडे '${c.parcel.taluka}' तालुक्यासाठी दस्तऐवज अपलोड करण्याचे अधिकार नाहीत. (Taluka scope restricted to ${req.user.taluka})`,
+          error: `आपल्याकडे '${c.parcel.taluka}' / '${c.parcel.villageName}' कार्यक्षेत्रासाठी दस्तऐवज अपलोड करण्याचे अधिकार नाहीत.`,
         });
       }
     }
